@@ -1,0 +1,773 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Product Management + AI Skill Assessment</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+
+  /* ============================================================
+     EASY-EDIT ZONE 1: BRAND COLORS
+     Change these if your brand colors ever change. Everything
+     else in the page references these variables.
+     ============================================================ */
+  :root{
+    --navy: #1A4584;
+    --navy-deep: #12305e;
+    --gray: #9AA3AD;
+    --cyan: #35C2E8;
+    --bg: #F5F8FB;
+    --surface: #FFFFFF;
+    --ink: #16213E;
+    --ink-soft: #4B5768;
+    --line: #E3E9F0;
+    --warn: #C0622A;
+
+    --tier-1: #B9C6DA;
+    --tier-2: #6FA3D6;
+    --tier-3: #35C2E8;
+    --tier-4: #1A4584;
+  }
+
+  *{ box-sizing: border-box; }
+
+  body{
+    margin:0;
+    background: var(--bg);
+    font-family: 'IBM Plex Sans', system-ui, sans-serif;
+    color: var(--ink);
+    display:flex;
+    justify-content:center;
+    padding: 32px 16px;
+  }
+
+  .card{
+    width:100%;
+    max-width: 640px;
+    background: var(--surface);
+    border-radius: 16px;
+    border: 1px solid var(--line);
+    box-shadow: 0 1px 2px rgba(22,33,62,0.04), 0 12px 32px rgba(22,33,62,0.06);
+    overflow:hidden;
+  }
+
+  .card-inner{ padding: 36px 32px 32px; }
+
+  h1,h2,h3{
+    font-family:'Space Grotesk', sans-serif;
+    margin: 0 0 8px;
+    color: var(--navy-deep);
+  }
+
+  .eyebrow{
+    font-size: 12px;
+    font-weight:600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--cyan);
+    margin-bottom: 10px;
+    display:block;
+  }
+
+  p{ line-height:1.55; color: var(--ink-soft); margin: 0 0 20px; }
+
+  .progress-rail{ display:flex; gap:5px; margin-bottom: 26px; }
+  .progress-seg{ flex:1; height:4px; border-radius:2px; background: var(--line); transition: background .25s ease; }
+  .progress-seg.done{ background: var(--cyan); }
+
+  .q-count{ font-size:13px; color: var(--gray); margin-bottom: 4px; font-weight:500; }
+  .q-category{ font-size:12px; color: var(--navy); font-weight:600; text-transform:uppercase; letter-spacing:0.04em; margin-bottom: 10px; }
+
+  .q-text{
+    font-size: 18px;
+    font-weight:600;
+    color: var(--navy-deep);
+    font-family:'Space Grotesk', sans-serif;
+    margin-bottom: 18px;
+    line-height:1.35;
+  }
+
+  .option{
+    display:block; width:100%; text-align:left;
+    padding: 13px 16px; margin-bottom: 9px;
+    border: 1.5px solid var(--line); border-radius: 10px;
+    background: var(--surface);
+    font-family:'IBM Plex Sans', sans-serif; font-size: 14.5px; color: var(--ink);
+    cursor:pointer; transition: border-color .15s ease, background .15s ease;
+  }
+  .option:hover{ border-color: var(--cyan); background: #F0FAFD; }
+  .option.selected{ border-color: var(--navy); background: #EEF3FA; }
+
+  .nav-row{ display:flex; justify-content:space-between; align-items:center; margin-top: 22px; }
+
+  button.btn{
+    font-family:'Space Grotesk', sans-serif; font-weight:600; font-size: 14px;
+    border-radius: 8px; padding: 11px 20px; border: none; cursor:pointer;
+    transition: opacity .15s ease, transform .1s ease;
+  }
+  button.btn:disabled{ opacity:0.35; cursor:not-allowed; }
+  button.btn:active:not(:disabled){ transform: scale(0.98); }
+  .btn-primary{ background: var(--navy); color:#fff; }
+  .btn-primary:hover:not(:disabled){ background: var(--navy-deep); }
+  .btn-ghost{ background:transparent; color: var(--ink-soft); }
+  .btn-ghost:hover:not(:disabled){ color: var(--navy); }
+
+  .gauge-wrap{ display:flex; flex-direction:column; align-items:center; margin: 4px 0 16px; }
+  .tier-label{ font-family:'Space Grotesk', sans-serif; font-weight:700; font-size: 22px; margin-top: 8px; color: var(--navy-deep); }
+  .score-sub{ font-size:14px; color:var(--gray); margin-top:2px; }
+  .tier-desc{ text-align:center; max-width: 460px; margin: 6px auto 22px; }
+
+  .section-block{ border-top: 1px solid var(--line); padding-top: 22px; margin-top: 6px; }
+  .section-block h3{ font-size:16px; margin-bottom:4px; }
+  .section-sub{ font-size:13px; color:var(--gray); margin-bottom:16px; }
+
+  .bar-row{ margin-bottom: 14px; }
+  .bar-row-top{ display:flex; justify-content:space-between; font-size:13.5px; font-weight:500; margin-bottom: 5px; }
+  .bar-row-top .pct{ color: var(--gray); font-weight:600; }
+  .bar-track{ height: 8px; background: var(--line); border-radius: 5px; overflow:hidden; }
+  .bar-fill{ height:100%; border-radius:5px; }
+
+  .growth-card{
+    border: 1.5px solid var(--line); border-radius: 12px; padding: 16px;
+    margin-bottom: 12px; background: #FBFCFE;
+  }
+  .growth-card .growth-tag{
+    display:inline-block; font-size: 11px; font-weight:700; letter-spacing:0.04em;
+    text-transform:uppercase; color: var(--warn); margin-bottom: 8px;
+  }
+  .growth-card h4{ font-family:'Space Grotesk', sans-serif; font-size:15px; margin:0 0 6px; color: var(--navy-deep); }
+  .growth-card p{ font-size: 13.5px; margin: 0 0 10px; }
+  .article-link{
+    display:flex; align-items:center; gap:10px; padding: 11px 13px;
+    border: 1px solid var(--line); border-radius: 9px; text-decoration:none;
+    color: var(--ink); font-size:13.5px; font-weight:500; background:#fff;
+    transition: border-color .15s ease, background .15s ease;
+  }
+  .article-link:hover{ border-color: var(--cyan); background:#F7FDFF; }
+  .article-link .arrow{ margin-left:auto; color: var(--cyan); font-weight:700; }
+
+  .text-input{
+    width:100%; padding: 12px 14px; margin-bottom: 12px;
+    border: 1.5px solid var(--line); border-radius: 9px;
+    font-family:'IBM Plex Sans', sans-serif; font-size: 14.5px; color: var(--ink);
+    background: #fff;
+  }
+  .text-input:focus{ outline:none; border-color: var(--cyan); }
+  select.text-input{ appearance:auto; }
+
+  .badge-section{ text-align:center; border-top: 1px solid var(--line); margin-top: 24px; padding-top: 24px; }
+  .retake-row{ text-align:center; margin-top: 20px; }
+  .retake-row button{ background:none; border:none; color:var(--gray); font-size:13px; text-decoration:underline; cursor:pointer; font-family:'IBM Plex Sans',sans-serif; }
+  .retake-row button:hover{ color:var(--navy); }
+
+  [data-screen]{ display:none; }
+  [data-screen].active{ display:block; }
+
+  @media (max-width: 480px){
+    .card-inner{ padding: 26px 20px 24px; }
+    .q-text{ font-size:16.5px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="card">
+  <div class="card-inner">
+
+    <!-- SCREEN 1: INTRO -->
+    <div data-screen="intro" class="active">
+      <span class="eyebrow">Product Advisory · Skill Check</span>
+      <h1>How well-rounded is your product + AI practice?</h1>
+      <p>Answer 14 quick questions covering core product management skills plus how you're using AI, both personally and across your organization. You'll get a skill breakdown and specific reading recommendations for the areas with the most room to grow.</p>
+      <div class="nav-row" style="justify-content:flex-start;">
+        <button class="btn btn-primary" onclick="startQuiz()">Start assessment →</button>
+      </div>
+    </div>
+
+    <!-- SCREEN 2: QUESTIONS -->
+    <div data-screen="quiz">
+      <div class="progress-rail" id="progressRail"></div>
+      <div class="q-count" id="qCount"></div>
+      <div class="q-category" id="qCategory"></div>
+      <div class="q-text" id="qText"></div>
+      <div id="optionsWrap"></div>
+      <div class="nav-row">
+        <button class="btn btn-ghost" id="backBtn" onclick="goBack()">← Back</button>
+        <button class="btn btn-primary" id="nextBtn" onclick="goNext()" disabled>Next →</button>
+      </div>
+    </div>
+
+    <!-- SCREEN 3: LEAD CAPTURE (shown after the last question, before results) -->
+    <div data-screen="lead">
+      <span class="eyebrow">Almost there</span>
+      <h2>Where should we send your results?</h2>
+      <p>Enter your details to see your skill breakdown and reading recommendations.</p>
+      <form id="leadForm" onsubmit="handleLeadSubmit(event)">
+        <input class="text-input" type="text" id="leadName" placeholder="Full name" required>
+        <input class="text-input" type="email" id="leadEmail" placeholder="Work email" required>
+        <input class="text-input" type="text" id="leadCompany" placeholder="Company" required>
+        <input class="text-input" type="text" id="leadTitle" placeholder="Job title" required>
+        <select class="text-input" id="leadCompanySize" required>
+          <option value="" disabled selected>Company size</option>
+          <option value="1-10">1-10 employees</option>
+          <option value="11-50">11-50 employees</option>
+          <option value="51-200">51-200 employees</option>
+          <option value="201-1000">201-1,000 employees</option>
+          <option value="1000+">1,000+ employees</option>
+        </select>
+        <input class="text-input" type="text" id="leadIndustry" placeholder="Industry" required>
+        <div class="nav-row" style="justify-content:flex-end;">
+          <button type="submit" class="btn btn-primary" id="leadSubmitBtn">See my results →</button>
+        </div>
+      </form>
+    </div>
+
+    <!-- SCREEN 4: RESULTS -->
+    <div data-screen="results">
+      <span class="eyebrow">Your result</span>
+      <div class="gauge-wrap">
+        <svg id="gaugeSvg" width="260" height="150" viewBox="0 0 260 150"></svg>
+        <div class="tier-label" id="tierLabel"></div>
+        <div class="score-sub" id="scoreSub"></div>
+      </div>
+      <p class="tier-desc" id="tierDesc"></p>
+
+      <div class="section-block">
+        <h3>Skill breakdown</h3>
+        <div class="section-sub">How you scored across each area</div>
+        <div id="barsWrap"></div>
+      </div>
+
+      <div class="section-block">
+        <h3>Your growth areas</h3>
+        <div class="section-sub">Your two lowest-scoring areas, with a recommended read for each</div>
+        <div id="growthWrap"></div>
+      </div>
+
+      <div class="badge-section">
+        <svg id="badgeSvg" width="150" height="170" viewBox="0 0 150 170"></svg>
+        <div style="margin-top:10px;">
+          <button class="btn btn-primary" onclick="downloadBadge()">Download your badge</button>
+        </div>
+      </div>
+
+      <div class="retake-row">
+        <button onclick="restart()">Retake the assessment</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+/* ================================================================
+   EASY-EDIT ZONE 1B: RESULTS LOGGING
+   Paste the URL you get after deploying the Google Apps Script
+   (see the setup instructions) between the quotes below. Leave it
+   blank ("") to run the assessment with no logging at all — it
+   will still work fine for the person taking it, it just won't
+   save anywhere for your sales report.
+   ================================================================ */
+const RESULTS_LOG_URL = "https://script.google.com/macros/s/AKfycbynJQYF9rv5maL_CGniS9UGhTDfBVeW3gVhEWUsFdGOqquv4osGx4nQvc8jNkaaY6wrrg/exec";
+
+/* ================================================================
+   EASY-EDIT ZONE 2: CATEGORIES
+   Each category needs a short "label", a bar color, and one
+   recommended article for when it comes up as a growth area.
+   Add a second article to the "articles" array if you want a
+   choice of two recommendations instead of one.
+   ================================================================ */
+const CATEGORIES = {
+  discovery: {
+    label: "Customer & Market Discovery",
+    color: "#6FA3D6",
+    articles: [{ title: "REPLACE ME: A lightweight discovery process for busy PMs", url: "https://www.productadvisory.co/" }]
+  },
+  strategy: {
+    label: "Product Strategy & Roadmapping",
+    color: "#4C8FCB",
+    articles: [{ title: "REPLACE ME: Building a roadmap tied to outcomes, not features", url: "https://www.productadvisory.co/" }]
+  },
+  prioritization: {
+    label: "Prioritization & Trade-offs",
+    color: "#35C2E8",
+    articles: [{ title: "REPLACE ME: A simple framework for saying no", url: "https://www.productadvisory.co/" }]
+  },
+  execution: {
+    label: "Execution & Delivery",
+    color: "#2AA0BF",
+    articles: [{ title: "REPLACE ME: Staying close to delivery without micromanaging", url: "https://www.productadvisory.co/" }]
+  },
+  stakeholder: {
+    label: "Stakeholder Communication & Influence",
+    color: "#1A4584",
+    articles: [{ title: "REPLACE ME: Presenting product plans leadership actually buys", url: "https://www.productadvisory.co/" }]
+  },
+  aiIndividual: {
+    label: "AI Fluency — Individual",
+    color: "#8AB6DD",
+    articles: [{ title: "REPLACE ME: Getting started with AI tools as a PM", url: "https://www.productadvisory.co/" }]
+  },
+  aiOrg: {
+    label: "AI Fluency — Organizational",
+    color: "#12305e",
+    articles: [{ title: "REPLACE ME: Building AI governance your whole org can use", url: "https://www.productadvisory.co/" }]
+  }
+};
+
+/* ================================================================
+   EASY-EDIT ZONE 3: QUESTIONS
+   Each question is tagged with a "cat" matching a key in
+   CATEGORIES above. Every answer is worth 0-3 points. Add,
+   remove, or reword freely as long as each cat has at least
+   one question.
+   ================================================================ */
+const QUESTIONS = [
+  {
+    cat: "discovery",
+    text: "How do you typically validate a new product idea before building it?",
+    options: [
+      { text: "I usually rely on gut instinct or internal opinions", points: 0 },
+      { text: "I occasionally talk to a few customers or review basic data", points: 1 },
+      { text: "I run structured discovery (interviews, surveys, prototypes) regularly", points: 2 },
+      { text: "I've built a repeatable discovery process my team follows", points: 3 }
+    ]
+  },
+  {
+    cat: "discovery",
+    text: "How well do you understand your market's competitive landscape?",
+    options: [
+      { text: "I have a general sense but haven't documented it", points: 0 },
+      { text: "I track a few competitors informally", points: 1 },
+      { text: "I maintain a structured view of the competitive landscape", points: 2 },
+      { text: "I use competitive insight to actively shape strategy and positioning", points: 3 }
+    ]
+  },
+  {
+    cat: "strategy",
+    text: "How would you describe your approach to setting product strategy?",
+    options: [
+      { text: "I mostly execute on requests from stakeholders", points: 0 },
+      { text: "I contribute ideas, but strategy is set by others", points: 1 },
+      { text: "I set strategy for my product area with some oversight", points: 2 },
+      { text: "I set and defend strategy independently, tied to business outcomes", points: 3 }
+    ]
+  },
+  {
+    cat: "strategy",
+    text: "How do you build and communicate your product roadmap?",
+    options: [
+      { text: "I don't have a formal roadmap process", points: 0 },
+      { text: "I maintain a basic feature list or timeline", points: 1 },
+      { text: "I maintain an outcome-based roadmap I review regularly", points: 2 },
+      { text: "I run a roadmap process other teams align their plans around", points: 3 }
+    ]
+  },
+  {
+    cat: "prioritization",
+    text: "When two important features compete for the same sprint, how do you decide?",
+    options: [
+      { text: "I go with whoever is loudest or highest-ranking", points: 0 },
+      { text: "I use rough judgment case by case", points: 1 },
+      { text: "I apply a consistent framework (e.g. RICE, value vs. effort)", points: 2 },
+      { text: "I've built or adapted a prioritization framework my org uses", points: 3 }
+    ]
+  },
+  {
+    cat: "prioritization",
+    text: "How comfortable are you saying no to a stakeholder request?",
+    options: [
+      { text: "Very uncomfortable — I usually try to fit everything in", points: 0 },
+      { text: "I can push back occasionally with support", points: 1 },
+      { text: "I regularly say no and explain the trade-off clearly", points: 2 },
+      { text: "I'm trusted to make and defend hard trade-off calls org-wide", points: 3 }
+    ]
+  },
+  {
+    cat: "execution",
+    text: "How would you describe your day-to-day work with engineering and design?",
+    options: [
+      { text: "I hand off requirements and stay largely uninvolved after", points: 0 },
+      { text: "I check in periodically during a sprint or cycle", points: 1 },
+      { text: "I'm closely involved throughout, unblocking issues as they arise", points: 2 },
+      { text: "I've shaped how my team's whole delivery process runs", points: 3 }
+    ]
+  },
+  {
+    cat: "execution",
+    text: "How do you know when a launched feature is actually working?",
+    options: [
+      { text: "I don't usually revisit it after launch", points: 0 },
+      { text: "I check basic usage numbers occasionally", points: 1 },
+      { text: "I define success metrics before launch and track them after", points: 2 },
+      { text: "I run structured post-launch reviews that inform future roadmap", points: 3 }
+    ]
+  },
+  {
+    cat: "stakeholder",
+    text: "How do you handle disagreement with a senior stakeholder about direction?",
+    options: [
+      { text: "I usually defer to them", points: 0 },
+      { text: "I raise concerns but often let it go if pushed back", points: 1 },
+      { text: "I make my case with data and reach alignment most of the time", points: 2 },
+      { text: "I'm regularly sought out to align stakeholders across teams", points: 3 }
+    ]
+  },
+  {
+    cat: "stakeholder",
+    text: "How would you rate your comfort presenting product plans to leadership?",
+    options: [
+      { text: "I avoid it when I can", points: 0 },
+      { text: "I can do it, but feel unprepared or nervous", points: 1 },
+      { text: "I present confidently and handle tough questions well", points: 2 },
+      { text: "I coach others on how to present to leadership", points: 3 }
+    ]
+  },
+  {
+    cat: "aiIndividual",
+    text: "How would you describe your personal use of AI tools in your own work?",
+    options: [
+      { text: "I don't use AI tools yet", points: 0 },
+      { text: "I've experimented casually with tools like ChatGPT", points: 1 },
+      { text: "I use AI tools regularly for specific tasks (research, writing, analysis)", points: 2 },
+      { text: "AI tools are fully integrated into my personal workflow", points: 3 }
+    ]
+  },
+  {
+    cat: "aiIndividual",
+    text: "How comfortable are you writing product requirements for an AI-powered feature?",
+    options: [
+      { text: "I've never done this", points: 0 },
+      { text: "I could contribute with guidance", points: 1 },
+      { text: "I could lead this with some support", points: 2 },
+      { text: "I regularly lead this independently", points: 3 }
+    ]
+  },
+  {
+    cat: "aiOrg",
+    text: "How would you describe your organization's approach to AI adoption?",
+    options: [
+      { text: "There's no clear AI strategy or guidance at my organization", points: 0 },
+      { text: "Individuals experiment on their own without coordination", points: 1 },
+      { text: "There's some shared guidance or tooling across teams", points: 2 },
+      { text: "There's a clear AI strategy with governance and cross-team enablement", points: 3 }
+    ]
+  },
+  {
+    cat: "aiOrg",
+    text: "What's your role in shaping how your organization adopts AI?",
+    options: [
+      { text: "I'm not involved in this at all", points: 0 },
+      { text: "I occasionally share ideas but don't drive decisions", points: 1 },
+      { text: "I actively contribute to AI strategy or tooling decisions", points: 2 },
+      { text: "I lead or co-lead AI strategy or governance for my organization", points: 3 }
+    ]
+  }
+];
+
+/* ================================================================
+   EASY-EDIT ZONE 4: OVERALL TIER LABELS
+   Used only for the headline label, gauge, and badge — the
+   "min"/"max" are percentage-of-total-score cutoffs (0-100).
+   ================================================================ */
+const TIERS = [
+  { name: "No Experience", min: 0, max: 25, desc: "You're just getting oriented across product management and AI — a great place to start with intention rather than overwhelm." },
+  { name: "Moderate Experience", min: 25.01, max: 50, desc: "You've got real experience in some areas and are building out the rest — the breakdown below shows exactly where to focus." },
+  { name: "Lots of Experience", min: 50.01, max: 75, desc: "You're solid across most of the practice, with a couple of areas still worth sharpening." },
+  { name: "Advanced Experience", min: 75.01, max: 100, desc: "You're strong across the board — the growth areas below are refinements, not gaps." }
+];
+
+/* ================================================================
+   Engine below this line — no need to edit to update content above.
+   ================================================================ */
+let current = 0;
+let answers = new Array(QUESTIONS.length).fill(null);
+
+function showScreen(name){
+  document.querySelectorAll('[data-screen]').forEach(el => el.classList.remove('active'));
+  document.querySelector('[data-screen="' + name + '"]').classList.add('active');
+}
+
+function startQuiz(){
+  current = 0;
+  answers = new Array(QUESTIONS.length).fill(null);
+  buildProgressRail();
+  renderQuestion();
+  showScreen('quiz');
+}
+
+function buildProgressRail(){
+  const rail = document.getElementById('progressRail');
+  rail.innerHTML = '';
+  QUESTIONS.forEach((_, i) => {
+    const seg = document.createElement('div');
+    seg.className = 'progress-seg';
+    seg.id = 'seg-' + i;
+    rail.appendChild(seg);
+  });
+}
+
+function updateProgressRail(){
+  QUESTIONS.forEach((_, i) => {
+    document.getElementById('seg-' + i).classList.toggle('done', i <= current && answers[i] !== null);
+  });
+}
+
+function renderQuestion(){
+  const q = QUESTIONS[current];
+  document.getElementById('qCount').textContent = 'Question ' + (current + 1) + ' of ' + QUESTIONS.length;
+  document.getElementById('qCategory').textContent = CATEGORIES[q.cat].label;
+  document.getElementById('qText').textContent = q.text;
+
+  const wrap = document.getElementById('optionsWrap');
+  wrap.innerHTML = '';
+  q.options.forEach((opt, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'option' + (answers[current] === i ? ' selected' : '');
+    btn.textContent = opt.text;
+    btn.onclick = () => selectOption(i);
+    wrap.appendChild(btn);
+  });
+
+  document.getElementById('backBtn').style.visibility = current === 0 ? 'hidden' : 'visible';
+  document.getElementById('nextBtn').disabled = answers[current] === null;
+  document.getElementById('nextBtn').textContent = current === QUESTIONS.length - 1 ? 'See my result →' : 'Next →';
+  updateProgressRail();
+}
+
+function selectOption(i){
+  answers[current] = i;
+  renderQuestion();
+}
+
+let lastScores = null; // cached so the lead form and results screen use the same computed scores
+
+function goNext(){
+  if (answers[current] === null) return;
+  if (current === QUESTIONS.length - 1){
+    lastScores = computeScores();
+    document.getElementById('leadForm').reset();
+    showScreen('lead');
+  } else {
+    current++;
+    renderQuestion();
+  }
+}
+
+function handleLeadSubmit(event){
+  event.preventDefault();
+  const lead = {
+    name: document.getElementById('leadName').value.trim(),
+    email: document.getElementById('leadEmail').value.trim(),
+    company: document.getElementById('leadCompany').value.trim(),
+    jobTitle: document.getElementById('leadTitle').value.trim(),
+    companySize: document.getElementById('leadCompanySize').value,
+    industry: document.getElementById('leadIndustry').value.trim()
+  };
+
+  logResult(lead, lastScores);
+  showResults(lastScores);
+}
+
+/* Fire-and-forget log to the Google Sheet via Apps Script.
+   Uses text/plain content type so the browser treats it as a
+   simple request and skips a CORS preflight — Apps Script web
+   apps don't handle preflight OPTIONS requests. We don't need to
+   read the response, so this never blocks showing results. */
+function logResult(lead, scores){
+  if (!RESULTS_LOG_URL) return; // logging disabled until a URL is configured
+
+  const tier = getTier(scores.overallPct);
+  const payload = Object.assign({}, lead, {
+    overallPct: Math.round(scores.overallPct),
+    overallScore: scores.overallTotal,
+    overallMax: scores.overallMax,
+    tier: tier.name
+  });
+  Object.keys(CATEGORIES).forEach(key => {
+    payload[key + 'Pct'] = Math.round(scores.catPct[key]);
+  });
+
+  fetch(RESULTS_LOG_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+    body: JSON.stringify(payload)
+  }).catch(() => { /* silently ignore logging failures — never block the user's results */ });
+}
+
+function goBack(){
+  if (current === 0) return;
+  current--;
+  renderQuestion();
+}
+
+function restart(){
+  showScreen('intro');
+}
+
+function computeScores(){
+  const catTotals = {};
+  const catMax = {};
+  Object.keys(CATEGORIES).forEach(k => { catTotals[k] = 0; catMax[k] = 0; });
+
+  let overallTotal = 0, overallMax = 0;
+  QUESTIONS.forEach((q, i) => {
+    const pts = q.options[answers[i]].points;
+    catTotals[q.cat] += pts;
+    catMax[q.cat] += 3;
+    overallTotal += pts;
+    overallMax += 3;
+  });
+
+  const catPct = {};
+  Object.keys(CATEGORIES).forEach(k => {
+    catPct[k] = catMax[k] > 0 ? (catTotals[k] / catMax[k]) * 100 : 0;
+  });
+
+  return {
+    overallPct: (overallTotal / overallMax) * 100,
+    overallTotal, overallMax,
+    catPct
+  };
+}
+
+function getTier(pct){
+  return TIERS.find(t => pct >= t.min && pct <= t.max) || TIERS[0];
+}
+
+function showResults(scores){
+  const { overallPct, overallTotal, overallMax, catPct } = scores;
+  const tier = getTier(overallPct);
+
+  document.getElementById('tierLabel').textContent = tier.name;
+  document.getElementById('scoreSub').textContent = 'Overall score: ' + overallTotal + ' / ' + overallMax;
+  document.getElementById('tierDesc').textContent = tier.desc;
+
+  drawGauge(overallPct);
+  drawBadge(tier);
+  renderBars(catPct);
+  renderGrowthAreas(catPct);
+
+  showScreen('results');
+}
+
+function renderBars(catPct){
+  const wrap = document.getElementById('barsWrap');
+  wrap.innerHTML = '';
+  Object.keys(CATEGORIES).forEach(key => {
+    const cat = CATEGORIES[key];
+    const pct = Math.round(catPct[key]);
+    const row = document.createElement('div');
+    row.className = 'bar-row';
+    row.innerHTML = `
+      <div class="bar-row-top"><span>${cat.label}</span><span class="pct">${pct}%</span></div>
+      <div class="bar-track"><div class="bar-fill" style="width:${pct}%; background:${cat.color};"></div></div>
+    `;
+    wrap.appendChild(row);
+  });
+}
+
+function renderGrowthAreas(catPct){
+  const sorted = Object.keys(CATEGORIES).sort((a, b) => catPct[a] - catPct[b]);
+  const lowest = sorted.slice(0, 2);
+
+  const wrap = document.getElementById('growthWrap');
+  wrap.innerHTML = '';
+  lowest.forEach(key => {
+    const cat = CATEGORIES[key];
+    const pct = Math.round(catPct[key]);
+    const card = document.createElement('div');
+    card.className = 'growth-card';
+    let articlesHtml = '';
+    cat.articles.forEach(a => {
+      articlesHtml += `<a class="article-link" href="${a.url}" target="_blank" rel="noopener"><span>${a.title}</span><span class="arrow">→</span></a>`;
+    });
+    card.innerHTML = `
+      <span class="growth-tag">Growth area · ${pct}%</span>
+      <h4>${cat.label}</h4>
+      <p>This is one of your lowest-scoring areas right now — a good next place to focus.</p>
+      ${articlesHtml}
+    `;
+    wrap.appendChild(card);
+  });
+}
+
+/* Signature element: semicircular "journey gauge" for the overall score */
+function drawGauge(pct){
+  const svg = document.getElementById('gaugeSvg');
+  const cx = 130, cy = 130, r = 100;
+
+  function polarToXY(angleDeg, radius){
+    const rad = (angleDeg * Math.PI) / 180;
+    return { x: cx + radius * Math.cos(rad), y: cy - radius * Math.sin(rad) };
+  }
+  function arcPath(a1, a2, radius){
+    const p1 = polarToXY(a1, radius);
+    const p2 = polarToXY(a2, radius);
+    const largeArc = Math.abs(a1 - a2) > 180 ? 1 : 0;
+    return `M ${p1.x} ${p1.y} A ${radius} ${radius} 0 ${largeArc} 1 ${p2.x} ${p2.y}`;
+  }
+
+  const zoneColors = ['#B9C6DA', '#6FA3D6', '#35C2E8', '#1A4584'];
+  let svgParts = '';
+  for (let i = 0; i < 4; i++){
+    const a1 = 180 - i * 45;
+    const a2 = 180 - (i + 1) * 45;
+    svgParts += `<path d="${arcPath(a1, a2, r)}" stroke="${zoneColors[i]}" stroke-width="14" fill="none" opacity="0.9"/>`;
+  }
+
+  const needleAngle = 180 - (pct / 100) * 180;
+  const tip = polarToXY(needleAngle, r - 22);
+  svgParts += `<line x1="${cx}" y1="${cy}" x2="${tip.x}" y2="${tip.y}" stroke="#16213E" stroke-width="3" stroke-linecap="round"/>`;
+  svgParts += `<circle cx="${cx}" cy="${cy}" r="6" fill="#16213E"/>`;
+  svgParts += `<text x="12" y="148" font-family="IBM Plex Sans" font-size="11" fill="#9AA3AD">Novice</text>`;
+  svgParts += `<text x="205" y="148" font-family="IBM Plex Sans" font-size="11" fill="#9AA3AD">Advanced</text>`;
+
+  svg.innerHTML = svgParts;
+}
+
+/* Hexagon completion badge, echoing the Product Advisory hex-badge mark */
+function drawBadge(tier){
+  const svg = document.getElementById('badgeSvg');
+  const colorMap = { 'No Experience': '#B9C6DA', 'Moderate Experience': '#6FA3D6', 'Lots of Experience': '#35C2E8', 'Advanced Experience': '#1A4584' };
+  const c = colorMap[tier.name] || '#1A4584';
+  const textColor = (tier.name === 'Advanced Experience') ? '#FFFFFF' : '#16213E';
+
+  svg.innerHTML = `
+    <polygon points="75,6 138,42 138,114 75,150 12,114 12,42" fill="${c}" stroke="#1A4584" stroke-width="2"/>
+    <polygon points="75,26 118,50 118,102 75,126 32,102 32,50" fill="none" stroke="${textColor}" stroke-width="1" opacity="0.35"/>
+    <text x="75" y="68" text-anchor="middle" font-family="Space Grotesk" font-weight="700" font-size="13" fill="${textColor}">${tier.name.split(' ')[0].toUpperCase()}</text>
+    <text x="75" y="86" text-anchor="middle" font-family="Space Grotesk" font-weight="700" font-size="13" fill="${textColor}">${tier.name.split(' ').slice(1).join(' ').toUpperCase()}</text>
+    <text x="75" y="140" text-anchor="middle" font-family="IBM Plex Sans" font-size="9" letter-spacing="1" fill="${textColor}" opacity="0.85">PRODUCT ADVISORY</text>
+  `;
+}
+
+function downloadBadge(){
+  const svgEl = document.getElementById('badgeSvg');
+  const svgData = new XMLSerializer().serializeToString(svgEl);
+  const canvas = document.createElement('canvas');
+  canvas.width = 450; canvas.height = 510;
+  const ctx = canvas.getContext('2d');
+  const img = new Image();
+  const svgBlob = new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' });
+  const url = URL.createObjectURL(svgBlob);
+
+  img.onload = function(){
+    ctx.fillStyle = '#FFFFFF';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+    URL.revokeObjectURL(url);
+    const pngUrl = canvas.toDataURL('image/png');
+    const a = document.createElement('a');
+    a.href = pngUrl;
+    a.download = 'ai-pm-assessment-badge.png';
+    a.click();
+  };
+  img.src = url;
+}
+</script>
+</body>
+</html>

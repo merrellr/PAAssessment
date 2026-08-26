@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Assessment Results — Aggregate Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy: #1A4584; --navy-deep: #12305e; --gray: #9AA3AD; --cyan: #35C2E8;
+    --bg: #F5F8FB; --surface: #FFFFFF; --ink: #16213E; --ink-soft: #4B5768; --line: #E3E9F0;
+  }
+  *{ box-sizing: border-box; }
+  body{
+    margin:0; background: var(--bg); font-family:'IBM Plex Sans', system-ui, sans-serif;
+    color: var(--ink); display:flex; justify-content:center; padding: 32px 16px;
+  }
+  .card{
+    width:100%; max-width: 720px; background: var(--surface); border-radius: 16px;
+    border: 1px solid var(--line); box-shadow: 0 1px 2px rgba(22,33,62,0.04), 0 12px 32px rgba(22,33,62,0.06);
+    padding: 36px 32px;
+  }
+  .eyebrow{ font-size: 12px; font-weight:600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--cyan); margin-bottom: 10px; display:block; }
+  h1{ font-family:'Space Grotesk', sans-serif; margin: 0 0 6px; color: var(--navy-deep); font-size: 24px; }
+  p.sub{ color: var(--ink-soft); margin: 0 0 28px; font-size: 14px; }
+
+  .stat-row{ display:flex; gap:16px; margin-bottom: 30px; flex-wrap:wrap; }
+  .stat-box{
+    flex:1; min-width: 140px; background: #F7F9FC; border: 1px solid var(--line);
+    border-radius: 12px; padding: 18px; text-align:center;
+  }
+  .stat-num{ font-family:'Space Grotesk', sans-serif; font-weight:700; font-size: 30px; color: var(--navy); }
+  .stat-label{ font-size: 12px; color: var(--gray); margin-top: 4px; }
+
+  .section{ margin-top: 8px; }
+  .section h2{ font-family:'Space Grotesk', sans-serif; font-size: 16px; margin: 0 0 16px; color: var(--navy-deep); }
+
+  .bar-row{ margin-bottom: 14px; }
+  .bar-row-top{ display:flex; justify-content:space-between; font-size:13.5px; font-weight:500; margin-bottom: 5px; }
+  .bar-row-top .pct{ color: var(--gray); font-weight:600; }
+  .bar-track{ height: 9px; background: var(--line); border-radius: 5px; overflow:hidden; }
+  .bar-fill{ height:100%; border-radius:5px; background: var(--navy); }
+
+  .tier-dist{ display:flex; height: 28px; border-radius: 8px; overflow:hidden; margin-bottom: 12px; }
+  .tier-seg{ display:flex; align-items:center; justify-content:center; font-size:11px; color:#fff; font-weight:600; }
+  .tier-legend{ display:flex; flex-wrap:wrap; gap:14px; font-size:12.5px; color: var(--ink-soft); }
+  .tier-legend span{ display:inline-flex; align-items:center; gap:6px; }
+  .swatch{ width:10px; height:10px; border-radius:3px; display:inline-block; }
+
+  .updated{ text-align:center; font-size: 11.5px; color: var(--gray); margin-top: 30px; }
+  .empty-state{ text-align:center; color: var(--ink-soft); font-size: 14px; padding: 30px 0; }
+</style>
+</head>
+<body>
+
+<div class="card">
+  <span class="eyebrow">Product Advisory</span>
+  <h1>How teams are scoring on the AI + Product Management assessment</h1>
+  <p class="sub">Aggregate results across everyone who has completed the self-assessment. No individual names or companies are shown here.</p>
+
+  <div id="content">
+    <div class="empty-state">Loading results…</div>
+  </div>
+
+  <div class="updated" id="updatedNote"></div>
+</div>
+
+<script>
+/* ================================================================
+   EASY-EDIT ZONE: DASHBOARD DATA SOURCE
+   Paste the same Apps Script Web App URL you used in the
+   assessment file (RESULTS_LOG_URL) between the quotes below.
+   ================================================================ */
+const DASHBOARD_DATA_URL = "https://script.google.com/macros/s/AKfycbynJQYF9rv5maL_CGniS9UGhTDfBVeW3gVhEWUsFdGOqquv4osGx4nQvc8jNkaaY6wrrg/exec";
+
+const CATEGORIES = {
+  discovery: { label: "Customer & Market Discovery" },
+  strategy: { label: "Product Strategy & Roadmapping" },
+  prioritization: { label: "Prioritization & Trade-offs" },
+  execution: { label: "Execution & Delivery" },
+  stakeholder: { label: "Stakeholder Communication & Influence" },
+  aiIndividual: { label: "AI Fluency — Individual" },
+  aiOrg: { label: "AI Fluency — Organizational" }
+};
+
+const TIER_COLORS = {
+  "No Experience": "#B9C6DA",
+  "Moderate Experience": "#6FA3D6",
+  "Lots of Experience": "#35C2E8",
+  "Advanced Experience": "#1A4584"
+};
+const TIER_ORDER = ["No Experience", "Moderate Experience", "Lots of Experience", "Advanced Experience"];
+
+function loadDashboard(){
+  const content = document.getElementById('content');
+  if (!DASHBOARD_DATA_URL){
+    content.innerHTML = '<div class="empty-state">No data source configured yet. Add your Apps Script URL to DASHBOARD_DATA_URL in this file.</div>';
+    return;
+  }
+
+  // JSONP request — a real cross-origin fetch() can't reliably read
+  // an Apps Script response, so we use a callback-based script tag instead.
+  const callbackName = 'dashCallback_' + Date.now();
+  window[callbackName] = function(stats){
+    renderDashboard(stats);
+    delete window[callbackName];
+    script.remove();
+  };
+  const script = document.createElement('script');
+  script.src = DASHBOARD_DATA_URL + '?callback=' + callbackName;
+  script.onerror = function(){
+    content.innerHTML = '<div class="empty-state">Couldn\'t load results right now. Check back shortly.</div>';
+  };
+  document.body.appendChild(script);
+}
+
+function renderDashboard(stats){
+  const content = document.getElementById('content');
+
+  if (!stats.totalCompletions){
+    content.innerHTML = '<div class="empty-state">No completed assessments yet — results will appear here once people start taking it.</div>';
+    return;
+  }
+
+  let html = '';
+
+  html += '<div class="stat-row">';
+  html += '<div class="stat-box"><div class="stat-num">' + stats.totalCompletions + '</div><div class="stat-label">Total completions</div></div>';
+  const avgOverall = Math.round(Object.values(stats.categoryAverages).reduce((a,b) => a + b, 0) / Object.keys(stats.categoryAverages).length);
+  html += '<div class="stat-box"><div class="stat-num">' + avgOverall + '%</div><div class="stat-label">Average score, all areas</div></div>';
+  html += '</div>';
+
+  html += '<div class="section"><h2>Average score by area</h2>';
+  Object.keys(CATEGORIES).forEach(key => {
+    const pct = stats.categoryAverages[key] || 0;
+    html += '<div class="bar-row">';
+    html += '<div class="bar-row-top"><span>' + CATEGORIES[key].label + '</span><span class="pct">' + pct + '%</span></div>';
+    html += '<div class="bar-track"><div class="bar-fill" style="width:' + pct + '%;"></div></div>';
+    html += '</div>';
+  });
+  html += '</div>';
+
+  html += '<div class="section"><h2>Experience tier distribution</h2>';
+  html += '<div class="tier-dist">';
+  TIER_ORDER.forEach(tier => {
+    const count = stats.tierCounts[tier] || 0;
+    const pct = Math.round((count / stats.totalCompletions) * 100);
+    if (pct > 0){
+      html += '<div class="tier-seg" style="width:' + pct + '%; background:' + TIER_COLORS[tier] + ';">' + (pct >= 10 ? pct + '%' : '') + '</div>';
+    }
+  });
+  html += '</div>';
+  html += '<div class="tier-legend">';
+  TIER_ORDER.forEach(tier => {
+    const count = stats.tierCounts[tier] || 0;
+    html += '<span><span class="swatch" style="background:' + TIER_COLORS[tier] + ';"></span>' + tier + ' (' + count + ')</span>';
+  });
+  html += '</div></div>';
+
+  content.innerHTML = html;
+  document.getElementById('updatedNote').textContent = 'Updated ' + new Date().toLocaleString();
+}
+
+loadDashboard();
+</script>
+</body>
+</html>
