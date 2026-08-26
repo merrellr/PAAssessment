@@ -54,7 +54,20 @@
     overflow:hidden;
   }
 
-  .card-inner{ padding: 36px 32px 32px; }
+  .brand-header{
+    display:flex; align-items:center; gap:9px;
+    padding: 16px 32px 14px;
+  }
+  .brand-word{
+    font-family:'Space Grotesk', sans-serif; font-weight:600; font-size: 13.5px;
+    letter-spacing: 0.02em; color: var(--navy-deep);
+  }
+  .brand-accent-bar{
+    height: 3px;
+    background: linear-gradient(90deg, var(--navy) 0%, var(--cyan) 100%);
+  }
+
+  .card-inner{ padding: 30px 32px 32px; }
 
   h1,h2,h3{
     font-family:'Space Grotesk', sans-serif;
@@ -155,8 +168,23 @@
     font-family:'IBM Plex Sans', sans-serif; font-size: 14.5px; color: var(--ink);
     background: #fff;
   }
+  .text-input.has-companion{ margin-bottom: 4px; }
   .text-input:focus{ outline:none; border-color: var(--cyan); }
+  .text-input.invalid{ border-color: #C0622A; }
   select.text-input{ appearance:auto; }
+
+  .field-error{
+    font-size: 12.5px; color: #C0622A; margin: 0 0 10px 2px; min-height: 1px;
+  }
+
+  .suggest-chip{
+    display:inline-flex; align-items:center; gap:6px;
+    font-size: 12.5px; color: var(--navy); background: #EEF3FA;
+    border: 1px solid var(--line); border-radius: 7px;
+    padding: 6px 10px; margin: 0 0 10px; cursor:pointer;
+  }
+  .suggest-chip:hover{ border-color: var(--cyan); }
+  .suggest-chip b{ font-weight:600; }
 
   .badge-section{ text-align:center; border-top: 1px solid var(--line); margin-top: 24px; padding-top: 24px; }
   .retake-row{ text-align:center; margin-top: 20px; }
@@ -175,11 +203,19 @@
 <body>
 
 <div class="card">
+  <div class="brand-header">
+    <svg width="22" height="22" viewBox="0 0 40 40" aria-hidden="true">
+      <polygon points="20,3 35,11.5 35,28.5 20,37 5,28.5 5,11.5" fill="var(--navy)"/>
+      <polygon points="20,10 29,15 29,25 20,30 11,25 11,15" fill="none" stroke="var(--cyan)" stroke-width="1.5"/>
+    </svg>
+    <span class="brand-word">Product Advisory</span>
+  </div>
+  <div class="brand-accent-bar"></div>
   <div class="card-inner">
 
     <!-- SCREEN 1: INTRO -->
     <div data-screen="intro" class="active">
-      <span class="eyebrow">Product Advisory · Skill Check</span>
+      <span class="eyebrow">Skill Check</span>
       <h1>How well-rounded is your product + AI practice?</h1>
       <p>Answer 14 quick questions covering core product management skills plus how you're using AI, both personally and across your organization. You'll get a skill breakdown and specific reading recommendations for the areas with the most room to grow.</p>
       <div class="nav-row" style="justify-content:flex-start;">
@@ -205,11 +241,19 @@
       <span class="eyebrow">Almost there</span>
       <h2>Where should we send your results?</h2>
       <p>Enter your details to see your skill breakdown and reading recommendations.</p>
-      <form id="leadForm" onsubmit="handleLeadSubmit(event)">
+      <form id="leadForm" onsubmit="handleLeadSubmit(event)" novalidate>
         <input class="text-input" type="text" id="leadName" placeholder="Full name" required>
-        <input class="text-input" type="email" id="leadEmail" placeholder="Work email" required>
-        <input class="text-input" type="text" id="leadCompany" placeholder="Company" required>
-        <input class="text-input" type="text" id="leadTitle" placeholder="Job title" required>
+
+        <input class="text-input has-companion" type="email" id="leadEmail" placeholder="Work email" required oninput="clearFieldError('leadEmail')">
+        <div class="field-error" id="leadEmailError"></div>
+
+        <input class="text-input has-companion" type="text" id="leadCompany" placeholder="Company (start typing)" list="companyList" required autocomplete="off" oninput="handleCompanyInput()">
+        <datalist id="companyList"></datalist>
+        <div class="suggest-chip" id="companySuggest" style="display:none;"></div>
+
+        <input class="text-input" type="text" id="leadTitle" placeholder="Job title (start typing)" list="jobTitleList" required>
+        <datalist id="jobTitleList"></datalist>
+
         <select class="text-input" id="leadCompanySize" required>
           <option value="" disabled selected>Company size</option>
           <option value="1-10">1-10 employees</option>
@@ -218,7 +262,10 @@
           <option value="201-1000">201-1,000 employees</option>
           <option value="1000+">1,000+ employees</option>
         </select>
-        <input class="text-input" type="text" id="leadIndustry" placeholder="Industry" required>
+
+        <input class="text-input" type="text" id="leadIndustry" placeholder="Industry (start typing)" list="industryList" required>
+        <datalist id="industryList"></datalist>
+
         <div class="nav-row" style="justify-content:flex-end;">
           <button type="submit" class="btn btn-primary" id="leadSubmitBtn">See my results →</button>
         </div>
@@ -248,7 +295,7 @@
       </div>
 
       <div class="badge-section">
-        <svg id="badgeSvg" width="150" height="170" viewBox="0 0 150 170"></svg>
+        <svg id="badgeSvg" width="180" height="165" viewBox="0 0 180 165"></svg>
         <div style="margin-top:10px;">
           <button class="btn btn-primary" onclick="downloadBadge()">Download your badge</button>
         </div>
@@ -272,6 +319,30 @@
    save anywhere for your sales report.
    ================================================================ */
 const RESULTS_LOG_URL = "https://script.google.com/macros/s/AKfycbynJQYF9rv5maL_CGniS9UGhTDfBVeW3gVhEWUsFdGOqquv4osGx4nQvc8jNkaaY6wrrg/exec";
+
+/* ================================================================
+   EASY-EDIT ZONE 1C: JOB TITLE AND INDUSTRY LISTS
+   These populate the searchable dropdowns on the lead form. People
+   can always type something not on the list — these are starting
+   suggestions, not a locked set. Add, remove, or reorder freely.
+   ================================================================ */
+const JOB_TITLE_OPTIONS = [
+  "Product Manager", "Senior Product Manager", "Director of Product",
+  "VP of Product", "Chief Product Officer", "Head of Product",
+  "Product Owner", "Product Marketing Manager", "Program Manager",
+  "Project Manager", "Business Analyst", "UX Designer", "UX Researcher",
+  "Engineering Manager", "CTO", "CEO / Founder", "Quality Director",
+  "VP of Quality", "Clinical Quality Manager", "Healthcare Administrator",
+  "Consultant"
+];
+
+const INDUSTRY_OPTIONS = [
+  "Healthcare Technology / Health IT", "Healthcare Provider (Hospital / Health System)",
+  "Healthcare Payer", "Pharmaceuticals / Biotech", "Software / SaaS",
+  "Financial Services", "Insurance", "Government / Public Sector",
+  "Education", "Nonprofit / Association", "Manufacturing",
+  "Retail / E-commerce", "Consulting", "Telecommunications", "Consumer Products"
+];
 
 /* ================================================================
    EASY-EDIT ZONE 2: CATEGORIES
@@ -499,6 +570,106 @@ function startQuiz(){
   showScreen('quiz');
 }
 
+/* Populate the job title and industry datalists from the static lists above. */
+function populateStaticDatalists(){
+  const jobList = document.getElementById('jobTitleList');
+  JOB_TITLE_OPTIONS.forEach(opt => {
+    const el = document.createElement('option');
+    el.value = opt;
+    jobList.appendChild(el);
+  });
+  const indList = document.getElementById('industryList');
+  INDUSTRY_OPTIONS.forEach(opt => {
+    const el = document.createElement('option');
+    el.value = opt;
+    indList.appendChild(el);
+  });
+}
+populateStaticDatalists();
+
+let knownCompanies = []; // populated from the Sheet once fetched
+
+/* Fetch previously submitted company names via JSONP so the field
+   can suggest real companies people have already entered. */
+function loadKnownCompanies(){
+  if (!RESULTS_LOG_URL) return;
+  const callbackName = 'companiesCallback_' + Date.now();
+  window[callbackName] = function(list){
+    knownCompanies = list || [];
+    const dl = document.getElementById('companyList');
+    dl.innerHTML = '';
+    knownCompanies.forEach(name => {
+      const el = document.createElement('option');
+      el.value = name;
+      dl.appendChild(el);
+    });
+    delete window[callbackName];
+    script.remove();
+  };
+  const script = document.createElement('script');
+  script.src = RESULTS_LOG_URL + '?action=companies&callback=' + callbackName;
+  script.onerror = function(){ /* fail silently — company field still works as plain text */ };
+  document.body.appendChild(script);
+}
+loadKnownCompanies();
+
+/* Simple Levenshtein edit distance, used to catch near-duplicate
+   company names (typos, extra spaces, missing punctuation). */
+function editDistance(a, b){
+  a = a.toLowerCase().trim(); b = b.toLowerCase().trim();
+  const dp = Array(a.length + 1).fill(null).map(() => Array(b.length + 1).fill(0));
+  for (let i = 0; i <= a.length; i++) dp[i][0] = i;
+  for (let j = 0; j <= b.length; j++) dp[0][j] = j;
+  for (let i = 1; i <= a.length; i++){
+    for (let j = 1; j <= b.length; j++){
+      dp[i][j] = a[i-1] === b[j-1] ? dp[i-1][j-1] : 1 + Math.min(dp[i-1][j], dp[i][j-1], dp[i-1][j-1]);
+    }
+  }
+  return dp[a.length][b.length];
+}
+
+function handleCompanyInput(){
+  const input = document.getElementById('leadCompany');
+  const chip = document.getElementById('companySuggest');
+  const typed = input.value.trim();
+
+  if (typed.length < 3 || knownCompanies.includes(typed)){
+    chip.style.display = 'none';
+    return;
+  }
+
+  let bestMatch = null, bestDist = Infinity;
+  knownCompanies.forEach(name => {
+    const dist = editDistance(typed, name);
+    if (dist < bestDist) { bestDist = dist; bestMatch = name; }
+  });
+
+  const threshold = typed.length <= 6 ? 1 : 2;
+  if (bestMatch && bestDist > 0 && bestDist <= threshold){
+    chip.innerHTML = 'Did you mean <b>' + bestMatch + '</b>?';
+    chip.style.display = 'inline-flex';
+    chip.onclick = () => {
+      input.value = bestMatch;
+      chip.style.display = 'none';
+    };
+  } else {
+    chip.style.display = 'none';
+  }
+}
+
+function setFieldError(fieldId, message){
+  document.getElementById(fieldId).classList.add('invalid');
+  document.getElementById(fieldId + 'Error').textContent = message;
+}
+function clearFieldError(fieldId){
+  document.getElementById(fieldId).classList.remove('invalid');
+  document.getElementById(fieldId + 'Error').textContent = '';
+}
+
+function isValidEmail(value){
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+}
+
 function buildProgressRail(){
   const rail = document.getElementById('progressRail');
   rail.innerHTML = '';
@@ -559,9 +730,19 @@ function goNext(){
 
 function handleLeadSubmit(event){
   event.preventDefault();
+
+  const emailField = document.getElementById('leadEmail');
+  const email = emailField.value.trim();
+  if (!isValidEmail(email)){
+    setFieldError('leadEmail', 'Enter a valid email address (e.g. name@company.com)');
+    emailField.focus();
+    return;
+  }
+  clearFieldError('leadEmail');
+
   const lead = {
     name: document.getElementById('leadName').value.trim(),
-    email: document.getElementById('leadEmail').value.trim(),
+    email: email,
     company: document.getElementById('leadCompany').value.trim(),
     jobTitle: document.getElementById('leadTitle').value.trim(),
     companySize: document.getElementById('leadCompanySize').value,
@@ -569,7 +750,7 @@ function handleLeadSubmit(event){
   };
 
   logResult(lead, lastScores);
-  showResults(lastScores);
+  showResults(lastScores, lead);
 }
 
 /* Fire-and-forget log to the Google Sheet via Apps Script.
@@ -638,7 +819,7 @@ function getTier(pct){
   return TIERS.find(t => pct >= t.min && pct <= t.max) || TIERS[0];
 }
 
-function showResults(scores){
+function showResults(scores, lead){
   const { overallPct, overallTotal, overallMax, catPct } = scores;
   const tier = getTier(overallPct);
 
@@ -647,7 +828,7 @@ function showResults(scores){
   document.getElementById('tierDesc').textContent = tier.desc;
 
   drawGauge(overallPct);
-  drawBadge(tier);
+  drawBadge(tier, lead.name);
   renderBars(catPct);
   renderGrowthAreas(catPct);
 
@@ -729,19 +910,21 @@ function drawGauge(pct){
   svg.innerHTML = svgParts;
 }
 
-/* Hexagon completion badge, echoing the Product Advisory hex-badge mark */
-function drawBadge(tier){
+/* Modern flat badge: solid tier-colored circle with a checkmark,
+   name / tier / date as clean type below it (LinkedIn-badge style) */
+function drawBadge(tier, name){
   const svg = document.getElementById('badgeSvg');
   const colorMap = { 'No Experience': '#B9C6DA', 'Moderate Experience': '#6FA3D6', 'Lots of Experience': '#35C2E8', 'Advanced Experience': '#1A4584' };
   const c = colorMap[tier.name] || '#1A4584';
-  const textColor = (tier.name === 'Advanced Experience') ? '#FFFFFF' : '#16213E';
+  const dateStr = new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  const displayName = name && name.length > 24 ? name.slice(0, 22) + '…' : (name || '');
 
   svg.innerHTML = `
-    <polygon points="75,6 138,42 138,114 75,150 12,114 12,42" fill="${c}" stroke="#1A4584" stroke-width="2"/>
-    <polygon points="75,26 118,50 118,102 75,126 32,102 32,50" fill="none" stroke="${textColor}" stroke-width="1" opacity="0.35"/>
-    <text x="75" y="68" text-anchor="middle" font-family="Space Grotesk" font-weight="700" font-size="13" fill="${textColor}">${tier.name.split(' ')[0].toUpperCase()}</text>
-    <text x="75" y="86" text-anchor="middle" font-family="Space Grotesk" font-weight="700" font-size="13" fill="${textColor}">${tier.name.split(' ').slice(1).join(' ').toUpperCase()}</text>
-    <text x="75" y="140" text-anchor="middle" font-family="IBM Plex Sans" font-size="9" letter-spacing="1" fill="${textColor}" opacity="0.85">PRODUCT ADVISORY</text>
+    <circle cx="90" cy="52" r="34" fill="${c}"/>
+    <path d="M75 52 L86 63 L107 40" fill="none" stroke="#FFFFFF" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+    <text x="90" y="108" text-anchor="middle" font-family="Space Grotesk" font-weight="600" font-size="14" fill="#16213E">${displayName}</text>
+    <text x="90" y="128" text-anchor="middle" font-family="Space Grotesk" font-weight="600" font-size="13" fill="#1A4584">${tier.name}</text>
+    <text x="90" y="148" text-anchor="middle" font-family="IBM Plex Sans" font-size="11" fill="#9AA3AD">Product Advisory · ${dateStr}</text>
   `;
 }
 
@@ -749,7 +932,7 @@ function downloadBadge(){
   const svgEl = document.getElementById('badgeSvg');
   const svgData = new XMLSerializer().serializeToString(svgEl);
   const canvas = document.createElement('canvas');
-  canvas.width = 450; canvas.height = 510;
+  canvas.width = 540; canvas.height = 495;
   const ctx = canvas.getContext('2d');
   const img = new Image();
   const svgBlob = new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' });
