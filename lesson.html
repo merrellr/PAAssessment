@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lesson — Product Advisory Learning</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy: #1A4584; --navy-deep: #12305e; --gray: #9AA3AD; --cyan: #35C2E8;
+    --bg: #F5F8FB; --surface: #FFFFFF; --ink: #16213E; --ink-soft: #4B5768; --line: #E3E9F0;
+  }
+  *{ box-sizing: border-box; }
+  body{ margin:0; background: var(--bg); font-family:'IBM Plex Sans', system-ui, sans-serif; color: var(--ink); }
+  .wrap{ max-width: 640px; margin: 0 auto; padding: 24px 16px 48px; }
+  .brand-accent-bar{ height: 3px; background: linear-gradient(90deg, var(--navy) 0%, var(--cyan) 100%); border-radius: 2px; margin-bottom: 24px; }
+  .back-link{ font-size: 13px; color: var(--gray); text-decoration:none; display:inline-block; margin-bottom: 16px; }
+  .back-link:hover{ color: var(--navy); }
+  .card{ background: var(--surface); border-radius: 16px; border: 1px solid var(--line); padding: 32px; box-shadow: 0 1px 2px rgba(22,33,62,0.04), 0 12px 32px rgba(22,33,62,0.06); }
+  .eyebrow{ font-size: 12px; font-weight:600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--cyan); margin-bottom: 8px; display:block; }
+  h1{ font-family:'Space Grotesk', sans-serif; font-size: 20px; margin: 0 0 18px; color: var(--navy-deep); }
+  p{ line-height:1.6; color: var(--ink-soft); }
+  .lesson-nav{ display:flex; gap:8px; margin: 24px 0; flex-wrap:wrap; }
+  .lesson-pill{ padding: 7px 12px; border-radius: 7px; font-size: 12.5px; font-weight:500; border: 1px solid var(--line); background:#fff; color: var(--ink-soft); text-decoration:none; }
+  .lesson-pill.done{ background:#EEF3FA; border-color: var(--cyan); color: var(--navy); }
+  .lesson-pill.current{ border-color: var(--navy); color: var(--navy); font-weight:600; }
+  .nav-row{ display:flex; justify-content:space-between; margin-top: 26px; }
+  button.btn{ font-family:'Space Grotesk', sans-serif; font-weight:600; font-size: 14px; border-radius: 8px; padding: 11px 20px; border: none; cursor:pointer; }
+  .btn-primary{ background: var(--navy); color:#fff; }
+  .btn-primary:hover{ background: var(--navy-deep); }
+  .btn-ghost{ background:none; color: var(--gray); border: 1px solid var(--line); }
+  .status-msg{ font-size: 13px; color: var(--gray); margin-top: 10px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="brand-accent-bar"></div>
+  <a class="back-link" href="lms-dashboard.html">← Back to dashboard</a>
+
+  <div class="card">
+    <span class="eyebrow" id="courseTitle">Loading…</span>
+    <h1 id="lessonTitle"></h1>
+
+    <div class="lesson-nav" id="lessonNav"></div>
+
+    <p id="lessonBody">This is placeholder lesson content. Replace this paragraph with the real lesson material whenever it's ready — nothing else on this page needs to change.</p>
+
+    <div class="nav-row">
+      <button class="btn btn-ghost" id="prevBtn" onclick="goToLesson(-1)">← Previous</button>
+      <button class="btn btn-primary" id="completeBtn" onclick="markCompleteAndContinue()">Mark complete & continue →</button>
+    </div>
+    <div class="status-msg" id="statusMsg"></div>
+  </div>
+</div>
+
+<script type="module">
+/* ================================================================
+   Uses the same Firebase config and course catalog as the
+   dashboard. If you edit the catalog in lms-dashboard.html, copy
+   the same CATALOG block here too so both pages stay in sync.
+   ================================================================ */
+const firebaseConfig = {
+  apiKey: "AIzaSyAcECtS5c6WeOhKlwRK-LYFE47npbuq_eU",
+  authDomain: "product-advisory-lms.firebaseapp.com",
+  projectId: "product-advisory-lms",
+  storageBucket: "product-advisory-lms.firebasestorage.app",
+  messagingSenderId: "1081134406437",
+  appId: "1:1081134406437:web:72e28604d093219e7698cc"
+};
+
+const DOMAINS = {
+  discovery: { label: "Customer & Market Discovery" },
+  strategy: { label: "Product Strategy & Roadmapping" },
+  prioritization: { label: "Prioritization & Trade-offs" },
+  execution: { label: "Execution & Delivery" },
+  stakeholder: { label: "Stakeholder Communication & Influence" },
+  aiIndividual: { label: "AI Fluency — Individual" },
+  aiOrg: { label: "AI Fluency — Organizational" }
+};
+const TIERS = [
+  { slug: "novice", label: "No Experience" },
+  { slug: "moderate", label: "Moderate Experience" },
+  { slug: "experienced", label: "Lots of Experience" },
+  { slug: "advanced", label: "Advanced Experience" }
+];
+function buildCatalog(){
+  const catalog = {};
+  Object.keys(DOMAINS).forEach(domainKey => {
+    TIERS.forEach(tier => {
+      const courseId = domainKey + "-" + tier.slug;
+      catalog[courseId] = {
+        title: DOMAINS[domainKey].label + " — " + tier.label,
+        lessons: [
+          { id: 1, title: "Lesson 1: Placeholder introduction" },
+          { id: 2, title: "Lesson 2: Placeholder core concept" },
+          { id: 3, title: "Lesson 3: Placeholder practice + wrap-up" }
+        ]
+      };
+    });
+  });
+  return catalog;
+}
+const CATALOG = buildCatalog();
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
+import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+const params = new URLSearchParams(window.location.search);
+const courseId = params.get('course');
+let lessonNum = parseInt(params.get('lesson') || '1', 10);
+const course = CATALOG[courseId];
+
+let currentUser = null;
+let completedLessons = [];
+
+if (!course){
+  document.getElementById('lessonTitle').textContent = 'Course not found';
+  document.getElementById('courseTitle').textContent = '';
+} else {
+  document.getElementById('courseTitle').textContent = course.title;
+}
+
+onAuthStateChanged(auth, async (user) => {
+  if (!user){
+    window.location.href = 'lms-dashboard.html';
+    return;
+  }
+  currentUser = user;
+  await loadProgress();
+  renderLesson();
+});
+
+async function loadProgress(){
+  const progressRef = doc(db, 'progress', currentUser.uid);
+  const snap = await getDoc(progressRef);
+  const data = snap.exists() ? snap.data() : { courses: {} };
+  const courseProgress = (data.courses && data.courses[courseId]) || { completed: [] };
+  completedLessons = courseProgress.completed || [];
+
+  // If arriving fresh (no ?lesson= in URL) resume at the first incomplete lesson
+  if (!params.get('lesson')){
+    const nextIncomplete = course.lessons.find(l => !completedLessons.includes(l.id));
+    lessonNum = nextIncomplete ? nextIncomplete.id : course.lessons[course.lessons.length - 1].id;
+  }
+}
+
+function renderLesson(){
+  if (!course) return;
+  const lesson = course.lessons.find(l => l.id === lessonNum) || course.lessons[0];
+  document.getElementById('lessonTitle').textContent = lesson.title;
+
+  const nav = document.getElementById('lessonNav');
+  nav.innerHTML = '';
+  course.lessons.forEach(l => {
+    const pill = document.createElement('a');
+    pill.href = 'lesson.html?course=' + courseId + '&lesson=' + l.id;
+    pill.className = 'lesson-pill' + (completedLessons.includes(l.id) ? ' done' : '') + (l.id === lessonNum ? ' current' : '');
+    pill.textContent = 'Lesson ' + l.id;
+    nav.appendChild(pill);
+  });
+
+  document.getElementById('prevBtn').style.visibility = lessonNum === 1 ? 'hidden' : 'visible';
+  const isLast = lessonNum === course.lessons[course.lessons.length - 1].id;
+  document.getElementById('completeBtn').textContent = isLast ? 'Mark complete & finish' : 'Mark complete & continue →';
+}
+
+window.goToLesson = function(direction){
+  window.location.href = 'lesson.html?course=' + courseId + '&lesson=' + (lessonNum + direction);
+};
+
+window.markCompleteAndContinue = async function(){
+  if (!completedLessons.includes(lessonNum)) completedLessons.push(lessonNum);
+
+  const progressRef = doc(db, 'progress', currentUser.uid);
+  const snap = await getDoc(progressRef);
+  const data = snap.exists() ? snap.data() : { courses: {} };
+  data.courses = data.courses || {};
+  data.courses[courseId] = { completed: completedLessons, lastLesson: lessonNum, updatedAt: new Date().toISOString() };
+  await setDoc(progressRef, data);
+
+  const isLast = lessonNum === course.lessons[course.lessons.length - 1].id;
+  if (isLast){
+    document.getElementById('statusMsg').textContent = 'Course complete — nice work. Redirecting to your dashboard…';
+    setTimeout(() => { window.location.href = 'lms-dashboard.html'; }, 1200);
+  } else {
+    window.location.href = 'lesson.html?course=' + courseId + '&lesson=' + (lessonNum + 1);
+  }
+};
+</script>
+</body>
+</html>

@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Product Advisory Learning</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy: #1A4584; --navy-deep: #12305e; --gray: #9AA3AD; --cyan: #35C2E8;
+    --bg: #F5F8FB; --surface: #FFFFFF; --ink: #16213E; --ink-soft: #4B5768; --line: #E3E9F0;
+    --warn: #C0622A;
+    --tier-1: #B9C6DA; --tier-2: #6FA3D6; --tier-3: #35C2E8; --tier-4: #1A4584;
+  }
+  *{ box-sizing: border-box; }
+  body{ margin:0; background: var(--bg); font-family:'IBM Plex Sans', system-ui, sans-serif; color: var(--ink); }
+
+  .wrap{ max-width: 760px; margin: 0 auto; padding: 0 16px 48px; }
+
+  .brand-header{ display:flex; align-items:center; gap:9px; padding: 24px 0 14px; }
+  .brand-word{ font-family:'Space Grotesk', sans-serif; font-weight:600; font-size: 15px; color: var(--navy-deep); }
+  .brand-accent-bar{ height: 3px; background: linear-gradient(90deg, var(--navy) 0%, var(--cyan) 100%); border-radius: 2px; margin-bottom: 24px; }
+
+  .card{ background: var(--surface); border-radius: 16px; border: 1px solid var(--line); padding: 32px; box-shadow: 0 1px 2px rgba(22,33,62,0.04), 0 12px 32px rgba(22,33,62,0.06); }
+
+  h1{ font-family:'Space Grotesk', sans-serif; font-size: 22px; margin: 0 0 8px; color: var(--navy-deep); }
+  h2{ font-family:'Space Grotesk', sans-serif; font-size: 16px; margin: 0 0 4px; color: var(--navy-deep); }
+  p{ line-height:1.55; color: var(--ink-soft); margin: 0 0 18px; }
+
+  .text-input{ width:100%; padding: 12px 14px; margin-bottom: 12px; border: 1.5px solid var(--line); border-radius: 9px; font-family:'IBM Plex Sans', sans-serif; font-size: 14.5px; }
+  .text-input:focus{ outline:none; border-color: var(--cyan); }
+  .field-error{ font-size: 12.5px; color: var(--warn); margin: -6px 0 12px 2px; min-height: 1px; }
+
+  button.btn{ font-family:'Space Grotesk', sans-serif; font-weight:600; font-size: 14px; border-radius: 8px; padding: 11px 20px; border: none; cursor:pointer; }
+  .btn-primary{ background: var(--navy); color:#fff; width:100%; }
+  .btn-primary:hover{ background: var(--navy-deep); }
+  .btn-google{ background:#fff; color: var(--ink); border: 1.5px solid var(--line); width:100%; margin-top: 8px; }
+  .btn-google:hover{ border-color: var(--cyan); }
+  .btn-ghost{ background:none; color: var(--gray); text-decoration:underline; font-size: 13px; padding: 6px; }
+
+  .toggle-row{ text-align:center; margin-top: 14px; font-size: 13.5px; color: var(--ink-soft); }
+  .toggle-row a{ color: var(--navy); cursor:pointer; text-decoration:underline; }
+
+  .top-bar{ display:flex; justify-content:space-between; align-items:center; margin-bottom: 22px; }
+  .top-bar .who{ font-size: 13.5px; color: var(--ink-soft); }
+
+  .rec-banner{ background:#EEF3FA; border:1px solid var(--line); border-radius: 12px; padding: 16px 18px; margin-bottom: 22px; }
+  .rec-banner .eyebrow{ font-size:11px; font-weight:600; letter-spacing:0.06em; text-transform:uppercase; color: var(--cyan); }
+  .rec-chip{ display:inline-block; background:#fff; border:1px solid var(--line); border-radius:7px; padding:6px 12px; margin: 8px 8px 0 0; font-size:13px; font-weight:500; color: var(--navy); text-decoration:none; }
+  .rec-chip:hover{ border-color: var(--cyan); }
+
+  .domain-group{ margin-bottom: 22px; }
+  .domain-title{ font-family:'Space Grotesk', sans-serif; font-weight:600; font-size: 14px; color: var(--navy-deep); margin-bottom: 10px; }
+  .tier-row{ display:grid; grid-template-columns: repeat(4, 1fr); gap:8px; }
+  .tier-card{ border:1px solid var(--line); border-radius: 10px; padding: 10px; text-align:center; text-decoration:none; color: var(--ink); background:#fff; }
+  .tier-card:hover{ border-color: var(--cyan); }
+  .tier-card .tname{ font-size: 11.5px; font-weight:600; margin-bottom: 6px; }
+  .tier-card .tbar{ height:5px; background: var(--line); border-radius:3px; overflow:hidden; margin-bottom: 6px; }
+  .tier-card .tbar-fill{ height:100%; background: var(--cyan); }
+  .tier-card .tstatus{ font-size: 10.5px; color: var(--gray); }
+
+  [data-screen]{ display:none; }
+  [data-screen].active{ display:block; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="brand-header">
+    <svg width="22" height="22" viewBox="0 0 40 40" aria-hidden="true">
+      <polygon points="20,3 35,11.5 35,28.5 20,37 5,28.5 5,11.5" fill="#1A4584"/>
+      <polygon points="20,10 29,15 29,25 20,30 11,25 11,15" fill="none" stroke="#35C2E8" stroke-width="1.5"/>
+    </svg>
+    <span class="brand-word">Product Advisory Learning</span>
+  </div>
+  <div class="brand-accent-bar"></div>
+
+  <!-- LOGIN / SIGN UP -->
+  <div data-screen="auth" class="active">
+    <div class="card" style="max-width:420px;margin:0 auto;">
+      <h1 id="authTitle">Welcome back</h1>
+      <p id="authSub">Log in to continue your courses.</p>
+
+      <input class="text-input" type="email" id="authEmail" placeholder="Email address">
+      <input class="text-input" type="password" id="authPassword" placeholder="Password">
+      <div class="field-error" id="authError"></div>
+
+      <button class="btn btn-primary" id="authSubmitBtn" onclick="handleAuthSubmit()">Log in</button>
+      <button class="btn btn-google" onclick="handleGoogleSignIn()">Sign in with Google</button>
+
+      <div class="toggle-row" id="authToggle">
+        Don't have an account? <a onclick="toggleAuthMode()">Sign up</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- DASHBOARD -->
+  <div data-screen="dashboard">
+    <div class="top-bar">
+      <div class="who">Signed in as <span id="whoEmail"></span></div>
+      <button class="btn btn-ghost" onclick="handleSignOut()">Sign out</button>
+    </div>
+
+    <div class="rec-banner" id="recBanner" style="display:none;">
+      <span class="eyebrow">Recommended for you</span>
+      <div id="recChips"></div>
+    </div>
+
+    <div id="courseCatalog"></div>
+  </div>
+
+</div>
+
+<script type="module">
+/* ================================================================
+   EASY-EDIT ZONE 1: FIREBASE CONFIG
+   Paste the config object Firebase gave you when you registered
+   the web app. This is safe to be public — it's not a secret key,
+   it just tells the page which Firebase project to talk to.
+   ================================================================ */
+const firebaseConfig = {
+  apiKey: "AIzaSyAcECtS5c6WeOhKlwRK-LYFE47npbuq_eU",
+  authDomain: "product-advisory-lms.firebaseapp.com",
+  projectId: "product-advisory-lms",
+  storageBucket: "product-advisory-lms.firebasestorage.app",
+  messagingSenderId: "1081134406437",
+  appId: "1:1081134406437:web:72e28604d093219e7698cc"
+};
+
+/* ================================================================
+   EASY-EDIT ZONE 2: RESULTS LOOKUP
+   Same Apps Script Web App URL used in the assessment. Used here
+   to pull someone's latest assessment result for recommendations.
+   ================================================================ */
+const RESULTS_LOG_URL = "https://script.google.com/macros/s/AKfycbynJQYF9rv5maL_CGniS9UGhTDfBVeW3gVhEWUsFdGOqquv4osGx4nQvc8jNkaaY6wrrg/exec";
+
+/* ================================================================
+   EASY-EDIT ZONE 3: COURSE CATALOG
+   Placeholder courses across all 7 domains x 4 tiers. Replace the
+   "lessons" arrays with real content whenever it's ready — the
+   dashboard, progress tracking, and recommendations all read from
+   this same structure, so nothing else needs to change.
+   ================================================================ */
+const DOMAINS = {
+  discovery: { label: "Customer & Market Discovery" },
+  strategy: { label: "Product Strategy & Roadmapping" },
+  prioritization: { label: "Prioritization & Trade-offs" },
+  execution: { label: "Execution & Delivery" },
+  stakeholder: { label: "Stakeholder Communication & Influence" },
+  aiIndividual: { label: "AI Fluency — Individual" },
+  aiOrg: { label: "AI Fluency — Organizational" }
+};
+
+const TIERS = [
+  { slug: "novice", label: "No Experience" },
+  { slug: "moderate", label: "Moderate Experience" },
+  { slug: "experienced", label: "Lots of Experience" },
+  { slug: "advanced", label: "Advanced Experience" }
+];
+
+function buildCatalog(){
+  const catalog = {};
+  Object.keys(DOMAINS).forEach(domainKey => {
+    TIERS.forEach(tier => {
+      const courseId = domainKey + "-" + tier.slug;
+      catalog[courseId] = {
+        domain: domainKey,
+        tier: tier.slug,
+        title: DOMAINS[domainKey].label + " — " + tier.label,
+        lessons: [
+          { id: 1, title: "Lesson 1: Placeholder introduction" },
+          { id: 2, title: "Lesson 2: Placeholder core concept" },
+          { id: 3, title: "Lesson 3: Placeholder practice + wrap-up" }
+        ]
+      };
+    });
+  });
+  return catalog;
+}
+const CATALOG = buildCatalog();
+
+/* ================================================================
+   Engine below this line.
+   ================================================================ */
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
+import {
+  getAuth, onAuthStateChanged, signOut,
+  createUserWithEmailAndPassword, signInWithEmailAndPassword,
+  GoogleAuthProvider, signInWithPopup
+} from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
+import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+let isSignUpMode = false;
+let currentUser = null;
+
+function showScreen(name){
+  document.querySelectorAll('[data-screen]').forEach(el => el.classList.remove('active'));
+  document.querySelector('[data-screen="' + name + '"]').classList.add('active');
+}
+
+window.toggleAuthMode = function(){
+  isSignUpMode = !isSignUpMode;
+  document.getElementById('authTitle').textContent = isSignUpMode ? 'Create your account' : 'Welcome back';
+  document.getElementById('authSub').textContent = isSignUpMode ? 'Sign up to start tracking your courses.' : 'Log in to continue your courses.';
+  document.getElementById('authSubmitBtn').textContent = isSignUpMode ? 'Sign up' : 'Log in';
+  document.getElementById('authToggle').innerHTML = isSignUpMode
+    ? 'Already have an account? <a onclick="toggleAuthMode()">Log in</a>'
+    : "Don't have an account? <a onclick=\"toggleAuthMode()\">Sign up</a>";
+  document.getElementById('authError').textContent = '';
+};
+
+window.handleAuthSubmit = async function(){
+  const email = document.getElementById('authEmail').value.trim();
+  const password = document.getElementById('authPassword').value;
+  const errorEl = document.getElementById('authError');
+  errorEl.textContent = '';
+
+  if (!email || !password){
+    errorEl.textContent = 'Enter both an email and a password.';
+    return;
+  }
+
+  try {
+    if (isSignUpMode){
+      await createUserWithEmailAndPassword(auth, email, password);
+    } else {
+      await signInWithEmailAndPassword(auth, email, password);
+    }
+  } catch (err){
+    errorEl.textContent = friendlyAuthError(err.code);
+  }
+};
+
+window.handleGoogleSignIn = async function(){
+  try {
+    await signInWithPopup(auth, new GoogleAuthProvider());
+  } catch (err){
+    document.getElementById('authError').textContent = friendlyAuthError(err.code);
+  }
+};
+
+window.handleSignOut = function(){
+  signOut(auth);
+};
+
+function friendlyAuthError(code){
+  const map = {
+    'auth/email-already-in-use': 'That email already has an account — try logging in instead.',
+    'auth/invalid-email': 'That email address looks invalid.',
+    'auth/weak-password': 'Password should be at least 6 characters.',
+    'auth/wrong-password': 'Incorrect password.',
+    'auth/user-not-found': 'No account found with that email.',
+    'auth/invalid-credential': 'Incorrect email or password.'
+  };
+  return map[code] || 'Something went wrong — please try again.';
+}
+
+onAuthStateChanged(auth, async (user) => {
+  if (user){
+    currentUser = user;
+    document.getElementById('whoEmail').textContent = user.email;
+    showScreen('dashboard');
+    await loadDashboard(user);
+  } else {
+    currentUser = null;
+    showScreen('auth');
+  }
+});
+
+async function loadDashboard(user){
+  const progressRef = doc(db, 'progress', user.uid);
+  const progressSnap = await getDoc(progressRef);
+  const progress = progressSnap.exists() ? progressSnap.data() : { courses: {} };
+
+  renderCatalog(progress);
+  loadRecommendations(user.email);
+}
+
+function renderCatalog(progress){
+  const wrap = document.getElementById('courseCatalog');
+  wrap.innerHTML = '';
+
+  Object.keys(DOMAINS).forEach(domainKey => {
+    const group = document.createElement('div');
+    group.className = 'domain-group';
+
+    const title = document.createElement('div');
+    title.className = 'domain-title';
+    title.textContent = DOMAINS[domainKey].label;
+    group.appendChild(title);
+
+    const row = document.createElement('div');
+    row.className = 'tier-row';
+
+    TIERS.forEach(tier => {
+      const courseId = domainKey + '-' + tier.slug;
+      const course = CATALOG[courseId];
+      const courseProgress = (progress.courses && progress.courses[courseId]) || { completed: [] };
+      const pct = Math.round((courseProgress.completed.length / course.lessons.length) * 100);
+
+      const a = document.createElement('a');
+      a.className = 'tier-card';
+      a.href = 'lesson.html?course=' + courseId;
+      a.innerHTML = `
+        <div class="tname">${tier.label}</div>
+        <div class="tbar"><div class="tbar-fill" style="width:${pct}%;"></div></div>
+        <div class="tstatus">${pct === 0 ? 'Not started' : (pct === 100 ? 'Completed' : pct + '% done')}</div>
+      `;
+      row.appendChild(a);
+    });
+
+    group.appendChild(row);
+    wrap.appendChild(group);
+  });
+}
+
+function loadRecommendations(email){
+  if (!RESULTS_LOG_URL) return;
+  const callbackName = 'lookupCallback_' + Date.now();
+  window[callbackName] = function(result){
+    if (result) renderRecommendations(result);
+    delete window[callbackName];
+    script.remove();
+  };
+  const script = document.createElement('script');
+  script.src = RESULTS_LOG_URL + '?action=lookup&email=' + encodeURIComponent(email) + '&callback=' + callbackName;
+  script.onerror = function(){ /* no assessment result on file yet — fine, just skip recommendations */ };
+  document.body.appendChild(script);
+}
+
+function renderRecommendations(result){
+  const sorted = Object.keys(result.categoryPct).sort((a, b) => result.categoryPct[a] - result.categoryPct[b]);
+  const lowestTwo = sorted.slice(0, 2);
+  const tierSlugMap = { 'No Experience': 'novice', 'Moderate Experience': 'moderate', 'Lots of Experience': 'experienced', 'Advanced Experience': 'advanced' };
+
+  const banner = document.getElementById('recBanner');
+  const chips = document.getElementById('recChips');
+  chips.innerHTML = '';
+
+  lowestTwo.forEach(domainKey => {
+    const pct = result.categoryPct[domainKey];
+    let tierSlug = 'novice';
+    if (pct > 75) tierSlug = 'advanced';
+    else if (pct > 50) tierSlug = 'experienced';
+    else if (pct > 25) tierSlug = 'moderate';
+    const courseId = domainKey + '-' + tierSlug;
+    const course = CATALOG[courseId];
+    if (!course) return;
+    const a = document.createElement('a');
+    a.className = 'rec-chip';
+    a.href = 'lesson.html?course=' + courseId;
+    a.textContent = course.title;
+    chips.appendChild(a);
+  });
+
+  if (chips.children.length > 0) banner.style.display = 'block';
+}
+</script>
+</body>
+</html>
