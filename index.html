@@ -772,6 +772,13 @@ function logResult(lead, scores){
     payload[key + 'Pct'] = Math.round(scores.catPct[key]);
   });
 
+  // Log each individual question's answer too — this is what lets
+  // us later see exactly which answer choices are most common,
+  // not just the rolled-up category percentages.
+  QUESTIONS.forEach((q, i) => {
+    payload['q' + (i + 1)] = q.options[answers[i]].text;
+  });
+
   fetch(RESULTS_LOG_URL, {
     method: 'POST',
     headers: { 'Content-Type': 'text/plain;charset=utf-8' },
