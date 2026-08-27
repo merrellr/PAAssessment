@@ -22,6 +22,10 @@
   .eyebrow{ font-size: 12px; font-weight:600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--cyan); margin-bottom: 8px; display:block; }
   h1{ font-family:'Space Grotesk', sans-serif; font-size: 20px; margin: 0 0 18px; color: var(--navy-deep); }
   p{ line-height:1.6; color: var(--ink-soft); }
+  #lessonBody p{ margin: 0 0 14px; }
+  #lessonBody ul{ margin: 0 0 14px; padding-left: 20px; }
+  #lessonBody li{ line-height:1.6; color: var(--ink-soft); margin-bottom: 8px; }
+  #lessonBody strong{ color: var(--ink); }
   .lesson-nav{ display:flex; gap:8px; margin: 24px 0; flex-wrap:wrap; }
   .lesson-pill{ padding: 7px 12px; border-radius: 7px; font-size: 12.5px; font-weight:500; border: 1px solid var(--line); background:#fff; color: var(--ink-soft); text-decoration:none; }
   .lesson-pill.done{ background:#EEF3FA; border-color: var(--cyan); color: var(--navy); }
@@ -45,7 +49,7 @@
 
     <div class="lesson-nav" id="lessonNav"></div>
 
-    <p id="lessonBody">This is placeholder lesson content. Replace this paragraph with the real lesson material whenever it's ready — nothing else on this page needs to change.</p>
+    <div id="lessonBody">Loading…</div>
 
     <div class="nav-row">
       <button class="btn btn-ghost" id="prevBtn" onclick="goToLesson(-1)">← Previous</button>
@@ -85,6 +89,56 @@ const TIERS = [
   { slug: "experienced", label: "Lots of Experience" },
   { slug: "advanced", label: "Advanced Experience" }
 ];
+/* ================================================================
+   EASY-EDIT ZONE: REAL LESSON CONTENT
+   This is where authored content lives, keyed by courseId
+   ("<domain>-<tier>"). Any course not listed here still falls
+   back to the generic 3-lesson placeholder automatically — you
+   only need an entry once real content is ready for that course.
+   Each lesson's "body" can include basic HTML (paragraphs, lists,
+   headings) since it's rendered directly on the page.
+   ================================================================ */
+const CONTENT_OVERRIDES = {
+  "aiOrg-moderate": {
+    lessons: [
+      {
+        id: 1,
+        title: "Lesson 1: The Three Stages of AI Enablement",
+        body: `
+          <p>Most organizations today sit in one of three stages. In the first, <strong>novice</strong>, AI adoption hasn't really started. In the second, <strong>individual enablement</strong>, a handful of curious employees have taught themselves to use AI tools well, building clever prompts and saving real time, but only for themselves.</p>
+          <p>This second stage is where the majority of companies are stuck right now. It feels like progress because someone on the team is clearly getting value from AI. But that value is fragile: if that person leaves, the knowledge leaves with them. If a new hire joins, they start from zero. Nothing about it survives turnover.</p>
+          <p>The third stage, <strong>organizational enablement</strong>, looks completely different. The organization itself, not just a few power users, has durable AI capability. Workflows are automated in a way that outlasts any one employee. Institutional knowledge lives in a system instead of in someone's head. That shift, from individual cleverness to shared infrastructure, is the single biggest unlock most companies are missing.</p>
+        `
+      },
+      {
+        id: 2,
+        title: "Lesson 2: Why the Shift Is Worth It",
+        body: `
+          <p>When you build an AI habit or workflow for one person, you're optimizing that person's time. That's real value, but it's capped, it scales only as far as their workload and only as long as they keep using it.</p>
+          <p>When you build for a process instead, a tool that handles a category of customer questions, or triages a type of internal request, you're removing friction from the system itself. It runs the same way at 9am and at midnight. And critically, it compounds: every improvement benefits everyone who touches that process going forward, not just whoever happened to build it.</p>
+          <p>There's a governance angle too. Individual AI use is invisible to the organization, nobody knows what prompts are being run or what decisions are being informed by an ungoverned tool. Organizational tools live inside managed systems, where they can be monitored, versioned, and improved like any other piece of software.</p>
+          <p>And there's a change-management angle: when AI capability lives in individual habits, adoption is uneven and leadership has little visibility into who's actually using it. When it lives in shared tools, adoption becomes something you can roll out, measure, and support, the same way you would any other enterprise software.</p>
+        `
+      },
+      {
+        id: 3,
+        title: "Lesson 3: A Practical Path to Your First Win",
+        body: `
+          <p>You don't need a full transformation program to make this shift. You need one real process, one working tool, and proof that it works. Here's a practical path:</p>
+          <ul>
+            <li><strong>Start narrow.</strong> Pick one process that's well understood, has a clear start and end point, and causes real friction today. Your first win should be boring and useful, not impressive.</li>
+            <li><strong>Map the process before building anything.</strong> Write out the actual steps a human takes today, including the exceptions. Most first attempts fail because nobody wrote down what "handling it" really meant.</li>
+            <li><strong>Ground it in real data.</strong> Connect it to your actual source of truth, rather than relying on generic knowledge. This is what makes the result dramatically more useful than a generic chatbot answer.</li>
+            <li><strong>Test with the people who live in the process every day</strong>, not just your own team. They'll find the gaps in an afternoon that you'd miss after weeks of solo testing.</li>
+            <li><strong>Assign ownership before launch.</strong> Someone needs to own this the way they'd own any piece of software: monitoring it, updating it as the process changes, retiring it if it stops earning its keep.</li>
+          </ul>
+          <p>Treat this first success as a proof point, not the finish line. The real payoff isn't the single automation, it's what that first win teaches your organization about what's possible, and the credibility it builds for the next one.</p>
+        `
+      }
+    ]
+  }
+};
+
 function buildCatalog(){
   const catalog = {};
   Object.keys(DOMAINS).forEach(domainKey => {
@@ -93,11 +147,14 @@ function buildCatalog(){
       catalog[courseId] = {
         title: DOMAINS[domainKey].label + " — " + tier.label,
         lessons: [
-          { id: 1, title: "Lesson 1: Placeholder introduction" },
-          { id: 2, title: "Lesson 2: Placeholder core concept" },
-          { id: 3, title: "Lesson 3: Placeholder practice + wrap-up" }
+          { id: 1, title: "Lesson 1: Placeholder introduction", body: "<p>This is placeholder lesson content. Replace this whenever real material is ready — nothing else on this page needs to change.</p>" },
+          { id: 2, title: "Lesson 2: Placeholder core concept", body: "<p>This is placeholder lesson content. Replace this whenever real material is ready — nothing else on this page needs to change.</p>" },
+          { id: 3, title: "Lesson 3: Placeholder practice + wrap-up", body: "<p>This is placeholder lesson content. Replace this whenever real material is ready — nothing else on this page needs to change.</p>" }
         ]
       };
+      if (CONTENT_OVERRIDES[courseId]) {
+        catalog[courseId].lessons = CONTENT_OVERRIDES[courseId].lessons;
+      }
     });
   });
   return catalog;
@@ -123,6 +180,7 @@ let completedLessons = [];
 if (!course){
   document.getElementById('lessonTitle').textContent = 'Course not found';
   document.getElementById('courseTitle').textContent = '';
+  document.getElementById('lessonBody').innerHTML = '<p>This link is missing a valid course. Go back to the dashboard and click into a course from there rather than typing this URL directly.</p>';
 } else {
   document.getElementById('courseTitle').textContent = course.title;
 }
@@ -133,8 +191,14 @@ onAuthStateChanged(auth, async (user) => {
     return;
   }
   currentUser = user;
-  await loadProgress();
-  renderLesson();
+  if (!course) return; // already showed a friendly message above
+  try {
+    await loadProgress();
+    renderLesson();
+  } catch (err){
+    console.error('Lesson load failed:', err);
+    document.getElementById('lessonBody').innerHTML = '<p>Something went wrong loading this lesson (' + err.message + '). Check the browser console for details, or try refreshing.</p>';
+  }
 });
 
 async function loadProgress(){
@@ -155,6 +219,7 @@ function renderLesson(){
   if (!course) return;
   const lesson = course.lessons.find(l => l.id === lessonNum) || course.lessons[0];
   document.getElementById('lessonTitle').textContent = lesson.title;
+  document.getElementById('lessonBody').innerHTML = lesson.body;
 
   const nav = document.getElementById('lessonNav');
   nav.innerHTML = '';
