@@ -137,6 +137,16 @@ const firebaseConfig = {
 const RESULTS_LOG_URL = "https://script.google.com/macros/s/AKfycbynJQYF9rv5maL_CGniS9UGhTDfBVeW3gVhEWUsFdGOqquv4osGx4nQvc8jNkaaY6wrrg/exec";
 
 /* ================================================================
+   EASY-EDIT ZONE 2B: CONTENT VERSION
+   Bump this number by 1 every time you update lesson content
+   (add/edit an article in lesson.html's CONTENT_OVERRIDES). This
+   gets appended to every course link, which forces GitHub's CDN
+   to treat it as a new URL and fetch fresh instead of serving a
+   stale cached copy of the old content.
+   ================================================================ */
+const CONTENT_VERSION = "2";
+
+/* ================================================================
    EASY-EDIT ZONE 3: COURSE CATALOG
    Placeholder courses across all 7 domains x 4 tiers. Replace the
    "lessons" arrays with real content whenever it's ready — the
@@ -306,7 +316,7 @@ function renderCatalog(progress){
 
       const a = document.createElement('a');
       a.className = 'tier-card';
-      a.href = 'lesson.html?course=' + courseId;
+      a.href = 'lesson.html?course=' + courseId + '&v=' + CONTENT_VERSION;
       a.innerHTML = `
         <div class="tname">${tier.label}</div>
         <div class="tbar"><div class="tbar-fill" style="width:${pct}%;"></div></div>
@@ -354,7 +364,7 @@ function renderRecommendations(result){
     if (!course) return;
     const a = document.createElement('a');
     a.className = 'rec-chip';
-    a.href = 'lesson.html?course=' + courseId;
+    a.href = 'lesson.html?course=' + courseId + '&v=' + CONTENT_VERSION;
     a.textContent = course.title;
     chips.appendChild(a);
   });
