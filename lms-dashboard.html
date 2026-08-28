@@ -37,10 +37,11 @@
   .auth-tab{ padding-bottom: 10px; font-family:'Space Grotesk', sans-serif; font-weight:600; font-size: 15px; color: var(--gray); cursor:pointer; border-bottom: 2px solid transparent; margin-bottom: -1.5px; }
   .auth-tab.active{ color: var(--navy-deep); border-bottom-color: var(--cyan); }
 
-  .input-icon-wrap{ position:relative; }
+  .input-icon-wrap{ position:relative; margin-bottom: 12px; }
   .input-icon-wrap svg{ position:absolute; left:13px; top:50%; transform:translateY(-50%); pointer-events:none; }
-  .input-icon-wrap .text-input{ padding-left: 38px; }
-  .password-toggle{ position:absolute; right:10px; top:50%; transform:translateY(-50%); background:none; border:none; cursor:pointer; padding:4px; line-height:0; }
+  .input-icon-wrap .text-input{ padding-left: 38px; margin-bottom: 0; }
+  #authPassword, #authPasswordConfirm{ padding-right: 40px; }
+  .password-toggle{ position:absolute; right:2px; top:0; bottom:0; width:36px; display:flex; align-items:center; justify-content:center; background:none; border:none; cursor:pointer; padding:0; }
 
   .divider-row{ display:flex; align-items:center; text-align:center; color: var(--gray); font-size:12.5px; margin: 16px 0; }
   .divider-row::before, .divider-row::after{ content:''; flex:1; height:1px; background:var(--line); }
@@ -127,6 +128,11 @@
         </button>
       </div>
 
+      <div class="input-icon-wrap" id="confirmPasswordWrap" style="display:none;">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9AA3AD" stroke-width="2"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
+        <input class="text-input" type="password" id="authPasswordConfirm" placeholder="Confirm password">
+      </div>
+
       <div class="field-error" id="authError"></div>
       <div class="field-error" id="authSuccess" style="color:#2E8B57;"></div>
 
@@ -198,7 +204,7 @@ const RESULTS_LOG_URL = "https://script.google.com/macros/s/AKfycbynJQYF9rv5maL_
    to treat it as a new URL and fetch fresh instead of serving a
    stale cached copy of the old content.
    ================================================================ */
-const CONTENT_VERSION = "13";
+const CONTENT_VERSION = "14";
 
 /* ================================================================
    EASY-EDIT ZONE 3: COURSE CATALOG
@@ -278,6 +284,7 @@ window.setAuthMode = function(signUp){
   document.getElementById('authError').textContent = '';
   document.getElementById('authSuccess').textContent = '';
   document.getElementById('forgotRow').style.display = isSignUpMode ? 'none' : 'block';
+  document.getElementById('confirmPasswordWrap').style.display = isSignUpMode ? 'block' : 'none';
 };
 
 window.togglePasswordVisibility = function(){
@@ -322,6 +329,18 @@ window.handleAuthSubmit = async function(){
   if (!email || !password){
     errorEl.textContent = 'Enter both an email and a password.';
     return;
+  }
+
+  if (isSignUpMode){
+    const confirmPassword = document.getElementById('authPasswordConfirm').value;
+    if (!confirmPassword){
+      errorEl.textContent = 'Confirm your password in the second field.';
+      return;
+    }
+    if (password !== confirmPassword){
+      errorEl.textContent = 'Passwords do not match.';
+      return;
+    }
   }
 
   try {
