@@ -99,9 +99,13 @@
     <div id="checkContainer"></div>
     <div id="reflectionContainer"></div>
 
+    <div id="sourceLinkRow" style="display:none; margin-top:22px;">
+      <a id="sourceLinkAnchor" href="#" target="_blank" rel="noopener" style="font-size:13.5px; color:var(--navy); text-decoration:underline;">Read the original article ↗</a>
+    </div>
+
     <div class="nav-row">
       <button class="btn btn-ghost" id="prevBtn" onclick="goToLesson(-1)">← Previous</button>
-      <button class="btn btn-primary" id="completeBtn" onclick="markCompleteAndContinue()">Mark complete & continue →</button>
+      <button class="btn btn-primary" id="completeBtn" onclick="markCompleteAndContinue()">Next →</button>
     </div>
     <div class="status-msg" id="statusMsg"></div>
   </div>
@@ -148,6 +152,7 @@ const TIERS = [
    ================================================================ */
 const CONTENT_OVERRIDES = {
   "aiOrg-moderate": {
+    sourceUrl: "https://www.linkedin.com/pulse/stop-enabling-individuals-start-organization-robert-merrell-uoboc/",
     lessons: [
       {
         id: 1,
@@ -281,6 +286,7 @@ function buildCatalog(){
       };
       if (CONTENT_OVERRIDES[courseId]) {
         catalog[courseId].lessons = CONTENT_OVERRIDES[courseId].lessons;
+        catalog[courseId].sourceUrl = CONTENT_OVERRIDES[courseId].sourceUrl || null;
       }
     });
   });
@@ -371,7 +377,15 @@ function renderLesson(){
 
   document.getElementById('prevBtn').style.visibility = lessonNum === 1 ? 'hidden' : 'visible';
   const isLast = lessonNum === course.lessons[course.lessons.length - 1].id;
-  document.getElementById('completeBtn').textContent = isLast ? 'Mark complete & finish' : 'Mark complete & continue →';
+  document.getElementById('completeBtn').textContent = isLast ? 'Complete' : 'Next →';
+
+  const sourceRow = document.getElementById('sourceLinkRow');
+  if (isLast && course.sourceUrl){
+    sourceRow.style.display = 'block';
+    document.getElementById('sourceLinkAnchor').href = course.sourceUrl;
+  } else {
+    sourceRow.style.display = 'none';
+  }
 }
 
 /* Interactive line comparison chart. Draws an SVG line chart with
