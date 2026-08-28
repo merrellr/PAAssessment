@@ -54,12 +54,23 @@
   .domain-group{ margin-bottom: 22px; }
   .domain-title{ font-family:'Space Grotesk', sans-serif; font-weight:600; font-size: 14px; color: var(--navy-deep); margin-bottom: 10px; }
   .tier-row{ display:grid; grid-template-columns: repeat(4, 1fr); gap:8px; }
-  .tier-card{ border:1px solid var(--line); border-radius: 10px; padding: 10px; text-align:center; text-decoration:none; color: var(--ink); background:#fff; }
+  .tier-card{ position:relative; border:1px solid var(--line); border-radius: 10px; padding: 10px; text-align:center; text-decoration:none; color: var(--ink); background:#fff; }
   .tier-card:hover{ border-color: var(--cyan); }
   .tier-card .tname{ font-size: 11.5px; font-weight:600; margin-bottom: 6px; }
   .tier-card .tbar{ height:5px; background: var(--line); border-radius:3px; overflow:hidden; margin-bottom: 6px; }
   .tier-card .tbar-fill{ height:100%; background: var(--cyan); }
   .tier-card .tstatus{ font-size: 10.5px; color: var(--gray); }
+
+  .tier-card.is-complete{ border-color:#2E8B57; background:#EEF9F1; }
+  .tier-card.is-complete .tbar-fill{ background:#2E8B57; }
+  .tier-card.is-complete .tstatus{ color:#2E8B57; font-weight:600; }
+  .tier-card .tcheck{ position:absolute; top:6px; right:8px; width:16px; height:16px; border-radius:50%; background:#2E8B57; color:#fff; font-size:10px; line-height:16px; text-align:center; }
+
+  .tier-card.is-inprogress{ border-color: var(--cyan); }
+  .tier-card.is-inprogress .tstatus{ color: var(--navy); font-weight:600; }
+
+  .tier-card.is-belowlevel{ opacity:0.55; background:#FAFAFA; }
+  .tier-card.is-belowlevel:hover{ opacity:0.85; }
 
   [data-screen]{ display:none; }
   [data-screen].active{ display:block; }
@@ -283,16 +294,35 @@ onAuthStateChanged(auth, async (user) => {
   }
 });
 
+const TIER_ORDER = ['novice', 'moderate', 'experienced', 'advanced'];
+
 async function loadDashboard(user){
   const progressRef = doc(db, 'progress', user.uid);
   const progressSnap = await getDoc(progressRef);
   const progress = progressSnap.exists() ? progressSnap.data() : { courses: {} };
 
-  renderCatalog(progress);
-  loadRecommendations(user.email);
+  const assessmentResult = await fetchAssessmentResult(user.email);
+  renderCatalog(progress, assessmentResult);
+  if (assessmentResult) renderRecommendations(assessmentResult, progress);
 }
 
-function renderCatalog(progress){
+/* Returns the tier slug ('novice'..'advanced') matching a category
+   percentage — same thresholds used everywhere else in the system. */
+function tierSlugForPct(pct){
+  if (pct > 75) return 'advanced';
+  if (pct > 50) return 'experienced';
+  if (pct > 25) return 'moderate';
+  return 'novice';
+}
+
+function isCourseComplete(progress, courseId){
+  const course = CATALOG[courseId];
+  const courseProgress = (progress.courses && progress.courses[courseId]) || { completed: [] };
+  const validCompleted = courseProgress.completed.filter(id => course.lessons.some(l => l.id === id));
+  return course.lessons.length > 0 && validCompleted.length >= course.lessons.length;
+}
+
+function renderCatalog(progress, assessmentResult){
   const wrap = document.getElementById('courseCatalog');
   wrap.innerHTML = '';
 
@@ -308,19 +338,39 @@ function renderCatalog(progress){
     const row = document.createElement('div');
     row.className = 'tier-row';
 
-    TIERS.forEach(tier => {
+    // Their assessed tier for this domain, if we have a result — used to
+    // grey out tiers below where they already tested in.
+    const assessedTierSlug = assessmentResult ? tierSlugForPct(assessmentResult.categoryPct[domainKey]) : null;
+    const assessedTierIndex = assessedTierSlug ? TIER_ORDER.indexOf(assessedTierSlug) : -1;
+
+    TIERS.forEach((tier, tierIndex) => {
       const courseId = domainKey + '-' + tier.slug;
       const course = CATALOG[courseId];
       const courseProgress = (progress.courses && progress.courses[courseId]) || { completed: [] };
-      const pct = Math.round((courseProgress.completed.length / course.lessons.length) * 100);
+      // Only count lesson ids that actually exist in this course — this is what
+      // fixes the over-100% bug from stale data left over by earlier content versions.
+      const validCompletedCount = courseProgress.completed.filter(id => course.lessons.some(l => l.id === id)).length;
+      const pct = Math.min(100, Math.round((validCompletedCount / course.lessons.length) * 100));
+
+      const isComplete = pct >= 100;
+      const isInProgress = pct > 0 && pct < 100;
+      const isBelowLevel = assessedTierIndex > -1 && tierIndex < assessedTierIndex && !isComplete && !isInProgress;
 
       const a = document.createElement('a');
-      a.className = 'tier-card';
+      a.className = 'tier-card'
+        + (isComplete ? ' is-complete' : '')
+        + (isInProgress ? ' is-inprogress' : '')
+        + (isBelowLevel ? ' is-belowlevel' : '');
       a.href = 'lesson.html?course=' + courseId + '&v=' + CONTENT_VERSION;
+
+      const statusText = isComplete ? 'Completed' : (isInProgress ? pct + '% done' : (isBelowLevel ? 'Below your tested level' : 'Not started'));
+      const checkBadge = isComplete ? '<div class="tcheck">✓</div>' : '';
+
       a.innerHTML = `
+        ${checkBadge}
         <div class="tname">${tier.label}</div>
         <div class="tbar"><div class="tbar-fill" style="width:${pct}%;"></div></div>
-        <div class="tstatus">${pct === 0 ? 'Not started' : (pct === 100 ? 'Completed' : pct + '% done')}</div>
+        <div class="tstatus">${statusText}</div>
       `;
       row.appendChild(a);
     });
@@ -330,38 +380,48 @@ function renderCatalog(progress){
   });
 }
 
-function loadRecommendations(email){
-  if (!RESULTS_LOG_URL) return;
-  const callbackName = 'lookupCallback_' + Date.now();
-  window[callbackName] = function(result){
-    if (result) renderRecommendations(result);
-    delete window[callbackName];
-    script.remove();
-  };
-  const script = document.createElement('script');
-  script.src = RESULTS_LOG_URL + '?action=lookup&email=' + encodeURIComponent(email) + '&callback=' + callbackName;
-  script.onerror = function(){ /* no assessment result on file yet — fine, just skip recommendations */ };
-  document.body.appendChild(script);
+function fetchAssessmentResult(email){
+  return new Promise((resolve) => {
+    if (!RESULTS_LOG_URL) { resolve(null); return; }
+    const callbackName = 'lookupCallback_' + Date.now();
+    window[callbackName] = function(result){
+      delete window[callbackName];
+      script.remove();
+      resolve(result || null);
+    };
+    const script = document.createElement('script');
+    script.src = RESULTS_LOG_URL + '?action=lookup&email=' + encodeURIComponent(email) + '&callback=' + callbackName;
+    script.onerror = function(){ resolve(null); };
+    document.body.appendChild(script);
+  });
 }
 
-function renderRecommendations(result){
+/* Picks the two lowest-scoring domains as before, but now skips a
+   recommendation forward to the next tier up if the person has
+   already completed the course we'd otherwise have recommended —
+   so a finished course never lingers in "Recommended for you". */
+function renderRecommendations(result, progress){
   const sorted = Object.keys(result.categoryPct).sort((a, b) => result.categoryPct[a] - result.categoryPct[b]);
   const lowestTwo = sorted.slice(0, 2);
-  const tierSlugMap = { 'No Experience': 'novice', 'Moderate Experience': 'moderate', 'Lots of Experience': 'experienced', 'Advanced Experience': 'advanced' };
 
   const banner = document.getElementById('recBanner');
   const chips = document.getElementById('recChips');
   chips.innerHTML = '';
 
   lowestTwo.forEach(domainKey => {
-    const pct = result.categoryPct[domainKey];
-    let tierSlug = 'novice';
-    if (pct > 75) tierSlug = 'advanced';
-    else if (pct > 50) tierSlug = 'experienced';
-    else if (pct > 25) tierSlug = 'moderate';
-    const courseId = domainKey + '-' + tierSlug;
+    let tierIndex = TIER_ORDER.indexOf(tierSlugForPct(result.categoryPct[domainKey]));
+    let courseId = domainKey + '-' + TIER_ORDER[tierIndex];
+
+    // Walk forward through tiers while the current recommendation is
+    // already completed, so completed courses never show up here.
+    while (CATALOG[courseId] && isCourseComplete(progress, courseId) && tierIndex < TIER_ORDER.length - 1){
+      tierIndex++;
+      courseId = domainKey + '-' + TIER_ORDER[tierIndex];
+    }
+
     const course = CATALOG[courseId];
-    if (!course) return;
+    if (!course || isCourseComplete(progress, courseId)) return; // fully done, nothing further to recommend here
+
     const a = document.createElement('a');
     a.className = 'rec-chip';
     a.href = 'lesson.html?course=' + courseId + '&v=' + CONTENT_VERSION;
