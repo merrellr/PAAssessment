@@ -62,6 +62,16 @@
   .top-bar{ display:flex; justify-content:space-between; align-items:center; margin-bottom: 22px; }
   .top-bar .who{ font-size: 13.5px; color: var(--ink-soft); }
 
+  .profile-menu-wrap{ position:relative; }
+  .profile-avatar-btn{ width:36px; height:36px; border-radius:50%; background: var(--navy); color:#fff; border:none; cursor:pointer; font-family:'Space Grotesk', sans-serif; font-weight:700; font-size:14px; }
+  .profile-avatar-btn:hover{ background: var(--navy-deep); }
+  .profile-dropdown{ position:absolute; right:0; top:44px; width:220px; background:#fff; border:1px solid var(--line); border-radius:12px; box-shadow: 0 8px 24px rgba(22,33,62,0.12); padding:14px; z-index:10; }
+  .profile-dropdown-email{ font-size:13px; font-weight:600; color: var(--ink); word-break:break-all; }
+  .profile-dropdown-verified{ font-size:11.5px; color: var(--gray); margin-top:2px; }
+  .profile-dropdown-divider{ height:1px; background:var(--line); margin:10px 0; }
+  .profile-dropdown-item{ display:block; padding:8px 4px; font-size:13.5px; color: var(--ink); text-decoration:none; cursor:pointer; border-radius:6px; }
+  .profile-dropdown-item:hover{ background:#F7F9FC; }
+
   .rec-banner{ background:#EEF3FA; border:1px solid var(--line); border-radius: 12px; padding: 16px 18px; margin-bottom: 22px; }
   .rec-banner .eyebrow{ font-size:11px; font-weight:600; letter-spacing:0.06em; text-transform:uppercase; color: var(--cyan); }
   .rec-chip{ display:inline-block; background:#fff; border:1px solid var(--line); border-radius:7px; padding:6px 12px; margin: 8px 8px 0 0; font-size:13px; font-weight:500; color: var(--navy); text-decoration:none; }
@@ -154,8 +164,30 @@
   <!-- DASHBOARD -->
   <div data-screen="dashboard">
     <div class="top-bar">
-      <div class="who">Signed in as <span id="whoEmail"></span></div>
-      <button class="btn btn-ghost" onclick="handleSignOut()">Sign out</button>
+      <div class="brand-word" style="font-size:14px;">Your courses</div>
+      <div class="profile-menu-wrap">
+        <button class="profile-avatar-btn" id="profileAvatarBtn" onclick="toggleProfileMenu()" aria-label="Account menu"></button>
+        <div class="profile-dropdown" id="profileDropdown" style="display:none;">
+          <div class="profile-dropdown-email" id="profileDropdownEmail"></div>
+          <div class="profile-dropdown-verified" id="profileDropdownVerified"></div>
+          <div class="profile-dropdown-divider"></div>
+          <a class="profile-dropdown-item" id="changePasswordMenuItem" onclick="openChangePassword()">Change password</a>
+          <a class="profile-dropdown-item" onclick="handleSignOut()">Log out</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="card" id="changePasswordCard" style="display:none; max-width:420px; margin-bottom:22px;">
+      <h2>Change password</h2>
+      <input class="text-input" type="password" id="currentPasswordInput" placeholder="Current password">
+      <input class="text-input" type="password" id="newPasswordInput" placeholder="New password">
+      <input class="text-input" type="password" id="newPasswordConfirmInput" placeholder="Confirm new password">
+      <div class="field-error" id="changePasswordError"></div>
+      <div class="field-error" id="changePasswordSuccess" style="color:#2E8B57;"></div>
+      <div style="display:flex; gap:10px;">
+        <button class="btn btn-primary btn-gradient" style="width:auto; padding:10px 20px;" onclick="handleChangePassword()">Save new password</button>
+        <button class="btn btn-ghost" onclick="closeChangePassword()">Cancel</button>
+      </div>
     </div>
 
     <div class="card" id="welcomeCard" style="display:none; margin-bottom:22px; background:linear-gradient(135deg, #EEF3FA 0%, #EAF7FB 100%); border-color: var(--line);">
@@ -216,7 +248,7 @@ const RESULTS_LOG_URL = "https://script.google.com/macros/s/AKfycbynJQYF9rv5maL_
    to treat it as a new URL and fetch fresh instead of serving a
    stale cached copy of the old content.
    ================================================================ */
-const CONTENT_VERSION = "15";
+const CONTENT_VERSION = "16";
 
 /* ================================================================
    EASY-EDIT ZONE 3: COURSE CATALOG
@@ -271,7 +303,8 @@ import {
   getAuth, onAuthStateChanged, signOut,
   createUserWithEmailAndPassword, signInWithEmailAndPassword,
   GoogleAuthProvider, signInWithPopup,
-  sendPasswordResetEmail, sendEmailVerification
+  sendPasswordResetEmail, sendEmailVerification,
+  updatePassword, reauthenticateWithCredential, EmailAuthProvider
 } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
 import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
 
@@ -394,7 +427,7 @@ function friendlyAuthError(code){
 onAuthStateChanged(auth, async (user) => {
   if (user){
     currentUser = user;
-    document.getElementById('whoEmail').textContent = user.email;
+    populateProfileMenu(user);
     document.getElementById('verifyBanner').style.display = user.emailVerified ? 'none' : 'block';
     showScreen('dashboard');
     await loadDashboard(user);
@@ -403,6 +436,79 @@ onAuthStateChanged(auth, async (user) => {
     showScreen('auth');
   }
 });
+
+function populateProfileMenu(user){
+  const initial = (user.email || '?').charAt(0).toUpperCase();
+  document.getElementById('profileAvatarBtn').textContent = initial;
+  document.getElementById('profileDropdownEmail').textContent = user.email;
+  document.getElementById('profileDropdownVerified').textContent = user.emailVerified ? 'Email verified' : 'Email not verified';
+
+  // Only show "Change password" for accounts that actually have a password —
+  // Google-only accounts have nothing to change here.
+  const hasPasswordProvider = user.providerData.some(p => p.providerId === 'password');
+  document.getElementById('changePasswordMenuItem').style.display = hasPasswordProvider ? 'block' : 'none';
+}
+
+window.toggleProfileMenu = function(){
+  const dropdown = document.getElementById('profileDropdown');
+  dropdown.style.display = dropdown.style.display === 'none' ? 'block' : 'none';
+};
+
+document.addEventListener('click', (e) => {
+  const wrap = document.querySelector('.profile-menu-wrap');
+  if (wrap && !wrap.contains(e.target)){
+    document.getElementById('profileDropdown').style.display = 'none';
+  }
+});
+
+window.openChangePassword = function(){
+  document.getElementById('profileDropdown').style.display = 'none';
+  document.getElementById('changePasswordCard').style.display = 'block';
+  document.getElementById('currentPasswordInput').value = '';
+  document.getElementById('newPasswordInput').value = '';
+  document.getElementById('newPasswordConfirmInput').value = '';
+  document.getElementById('changePasswordError').textContent = '';
+  document.getElementById('changePasswordSuccess').textContent = '';
+};
+
+window.closeChangePassword = function(){
+  document.getElementById('changePasswordCard').style.display = 'none';
+};
+
+window.handleChangePassword = async function(){
+  const currentPassword = document.getElementById('currentPasswordInput').value;
+  const newPassword = document.getElementById('newPasswordInput').value;
+  const confirmPassword = document.getElementById('newPasswordConfirmInput').value;
+  const errorEl = document.getElementById('changePasswordError');
+  const successEl = document.getElementById('changePasswordSuccess');
+  errorEl.textContent = '';
+  successEl.textContent = '';
+
+  if (!currentPassword || !newPassword || !confirmPassword){
+    errorEl.textContent = 'Fill in all three fields.';
+    return;
+  }
+  if (newPassword !== confirmPassword){
+    errorEl.textContent = 'New passwords do not match.';
+    return;
+  }
+  if (newPassword.length < 6){
+    errorEl.textContent = 'New password should be at least 6 characters.';
+    return;
+  }
+
+  try {
+    const credential = EmailAuthProvider.credential(currentUser.email, currentPassword);
+    await reauthenticateWithCredential(currentUser, credential);
+    await updatePassword(currentUser, newPassword);
+    successEl.textContent = 'Password updated.';
+    document.getElementById('currentPasswordInput').value = '';
+    document.getElementById('newPasswordInput').value = '';
+    document.getElementById('newPasswordConfirmInput').value = '';
+  } catch (err){
+    errorEl.textContent = friendlyAuthError(err.code);
+  }
+};
 
 window.handleResendVerification = async function(){
   if (!currentUser) return;
