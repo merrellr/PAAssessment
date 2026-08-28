@@ -97,12 +97,16 @@
       <input class="text-input" type="email" id="authEmail" placeholder="Email address">
       <input class="text-input" type="password" id="authPassword" placeholder="Password">
       <div class="field-error" id="authError"></div>
+      <div class="field-error" id="authSuccess" style="color:#2E8B57;"></div>
 
       <button class="btn btn-primary" id="authSubmitBtn" onclick="handleAuthSubmit()">Log in</button>
       <button class="btn btn-google" onclick="handleGoogleSignIn()">Sign in with Google</button>
 
       <div class="toggle-row" id="authToggle">
         Don't have an account? <a onclick="toggleAuthMode()">Sign up</a>
+      </div>
+      <div class="toggle-row" id="forgotRow">
+        <a onclick="handleForgotPassword()">Forgot password?</a>
       </div>
     </div>
   </div>
@@ -112,6 +116,11 @@
     <div class="top-bar">
       <div class="who">Signed in as <span id="whoEmail"></span></div>
       <button class="btn btn-ghost" onclick="handleSignOut()">Sign out</button>
+    </div>
+
+    <div class="rec-banner" id="verifyBanner" style="display:none; background:#FFF8E8; border-color:#F0DDA8;">
+      <span style="font-size:13px; color:var(--ink-soft);">Please verify your email — check your inbox for a link.</span>
+      <a onclick="handleResendVerification()" style="margin-left:10px; font-size:13px; color:var(--navy); text-decoration:underline; cursor:pointer;">Resend email</a>
     </div>
 
     <div class="rec-banner" id="recBanner" style="display:none;">
@@ -155,7 +164,7 @@ const RESULTS_LOG_URL = "https://script.google.com/macros/s/AKfycbynJQYF9rv5maL_
    to treat it as a new URL and fetch fresh instead of serving a
    stale cached copy of the old content.
    ================================================================ */
-const CONTENT_VERSION = "11";
+const CONTENT_VERSION = "12";
 
 /* ================================================================
    EASY-EDIT ZONE 3: COURSE CATALOG
@@ -209,7 +218,8 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/fireba
 import {
   getAuth, onAuthStateChanged, signOut,
   createUserWithEmailAndPassword, signInWithEmailAndPassword,
-  GoogleAuthProvider, signInWithPopup
+  GoogleAuthProvider, signInWithPopup,
+  sendPasswordResetEmail, sendEmailVerification
 } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
 import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
 
@@ -234,13 +244,37 @@ window.toggleAuthMode = function(){
     ? 'Already have an account? <a onclick="toggleAuthMode()">Log in</a>'
     : "Don't have an account? <a onclick=\"toggleAuthMode()\">Sign up</a>";
   document.getElementById('authError').textContent = '';
+  document.getElementById('authSuccess').textContent = '';
+  document.getElementById('forgotRow').style.display = isSignUpMode ? 'none' : 'block';
+};
+
+window.handleForgotPassword = async function(){
+  const email = document.getElementById('authEmail').value.trim();
+  const errorEl = document.getElementById('authError');
+  const successEl = document.getElementById('authSuccess');
+  errorEl.textContent = '';
+  successEl.textContent = '';
+
+  if (!email){
+    errorEl.textContent = 'Enter your email address above first, then click "Forgot password?"';
+    return;
+  }
+
+  try {
+    await sendPasswordResetEmail(auth, email);
+    successEl.textContent = 'Password reset email sent — check your inbox.';
+  } catch (err){
+    errorEl.textContent = friendlyAuthError(err.code);
+  }
 };
 
 window.handleAuthSubmit = async function(){
   const email = document.getElementById('authEmail').value.trim();
   const password = document.getElementById('authPassword').value;
   const errorEl = document.getElementById('authError');
+  const successEl = document.getElementById('authSuccess');
   errorEl.textContent = '';
+  successEl.textContent = '';
 
   if (!email || !password){
     errorEl.textContent = 'Enter both an email and a password.';
@@ -249,7 +283,8 @@ window.handleAuthSubmit = async function(){
 
   try {
     if (isSignUpMode){
-      await createUserWithEmailAndPassword(auth, email, password);
+      const cred = await createUserWithEmailAndPassword(auth, email, password);
+      await sendEmailVerification(cred.user);
     } else {
       await signInWithEmailAndPassword(auth, email, password);
     }
@@ -286,6 +321,7 @@ onAuthStateChanged(auth, async (user) => {
   if (user){
     currentUser = user;
     document.getElementById('whoEmail').textContent = user.email;
+    document.getElementById('verifyBanner').style.display = user.emailVerified ? 'none' : 'block';
     showScreen('dashboard');
     await loadDashboard(user);
   } else {
@@ -293,6 +329,16 @@ onAuthStateChanged(auth, async (user) => {
     showScreen('auth');
   }
 });
+
+window.handleResendVerification = async function(){
+  if (!currentUser) return;
+  try {
+    await sendEmailVerification(currentUser);
+    document.getElementById('verifyBanner').querySelector('span').textContent = 'Verification email sent — check your inbox.';
+  } catch (err){
+    document.getElementById('verifyBanner').querySelector('span').textContent = 'Could not resend right now — try again shortly.';
+  }
+};
 
 const TIER_ORDER = ['novice', 'moderate', 'experienced', 'advanced'];
 
