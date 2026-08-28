@@ -69,6 +69,10 @@
   .reflection-box textarea:focus{ outline:none; border-color: var(--cyan); }
   .reflection-save-row{ display:flex; justify-content:space-between; align-items:center; margin-top: 10px; }
   .reflection-save-row button{ font-family:'Space Grotesk', sans-serif; font-weight:600; font-size: 13px; padding: 8px 16px; border-radius: 7px; border:none; background: var(--navy); color:#fff; cursor:pointer; }
+  .linkedin-box{ background:#EAF4FD; border: 1.5px solid #B9DBF5; border-radius: 12px; padding: 16px 18px; margin-top: 22px; }
+  .linkedin-box p{ font-size: 13.5px; margin: 0 0 12px; color: var(--ink-soft); }
+  .linkedin-btn{ display:inline-flex; align-items:center; gap:8px; background:#0A66C2; color:#fff; font-family:'Space Grotesk', sans-serif; font-weight:600; font-size: 13.5px; padding: 9px 16px; border-radius: 8px; text-decoration:none; }
+  .linkedin-btn:hover{ background:#084d92; }
   .reflection-saved-note{ font-size: 12px; color: var(--gray); }
   .lesson-nav{ display:flex; gap:8px; margin: 24px 0; flex-wrap:wrap; }
   .lesson-pill{ padding: 7px 12px; border-radius: 7px; font-size: 12.5px; font-weight:500; border: 1px solid var(--line); background:#fff; color: var(--ink-soft); text-decoration:none; }
@@ -99,8 +103,11 @@
     <div id="checkContainer"></div>
     <div id="reflectionContainer"></div>
 
-    <div id="sourceLinkRow" style="display:none; margin-top:22px;">
-      <a id="sourceLinkAnchor" href="#" target="_blank" rel="noopener" style="font-size:13.5px; color:var(--navy); text-decoration:underline;">Read the original article ↗</a>
+    <div id="sourceLinkRow" style="display:none;">
+      <div class="linkedin-box">
+        <p>This lesson has a companion article on our Product+ newsletter. Take a look and share your comments.</p>
+        <a id="sourceLinkAnchor" class="linkedin-btn" href="#" target="_blank" rel="noopener">Review on Product+ ↗</a>
+      </div>
     </div>
 
     <div class="nav-row">
