@@ -33,10 +33,25 @@
   .text-input:focus{ outline:none; border-color: var(--cyan); }
   .field-error{ font-size: 12.5px; color: var(--warn); margin: -6px 0 12px 2px; min-height: 1px; }
 
+  .auth-tabs{ display:flex; gap:24px; border-bottom: 1.5px solid var(--line); margin-bottom: 18px; }
+  .auth-tab{ padding-bottom: 10px; font-family:'Space Grotesk', sans-serif; font-weight:600; font-size: 15px; color: var(--gray); cursor:pointer; border-bottom: 2px solid transparent; margin-bottom: -1.5px; }
+  .auth-tab.active{ color: var(--navy-deep); border-bottom-color: var(--cyan); }
+
+  .input-icon-wrap{ position:relative; }
+  .input-icon-wrap svg{ position:absolute; left:13px; top:50%; transform:translateY(-50%); pointer-events:none; }
+  .input-icon-wrap .text-input{ padding-left: 38px; }
+  .password-toggle{ position:absolute; right:10px; top:50%; transform:translateY(-50%); background:none; border:none; cursor:pointer; padding:4px; line-height:0; }
+
+  .divider-row{ display:flex; align-items:center; text-align:center; color: var(--gray); font-size:12.5px; margin: 16px 0; }
+  .divider-row::before, .divider-row::after{ content:''; flex:1; height:1px; background:var(--line); }
+  .divider-row span{ padding: 0 12px; }
+
   button.btn{ font-family:'Space Grotesk', sans-serif; font-weight:600; font-size: 14px; border-radius: 8px; padding: 11px 20px; border: none; cursor:pointer; }
   .btn-primary{ background: var(--navy); color:#fff; width:100%; }
   .btn-primary:hover{ background: var(--navy-deep); }
-  .btn-google{ background:#fff; color: var(--ink); border: 1.5px solid var(--line); width:100%; margin-top: 8px; }
+  .btn-gradient{ background: linear-gradient(90deg, var(--navy) 0%, var(--navy-deep) 100%); border-radius: 24px; padding: 12px 20px; }
+  .btn-gradient:hover{ opacity:0.92; }
+  .btn-google{ background:#fff; color: var(--ink); border: 1.5px solid var(--line); width:100%; margin-top: 4px; display:flex; align-items:center; justify-content:center; gap:9px; border-radius: 24px; }
   .btn-google:hover{ border-color: var(--cyan); }
   .btn-ghost{ background:none; color: var(--gray); text-decoration:underline; font-size: 13px; padding: 6px; }
 
@@ -91,23 +106,42 @@
   <!-- LOGIN / SIGN UP -->
   <div data-screen="auth" class="active">
     <div class="card" style="max-width:420px;margin:0 auto;">
-      <h1 id="authTitle">Welcome back</h1>
+
+      <div class="auth-tabs">
+        <div class="auth-tab active" id="tabLogin" onclick="setAuthMode(false)">Log in</div>
+        <div class="auth-tab" id="tabSignup" onclick="setAuthMode(true)">Create account</div>
+      </div>
+
       <p id="authSub">Log in to continue your courses.</p>
 
-      <input class="text-input" type="email" id="authEmail" placeholder="Email address">
-      <input class="text-input" type="password" id="authPassword" placeholder="Password">
+      <div class="input-icon-wrap">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9AA3AD" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>
+        <input class="text-input" type="email" id="authEmail" placeholder="Email address">
+      </div>
+
+      <div class="input-icon-wrap">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9AA3AD" stroke-width="2"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
+        <input class="text-input" type="password" id="authPassword" placeholder="Password">
+        <button type="button" class="password-toggle" id="passwordToggleBtn" onclick="togglePasswordVisibility()" aria-label="Show password">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#9AA3AD" stroke-width="2"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/></svg>
+        </button>
+      </div>
+
       <div class="field-error" id="authError"></div>
       <div class="field-error" id="authSuccess" style="color:#2E8B57;"></div>
 
-      <button class="btn btn-primary" id="authSubmitBtn" onclick="handleAuthSubmit()">Log in</button>
-      <button class="btn btn-google" onclick="handleGoogleSignIn()">Sign in with Google</button>
-
-      <div class="toggle-row" id="authToggle">
-        Don't have an account? <a onclick="toggleAuthMode()">Sign up</a>
-      </div>
-      <div class="toggle-row" id="forgotRow">
+      <div class="toggle-row" id="forgotRow" style="text-align:right; margin-top:-4px;">
         <a onclick="handleForgotPassword()">Forgot password?</a>
       </div>
+
+      <button class="btn btn-primary btn-gradient" id="authSubmitBtn" onclick="handleAuthSubmit()">Log in</button>
+
+      <div class="divider-row"><span>or</span></div>
+
+      <button class="btn btn-google" onclick="handleGoogleSignIn()">
+        <svg width="17" height="17" viewBox="0 0 24 24"><path fill="#4285F4" d="M23.52 12.27c0-.85-.08-1.67-.22-2.45H12v4.64h6.47a5.53 5.53 0 0 1-2.4 3.63v3h3.88c2.27-2.09 3.57-5.17 3.57-8.82z"/><path fill="#34A853" d="M12 24c3.24 0 5.95-1.07 7.94-2.91l-3.88-3c-1.08.72-2.45 1.15-4.06 1.15-3.13 0-5.78-2.11-6.73-4.96H1.27v3.11A12 12 0 0 0 12 24z"/><path fill="#FBBC05" d="M5.27 14.28A7.2 7.2 0 0 1 4.89 12c0-.79.14-1.56.38-2.28V6.61H1.27A12 12 0 0 0 0 12c0 1.94.46 3.77 1.27 5.39l4-3.11z"/><path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.44-3.44C17.94 1.19 15.24 0 12 0 7.31 0 3.26 2.69 1.27 6.61l4 3.11C6.22 6.86 8.87 4.75 12 4.75z"/></svg>
+        Continue with Google
+      </button>
     </div>
   </div>
 
@@ -164,7 +198,7 @@ const RESULTS_LOG_URL = "https://script.google.com/macros/s/AKfycbynJQYF9rv5maL_
    to treat it as a new URL and fetch fresh instead of serving a
    stale cached copy of the old content.
    ================================================================ */
-const CONTENT_VERSION = "12";
+const CONTENT_VERSION = "13";
 
 /* ================================================================
    EASY-EDIT ZONE 3: COURSE CATALOG
@@ -235,17 +269,26 @@ function showScreen(name){
   document.querySelector('[data-screen="' + name + '"]').classList.add('active');
 }
 
-window.toggleAuthMode = function(){
-  isSignUpMode = !isSignUpMode;
-  document.getElementById('authTitle').textContent = isSignUpMode ? 'Create your account' : 'Welcome back';
+window.setAuthMode = function(signUp){
+  isSignUpMode = signUp;
+  document.getElementById('tabLogin').classList.toggle('active', !isSignUpMode);
+  document.getElementById('tabSignup').classList.toggle('active', isSignUpMode);
   document.getElementById('authSub').textContent = isSignUpMode ? 'Sign up to start tracking your courses.' : 'Log in to continue your courses.';
-  document.getElementById('authSubmitBtn').textContent = isSignUpMode ? 'Sign up' : 'Log in';
-  document.getElementById('authToggle').innerHTML = isSignUpMode
-    ? 'Already have an account? <a onclick="toggleAuthMode()">Log in</a>'
-    : "Don't have an account? <a onclick=\"toggleAuthMode()\">Sign up</a>";
+  document.getElementById('authSubmitBtn').textContent = isSignUpMode ? 'Create account' : 'Log in';
   document.getElementById('authError').textContent = '';
   document.getElementById('authSuccess').textContent = '';
   document.getElementById('forgotRow').style.display = isSignUpMode ? 'none' : 'block';
+};
+
+window.togglePasswordVisibility = function(){
+  const input = document.getElementById('authPassword');
+  const btn = document.getElementById('passwordToggleBtn');
+  const showing = input.type === 'text';
+  input.type = showing ? 'password' : 'text';
+  btn.setAttribute('aria-label', showing ? 'Show password' : 'Hide password');
+  btn.innerHTML = showing
+    ? '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#9AA3AD" stroke-width="2"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/></svg>'
+    : '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#9AA3AD" stroke-width="2"><path d="M17.94 17.94A10.94 10.94 0 0 1 12 19c-7 0-11-7-11-7a18.5 18.5 0 0 1 5.06-5.94M9.9 4.24A10.94 10.94 0 0 1 12 4c7 0 11 7 11 7a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>';
 };
 
 window.handleForgotPassword = async function(){
