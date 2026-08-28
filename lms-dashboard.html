@@ -155,7 +155,7 @@ const RESULTS_LOG_URL = "https://script.google.com/macros/s/AKfycbynJQYF9rv5maL_
    to treat it as a new URL and fetch fresh instead of serving a
    stale cached copy of the old content.
    ================================================================ */
-const CONTENT_VERSION = "10";
+const CONTENT_VERSION = "11";
 
 /* ================================================================
    EASY-EDIT ZONE 3: COURSE CATALOG
@@ -304,6 +304,50 @@ async function loadDashboard(user){
   const assessmentResult = await fetchAssessmentResult(user.email);
   renderCatalog(progress, assessmentResult);
   if (assessmentResult) renderRecommendations(assessmentResult, progress);
+
+  syncProgressReport(user.email, progress, assessmentResult);
+}
+
+/* Quietly sends a full 28-course status snapshot to the Progress
+   sheet every time the dashboard loads — fire-and-forget, never
+   blocks anything the person sees. */
+function syncProgressReport(email, progress, assessmentResult){
+  if (!RESULTS_LOG_URL) return;
+
+  const rows = [];
+  Object.keys(DOMAINS).forEach(domainKey => {
+    const assessedTierSlug = assessmentResult ? tierSlugForPct(assessmentResult.categoryPct[domainKey]) : null;
+    const assessedTierIndex = assessedTierSlug ? TIER_ORDER.indexOf(assessedTierSlug) : -1;
+
+    TIERS.forEach((tier, tierIndex) => {
+      const courseId = domainKey + '-' + tier.slug;
+      const course = CATALOG[courseId];
+      const courseProgress = (progress.courses && progress.courses[courseId]) || { completed: [] };
+      const validCompletedCount = courseProgress.completed.filter(id => course.lessons.some(l => l.id === id)).length;
+      const pct = Math.min(100, Math.round((validCompletedCount / course.lessons.length) * 100));
+
+      let status = 'Not assessed yet';
+      if (assessedTierIndex > -1){
+        if (tierIndex === assessedTierIndex) status = 'Assigned';
+        else if (tierIndex < assessedTierIndex) status = 'Tested out';
+        else status = 'Optional';
+      }
+
+      const courseStatus = pct >= 100 ? 'Completed' : (pct > 0 ? 'In progress' : 'Not started');
+
+      rows.push({
+        email, domain: domainKey, tier: tier.slug, courseId,
+        status, lessonsCompleted: validCompletedCount, totalLessons: course.lessons.length,
+        percentComplete: pct, courseStatus
+      });
+    });
+  });
+
+  fetch(RESULTS_LOG_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+    body: JSON.stringify({ action: 'syncProgress', rows })
+  }).catch(() => { /* silently ignore — reporting sync is never allowed to block the dashboard */ });
 }
 
 /* Returns the tier slug ('novice'..'advanced') matching a category
