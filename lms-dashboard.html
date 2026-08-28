@@ -158,6 +158,18 @@
       <button class="btn btn-ghost" onclick="handleSignOut()">Sign out</button>
     </div>
 
+    <div class="card" id="welcomeCard" style="display:none; margin-bottom:22px; background:linear-gradient(135deg, #EEF3FA 0%, #EAF7FB 100%); border-color: var(--line);">
+      <span class="eyebrow">Welcome</span>
+      <h1 style="font-size:19px;">You're in! Here's how to get the most out of this</h1>
+      <p style="margin-bottom:14px;">Your courses are organized into seven skill areas, each with four experience levels. If you've taken the assessment, we've already highlighted where to start below. From here:</p>
+      <ul style="font-size:13.5px; color:var(--ink-soft); margin:0 0 18px; padding-left:20px; line-height:1.7;">
+        <li>Check <strong>Recommended for you</strong> for your best starting point</li>
+        <li>Click into any course tile to begin, your progress saves automatically</li>
+        <li>Come back anytime, you'll always resume right where you left off</li>
+      </ul>
+      <button class="btn btn-primary btn-gradient" style="width:auto; padding:10px 22px;" onclick="dismissWelcome()">Get started →</button>
+    </div>
+
     <div class="rec-banner" id="verifyBanner" style="display:none; background:#FFF8E8; border-color:#F0DDA8;">
       <span style="font-size:13px; color:var(--ink-soft);">Please verify your email — check your inbox for a link.</span>
       <a onclick="handleResendVerification()" style="margin-left:10px; font-size:13px; color:var(--navy); text-decoration:underline; cursor:pointer;">Resend email</a>
@@ -204,7 +216,7 @@ const RESULTS_LOG_URL = "https://script.google.com/macros/s/AKfycbynJQYF9rv5maL_
    to treat it as a new URL and fetch fresh instead of serving a
    stale cached copy of the old content.
    ================================================================ */
-const CONTENT_VERSION = "14";
+const CONTENT_VERSION = "15";
 
 /* ================================================================
    EASY-EDIT ZONE 3: COURSE CATALOG
@@ -402,12 +414,28 @@ window.handleResendVerification = async function(){
   }
 };
 
+window.dismissWelcome = async function(){
+  document.getElementById('welcomeCard').style.display = 'none';
+  if (!currentUser) return;
+  try {
+    const progressRef = doc(db, 'progress', currentUser.uid);
+    const snap = await getDoc(progressRef);
+    const data = snap.exists() ? snap.data() : { courses: {} };
+    data.hasSeenWelcome = true;
+    await setDoc(progressRef, data);
+  } catch (err){
+    console.error('Could not save welcome-seen flag:', err);
+  }
+};
+
 const TIER_ORDER = ['novice', 'moderate', 'experienced', 'advanced'];
 
 async function loadDashboard(user){
   const progressRef = doc(db, 'progress', user.uid);
   const progressSnap = await getDoc(progressRef);
   const progress = progressSnap.exists() ? progressSnap.data() : { courses: {} };
+
+  document.getElementById('welcomeCard').style.display = progress.hasSeenWelcome ? 'none' : 'block';
 
   const assessmentResult = await fetchAssessmentResult(user.email);
   renderCatalog(progress, assessmentResult);
