@@ -65,10 +65,16 @@
   .profile-menu-wrap{ position:relative; }
   .profile-avatar-btn{ width:36px; height:36px; border-radius:50%; background: var(--navy); color:#fff; border:none; cursor:pointer; font-family:'Space Grotesk', sans-serif; font-weight:700; font-size:14px; }
   .profile-avatar-btn:hover{ background: var(--navy-deep); }
-  .profile-dropdown{ position:absolute; right:0; top:44px; width:220px; background:#fff; border:1px solid var(--line); border-radius:12px; box-shadow: 0 8px 24px rgba(22,33,62,0.12); padding:14px; z-index:10; }
-  .profile-dropdown-email{ font-size:13px; font-weight:600; color: var(--ink); word-break:break-all; }
+  .profile-dropdown{ position:absolute; right:0; top:44px; width:250px; background:#fff; border:1px solid var(--line); border-radius:12px; box-shadow: 0 8px 24px rgba(22,33,62,0.12); padding:14px; z-index:10; }
+  .profile-name-row{ margin-bottom: 4px; }
+  .profile-name-input{ width:100%; border:none; background:none; font-family:'Space Grotesk', sans-serif; font-weight:600; font-size: 14.5px; color: var(--ink); padding:2px 0; }
+  .profile-name-input:focus{ outline:none; border-bottom: 1.5px solid var(--cyan); }
+  .profile-dropdown-email{ font-size:12.5px; color: var(--ink-soft); word-break:break-all; }
   .profile-dropdown-verified{ font-size:11.5px; color: var(--gray); margin-top:2px; }
   .profile-dropdown-divider{ height:1px; background:var(--line); margin:10px 0; }
+  .profile-progress-summary{ font-size:12.5px; }
+  .profile-progress-label{ font-size:11px; font-weight:600; color: var(--cyan); text-transform:uppercase; letter-spacing:0.04em; margin-bottom: 6px; }
+  .profile-progress-line{ color: var(--ink-soft); margin-bottom: 3px; }
   .profile-dropdown-item{ display:block; padding:8px 4px; font-size:13.5px; color: var(--ink); text-decoration:none; cursor:pointer; border-radius:6px; }
   .profile-dropdown-item:hover{ background:#F7F9FC; }
 
@@ -168,9 +174,23 @@
       <div class="profile-menu-wrap">
         <button class="profile-avatar-btn" id="profileAvatarBtn" onclick="toggleProfileMenu()" aria-label="Account menu"></button>
         <div class="profile-dropdown" id="profileDropdown" style="display:none;">
+
+          <div class="profile-name-row">
+            <input type="text" id="displayNameInput" class="profile-name-input" placeholder="Add your name" onblur="handleSaveDisplayName()" onkeydown="if(event.key==='Enter'){this.blur();}">
+          </div>
           <div class="profile-dropdown-email" id="profileDropdownEmail"></div>
           <div class="profile-dropdown-verified" id="profileDropdownVerified"></div>
+
           <div class="profile-dropdown-divider"></div>
+
+          <div class="profile-progress-summary">
+            <div class="profile-progress-label">Your progress</div>
+            <div id="profileAssessedLevel" class="profile-progress-line"></div>
+            <div id="profileCoursesCompleted" class="profile-progress-line"></div>
+          </div>
+
+          <div class="profile-dropdown-divider"></div>
+
           <a class="profile-dropdown-item" id="changePasswordMenuItem" onclick="openChangePassword()">Change password</a>
           <a class="profile-dropdown-item" onclick="handleSignOut()">Log out</a>
         </div>
@@ -248,7 +268,7 @@ const RESULTS_LOG_URL = "https://script.google.com/macros/s/AKfycbynJQYF9rv5maL_
    to treat it as a new URL and fetch fresh instead of serving a
    stale cached copy of the old content.
    ================================================================ */
-const CONTENT_VERSION = "16";
+const CONTENT_VERSION = "17";
 
 /* ================================================================
    EASY-EDIT ZONE 3: COURSE CATALOG
@@ -304,7 +324,8 @@ import {
   createUserWithEmailAndPassword, signInWithEmailAndPassword,
   GoogleAuthProvider, signInWithPopup,
   sendPasswordResetEmail, sendEmailVerification,
-  updatePassword, reauthenticateWithCredential, EmailAuthProvider
+  updatePassword, reauthenticateWithCredential, EmailAuthProvider,
+  updateProfile
 } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
 import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
 
@@ -438,8 +459,9 @@ onAuthStateChanged(auth, async (user) => {
 });
 
 function populateProfileMenu(user){
-  const initial = (user.email || '?').charAt(0).toUpperCase();
+  const initial = ((user.displayName || user.email || '?').charAt(0)).toUpperCase();
   document.getElementById('profileAvatarBtn').textContent = initial;
+  document.getElementById('displayNameInput').value = user.displayName || '';
   document.getElementById('profileDropdownEmail').textContent = user.email;
   document.getElementById('profileDropdownVerified').textContent = user.emailVerified ? 'Email verified' : 'Email not verified';
 
@@ -447,6 +469,36 @@ function populateProfileMenu(user){
   // Google-only accounts have nothing to change here.
   const hasPasswordProvider = user.providerData.some(p => p.providerId === 'password');
   document.getElementById('changePasswordMenuItem').style.display = hasPasswordProvider ? 'block' : 'none';
+}
+
+window.handleSaveDisplayName = async function(){
+  const newName = document.getElementById('displayNameInput').value.trim();
+  if (newName === (currentUser.displayName || '')) return; // nothing changed
+  try {
+    await updateProfile(currentUser, { displayName: newName });
+    document.getElementById('profileAvatarBtn').textContent = ((newName || currentUser.email || '?').charAt(0)).toUpperCase();
+  } catch (err){
+    console.error('Could not save display name:', err);
+  }
+};
+
+/* Fills in the "Your progress" summary once loadDashboard has computed
+   the person's assessment result and course completion data. */
+function populateProfileProgressSummary(progress, assessmentResult){
+  const levelEl = document.getElementById('profileAssessedLevel');
+  const completedEl = document.getElementById('profileCoursesCompleted');
+
+  levelEl.textContent = assessmentResult ? ('Assessed level: ' + assessmentResult.tier) : 'Take the assessment to see your level';
+
+  let completedCount = 0;
+  const totalCourses = Object.keys(DOMAINS).length * TIERS.length;
+  Object.keys(DOMAINS).forEach(domainKey => {
+    TIERS.forEach(tier => {
+      const courseId = domainKey + '-' + tier.slug;
+      if (isCourseComplete(progress, courseId)) completedCount++;
+    });
+  });
+  completedEl.textContent = 'Courses completed: ' + completedCount + ' of ' + totalCourses;
 }
 
 window.toggleProfileMenu = function(){
@@ -546,6 +598,7 @@ async function loadDashboard(user){
   const assessmentResult = await fetchAssessmentResult(user.email);
   renderCatalog(progress, assessmentResult);
   if (assessmentResult) renderRecommendations(assessmentResult, progress);
+  populateProfileProgressSummary(progress, assessmentResult);
 
   syncProgressReport(user.email, progress, assessmentResult);
 }
