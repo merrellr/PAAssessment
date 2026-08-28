@@ -39,6 +39,37 @@
   .check-feedback{ font-size: 13px; margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--line); color: var(--ink-soft); display:none; }
   .check-feedback.show{ display:block; }
   .check-feedback strong{ color: var(--ink); }
+
+  .chart-box{ margin-top: 20px; }
+  .chart-slider-row{ display:flex; align-items:center; gap:12px; margin-bottom: 14px; }
+  .chart-slider-row input[type=range]{ flex:1; accent-color: var(--cyan); }
+  .chart-slider-row .month-label{ font-size: 13px; color: var(--ink-soft); min-width: 68px; text-align:right; }
+  .chart-stats{ display:flex; gap:14px; margin-bottom: 14px; }
+  .chart-stat{ flex:1; background:#F7F9FC; border-radius: 10px; padding: 10px 12px; }
+  .chart-stat .clabel{ font-size: 11.5px; color: var(--gray); margin-bottom: 2px; }
+  .chart-stat .cval{ font-family:'Space Grotesk', sans-serif; font-weight:700; font-size: 18px; }
+  .chart-caption{ font-size: 11.5px; color: var(--gray); text-align:center; margin-top: 6px; }
+
+  .stepper-box{ margin-top: 8px; }
+  .stepper-dots{ display:flex; gap:6px; margin-bottom: 14px; }
+  .stepper-dot{ flex:1; height:4px; border-radius:2px; background: var(--line); cursor:pointer; }
+  .stepper-dot.active{ background: var(--navy); }
+  .stepper-dot.seen{ background: var(--cyan); }
+  .stepper-card{ background:#F7F9FC; border-radius: 12px; padding: 16px 18px; margin-bottom: 12px; }
+  .stepper-card .snum{ font-size: 11px; font-weight:600; color: var(--cyan); text-transform:uppercase; letter-spacing:0.04em; margin-bottom: 6px; }
+  .stepper-card h4{ font-family:'Space Grotesk', sans-serif; font-size: 14.5px; margin: 0 0 8px; color: var(--navy-deep); }
+  .stepper-card p{ font-size: 13.5px; margin: 0; }
+  .stepper-nav{ display:flex; justify-content:space-between; }
+  .stepper-nav button{ font-family:'IBM Plex Sans', sans-serif; font-size: 13px; padding: 7px 14px; border-radius: 7px; border: 1px solid var(--line); background:#fff; cursor:pointer; color: var(--ink); }
+  .stepper-nav button:disabled{ opacity:0.35; cursor:not-allowed; }
+
+  .reflection-box{ background:#F7F9FC; border-radius: 12px; padding: 16px 18px; margin-top: 20px; }
+  .reflection-box .rlabel{ font-size: 11px; font-weight:600; color: var(--cyan); text-transform:uppercase; letter-spacing:0.04em; margin-bottom: 8px; display:block; }
+  .reflection-box textarea{ width:100%; min-height: 80px; padding: 10px 12px; border: 1.5px solid var(--line); border-radius: 9px; font-family:'IBM Plex Sans', sans-serif; font-size: 13.5px; resize:vertical; }
+  .reflection-box textarea:focus{ outline:none; border-color: var(--cyan); }
+  .reflection-save-row{ display:flex; justify-content:space-between; align-items:center; margin-top: 10px; }
+  .reflection-save-row button{ font-family:'Space Grotesk', sans-serif; font-weight:600; font-size: 13px; padding: 8px 16px; border-radius: 7px; border:none; background: var(--navy); color:#fff; cursor:pointer; }
+  .reflection-saved-note{ font-size: 12px; color: var(--gray); }
   .lesson-nav{ display:flex; gap:8px; margin: 24px 0; flex-wrap:wrap; }
   .lesson-pill{ padding: 7px 12px; border-radius: 7px; font-size: 12.5px; font-weight:500; border: 1px solid var(--line); background:#fff; color: var(--ink-soft); text-decoration:none; }
   .lesson-pill.done{ background:#EEF3FA; border-color: var(--cyan); color: var(--navy); }
@@ -63,7 +94,10 @@
     <div class="lesson-nav" id="lessonNav"></div>
 
     <div id="lessonBody">Loading…</div>
+    <div id="chartContainer"></div>
+    <div id="stepperContainer"></div>
     <div id="checkContainer"></div>
+    <div id="reflectionContainer"></div>
 
     <div class="nav-row">
       <button class="btn btn-ghost" id="prevBtn" onclick="goToLesson(-1)">← Previous</button>
@@ -141,8 +175,15 @@ const CONTENT_OVERRIDES = {
         image: { src: "images/individual-vs-organizational.png", alt: "Building for the individual shown as a single contained potted plant; building for the organization shown as three connected trees sharing a root system" },
         body: `
           <p>When you build an AI habit or workflow for one person, you're optimizing that person's time. That's real value, but it's <strong>contained, isolated</strong>, like a plant in a pot. It scales only as far as their workload and only as long as they keep using it.</p>
-          <p>When you build for a process instead, a tool that handles a category of customer questions, or triages a type of internal request, the value becomes <strong>connected and compounding</strong>. It runs the same way at 9am and at midnight. Every improvement benefits everyone who touches that process going forward, not just whoever happened to build it.</p>
+          <p>When you build for a process instead, the value becomes <strong>connected and compounding</strong>. Drag the slider below to see how the gap between the two grows over time.</p>
         `,
+        chart: {
+          individualLabel: "Individual habit",
+          orgLabel: "Organizational process",
+          maxMonths: 12,
+          individualAt: (m) => Math.min(m * 8, 40),
+          orgAt: (m) => Math.round(m * m * 1.2)
+        },
         check: {
           question: "Why does organizational value 'compound' in a way individual value doesn't?",
           options: [
@@ -178,15 +219,15 @@ const CONTENT_OVERRIDES = {
         title: "Lesson 4: A Practical Five-Step Path",
         image: { src: "images/five-steps.png", alt: "Five growth stages labeled: Start narrow, Map the process, Ground in real data, Test with real users, Assign an owner" },
         body: `
-          <p>You don't need a full transformation program to make this shift. You need one real process, one working tool, and proof that it works.</p>
-          <ul>
-            <li><strong>Start narrow.</strong> Pick one process that's well understood, has a clear start and end point, and causes real friction today. Your first win should be boring and useful, not impressive.</li>
-            <li><strong>Map the process before building anything.</strong> Write out the actual steps a human takes today, including the exceptions. Most first attempts fail because nobody wrote down what "handling it" really meant.</li>
-            <li><strong>Ground it in real data.</strong> Connect it to your actual source of truth, rather than relying on generic knowledge. This is what makes the result dramatically more useful than a generic chatbot answer.</li>
-            <li><strong>Test with the people who live in the process every day</strong>, not just your own team. They'll find the gaps in an afternoon that you'd miss after weeks of solo testing.</li>
-            <li><strong>Assign ownership before launch.</strong> Someone needs to own this the way they'd own any piece of software: monitoring it, updating it as the process changes, retiring it if it stops earning its keep.</li>
-          </ul>
+          <p>You don't need a full transformation program to make this shift. You need one real process, one working tool, and proof that it works. Step through the five steps below.</p>
         `,
+        steps: [
+          { title: "Start narrow", detail: "Pick one process that's well understood, has a clear start and end point, and causes real friction today. Your first win should be boring and useful, not impressive." },
+          { title: "Map the process", detail: "Write out the actual steps a human takes today, including the exceptions. Most first attempts fail because nobody wrote down what \"handling it\" really meant." },
+          { title: "Ground it in real data", detail: "Connect it to your actual source of truth, rather than relying on generic knowledge. This is what makes the result dramatically more useful than a generic chatbot answer." },
+          { title: "Test with real users", detail: "Test with the people who live in the process every day, not just your own team. They'll find the gaps in an afternoon that you'd miss after weeks of solo testing." },
+          { title: "Assign an owner", detail: "Someone needs to own this the way they'd own any piece of software: monitoring it, updating it as the process changes, retiring it if it stops earning its keep." }
+        ],
         check: {
           question: "Why does the article recommend starting with a 'boring' process rather than an ambitious one?",
           options: [
@@ -216,6 +257,9 @@ const CONTENT_OVERRIDES = {
           ],
           correct: 1,
           explanation: "One proven win is a seed, not a finish line. Its biggest value is the credibility and know-how it creates for everything that follows."
+        },
+        reflection: {
+          prompt: "What's one process at your organization that fits this pattern, something well understood, causes real friction, and could be a strong first win?"
         }
       }
     ]
@@ -259,6 +303,7 @@ const course = CATALOG[courseId];
 
 let currentUser = null;
 let completedLessons = [];
+let reflections = {};
 
 if (!course){
   document.getElementById('lessonTitle').textContent = 'Course not found';
@@ -290,6 +335,7 @@ async function loadProgress(){
   const data = snap.exists() ? snap.data() : { courses: {} };
   const courseProgress = (data.courses && data.courses[courseId]) || { completed: [] };
   completedLessons = courseProgress.completed || [];
+  reflections = courseProgress.reflections || {};
 
   // If arriving fresh (no ?lesson= in URL) resume at the first incomplete lesson
   if (!params.get('lesson')){
@@ -308,7 +354,10 @@ function renderLesson(){
     : '';
   document.getElementById('lessonBody').innerHTML = imageHtml + lesson.body;
 
+  renderChart(lesson.chart);
+  renderStepper(lesson.steps);
   renderCheck(lesson.check);
+  renderReflection(lesson.reflection, lesson.id);
 
   const nav = document.getElementById('lessonNav');
   nav.innerHTML = '';
@@ -323,6 +372,112 @@ function renderLesson(){
   document.getElementById('prevBtn').style.visibility = lessonNum === 1 ? 'hidden' : 'visible';
   const isLast = lessonNum === course.lessons[course.lessons.length - 1].id;
   document.getElementById('completeBtn').textContent = isLast ? 'Mark complete & finish' : 'Mark complete & continue →';
+}
+
+/* Interactive line comparison chart. Draws an SVG line chart with
+   a month slider — as the user drags it, both lines redraw up to
+   that point and the two stat numbers update. Purely illustrative
+   (not real measured data), which is called out in the caption. */
+function renderChart(chart){
+  const container = document.getElementById('chartContainer');
+  container.innerHTML = '';
+  if (!chart) return;
+
+  const box = document.createElement('div');
+  box.className = 'chart-box';
+  box.innerHTML = `
+    <div class="chart-slider-row">
+      <input type="range" min="1" max="${chart.maxMonths}" value="${chart.maxMonths}" id="chartSlider">
+      <span class="month-label" id="chartMonthLabel">Month ${chart.maxMonths}</span>
+    </div>
+    <svg id="chartSvg" viewBox="0 0 400 180" style="width:100%; height:auto;"></svg>
+    <div class="chart-stats">
+      <div class="chart-stat"><div class="clabel">${chart.individualLabel}</div><div class="cval" id="chartIndVal" style="color:var(--gray);"></div></div>
+      <div class="chart-stat"><div class="clabel">${chart.orgLabel}</div><div class="cval" id="chartOrgVal" style="color:var(--navy);"></div></div>
+    </div>
+    <div class="chart-caption">Illustrative model, not measured data</div>
+  `;
+  container.appendChild(box);
+
+  const slider = box.querySelector('#chartSlider');
+  const svg = box.querySelector('#chartSvg');
+
+  function draw(monthsShown){
+    const indPoints = [], orgPoints = [];
+    let maxVal = 0;
+    for (let m = 1; m <= chart.maxMonths; m++){
+      maxVal = Math.max(maxVal, chart.individualAt(m), chart.orgAt(m));
+    }
+    for (let m = 1; m <= monthsShown; m++){
+      const x = 20 + (m - 1) * (360 / (chart.maxMonths - 1));
+      indPoints.push([x, 160 - (chart.individualAt(m) / maxVal) * 140]);
+      orgPoints.push([x, 160 - (chart.orgAt(m) / maxVal) * 140]);
+    }
+    const toPath = (pts) => pts.map((p, i) => (i === 0 ? 'M' : 'L') + p[0].toFixed(1) + ' ' + p[1].toFixed(1)).join(' ');
+
+    svg.innerHTML = `
+      <line x1="20" y1="160" x2="380" y2="160" stroke="#E3E9F0" stroke-width="1"/>
+      <path d="${toPath(indPoints)}" fill="none" stroke="#9AA3AD" stroke-width="2.5"/>
+      <path d="${toPath(orgPoints)}" fill="none" stroke="#1A4584" stroke-width="2.5"/>
+      ${indPoints.length ? `<circle cx="${indPoints[indPoints.length-1][0]}" cy="${indPoints[indPoints.length-1][1]}" r="4" fill="#9AA3AD"/>` : ''}
+      ${orgPoints.length ? `<circle cx="${orgPoints[orgPoints.length-1][0]}" cy="${orgPoints[orgPoints.length-1][1]}" r="4" fill="#1A4584"/>` : ''}
+    `;
+
+    box.querySelector('#chartIndVal').textContent = Math.round(chart.individualAt(monthsShown));
+    box.querySelector('#chartOrgVal').textContent = Math.round(chart.orgAt(monthsShown));
+    box.querySelector('#chartMonthLabel').textContent = 'Month ' + monthsShown;
+  }
+
+  slider.oninput = () => draw(parseInt(slider.value, 10));
+  draw(chart.maxMonths);
+}
+
+/* Click-through stepper for sequential processes. Shows one step
+   at a time with dot navigation, rather than a static bullet list. */
+function renderStepper(steps){
+  const container = document.getElementById('stepperContainer');
+  container.innerHTML = '';
+  if (!steps || !steps.length) return;
+
+  let current = 0;
+  const box = document.createElement('div');
+  box.className = 'stepper-box';
+  box.innerHTML = `
+    <div class="stepper-dots" id="stepperDots"></div>
+    <div class="stepper-card" id="stepperCard"></div>
+    <div class="stepper-nav">
+      <button id="stepperPrev" type="button">← Previous step</button>
+      <button id="stepperNext" type="button">Next step →</button>
+    </div>
+  `;
+  container.appendChild(box);
+
+  const dotsWrap = box.querySelector('#stepperDots');
+  steps.forEach((_, i) => {
+    const dot = document.createElement('div');
+    dot.className = 'stepper-dot';
+    dot.onclick = () => { current = i; render(); };
+    dotsWrap.appendChild(dot);
+  });
+
+  function render(){
+    const step = steps[current];
+    box.querySelector('#stepperCard').innerHTML = `
+      <div class="snum">Step ${current + 1} of ${steps.length}</div>
+      <h4>${step.title}</h4>
+      <p>${step.detail}</p>
+    `;
+    Array.from(dotsWrap.children).forEach((dot, i) => {
+      dot.classList.toggle('active', i === current);
+      dot.classList.toggle('seen', i < current);
+    });
+    box.querySelector('#stepperPrev').disabled = current === 0;
+    box.querySelector('#stepperNext').disabled = current === steps.length - 1;
+  }
+
+  box.querySelector('#stepperPrev').onclick = () => { if (current > 0){ current--; render(); } };
+  box.querySelector('#stepperNext').onclick = () => { if (current < steps.length - 1){ current++; render(); } };
+  render();
 }
 
 /* Renders a short single-question knowledge check with instant
@@ -370,6 +525,46 @@ window.goToLesson = function(direction){
   window.location.href = 'lesson.html?course=' + courseId + '&lesson=' + (lessonNum + direction);
 };
 
+/* Renders a short reflection prompt. Saved answers persist to
+   Firestore and are shown back pre-filled if the person revisits. */
+function renderReflection(reflection, lessonId){
+  const container = document.getElementById('reflectionContainer');
+  container.innerHTML = '';
+  if (!reflection) return;
+
+  const existing = reflections[lessonId] || '';
+  const box = document.createElement('div');
+  box.className = 'reflection-box';
+  box.innerHTML = `
+    <span class="rlabel">Your reflection</span>
+    <p style="margin:0 0 10px; font-size:13.5px;">${reflection.prompt}</p>
+    <textarea id="reflectionInput" placeholder="Type your answer here">${existing}</textarea>
+    <div class="reflection-save-row">
+      <span class="reflection-saved-note" id="reflectionSavedNote">${existing ? 'Saved previously' : ''}</span>
+      <button type="button" id="reflectionSaveBtn">Save reflection</button>
+    </div>
+  `;
+  container.appendChild(box);
+
+  box.querySelector('#reflectionSaveBtn').onclick = async () => {
+    const text = box.querySelector('#reflectionInput').value.trim();
+    reflections[lessonId] = text;
+    try {
+      const progressRef = doc(db, 'progress', currentUser.uid);
+      const snap = await getDoc(progressRef);
+      const data = snap.exists() ? snap.data() : { courses: {} };
+      data.courses = data.courses || {};
+      data.courses[courseId] = data.courses[courseId] || {};
+      data.courses[courseId].reflections = reflections;
+      await setDoc(progressRef, data);
+      box.querySelector('#reflectionSavedNote').textContent = 'Saved just now';
+    } catch (err){
+      console.error('Saving reflection failed:', err);
+      box.querySelector('#reflectionSavedNote').textContent = 'Could not save — try again';
+    }
+  };
+}
+
 window.markCompleteAndContinue = async function(){
   if (!completedLessons.includes(lessonNum)) completedLessons.push(lessonNum);
 
@@ -377,7 +572,13 @@ window.markCompleteAndContinue = async function(){
   const snap = await getDoc(progressRef);
   const data = snap.exists() ? snap.data() : { courses: {} };
   data.courses = data.courses || {};
-  data.courses[courseId] = { completed: completedLessons, lastLesson: lessonNum, updatedAt: new Date().toISOString() };
+  const existingCourseData = data.courses[courseId] || {};
+  data.courses[courseId] = {
+    completed: completedLessons,
+    lastLesson: lessonNum,
+    updatedAt: new Date().toISOString(),
+    reflections: existingCourseData.reflections || reflections
+  };
   await setDoc(progressRef, data);
 
   const isLast = lessonNum === course.lessons[course.lessons.length - 1].id;
