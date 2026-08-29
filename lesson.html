@@ -631,7 +631,7 @@ window.markCompleteAndContinue = async function(){
   const isLast = lessonNum === course.lessons[course.lessons.length - 1].id;
   if (isLast){
     document.getElementById('statusMsg').textContent = 'Course complete — nice work. Redirecting to your dashboard…';
-    setTimeout(() => { window.location.href = 'lms-dashboard.html'; }, 1200);
+    setTimeout(() => { window.location.href = 'lms-dashboard.html?justCompleted=1'; }, 1200);
   } else {
     window.location.href = 'lesson.html?course=' + courseId + '&lesson=' + (lessonNum + 1);
   }
