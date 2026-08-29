@@ -81,7 +81,8 @@
   .profile-field-label{ display:block; font-size:12px; font-weight:600; color: var(--ink-soft); margin: 0 0 5px 2px; }
 
   .stat-strip{ display:flex; gap:14px; margin-bottom: 22px; }
-  .stat-box{ flex:1; background:#fff; border:1px solid var(--line); border-radius:12px; padding: 16px 18px; text-align:center; }
+  .stat-box{ flex:1; background:#fff; border:1px solid var(--line); border-radius:12px; padding: 16px 18px; text-align:center; transition: background 0.4s ease; }
+  .stat-box.pulse-success{ background:#EEF9F1; border-color:#2E8B57; }
   .stat-num{ font-family:'Space Grotesk', sans-serif; font-weight:700; font-size: 28px; color: var(--navy); }
   .stat-label{ font-size: 12px; color: var(--gray); margin-top: 4px; }
 
@@ -256,6 +257,8 @@
       <div id="summaryDetailsPanel" style="display:none; margin-top:14px; padding-top:14px; border-top:1px solid var(--line);"></div>
     </div>
 
+    <div id="progressToast" style="display:none; background:#EEF9F1; border:1px solid #2E8B57; border-radius:10px; padding:10px 14px; margin-bottom:14px; font-size:13.5px; color:#1f6b47; text-align:center;">Nice work! Updating your progress…</div>
+
     <div class="stat-strip" id="assignedStatStrip" style="display:none;">
       <div class="stat-box">
         <div class="stat-num" id="statAssignedTotal">0</div>
@@ -265,6 +268,11 @@
         <div class="stat-num" id="statAssignedCompleted">0</div>
         <div class="stat-label">Completed</div>
       </div>
+    </div>
+
+    <div class="card" id="domainOverviewCard" style="display:none; margin-bottom:22px;">
+      <div style="font-size:13px; color:var(--gray); margin-bottom:12px;">Your levels across all seven domains</div>
+      <div id="domainOverviewBars"></div>
     </div>
 
     <div class="card" id="assessmentPromptCard" style="display:none; margin-bottom:22px;">
@@ -346,7 +354,7 @@ const RESULTS_LOG_URL = "https://script.google.com/macros/s/AKfycbynJQYF9rv5maL_
    to treat it as a new URL and fetch fresh instead of serving a
    stale cached copy of the old content.
    ================================================================ */
-const CONTENT_VERSION = "28";
+const CONTENT_VERSION = "29";
 
 /* ================================================================
    EASY-EDIT ZONE 3: COURSE CATALOG
@@ -719,10 +727,22 @@ function buildAssessmentPrefillUrl(user, profile){
 /* "Assigned" = every tier at or above the level someone tested into for
    that domain (their forward growth path). Tiers below their tested
    level don't count — they've already tested out of those. */
+function animateCountUp(el, from, to, duration){
+  const start = performance.now();
+  function tick(now){
+    const progress = Math.min((now - start) / duration, 1);
+    el.textContent = Math.round(from + (to - from) * progress);
+    if (progress < 1) requestAnimationFrame(tick);
+  }
+  requestAnimationFrame(tick);
+}
+
 function renderAssignedStat(progress, assessmentResult){
   const strip = document.getElementById('assignedStatStrip');
   const card = document.getElementById('assessmentSummaryCard');
-  if (!assessmentResult){ strip.style.display = 'none'; card.style.display = 'none'; return; }
+  const overviewCard = document.getElementById('domainOverviewCard');
+  if (!assessmentResult){ strip.style.display = 'none'; card.style.display = 'none'; overviewCard.style.display = 'none'; return; }
+  overviewCard.style.display = 'block';
 
   let totalAssigned = 0, totalCompleted = 0;
   Object.keys(DOMAINS).forEach(domainKey => {
@@ -736,8 +756,23 @@ function renderAssignedStat(progress, assessmentResult){
   });
 
   document.getElementById('statAssignedTotal').textContent = totalAssigned;
-  document.getElementById('statAssignedCompleted').textContent = totalCompleted;
   strip.style.display = 'flex';
+
+  const completedEl = document.getElementById('statAssignedCompleted');
+  const completedBox = completedEl.closest('.stat-box');
+  const params = new URLSearchParams(window.location.search);
+  if (params.get('justCompleted') === '1'){
+    history.replaceState(null, '', window.location.pathname);
+    document.getElementById('progressToast').style.display = 'block';
+    completedBox.classList.add('pulse-success');
+    animateCountUp(completedEl, Math.max(0, totalCompleted - 1), totalCompleted, 600);
+    setTimeout(() => {
+      document.getElementById('progressToast').style.display = 'none';
+      completedBox.classList.remove('pulse-success');
+    }, 2600);
+  } else {
+    completedEl.textContent = totalCompleted;
+  }
 
   document.getElementById('summaryTierLabel').textContent = assessmentResult.tier;
 
@@ -761,20 +796,22 @@ function renderAssignedStat(progress, assessmentResult){
 
   document.getElementById('summaryActiveTime').textContent = 'Active time in courses: ' + formatDuration(progress.totalActiveMs || 0);
 
-  const detailsPanel = document.getElementById('summaryDetailsPanel');
-  detailsPanel.innerHTML = '';
-  Object.keys(DOMAINS).forEach(domainKey => {
-    const pct = Math.round(assessmentResult.categoryPct[domainKey] || 0);
-    const row = document.createElement('div');
-    row.style.marginBottom = '10px';
-    row.innerHTML = `
-      <div style="display:flex; justify-content:space-between; font-size:12.5px; margin-bottom:4px;"><span>${DOMAINS[domainKey].label}</span><span style="color:var(--gray);">${pct}%</span></div>
-      <div style="height:6px; background:var(--line); border-radius:3px; overflow:hidden;"><div style="width:${pct}%; height:100%; background:var(--cyan);"></div></div>
-    `;
-    detailsPanel.appendChild(row);
-  });
+  document.getElementById('summaryDetailsPanel').innerHTML = buildDomainBarsHtml(assessmentResult);
+  document.getElementById('domainOverviewBars').innerHTML = buildDomainBarsHtml(assessmentResult);
 
   card.style.display = 'block';
+}
+
+function buildDomainBarsHtml(assessmentResult){
+  return Object.keys(DOMAINS).map(domainKey => {
+    const pct = Math.round(assessmentResult.categoryPct[domainKey] || 0);
+    return `
+      <div style="margin-bottom:10px;">
+        <div style="display:flex; justify-content:space-between; font-size:12.5px; margin-bottom:4px;"><span>${DOMAINS[domainKey].label}</span><span style="color:var(--gray);">${pct}%</span></div>
+        <div style="height:6px; background:var(--line); border-radius:3px; overflow:hidden;"><div style="width:${pct}%; height:100%; background:var(--cyan);"></div></div>
+      </div>
+    `;
+  }).join('');
 }
 
 function formatDuration(ms){
