@@ -285,7 +285,7 @@ const RESULTS_LOG_URL = "https://script.google.com/macros/s/AKfycbynJQYF9rv5maL_
    to treat it as a new URL and fetch fresh instead of serving a
    stale cached copy of the old content.
    ================================================================ */
-const CONTENT_VERSION = "19";
+const CONTENT_VERSION = "20";
 
 /* ================================================================
    EASY-EDIT ZONE 3: COURSE CATALOG
@@ -339,7 +339,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/fireba
 import {
   getAuth, onAuthStateChanged, signOut,
   createUserWithEmailAndPassword, signInWithEmailAndPassword,
-  GoogleAuthProvider, signInWithPopup,
+  GoogleAuthProvider, signInWithRedirect, getRedirectResult,
   sendPasswordResetEmail, sendEmailVerification,
   updatePassword, reauthenticateWithCredential, EmailAuthProvider
 } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
@@ -348,6 +348,13 @@ import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/fireb
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
+
+// Catches the result of a redirect-based Google sign-in when the
+// browser comes back from Google. If sign-in failed for some reason,
+// this is what surfaces the actual error instead of a silent loop.
+getRedirectResult(auth).catch((err) => {
+  document.getElementById('authError').textContent = friendlyAuthError(err.code);
+});
 
 let isSignUpMode = false;
 let currentUser = null;
@@ -437,12 +444,11 @@ window.handleAuthSubmit = async function(){
   }
 };
 
-window.handleGoogleSignIn = async function(){
-  try {
-    await signInWithPopup(auth, new GoogleAuthProvider());
-  } catch (err){
-    document.getElementById('authError').textContent = friendlyAuthError(err.code);
-  }
+window.handleGoogleSignIn = function(){
+  signInWithRedirect(auth, new GoogleAuthProvider());
+  // The browser navigates away to Google here — nothing else runs
+  // until it comes back, at which point getRedirectResult (below)
+  // picks up the result.
 };
 
 window.handleSignOut = function(){
