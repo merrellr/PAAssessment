@@ -403,7 +403,7 @@ window.renderDashboardAccessSection = function(){
    fields so they don't have to retype anything we already know.
    Everything stays editable — this never blocks or skips the screen.
    ================================================================ */
-(function prefillLeadFromUrl(){
+function prefillLeadFromUrl(){
   const params = new URLSearchParams(window.location.search);
   const map = {
     name: 'leadName', email: 'leadEmail', company: 'leadCompany',
@@ -416,7 +416,8 @@ window.renderDashboardAccessSection = function(){
       if (el) el.value = value;
     }
   });
-})();
+}
+prefillLeadFromUrl();
 
 /* ================================================================
    EASY-EDIT ZONE 1B: RESULTS LOGGING
@@ -829,6 +830,7 @@ function goNext(){
   if (current === QUESTIONS.length - 1){
     lastScores = computeScores();
     document.getElementById('leadForm').reset();
+    prefillLeadFromUrl();
     showScreen('lead');
   } else {
     current++;
