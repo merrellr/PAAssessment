@@ -194,52 +194,11 @@
 
           <div class="profile-dropdown-divider"></div>
 
-          <a class="profile-dropdown-item" onclick="openEditProfile()">Edit profile</a>
+          <a class="profile-dropdown-item" href="profile.html">My Profile</a>
           <a class="profile-dropdown-item" id="changePasswordMenuItem" onclick="openChangePassword()">Change password</a>
           <a class="profile-dropdown-item" onclick="handleSignOut()">Log out</a>
         </div>
       </div>
-    </div>
-
-    <div class="card" id="editProfileCard" style="display:none; max-width:420px; margin-bottom:22px;">
-      <h2>Edit profile</h2>
-
-      <label class="profile-field-label">Display name</label>
-      <input class="text-input" type="text" id="editDisplayName" placeholder="Your name">
-
-      <label class="profile-field-label">Phone number</label>
-      <input class="text-input" type="tel" id="editPhone" placeholder="(555) 555-5555">
-
-      <label class="profile-field-label">Role / job title</label>
-      <input class="text-input" type="text" id="editJobTitle" placeholder="e.g. Senior Product Manager">
-
-      <label class="profile-field-label">Company size</label>
-      <select class="text-input" id="editCompanySize">
-        <option value="">Select one</option>
-        <option value="1-10">1-10 employees</option>
-        <option value="11-50">11-50 employees</option>
-        <option value="51-200">51-200 employees</option>
-        <option value="201-1000">201-1,000 employees</option>
-        <option value="1000+">1,000+ employees</option>
-      </select>
-
-      <div class="field-error" id="editProfileError"></div>
-      <div class="field-error" id="editProfileSuccess" style="color:#2E8B57;"></div>
-
-      <div style="display:flex; gap:10px; margin-bottom:20px;">
-        <button class="btn btn-primary btn-gradient" style="width:auto; padding:10px 20px;" onclick="handleSaveProfile()">Save profile</button>
-        <button class="btn btn-ghost" onclick="closeEditProfile()">Cancel</button>
-      </div>
-
-      <div class="profile-dropdown-divider"></div>
-
-      <h2 style="font-size:15px; margin-top:16px;">Change email</h2>
-      <p style="font-size:12.5px; margin-bottom:10px;">We'll send a confirmation link to your new address — the change won't take effect until you click it.</p>
-      <input class="text-input" type="email" id="editNewEmail" placeholder="New email address">
-      <input class="text-input" type="password" id="editEmailCurrentPassword" placeholder="Current password" style="display:none;">
-      <div class="field-error" id="editEmailError"></div>
-      <div class="field-error" id="editEmailSuccess" style="color:#2E8B57;"></div>
-      <button class="btn btn-primary btn-gradient" style="width:auto; padding:10px 20px;" onclick="handleChangeEmail()">Send confirmation link</button>
     </div>
 
     <div class="card" id="changePasswordCard" style="display:none; max-width:420px; margin-bottom:22px;">
@@ -254,6 +213,8 @@
         <button class="btn btn-ghost" onclick="closeChangePassword()">Cancel</button>
       </div>
     </div>
+
+    <div id="mainProgressSummary" style="display:none; font-size:13.5px; color:var(--ink-soft); margin-bottom:10px;"></div>
 
     <div class="stat-strip" id="assignedStatStrip" style="display:none;">
       <div class="stat-box">
@@ -324,7 +285,7 @@ const RESULTS_LOG_URL = "https://script.google.com/macros/s/AKfycbynJQYF9rv5maL_
    to treat it as a new URL and fetch fresh instead of serving a
    stale cached copy of the old content.
    ================================================================ */
-const CONTENT_VERSION = "18";
+const CONTENT_VERSION = "19";
 
 /* ================================================================
    EASY-EDIT ZONE 3: COURSE CATALOG
@@ -378,10 +339,9 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/fireba
 import {
   getAuth, onAuthStateChanged, signOut,
   createUserWithEmailAndPassword, signInWithEmailAndPassword,
-  GoogleAuthProvider, signInWithPopup, reauthenticateWithPopup,
+  GoogleAuthProvider, signInWithPopup,
   sendPasswordResetEmail, sendEmailVerification,
-  updatePassword, reauthenticateWithCredential, EmailAuthProvider,
-  updateProfile, verifyBeforeUpdateEmail
+  updatePassword, reauthenticateWithCredential, EmailAuthProvider
 } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
 import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
 
@@ -608,96 +568,6 @@ window.handleChangePassword = async function(){
   }
 };
 
-window.openEditProfile = async function(){
-  document.getElementById('profileDropdown').style.display = 'none';
-  document.getElementById('editProfileCard').style.display = 'block';
-  document.getElementById('editProfileError').textContent = '';
-  document.getElementById('editProfileSuccess').textContent = '';
-  document.getElementById('editEmailError').textContent = '';
-  document.getElementById('editEmailSuccess').textContent = '';
-
-  document.getElementById('editDisplayName').value = currentUser.displayName || '';
-  document.getElementById('editNewEmail').value = '';
-  document.getElementById('editEmailCurrentPassword').value = '';
-
-  const progressRef = doc(db, 'progress', currentUser.uid);
-  const snap = await getDoc(progressRef);
-  const data = snap.exists() ? snap.data() : {};
-  const profile = data.profile || {};
-  document.getElementById('editPhone').value = profile.phone || '';
-  document.getElementById('editJobTitle').value = profile.jobTitle || '';
-  document.getElementById('editCompanySize').value = profile.companySize || '';
-};
-
-window.closeEditProfile = function(){
-  document.getElementById('editProfileCard').style.display = 'none';
-};
-
-window.handleSaveProfile = async function(){
-  const errorEl = document.getElementById('editProfileError');
-  const successEl = document.getElementById('editProfileSuccess');
-  errorEl.textContent = '';
-  successEl.textContent = '';
-
-  const newName = document.getElementById('editDisplayName').value.trim();
-  const phone = document.getElementById('editPhone').value.trim();
-  const jobTitle = document.getElementById('editJobTitle').value.trim();
-  const companySize = document.getElementById('editCompanySize').value;
-
-  try {
-    if (newName !== (currentUser.displayName || '')){
-      await updateProfile(currentUser, { displayName: newName });
-    }
-
-    const progressRef = doc(db, 'progress', currentUser.uid);
-    const snap = await getDoc(progressRef);
-    const data = snap.exists() ? snap.data() : { courses: {} };
-    data.profile = { phone, jobTitle, companySize };
-    await setDoc(progressRef, data);
-
-    populateProfileMenu(currentUser);
-    successEl.textContent = 'Profile saved.';
-  } catch (err){
-    console.error('Could not save profile:', err);
-    errorEl.textContent = 'Something went wrong saving your profile — please try again.';
-  }
-};
-
-window.handleChangeEmail = async function(){
-  const errorEl = document.getElementById('editEmailError');
-  const successEl = document.getElementById('editEmailSuccess');
-  errorEl.textContent = '';
-  successEl.textContent = '';
-
-  const newEmail = document.getElementById('editNewEmail').value.trim();
-  if (!newEmail){
-    errorEl.textContent = 'Enter the new email address.';
-    return;
-  }
-
-  try {
-    const hasPasswordProvider = currentUser.providerData.some(p => p.providerId === 'password');
-    if (hasPasswordProvider){
-      const currentPassword = document.getElementById('editEmailCurrentPassword').value;
-      if (!currentPassword){
-        errorEl.textContent = 'Enter your current password to confirm this change.';
-        return;
-      }
-      const credential = EmailAuthProvider.credential(currentUser.email, currentPassword);
-      await reauthenticateWithCredential(currentUser, credential);
-    } else {
-      await reauthenticateWithPopup(currentUser, new GoogleAuthProvider());
-    }
-
-    await verifyBeforeUpdateEmail(currentUser, newEmail);
-    successEl.textContent = 'Confirmation link sent to ' + newEmail + ' — click it there to finish the change.';
-    document.getElementById('editNewEmail').value = '';
-    document.getElementById('editEmailCurrentPassword').value = '';
-  } catch (err){
-    errorEl.textContent = friendlyAuthError(err.code);
-  }
-};
-
 window.handleResendVerification = async function(){
   if (!currentUser) return;
   try {
@@ -745,7 +615,8 @@ async function loadDashboard(user){
    level don't count — they've already tested out of those. */
 function renderAssignedStat(progress, assessmentResult){
   const strip = document.getElementById('assignedStatStrip');
-  if (!assessmentResult){ strip.style.display = 'none'; return; }
+  const summary = document.getElementById('mainProgressSummary');
+  if (!assessmentResult){ strip.style.display = 'none'; summary.style.display = 'none'; return; }
 
   let totalAssigned = 0, totalCompleted = 0;
   Object.keys(DOMAINS).forEach(domainKey => {
@@ -761,6 +632,9 @@ function renderAssignedStat(progress, assessmentResult){
   document.getElementById('statAssignedTotal').textContent = totalAssigned;
   document.getElementById('statAssignedCompleted').textContent = totalCompleted;
   strip.style.display = 'flex';
+
+  summary.textContent = 'Your assessed level: ' + assessmentResult.tier;
+  summary.style.display = 'block';
 }
 
 /* Quietly sends a full 28-course status snapshot to the Progress
