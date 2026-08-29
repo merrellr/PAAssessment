@@ -267,7 +267,7 @@
       <span class="eyebrow">Get started</span>
       <h1 style="font-size:19px;">Find your starting point</h1>
       <p>Answer a few questions about your product and AI skills to unlock courses matched to your level, across all seven skill areas below.</p>
-      <a href="index.html" class="btn btn-primary btn-gradient" style="display:inline-block; width:auto; padding:11px 22px; text-decoration:none;">Take the assessment →</a>
+      <a id="takeAssessmentLink" href="index.html" class="btn btn-primary btn-gradient" style="display:inline-block; width:auto; padding:11px 22px; text-decoration:none;">Take the assessment →</a>
     </div>
 
     <div class="rec-banner" id="recBanner" style="display:none;">
@@ -311,7 +311,7 @@ const RESULTS_LOG_URL = "https://script.google.com/macros/s/AKfycbynJQYF9rv5maL_
    to treat it as a new URL and fetch fresh instead of serving a
    stale cached copy of the old content.
    ================================================================ */
-const CONTENT_VERSION = "25";
+const CONTENT_VERSION = "26";
 
 /* ================================================================
    EASY-EDIT ZONE 3: COURSE CATALOG
@@ -654,6 +654,9 @@ async function loadDashboard(user){
 
   document.getElementById('welcomeCard').style.display = progress.hasSeenWelcome ? 'none' : 'block';
 
+  const assessmentUrl = buildAssessmentPrefillUrl(user, progress.profile || {});
+  document.getElementById('takeAssessmentLink').href = assessmentUrl;
+
   const assessmentResult = await fetchAssessmentResult(user.email);
   renderCatalog(progress, assessmentResult);
   if (assessmentResult) renderRecommendations(assessmentResult, progress);
@@ -661,6 +664,21 @@ async function loadDashboard(user){
   renderAssignedStat(progress, assessmentResult);
 
   syncProgressReport(user.email, progress, assessmentResult);
+}
+
+/* Builds the assessment link with everything we already know about
+   this person tacked on as query params, so the assessment's info
+   screen can arrive pre-filled instead of asking again from scratch. */
+function buildAssessmentPrefillUrl(user, profile){
+  const params = new URLSearchParams();
+  if (user.displayName) params.set('name', user.displayName);
+  if (user.email) params.set('email', user.email);
+  if (profile.company) params.set('company', profile.company);
+  if (profile.jobTitle) params.set('jobTitle', profile.jobTitle);
+  if (profile.companySize) params.set('companySize', profile.companySize);
+  if (profile.industry) params.set('industry', profile.industry);
+  const query = params.toString();
+  return 'index.html' + (query ? '?' + query : '');
 }
 
 /* "Assigned" = every tier at or above the level someone tested into for
@@ -742,7 +760,7 @@ window.toggleSummaryDetails = function(){
 window.handleRetakeAssessment = function(){
   const confirmed = window.confirm('Retaking the assessment will update your recommended courses based on your current skills. Continue?');
   if (confirmed){
-    window.location.href = 'index.html';
+    window.location.href = document.getElementById('takeAssessmentLink').href;
   }
 };
 
