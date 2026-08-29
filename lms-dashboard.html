@@ -416,7 +416,7 @@ const RESULTS_LOG_URL = "https://script.google.com/macros/s/AKfycbynJQYF9rv5maL_
    to treat it as a new URL and fetch fresh instead of serving a
    stale cached copy of the old content.
    ================================================================ */
-const CONTENT_VERSION = "36";
+const CONTENT_VERSION = "37";
 
 /* ================================================================
    EASY-EDIT ZONE 3: COURSE CATALOG
@@ -916,13 +916,13 @@ function drawSummaryRing(pct, color){
 /* Same per-domain colors used on the assessment's own skill breakdown,
    kept in sync so a domain always reads as the same color everywhere. */
 const DOMAIN_COLORS = {
-  discovery: "#6FA3D6",
-  strategy: "#4C8FCB",
-  prioritization: "#35C2E8",
-  execution: "#2AA0BF",
-  stakeholder: "#1A4584",
-  aiIndividual: "#8AB6DD",
-  aiOrg: "#12305e"
+  discovery: "#3B82F6",
+  strategy: "#8B5CF6",
+  prioritization: "#EC4899",
+  execution: "#F97316",
+  stakeholder: "#10B981",
+  aiIndividual: "#06B6D4",
+  aiOrg: "#6366F1"
 };
 
 const DOMAIN_SHORT_LABELS = {
@@ -1125,7 +1125,8 @@ function renderCatalog(progress, assessmentResult){
 
     const title = document.createElement('div');
     title.className = 'domain-title';
-    title.textContent = DOMAINS[domainKey].label;
+    title.style.cssText = 'display:flex; align-items:center; gap:9px;';
+    title.innerHTML = domainIconBadgeHtml(domainKey, 24) + '<span>' + DOMAINS[domainKey].label + '</span>';
     group.appendChild(title);
 
     const row = document.createElement('div');
@@ -1183,7 +1184,8 @@ function renderLockedTeaser(wrap){
 
     const title = document.createElement('div');
     title.className = 'domain-title';
-    title.textContent = DOMAINS[domainKey].label;
+    title.style.cssText = 'display:flex; align-items:center; gap:9px; opacity:0.6;';
+    title.innerHTML = domainIconBadgeHtml(domainKey, 24) + '<span>' + DOMAINS[domainKey].label + '</span>';
     group.appendChild(title);
 
     const row = document.createElement('div');
