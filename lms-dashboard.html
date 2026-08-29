@@ -109,6 +109,10 @@
   .tier-card.is-belowlevel{ opacity:0.55; background:#FAFAFA; }
   .tier-card.is-belowlevel:hover{ opacity:0.85; }
 
+  .tier-card.is-locked{ opacity:0.45; cursor:default; }
+  .tier-card.is-locked:hover{ border-color: var(--line); opacity:0.45; }
+  .tier-card .lock-icon{ display:block; margin: 0 auto 4px; }
+
   [data-screen]{ display:none; }
   [data-screen].active{ display:block; }
 </style>
@@ -219,7 +223,8 @@
         <div>
           <div style="font-size:11.5px; color:var(--gray);">Your assessed level</div>
           <div style="font-family:'Space Grotesk', sans-serif; font-weight:600; font-size:16px; color:var(--navy-deep);" id="summaryTierLabel"></div>
-          <div style="font-size:12px; color:var(--gray); margin-top:4px;" id="summaryTimeSince"></div>
+          <div style="font-size:12px; color:var(--gray); margin-top:4px;" id="summaryTimeSinceFirst"></div>
+          <div style="font-size:12px; color:var(--gray);" id="summaryTimeSince"></div>
           <div style="font-size:12px; color:var(--gray);" id="summaryActiveTime"></div>
         </div>
         <div style="display:flex; gap:16px; white-space:nowrap;">
@@ -256,6 +261,13 @@
     <div class="rec-banner" id="verifyBanner" style="display:none; background:#FFF8E8; border-color:#F0DDA8;">
       <span style="font-size:13px; color:var(--ink-soft);">Please verify your email — check your inbox for a link.</span>
       <a onclick="handleResendVerification()" style="margin-left:10px; font-size:13px; color:var(--navy); text-decoration:underline; cursor:pointer;">Resend email</a>
+    </div>
+
+    <div class="card" id="assessmentPromptCard" style="display:none; margin-bottom:22px;">
+      <span class="eyebrow">Get started</span>
+      <h1 style="font-size:19px;">Find your starting point</h1>
+      <p>Answer a few questions about your product and AI skills to unlock courses matched to your level, across all seven skill areas below.</p>
+      <a href="index.html" class="btn btn-primary btn-gradient" style="display:inline-block; width:auto; padding:11px 22px; text-decoration:none;">Take the assessment →</a>
     </div>
 
     <div class="rec-banner" id="recBanner" style="display:none;">
@@ -299,7 +311,7 @@ const RESULTS_LOG_URL = "https://script.google.com/macros/s/AKfycbynJQYF9rv5maL_
    to treat it as a new URL and fetch fresh instead of serving a
    stale cached copy of the old content.
    ================================================================ */
-const CONTENT_VERSION = "24";
+const CONTENT_VERSION = "25";
 
 /* ================================================================
    EASY-EDIT ZONE 3: COURSE CATALOG
@@ -676,9 +688,22 @@ function renderAssignedStat(progress, assessmentResult){
 
   document.getElementById('summaryTierLabel').textContent = assessmentResult.tier;
 
-  if (assessmentResult.submittedAt){
-    const days = Math.floor((Date.now() - new Date(assessmentResult.submittedAt).getTime()) / 86400000);
-    document.getElementById('summaryTimeSince').textContent = days <= 0 ? 'Assessed today' : (days + ' day' + (days === 1 ? '' : 's') + ' since your last assessment');
+  const sinceFirstEl = document.getElementById('summaryTimeSinceFirst');
+  const sinceLastEl = document.getElementById('summaryTimeSince');
+  sinceFirstEl.textContent = '';
+  sinceLastEl.textContent = '';
+
+  const hasRetaken = assessmentResult.firstSubmittedAt && assessmentResult.submittedAt
+    && new Date(assessmentResult.firstSubmittedAt).getTime() !== new Date(assessmentResult.submittedAt).getTime();
+
+  if (assessmentResult.firstSubmittedAt){
+    const daysFirst = Math.floor((Date.now() - new Date(assessmentResult.firstSubmittedAt).getTime()) / 86400000);
+    sinceFirstEl.textContent = daysFirst <= 0 ? 'Started today' : (daysFirst + ' day' + (daysFirst === 1 ? '' : 's') + ' on this journey');
+  }
+
+  if (hasRetaken && assessmentResult.submittedAt){
+    const daysLast = Math.floor((Date.now() - new Date(assessmentResult.submittedAt).getTime()) / 86400000);
+    sinceLastEl.textContent = daysLast <= 0 ? 'Reassessed today' : (daysLast + ' day' + (daysLast === 1 ? '' : 's') + ' since your last reassessment');
   }
 
   document.getElementById('summaryActiveTime').textContent = 'Active time in courses: ' + formatDuration(progress.totalActiveMs || 0);
@@ -779,7 +804,15 @@ function isCourseComplete(progress, courseId){
 
 function renderCatalog(progress, assessmentResult){
   const wrap = document.getElementById('courseCatalog');
+  const promptCard = document.getElementById('assessmentPromptCard');
   wrap.innerHTML = '';
+
+  if (!assessmentResult){
+    promptCard.style.display = 'block';
+    renderLockedTeaser(wrap);
+    return;
+  }
+  promptCard.style.display = 'none';
 
   Object.keys(DOMAINS).forEach(domainKey => {
     const group = document.createElement('div');
@@ -828,6 +861,39 @@ function renderCatalog(progress, assessmentResult){
         <div class="tstatus">${statusText}</div>
       `;
       row.appendChild(a);
+    });
+
+    group.appendChild(row);
+    wrap.appendChild(group);
+  });
+}
+
+/* Shown instead of the real catalog when someone hasn't taken the
+   assessment yet — teases the shape of what's coming without
+   letting them into any actual course content. */
+function renderLockedTeaser(wrap){
+  Object.keys(DOMAINS).forEach(domainKey => {
+    const group = document.createElement('div');
+    group.className = 'domain-group';
+
+    const title = document.createElement('div');
+    title.className = 'domain-title';
+    title.textContent = DOMAINS[domainKey].label;
+    group.appendChild(title);
+
+    const row = document.createElement('div');
+    row.className = 'tier-row';
+
+    TIERS.forEach(tier => {
+      const card = document.createElement('div');
+      card.className = 'tier-card is-locked';
+      card.innerHTML = `
+        <svg class="lock-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9AA3AD" stroke-width="2"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
+        <div class="tname">${tier.label}</div>
+        <div class="tbar"><div class="tbar-fill" style="width:0%;"></div></div>
+        <div class="tstatus">Locked</div>
+      `;
+      row.appendChild(card);
     });
 
     group.appendChild(row);
