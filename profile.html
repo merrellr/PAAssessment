@@ -73,6 +73,9 @@
     <label class="profile-field-label">Display name</label>
     <input class="text-input" type="text" id="editDisplayName" placeholder="Your name">
 
+    <label class="profile-field-label">Company</label>
+    <input class="text-input" type="text" id="editCompany" placeholder="Your company name">
+
     <label class="profile-field-label">Phone number</label>
     <input class="text-input" type="tel" id="editPhone" placeholder="(555) 555-5555">
 
@@ -88,6 +91,9 @@
       <option value="201-1000">201-1,000 employees</option>
       <option value="1000+">1,000+ employees</option>
     </select>
+
+    <label class="profile-field-label">Industry</label>
+    <input class="text-input" type="text" id="editIndustry" placeholder="e.g. Healthcare Technology">
 
     <div class="field-error" id="editProfileError"></div>
     <div class="field-error" id="editProfileSuccess" style="color:#2E8B57;"></div>
@@ -165,9 +171,11 @@ onAuthStateChanged(auth, async (user) => {
   const snap = await getDoc(progressRef);
   const data = snap.exists() ? snap.data() : {};
   const profile = data.profile || {};
+  document.getElementById('editCompany').value = profile.company || '';
   document.getElementById('editPhone').value = profile.phone || '';
   document.getElementById('editJobTitle').value = profile.jobTitle || '';
   document.getElementById('editCompanySize').value = profile.companySize || '';
+  document.getElementById('editIndustry').value = profile.industry || '';
 });
 
 window.handleSaveProfile = async function(){
@@ -177,9 +185,11 @@ window.handleSaveProfile = async function(){
   successEl.textContent = '';
 
   const newName = document.getElementById('editDisplayName').value.trim();
+  const company = document.getElementById('editCompany').value.trim();
   const phone = document.getElementById('editPhone').value.trim();
   const jobTitle = document.getElementById('editJobTitle').value.trim();
   const companySize = document.getElementById('editCompanySize').value;
+  const industry = document.getElementById('editIndustry').value.trim();
 
   try {
     if (newName !== (currentUser.displayName || '')){
@@ -192,7 +202,7 @@ window.handleSaveProfile = async function(){
     const progressRef = doc(db, 'progress', currentUser.uid);
     const snap = await getDoc(progressRef);
     const data = snap.exists() ? snap.data() : { courses: {} };
-    data.profile = { phone, jobTitle, companySize };
+    data.profile = { company, phone, jobTitle, companySize, industry };
     await setDoc(progressRef, data);
 
     successEl.textContent = 'Profile saved.';
