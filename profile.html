@@ -37,6 +37,10 @@
 
   .profile-field-label{ display:block; font-size:12px; font-weight:600; color: var(--ink-soft); margin: 0 0 5px 2px; }
   .text-input{ width:100%; padding: 12px 14px; margin-bottom: 14px; border: 1.5px solid var(--line); border-radius: 9px; font-family:'IBM Plex Sans', sans-serif; font-size: 14.5px; }
+  .text-input.has-companion{ margin-bottom: 4px; }
+  .suggest-chip{ display:inline-flex; align-items:center; gap:6px; font-size: 12.5px; color: var(--navy); background: #EEF3FA; border: 1px solid var(--line); border-radius: 7px; padding: 6px 10px; margin: 0 0 14px; cursor:pointer; }
+  .suggest-chip:hover{ border-color: var(--cyan); }
+  .suggest-chip b{ font-weight:600; }
   .text-input:focus{ outline:none; border-color: var(--cyan); }
   .field-error{ font-size: 12.5px; color: var(--warn); margin: -8px 0 12px 2px; min-height: 1px; }
 
@@ -74,13 +78,16 @@
     <input class="text-input" type="text" id="editDisplayName" placeholder="Your name">
 
     <label class="profile-field-label">Company</label>
-    <input class="text-input" type="text" id="editCompany" placeholder="Your company name">
+    <input class="text-input has-companion" type="text" id="editCompany" placeholder="Company (start typing)" list="companyList" autocomplete="off" oninput="handleCompanyInput()">
+    <datalist id="companyList"></datalist>
+    <div class="suggest-chip" id="companySuggest" style="display:none;"></div>
 
     <label class="profile-field-label">Phone number</label>
     <input class="text-input" type="tel" id="editPhone" placeholder="(555) 555-5555">
 
     <label class="profile-field-label">Role / job title</label>
-    <input class="text-input" type="text" id="editJobTitle" placeholder="e.g. Senior Product Manager">
+    <input class="text-input" type="text" id="editJobTitle" placeholder="Job title (start typing)" list="jobTitleList">
+    <datalist id="jobTitleList"></datalist>
 
     <label class="profile-field-label">Company size</label>
     <select class="text-input" id="editCompanySize">
@@ -93,7 +100,8 @@
     </select>
 
     <label class="profile-field-label">Industry</label>
-    <input class="text-input" type="text" id="editIndustry" placeholder="e.g. Healthcare Technology">
+    <input class="text-input" type="text" id="editIndustry" placeholder="Industry (start typing)" list="industryList">
+    <datalist id="industryList"></datalist>
 
     <div class="field-error" id="editProfileError"></div>
     <div class="field-error" id="editProfileSuccess" style="color:#2E8B57;"></div>
@@ -135,6 +143,113 @@ const auth = getAuth(app);
 const db = getFirestore(app);
 
 let currentUser = null;
+
+/* ================================================================
+   Same job title / industry lists and company auto-suggest logic
+   used on the assessment, kept in sync so both places offer the
+   same experience. RESULTS_LOG_URL is the same Apps Script backend.
+   ================================================================ */
+const RESULTS_LOG_URL = "https://script.google.com/macros/s/AKfycbynJQYF9rv5maL_CGniS9UGhTDfBVeW3gVhEWUsFdGOqquv4osGx4nQvc8jNkaaY6wrrg/exec";
+
+const JOB_TITLE_OPTIONS = [
+  "Product Manager", "Senior Product Manager", "Director of Product",
+  "VP of Product", "Chief Product Officer", "Head of Product",
+  "Product Owner", "Product Marketing Manager", "Program Manager",
+  "Project Manager", "Business Analyst", "UX Designer", "UX Researcher",
+  "Engineering Manager", "CTO", "CEO / Founder", "Quality Director",
+  "VP of Quality", "Clinical Quality Manager", "Healthcare Administrator",
+  "Consultant"
+];
+
+const INDUSTRY_OPTIONS = [
+  "Healthcare Technology / Health IT", "Healthcare Provider (Hospital / Health System)",
+  "Healthcare Payer", "Pharmaceuticals / Biotech", "Software / SaaS",
+  "Financial Services", "Insurance", "Government / Public Sector",
+  "Education", "Nonprofit / Association", "Manufacturing",
+  "Retail / E-commerce", "Consulting", "Telecommunications", "Consumer Products"
+];
+
+function populateStaticDatalists(){
+  const jobList = document.getElementById('jobTitleList');
+  JOB_TITLE_OPTIONS.forEach(opt => {
+    const el = document.createElement('option');
+    el.value = opt;
+    jobList.appendChild(el);
+  });
+  const indList = document.getElementById('industryList');
+  INDUSTRY_OPTIONS.forEach(opt => {
+    const el = document.createElement('option');
+    el.value = opt;
+    indList.appendChild(el);
+  });
+}
+populateStaticDatalists();
+
+let knownCompanies = [];
+
+function loadKnownCompanies(){
+  if (!RESULTS_LOG_URL) return;
+  const callbackName = 'companiesCallback_' + Date.now();
+  window[callbackName] = function(list){
+    knownCompanies = list || [];
+    const dl = document.getElementById('companyList');
+    dl.innerHTML = '';
+    knownCompanies.forEach(name => {
+      const el = document.createElement('option');
+      el.value = name;
+      dl.appendChild(el);
+    });
+    delete window[callbackName];
+    script.remove();
+  };
+  const script = document.createElement('script');
+  script.src = RESULTS_LOG_URL + '?action=companies&callback=' + callbackName;
+  script.onerror = function(){ /* fail silently — company field still works as plain text */ };
+  document.body.appendChild(script);
+}
+loadKnownCompanies();
+
+function editDistance(a, b){
+  a = a.toLowerCase().trim(); b = b.toLowerCase().trim();
+  const dp = Array(a.length + 1).fill(null).map(() => Array(b.length + 1).fill(0));
+  for (let i = 0; i <= a.length; i++) dp[i][0] = i;
+  for (let j = 0; j <= b.length; j++) dp[0][j] = j;
+  for (let i = 1; i <= a.length; i++){
+    for (let j = 1; j <= b.length; j++){
+      dp[i][j] = a[i-1] === b[j-1] ? dp[i-1][j-1] : 1 + Math.min(dp[i-1][j], dp[i][j-1], dp[i-1][j-1]);
+    }
+  }
+  return dp[a.length][b.length];
+}
+
+window.handleCompanyInput = function(){
+  const input = document.getElementById('editCompany');
+  const chip = document.getElementById('companySuggest');
+  const typed = input.value.trim();
+
+  if (typed.length < 3 || knownCompanies.includes(typed)){
+    chip.style.display = 'none';
+    return;
+  }
+
+  let bestMatch = null, bestDist = Infinity;
+  knownCompanies.forEach(name => {
+    const dist = editDistance(typed, name);
+    if (dist < bestDist) { bestDist = dist; bestMatch = name; }
+  });
+
+  const threshold = typed.length <= 6 ? 1 : 2;
+  if (bestMatch && bestDist > 0 && bestDist <= threshold){
+    chip.innerHTML = 'Did you mean <b>' + bestMatch + '</b>?';
+    chip.style.display = 'inline-flex';
+    chip.onclick = () => {
+      input.value = bestMatch;
+      chip.style.display = 'none';
+    };
+  } else {
+    chip.style.display = 'none';
+  }
+};
 
 function friendlyAuthError(code){
   const map = {
