@@ -268,19 +268,21 @@
 
     <div class="card" id="assessmentSummaryCard" style="display:none; margin-bottom:18px;">
       <span class="eyebrow">Your result</span>
-      <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:16px;">
-        <div>
-          <div style="font-size:11.5px; color:var(--gray);">Your assessed level</div>
-          <div style="font-family:'Space Grotesk', sans-serif; font-weight:600; font-size:16px; color:var(--navy-deep);" id="summaryTierLabel"></div>
-          <div style="font-size:12px; color:var(--gray); margin-top:4px;" id="summaryTimeSinceFirst"></div>
-          <div style="font-size:12px; color:var(--gray);" id="summaryTimeSince"></div>
-          <div style="font-size:12px; color:var(--gray);" id="summaryActiveTime"></div>
-          <a onclick="toggleSummaryDetails()" style="font-size:13px; color:var(--navy); cursor:pointer; text-decoration:underline; display:inline-block; margin-top:10px;" id="detailsToggleLink">View details</a>
-        </div>
-        <div style="text-align:center;">
-          <svg id="summaryGaugeSvg" width="150" height="86" viewBox="0 0 260 150"></svg>
-          <a onclick="handleRetakeAssessment()" style="font-size:13px; color:var(--ink-soft); cursor:pointer; text-decoration:underline; display:block; margin-top:2px;">Retake assessment</a>
-        </div>
+
+      <div style="display:flex; flex-direction:column; align-items:center; text-align:center;">
+        <svg id="summaryGaugeSvg" width="180" height="104" viewBox="0 0 260 150" style="max-width:100%; height:auto;"></svg>
+        <div style="font-family:'Space Grotesk', sans-serif; font-weight:600; font-size:17px; color:var(--navy-deep); margin-top:2px;" id="summaryTierLabel"></div>
+      </div>
+
+      <div style="text-align:center; margin: 8px 0 16px;">
+        <div style="font-size:12px; color:var(--gray);" id="summaryTimeSinceFirst"></div>
+        <div style="font-size:12px; color:var(--gray);" id="summaryTimeSince"></div>
+        <div style="font-size:12px; color:var(--gray);" id="summaryActiveTime"></div>
+      </div>
+
+      <div style="display:flex; justify-content:center; gap:24px; border-top:1px solid var(--line); padding-top:14px;">
+        <a onclick="toggleSummaryDetails()" style="font-size:13px; color:var(--navy); cursor:pointer; text-decoration:underline;" id="detailsToggleLink">View details</a>
+        <a onclick="handleRetakeAssessment()" style="font-size:13px; color:var(--ink-soft); cursor:pointer; text-decoration:underline;">Retake assessment</a>
       </div>
       <div id="summaryDetailsPanel" style="display:none; margin-top:14px; padding-top:14px; border-top:1px solid var(--line);"></div>
     </div>
@@ -379,7 +381,7 @@ const RESULTS_LOG_URL = "https://script.google.com/macros/s/AKfycbynJQYF9rv5maL_
    to treat it as a new URL and fetch fresh instead of serving a
    stale cached copy of the old content.
    ================================================================ */
-const CONTENT_VERSION = "31";
+const CONTENT_VERSION = "32";
 
 /* ================================================================
    EASY-EDIT ZONE 3: COURSE CATALOG
@@ -864,13 +866,26 @@ function drawSummaryGauge(pct){
   svg.innerHTML = svgParts;
 }
 
+/* Same per-domain colors used on the assessment's own skill breakdown,
+   kept in sync so a domain always reads as the same color everywhere. */
+const DOMAIN_COLORS = {
+  discovery: "#6FA3D6",
+  strategy: "#4C8FCB",
+  prioritization: "#35C2E8",
+  execution: "#2AA0BF",
+  stakeholder: "#1A4584",
+  aiIndividual: "#8AB6DD",
+  aiOrg: "#12305e"
+};
+
 function buildDomainBarsHtml(assessmentResult){
   return Object.keys(DOMAINS).map(domainKey => {
     const pct = Math.round(assessmentResult.categoryPct[domainKey] || 0);
+    const color = DOMAIN_COLORS[domainKey] || 'var(--cyan)';
     return `
       <div style="margin-bottom:10px;">
         <div style="display:flex; justify-content:space-between; font-size:12.5px; margin-bottom:4px;"><span>${DOMAINS[domainKey].label}</span><span style="color:var(--gray);">${pct}%</span></div>
-        <div style="height:6px; background:var(--line); border-radius:3px; overflow:hidden;"><div style="width:${pct}%; height:100%; background:var(--cyan);"></div></div>
+        <div style="height:6px; background:var(--line); border-radius:3px; overflow:hidden;"><div style="width:${pct}%; height:100%; background:${color};"></div></div>
       </div>
     `;
   }).join('');
