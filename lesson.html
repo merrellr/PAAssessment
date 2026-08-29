@@ -303,7 +303,7 @@ const CATALOG = buildCatalog();
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
-import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+import { getFirestore, doc, getDoc, setDoc, increment } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
@@ -336,11 +336,37 @@ onAuthStateChanged(auth, async (user) => {
   try {
     await loadProgress();
     renderLesson();
+    startActiveTimeTracking();
   } catch (err){
     console.error('Lesson load failed:', err);
     document.getElementById('lessonBody').innerHTML = '<p>Something went wrong loading this lesson (' + err.message + '). Check the browser console for details, or try refreshing.</p>';
   }
 });
+
+/* Same active-time tracker as the dashboard — only counts time while
+   this tab is visible, flushed to Firestore via atomic increment. */
+let activeTimeSegmentStart = document.hidden ? null : Date.now();
+
+function flushActiveTime(){
+  if (activeTimeSegmentStart === null || !currentUser) return;
+  const elapsed = Date.now() - activeTimeSegmentStart;
+  activeTimeSegmentStart = document.hidden ? null : Date.now();
+  if (elapsed < 1000) return;
+  const progressRef = doc(db, 'progress', currentUser.uid);
+  setDoc(progressRef, { totalActiveMs: increment(elapsed) }, { merge: true }).catch(() => {});
+}
+
+function startActiveTimeTracking(){
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden){
+      flushActiveTime();
+    } else {
+      activeTimeSegmentStart = Date.now();
+    }
+  });
+  window.addEventListener('pagehide', flushActiveTime);
+  setInterval(flushActiveTime, 60000);
+}
 
 async function loadProgress(){
   const progressRef = doc(db, 'progress', currentUser.uid);
