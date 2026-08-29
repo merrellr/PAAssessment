@@ -214,7 +214,21 @@
       </div>
     </div>
 
-    <div id="mainProgressSummary" style="display:none; font-size:13.5px; color:var(--ink-soft); margin-bottom:10px;"></div>
+    <div class="card" id="assessmentSummaryCard" style="display:none; margin-bottom:18px;">
+      <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:10px;">
+        <div>
+          <div style="font-size:11.5px; color:var(--gray);">Your assessed level</div>
+          <div style="font-family:'Space Grotesk', sans-serif; font-weight:600; font-size:16px; color:var(--navy-deep);" id="summaryTierLabel"></div>
+          <div style="font-size:12px; color:var(--gray); margin-top:4px;" id="summaryTimeSince"></div>
+          <div style="font-size:12px; color:var(--gray);" id="summaryActiveTime"></div>
+        </div>
+        <div style="display:flex; gap:16px; white-space:nowrap;">
+          <a onclick="toggleSummaryDetails()" style="font-size:13px; color:var(--navy); cursor:pointer; text-decoration:underline;" id="detailsToggleLink">View details</a>
+          <a onclick="handleRetakeAssessment()" style="font-size:13px; color:var(--ink-soft); cursor:pointer; text-decoration:underline;">Retake assessment</a>
+        </div>
+      </div>
+      <div id="summaryDetailsPanel" style="display:none; margin-top:14px; padding-top:14px; border-top:1px solid var(--line);"></div>
+    </div>
 
     <div class="stat-strip" id="assignedStatStrip" style="display:none;">
       <div class="stat-box">
@@ -285,7 +299,7 @@ const RESULTS_LOG_URL = "https://script.google.com/macros/s/AKfycbynJQYF9rv5maL_
    to treat it as a new URL and fetch fresh instead of serving a
    stale cached copy of the old content.
    ================================================================ */
-const CONTENT_VERSION = "23";
+const CONTENT_VERSION = "24";
 
 /* ================================================================
    EASY-EDIT ZONE 3: COURSE CATALOG
@@ -343,7 +357,7 @@ import {
   sendPasswordResetEmail, sendEmailVerification,
   updatePassword, reauthenticateWithCredential, EmailAuthProvider
 } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
-import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+import { getFirestore, doc, getDoc, setDoc, increment } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
@@ -468,11 +482,39 @@ onAuthStateChanged(auth, async (user) => {
     document.getElementById('verifyBanner').style.display = user.emailVerified ? 'none' : 'block';
     showScreen('dashboard');
     await loadDashboard(user);
+    startActiveTimeTracking(user);
   } else {
     currentUser = null;
     showScreen('auth');
   }
 });
+
+/* Tracks time actively spent on this page — only while the tab is
+   visible and focused — and periodically flushes the accumulated
+   time to Firestore using an atomic increment so concurrent tabs
+   or page reloads never overwrite each other's counted time. */
+let activeTimeSegmentStart = document.hidden ? null : Date.now();
+
+function flushActiveTime(){
+  if (activeTimeSegmentStart === null || !currentUser) return;
+  const elapsed = Date.now() - activeTimeSegmentStart;
+  activeTimeSegmentStart = document.hidden ? null : Date.now();
+  if (elapsed < 1000) return; // ignore negligible slivers
+  const progressRef = doc(db, 'progress', currentUser.uid);
+  setDoc(progressRef, { totalActiveMs: increment(elapsed) }, { merge: true }).catch(() => {});
+}
+
+function startActiveTimeTracking(){
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden){
+      flushActiveTime();
+    } else {
+      activeTimeSegmentStart = Date.now();
+    }
+  });
+  window.addEventListener('pagehide', flushActiveTime);
+  setInterval(flushActiveTime, 60000); // periodic safety flush every minute
+}
 
 function populateProfileMenu(user){
   const initial = ((user.displayName || user.email || '?').charAt(0)).toUpperCase();
@@ -614,8 +656,8 @@ async function loadDashboard(user){
    level don't count — they've already tested out of those. */
 function renderAssignedStat(progress, assessmentResult){
   const strip = document.getElementById('assignedStatStrip');
-  const summary = document.getElementById('mainProgressSummary');
-  if (!assessmentResult){ strip.style.display = 'none'; summary.style.display = 'none'; return; }
+  const card = document.getElementById('assessmentSummaryCard');
+  if (!assessmentResult){ strip.style.display = 'none'; card.style.display = 'none'; return; }
 
   let totalAssigned = 0, totalCompleted = 0;
   Object.keys(DOMAINS).forEach(domainKey => {
@@ -632,9 +674,52 @@ function renderAssignedStat(progress, assessmentResult){
   document.getElementById('statAssignedCompleted').textContent = totalCompleted;
   strip.style.display = 'flex';
 
-  summary.textContent = 'Your assessed level: ' + assessmentResult.tier;
-  summary.style.display = 'block';
+  document.getElementById('summaryTierLabel').textContent = assessmentResult.tier;
+
+  if (assessmentResult.submittedAt){
+    const days = Math.floor((Date.now() - new Date(assessmentResult.submittedAt).getTime()) / 86400000);
+    document.getElementById('summaryTimeSince').textContent = days <= 0 ? 'Assessed today' : (days + ' day' + (days === 1 ? '' : 's') + ' since your last assessment');
+  }
+
+  document.getElementById('summaryActiveTime').textContent = 'Active time in courses: ' + formatDuration(progress.totalActiveMs || 0);
+
+  const detailsPanel = document.getElementById('summaryDetailsPanel');
+  detailsPanel.innerHTML = '';
+  Object.keys(DOMAINS).forEach(domainKey => {
+    const pct = Math.round(assessmentResult.categoryPct[domainKey] || 0);
+    const row = document.createElement('div');
+    row.style.marginBottom = '10px';
+    row.innerHTML = `
+      <div style="display:flex; justify-content:space-between; font-size:12.5px; margin-bottom:4px;"><span>${DOMAINS[domainKey].label}</span><span style="color:var(--gray);">${pct}%</span></div>
+      <div style="height:6px; background:var(--line); border-radius:3px; overflow:hidden;"><div style="width:${pct}%; height:100%; background:var(--cyan);"></div></div>
+    `;
+    detailsPanel.appendChild(row);
+  });
+
+  card.style.display = 'block';
 }
+
+function formatDuration(ms){
+  const totalMinutes = Math.floor(ms / 60000);
+  if (totalMinutes < 1) return 'Less than a minute';
+  const hours = Math.floor(totalMinutes / 60);
+  const minutes = totalMinutes % 60;
+  return hours > 0 ? (hours + 'h ' + minutes + 'm') : (minutes + 'm');
+}
+
+window.toggleSummaryDetails = function(){
+  const panel = document.getElementById('summaryDetailsPanel');
+  const isOpen = panel.style.display === 'block';
+  panel.style.display = isOpen ? 'none' : 'block';
+  document.getElementById('detailsToggleLink').textContent = isOpen ? 'View details' : 'Hide details';
+};
+
+window.handleRetakeAssessment = function(){
+  const confirmed = window.confirm('Retaking the assessment will update your recommended courses based on your current skills. Continue?');
+  if (confirmed){
+    window.location.href = 'index.html';
+  }
+};
 
 /* Quietly sends a full 28-course status snapshot to the Progress
    sheet every time the dashboard loads — fire-and-forget, never
