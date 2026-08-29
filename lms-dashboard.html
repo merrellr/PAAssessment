@@ -82,6 +82,9 @@
 
   .stat-strip{ display:flex; gap:14px; margin-bottom: 22px; }
   .stat-box{ flex:1; background:#fff; border:1px solid var(--line); border-radius:12px; padding: 16px 18px; text-align:center; transition: background 0.4s ease; }
+
+  @keyframes skeletonPulse{ 0%, 100%{ opacity:1; } 50%{ opacity:0.5; } }
+  .skeleton-block{ background: var(--line); border-radius:10px; animation: skeletonPulse 1.4s ease-in-out infinite; }
   .stat-box.pulse-success{ background:#EEF9F1; border-color:#2E8B57; }
   .stat-num{ font-family:'Space Grotesk', sans-serif; font-weight:700; font-size: 28px; color: var(--navy); }
   .stat-label{ font-size: 12px; color: var(--gray); margin-top: 4px; }
@@ -223,6 +226,29 @@
       </div>
     </div>
 
+    <div id="dashboardSkeleton">
+      <div class="stat-strip" style="margin-bottom:22px;">
+        <div class="skeleton-block" style="height:70px; flex:1;"></div>
+        <div class="skeleton-block" style="height:70px; flex:1;"></div>
+      </div>
+      <div class="skeleton-block" style="height:110px; margin-bottom:22px;"></div>
+      <div class="skeleton-block" style="height:18px; width:160px; margin-bottom:14px;"></div>
+      <div class="tier-row" style="margin-bottom:20px;">
+        <div class="skeleton-block" style="height:58px;"></div>
+        <div class="skeleton-block" style="height:58px;"></div>
+        <div class="skeleton-block" style="height:58px;"></div>
+        <div class="skeleton-block" style="height:58px;"></div>
+      </div>
+      <div class="tier-row">
+        <div class="skeleton-block" style="height:58px;"></div>
+        <div class="skeleton-block" style="height:58px;"></div>
+        <div class="skeleton-block" style="height:58px;"></div>
+        <div class="skeleton-block" style="height:58px;"></div>
+      </div>
+    </div>
+
+    <div id="dashboardContent" style="display:none;">
+
     <div class="rec-banner" id="verifyBanner" style="display:none; background:#FFF8E8; border-color:#F0DDA8;">
       <span style="font-size:13px; color:var(--ink-soft);">Please verify your email — check your inbox for a link.</span>
       <a onclick="handleResendVerification()" style="margin-left:10px; font-size:13px; color:var(--navy); text-decoration:underline; cursor:pointer;">Resend email</a>
@@ -319,6 +345,8 @@
     </div>
 
     <div id="courseCatalog"></div>
+
+    </div>
   </div>
 
 </div>
@@ -354,7 +382,7 @@ const RESULTS_LOG_URL = "https://script.google.com/macros/s/AKfycbynJQYF9rv5maL_
    to treat it as a new URL and fetch fresh instead of serving a
    stale cached copy of the old content.
    ================================================================ */
-const CONTENT_VERSION = "29";
+const CONTENT_VERSION = "30";
 
 /* ================================================================
    EASY-EDIT ZONE 3: COURSE CATALOG
@@ -537,7 +565,13 @@ onAuthStateChanged(auth, async (user) => {
     document.getElementById('profileMenuWrap').style.display = 'block';
     document.getElementById('verifyBanner').style.display = user.emailVerified ? 'none' : 'block';
     showScreen('dashboard');
+
+    document.getElementById('dashboardSkeleton').style.display = 'block';
+    document.getElementById('dashboardContent').style.display = 'none';
     await loadDashboard(user);
+    document.getElementById('dashboardSkeleton').style.display = 'none';
+    document.getElementById('dashboardContent').style.display = 'block';
+
     startActiveTimeTracking(user);
   } else {
     currentUser = null;
