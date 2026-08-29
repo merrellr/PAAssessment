@@ -278,7 +278,7 @@ const RESULTS_LOG_URL = "https://script.google.com/macros/s/AKfycbynJQYF9rv5maL_
    to treat it as a new URL and fetch fresh instead of serving a
    stale cached copy of the old content.
    ================================================================ */
-const CONTENT_VERSION = "21";
+const CONTENT_VERSION = "22";
 
 /* ================================================================
    EASY-EDIT ZONE 3: COURSE CATALOG
@@ -469,7 +469,6 @@ function populateProfileMenu(user){
   // Google-only accounts have nothing to change here.
   const hasPasswordProvider = user.providerData.some(p => p.providerId === 'password');
   document.getElementById('changePasswordMenuItem').style.display = hasPasswordProvider ? 'block' : 'none';
-  document.getElementById('editEmailCurrentPassword').style.display = hasPasswordProvider ? 'block' : 'none';
 }
 
 /* Fills in the "Your progress" summary once loadDashboard has computed
