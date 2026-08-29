@@ -266,74 +266,64 @@
       <button class="btn btn-primary btn-gradient" style="width:auto; padding:10px 22px;" onclick="dismissWelcome()">Get started →</button>
     </div>
 
-    <div class="card" id="assessmentSummaryCard" style="display:none; margin-bottom:18px;">
-      <span class="eyebrow">Your result</span>
+    <div id="tileRow" style="display:none; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap:14px; margin-bottom:18px;">
 
-      <div style="display:flex; flex-direction:column; align-items:center; text-align:center;">
-        <svg id="summaryGaugeSvg" width="180" height="104" viewBox="0 0 260 150" style="max-width:100%; height:auto;"></svg>
-        <div style="font-family:'Space Grotesk', sans-serif; font-weight:600; font-size:17px; color:var(--navy-deep); margin-top:2px;" id="summaryTierLabel"></div>
+      <div class="card" style="margin-bottom:0;">
+        <span class="eyebrow">Your result</span>
+        <div style="display:flex; align-items:center; gap:12px; margin-top:8px;">
+          <svg id="summaryRingSvg" width="58" height="58" viewBox="0 0 36 36" style="flex-shrink:0;">
+            <circle cx="18" cy="18" r="15" fill="none" stroke="var(--line)" stroke-width="4"/>
+            <circle id="summaryRingFill" cx="18" cy="18" r="15" fill="none" stroke-width="4" stroke-linecap="round" transform="rotate(-90 18 18)"/>
+          </svg>
+          <div>
+            <div style="font-family:'Space Grotesk', sans-serif; font-weight:600; font-size:14.5px; color:var(--navy-deep); line-height:1.25;" id="summaryTierLabel"></div>
+            <div style="font-size:12px; color:var(--gray);" id="summaryOverallPct"></div>
+          </div>
+        </div>
+        <div style="font-size:11.5px; color:var(--gray); margin-top:10px; line-height:1.6;">
+          <div id="summaryTimeSinceFirst"></div>
+          <div id="summaryTimeSince"></div>
+          <div id="summaryActiveTime"></div>
+        </div>
+        <div style="display:flex; gap:16px; border-top:1px solid var(--line); margin-top:12px; padding-top:12px;">
+          <a onclick="toggleSummaryDetails()" style="font-size:12.5px; color:var(--navy); cursor:pointer; text-decoration:underline;" id="detailsToggleLink">View details</a>
+          <a onclick="handleRetakeAssessment()" style="font-size:12.5px; color:var(--ink-soft); cursor:pointer; text-decoration:underline;">Retake</a>
+        </div>
+        <div id="summaryDetailsPanel" style="display:none; margin-top:14px; padding-top:14px; border-top:1px solid var(--line);"></div>
       </div>
 
-      <div style="text-align:center; margin: 8px 0 16px;">
-        <div style="font-size:12px; color:var(--gray);" id="summaryTimeSinceFirst"></div>
-        <div style="font-size:12px; color:var(--gray);" id="summaryTimeSince"></div>
-        <div style="font-size:12px; color:var(--gray);" id="summaryActiveTime"></div>
+      <div class="card" style="margin-bottom:0;">
+        <span class="eyebrow">Your courses</span>
+        <div style="margin-top:8px;">
+          <span style="font-family:'Space Grotesk', sans-serif; font-weight:700; font-size:22px; color:var(--navy);" id="statAssignedCompleted">0</span>
+          <span style="font-size:13px; color:var(--gray);"> of </span>
+          <span style="font-family:'Space Grotesk', sans-serif; font-weight:700; font-size:22px; color:var(--navy);" id="statAssignedTotal">0</span>
+        </div>
+        <div style="font-size:11.5px; color:var(--gray); margin-bottom:14px;">completed in your current plan</div>
+        <div style="border-top:1px solid var(--line); padding-top:12px;">
+          <span style="font-family:'Space Grotesk', sans-serif; font-weight:700; font-size:18px; color:var(--navy-deep);" id="statTotalCompletedAllTime">0</span>
+          <div style="font-size:11.5px; color:var(--gray);">total completed — all time</div>
+        </div>
       </div>
 
-      <div style="display:flex; justify-content:center; gap:24px; border-top:1px solid var(--line); padding-top:14px;">
-        <a onclick="toggleSummaryDetails()" style="font-size:13px; color:var(--navy); cursor:pointer; text-decoration:underline;" id="detailsToggleLink">View details</a>
-        <a onclick="handleRetakeAssessment()" style="font-size:13px; color:var(--ink-soft); cursor:pointer; text-decoration:underline;">Retake assessment</a>
+      <div class="card" id="growthCard" style="display:none; margin-bottom:0;">
+        <span class="eyebrow">Your growth</span>
+        <div style="display:flex; align-items:baseline; gap:6px; margin-top:8px; font-size:13px;">
+          <span id="growthFirstTier" style="font-weight:600;"></span>
+          <span style="color:var(--gray);">→</span>
+          <span id="growthCurrentTier" style="font-weight:600;"></span>
+        </div>
+        <div id="growthDelta" style="font-family:'Space Grotesk', sans-serif; font-weight:700; font-size:22px; margin-top:6px;"></div>
+        <div style="font-size:11px; color:var(--gray); margin-bottom:12px;">overall growth</div>
+        <div style="font-size:11.5px; color:var(--gray); border-top:1px solid var(--line); padding-top:12px; line-height:1.6;">
+          <div id="growthActiveTime"></div>
+          <div id="growthDaysOnJourney"></div>
+        </div>
       </div>
-      <div id="summaryDetailsPanel" style="display:none; margin-top:14px; padding-top:14px; border-top:1px solid var(--line);"></div>
-    </div>
 
-    <div class="card" id="growthCard" style="display:none; margin-bottom:18px;">
-      <div style="font-size:13px; color:var(--gray); margin-bottom:16px;">Your growth since you started</div>
-      <div style="display:flex; align-items:center; gap:16px; flex-wrap:wrap; margin-bottom:18px;">
-        <div style="text-align:center;">
-          <div style="font-size:10.5px; color:var(--gray); text-transform:uppercase; letter-spacing:0.04em;">First assessment</div>
-          <div id="growthFirstTier" style="font-family:'Space Grotesk', sans-serif; font-weight:700; font-size:18px;"></div>
-          <div id="growthFirstPct" style="font-size:11.5px; color:var(--gray);"></div>
-        </div>
-        <div style="font-size:18px; color:var(--gray);">→</div>
-        <div style="text-align:center;">
-          <div style="font-size:10.5px; color:var(--gray); text-transform:uppercase; letter-spacing:0.04em;">Current</div>
-          <div id="growthCurrentTier" style="font-family:'Space Grotesk', sans-serif; font-weight:700; font-size:18px; color:var(--navy);"></div>
-          <div id="growthCurrentPct" style="font-size:11.5px; color:var(--gray);"></div>
-        </div>
-        <div style="margin-left:auto; text-align:center; background:#EEF9F1; border-radius:10px; padding:10px 16px;">
-          <div id="growthDelta" style="font-size:17px; font-weight:700; color:#2E8B57;"></div>
-          <div style="font-size:10px; color:#2E8B57;">overall growth</div>
-        </div>
-      </div>
-      <div style="display:flex; gap:12px; flex-wrap:wrap;">
-        <div class="stat-box" style="flex:1; min-width:110px;">
-          <div class="stat-num" id="growthCoursesCompleted">0</div>
-          <div class="stat-label">Courses completed</div>
-        </div>
-        <div class="stat-box" style="flex:1; min-width:110px;">
-          <div class="stat-num" id="growthActiveTime" style="font-size:22px;">0m</div>
-          <div class="stat-label">Total active time</div>
-        </div>
-        <div class="stat-box" style="flex:1; min-width:110px;">
-          <div class="stat-num" id="growthDaysOnJourney">0</div>
-          <div class="stat-label">Days on this journey</div>
-        </div>
-      </div>
     </div>
 
     <div id="progressToast" style="display:none; background:#EEF9F1; border:1px solid #2E8B57; border-radius:10px; padding:10px 14px; margin-bottom:14px; font-size:13.5px; color:#1f6b47; text-align:center;">Nice work! Updating your progress…</div>
-
-    <div class="stat-strip" id="assignedStatStrip" style="display:none;">
-      <div class="stat-box">
-        <div class="stat-num" id="statAssignedTotal">0</div>
-        <div class="stat-label">Assigned courses</div>
-      </div>
-      <div class="stat-box">
-        <div class="stat-num" id="statAssignedCompleted">0</div>
-        <div class="stat-label">Completed</div>
-      </div>
-    </div>
 
     <div class="card" id="assessmentPromptCard" style="display:none; margin-bottom:22px;">
       <span class="eyebrow">Get started</span>
@@ -416,7 +406,7 @@ const RESULTS_LOG_URL = "https://script.google.com/macros/s/AKfycbynJQYF9rv5maL_
    to treat it as a new URL and fetch fresh instead of serving a
    stale cached copy of the old content.
    ================================================================ */
-const CONTENT_VERSION = "33";
+const CONTENT_VERSION = "34";
 
 /* ================================================================
    EASY-EDIT ZONE 3: COURSE CATALOG
@@ -806,41 +796,58 @@ function animateCountUp(el, from, to, duration){
 }
 
 function renderAssignedStat(progress, assessmentResult){
-  const strip = document.getElementById('assignedStatStrip');
-  const card = document.getElementById('assessmentSummaryCard');
-  if (!assessmentResult){ strip.style.display = 'none'; card.style.display = 'none'; return; }
+  const tileRow = document.getElementById('tileRow');
+  if (!assessmentResult){ tileRow.style.display = 'none'; return; }
+  tileRow.style.display = 'grid';
 
-  let totalAssigned = 0, totalCompleted = 0;
+  let totalAssigned = 0, totalCompletedInPlan = 0;
   Object.keys(DOMAINS).forEach(domainKey => {
     const assessedTierIndex = TIER_ORDER.indexOf(tierSlugForPct(assessmentResult.categoryPct[domainKey]));
     TIERS.forEach((tier, tierIndex) => {
-      if (tierIndex < assessedTierIndex) return; // tested out — not assigned
+      if (tierIndex < assessedTierIndex) return; // tested out — not currently assigned
       totalAssigned++;
       const courseId = domainKey + '-' + tier.slug;
-      if (isCourseComplete(progress, courseId)) totalCompleted++;
+      if (isCourseComplete(progress, courseId)) totalCompletedInPlan++;
+    });
+  });
+
+  // Lifetime total — every course ever finished, regardless of whether it's
+  // still assigned today. This never shrinks, even after a reassessment
+  // tests someone out of a course they already completed.
+  let totalCompletedAllTime = 0;
+  Object.keys(DOMAINS).forEach(domainKey => {
+    TIERS.forEach(tier => {
+      const courseId = domainKey + '-' + tier.slug;
+      if (isCourseComplete(progress, courseId)) totalCompletedAllTime++;
     });
   });
 
   document.getElementById('statAssignedTotal').textContent = totalAssigned;
-  strip.style.display = 'flex';
+  document.getElementById('statTotalCompletedAllTime').textContent = totalCompletedAllTime;
 
   const completedEl = document.getElementById('statAssignedCompleted');
-  const completedBox = completedEl.closest('.stat-box');
+  const completedBox = completedEl.closest('.card');
   const params = new URLSearchParams(window.location.search);
   if (params.get('justCompleted') === '1'){
     history.replaceState(null, '', window.location.pathname);
     document.getElementById('progressToast').style.display = 'block';
     completedBox.classList.add('pulse-success');
-    animateCountUp(completedEl, Math.max(0, totalCompleted - 1), totalCompleted, 600);
+    animateCountUp(completedEl, Math.max(0, totalCompletedInPlan - 1), totalCompletedInPlan, 600);
     setTimeout(() => {
       document.getElementById('progressToast').style.display = 'none';
       completedBox.classList.remove('pulse-success');
     }, 2600);
   } else {
-    completedEl.textContent = totalCompleted;
+    completedEl.textContent = totalCompletedInPlan;
   }
 
+  const tierColorFor = (tierName) => {
+    const map = { 'No Experience': '#B9C6DA', 'Moderate Experience': '#6FA3D6', 'Lots of Experience': '#35C2E8', 'Advanced Experience': '#1A4584' };
+    return map[tierName] || 'var(--navy)';
+  };
+
   document.getElementById('summaryTierLabel').textContent = assessmentResult.tier;
+  document.getElementById('summaryOverallPct').textContent = Math.round(assessmentResult.overallPct) + '%';
 
   const sinceFirstEl = document.getElementById('summaryTimeSinceFirst');
   const sinceLastEl = document.getElementById('summaryTimeSince');
@@ -864,31 +871,19 @@ function renderAssignedStat(progress, assessmentResult){
   if (hasRetaken && assessmentResult.firstOverallPct !== undefined){
     growthCard.style.display = 'block';
 
-    const tierColorFor = (tierName) => {
-      const map = { 'No Experience': '#B9C6DA', 'Moderate Experience': '#6FA3D6', 'Lots of Experience': '#35C2E8', 'Advanced Experience': '#1A4584' };
-      return map[tierName] || 'var(--navy)';
-    };
-
     document.getElementById('growthFirstTier').textContent = assessmentResult.firstTier;
     document.getElementById('growthFirstTier').style.color = tierColorFor(assessmentResult.firstTier);
-    document.getElementById('growthFirstPct').textContent = Math.round(assessmentResult.firstOverallPct) + '%';
-
     document.getElementById('growthCurrentTier').textContent = assessmentResult.tier;
     document.getElementById('growthCurrentTier').style.color = tierColorFor(assessmentResult.tier);
-    document.getElementById('growthCurrentPct').textContent = Math.round(assessmentResult.overallPct) + '%';
 
     const delta = Math.round(assessmentResult.overallPct - assessmentResult.firstOverallPct);
     const deltaEl = document.getElementById('growthDelta');
-    const deltaBox = deltaEl.parentElement;
     deltaEl.textContent = (delta >= 0 ? '+' : '') + delta + '%';
-    deltaBox.style.background = delta >= 0 ? '#EEF9F1' : '#FCEFE9';
     deltaEl.style.color = delta >= 0 ? '#2E8B57' : '#C0622A';
-    deltaBox.querySelector('div:last-child').style.color = delta >= 0 ? '#2E8B57' : '#C0622A';
 
-    document.getElementById('growthCoursesCompleted').textContent = totalCompleted;
-    document.getElementById('growthActiveTime').textContent = formatDuration(progress.totalActiveMs || 0);
+    document.getElementById('growthActiveTime').textContent = 'Active time: ' + formatDuration(progress.totalActiveMs || 0);
     const daysOnJourney = Math.floor((Date.now() - new Date(assessmentResult.firstSubmittedAt).getTime()) / 86400000);
-    document.getElementById('growthDaysOnJourney').textContent = Math.max(0, daysOnJourney);
+    document.getElementById('growthDaysOnJourney').textContent = Math.max(0, daysOnJourney) + ' days on this journey';
   } else {
     growthCard.style.display = 'none';
   }
@@ -896,42 +891,15 @@ function renderAssignedStat(progress, assessmentResult){
   document.getElementById('summaryActiveTime').textContent = 'Active time in courses: ' + formatDuration(progress.totalActiveMs || 0);
 
   document.getElementById('summaryDetailsPanel').innerHTML = buildDomainBarsHtml(assessmentResult);
-  drawSummaryGauge(assessmentResult.overallPct);
-
-  card.style.display = 'block';
+  drawSummaryRing(assessmentResult.overallPct, tierColorFor(assessmentResult.tier));
 }
 
-function drawSummaryGauge(pct){
-  const svg = document.getElementById('summaryGaugeSvg');
-  const cx = 130, cy = 130, r = 100;
-
-  function polarToXY(angleDeg, radius){
-    const rad = (angleDeg * Math.PI) / 180;
-    return { x: cx + radius * Math.cos(rad), y: cy - radius * Math.sin(rad) };
-  }
-  function arcPath(a1, a2, radius){
-    const p1 = polarToXY(a1, radius);
-    const p2 = polarToXY(a2, radius);
-    const largeArc = Math.abs(a1 - a2) > 180 ? 1 : 0;
-    return `M ${p1.x} ${p1.y} A ${radius} ${radius} 0 ${largeArc} 1 ${p2.x} ${p2.y}`;
-  }
-
-  const zoneColors = ['#B9C6DA', '#6FA3D6', '#35C2E8', '#1A4584'];
-  let svgParts = '';
-  for (let i = 0; i < 4; i++){
-    const a1 = 180 - i * 45;
-    const a2 = 180 - (i + 1) * 45;
-    svgParts += `<path d="${arcPath(a1, a2, r)}" stroke="${zoneColors[i]}" stroke-width="14" fill="none" opacity="0.9"/>`;
-  }
-
-  const needleAngle = 180 - (pct / 100) * 180;
-  const tip = polarToXY(needleAngle, r - 22);
-  svgParts += `<line x1="${cx}" y1="${cy}" x2="${tip.x}" y2="${tip.y}" stroke="#16213E" stroke-width="3" stroke-linecap="round"/>`;
-  svgParts += `<circle cx="${cx}" cy="${cy}" r="6" fill="#16213E"/>`;
-  svgParts += `<text x="12" y="148" font-family="IBM Plex Sans" font-size="11" fill="#9AA3AD">Novice</text>`;
-  svgParts += `<text x="205" y="148" font-family="IBM Plex Sans" font-size="11" fill="#9AA3AD">Advanced</text>`;
-
-  svg.innerHTML = svgParts;
+function drawSummaryRing(pct, color){
+  const circle = document.getElementById('summaryRingFill');
+  const circumference = 2 * Math.PI * 15;
+  const filled = (Math.max(0, Math.min(100, pct)) / 100) * circumference;
+  circle.setAttribute('stroke', color);
+  circle.setAttribute('stroke-dasharray', filled + ' ' + circumference);
 }
 
 /* Same per-domain colors used on the assessment's own skill breakdown,
