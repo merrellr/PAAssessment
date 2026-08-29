@@ -301,6 +301,23 @@
         </div>
       </div>
 
+      <div class="section-block" id="dashboardAccessSection">
+        <h3 id="dashboardAccessHeading">Access your dashboard</h3>
+        <div id="dashboardAccessLoggedIn" style="display:none;">
+          <p style="margin-bottom:14px;">You're logged in — your results are already saved to your dashboard.</p>
+          <a href="lms-dashboard.html" class="btn btn-primary" style="text-decoration:none; display:inline-block;">Go to your dashboard →</a>
+        </div>
+        <div id="dashboardAccessSignup" style="display:none;">
+          <p style="margin-bottom:14px;">Create a password to save these results and access courses matched to your level.</p>
+          <input class="text-input has-companion" type="password" id="signupPassword" placeholder="Choose a password">
+          <div class="field-error" id="signupPasswordError"></div>
+          <input class="text-input has-companion" type="password" id="signupPasswordConfirm" placeholder="Confirm password">
+          <div class="field-error" id="signupConfirmError"></div>
+          <div class="field-error" id="signupGeneralError"></div>
+          <button class="btn btn-primary" onclick="handleCreateAccountFromResults()">Create account & continue →</button>
+        </div>
+      </div>
+
       <div class="retake-row">
         <button onclick="restart()">Retake the assessment</button>
       </div>
@@ -309,7 +326,98 @@
   </div>
 </div>
 
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
+import { getAuth, onAuthStateChanged, createUserWithEmailAndPassword, updateProfile } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
+import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyAcECtS5c6WeOhKlwRK-LYFE47npbuq_eU",
+  authDomain: "product-advisory-lms.firebaseapp.com",
+  projectId: "product-advisory-lms",
+  storageBucket: "product-advisory-lms.firebasestorage.app",
+  messagingSenderId: "1081134406437",
+  appId: "1:1081134406437:web:72e28604d093219e7698cc"
+};
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+let isLoggedIn = false;
+onAuthStateChanged(auth, (user) => {
+  isLoggedIn = !!user;
+});
+
+window.handleCreateAccountFromResults = async function(){
+  const password = document.getElementById('signupPassword').value;
+  const confirmPassword = document.getElementById('signupPasswordConfirm').value;
+  const pwError = document.getElementById('signupPasswordError');
+  const confirmError = document.getElementById('signupConfirmError');
+  const generalError = document.getElementById('signupGeneralError');
+  pwError.textContent = ''; confirmError.textContent = ''; generalError.textContent = '';
+
+  if (!password || password.length < 6){
+    pwError.textContent = 'Password should be at least 6 characters.';
+    return;
+  }
+  if (password !== confirmPassword){
+    confirmError.textContent = 'Passwords do not match.';
+    return;
+  }
+
+  try {
+    const cred = await createUserWithEmailAndPassword(auth, window.__leadSnapshot.email, password);
+    await updateProfile(cred.user, { displayName: window.__leadSnapshot.name });
+    await setDoc(doc(db, 'progress', cred.user.uid), {
+      courses: {},
+      profile: {
+        company: window.__leadSnapshot.company || '',
+        jobTitle: window.__leadSnapshot.jobTitle || '',
+        companySize: window.__leadSnapshot.companySize || '',
+        industry: window.__leadSnapshot.industry || ''
+      }
+    }, { merge: true });
+    window.location.href = 'lms-dashboard.html';
+  } catch (err){
+    if (err.code === 'auth/email-already-in-use'){
+      generalError.innerHTML = 'An account already exists for this email. <a href="lms-dashboard.html">Log in instead →</a>';
+    } else {
+      generalError.textContent = 'Something went wrong creating your account — please try again.';
+    }
+  }
+};
+
+window.renderDashboardAccessSection = function(){
+  const loggedInBox = document.getElementById('dashboardAccessLoggedIn');
+  const signupBox = document.getElementById('dashboardAccessSignup');
+  loggedInBox.style.display = isLoggedIn ? 'block' : 'none';
+  signupBox.style.display = isLoggedIn ? 'none' : 'block';
+};
+</script>
+
 <script>
+/* ================================================================
+   PREFILL FROM URL
+   If someone arrives here from the LMS dashboard with known info
+   already attached as query params, pre-fill the matching lead
+   fields so they don't have to retype anything we already know.
+   Everything stays editable — this never blocks or skips the screen.
+   ================================================================ */
+(function prefillLeadFromUrl(){
+  const params = new URLSearchParams(window.location.search);
+  const map = {
+    name: 'leadName', email: 'leadEmail', company: 'leadCompany',
+    jobTitle: 'leadTitle', companySize: 'leadCompanySize', industry: 'leadIndustry'
+  };
+  Object.keys(map).forEach(key => {
+    const value = params.get(key);
+    if (value) {
+      const el = document.getElementById(map[key]);
+      if (el) el.value = value;
+    }
+  });
+})();
+
 /* ================================================================
    EASY-EDIT ZONE 1B: RESULTS LOGGING
    Paste the URL you get after deploying the Google Apps Script
@@ -748,6 +856,7 @@ function handleLeadSubmit(event){
     companySize: document.getElementById('leadCompanySize').value,
     industry: document.getElementById('leadIndustry').value.trim()
   };
+  window.__leadSnapshot = lead;
 
   logResult(lead, lastScores);
   showResults(lastScores, lead);
@@ -838,6 +947,7 @@ function showResults(scores, lead){
   drawBadge(tier, lead.name);
   renderBars(catPct);
   renderGrowthAreas(catPct);
+  if (window.renderDashboardAccessSection) window.renderDashboardAccessSection();
 
   showScreen('results');
 }
