@@ -344,8 +344,10 @@ const auth = getAuth(app);
 const db = getFirestore(app);
 
 let isLoggedIn = false;
+window.isLoggedIn = false;
 onAuthStateChanged(auth, (user) => {
   isLoggedIn = !!user;
+  window.isLoggedIn = isLoggedIn; // exposed so the classic script can check it too
 });
 
 window.handleCreateAccountFromResults = async function(){
@@ -938,6 +940,20 @@ function getTier(pct){
 }
 
 function showResults(scores, lead){
+  if (window.isLoggedIn){
+    // Already have an account — no need to show the full results page here at
+    // all, the dashboard now displays this same information front and center.
+    const resultsScreen = document.querySelector('[data-screen="results"]');
+    resultsScreen.innerHTML = `
+      <span class="eyebrow">Your result</span>
+      <h1>Saving your results…</h1>
+      <p>Taking you to your dashboard, where your updated results and courses are waiting.</p>
+    `;
+    showScreen('results');
+    setTimeout(() => { window.location.href = 'lms-dashboard.html'; }, 900);
+    return;
+  }
+
   const { overallPct, overallTotal, overallMax, catPct } = scores;
   const tier = getTier(overallPct);
 
