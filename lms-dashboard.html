@@ -19,7 +19,8 @@
 
   .wrap{ max-width: 760px; margin: 0 auto; padding: 0 16px 48px; }
 
-  .brand-header{ display:flex; align-items:center; gap:9px; padding: 24px 0 14px; }
+  .brand-header{ display:flex; align-items:center; justify-content:space-between; gap:9px; padding: 24px 0 14px; }
+  .brand-header-left{ display:flex; align-items:center; gap:9px; }
   .brand-word{ font-family:'Space Grotesk', sans-serif; font-weight:600; font-size: 15px; color: var(--navy-deep); }
   .brand-accent-bar{ height: 3px; background: linear-gradient(90deg, var(--navy) 0%, var(--cyan) 100%); border-radius: 2px; margin-bottom: 24px; }
 
@@ -63,7 +64,8 @@
   .top-bar .who{ font-size: 13.5px; color: var(--ink-soft); }
 
   .profile-menu-wrap{ position:relative; }
-  .profile-avatar-btn{ width:36px; height:36px; border-radius:50%; background: var(--navy); color:#fff; border:none; cursor:pointer; font-family:'Space Grotesk', sans-serif; font-weight:700; font-size:14px; }
+  .profile-avatar-btn{ display:flex; align-items:center; gap:7px; padding: 7px 14px 7px 10px; border-radius:20px; background: var(--navy); color:#fff; border:none; cursor:pointer; font-family:'Space Grotesk', sans-serif; font-weight:600; font-size:13px; }
+  .profile-avatar-btn:hover{ background: var(--navy-deep); }
   .profile-avatar-btn:hover{ background: var(--navy-deep); }
   .profile-dropdown{ position:absolute; right:0; top:44px; width:250px; background:#fff; border:1px solid var(--line); border-radius:12px; box-shadow: 0 8px 24px rgba(22,33,62,0.12); padding:14px; z-index:10; }
   .profile-dropdown-name{ font-family:'Space Grotesk', sans-serif; font-weight:600; font-size: 14.5px; color: var(--ink); }
@@ -121,11 +123,39 @@
 <div class="wrap">
 
   <div class="brand-header">
-    <svg width="22" height="22" viewBox="0 0 40 40" aria-hidden="true">
-      <polygon points="20,3 35,11.5 35,28.5 20,37 5,28.5 5,11.5" fill="#1A4584"/>
-      <polygon points="20,10 29,15 29,25 20,30 11,25 11,15" fill="none" stroke="#35C2E8" stroke-width="1.5"/>
-    </svg>
-    <span class="brand-word">Product Advisory Learning</span>
+    <div class="brand-header-left">
+      <svg width="22" height="22" viewBox="0 0 40 40" aria-hidden="true">
+        <polygon points="20,3 35,11.5 35,28.5 20,37 5,28.5 5,11.5" fill="#1A4584"/>
+        <polygon points="20,10 29,15 29,25 20,30 11,25 11,15" fill="none" stroke="#35C2E8" stroke-width="1.5"/>
+      </svg>
+      <span class="brand-word">Product Advisory Learning</span>
+    </div>
+    <div class="profile-menu-wrap" id="profileMenuWrap" style="display:none;">
+      <button class="profile-avatar-btn" id="profileAvatarBtn" onclick="toggleProfileMenu()" aria-label="Account menu">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>
+        Profile
+      </button>
+      <div class="profile-dropdown" id="profileDropdown" style="display:none;">
+
+        <div class="profile-dropdown-name" id="profileDropdownName"></div>
+        <div class="profile-dropdown-email" id="profileDropdownEmail"></div>
+        <div class="profile-dropdown-verified" id="profileDropdownVerified"></div>
+
+        <div class="profile-dropdown-divider"></div>
+
+        <div class="profile-progress-summary">
+          <div class="profile-progress-label">Your progress</div>
+          <div id="profileAssessedLevel" class="profile-progress-line"></div>
+          <div id="profileCoursesCompleted" class="profile-progress-line"></div>
+        </div>
+
+        <div class="profile-dropdown-divider"></div>
+
+        <a class="profile-dropdown-item" href="profile.html">My Profile</a>
+        <a class="profile-dropdown-item" id="changePasswordMenuItem" onclick="openChangePassword()">Change password</a>
+        <a class="profile-dropdown-item" onclick="handleSignOut()">Log out</a>
+      </div>
+    </div>
   </div>
   <div class="brand-accent-bar"></div>
 
@@ -178,32 +208,6 @@
 
   <!-- DASHBOARD -->
   <div data-screen="dashboard">
-    <div class="top-bar">
-      <div class="brand-word" style="font-size:14px;">Your courses</div>
-      <div class="profile-menu-wrap">
-        <button class="profile-avatar-btn" id="profileAvatarBtn" onclick="toggleProfileMenu()" aria-label="Account menu"></button>
-        <div class="profile-dropdown" id="profileDropdown" style="display:none;">
-
-          <div class="profile-dropdown-name" id="profileDropdownName"></div>
-          <div class="profile-dropdown-email" id="profileDropdownEmail"></div>
-          <div class="profile-dropdown-verified" id="profileDropdownVerified"></div>
-
-          <div class="profile-dropdown-divider"></div>
-
-          <div class="profile-progress-summary">
-            <div class="profile-progress-label">Your progress</div>
-            <div id="profileAssessedLevel" class="profile-progress-line"></div>
-            <div id="profileCoursesCompleted" class="profile-progress-line"></div>
-          </div>
-
-          <div class="profile-dropdown-divider"></div>
-
-          <a class="profile-dropdown-item" href="profile.html">My Profile</a>
-          <a class="profile-dropdown-item" id="changePasswordMenuItem" onclick="openChangePassword()">Change password</a>
-          <a class="profile-dropdown-item" onclick="handleSignOut()">Log out</a>
-        </div>
-      </div>
-    </div>
 
     <div class="card" id="changePasswordCard" style="display:none; max-width:420px; margin-bottom:22px;">
       <h2>Change password</h2>
@@ -216,6 +220,23 @@
         <button class="btn btn-primary btn-gradient" style="width:auto; padding:10px 20px;" onclick="handleChangePassword()">Save new password</button>
         <button class="btn btn-ghost" onclick="closeChangePassword()">Cancel</button>
       </div>
+    </div>
+
+    <div class="rec-banner" id="verifyBanner" style="display:none; background:#FFF8E8; border-color:#F0DDA8;">
+      <span style="font-size:13px; color:var(--ink-soft);">Please verify your email — check your inbox for a link.</span>
+      <a onclick="handleResendVerification()" style="margin-left:10px; font-size:13px; color:var(--navy); text-decoration:underline; cursor:pointer;">Resend email</a>
+    </div>
+
+    <div class="card" id="welcomeCard" style="display:none; margin-bottom:22px; background:linear-gradient(135deg, #EEF3FA 0%, #EAF7FB 100%); border-color: var(--line);">
+      <span class="eyebrow">Welcome</span>
+      <h1 style="font-size:19px;">You're in! Here's how to get the most out of this</h1>
+      <p style="margin-bottom:14px;">Your courses are organized into seven skill areas, each with four experience levels. If you've taken the assessment, we've already highlighted where to start below. From here:</p>
+      <ul style="font-size:13.5px; color:var(--ink-soft); margin:0 0 18px; padding-left:20px; line-height:1.7;">
+        <li>Check <strong>Recommended for you</strong> for your best starting point</li>
+        <li>Click into any course tile to begin, your progress saves automatically</li>
+        <li>Come back anytime, you'll always resume right where you left off</li>
+      </ul>
+      <button class="btn btn-primary btn-gradient" style="width:auto; padding:10px 22px;" onclick="dismissWelcome()">Get started →</button>
     </div>
 
     <div class="card" id="assessmentSummaryCard" style="display:none; margin-bottom:18px;">
@@ -244,23 +265,6 @@
         <div class="stat-num" id="statAssignedCompleted">0</div>
         <div class="stat-label">Completed</div>
       </div>
-    </div>
-
-    <div class="card" id="welcomeCard" style="display:none; margin-bottom:22px; background:linear-gradient(135deg, #EEF3FA 0%, #EAF7FB 100%); border-color: var(--line);">
-      <span class="eyebrow">Welcome</span>
-      <h1 style="font-size:19px;">You're in! Here's how to get the most out of this</h1>
-      <p style="margin-bottom:14px;">Your courses are organized into seven skill areas, each with four experience levels. If you've taken the assessment, we've already highlighted where to start below. From here:</p>
-      <ul style="font-size:13.5px; color:var(--ink-soft); margin:0 0 18px; padding-left:20px; line-height:1.7;">
-        <li>Check <strong>Recommended for you</strong> for your best starting point</li>
-        <li>Click into any course tile to begin, your progress saves automatically</li>
-        <li>Come back anytime, you'll always resume right where you left off</li>
-      </ul>
-      <button class="btn btn-primary btn-gradient" style="width:auto; padding:10px 22px;" onclick="dismissWelcome()">Get started →</button>
-    </div>
-
-    <div class="rec-banner" id="verifyBanner" style="display:none; background:#FFF8E8; border-color:#F0DDA8;">
-      <span style="font-size:13px; color:var(--ink-soft);">Please verify your email — check your inbox for a link.</span>
-      <a onclick="handleResendVerification()" style="margin-left:10px; font-size:13px; color:var(--navy); text-decoration:underline; cursor:pointer;">Resend email</a>
     </div>
 
     <div class="card" id="assessmentPromptCard" style="display:none; margin-bottom:22px;">
@@ -298,6 +302,8 @@
         <p style="font-size:12.5px; margin-top:14px; margin-bottom:0;">You'll also get a downloadable badge and reading recommendations targeted to your two weakest areas.</p>
       </div>
     </div>
+
+    <h2 style="font-family:'Space Grotesk', sans-serif; font-size:16px; color:var(--navy-deep); margin: 6px 0 14px;">Your Courses</h2>
 
     <div class="rec-banner" id="recBanner" style="display:none;">
       <span class="eyebrow">Recommended for you</span>
@@ -340,7 +346,7 @@ const RESULTS_LOG_URL = "https://script.google.com/macros/s/AKfycbynJQYF9rv5maL_
    to treat it as a new URL and fetch fresh instead of serving a
    stale cached copy of the old content.
    ================================================================ */
-const CONTENT_VERSION = "27";
+const CONTENT_VERSION = "28";
 
 /* ================================================================
    EASY-EDIT ZONE 3: COURSE CATALOG
@@ -520,12 +526,14 @@ onAuthStateChanged(auth, async (user) => {
   if (user){
     currentUser = user;
     populateProfileMenu(user);
+    document.getElementById('profileMenuWrap').style.display = 'block';
     document.getElementById('verifyBanner').style.display = user.emailVerified ? 'none' : 'block';
     showScreen('dashboard');
     await loadDashboard(user);
     startActiveTimeTracking(user);
   } else {
     currentUser = null;
+    document.getElementById('profileMenuWrap').style.display = 'none';
     showScreen('auth');
   }
 });
@@ -558,8 +566,6 @@ function startActiveTimeTracking(){
 }
 
 function populateProfileMenu(user){
-  const initial = ((user.displayName || user.email || '?').charAt(0)).toUpperCase();
-  document.getElementById('profileAvatarBtn').textContent = initial;
   document.getElementById('profileDropdownName').textContent = user.displayName || 'Add your name';
   document.getElementById('profileDropdownEmail').textContent = user.email;
   document.getElementById('profileDropdownVerified').textContent = user.emailVerified ? 'Email verified' : 'Email not verified';
