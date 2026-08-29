@@ -289,7 +289,10 @@
           <a onclick="toggleSummaryDetails()" style="font-size:12.5px; color:var(--navy); cursor:pointer; text-decoration:underline;" id="detailsToggleLink">View details</a>
           <a onclick="handleRetakeAssessment()" style="font-size:12.5px; color:var(--ink-soft); cursor:pointer; text-decoration:underline;">Retake</a>
         </div>
-        <div id="summaryDetailsPanel" style="display:none; margin-top:14px; padding-top:14px; border-top:1px solid var(--line);"></div>
+        <div id="summaryDetailsPanel" style="display:none; margin-top:14px; padding-top:14px; border-top:1px solid var(--line);">
+          <svg id="radarChartSvg" width="240" height="240" viewBox="0 0 300 300" style="display:block; margin:0 auto 16px;"></svg>
+          <div id="domainBarsContainer"></div>
+        </div>
       </div>
 
       <div class="card" style="margin-bottom:0;">
@@ -406,7 +409,7 @@ const RESULTS_LOG_URL = "https://script.google.com/macros/s/AKfycbynJQYF9rv5maL_
    to treat it as a new URL and fetch fresh instead of serving a
    stale cached copy of the old content.
    ================================================================ */
-const CONTENT_VERSION = "34";
+const CONTENT_VERSION = "35";
 
 /* ================================================================
    EASY-EDIT ZONE 3: COURSE CATALOG
@@ -890,7 +893,8 @@ function renderAssignedStat(progress, assessmentResult){
 
   document.getElementById('summaryActiveTime').textContent = 'Active time in courses: ' + formatDuration(progress.totalActiveMs || 0);
 
-  document.getElementById('summaryDetailsPanel').innerHTML = buildDomainBarsHtml(assessmentResult);
+  document.getElementById('domainBarsContainer').innerHTML = buildDomainBarsHtml(assessmentResult);
+  drawRadarChart(assessmentResult);
   drawSummaryRing(assessmentResult.overallPct, tierColorFor(assessmentResult.tier));
 }
 
@@ -914,17 +918,100 @@ const DOMAIN_COLORS = {
   aiOrg: "#12305e"
 };
 
+const DOMAIN_SHORT_LABELS = {
+  discovery: "Discovery",
+  strategy: "Strategy",
+  prioritization: "Prioritize",
+  execution: "Execute",
+  stakeholder: "Stakeholder",
+  aiIndividual: "AI, individual",
+  aiOrg: "AI, org"
+};
+
+/* Simple stroke-based icons, one per domain, drawn by hand rather than
+   pulled from an icon font — keeps this page dependency-free. */
+const DOMAIN_ICON_PATHS = {
+  discovery: '<circle cx="12" cy="12" r="9"/><path d="M14.5 9.5L13 13l-3.5 1.5L11 11z"/>',
+  strategy: '<circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r="0.8" fill="currentColor"/>',
+  prioritization: '<line x1="6" y1="5" x2="6" y2="19"/><circle cx="6" cy="10" r="2"/><line x1="12" y1="5" x2="12" y2="19"/><circle cx="12" cy="15" r="2"/><line x1="18" y1="5" x2="18" y2="19"/><circle cx="18" cy="8" r="2"/>',
+  execution: '<path d="M12 3c-1.2 3-3.8 4.2-3.8 7.8a3.8 3.8 0 0 0 7.6 0c0-1.6-.6-2.4-.6-2.4s.3 1.6-.8 2.4c0-2.6-1.6-3.6-2.4-7.8z"/>',
+  stakeholder: '<path d="M4 5h16v10H8l-4 4z"/>',
+  aiIndividual: '<rect x="6" y="6" width="12" height="12" rx="2"/><line x1="9" y1="3" x2="9" y2="6"/><line x1="15" y1="3" x2="15" y2="6"/><line x1="9" y1="18" x2="9" y2="21"/><line x1="15" y1="18" x2="15" y2="21"/><line x1="3" y1="9" x2="6" y2="9"/><line x1="18" y1="9" x2="21" y2="9"/>',
+  aiOrg: '<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1L7 17M17 7l2.1-2.1"/>'
+};
+
+function domainIconBadgeHtml(domainKey, size){
+  const color = DOMAIN_COLORS[domainKey];
+  const path = DOMAIN_ICON_PATHS[domainKey];
+  return `
+    <div style="width:${size}px; height:${size}px; border-radius:6px; background:${color}22; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+      <svg width="${size - 8}" height="${size - 8}" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${path}</svg>
+    </div>
+  `;
+}
+
 function buildDomainBarsHtml(assessmentResult){
   return Object.keys(DOMAINS).map(domainKey => {
     const pct = Math.round(assessmentResult.categoryPct[domainKey] || 0);
     const color = DOMAIN_COLORS[domainKey] || 'var(--cyan)';
     return `
-      <div style="margin-bottom:10px;">
-        <div style="display:flex; justify-content:space-between; font-size:12.5px; margin-bottom:4px;"><span>${DOMAINS[domainKey].label}</span><span style="color:var(--gray);">${pct}%</span></div>
-        <div style="height:6px; background:var(--line); border-radius:3px; overflow:hidden;"><div style="width:${pct}%; height:100%; background:${color};"></div></div>
+      <div style="display:flex; align-items:center; gap:9px; margin-bottom:10px;">
+        ${domainIconBadgeHtml(domainKey, 26)}
+        <div style="flex:1;">
+          <div style="display:flex; justify-content:space-between; font-size:12.5px; margin-bottom:4px;"><span>${DOMAINS[domainKey].label}</span><span style="color:var(--gray);">${pct}%</span></div>
+          <div style="height:6px; background:var(--line); border-radius:3px; overflow:hidden;"><div style="width:${pct}%; height:100%; background:${color};"></div></div>
+        </div>
       </div>
     `;
   }).join('');
+}
+
+/* Seven-spoke radar chart plotting each domain's percentage. Grid rings
+   at 25/50/75/100% give a reference; the filled polygon is the actual
+   scores, with each point colored to match its domain. */
+function drawRadarChart(assessmentResult){
+  const svg = document.getElementById('radarChartSvg');
+  const cx = 150, cy = 150, maxR = 105;
+  const domainKeys = Object.keys(DOMAINS);
+  const angleStep = 360 / domainKeys.length;
+
+  function axisPoint(index, r){
+    const angle = -90 + index * angleStep;
+    const rad = (angle * Math.PI) / 180;
+    return { x: cx + r * Math.cos(rad), y: cy + r * Math.sin(rad) };
+  }
+
+  let parts = '';
+
+  [25, 50, 75, 100].forEach(gridPct => {
+    const pts = domainKeys.map((_, i) => axisPoint(i, (gridPct / 100) * maxR));
+    const d = pts.map((p, i) => (i === 0 ? 'M' : 'L') + p.x.toFixed(1) + ' ' + p.y.toFixed(1)).join(' ') + ' Z';
+    parts += `<path d="${d}" fill="none" stroke="#E3E9F0" stroke-width="1"/>`;
+  });
+
+  domainKeys.forEach((_, i) => {
+    const p = axisPoint(i, maxR);
+    parts += `<line x1="${cx}" y1="${cy}" x2="${p.x.toFixed(1)}" y2="${p.y.toFixed(1)}" stroke="#E3E9F0" stroke-width="1"/>`;
+  });
+
+  const dataPoints = domainKeys.map((domainKey, i) => {
+    const pct = assessmentResult.categoryPct[domainKey] || 0;
+    return axisPoint(i, (Math.max(0, Math.min(100, pct)) / 100) * maxR);
+  });
+  const dataPath = dataPoints.map((p, i) => (i === 0 ? 'M' : 'L') + p.x.toFixed(1) + ' ' + p.y.toFixed(1)).join(' ') + ' Z';
+  parts += `<path d="${dataPath}" fill="#35C2E8" fill-opacity="0.22" stroke="#1A4584" stroke-width="2"/>`;
+
+  dataPoints.forEach((p, i) => {
+    parts += `<circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="4" fill="${DOMAIN_COLORS[domainKeys[i]]}"/>`;
+  });
+
+  domainKeys.forEach((domainKey, i) => {
+    const labelPoint = axisPoint(i, maxR + 22);
+    const anchor = labelPoint.x < cx - 8 ? 'end' : (labelPoint.x > cx + 8 ? 'start' : 'middle');
+    parts += `<text x="${labelPoint.x.toFixed(1)}" y="${labelPoint.y.toFixed(1)}" text-anchor="${anchor}" font-family="IBM Plex Sans" font-size="10" fill="#4B5768">${DOMAIN_SHORT_LABELS[domainKey]}</text>`;
+  });
+
+  svg.innerHTML = parts;
 }
 
 function formatDuration(ms){
