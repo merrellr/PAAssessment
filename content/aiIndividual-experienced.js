@@ -10,7 +10,7 @@
 window.CONTENT_OVERRIDES = window.CONTENT_OVERRIDES || {};
 
 window.CONTENT_OVERRIDES["aiIndividual-experienced"] = {
-  sourceUrl: "",
+  sourceUrl: "https://www.linkedin.com/pulse/how-run-product-discovery-ai-agents-without-losing-voice-merrell-mvrdc",
   lessons: [
     {
       id: 1,
