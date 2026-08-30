@@ -97,6 +97,7 @@
 
     <div class="lesson-nav" id="lessonNav"></div>
 
+    <div id="preCheckContainer"></div>
     <div id="lessonBody">Loading…</div>
     <div id="chartContainer"></div>
     <div id="stepperContainer"></div>
@@ -282,6 +283,12 @@ function renderLesson(){
   const lesson = course.lessons.find(l => l.id === lessonNum) || course.lessons[0];
   document.getElementById('lessonTitle').textContent = lesson.title;
 
+  // "Predict, then reveal" — an optional question shown BEFORE the body
+  // text, framed as a guess. The body right below then reveals what
+  // actually happens, so reading becomes checking your prediction
+  // rather than just absorbing information passively.
+  renderChecksInto('preCheckContainer', lesson.preCheck ? [lesson.preCheck] : null);
+
   const imageHtml = lesson.image
     ? `<img class="lesson-image" src="${lesson.image.src}" alt="${lesson.image.alt}"><div class="lesson-image-caption">${lesson.image.alt}</div>`
     : '';
@@ -289,7 +296,12 @@ function renderLesson(){
 
   renderChart(lesson.chart);
   renderStepper(lesson.steps);
-  renderCheck(lesson.check);
+
+  // Supports either "checks" (an array, for more than one question)
+  // or the older singular "check" — both render the same way.
+  const checksArray = lesson.checks || (lesson.check ? [lesson.check] : null);
+  renderChecksInto('checkContainer', checksArray);
+
   renderReflection(lesson.reflection, lesson.id);
 
   const nav = document.getElementById('lessonNav');
@@ -421,44 +433,47 @@ function renderStepper(steps){
   render();
 }
 
-/* Renders a short single-question knowledge check with instant
-   feedback. Purely for reinforcement — it never blocks progress,
-   people can continue whether they get it right or not. */
-function renderCheck(check){
-  const container = document.getElementById('checkContainer');
+/* Renders one or more knowledge-check questions with instant
+   feedback. Purely for reinforcement — never blocks progress,
+   people can continue whether they get it right or not. Accepts
+   an array so a lesson can ask more than one question. */
+function renderChecksInto(containerId, checks){
+  const container = document.getElementById(containerId);
   container.innerHTML = '';
-  if (!check) return;
+  if (!checks || !checks.length) return;
 
-  const box = document.createElement('div');
-  box.className = 'check-box';
-  box.innerHTML = `
-    <span class="check-eyebrow">Quick check</span>
-    <div class="check-q">${check.question}</div>
-    <div id="checkOptions"></div>
-    <div class="check-feedback" id="checkFeedback"></div>
-  `;
-  container.appendChild(box);
+  checks.forEach((check) => {
+    const box = document.createElement('div');
+    box.className = 'check-box';
+    box.innerHTML = `
+      <span class="check-eyebrow">${check.label || 'Quick check'}</span>
+      <div class="check-q">${check.question}</div>
+      <div class="check-options-wrap"></div>
+      <div class="check-feedback"></div>
+    `;
+    container.appendChild(box);
 
-  const optionsWrap = box.querySelector('#checkOptions');
-  check.options.forEach((optText, i) => {
-    const btn = document.createElement('button');
-    btn.type = 'button';
-    btn.className = 'check-option';
-    btn.textContent = optText;
-    btn.onclick = () => {
-      const allButtons = optionsWrap.querySelectorAll('.check-option');
-      allButtons.forEach(b => b.disabled = true);
-      if (i === check.correct){
-        btn.classList.add('correct');
-      } else {
-        btn.classList.add('incorrect');
-        allButtons[check.correct].classList.add('correct');
-      }
-      const feedback = box.querySelector('#checkFeedback');
-      feedback.classList.add('show');
-      feedback.innerHTML = (i === check.correct ? '<strong>Correct.</strong> ' : '<strong>Not quite.</strong> ') + check.explanation;
-    };
-    optionsWrap.appendChild(btn);
+    const optionsWrap = box.querySelector('.check-options-wrap');
+    const feedback = box.querySelector('.check-feedback');
+    check.options.forEach((optText, i) => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'check-option';
+      btn.textContent = optText;
+      btn.onclick = () => {
+        const allButtons = optionsWrap.querySelectorAll('.check-option');
+        allButtons.forEach(b => b.disabled = true);
+        if (i === check.correct){
+          btn.classList.add('correct');
+        } else {
+          btn.classList.add('incorrect');
+          allButtons[check.correct].classList.add('correct');
+        }
+        feedback.classList.add('show');
+        feedback.innerHTML = (i === check.correct ? '<strong>Correct.</strong> ' : '<strong>Not quite.</strong> ') + check.explanation;
+      };
+      optionsWrap.appendChild(btn);
+    });
   });
 }
 
