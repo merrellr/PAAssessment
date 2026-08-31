@@ -21,7 +21,7 @@
 
   .brand-header{ display:flex; align-items:center; justify-content:space-between; gap:9px; padding: 24px 0 14px; }
   .brand-header-left{ display:flex; align-items:center; gap:9px; }
-  .brand-word{ font-family:'Space Grotesk', sans-serif; font-weight:600; font-size: 15px; color: var(--navy-deep); }
+  .brand-word{ font-family:'Space Grotesk', sans-serif; font-weight:700; font-size: 15px; color: var(--navy-deep); }
   .brand-accent-bar{ height: 3px; background: linear-gradient(90deg, var(--navy) 0%, var(--cyan) 100%); border-radius: 2px; margin-bottom: 24px; }
 
   .card{ background: var(--surface); border-radius: 16px; border: 1px solid var(--line); padding: 32px; box-shadow: 0 1px 2px rgba(22,33,62,0.04), 0 12px 32px rgba(22,33,62,0.06); }
@@ -132,13 +132,16 @@
 <div class="wrap">
 
   <div class="brand-header">
-    <div class="brand-header-left">
-      <svg width="22" height="22" viewBox="0 0 40 40" aria-hidden="true">
+    <a href="https://www.productadvisory.co/" class="brand-header-left" style="text-decoration:none;">
+      <svg width="28" height="28" viewBox="0 0 40 40" aria-hidden="true">
         <polygon points="20,3 35,11.5 35,28.5 20,37 5,28.5 5,11.5" fill="#1A4584"/>
         <polygon points="20,10 29,15 29,25 20,30 11,25 11,15" fill="none" stroke="#35C2E8" stroke-width="1.5"/>
       </svg>
-      <span class="brand-word">Product Advisory Learning</span>
-    </div>
+      <div>
+        <div style="font-family:'IBM Plex Sans', sans-serif; font-weight:600; font-size:10.5px; letter-spacing:0.06em; color:var(--gray); line-height:1;">PRODUCT ADVISORY</div>
+        <div class="brand-word" style="font-size:19px; line-height:1.3;">Learning</div>
+      </div>
+    </a>
     <div class="profile-menu-wrap" id="profileMenuWrap" style="display:none;">
       <button class="profile-avatar-btn" id="profileAvatarBtn" onclick="toggleProfileMenu()" aria-label="Account menu">
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>
@@ -331,13 +334,23 @@
         </div>
       </div>
 
-      <div class="card" id="insightSummaryCard" style="margin-bottom:0; background:#EEF3FA; border-color:var(--line);">
-        <span class="eyebrow">Your insight</span>
+      <div class="card" style="margin-bottom:0; background:#EEF9F1; border-color:var(--line);">
+        <span class="eyebrow" style="color:#2E8B57;">Your strength</span>
         <div style="display:flex; align-items:flex-start; gap:10px; margin-top:10px;">
-          <div style="width:30px; height:30px; border-radius:8px; background:var(--navy); display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+          <div style="width:30px; height:30px; border-radius:8px; background:#2E8B57; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 L14.5 9 L22 9 L16 13.5 L18 21 L12 16.5 L6 21 L8 13.5 L2 9 L9.5 9 Z"/></svg>
           </div>
-          <div style="font-size:12.5px; color:var(--ink-soft); line-height:1.55;" id="insightSummaryText"></div>
+          <div style="font-size:13px; color:var(--ink-soft); line-height:1.55;" id="insightStrengthText"></div>
+        </div>
+      </div>
+
+      <div class="card" style="margin-bottom:0; background:#EEF3FA; border-color:var(--line);">
+        <span class="eyebrow">Your growth area</span>
+        <div style="display:flex; align-items:flex-start; gap:10px; margin-top:10px;">
+          <div style="width:30px; height:30px; border-radius:8px; background:var(--navy); display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r="0.8" fill="#fff"/></svg>
+          </div>
+          <div style="font-size:13px; color:var(--ink-soft); line-height:1.55;" id="insightGrowthText"></div>
         </div>
       </div>
 
@@ -449,7 +462,7 @@ const RESULTS_LOG_URL = "https://script.google.com/macros/s/AKfycbynJQYF9rv5maL_
    to treat it as a new URL and fetch fresh instead of serving a
    stale cached copy of the old content.
    ================================================================ */
-const CONTENT_VERSION = "39";
+const CONTENT_VERSION = "40";
 
 /* ================================================================
    EASY-EDIT ZONE 3: COURSE CATALOG
@@ -969,10 +982,10 @@ function populateInsightSummary(assessmentResult){
     if (pct < (assessmentResult.categoryPct[weakest] || 0)) weakest = key;
   });
 
-  const text = `You show the strongest skills in <strong>${DOMAINS[strongest].label}</strong>. `
-    + `Your primary growth opportunity right now is in <strong>${DOMAINS[weakest].label}</strong>, `
-    + `a good place to focus your next few courses.`;
-  document.getElementById('insightSummaryText').innerHTML = text;
+  document.getElementById('insightStrengthText').innerHTML =
+    `You show the strongest skills in <strong>${DOMAINS[strongest].label}</strong>.`;
+  document.getElementById('insightGrowthText').innerHTML =
+    `Your primary growth opportunity right now is <strong>${DOMAINS[weakest].label}</strong>, a good place to focus your next few courses.`;
 }
 
 function drawSummaryRing(pct, color){
