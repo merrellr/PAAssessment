@@ -331,6 +331,38 @@
         </div>
       </div>
 
+      <div class="card" id="profileTile" style="margin-bottom:0;">
+        <span class="eyebrow">Your profile</span>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:10px; font-size:12.5px;">
+          <div>
+            <div style="color:var(--gray); font-size:10.5px; text-transform:uppercase; letter-spacing:0.03em;">Tier level</div>
+            <div id="profileTierLevel" style="font-weight:600; color:var(--navy-deep);">—</div>
+          </div>
+          <div>
+            <div style="color:var(--gray); font-size:10.5px; text-transform:uppercase; letter-spacing:0.03em;">Industry</div>
+            <div id="profileIndustry" style="font-weight:600; color:var(--navy-deep);">—</div>
+          </div>
+          <div>
+            <div style="color:var(--gray); font-size:10.5px; text-transform:uppercase; letter-spacing:0.03em;">Company size</div>
+            <div id="profileCompanySize" style="font-weight:600; color:var(--navy-deep);">—</div>
+          </div>
+          <div>
+            <div style="color:var(--gray); font-size:10.5px; text-transform:uppercase; letter-spacing:0.03em;">Assessed on</div>
+            <div id="profileAssessedDate" style="font-weight:600; color:var(--navy-deep);">—</div>
+          </div>
+        </div>
+        <a href="profile.html" style="display:inline-block; font-size:12.5px; color:var(--navy); text-decoration:underline; margin-top:14px;">Edit profile</a>
+      </div>
+
+    </div>
+
+    <div class="card" id="insightSummaryCard" style="display:none; margin-bottom:18px; background:#EEF3FA; border-color:var(--line);">
+      <div style="display:flex; align-items:flex-start; gap:12px;">
+        <div style="width:34px; height:34px; border-radius:9px; background:var(--navy); display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 L14.5 9 L22 9 L16 13.5 L18 21 L12 16.5 L6 21 L8 13.5 L2 9 L9.5 9 Z"/></svg>
+        </div>
+        <div style="font-size:13.5px; color:var(--ink-soft); line-height:1.6; padding-top:4px;" id="insightSummaryText"></div>
+      </div>
     </div>
 
     <div id="progressToast" style="display:none; background:#EEF9F1; border:1px solid #2E8B57; border-radius:10px; padding:10px 14px; margin-bottom:14px; font-size:13.5px; color:#1f6b47; text-align:center;">Nice work! Updating your progress…</div>
@@ -416,7 +448,7 @@ const RESULTS_LOG_URL = "https://script.google.com/macros/s/AKfycbynJQYF9rv5maL_
    to treat it as a new URL and fetch fresh instead of serving a
    stale cached copy of the old content.
    ================================================================ */
-const CONTENT_VERSION = "37";
+const CONTENT_VERSION = "38";
 
 /* ================================================================
    EASY-EDIT ZONE 3: COURSE CATALOG
@@ -807,7 +839,7 @@ function animateCountUp(el, from, to, duration){
 
 function renderAssignedStat(progress, assessmentResult){
   const tileRow = document.getElementById('tileRow');
-  if (!assessmentResult){ tileRow.style.display = 'none'; return; }
+  if (!assessmentResult){ tileRow.style.display = 'none'; document.getElementById('insightSummaryCard').style.display = 'none'; return; }
   tileRow.style.display = 'grid';
 
   let totalAssigned = 0, totalCompletedInPlan = 0;
@@ -903,6 +935,45 @@ function renderAssignedStat(progress, assessmentResult){
   document.getElementById('domainBarsContainer').innerHTML = buildDomainBarsHtml(assessmentResult);
   drawRadarChart(assessmentResult);
   drawSummaryRing(assessmentResult.overallPct, tierColorFor(assessmentResult.tier));
+
+  populateProfileTile(progress, assessmentResult);
+  populateInsightSummary(assessmentResult);
+}
+
+/* "Your profile" tile — surfaces info already collected via the
+   assessment and Edit Profile page, so it isn't just sitting unused. */
+function populateProfileTile(progress, assessmentResult){
+  document.getElementById('profileTierLevel').textContent = assessmentResult.tier || '—';
+
+  const profile = progress.profile || {};
+  document.getElementById('profileIndustry').textContent = profile.industry || 'Not set';
+  document.getElementById('profileCompanySize').textContent = profile.companySize || 'Not set';
+
+  if (assessmentResult.submittedAt){
+    const d = new Date(assessmentResult.submittedAt);
+    document.getElementById('profileAssessedDate').textContent = d.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
+  }
+}
+
+/* Auto-generated plain-language summary — no LLM involved, just finds
+   the highest and lowest scoring domains from data already on hand. */
+function populateInsightSummary(assessmentResult){
+  const card = document.getElementById('insightSummaryCard');
+  const domainKeys = Object.keys(DOMAINS);
+  if (!domainKeys.length){ card.style.display = 'none'; return; }
+
+  let strongest = domainKeys[0], weakest = domainKeys[0];
+  domainKeys.forEach(key => {
+    const pct = assessmentResult.categoryPct[key] || 0;
+    if (pct > (assessmentResult.categoryPct[strongest] || 0)) strongest = key;
+    if (pct < (assessmentResult.categoryPct[weakest] || 0)) weakest = key;
+  });
+
+  const text = `You show the strongest skills in <strong>${DOMAINS[strongest].label}</strong>. `
+    + `Your primary growth opportunity right now is in <strong>${DOMAINS[weakest].label}</strong>, `
+    + `a good place to focus your next few courses.`;
+  document.getElementById('insightSummaryText').innerHTML = text;
+  card.style.display = 'block';
 }
 
 function drawSummaryRing(pct, color){
