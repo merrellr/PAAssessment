@@ -211,6 +211,11 @@
         <a onclick="handleForgotPassword()">Forgot password?</a>
       </div>
 
+      <label id="termsCheckRow" style="display:none; align-items:flex-start; gap:8px; font-size:12.5px; color:var(--ink-soft); margin:8px 0 14px; cursor:pointer;">
+        <input type="checkbox" id="agreeTermsCheckbox" style="margin-top:2px;">
+        <span>I agree to the <a href="https://www.productadvisory.co/terms-of-use" target="_blank" rel="noopener" style="color:var(--navy);">Terms of Use</a>, which includes our Privacy Policy.</span>
+      </label>
+
       <button class="btn btn-primary btn-gradient" id="authSubmitBtn" onclick="handleAuthSubmit()">Log in</button>
 
       <div class="divider-row"><span>or</span></div>
@@ -219,6 +224,7 @@
         <svg width="17" height="17" viewBox="0 0 24 24"><path fill="#4285F4" d="M23.52 12.27c0-.85-.08-1.67-.22-2.45H12v4.64h6.47a5.53 5.53 0 0 1-2.4 3.63v3h3.88c2.27-2.09 3.57-5.17 3.57-8.82z"/><path fill="#34A853" d="M12 24c3.24 0 5.95-1.07 7.94-2.91l-3.88-3c-1.08.72-2.45 1.15-4.06 1.15-3.13 0-5.78-2.11-6.73-4.96H1.27v3.11A12 12 0 0 0 12 24z"/><path fill="#FBBC05" d="M5.27 14.28A7.2 7.2 0 0 1 4.89 12c0-.79.14-1.56.38-2.28V6.61H1.27A12 12 0 0 0 0 12c0 1.94.46 3.77 1.27 5.39l4-3.11z"/><path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.44-3.44C17.94 1.19 15.24 0 12 0 7.31 0 3.26 2.69 1.27 6.61l4 3.11C6.22 6.86 8.87 4.75 12 4.75z"/></svg>
         Continue with Google
       </button>
+      <div id="googleTermsNote" style="display:none; font-size:11px; color:var(--gray); text-align:center; margin-top:8px;">By continuing with Google, you agree to our <a href="https://www.productadvisory.co/terms-of-use" target="_blank" rel="noopener" style="color:var(--gray);">Terms of Use</a>.</div>
     </div>
   </div>
 
@@ -422,7 +428,7 @@ const RESULTS_LOG_URL = "https://script.google.com/macros/s/AKfycbynJQYF9rv5maL_
    to treat it as a new URL and fetch fresh instead of serving a
    stale cached copy of the old content.
    ================================================================ */
-const CONTENT_VERSION = "44";
+const CONTENT_VERSION = "45";
 
 /* ================================================================
    EASY-EDIT ZONE 3: COURSE CATALOG
@@ -476,7 +482,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/fireba
 import {
   getAuth, onAuthStateChanged, signOut,
   createUserWithEmailAndPassword, signInWithEmailAndPassword,
-  GoogleAuthProvider, signInWithPopup,
+  GoogleAuthProvider, signInWithPopup, getAdditionalUserInfo,
   sendPasswordResetEmail, sendEmailVerification,
   updatePassword, reauthenticateWithCredential, EmailAuthProvider
 } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
@@ -504,6 +510,8 @@ window.setAuthMode = function(signUp){
   document.getElementById('authSuccess').textContent = '';
   document.getElementById('forgotRow').style.display = isSignUpMode ? 'none' : 'block';
   document.getElementById('confirmPasswordWrap').style.display = isSignUpMode ? 'block' : 'none';
+  document.getElementById('termsCheckRow').style.display = isSignUpMode ? 'flex' : 'none';
+  document.getElementById('googleTermsNote').style.display = isSignUpMode ? 'block' : 'none';
 };
 
 window.togglePasswordVisibility = function(){
@@ -560,12 +568,17 @@ window.handleAuthSubmit = async function(){
       errorEl.textContent = 'Passwords do not match.';
       return;
     }
+    if (!document.getElementById('agreeTermsCheckbox').checked){
+      errorEl.textContent = 'Please agree to the Terms of Use to create an account.';
+      return;
+    }
   }
 
   try {
     if (isSignUpMode){
       const cred = await createUserWithEmailAndPassword(auth, email, password);
       await sendEmailVerification(cred.user);
+      await setDoc(doc(db, 'progress', cred.user.uid), { agreedToTermsAt: new Date().toISOString() }, { merge: true });
     } else {
       await signInWithEmailAndPassword(auth, email, password);
     }
@@ -576,7 +589,10 @@ window.handleAuthSubmit = async function(){
 
 window.handleGoogleSignIn = async function(){
   try {
-    await signInWithPopup(auth, new GoogleAuthProvider());
+    const result = await signInWithPopup(auth, new GoogleAuthProvider());
+    if (getAdditionalUserInfo(result)?.isNewUser){
+      await setDoc(doc(db, 'progress', result.user.uid), { agreedToTermsAt: new Date().toISOString() }, { merge: true });
+    }
   } catch (err){
     document.getElementById('authError').textContent = friendlyAuthError(err.code);
   }
