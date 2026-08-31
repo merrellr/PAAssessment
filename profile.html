@@ -126,7 +126,7 @@
   </div>
 
   <div style="margin-top:40px; padding:20px 0; border-top:1px solid var(--line); text-align:center; font-size:12px; color:var(--gray);">
-    © 2026 Product Advisory, LLC. All rights reserved. &nbsp;·&nbsp;
+    © <span id="footerYear"></span> Product Advisory, LLC. All rights reserved. &nbsp;·&nbsp;
     <a href="https://www.productadvisory.co/privacy-policy" target="_blank" rel="noopener" style="color:var(--gray); text-decoration:underline;">Privacy Policy</a> &nbsp;·&nbsp;
     <a href="https://www.productadvisory.co/terms-of-use" target="_blank" rel="noopener" style="color:var(--gray); text-decoration:underline;">Terms of Use</a>
   </div>
@@ -374,5 +374,6 @@ window.handleChangeEmail = async function(){
   }
 };
 </script>
+<script>document.getElementById("footerYear").textContent = new Date().getFullYear();</script>
 </body>
 </html>
