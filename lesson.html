@@ -26,8 +26,17 @@
   #lessonBody ul{ margin: 0 0 14px; padding-left: 20px; }
   #lessonBody li{ line-height:1.6; color: var(--ink-soft); margin-bottom: 8px; }
   #lessonBody strong{ color: var(--ink); }
-  .lesson-image{ width:100%; border-radius: 10px; border: 1px solid var(--line); margin-bottom: 16px; display:block; }
-  .lesson-image-caption{ font-size: 12.5px; color: var(--gray); text-align:center; margin: -8px 0 18px; }
+  .lesson-figure{ margin: 0 0 20px; }
+  .lesson-figure img{ width:100%; border-radius: 10px; border: 1px solid var(--line); display:block; }
+  .lesson-figure figcaption{ font-size: 12.5px; color: var(--gray); text-align:center; margin: 8px 0 0; line-height:1.5; }
+  .lesson-figure .cap-label{ display:block; font-size: 11px; font-weight:600; letter-spacing:0.06em; text-transform:uppercase; color: var(--cyan); margin-bottom: 5px; }
+  /* On wider screens, sit the caption beside the diagram as a labeled note
+     instead of stacked underneath. Falls back to stacked below 640px. */
+  @media (min-width: 640px){
+    .lesson-figure{ display:flex; gap:18px; align-items:flex-start; }
+    .lesson-figure img{ flex: 0 1 60%; }
+    .lesson-figure figcaption{ flex: 1 1 40%; text-align:left; margin: 0; padding-left: 18px; border-left: 2px solid var(--line); }
+  }
 
   .check-box{ background:#F7F9FC; border: 1.5px solid var(--line); border-radius: 12px; padding: 18px 20px; margin-top: 24px; }
   .check-box .check-eyebrow{ font-size: 11px; font-weight:600; letter-spacing:0.06em; text-transform:uppercase; color: var(--cyan); display:block; margin-bottom: 8px; }
@@ -311,7 +320,10 @@ function renderLesson(){
   renderChecksInto('preCheckContainer', lesson.preCheck ? [lesson.preCheck] : null);
 
   const imageHtml = lesson.image
-    ? `<img class="lesson-image" src="${lesson.image.src}" alt="${lesson.image.alt}"><div class="lesson-image-caption">${lesson.image.alt}</div>`
+    ? `<figure class="lesson-figure">
+         <img src="${lesson.image.src}" alt="${lesson.image.alt}">
+         <figcaption><span class="cap-label">Figure</span>${lesson.image.alt}</figcaption>
+       </figure>`
     : '';
   document.getElementById('lessonBody').innerHTML = imageHtml + lesson.body;
 
