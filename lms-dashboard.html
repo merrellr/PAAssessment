@@ -17,7 +17,7 @@
   *{ box-sizing: border-box; }
   body{ margin:0; background: var(--bg); font-family:'IBM Plex Sans', system-ui, sans-serif; color: var(--ink); }
 
-  .wrap{ max-width: 760px; margin: 0 auto; padding: 0 16px 48px; }
+  .wrap{ max-width: 1100px; margin: 0 auto; padding: 0 16px 48px; }
 
   .brand-header{ display:flex; align-items:center; justify-content:space-between; gap:9px; padding: 24px 0 14px; }
   .brand-header-left{ display:flex; align-items:center; gap:9px; }
@@ -390,7 +390,7 @@
   </div>
 
   <div style="margin-top:40px; padding:20px 0; border-top:1px solid var(--line); text-align:center; font-size:12px; color:var(--gray);">
-    © 2026 Product Advisory, LLC. All rights reserved. &nbsp;·&nbsp;
+    © <span id="footerYear"></span> Product Advisory, LLC. All rights reserved. &nbsp;·&nbsp;
     <a href="https://www.productadvisory.co/privacy-policy" target="_blank" rel="noopener" style="color:var(--gray); text-decoration:underline;">Privacy Policy</a> &nbsp;·&nbsp;
     <a href="https://www.productadvisory.co/terms-of-use" target="_blank" rel="noopener" style="color:var(--gray); text-decoration:underline;">Terms of Use</a>
   </div>
@@ -428,7 +428,7 @@ const RESULTS_LOG_URL = "https://script.google.com/macros/s/AKfycbynJQYF9rv5maL_
    to treat it as a new URL and fetch fresh instead of serving a
    stale cached copy of the old content.
    ================================================================ */
-const CONTENT_VERSION = "45";
+const CONTENT_VERSION = "46";
 
 /* ================================================================
    EASY-EDIT ZONE 3: COURSE CATALOG
@@ -1348,5 +1348,6 @@ function renderRecommendations(result, progress){
   if (chips.children.length > 0) banner.style.display = 'block';
 }
 </script>
+<script>document.getElementById("footerYear").textContent = new Date().getFullYear();</script>
 </body>
 </html>
