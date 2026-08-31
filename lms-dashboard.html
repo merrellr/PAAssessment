@@ -160,6 +160,8 @@
           <div class="profile-progress-label">Your progress</div>
           <div id="profileAssessedLevel" class="profile-progress-line"></div>
           <div id="profileCoursesCompleted" class="profile-progress-line"></div>
+          <div id="profileDropdownIndustry" class="profile-progress-line"></div>
+          <div id="profileDropdownCompanySize" class="profile-progress-line"></div>
         </div>
 
         <div class="profile-dropdown-divider"></div>
@@ -313,19 +315,19 @@
       </div>
 
       <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:18px;">
-        <div style="flex:1; min-width:220px; background:#EEF9F1; border-radius:10px; padding:10px 14px; font-size:13px; color:var(--ink-soft); display:flex; align-items:center; gap:8px;">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#2E8B57" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M12 2 L14.5 9 L22 9 L16 13.5 L18 21 L12 16.5 L6 21 L8 13.5 L2 9 L9.5 9 Z"/></svg>
-          <span id="insightStrengthText"></span>
+        <div style="flex:1; min-width:220px; background:#EEF9F1; border-radius:10px; padding:12px 14px; display:flex; align-items:flex-start; gap:10px;">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#2E8B57" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0; margin-top:1px;"><path d="M12 2 L14.5 9 L22 9 L16 13.5 L18 21 L12 16.5 L6 21 L8 13.5 L2 9 L9.5 9 Z"/></svg>
+          <div>
+            <div style="font-size:10.5px; text-transform:uppercase; letter-spacing:0.04em; color:#2E8B57; font-weight:600;">Strength</div>
+            <div style="font-size:13px; color:var(--ink-soft); margin-top:2px;" id="insightStrengthText"></div>
+          </div>
         </div>
-        <div style="flex:1; min-width:220px; background:#EEF3FA; border-radius:10px; padding:10px 14px; font-size:13px; color:var(--ink-soft); display:flex; align-items:center; gap:8px;">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--navy)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r="0.8" fill="var(--navy)"/></svg>
-          <span id="insightGrowthText"></span>
-        </div>
-        <div id="profileTile" style="flex:1; min-width:220px; background:#fff; border:1px solid var(--line); border-radius:10px; padding:10px 14px; font-size:13px; color:var(--ink-soft); display:flex; align-items:center; gap:8px; justify-content:space-between;">
-          <span><span id="profileIndustry">—</span> · <span id="profileCompanySize">—</span></span>
-          <a href="profile.html" style="font-size:12px; color:var(--navy); text-decoration:underline; white-space:nowrap;">Edit profile</a>
-          <span id="profileTierLevel" style="display:none;"></span>
-          <span id="profileAssessedDate" style="display:none;"></span>
+        <div style="flex:1; min-width:220px; background:#EEF3FA; border-radius:10px; padding:12px 14px; display:flex; align-items:flex-start; gap:10px;">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--navy)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0; margin-top:1px;"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r="0.8" fill="var(--navy)"/></svg>
+          <div>
+            <div style="font-size:10.5px; text-transform:uppercase; letter-spacing:0.04em; color:var(--navy); font-weight:600;">Growth area</div>
+            <div style="font-size:13px; color:var(--ink-soft); margin-top:2px;" id="insightGrowthText"></div>
+          </div>
         </div>
       </div>
 
@@ -381,6 +383,12 @@
     </div>
   </div>
 
+  <div style="margin-top:40px; padding:20px 0; border-top:1px solid var(--line); text-align:center; font-size:12px; color:var(--gray);">
+    © 2026 Product Advisory, LLC. All rights reserved. &nbsp;·&nbsp;
+    <a href="https://www.productadvisory.co/privacy-policy" target="_blank" rel="noopener" style="color:var(--gray); text-decoration:underline;">Privacy Policy</a> &nbsp;·&nbsp;
+    <a href="https://www.productadvisory.co/terms-of-use" target="_blank" rel="noopener" style="color:var(--gray); text-decoration:underline;">Terms of Use</a>
+  </div>
+
 </div>
 
 <script type="module">
@@ -414,7 +422,7 @@ const RESULTS_LOG_URL = "https://script.google.com/macros/s/AKfycbynJQYF9rv5maL_
    to treat it as a new URL and fetch fresh instead of serving a
    stale cached copy of the old content.
    ================================================================ */
-const CONTENT_VERSION = "43";
+const CONTENT_VERSION = "44";
 
 /* ================================================================
    EASY-EDIT ZONE 3: COURSE CATALOG
@@ -906,17 +914,13 @@ function renderAssignedStat(progress, assessmentResult){
 
 /* "Your profile" tile — surfaces info already collected via the
    assessment and Edit Profile page, so it isn't just sitting unused. */
+/* Now writes into the profile dropdown menu rather than a dashboard
+   tile, tier level and assessed date already show elsewhere on the
+   page (hero band), so only industry and company size are needed here. */
 function populateProfileTile(progress, assessmentResult){
-  document.getElementById('profileTierLevel').textContent = assessmentResult.tier || '—';
-
   const profile = progress.profile || {};
-  document.getElementById('profileIndustry').textContent = profile.industry || 'Not set';
-  document.getElementById('profileCompanySize').textContent = profile.companySize || 'Not set';
-
-  if (assessmentResult.submittedAt){
-    const d = new Date(assessmentResult.submittedAt);
-    document.getElementById('profileAssessedDate').textContent = d.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
-  }
+  document.getElementById('profileDropdownIndustry').textContent = 'Industry: ' + (profile.industry || 'Not set');
+  document.getElementById('profileDropdownCompanySize').textContent = 'Company size: ' + (profile.companySize || 'Not set');
 }
 
 /* Auto-generated plain-language summary — no LLM involved, just finds
