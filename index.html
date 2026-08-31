@@ -40,7 +40,8 @@
     font-family: 'IBM Plex Sans', system-ui, sans-serif;
     color: var(--ink);
     display:flex;
-    justify-content:center;
+    flex-direction:column;
+    align-items:center;
     padding: 32px 16px;
   }
 
@@ -316,6 +317,11 @@
           <div class="field-error" id="signupPasswordError"></div>
           <input class="text-input has-companion" type="password" id="signupPasswordConfirm" placeholder="Confirm password">
           <div class="field-error" id="signupConfirmError"></div>
+          <label style="display:flex; align-items:flex-start; gap:8px; font-size:12.5px; color:var(--ink); margin:10px 0 14px; cursor:pointer;">
+            <input type="checkbox" id="signupAgreeTerms" style="margin-top:2px;">
+            <span>I agree to the <a href="https://www.productadvisory.co/terms-of-use" target="_blank" rel="noopener">Terms of Use</a>, which includes the Privacy Policy.</span>
+          </label>
+          <div class="field-error" id="signupTermsError"></div>
           <div class="field-error" id="signupGeneralError"></div>
           <button class="btn btn-primary" onclick="handleCreateAccountFromResults()">Create account & continue →</button>
         </div>
@@ -327,6 +333,12 @@
     </div>
 
   </div>
+</div>
+
+<div style="max-width:640px; margin:20px auto 0; padding:20px 0; border-top:1px solid var(--line); text-align:center; font-size:12px; color:var(--gray);">
+  © 2026 Product Advisory, LLC. All rights reserved. &nbsp;·&nbsp;
+  <a href="https://www.productadvisory.co/privacy-policy" target="_blank" rel="noopener" style="color:var(--gray); text-decoration:underline;">Privacy Policy</a> &nbsp;·&nbsp;
+  <a href="https://www.productadvisory.co/terms-of-use" target="_blank" rel="noopener" style="color:var(--gray); text-decoration:underline;">Terms of Use</a>
 </div>
 
 <script type="module">
@@ -358,8 +370,9 @@ window.handleCreateAccountFromResults = async function(){
   const confirmPassword = document.getElementById('signupPasswordConfirm').value;
   const pwError = document.getElementById('signupPasswordError');
   const confirmError = document.getElementById('signupConfirmError');
+  const termsError = document.getElementById('signupTermsError');
   const generalError = document.getElementById('signupGeneralError');
-  pwError.textContent = ''; confirmError.textContent = ''; generalError.textContent = '';
+  pwError.textContent = ''; confirmError.textContent = ''; termsError.textContent = ''; generalError.textContent = '';
 
   if (!password || password.length < 6){
     pwError.textContent = 'Password should be at least 6 characters.';
@@ -369,12 +382,17 @@ window.handleCreateAccountFromResults = async function(){
     confirmError.textContent = 'Passwords do not match.';
     return;
   }
+  if (!document.getElementById('signupAgreeTerms').checked){
+    termsError.textContent = 'Please agree to the Terms of Use to create an account.';
+    return;
+  }
 
   try {
     const cred = await createUserWithEmailAndPassword(auth, window.__leadSnapshot.email, password);
     await updateProfile(cred.user, { displayName: window.__leadSnapshot.name });
     await setDoc(doc(db, 'progress', cred.user.uid), {
       courses: {},
+      agreedToTermsAt: new Date().toISOString(),
       profile: {
         company: window.__leadSnapshot.company || '',
         jobTitle: window.__leadSnapshot.jobTitle || '',
