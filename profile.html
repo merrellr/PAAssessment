@@ -131,22 +131,6 @@
     <button class="btn btn-primary" onclick="handleSaveProfile()">Save profile</button>
   </div>
 
-  <div class="card" id="changePasswordSection">
-    <h2>Change password</h2>
-    <input class="text-input" type="password" id="currentPasswordInput" placeholder="Current password">
-    <div class="field-pair">
-      <div>
-        <input class="text-input" type="password" id="newPasswordInput" placeholder="New password">
-      </div>
-      <div>
-        <input class="text-input" type="password" id="newPasswordConfirmInput" placeholder="Confirm new password">
-      </div>
-    </div>
-    <div class="field-error" id="changePasswordError"></div>
-    <div class="field-error" id="changePasswordSuccess" style="color:#2E8B57;"></div>
-    <button class="btn btn-primary" onclick="handleChangePassword()">Save new password</button>
-  </div>
-
   <div class="card">
     <h2>Change email</h2>
     <p>We'll send a confirmation link to your new address — the change won't take effect until you click it there.</p>
@@ -177,7 +161,7 @@ const firebaseConfig = {
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
 import {
   getAuth, onAuthStateChanged, GoogleAuthProvider,
-  reauthenticateWithCredential, reauthenticateWithPopup, EmailAuthProvider, updatePassword,
+  reauthenticateWithCredential, reauthenticateWithPopup, EmailAuthProvider,
   updateProfile, verifyBeforeUpdateEmail
 } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
 import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
@@ -325,7 +309,6 @@ onAuthStateChanged(auth, async (user) => {
 
   const hasPasswordProvider = user.providerData.some(p => p.providerId === 'password');
   document.getElementById('editEmailCurrentPassword').style.display = hasPasswordProvider ? 'block' : 'none';
-  document.getElementById('changePasswordSection').style.display = hasPasswordProvider ? 'block' : 'none';
 
   const progressRef = doc(db, 'progress', user.uid);
   const snap = await getDoc(progressRef);
@@ -369,41 +352,6 @@ window.handleSaveProfile = async function(){
   } catch (err){
     console.error('Could not save profile:', err);
     errorEl.textContent = 'Something went wrong saving your profile — please try again.';
-  }
-};
-
-window.handleChangePassword = async function(){
-  const currentPassword = document.getElementById('currentPasswordInput').value;
-  const newPassword = document.getElementById('newPasswordInput').value;
-  const confirmPassword = document.getElementById('newPasswordConfirmInput').value;
-  const errorEl = document.getElementById('changePasswordError');
-  const successEl = document.getElementById('changePasswordSuccess');
-  errorEl.textContent = '';
-  successEl.textContent = '';
-
-  if (!currentPassword || !newPassword || !confirmPassword){
-    errorEl.textContent = 'Fill in all three fields.';
-    return;
-  }
-  if (newPassword !== confirmPassword){
-    errorEl.textContent = 'New passwords do not match.';
-    return;
-  }
-  if (newPassword.length < 6){
-    errorEl.textContent = 'New password should be at least 6 characters.';
-    return;
-  }
-
-  try {
-    const credential = EmailAuthProvider.credential(currentUser.email, currentPassword);
-    await reauthenticateWithCredential(currentUser, credential);
-    await updatePassword(currentUser, newPassword);
-    successEl.textContent = 'Password updated.';
-    document.getElementById('currentPasswordInput').value = '';
-    document.getElementById('newPasswordInput').value = '';
-    document.getElementById('newPasswordConfirmInput').value = '';
-  } catch (err){
-    errorEl.textContent = friendlyAuthError(err.code);
   }
 };
 
