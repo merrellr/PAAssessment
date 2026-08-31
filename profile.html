@@ -17,7 +17,7 @@
   body{ margin:0; background: var(--bg); font-family:'IBM Plex Sans', system-ui, sans-serif; color: var(--ink); }
   .wrap{ max-width: 560px; margin: 0 auto; padding: 24px 16px 48px; }
   .brand-header{ display:flex; align-items:center; gap:9px; padding: 0 0 14px; }
-  .brand-word{ font-family:'Space Grotesk', sans-serif; font-weight:600; font-size: 15px; color: var(--navy-deep); }
+  .brand-word{ font-family:'Space Grotesk', sans-serif; font-weight:700; font-size: 15px; color: var(--navy-deep); }
   .brand-accent-bar{ height: 3px; background: linear-gradient(90deg, var(--navy) 0%, var(--cyan) 100%); border-radius: 2px; margin-bottom: 24px; }
   .back-link{ font-size: 13px; color: var(--gray); text-decoration:none; display:inline-block; margin-bottom: 16px; }
   .back-link:hover{ color: var(--navy); }
@@ -54,13 +54,16 @@
 </head>
 <body>
 <div class="wrap">
-  <div class="brand-header">
-    <svg width="22" height="22" viewBox="0 0 40 40" aria-hidden="true">
+  <a href="lms-dashboard.html" class="brand-header" style="text-decoration:none;">
+    <svg width="28" height="28" viewBox="0 0 40 40" aria-hidden="true">
       <polygon points="20,3 35,11.5 35,28.5 20,37 5,28.5 5,11.5" fill="#1A4584"/>
       <polygon points="20,10 29,15 29,25 20,30 11,25 11,15" fill="none" stroke="#35C2E8" stroke-width="1.5"/>
     </svg>
-    <span class="brand-word">Product Advisory Learning</span>
-  </div>
+    <div>
+      <div style="font-family:'IBM Plex Sans', sans-serif; font-weight:600; font-size:10.5px; letter-spacing:0.06em; color:var(--gray); line-height:1;">PRODUCT ADVISORY</div>
+      <div class="brand-word" style="font-size:19px; line-height:1.3;">Learning</div>
+    </div>
+  </a>
   <div class="brand-accent-bar"></div>
   <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
     <a class="back-link" href="lms-dashboard.html" style="margin-bottom:0;">← Back to dashboard</a>
