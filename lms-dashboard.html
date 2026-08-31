@@ -132,7 +132,7 @@
 <div class="wrap">
 
   <div class="brand-header">
-    <a href="https://www.productadvisory.co/" class="brand-header-left" style="text-decoration:none;">
+    <a href="lms-dashboard.html" class="brand-header-left" style="text-decoration:none;">
       <svg width="28" height="28" viewBox="0 0 40 40" aria-hidden="true">
         <polygon points="20,3 35,11.5 35,28.5 20,37 5,28.5 5,11.5" fill="#1A4584"/>
         <polygon points="20,10 29,15 29,25 20,30 11,25 11,15" fill="none" stroke="#35C2E8" stroke-width="1.5"/>
@@ -462,7 +462,7 @@ const RESULTS_LOG_URL = "https://script.google.com/macros/s/AKfycbynJQYF9rv5maL_
    to treat it as a new URL and fetch fresh instead of serving a
    stale cached copy of the old content.
    ================================================================ */
-const CONTENT_VERSION = "40";
+const CONTENT_VERSION = "41";
 
 /* ================================================================
    EASY-EDIT ZONE 3: COURSE CATALOG
@@ -1206,19 +1206,31 @@ function renderCatalog(progress, assessmentResult){
     const group = document.createElement('div');
     group.className = 'domain-group';
 
-    const title = document.createElement('div');
-    title.className = 'domain-title';
-    title.style.cssText = 'display:flex; align-items:center; gap:9px;';
-    title.innerHTML = domainIconBadgeHtml(domainKey, 24) + '<span>' + DOMAINS[domainKey].label + '</span>';
-    group.appendChild(title);
-
-    const row = document.createElement('div');
-    row.className = 'tier-row';
-
     // Their assessed tier for this domain, if we have a result — used to
     // grey out tiers below where they already tested in.
     const assessedTierSlug = assessmentResult ? tierSlugForPct(assessmentResult.categoryPct[domainKey]) : null;
     const assessedTierIndex = assessedTierSlug ? TIER_ORDER.indexOf(assessedTierSlug) : -1;
+
+    // Domain-level completion %, scoped to assigned tiers only (same
+    // scoping as the "Your courses" tile), shown next to the heading.
+    let domainAssigned = 0, domainCompleted = 0;
+    TIERS.forEach((tier, tierIndex) => {
+      if (assessedTierIndex > -1 && tierIndex < assessedTierIndex) return;
+      domainAssigned++;
+      if (isCourseComplete(progress, domainKey + '-' + tier.slug)) domainCompleted++;
+    });
+    const domainPct = domainAssigned > 0 ? Math.round((domainCompleted / domainAssigned) * 100) : 0;
+
+    const title = document.createElement('div');
+    title.className = 'domain-title';
+    title.style.cssText = 'display:flex; align-items:center; gap:9px;';
+    title.innerHTML = domainIconBadgeHtml(domainKey, 24)
+      + '<span>' + DOMAINS[domainKey].label + '</span>'
+      + '<span style="font-size:12px; font-weight:500; color:var(--gray); margin-left:auto;">' + domainPct + '% complete</span>';
+    group.appendChild(title);
+
+    const row = document.createElement('div');
+    row.className = 'tier-row';
 
     TIERS.forEach((tier, tierIndex) => {
       const courseId = domainKey + '-' + tier.slug;
@@ -1307,19 +1319,34 @@ function fetchAssessmentResult(email){
   });
 }
 
-/* Picks the two lowest-scoring domains as before, but now skips a
-   recommendation forward to the next tier up if the person has
-   already completed the course we'd otherwise have recommended —
-   so a finished course never lingers in "Recommended for you". */
+/* Recommends from the domains with the most actual work left to do —
+   assigned courses not yet completed — rather than raw assessment
+   score. This is what makes recommendations respond immediately to
+   completing a course, not just to retaking the assessment: finishing
+   a course shrinks that domain's gap right away. Ties in gap count
+   fall back to lowest score first. Within a domain, the course
+   recommended is always the one at the person's current tier level,
+   walking forward automatically if that one's already done. */
 function renderRecommendations(result, progress){
-  const sorted = Object.keys(result.categoryPct).sort((a, b) => result.categoryPct[a] - result.categoryPct[b]);
-  const lowestTwo = sorted.slice(0, 2);
+  const domainGaps = Object.keys(DOMAINS).map(domainKey => {
+    const assessedTierIndex = TIER_ORDER.indexOf(tierSlugForPct(result.categoryPct[domainKey]));
+    let assigned = 0, completed = 0;
+    TIERS.forEach((tier, tierIndex) => {
+      if (tierIndex < assessedTierIndex) return; // tested out — not assigned
+      assigned++;
+      if (isCourseComplete(progress, domainKey + '-' + tier.slug)) completed++;
+    });
+    return { domainKey, gap: assigned - completed, pct: result.categoryPct[domainKey] || 0 };
+  });
+
+  domainGaps.sort((a, b) => (b.gap - a.gap) || (a.pct - b.pct));
+  const topDomains = domainGaps.filter(d => d.gap > 0).slice(0, 2);
 
   const banner = document.getElementById('recBanner');
   const chips = document.getElementById('recChips');
   chips.innerHTML = '';
 
-  lowestTwo.forEach(domainKey => {
+  topDomains.forEach(({ domainKey }) => {
     let tierIndex = TIER_ORDER.indexOf(tierSlugForPct(result.categoryPct[domainKey]));
     let courseId = domainKey + '-' + TIER_ORDER[tierIndex];
 
