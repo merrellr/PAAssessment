@@ -331,6 +331,16 @@
         </div>
       </div>
 
+      <div class="card" id="insightSummaryCard" style="margin-bottom:0; background:#EEF3FA; border-color:var(--line);">
+        <span class="eyebrow">Your insight</span>
+        <div style="display:flex; align-items:flex-start; gap:10px; margin-top:10px;">
+          <div style="width:30px; height:30px; border-radius:8px; background:var(--navy); display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 L14.5 9 L22 9 L16 13.5 L18 21 L12 16.5 L6 21 L8 13.5 L2 9 L9.5 9 Z"/></svg>
+          </div>
+          <div style="font-size:12.5px; color:var(--ink-soft); line-height:1.55;" id="insightSummaryText"></div>
+        </div>
+      </div>
+
       <div class="card" id="profileTile" style="margin-bottom:0;">
         <span class="eyebrow">Your profile</span>
         <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:10px; font-size:12.5px;">
@@ -354,15 +364,6 @@
         <a href="profile.html" style="display:inline-block; font-size:12.5px; color:var(--navy); text-decoration:underline; margin-top:14px;">Edit profile</a>
       </div>
 
-    </div>
-
-    <div class="card" id="insightSummaryCard" style="display:none; margin-bottom:18px; background:#EEF3FA; border-color:var(--line);">
-      <div style="display:flex; align-items:flex-start; gap:12px;">
-        <div style="width:34px; height:34px; border-radius:9px; background:var(--navy); display:flex; align-items:center; justify-content:center; flex-shrink:0;">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 L14.5 9 L22 9 L16 13.5 L18 21 L12 16.5 L6 21 L8 13.5 L2 9 L9.5 9 Z"/></svg>
-        </div>
-        <div style="font-size:13.5px; color:var(--ink-soft); line-height:1.6; padding-top:4px;" id="insightSummaryText"></div>
-      </div>
     </div>
 
     <div id="progressToast" style="display:none; background:#EEF9F1; border:1px solid #2E8B57; border-radius:10px; padding:10px 14px; margin-bottom:14px; font-size:13.5px; color:#1f6b47; text-align:center;">Nice work! Updating your progress…</div>
@@ -448,7 +449,7 @@ const RESULTS_LOG_URL = "https://script.google.com/macros/s/AKfycbynJQYF9rv5maL_
    to treat it as a new URL and fetch fresh instead of serving a
    stale cached copy of the old content.
    ================================================================ */
-const CONTENT_VERSION = "38";
+const CONTENT_VERSION = "39";
 
 /* ================================================================
    EASY-EDIT ZONE 3: COURSE CATALOG
@@ -839,7 +840,7 @@ function animateCountUp(el, from, to, duration){
 
 function renderAssignedStat(progress, assessmentResult){
   const tileRow = document.getElementById('tileRow');
-  if (!assessmentResult){ tileRow.style.display = 'none'; document.getElementById('insightSummaryCard').style.display = 'none'; return; }
+  if (!assessmentResult){ tileRow.style.display = 'none'; return; }
   tileRow.style.display = 'grid';
 
   let totalAssigned = 0, totalCompletedInPlan = 0;
@@ -958,9 +959,8 @@ function populateProfileTile(progress, assessmentResult){
 /* Auto-generated plain-language summary — no LLM involved, just finds
    the highest and lowest scoring domains from data already on hand. */
 function populateInsightSummary(assessmentResult){
-  const card = document.getElementById('insightSummaryCard');
   const domainKeys = Object.keys(DOMAINS);
-  if (!domainKeys.length){ card.style.display = 'none'; return; }
+  if (!domainKeys.length) return;
 
   let strongest = domainKeys[0], weakest = domainKeys[0];
   domainKeys.forEach(key => {
@@ -973,7 +973,6 @@ function populateInsightSummary(assessmentResult){
     + `Your primary growth opportunity right now is in <strong>${DOMAINS[weakest].label}</strong>, `
     + `a good place to focus your next few courses.`;
   document.getElementById('insightSummaryText').innerHTML = text;
-  card.style.display = 'block';
 }
 
 function drawSummaryRing(pct, color){
