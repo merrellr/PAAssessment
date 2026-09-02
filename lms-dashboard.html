@@ -383,7 +383,10 @@
       </div>
     </div>
 
-    <h2 style="font-family:'Space Grotesk', sans-serif; font-size:16px; color:var(--navy-deep); margin: 6px 0 14px;">Your Courses</h2>
+    <div style="display:flex; align-items:baseline; justify-content:space-between; margin: 6px 0 14px;">
+      <h2 style="font-family:'Space Grotesk', sans-serif; font-size:16px; color:var(--navy-deep); margin:0;">Your Courses</h2>
+      <a href="framework.html" style="font-size:12.5px; color:var(--navy); text-decoration:underline;">About the framework →</a>
+    </div>
 
     <div class="rec-banner" id="recBanner" style="display:none;">
       <span class="eyebrow">Recommended for you</span>
@@ -403,6 +406,7 @@
 
 </div>
 
+<script src="content/framework-data.js"></script>
 <script type="module">
 /* ================================================================
    EASY-EDIT ZONE 1: FIREBASE CONFIG
@@ -434,7 +438,7 @@ const RESULTS_LOG_URL = "https://script.google.com/macros/s/AKfycbynJQYF9rv5maL_
    to treat it as a new URL and fetch fresh instead of serving a
    stale cached copy of the old content.
    ================================================================ */
-const CONTENT_VERSION = "47";
+const CONTENT_VERSION = "48";
 
 /* ================================================================
    EASY-EDIT ZONE 3: COURSE CATALOG
@@ -1016,6 +1020,43 @@ function domainIconBadgeHtml(domainKey, size){
   `;
 }
 
+const TIER_LABEL_BY_SLUG = { novice: "No Experience", moderate: "Moderate Experience", experienced: "Lots of Experience", advanced: "Advanced Experience" };
+
+/* Small "i" button + hidden popover, toggled via toggleInfoPopover below.
+   Pulls its text from window.FRAMEWORK_DATA (content/framework-data.js),
+   the same source the full framework.html page reads from. */
+function infoIconHtml(domainKey, currentTierSlug){
+  const uid = 'infoPopover-' + domainKey;
+  const framework = (window.FRAMEWORK_DATA && window.FRAMEWORK_DATA[domainKey]) || null;
+  const description = framework ? framework.description : '';
+  const tierLine = currentTierSlug
+    ? `<div style="font-size:12px; color:var(--navy); font-weight:600; margin-bottom:10px;">Your current level: ${TIER_LABEL_BY_SLUG[currentTierSlug]}</div>`
+    : '';
+  return `
+    <span style="position:relative; display:inline-flex;">
+      <button type="button" onclick="toggleInfoPopover('${uid}')" style="width:16px; height:16px; border-radius:50%; border:1.5px solid var(--gray); background:none; color:var(--gray); font-size:10px; font-weight:700; line-height:1; cursor:pointer; display:flex; align-items:center; justify-content:center; padding:0; font-family:'Space Grotesk', sans-serif;" aria-label="About this domain">i</button>
+      <div id="${uid}" class="info-popover" style="display:none; position:absolute; top:22px; left:0; z-index:20; width:270px; background:#fff; border:1px solid var(--line); border-radius:10px; padding:14px 16px; box-shadow:0 8px 24px rgba(0,0,0,0.14); font-weight:400;">
+        <div style="font-size:13px; color:var(--ink-soft); line-height:1.5; margin-bottom:10px;">${description}</div>
+        ${tierLine}
+        <a href="framework.html" style="font-size:12.5px; color:var(--navy); text-decoration:underline;">View full framework →</a>
+      </div>
+    </span>
+  `;
+}
+
+window.toggleInfoPopover = function(uid){
+  const target = document.getElementById(uid);
+  const isOpen = target.style.display === 'block';
+  document.querySelectorAll('.info-popover').forEach(el => { el.style.display = 'none'; });
+  target.style.display = isOpen ? 'none' : 'block';
+};
+
+document.addEventListener('click', (e) => {
+  if (!e.target.closest('.info-popover') && e.target.getAttribute('aria-label') !== 'About this domain'){
+    document.querySelectorAll('.info-popover').forEach(el => { el.style.display = 'none'; });
+  }
+});
+
 function buildDomainBarsHtml(assessmentResult){
   return Object.keys(DOMAINS).map(domainKey => {
     const pct = Math.round(assessmentResult.categoryPct[domainKey] || 0);
@@ -1205,11 +1246,13 @@ function renderCatalog(progress, assessmentResult){
     });
     const domainPct = domainAssigned > 0 ? Math.round((domainCompleted / domainAssigned) * 100) : 0;
 
+    const currentTierSlug = assessmentResult ? tierSlugForPct(assessmentResult.categoryPct[domainKey]) : null;
     const title = document.createElement('div');
     title.className = 'domain-title';
-    title.style.cssText = 'display:flex; align-items:center; gap:9px;';
+    title.style.cssText = 'display:flex; align-items:center; gap:9px; position:relative;';
     title.innerHTML = domainIconBadgeHtml(domainKey, 24)
       + '<span>' + DOMAINS[domainKey].label + '</span>'
+      + infoIconHtml(domainKey, currentTierSlug)
       + '<span style="font-size:12px; font-weight:500; color:var(--gray); margin-left:auto;">' + domainPct + '% complete</span>';
     group.appendChild(title);
 
@@ -1263,8 +1306,8 @@ function renderLockedTeaser(wrap){
 
     const title = document.createElement('div');
     title.className = 'domain-title';
-    title.style.cssText = 'display:flex; align-items:center; gap:9px; opacity:0.6;';
-    title.innerHTML = domainIconBadgeHtml(domainKey, 24) + '<span>' + DOMAINS[domainKey].label + '</span>';
+    title.style.cssText = 'display:flex; align-items:center; gap:9px; opacity:0.6; position:relative;';
+    title.innerHTML = domainIconBadgeHtml(domainKey, 24) + '<span>' + DOMAINS[domainKey].label + '</span>' + infoIconHtml(domainKey, null);
     group.appendChild(title);
 
     const row = document.createElement('div');
