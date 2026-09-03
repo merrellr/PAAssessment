@@ -19,6 +19,7 @@
   .brand-word{ font-family:'Space Grotesk', sans-serif; font-weight:700; font-size:15px; color:var(--navy-deep); }
   .brand-accent-bar{ height:3px; background:linear-gradient(90deg, var(--navy) 0%, var(--cyan) 100%); border-radius:2px; margin-bottom:28px; }
   .back-link{ font-size:13px; color:var(--gray); text-decoration:none; display:inline-block; margin-bottom:16px; }
+  .back-link:hover{ color:var(--navy); }
   .card{ background:#fff; border:1px solid var(--line); border-radius:14px; padding:24px 26px; margin-bottom:18px; }
   h1{ font-family:'Space Grotesk', sans-serif; font-size:24px; color:var(--navy-deep); margin:0 0 10px; }
   h2{ font-family:'Space Grotesk', sans-serif; font-size:17px; color:var(--navy-deep); margin:0; }
@@ -26,10 +27,31 @@
   .eyebrow{ font-family:'Space Grotesk', sans-serif; font-weight:600; font-size:12px; letter-spacing:0.06em; color:var(--cyan); text-transform:uppercase; }
   .domain-header{ display:flex; align-items:center; gap:12px; margin-bottom:10px; }
   .domain-badge{ width:40px; height:40px; border-radius:10px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
-  .tier-grid{ display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap:12px; margin-top:16px; }
-  .tier-block{ background:var(--bg); border-radius:10px; padding:14px 16px; border-top:3px solid var(--line); }
-  .tier-block-label{ font-family:'Space Grotesk', sans-serif; font-weight:700; font-size:12.5px; margin-bottom:6px; }
-  .tier-block p{ font-size:13px; margin:0; }
+
+  /* Shared "dot meter" used both in the legend and on each level tab:
+     three slots, filled left-to-right — 0 for No Experience, then 1 / 2 / 3.
+     This is the visual language we'll reuse on the dashboard later. */
+  .tier-dots{ display:flex; gap:4px; }
+  .tier-dot{ width:9px; height:9px; border-radius:50%; border:1.5px solid var(--line); box-sizing:border-box; }
+
+  .tier-legend{ display:flex; flex-wrap:wrap; gap:10px 20px; align-items:center; margin-top:14px; }
+  .tier-legend .leg-item{ display:flex; align-items:center; gap:7px; font-size:12.5px; color:var(--ink-soft); }
+  .legend-intro{ font-size:13px; color:var(--ink-soft); margin:18px 0 0; }
+  .legend-intro strong{ color:var(--ink); }
+
+  .tier-tabs{ display:flex; gap:8px; margin-top:16px; flex-wrap:wrap; }
+  .tier-tab{ flex:1 1 130px; min-width:130px; background:var(--bg); border:1.5px solid var(--line); border-radius:10px;
+    padding:10px 12px; cursor:pointer; text-align:left; font-family:inherit;
+    transition:border-color .15s ease, background .15s ease, box-shadow .15s ease; }
+  .tier-tab:hover{ background:#fff; }
+  .tier-tab:focus-visible{ outline:2px solid currentColor; outline-offset:2px; }
+  .tier-tab.active{ background:#fff; border-color:currentColor; box-shadow:0 1px 3px rgba(22,33,62,0.08); }
+  .tier-tab-label{ font-family:'Space Grotesk', sans-serif; font-weight:700; font-size:12px; margin-top:6px; color:var(--ink); }
+
+  .tier-detail{ background:var(--bg); border-radius:10px; padding:16px 18px; margin-top:12px; border-top:3px solid var(--line); }
+  .tier-detail p{ margin:0; font-size:13.5px; line-height:1.6; }
+  .tier-detail:focus-visible{ outline:2px solid var(--navy); outline-offset:2px; }
+
   .cta-row{ text-align:center; margin-top:28px; }
   .btn{ display:inline-block; background:linear-gradient(135deg, var(--navy) 0%, var(--navy-deep) 100%); color:#fff; padding:12px 26px; border-radius:24px; text-decoration:none; font-weight:600; font-size:14.5px; }
 </style>
@@ -56,7 +78,9 @@
     <span class="eyebrow">The Training Framework</span>
     <h1>Seven Domains, Four Levels Each</h1>
     <p>Everything in this program is organized around seven core skill areas that make up modern product management, three of them focused specifically on working with AI. Your assessment measures where you stand in each one today, and your course plan is built from that starting point, not a generic curriculum everyone gets.</p>
-    <p>Within each domain, there are four levels: <strong>No Experience</strong>, <strong>Moderate Experience</strong>, <strong>Lots of Experience</strong>, and <strong>Advanced Experience</strong>. These aren't just labels, each one describes a genuinely different way of operating in that domain, not just "knows more facts." Browse the seven domains below to see exactly what's being measured and what growth actually looks like in each one.</p>
+    <p>Within each domain, there are four levels: <strong>No Experience</strong>, <strong>Moderate Experience</strong>, <strong>Lots of Experience</strong>, and <strong>Advanced Experience</strong>. These aren't just labels, each one describes a genuinely different way of operating in that domain, not just "knows more facts." Pick a level under any domain below to see exactly what it looks like.</p>
+    <p class="legend-intro"><strong>Reading the levels:</strong> each one is marked with a three-dot meter that fills as experience grows.</p>
+    <div class="tier-legend" id="tierLegend" aria-hidden="true"></div>
   </div>
 
   <div id="domainsContainer"></div>
@@ -93,23 +117,48 @@ const TIER_LABELS = [
   ["experienced", "Lots of Experience"],
   ["advanced", "Advanced Experience"]
 ];
+const TIER_KEYS = TIER_LABELS.map(([k]) => k);
+
+// Filled-dot count per tier: 0 for No Experience, then 1 / 2 / 3 —
+// the shared visual language for tier level across the site.
+const TIER_FILLED_DOTS = { novice: 0, moderate: 1, experienced: 2, advanced: 3 };
+
+function tierDotsHtml(tierKey, color){
+  let dots = '';
+  for (let i = 0; i < 3; i++){
+    const filled = i < TIER_FILLED_DOTS[tierKey];
+    dots += `<span class="tier-dot" style="${filled ? `background:${color}; border-color:${color};` : ''}"></span>`;
+  }
+  return `<span class="tier-dots">${dots}</span>`;
+}
+
+// Which tier is currently shown for each domain (defaults to the first).
+const activeTier = {};
+
+const legend = document.getElementById('tierLegend');
+legend.innerHTML = TIER_LABELS.map(([key, label]) =>
+  `<span class="leg-item">${tierDotsHtml(key, '#1A4584')}<span>${label}</span></span>`
+).join('');
 
 const container = document.getElementById('domainsContainer');
 Object.keys(window.FRAMEWORK_DATA).forEach(domainKey => {
   const domain = window.FRAMEWORK_DATA[domainKey];
   const color = DOMAIN_COLORS[domainKey];
+  activeTier[domainKey] = TIER_KEYS[0];
+
   const card = document.createElement('div');
   card.className = 'card';
 
-  let tierBlocks = '';
-  TIER_LABELS.forEach(([tierKey, tierLabel]) => {
-    tierBlocks += `
-      <div class="tier-block" style="border-top-color:${color};">
-        <div class="tier-block-label" style="color:${color};">${tierLabel}</div>
-        <p>${domain.tiers[tierKey]}</p>
-      </div>
-    `;
-  });
+  const tabs = TIER_LABELS.map(([tierKey, tierLabel], i) => `
+    <button type="button" role="tab" id="tab-${domainKey}-${tierKey}"
+      class="tier-tab${i === 0 ? ' active' : ''}"
+      aria-selected="${i === 0 ? 'true' : 'false'}" aria-controls="panel-${domainKey}"
+      tabindex="${i === 0 ? 0 : -1}" style="color:${color};"
+      onclick="selectTier('${domainKey}', '${tierKey}')">
+      ${tierDotsHtml(tierKey, color)}
+      <span class="tier-tab-label">${tierLabel}</span>
+    </button>
+  `).join('');
 
   card.innerHTML = `
     <div class="domain-header">
@@ -119,12 +168,47 @@ Object.keys(window.FRAMEWORK_DATA).forEach(domainKey => {
       <h2>${domain.label}</h2>
     </div>
     <p>${domain.description}</p>
-    <div class="tier-grid">${tierBlocks}</div>
+    <div class="tier-tabs" role="tablist" aria-label="Experience levels for ${domain.label}">${tabs}</div>
+    <div class="tier-detail" id="panel-${domainKey}" role="tabpanel" tabindex="0" aria-live="polite" style="border-top-color:${color};">
+      <p>${domain.tiers[TIER_KEYS[0]]}</p>
+    </div>
   `;
   container.appendChild(card);
+
+  // Arrow-key / Home / End navigation within this domain's level tabs.
+  card.querySelector('.tier-tabs').addEventListener('keydown', (e) => {
+    const currentIdx = TIER_KEYS.indexOf(activeTier[domainKey]);
+    let nextIdx = null;
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') nextIdx = (currentIdx + 1) % TIER_KEYS.length;
+    else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') nextIdx = (currentIdx - 1 + TIER_KEYS.length) % TIER_KEYS.length;
+    else if (e.key === 'Home') nextIdx = 0;
+    else if (e.key === 'End') nextIdx = TIER_KEYS.length - 1;
+    if (nextIdx === null) return;
+    e.preventDefault();
+    const nextKey = TIER_KEYS[nextIdx];
+    selectTier(domainKey, nextKey);
+    document.getElementById('tab-' + domainKey + '-' + nextKey).focus();
+  });
 });
 
 document.getElementById('footerYear').textContent = new Date().getFullYear();
+
+window.selectTier = function(domainKey, tierKey){
+  const color = DOMAIN_COLORS[domainKey];
+  activeTier[domainKey] = tierKey;
+
+  const panel = document.getElementById('panel-' + domainKey);
+  panel.querySelector('p').textContent = window.FRAMEWORK_DATA[domainKey].tiers[tierKey];
+  panel.style.borderTopColor = color;
+
+  TIER_KEYS.forEach((key) => {
+    const tab = document.getElementById('tab-' + domainKey + '-' + key);
+    const on = key === tierKey;
+    tab.classList.toggle('active', on);
+    tab.setAttribute('aria-selected', on ? 'true' : 'false');
+    tab.tabIndex = on ? 0 : -1;
+  });
+};
 </script>
 </body>
 </html>
