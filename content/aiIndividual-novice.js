@@ -10,7 +10,7 @@
 window.CONTENT_OVERRIDES = window.CONTENT_OVERRIDES || {};
 
 window.CONTENT_OVERRIDES["aiIndividual-novice"] = {
-  sourceUrl: "",
+  sourceUrl: "https://www.linkedin.com/pulse/ai-project-its-practice-heres-how-build-one-robert-merrell-4skoc",
   lessons: [
     {
       id: 1,
