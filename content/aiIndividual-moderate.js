@@ -1,9 +1,7 @@
 /* ================================================================
    COURSE CONTENT: AI Fluency — Individual, Moderate Experience
-   Source articles: "From Roadmaps to Rituals: How Agentic AI Is
-   Rewriting the Product Manager's Job" and "How to Build
-   Product-Focused AI Agents That Actually Make Better Decisions"
-   (Robert Merrell, LinkedIn)
+   Source article: "From Roadmaps to Rituals: How Agentic AI Is
+   Rewriting the Product Manager's Job" (Robert Merrell, LinkedIn)
    ================================================================
    This file only needs to be edited if you're changing THIS
    course's content. Adding a new course means creating a new file
@@ -12,7 +10,7 @@
 window.CONTENT_OVERRIDES = window.CONTENT_OVERRIDES || {};
 
 window.CONTENT_OVERRIDES["aiIndividual-moderate"] = {
-  sourceUrl: "",
+  sourceUrl: "https://www.linkedin.com/pulse/from-roadmaps-rituals-how-agentic-ai-rewriting-job-merrell-mism-r8pnc",
   lessons: [
     {
       id: 1,
@@ -183,37 +181,42 @@ window.CONTENT_OVERRIDES["aiIndividual-moderate"] = {
     },
     {
       id: 5,
-      title: "Lesson 5: Shape the Agent, Protect Your Judgment",
+      title: "Lesson 5: The PM as Conductor",
       body: `
-        <p>Two habits make the difference between an agent that helps and one that adds noise.</p>
+        <p>When these rituals have agents built into them, the job itself starts to look different:</p>
+        <ul>
+          <li>Less time creating artifacts, more time aligning people.</li>
+          <li>Less energy chasing status, more energy shaping strategy.</li>
+          <li>Fewer one-off tasks, more reusable systems and playbooks.</li>
+        </ul>
+        <p>Your calendar shifts toward regular review rituals with AI-prepared inputs, deep-dive sessions with design, engineering, and stakeholders, and protected focus time for thinking, writing, and deciding. You become less of a project manager and more of a <strong>conductor</strong>, not because you work less, but because more of your effort points at the parts of the job that are uniquely yours: framing problems, telling the story, making hard choices under uncertainty.</p>
+        <p>You don't need an "AI transformation" to get there. Three practical steps:</p>
       `,
       steps: [
-        { title: "Write a one-sentence role for each agent", detail: "Not \"an AI assistant.\" Something like: \"This agent exists to challenge product assumptions, surface risk, and improve decision quality before engineering effort is committed.\" If you can't state the purpose clearly, it won't deliver consistent value." },
-        { title: "Ground it in product reality, persistently", detail: "Give the agent standing context it doesn't have to be re-told each time: the real problem you solve and who for, your strategic and regulatory constraints, common customer objections and lost-deal reasons, and your product philosophy (speed vs. quality bias, opinionated vs. flexible)." },
-        { title: "Make it usefully opinionated", detail: "Generic system prompts produce generic output. Bake in productive bias that reflects your strategy: question feature requests that don't tie to a user outcome, surface second-order effects before recommending, prioritize long-term trust over short-term engagement." },
-        { title: "Assign it a role in real product moments", detail: "Instead of asking for answers, say: \"Review this PRD as a skeptical product leader and identify assumptions, risks, and gaps.\" That shifts the agent from idea generation to decision-quality improvement." },
-        { title: "Protect your judgment time", detail: "Use the hours the agents give back for deeper strategic work. Don't immediately refill the gap with more meetings. Treat that time as a \"sense-making\" block." }
+        { title: "Pick one ritual", detail: "Choose a single workflow that already happens on a regular cadence — weekly backlog grooming, monthly KPI reviews. One is enough to start." },
+        { title: "Define a \"good enough\" first agent", detail: "Be explicit about what it should do: gather inputs, summarize, group, or propose options. Accept that version one will be imperfect and improve it through your feedback, the same way you'd coach a new team member." },
+        { title: "Protect your judgment time", detail: "Use the hours you get back to deepen your strategic work. Don't immediately fill the gap with more meetings or busywork. Treat that recovered time as a protected sense-making block." }
       ],
       checks: [
         {
-          question: "Why write a one-sentence role definition before designing prompts or workflows for an agent?",
+          question: "The lesson calls the shift \"from project manager to conductor.\" What does that mean in practice?",
           options: [
-            "It's a documentation requirement for most AI tools",
-            "If you can't describe the agent's purpose clearly, it won't deliver consistent value — the role is what keeps its output focused",
-            "It lets you skip giving the agent any other context"
+            "The PM stops doing hands-on work and only reviews others' output",
+            "More of the PM's effort points at the uniquely human parts — framing problems, telling the story, hard choices — while agents absorb the repeatable production work",
+            "The PM manages the AI agents the way they used to manage engineers"
           ],
           correct: 1,
-          explanation: "A clear, narrow purpose is what makes an agent reliable. Vague scope is the main reason agent output feels impressive in a demo and unreliable in daily work."
+          explanation: "\"Not because you work less, but because more of your effort is directed at the uniquely human parts of product management.\" The volume work moves to agents; the judgment and alignment work stays, and grows."
         },
         {
-          question: "The lesson says a product agent should be \"usefully opinionated\" rather than neutral. Why?",
+          question: "Why does the lesson say to accept that \"version one will be imperfect\" for a first agent?",
           options: [
-            "Neutral agents are slower to respond",
-            "When the agent's bias reflects your product strategy — question outcome-free requests, weigh long-term trust — that aligned judgment is an advantage, not a risk",
-            "Opinionated agents need less grounding context"
+            "Because AI output can't be improved once it's set up",
+            "Because you improve it through feedback over time — treating it like coaching a new team member, not like buying a finished tool",
+            "Because imperfect agents are cheaper to run"
           ],
           correct: 1,
-          explanation: "\"The goal is not neutrality. The goal is aligned judgment.\" A generic assistant gives generic answers; one shaped by your strategy gives answers you can act on."
+          explanation: "\"Treat agents as team members and invest in training them.\" A rough first version you refine beats waiting for a perfect one that never ships."
         },
         {
           label: "Bringing it together",
@@ -224,11 +227,11 @@ window.CONTENT_OVERRIDES["aiIndividual-moderate"] = {
             "Protect it as sense-making time — strategy, stakeholder alignment, the framing and hard-choice work agents can't do"
           ],
           correct: 2,
-          explanation: "The entire point of moving from roadmaps to rituals is to redirect effort toward the uniquely human parts of the job. Refilling the time with volume defeats the purpose."
+          explanation: "The entire point of moving from roadmaps to rituals is to redirect effort toward the uniquely human parts of the job. Refilling the time with volume defeats the purpose. The real question isn't \"will AI take my job?\" — it's \"how quickly can I redesign my job around the things only I can do?\""
         }
       ],
       reflection: {
-        prompt: "Pick one ritual you run on a cadence (grooming, insights review, KPI review). Write the one-sentence role you'd give an agent to take its first pass, and name the judgment call you'd keep for yourself."
+        prompt: "Pick one ritual you run on a cadence (grooming, insights review, KPI review). Describe the \"good enough\" first agent you'd build for it — what it gathers or summarizes — and the judgment call you'd keep for yourself."
       }
     }
   ]

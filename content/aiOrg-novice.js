@@ -10,7 +10,7 @@
 window.CONTENT_OVERRIDES = window.CONTENT_OVERRIDES || {};
 
 window.CONTENT_OVERRIDES["aiOrg-novice"] = {
-  sourceUrl: "",
+  sourceUrl: "https://www.linkedin.com/pulse/your-first-ai-product-team-designing-squad-agents-just-robert-merrell-vudmc",
   lessons: [
     {
       id: 1,

@@ -10,7 +10,7 @@
 window.CONTENT_OVERRIDES = window.CONTENT_OVERRIDES || {};
 
 window.CONTENT_OVERRIDES["aiOrg-advanced"] = {
-  sourceUrl: "",
+  sourceUrl: "https://www.linkedin.com/pulse/beyond-automation-win-customers-life-robert-merrell-bxltc",
   lessons: [
     {
       id: 1,
