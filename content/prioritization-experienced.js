@@ -11,7 +11,7 @@
 window.CONTENT_OVERRIDES = window.CONTENT_OVERRIDES || {};
 
 window.CONTENT_OVERRIDES["prioritization-experienced"] = {
-  sourceUrl: "",
+  sourceUrl: "https://www.linkedin.com/pulse/feature-fallacy-why-shipping-more-isnt-helping-your-do-merrell-mism-ozcbc",
   lessons: [
     {
       id: 1,
