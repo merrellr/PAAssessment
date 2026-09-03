@@ -10,7 +10,7 @@
 window.CONTENT_OVERRIDES = window.CONTENT_OVERRIDES || {};
 
 window.CONTENT_OVERRIDES["strategy-advanced"] = {
-  sourceUrl: "",
+  sourceUrl: "https://www.linkedin.com/pulse/how-build-product-focused-ai-agents-actually-make-merrell-mism-rmu8c",
   lessons: [
     {
       id: 1,
