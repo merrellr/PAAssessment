@@ -1,161 +1,78 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>The Training Framework — Product Advisory Learning</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
-<style>
-  :root{
-    --navy:#1A4584; --navy-deep:#12305e; --cyan:#35C2E8; --gray:#9AA3AD;
-    --ink:#16213E; --ink-soft:#4B5768; --line:#E3E9F0; --bg:#F5F8FB;
+/* ================================================================
+   TRAINING FRAMEWORK DATA
+   Shared by lms-dashboard.html (info popovers) and framework.html
+   (the full reference page), so the actual competency descriptions
+   only need to be edited in one place.
+   ================================================================ */
+window.FRAMEWORK_DATA = {
+  discovery: {
+    label: "Customer & Market Discovery",
+    description: "The practice of understanding real user needs, market dynamics, and problem validation before committing real resources to build something. It's what keeps a product grounded in reality instead of assumptions.",
+    tiers: {
+      novice: "Aware that customer research matters, but hasn't yet run a structured discovery conversation or validated a problem before starting to build.",
+      moderate: "Can conduct basic user interviews and gather feedback, but discovery often happens informally, or after a solution is already underway rather than before.",
+      experienced: "Runs a structured discovery process, validates problems before committing resources, and can reliably separate real signal from noise in user feedback.",
+      advanced: "Builds and teaches repeatable discovery systems across teams, and treats discovery as a genuine competitive advantage rather than a phase to get through."
+    }
+  },
+  strategy: {
+    label: "Product Strategy & Roadmapping",
+    description: "Translating market understanding and business goals into a coherent product direction, and a roadmap that credibly connects today's work to that direction rather than just a list of features.",
+    tiers: {
+      novice: "Roadmaps, when they exist, are mostly lists of requested features rather than a connected strategy.",
+      moderate: "Can build a roadmap with clear near-term priorities, but struggles to tie it clearly to broader business strategy or defend trade-offs under pressure.",
+      experienced: "Builds and communicates a roadmap that's genuinely tied to strategy, and can adapt it credibly as new information arrives without losing the thread.",
+      advanced: "Shapes strategy at the company level, not just the product level, and mentors others in strategic thinking."
+    }
+  },
+  prioritization: {
+    label: "Prioritization & Trade-offs",
+    description: "The discipline of deciding what to work on next, and just as importantly, what not to, given limited time and resources, in a way that holds up under real pressure.",
+    tiers: {
+      novice: "Prioritization is largely reactive, driven by whoever asked loudest or most recently.",
+      moderate: "Uses a basic prioritization framework, like a value-versus-effort view, but applies it inconsistently from one decision to the next.",
+      experienced: "Applies a prioritization framework consistently, and can clearly explain trade-offs to stakeholders who disagree with the call.",
+      advanced: "Designs prioritization systems that other teams adopt, and navigates prioritization conflicts at an organizational level."
+    }
+  },
+  execution: {
+    label: "Execution & Delivery",
+    description: "Turning decisions into shipped, working product, reliably and without unnecessary drama, from an idea all the way through launch and the iteration that follows.",
+    tiers: {
+      novice: "Execution happens, but timelines and scope are unpredictable, and surprises tend to show up late in the process.",
+      moderate: "Can run a team through a delivery cycle with reasonable predictability using a defined process.",
+      experienced: "Delivers complex, cross-team initiatives reliably, and builds in real contingency for the unexpected rather than hoping nothing goes wrong.",
+      advanced: "Designs delivery systems and rhythms that other teams adopt, and coaches others through complex, high-stakes launches."
+    }
+  },
+  stakeholder: {
+    label: "Stakeholder Communication & Influence",
+    description: "Building genuine alignment and trust across the many different people, teams, and functions a product touches, especially the ones that don't report to you.",
+    tiers: {
+      novice: "Communication is mostly reactive, updates happen when someone asks, rather than being shared proactively.",
+      moderate: "Keeps key stakeholders reasonably informed and can navigate straightforward disagreements as they come up.",
+      experienced: "Proactively builds alignment across functions before conflicts arise, and can influence outcomes without relying on formal authority.",
+      advanced: "Shapes how the organization communicates and collaborates cross-functionally, and mentors others in stakeholder management."
+    }
+  },
+  aiIndividual: {
+    label: "AI Fluency — Individual",
+    description: "How effectively someone personally uses AI tools to remove friction from their own work, and how well they've developed judgment about where to trust AI output and where to double-check it.",
+    tiers: {
+      novice: "Hasn't yet built a regular personal practice with AI tools, or is just starting to experiment.",
+      moderate: "Uses AI tools casually for specific tasks, but hasn't yet developed strong judgment about where it genuinely helps most.",
+      experienced: "Has a real, integrated personal practice with AI tools, and knows specifically where to trust the output and where it still needs a second look.",
+      advanced: "Has fully integrated multiple AI tools into a sophisticated daily workflow, and helps other people build that same judgment."
+    }
+  },
+  aiOrg: {
+    label: "AI Fluency — Organizational",
+    description: "The ability to bring real AI capability into an organization in a way that's durable and governed, and that survives beyond any one enthusiastic individual who happens to be good at it.",
+    tiers: {
+      novice: "AI use across the organization, where it exists at all, is scattered and individual, with no shared capability behind it.",
+      moderate: "Has helped build at least one shared, working AI tool or process that a whole team relies on, not just one person.",
+      experienced: "Has led an AI initiative from discovery through a real pilot to genuine adoption, with real metrics behind it.",
+      advanced: "Has built organization-wide AI capability and governance that scales cleanly across multiple teams and use cases."
+    }
   }
-  *{ box-sizing:border-box; }
-  body{ margin:0; background:var(--bg); font-family:'IBM Plex Sans', sans-serif; color:var(--ink); }
-  .wrap{ max-width:900px; margin:0 auto; padding:0 16px 48px; }
-  .brand-header{ display:flex; align-items:center; justify-content:space-between; gap:9px; padding:24px 0 14px; }
-  .brand-header-left{ display:flex; align-items:center; gap:9px; text-decoration:none; }
-  .brand-word{ font-family:'Space Grotesk', sans-serif; font-weight:700; font-size:15px; color:var(--navy-deep); }
-  .brand-accent-bar{ height:3px; background:linear-gradient(90deg, var(--navy) 0%, var(--cyan) 100%); border-radius:2px; margin-bottom:28px; }
-  .back-link{ font-size:13px; color:var(--gray); text-decoration:none; display:inline-block; margin-bottom:16px; }
-  .card{ background:#fff; border:1px solid var(--line); border-radius:14px; padding:24px 26px; margin-bottom:18px; }
-  h1{ font-family:'Space Grotesk', sans-serif; font-size:24px; color:var(--navy-deep); margin:0 0 10px; }
-  h2{ font-family:'Space Grotesk', sans-serif; font-size:17px; color:var(--navy-deep); margin:0; }
-  p{ line-height:1.6; color:var(--ink-soft); font-size:14.5px; }
-  .eyebrow{ font-family:'Space Grotesk', sans-serif; font-weight:600; font-size:12px; letter-spacing:0.06em; color:var(--cyan); text-transform:uppercase; }
-  .domain-header{ display:flex; align-items:center; gap:12px; margin-bottom:10px; }
-  .domain-badge{ width:40px; height:40px; border-radius:10px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
-  .tier-tabs{ display:flex; gap:8px; margin-top:16px; flex-wrap:wrap; }
-  .tier-tab{ flex:1; min-width:130px; background:var(--bg); border:1.5px solid var(--line); border-radius:10px; padding:10px 12px; cursor:pointer; text-align:left; font-family:inherit; }
-  .tier-tab.active{ background:#fff; border-color:currentColor; }
-  .tier-tab-label{ font-family:'Space Grotesk', sans-serif; font-weight:700; font-size:12px; margin-top:6px; color:var(--ink); }
-  .tier-dots{ display:flex; gap:4px; }
-  .tier-dot{ width:9px; height:9px; border-radius:50%; border:1.5px solid var(--line); }
-  .tier-detail{ background:var(--bg); border-radius:10px; padding:16px 18px; margin-top:12px; border-top:3px solid var(--line); }
-  .tier-detail p{ margin:0; font-size:13.5px; }
-  .cta-row{ text-align:center; margin-top:28px; }
-  .btn{ display:inline-block; background:linear-gradient(135deg, var(--navy) 0%, var(--navy-deep) 100%); color:#fff; padding:12px 26px; border-radius:24px; text-decoration:none; font-weight:600; font-size:14.5px; }
-</style>
-</head>
-<body>
-<div class="wrap">
-
-  <div class="brand-header">
-    <a href="lms-dashboard.html" class="brand-header-left" style="text-decoration:none;">
-      <svg width="28" height="28" viewBox="0 0 40 40" aria-hidden="true">
-        <polygon points="20,3 35,11.5 35,28.5 20,37 5,28.5 5,11.5" fill="#1A4584"/>
-        <polygon points="20,10 29,15 29,25 20,30 11,25 11,15" fill="none" stroke="#35C2E8" stroke-width="1.5"/>
-      </svg>
-      <div>
-        <div style="font-family:'IBM Plex Sans', sans-serif; font-weight:600; font-size:10.5px; letter-spacing:0.06em; color:var(--gray); line-height:1;">PRODUCT ADVISORY</div>
-        <div class="brand-word" style="font-size:19px; line-height:1.3;">Learning</div>
-      </div>
-    </a>
-  </div>
-  <div class="brand-accent-bar"></div>
-  <a class="back-link" href="lms-dashboard.html">← Back to dashboard</a>
-
-  <div class="card">
-    <span class="eyebrow">The Training Framework</span>
-    <h1>Seven Domains, Four Levels Each</h1>
-    <p>Everything in this program is organized around seven core skill areas that make up modern product management, three of them focused specifically on working with AI. Your assessment measures where you stand in each one today, and your course plan is built from that starting point, not a generic curriculum everyone gets.</p>
-    <p>Within each domain, there are four levels: <strong>No Experience</strong>, <strong>Moderate Experience</strong>, <strong>Lots of Experience</strong>, and <strong>Advanced Experience</strong>. These aren't just labels, each one describes a genuinely different way of operating in that domain, not just "knows more facts." Browse the seven domains below to see exactly what's being measured and what growth actually looks like in each one.</p>
-  </div>
-
-  <div id="domainsContainer"></div>
-
-  <div class="cta-row">
-    <a href="index.html" class="btn">Take the Assessment →</a>
-  </div>
-
-  <div style="margin-top:40px; padding:20px 0; border-top:1px solid var(--line); text-align:center; font-size:12px; color:var(--gray);">
-    © <span id="footerYear"></span> Product Advisory, LLC. All rights reserved. &nbsp;·&nbsp;
-    <a href="https://www.productadvisory.co/privacy-policy" target="_blank" rel="noopener" style="color:var(--gray); text-decoration:underline;">Privacy Policy</a> &nbsp;·&nbsp;
-    <a href="https://www.productadvisory.co/terms-of-use" target="_blank" rel="noopener" style="color:var(--gray); text-decoration:underline;">Terms of Use</a>
-  </div>
-</div>
-
-<script src="content/framework-data.js"></script>
-<script>
-const DOMAIN_COLORS = {
-  discovery: "#3B82F6", strategy: "#8B5CF6", prioritization: "#EC4899",
-  execution: "#F97316", stakeholder: "#10B981", aiIndividual: "#06B6D4", aiOrg: "#6366F1"
 };
-const DOMAIN_ICON_PATHS = {
-  discovery: '<circle cx="12" cy="12" r="9"/><path d="M14.5 9.5L13 13l-3.5 1.5L11 11z"/>',
-  strategy: '<circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r="0.8" fill="currentColor"/>',
-  prioritization: '<line x1="6" y1="5" x2="6" y2="19"/><circle cx="6" cy="10" r="2"/><line x1="12" y1="5" x2="12" y2="19"/><circle cx="12" cy="15" r="2"/><line x1="18" y1="5" x2="18" y2="19"/><circle cx="18" cy="8" r="2"/>',
-  execution: '<path d="M12 3c-1.2 3-3.8 4.2-3.8 7.8a3.8 3.8 0 0 0 7.6 0c0-1.6-.6-2.4-.6-2.4s.3 1.6-.8 2.4c0-2.6-1.6-3.6-2.4-7.8z"/>',
-  stakeholder: '<path d="M4 5h16v10H8l-4 4z"/>',
-  aiIndividual: '<rect x="6" y="6" width="12" height="12" rx="2"/><line x1="9" y1="3" x2="9" y2="6"/><line x1="15" y1="3" x2="15" y2="6"/><line x1="9" y1="18" x2="9" y2="21"/><line x1="15" y1="18" x2="15" y2="21"/><line x1="3" y1="9" x2="6" y2="9"/><line x1="18" y1="9" x2="21" y2="9"/>',
-  aiOrg: '<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1L7 17M17 7l2.1-2.1"/>'
-};
-const TIER_LABELS = [
-  ["novice", "No Experience"],
-  ["moderate", "Moderate Experience"],
-  ["experienced", "Lots of Experience"],
-  ["advanced", "Advanced Experience"]
-];
-
-// Filled-dot count per tier: 0 for No Experience, 1/2/3 for the rest —
-// this is the shared visual language for tier level across the site.
-const TIER_FILLED_DOTS = { novice: 0, moderate: 1, experienced: 2, advanced: 3 };
-
-function tierDotsHtml(tierKey, color){
-  let dots = '';
-  for (let i = 0; i < 3; i++){
-    const filled = i < TIER_FILLED_DOTS[tierKey];
-    dots += `<span class="tier-dot" style="${filled ? `background:${color}; border-color:${color};` : ''}"></span>`;
-  }
-  return `<div class="tier-dots">${dots}</div>`;
-}
-
-const container = document.getElementById('domainsContainer');
-Object.keys(window.FRAMEWORK_DATA).forEach(domainKey => {
-  const domain = window.FRAMEWORK_DATA[domainKey];
-  const color = DOMAIN_COLORS[domainKey];
-  const card = document.createElement('div');
-  card.className = 'card';
-
-  let tabs = '';
-  TIER_LABELS.forEach(([tierKey, tierLabel], i) => {
-    tabs += `
-      <button type="button" class="tier-tab${i === 0 ? ' active' : ''}" id="tab-${domainKey}-${tierKey}"
-        style="color:${color};" onclick="selectTier('${domainKey}', '${tierKey}', '${color}')">
-        ${tierDotsHtml(tierKey, color)}
-        <div class="tier-tab-label">${tierLabel}</div>
-      </button>
-    `;
-  });
-
-  card.innerHTML = `
-    <div class="domain-header">
-      <div class="domain-badge" style="background:${color}18;">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${DOMAIN_ICON_PATHS[domainKey]}</svg>
-      </div>
-      <h2>${domain.label}</h2>
-    </div>
-    <p>${domain.description}</p>
-    <div class="tier-tabs">${tabs}</div>
-    <div class="tier-detail" id="detail-${domainKey}" style="border-top-color:${color};">
-      <p>${domain.tiers.novice}</p>
-    </div>
-  `;
-  container.appendChild(card);
-  card.dataset.domainKey = domainKey;
-});
-
-document.getElementById('footerYear').textContent = new Date().getFullYear();
-
-window.selectTier = function(domainKey, tierKey, color){
-  document.getElementById('detail-' + domainKey).querySelector('p').textContent = window.FRAMEWORK_DATA[domainKey].tiers[tierKey];
-  document.getElementById('detail-' + domainKey).style.borderTopColor = color;
-  TIER_LABELS.forEach(([key]) => {
-    document.getElementById('tab-' + domainKey + '-' + key).classList.remove('active');
-  });
-  document.getElementById('tab-' + domainKey + '-' + tierKey).classList.add('active');
-};
-</script>
-</body>
-</html>
