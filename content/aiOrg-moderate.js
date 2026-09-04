@@ -27,6 +27,13 @@ window.CONTENT_OVERRIDES = window.CONTENT_OVERRIDES || {};
 
 window.CONTENT_OVERRIDES["aiOrg-moderate"] = {
   sourceUrl: "https://www.linkedin.com/pulse/stop-enabling-individuals-start-organization-robert-merrell-uoboc/",
+  recap: [
+    "Know where your organization actually stands — scattered individual use is not organizational capability.",
+    "Contained growth is one person's habit; compounding growth is a shared capability a whole team relies on.",
+    "The governance and change-management case: durable AI needs shared processes, not just enthusiastic individuals.",
+    "A practical five-step path takes you from individual experimentation to organizational capability.",
+    "The bigger picture — build the capability that survives beyond any one person."
+  ],
   lessons: [
     {
       id: 1,

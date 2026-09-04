@@ -14,6 +14,13 @@ window.CONTENT_OVERRIDES = window.CONTENT_OVERRIDES || {};
 
 window.CONTENT_OVERRIDES["strategy-moderate"] = {
   sourceUrl: "",
+  recap: [
+    "One product needs several pitches — tailor positioning to each segment rather than a single generic message.",
+    "A value proposition lands when it names a specific outcome for a specific user, not a list of features.",
+    "A launch plan coordinates product, marketing, and sales against a shared timeline and a shared definition of 'launched'.",
+    "Enable sales with real material — playbooks, demo scripts, objection handling — and align the rest of the company on the story.",
+    "The launch isn't the finish line; post-launch monitoring and iteration is where the value actually gets realized."
+  ],
   lessons: [
     {
       id: 1,

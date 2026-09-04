@@ -11,6 +11,13 @@ window.CONTENT_OVERRIDES = window.CONTENT_OVERRIDES || {};
 
 window.CONTENT_OVERRIDES["aiOrg-novice"] = {
   sourceUrl: "https://www.linkedin.com/pulse/your-first-ai-product-team-designing-squad-agents-just-robert-merrell-vudmc",
+  recap: [
+    "One general-purpose chatbot doing every job produces context overload, mixed quality, and no clear ownership.",
+    "Design agents like roles on a team — a starting squad of Researcher, Analyst, Experiment Designer, Copywriter, with handoffs so outputs become inputs.",
+    "Start from a costly recurring workflow, not a model; its pain points become the agents' responsibilities.",
+    "Scope an MVP squad (useful weekly, small, evaluable) and prioritize which agent to build first on frequency, time cost, risk, and leverage.",
+    "Plug it into the tools your team already uses and evaluate each agent like a product — if you can't evaluate it, it will drift."
+  ],
   lessons: [
     {
       id: 1,

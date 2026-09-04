@@ -15,6 +15,13 @@ window.CONTENT_OVERRIDES = window.CONTENT_OVERRIDES || {};
 
 window.CONTENT_OVERRIDES["stakeholder-novice"] = {
   sourceUrl: "",
+  recap: [
+    "Reactive communication only reaches the people who chase you; every 'quick question' is a preventable interruption.",
+    "Build a predictable cadence — standups, a weekly sync, sprint reviews — so people stop needing to ask for status.",
+    "Set up visible channels: a shared board where progress is self-serve, an open channel instead of DMs, collaborative docs as a single source of truth.",
+    "Tailor the update per audience — delivery detail for the team, on-track/risk/decision for a sponsor, impact and timing for customer-facing teams — and always explain the 'why' of a change.",
+    "Make transparency the default, including about setbacks; a stakeholder who only hears good news stops trusting the channel."
+  ],
   lessons: [
     {
       id: 1,

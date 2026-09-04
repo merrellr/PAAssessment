@@ -17,6 +17,13 @@ window.CONTENT_OVERRIDES = window.CONTENT_OVERRIDES || {};
 
 window.CONTENT_OVERRIDES["prioritization-moderate"] = {
   sourceUrl: "",
+  recap: [
+    "A value-vs-effort framework slips because the inputs are soft — 'value' is a guess that shifts with the room.",
+    "Ground 'value' in a named metric and a rough size of the change, so it can be debated with evidence instead of vibes.",
+    "Validate the big estimates cheaply — an A/B test or small pilot — before committing high effort, and check the demand shows up beyond one loud segment.",
+    "Apply the same rubric the same way every time, on a cadence, with the criteria and their definitions written down.",
+    "Close the loop — compare the result to the baseline you predicted; a consistent miss is a bias to calibrate out next round."
+  ],
   lessons: [
     {
       id: 1,

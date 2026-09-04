@@ -11,6 +11,14 @@ window.CONTENT_OVERRIDES = window.CONTENT_OVERRIDES || {};
 
 window.CONTENT_OVERRIDES["discovery-experienced"] = {
   sourceUrl: "https://www.linkedin.com/pulse/overcoming-common-pitfalls-early-stage-product-saas-robert-merrell-eshlc",
+  recap: [
+    "Build around the customer's actual workflow, not the founding vision — the workflow is where adoption is won or lost.",
+    "Narrow focus is a strategic advantage: solve one painful problem for one clearly-defined group before expanding.",
+    "Integration and compliance are discovery inputs, not later-stage cleanup — surface them while the design is still cheap to change.",
+    "The buyer is often not the user; you have to understand and sell to both, with different messages.",
+    "Design pilots and implementations with discipline — clear success criteria, a representative cohort, a defined end.",
+    "Credibility is earned through depth on a real problem, not presented in a pitch."
+  ],
   lessons: [
     {
       id: 1,

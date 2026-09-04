@@ -15,6 +15,13 @@ window.CONTENT_OVERRIDES = window.CONTENT_OVERRIDES || {};
 
 window.CONTENT_OVERRIDES["discovery-moderate"] = {
   sourceUrl: "",
+  recap: [
+    "Make feedback systematic: reach every stakeholder group, keep regular touchpoints, and shadow real work when you can.",
+    "Blend quantitative and qualitative — surveys for 'what and how many', interviews for 'why', and the support team as a free always-on channel.",
+    "Close the loop: be transparent about decisions (including a 'no' and its reason), keep a visible roadmap, run pilot groups.",
+    "Not all feedback is a market signal — segment it by role, region, or size; a theme across segments is a signal, one confined to a segment is a data point.",
+    "Discovery is a cycle, not a phase: small increments, a short review each iteration, and findings that are allowed to change the roadmap."
+  ],
   lessons: [
     {
       id: 1,

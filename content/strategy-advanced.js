@@ -11,6 +11,13 @@ window.CONTENT_OVERRIDES = window.CONTENT_OVERRIDES || {};
 
 window.CONTENT_OVERRIDES["strategy-advanced"] = {
   sourceUrl: "https://www.linkedin.com/pulse/how-build-product-focused-ai-agents-actually-make-merrell-mism-rmu8c",
+  recap: [
+    "Treat a product agent as a decision participant, not a tool — define the decisions it influences, the context it holds, and the trade-offs it weighs in one sentence.",
+    "Ground it persistently in four context categories: product truths, strategic constraints, customer signals, product philosophy.",
+    "Make it usefully opinionated — bake in strategy-aligned bias; the goal is aligned judgment, not neutrality.",
+    "Embed it at each lifecycle decision point (discovery, PRDs, roadmapping, launch readiness, post-launch) by assigning it a role, not asking it for answers.",
+    "Maintain it as a living system — refresh context quarterly; the payoff is consistent senior-level judgment applied everywhere."
+  ],
   lessons: [
     {
       id: 1,

@@ -11,6 +11,13 @@ window.CONTENT_OVERRIDES = window.CONTENT_OVERRIDES || {};
 
 window.CONTENT_OVERRIDES["aiIndividual-moderate"] = {
   sourceUrl: "https://www.linkedin.com/pulse/from-roadmaps-rituals-how-agentic-ai-rewriting-job-merrell-mism-r8pnc",
+  recap: [
+    "Stop asking 'what can I prompt for' and start asking 'which recurring ritual can an agent support or partly own'.",
+    "Hand the first pass of backlog grooming to an agent — clustering, dedup, draft problem statements — and spend your time on trade-offs and the 'why'.",
+    "Run research and experiments as always-on engines: the agent collects and summarizes; you tell weak signal from hype and own the learning agenda.",
+    "Turn KPI reviews from a reporting readout into a decision meeting by reading the agent's summary before the meeting.",
+    "Become a conductor — pick one ritual, define a 'good enough' first agent, and protect the recovered time for sense-making."
+  ],
   lessons: [
     {
       id: 1,

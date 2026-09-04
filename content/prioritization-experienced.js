@@ -12,6 +12,13 @@ window.CONTENT_OVERRIDES = window.CONTENT_OVERRIDES || {};
 
 window.CONTENT_OVERRIDES["prioritization-experienced"] = {
   sourceUrl: "https://www.linkedin.com/pulse/feature-fallacy-why-shipping-more-isnt-helping-your-do-merrell-mism-ozcbc",
+  recap: [
+    "Shipping volume is a misleading scoreboard; optimize for value density — outcome created divided by effort required.",
+    "Run the OEM loop: define the outcome in observable terms, back it with a falsifiable hypothesis, ship the minimally sufficient intervention.",
+    "Replace roadmaps with bet maps — belief, confidence, leading indicators, and kill criteria written in advance.",
+    "Five quarterly moves: segment before you scale, default to workflow not widgets, measure the path not the page, design for reversibility, run a weekly Outcomes Review.",
+    "Work the denominator too — a quarterly decommission list; removing friction on the existing path often beats adding capability."
+  ],
   lessons: [
     {
       id: 1,

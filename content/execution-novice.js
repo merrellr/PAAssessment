@@ -15,6 +15,13 @@ window.CONTENT_OVERRIDES = window.CONTENT_OVERRIDES || {};
 
 window.CONTENT_OVERRIDES["execution-novice"] = {
   sourceUrl: "",
+  recap: [
+    "End-of-project surprises are a structure problem: one large batch means the first real test comes when there's no time to react.",
+    "Work in tested increments — a focused MVP scope, an agile cadence, a beta to a select group — so problem signals arrive continuously.",
+    "Automate the checks: tests on every change catch a break in isolation the day it's introduced; CI/CD removes the manual steps where error and delay creep in.",
+    "Track a few quality numbers — defect rate, downtime, cycle time — reviewed every sprint so a bad trend is caught while it's small.",
+    "Small scope, cadence, automated checks, and metrics all move the moment you learn about a problem earlier; that's what makes timelines predictable."
+  ],
   lessons: [
     {
       id: 1,

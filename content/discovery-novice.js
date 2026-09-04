@@ -14,6 +14,13 @@ window.CONTENT_OVERRIDES = window.CONTENT_OVERRIDES || {};
 
 window.CONTENT_OVERRIDES["discovery-novice"] = {
   sourceUrl: "",
+  recap: [
+    "Start every feature with a written problem statement — the pain, who has it, and why current options fall short — before any design.",
+    "Your 'users' are usually several groups (daily users, buyers, influencers); build a simple persona for each, covering their day, goals, and constraints.",
+    "Real research is primary (interviews, pilots) plus secondary (existing reports, competitor docs), and a competitive analysis that hunts for the gaps.",
+    "Validate before you build: ship a focused MVP to a small representative group and watch usability, stated feedback, and analytics together.",
+    "The sequence — problem, market, validate, then build — isn't hard; the discipline is doing it before you've sunk resources into a solution."
+  ],
   lessons: [
     {
       id: 1,

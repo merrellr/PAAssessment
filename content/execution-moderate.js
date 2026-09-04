@@ -11,6 +11,14 @@ window.CONTENT_OVERRIDES = window.CONTENT_OVERRIDES || {};
 
 window.CONTENT_OVERRIDES["execution-moderate"] = {
   sourceUrl: "https://www.linkedin.com/pulse/improving-accessibility-ai-tools-innovations-making-life-merrell-wndmc",
+  recap: [
+    "Treat accessibility as innovation, not obligation — accessible design is usually better design for everyone.",
+    "AI is already changing accessibility: captioning, alt-text, real-time translation, navigation assistance.",
+    "AI is an enabler, not a shortcut — it accelerates the work but doesn't remove the need for human judgment and testing with real users.",
+    "Roll it out with a playbook: start narrow, measure, expand once it's earned it.",
+    "Measure what matters — task completion for users with disabilities, not just a compliance checkbox.",
+    "Quick wins you can turn on today: auto alt-text, captions, contrast checks, keyboard-navigation audits."
+  ],
   lessons: [
     {
       id: 1,

@@ -13,6 +13,12 @@ window.CONTENT_OVERRIDES = window.CONTENT_OVERRIDES || {};
 
 window.CONTENT_OVERRIDES["stakeholder-moderate"] = {
   sourceUrl: "",
+  recap: [
+    "Each role on a product team (PM, PO, design, engineering, QA) needs something different from you — know what.",
+    "Collaboration doesn't happen by accident: agile ceremonies, shared tools, and deliberate communication channels.",
+    "Empower people with real autonomy and trust, not just direction.",
+    "Recognize contributions and invest in continuous learning to keep a team high-performing."
+  ],
   lessons: [
     {
       id: 1,

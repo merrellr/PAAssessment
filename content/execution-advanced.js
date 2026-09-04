@@ -15,6 +15,13 @@ window.CONTENT_OVERRIDES = window.CONTENT_OVERRIDES || {};
 
 window.CONTENT_OVERRIDES["execution-advanced"] = {
   sourceUrl: "",
+  recap: [
+    "Advanced execution is building a delivery system other teams adopt and coaching others through high-stakes launches — not shipping bigger projects yourself.",
+    "Standardize a small set of rhythms: an iterative roadmap format, CI/CD and automated testing as default, a shared quality-metrics view, a fixed review cadence.",
+    "Coach a team through a hard launch with a pre-mortem, a readiness review they run, a non-negotiable staged rollout and tested rollback, and a lesson-focused debrief.",
+    "Make data-driven optimization a standard practice built into every team's loop, not a special project someone champions.",
+    "Make it durable — a continuous-improvement culture, shared playbooks, and more than one person who can coach a launch."
+  ],
   lessons: [
     {
       id: 1,

@@ -11,6 +11,13 @@ window.CONTENT_OVERRIDES = window.CONTENT_OVERRIDES || {};
 
 window.CONTENT_OVERRIDES["aiOrg-advanced"] = {
   sourceUrl: "https://www.linkedin.com/pulse/beyond-automation-win-customers-life-robert-merrell-bxltc",
+  recap: [
+    "Where you point mature AI capability — out of the customer relationship or into freeing people for it — is a strategic choice, not a tooling one.",
+    "Be honest about the division of labor: AI handles the 'what' (24/7, personalization, summarizing); people deliver the 'how' (empathy, judgment, rapport).",
+    "Engineer the quick win — AI spots the moment, a person delivers the outreach or the escalation.",
+    "Going the extra mile: clearing volume off the team buys the time to genuinely understand a customer's world — loyalty a competitor can't easily break.",
+    "AI's direction is set by strategy — make the human-plus-AI operating model explicit and consistent across teams."
+  ],
   lessons: [
     {
       id: 1,

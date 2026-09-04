@@ -11,6 +11,13 @@ window.CONTENT_OVERRIDES = window.CONTENT_OVERRIDES || {};
 
 window.CONTENT_OVERRIDES["aiIndividual-novice"] = {
   sourceUrl: "https://www.linkedin.com/pulse/ai-project-its-practice-heres-how-build-one-robert-merrell-4skoc",
+  recap: [
+    "Nobody is ready — waiting for 'ready' is deciding not to go; you start anyway and adjust.",
+    "Adoption moves through stages — you, then one use case, then team traction, then org capability — each building evidence for the next.",
+    "Get started with four moves: use it yourself first, automate one repetitive task, lower the bar for a 'win', give your team permission to experiment.",
+    "Scale by sharing what works, standardizing the wins into templates, and connecting AI to outcomes people already care about.",
+    "The whole playbook: one use case, one experiment, one person willing to share what they learned."
+  ],
   lessons: [
     {
       id: 1,

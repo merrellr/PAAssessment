@@ -11,6 +11,13 @@ window.CONTENT_OVERRIDES = window.CONTENT_OVERRIDES || {};
 
 window.CONTENT_OVERRIDES["aiIndividual-advanced"] = {
   sourceUrl: "https://www.linkedin.com/pulse/day-life-product-manager-working-ai-agents-2026-edition-merrell-uwsic",
+  recap: [
+    "The shift nobody announced: agents took over the watching, so the PM's day concentrates around the judgment calls.",
+    "Morning — agents do the watching: an inbox digest, a meeting brief that flags a silence, a shortened standup.",
+    "Midday — agents catch what would have slipped through: a usage drop before a renewal call, a pattern across accounts.",
+    "Afternoon — editing, not authoring: a flawed first-draft PRD is still a huge head start, and the PM overrides a backlog reorder with context the agent can't see.",
+    "What's actually different: the reading, summarizing, and first-drafting moved to agents; the job got more concentrated, not smaller."
+  ],
   lessons: [
     {
       id: 1,

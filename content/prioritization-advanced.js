@@ -16,6 +16,13 @@ window.CONTENT_OVERRIDES = window.CONTENT_OVERRIDES || {};
 
 window.CONTENT_OVERRIDES["prioritization-advanced"] = {
   sourceUrl: "",
+  recap: [
+    "Advanced prioritization is designing a method other teams adopt and resolving cross-team priority conflicts — not ordering your own backlog.",
+    "A method teams will adopt has three properties: shared criteria and definitions, a common data source, and outputs traceable to their inputs.",
+    "Tie the ranking to P&L data so trade-offs are expressed in the language leadership actually decides in.",
+    "Think portfolio: classify products by stage, set stage-appropriate goals, allocate capacity across products before each team prioritizes within its slice.",
+    "When two teams collide, run the shared method and show the work — don't pick a side — and grow other facilitators so it doesn't depend on you."
+  ],
   lessons: [
     {
       id: 1,
