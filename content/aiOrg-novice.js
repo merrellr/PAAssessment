@@ -45,11 +45,11 @@ window.CONTENT_OVERRIDES["aiOrg-novice"] = {
       `,
       checks: [
         {
-          question: "Why does routing every job through one assistant produce \"mixed quality\"?",
+          question: "Your one assistant writes a sharp competitive brief in the morning, then a vague, half-wrong experiment analysis in the afternoon, and nobody can say why. What does this lesson blame?",
           options: [
-            "The model runs out of memory partway through the day",
-            "Different jobs need different context, tools, tone, and evaluation — one assistant handling all of them can't be set up well for any single one",
-            "Quality only drops when too many people use the assistant at once"
+            "The model ran out of memory over the course of the day",
+            "One assistant handling every job can't have the right context, tools, and evaluation bar for any single one of them",
+            "The afternoon prompt just wasn't detailed enough"
           ],
           correct: 1,
           explanation: "Research, PRD drafting, and experiment analysis are genuinely different jobs. Specializing lets each one have the right context and its own bar for \"good.\""
@@ -124,6 +124,30 @@ window.CONTENT_OVERRIDES["aiOrg-novice"] = {
       body: `
         <p>The biggest mistake is starting with the technology. Start with a <strong>workflow</strong> you want to improve, a recurring product ritual that's expensive in time and attention: weekly backlog grooming, monthly insights review, quarterly planning, experiment review and writeups.</p>
         <p>Then ask three questions about it: where do we lose time, where do mistakes happen, and where do we lack consistency? Those pain points become your first agent responsibilities.</p>
+        <svg viewBox="0 0 400 124" style="width:100%; height:auto; margin:4px 0 2px;" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <marker id="aoWf" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+              <path d="M0,0 L10,5 L0,10 z" fill="#9AA3AD"/>
+            </marker>
+          </defs>
+          <rect x="8" y="46" width="96" height="32" rx="6" fill="#EEF3FA" stroke="#1A4584" stroke-width="1.3"/>
+          <text x="56" y="60" text-anchor="middle" font-family="'Space Grotesk',sans-serif" font-size="8" font-weight="700" fill="#12305e">A costly</text>
+          <text x="56" y="71" text-anchor="middle" font-family="'Space Grotesk',sans-serif" font-size="8" font-weight="700" fill="#12305e">recurring ritual</text>
+          <g font-family="sans-serif" font-size="7.5" fill="#4B5768" text-anchor="middle">
+            <rect x="150" y="10" width="150" height="26" rx="5" fill="#E7F7FC" stroke="#35C2E8" stroke-width="1"/><text x="225" y="26">Where do we lose time?</text>
+            <rect x="150" y="49" width="150" height="26" rx="5" fill="#E7F7FC" stroke="#35C2E8" stroke-width="1"/><text x="225" y="65">Where do mistakes happen?</text>
+            <rect x="150" y="88" width="150" height="26" rx="5" fill="#E7F7FC" stroke="#35C2E8" stroke-width="1"/><text x="225" y="104">Where do we lack consistency?</text>
+          </g>
+          <g stroke="#9AA3AD" stroke-width="1.1">
+            <line x1="104" y1="56" x2="148" y2="24" marker-end="url(#aoWf)"/>
+            <line x1="104" y1="62" x2="148" y2="62" marker-end="url(#aoWf)"/>
+            <line x1="104" y1="68" x2="148" y2="100" marker-end="url(#aoWf)"/>
+          </g>
+          <text x="325" y="49" text-anchor="middle" font-family="sans-serif" font-size="7.5" font-weight="700" fill="#2E8B57">each &#8594;</text>
+          <text x="325" y="60" text-anchor="middle" font-family="sans-serif" font-size="7.5" fill="#4B5768">one agent's</text>
+          <text x="325" y="70" text-anchor="middle" font-family="sans-serif" font-size="7.5" fill="#4B5768">responsibility</text>
+          <line x1="300" y1="62" x2="308" y2="62" stroke="#9AA3AD" stroke-width="1.1" marker-end="url(#aoWf)"/>
+        </svg>
         <p>Take discovery and validation for a new initiative. Common pain points: feedback scattered across tools, competitive research outdated, insights not consistently synthesized, hypotheses and experiments varying in quality, messaging rushed at launch. Every one of those is a job you can hand to a specific agent, which is exactly why that workflow is a good place for a squad.</p>
       `,
       checks: [

@@ -99,6 +99,22 @@ window.CONTENT_OVERRIDES["aiIndividual-experienced"] = {
       body: `
         <p>Once you have real conversations, this is where agents earn their keep. Most teams drown in qualitative data, interview notes, support tickets, sales call notes scattered across half a dozen tools. AI agents are excellent at organizing that chaos: grouping feedback by recurring themes, surfacing common phrases, spotting patterns across more data than any human could reasonably process alone.</p>
         <p>What they shouldn't do is interpret meaning on your behalf. When agents label clusters, those labels need to be reviewed, and often rewritten, by humans. Customers rarely talk in product taxonomy, they talk in lived experience, and preserving their actual language matters because it carries intent and emotion that a tidy label erases.</p>
+        <svg viewBox="0 0 400 138" style="width:100%; height:auto; margin:4px 0 2px;" xmlns="http://www.w3.org/2000/svg">
+          <line x1="200" y1="10" x2="200" y2="128" stroke="#E3E9F0" stroke-width="1.5"/>
+          <text x="200" y="122" text-anchor="middle" font-family="'Space Grotesk',sans-serif" font-size="7.5" font-weight="700" fill="#9AA3AD">the line</text>
+          <text x="100" y="20" text-anchor="middle" font-family="'Space Grotesk',sans-serif" font-size="9" font-weight="700" fill="#35C2E8">Agent: synthesize</text>
+          <text x="300" y="20" text-anchor="middle" font-family="'Space Grotesk',sans-serif" font-size="9" font-weight="700" fill="#1A4584">Human: interpret</text>
+          <g font-family="sans-serif" font-size="8" fill="#4B5768">
+            <text x="14" y="42">group feedback by recurring theme</text>
+            <text x="14" y="62">surface the common phrases</text>
+            <text x="14" y="82">spot patterns across more data</text>
+            <text x="14" y="102">than a person could read</text>
+            <text x="212" y="42">say what a cluster actually means</text>
+            <text x="212" y="62">decide what's worth acting on</text>
+            <text x="212" y="82">rewrite labels in the customer's</text>
+            <text x="212" y="102">own words, not product taxonomy</text>
+          </g>
+        </svg>
         <p>A good test: if a synthesized insight sounds like internal jargon rather than something a customer would actually say, that's your signal to intervene.</p>
       `,
       checks: [

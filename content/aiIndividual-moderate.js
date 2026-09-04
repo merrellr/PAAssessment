@@ -124,6 +124,25 @@ window.CONTENT_OVERRIDES["aiIndividual-moderate"] = {
         <p>Two more rituals follow the same shape: the agent runs continuously in the background, you turn its output into decisions.</p>
         <p><strong>Market research.</strong> Instead of scrambling when a competitor appears or leadership asks about a space, an "Insights" agent tracks competitor release notes, pricing pages, job postings, and analyst reports, and produces a weekly digest. Your ritual becomes a 30-minute session where you annotate implications and write "so what does this mean for our strategy?"</p>
         <p><strong>Experiment design.</strong> An "Experiment Designer" agent generates ideas from feedback and prior tests, turns them into clear hypotheses and success metrics, proposes sample size and duration, and writes consistent briefs. Your ritual becomes idea-harvesting on a cadence, a weekly review to choose which experiments to run, and a simple debrief after each one.</p>
+        <svg viewBox="0 0 400 104" style="width:100%; height:auto; margin:4px 0 2px;" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <marker id="aiMEng" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+              <path d="M0,0 L10,5 L0,10 z" fill="#9AA3AD"/>
+            </marker>
+          </defs>
+          <g text-anchor="middle" font-family="'Space Grotesk',sans-serif" font-size="7.5" font-weight="700" fill="#12305e">
+            <rect x="6" y="30" width="92" height="30" rx="5" fill="#E7F7FC" stroke="#35C2E8" stroke-width="1.2"/><text x="52" y="42">Agent watches</text><text x="52" y="52">continuously</text>
+            <rect x="112" y="30" width="80" height="30" rx="5" fill="#E7F7FC" stroke="#35C2E8" stroke-width="1.2"/><text x="152" y="48">Weekly digest</text>
+            <rect x="206" y="30" width="96" height="30" rx="5" fill="#EEF3FA" stroke="#1A4584" stroke-width="1.2"/><text x="254" y="42">Your 30 min:</text><text x="254" y="52">"so what?"</text>
+            <rect x="316" y="30" width="78" height="30" rx="5" fill="#EEF9F1" stroke="#2E8B57" stroke-width="1.1"/><text x="355" y="42">React / watch</text><text x="355" y="52">/ ignore</text>
+          </g>
+          <g stroke="#9AA3AD" stroke-width="1.2">
+            <line x1="98" y1="45" x2="110" y2="45" marker-end="url(#aiMEng)"/>
+            <line x1="192" y1="45" x2="204" y2="45" marker-end="url(#aiMEng)"/>
+            <line x1="302" y1="45" x2="314" y2="45" marker-end="url(#aiMEng)"/>
+          </g>
+          <text x="200" y="86" text-anchor="middle" font-family="sans-serif" font-size="7.5" fill="#4B5768">The agent collects and summarizes; the "so what?" call stays yours.</text>
+        </svg>
         <p>In both cases the agent collects and summarizes. You do the part it can't: telling weak signal from hype, deciding whether to react, watch, or ignore, and owning the learning agenda across quarters.</p>
       `,
       checks: [
