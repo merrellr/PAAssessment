@@ -222,7 +222,7 @@
     <div data-screen="intro" class="active">
       <span class="eyebrow">Skill Check</span>
       <h1>How well-rounded is your product + AI practice?</h1>
-      <p>Answer 14 quick questions covering core product management skills plus how you're using AI, both personally and across your organization. You'll get a skill breakdown and specific reading recommendations for the areas with the most room to grow.</p>
+      <p>Answer 14 quick questions across core product management skills and how you're using AI — personally and across your organization. You'll get a skill breakdown across seven areas, plus a course plan that starts each track at your level, not at lesson one of everything.</p>
       <div class="nav-row" style="justify-content:flex-start;">
         <button class="btn btn-primary" onclick="startQuiz()">Start assessment →</button>
       </div>
@@ -245,7 +245,7 @@
     <div data-screen="lead">
       <span class="eyebrow">Almost there</span>
       <h2>Where should we send your results?</h2>
-      <p>Enter your details to see your skill breakdown and reading recommendations.</p>
+      <p>Enter your details to see your skill breakdown and the courses matched to your level in each area.</p>
       <form id="leadForm" onsubmit="handleLeadSubmit(event)" novalidate>
         <input class="text-input" type="text" id="leadName" placeholder="Full name" required>
 
@@ -295,7 +295,7 @@
 
       <div class="section-block">
         <h3>Your growth areas</h3>
-        <div class="section-sub">Your two lowest-scoring areas, with a recommended read for each</div>
+        <div class="section-sub">Your two lowest-scoring areas — start here, at the level the assessment placed you</div>
         <div id="growthWrap"></div>
       </div>
 
