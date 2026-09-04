@@ -116,6 +116,19 @@ window.CONTENT_OVERRIDES["execution-experienced"] = {
       body: `
         <p>The failures that hurt most are the ones that only appear under load, a launch spike, a seasonal surge, a big new customer going live. Hoping the system holds is not a plan; rehearsing is.</p>
         <p><strong>Performance testing and load simulation</strong> mean deliberately pushing the system to and past its expected peak in a controlled setting, so you find the bottleneck, the query that falls over, the queue that backs up, the memory that leaks, before real traffic finds it for you.</p>
+        <svg viewBox="0 0 400 150" style="width:100%; height:auto; margin:4px 0 2px;" xmlns="http://www.w3.org/2000/svg">
+          <line x1="40" y1="16" x2="40" y2="120" stroke="#9AA3AD" stroke-width="1.2"/>
+          <line x1="40" y1="120" x2="384" y2="120" stroke="#9AA3AD" stroke-width="1.2"/>
+          <text x="18" y="112" text-anchor="start" font-family="sans-serif" font-size="8" fill="#4B5768" transform="rotate(-90 18 112)">response time</text>
+          <text x="212" y="140" text-anchor="middle" font-family="sans-serif" font-size="8" fill="#4B5768">load &#8594;</text>
+          <path d="M40 108 L150 104 L230 96 L286 80 L320 44 L340 20" fill="none" stroke="#1A4584" stroke-width="1.8"/>
+          <line x1="286" y1="16" x2="286" y2="120" stroke="#35C2E8" stroke-width="1.2" stroke-dasharray="4 3"/>
+          <text x="286" y="12" text-anchor="middle" font-family="'Space Grotesk',sans-serif" font-size="7.5" font-weight="700" fill="#12305e">~3x = known ceiling</text>
+          <circle cx="286" cy="80" r="4" fill="#C0622A"/>
+          <text x="278" y="66" text-anchor="end" font-family="sans-serif" font-size="7.5" fill="#C0622A">first bottleneck &#8212; the report query</text>
+          <text x="120" y="100" font-family="sans-serif" font-size="7.5" fill="#4B5768">flat and fine</text>
+          <text x="380" y="112" text-anchor="end" font-family="sans-serif" font-size="7.5" fill="#9AA3AD">degraded past here</text>
+        </svg>
         <p>The output isn't just "it passed." It's a known ceiling ("we're solid to 3x current load, degraded past that") and a list of the specific things that break first, which becomes your pre-launch fix list and your scaling roadmap.</p>
       `,
       checks: [
@@ -155,11 +168,11 @@ window.CONTENT_OVERRIDES["execution-experienced"] = {
       ],
       checks: [
         {
-          question: "Why involve security, legal, or compliance at planning time rather than pre-launch review?",
+          question: "Two weeks before launch, a legal review finds the data-export feature needs consent tracking the schema was never built to hold. What does this course say the fix is for next time?",
           options: [
-            "To share the blame if something goes wrong",
-            "They surface the requirements that shape the design while the design is still cheap to change — avoiding a late rebuild",
-            "Because pre-launch review is optional if planning review happened"
+            "Add more buffer before the pre-launch legal review so there's time to react",
+            "Bring legal and compliance in at planning, where the requirement is a design input rather than a rework order",
+            "Ship without export and add it in a fast-follow once legal signs off"
           ],
           correct: 1,
           explanation: "A constraint found at planning is a design input. The same constraint found at launch is a rework order. Moving the checkpoint earlier is the contingency."

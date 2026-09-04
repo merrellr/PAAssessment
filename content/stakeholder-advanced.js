@@ -122,15 +122,32 @@ window.CONTENT_OVERRIDES["stakeholder-advanced"] = {
           <li><strong>Align messaging to real value propositions.</strong> Marketing's claims and the product's actual differentiators should be the same list. Gaps there show up as churn when reality doesn't match the pitch.</li>
           <li><strong>Equip sales properly.</strong> Sales is often the customer's first contact. Give them playbooks, demo scripts, and objection-handling guides, and keep them trained as the product changes, so they can articulate value accurately.</li>
         </ul>
+        <svg viewBox="0 0 400 106" style="width:100%; height:auto; margin:4px 0 2px;" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <marker id="saMotion" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+              <path d="M0,0 L10,5 L0,10 z" fill="#9AA3AD"/>
+            </marker>
+          </defs>
+          <g text-anchor="middle" font-family="'Space Grotesk',sans-serif" font-size="8" font-weight="700" fill="#12305e">
+            <rect x="8" y="12" width="112" height="26" rx="5" fill="#E7F7FC" stroke="#35C2E8" stroke-width="1.1"/><text x="64" y="28">Marketing touch</text>
+            <rect x="144" y="12" width="112" height="26" rx="5" fill="#E7F7FC" stroke="#35C2E8" stroke-width="1.1"/><text x="200" y="28">Sales conversation</text>
+            <rect x="280" y="12" width="112" height="26" rx="5" fill="#EEF3FA" stroke="#1A4584" stroke-width="1.1"/><text x="336" y="28">The product</text>
+          </g>
+          <line x1="120" y1="25" x2="142" y2="25" stroke="#9AA3AD" stroke-width="1.2" marker-end="url(#saMotion)"/>
+          <line x1="256" y1="25" x2="278" y2="25" stroke="#9AA3AD" stroke-width="1.2" marker-end="url(#saMotion)"/>
+          <rect x="8" y="52" width="384" height="22" rx="5" fill="#EEF9F1" stroke="#2E8B57" stroke-width="1.2"/>
+          <text x="200" y="66" text-anchor="middle" font-family="sans-serif" font-size="8" fill="#256b45">one shared set: personas &#183; value propositions &#183; claims</text>
+          <text x="200" y="92" text-anchor="middle" font-family="sans-serif" font-size="7.5" fill="#4B5768">The customer's experience stays consistent from first touch to the product itself.</text>
+        </svg>
         <p>When this works, a customer's experience is consistent from the first marketing touch through the sales conversation to the product itself.</p>
       `,
       checks: [
         {
-          question: "Why build buyer personas jointly with marketing rather than handing them yours?",
+          question: "Marketing built its buyer personas from campaign data; product built different ones from user interviews. Six months on, the roadmap and the ad targeting are aimed at noticeably different people. What does this lesson say went wrong?",
           options: [
-            "Marketing owns persona work by convention",
-            "So the people the product is designed for and the people marketing is messaging to are genuinely the same — built from one shared body of research",
-            "It's faster to split the work"
+            "Product should have deferred to marketing's personas",
+            "Separate persona work drifts — the fix is one shared body of research both functions build from",
+            "The personas were revisited too often and lost coherence"
           ],
           correct: 1,
           explanation: "Separate persona work drifts. A shared persona built from shared research keeps product design and market messaging pointed at the same audience."

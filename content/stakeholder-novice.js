@@ -115,6 +115,25 @@ window.CONTENT_OVERRIDES["stakeholder-novice"] = {
       title: "Lesson 3: Set Up the Channels",
       body: `
         <p>A cadence needs somewhere for the information to live between meetings. Three basics:</p>
+        <svg viewBox="0 0 400 128" style="width:100%; height:auto; margin:4px 0 2px;" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <marker id="snCh" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+              <path d="M0,0 L10,5 L0,10 z" fill="#9AA3AD"/>
+            </marker>
+          </defs>
+          <g text-anchor="middle" font-family="'Space Grotesk',sans-serif" font-size="8" font-weight="700" fill="#12305e">
+            <rect x="10" y="10" width="150" height="26" rx="5" fill="#EEF3FA" stroke="#1A4584" stroke-width="1"/><text x="85" y="27">Shared board</text>
+            <rect x="10" y="50" width="150" height="26" rx="5" fill="#EEF3FA" stroke="#1A4584" stroke-width="1"/><text x="85" y="67">Open channel</text>
+            <rect x="10" y="90" width="150" height="26" rx="5" fill="#EEF3FA" stroke="#1A4584" stroke-width="1"/><text x="85" y="107">Collaborative docs</text>
+            <rect x="248" y="46" width="142" height="36" rx="8" fill="#EEF9F1" stroke="#2E8B57" stroke-width="1.3"/><text x="319" y="62">Default state:</text><text x="319" y="74">informed</text>
+          </g>
+          <g stroke="#9AA3AD" stroke-width="1.2">
+            <line x1="160" y1="23" x2="246" y2="56" marker-end="url(#snCh)"/>
+            <line x1="160" y1="63" x2="246" y2="63" marker-end="url(#snCh)"/>
+            <line x1="160" y1="103" x2="246" y2="72" marker-end="url(#snCh)"/>
+          </g>
+          <text x="200" y="126" text-anchor="middle" font-family="sans-serif" font-size="7.5" fill="#4B5768">Staying uninformed should take effort, not the other way around.</text>
+        </svg>
         <ul>
           <li><strong>A shared project tool</strong> (Jira, Linear, Trello, whatever your team uses) where progress is visible without anyone reporting it. If a stakeholder can open the board and see status, that's a question you never have to answer.</li>
           <li><strong>An open communication channel</strong> (Slack, Teams) that breaks down silos, so updates and decisions are visible to everyone who needs them, not trapped in DMs.</li>
@@ -159,11 +178,11 @@ window.CONTENT_OVERRIDES["stakeholder-novice"] = {
       ],
       checks: [
         {
-          question: "What does a sponsor or executive most need from a project update?",
+          question: "You forward your sponsor the same task-by-task update you send the delivery team. They reply: \"Just tell me — are we hitting the date, and is there anything you need from me?\" What does this course say you got wrong?",
           options: [
-            "The full task list with owners and dates",
-            "Whether it's on track against the goal, the main risk, and any decision they need to make",
-            "A live demo of the latest build"
+            "Nothing; the sponsor should read the detail you provided",
+            "Wrong altitude — a sponsor needs on-track / main-risk / decision-needed, not the task-level view",
+            "You should have sent it as a live demo instead of a written update"
           ],
           correct: 1,
           explanation: "Executives are tracking the bet, not the tasks. On-track / main-risk / decision-needed is the right altitude for them."

@@ -119,6 +119,24 @@ window.CONTENT_OVERRIDES["execution-novice"] = {
       title: "Lesson 3: Automate the Checks",
       body: `
         <p>Increments only give you early signal if something is actually checking each one. Manual testing at the end of a project is exactly the late-signal problem again.</p>
+        <svg viewBox="0 0 400 108" style="width:100%; height:auto; margin:4px 0 2px;" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <marker id="enPipe" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+              <path d="M0,0 L10,5 L0,10 z" fill="#9AA3AD"/>
+            </marker>
+          </defs>
+          <g text-anchor="middle" font-family="'Space Grotesk',sans-serif" font-size="8" font-weight="700" fill="#12305e">
+            <rect x="8" y="34" width="74" height="28" rx="5" fill="#EEF3FA" stroke="#1A4584" stroke-width="1.1"/><text x="45" y="52">commit</text>
+            <rect x="110" y="34" width="90" height="28" rx="5" fill="#E7F7FC" stroke="#35C2E8" stroke-width="1.3"/><text x="155" y="49">automated</text><text x="155" y="58" font-size="7" font-weight="400" fill="#4B5768">tests</text>
+            <rect x="228" y="34" width="74" height="28" rx="5" fill="#EEF3FA" stroke="#1A4584" stroke-width="1.1"/><text x="265" y="52">CI/CD build</text>
+            <rect x="330" y="34" width="62" height="28" rx="5" fill="#EEF9F1" stroke="#2E8B57" stroke-width="1.1"/><text x="361" y="52">deploy</text>
+          </g>
+          <line x1="82" y1="48" x2="108" y2="48" stroke="#9AA3AD" stroke-width="1.2" marker-end="url(#enPipe)"/>
+          <line x1="200" y1="48" x2="226" y2="48" stroke="#9AA3AD" stroke-width="1.2" marker-end="url(#enPipe)"/>
+          <line x1="302" y1="48" x2="328" y2="48" stroke="#9AA3AD" stroke-width="1.2" marker-end="url(#enPipe)"/>
+          <line x1="155" y1="62" x2="155" y2="78" stroke="#C0622A" stroke-width="1.2"/>
+          <text x="155" y="90" text-anchor="middle" font-family="sans-serif" font-size="7.5" fill="#C0622A">a break stops here, in isolation &#8212; the day it's introduced</text>
+        </svg>
         <ul>
           <li><strong>Automated tests</strong>, regression, functional, and security, run on every change, so a break is caught the day it's introduced by whoever introduced it, not weeks later by a user.</li>
           <li><strong>Continuous integration / continuous deployment (CI/CD)</strong> automates the build-and-release path. It removes the manual steps where human error creeps in and slows delivery, and it makes shipping a small change routine instead of an event.</li>
@@ -127,11 +145,11 @@ window.CONTENT_OVERRIDES["execution-novice"] = {
       `,
       checks: [
         {
-          question: "How do automated tests running on every change reduce late surprises?",
+          question: "A developer merges a change on Monday that quietly breaks an unrelated report. The team runs automated tests on every change; a second team tests manually in the final week before launch. Who has the easier fix, and why?",
           options: [
-            "They replace the need for a QA team entirely",
-            "A break is caught the day it's introduced, in isolation, rather than weeks later as one of many unexplained failures",
-            "They make the code run faster"
+            "The manual team — they see all the failures together and can triage them in one pass",
+            "The automated team — the break surfaces Monday, tied to one change, instead of as one of many unexplained failures weeks later",
+            "No difference; the bug takes the same effort to fix either way"
           ],
           correct: 1,
           explanation: "Immediate, isolated failure signals (\"this change broke this test\") are far easier to fix than a batch of end-of-project failures with no obvious cause."
