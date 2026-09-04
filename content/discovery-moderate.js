@@ -79,7 +79,19 @@ window.CONTENT_OVERRIDES["discovery-moderate"] = {
           <li><strong>One-on-one interviews</strong> capture the "why" behind a behaviour. This is where you learn what a number can't tell you.</li>
           <li><strong>Support and success teams</strong> are often the first to hear complaints and feature requests. That channel is free and continuous — use it.</li>
         </ul>
-        <p>The pattern: use the quantitative sources to see <em>what</em> is happening and how widely, and the qualitative ones to understand <em>why</em>.</p>
+        <p>The pattern:</p>
+        <svg viewBox="0 0 400 96" style="width:100%; height:auto; margin:4px 0 2px;">
+          <rect x="8" y="14" width="188" height="66" rx="10" fill="#E7F7FC" stroke="#35C2E8" stroke-width="1.3"/>
+          <rect x="204" y="14" width="188" height="66" rx="10" fill="#EEF3FA" stroke="#1A4584" stroke-width="1.3"/>
+          <g text-anchor="middle" font-family="'Space Grotesk',sans-serif">
+            <text x="102" y="36" font-size="11" font-weight="700" fill="#12305e">Quantitative</text>
+            <text x="102" y="54" font-size="8.5" font-weight="400" fill="#4B5768" font-family="sans-serif">surveys, analytics</text>
+            <text x="102" y="70" font-size="9" font-weight="700" fill="#1A4584">what, and how widely</text>
+            <text x="298" y="36" font-size="11" font-weight="700" fill="#12305e">Qualitative</text>
+            <text x="298" y="54" font-size="8.5" font-weight="400" fill="#4B5768" font-family="sans-serif">interviews, support calls</text>
+            <text x="298" y="70" font-size="9" font-weight="700" fill="#1A4584">why</text>
+          </g>
+        </svg>
       `,
       checks: [
         {
@@ -161,7 +173,17 @@ window.CONTENT_OVERRIDES["discovery-moderate"] = {
           <li><strong>Cross-functional reviews.</strong> Sit down regularly with sales, marketing, and support to discuss which feedback lines up with broader market movement and which doesn't.</li>
           <li><strong>Segment the feedback.</strong> Break it down by role, region, or company size. If the same theme shows up across multiple segments, it's a signal. If it's isolated to one, treat it as a data point, not a mandate.</li>
         </ul>
-        <p>The features worth prioritizing sit at the intersection: a real user need <em>and</em> a market opportunity.</p>
+        <svg viewBox="0 0 400 150" style="width:100%; height:auto; margin:6px 0 2px;">
+          <circle cx="150" cy="75" r="62" fill="#E7F7FC" fill-opacity="0.7" stroke="#35C2E8" stroke-width="1.3"/>
+          <circle cx="250" cy="75" r="62" fill="#EEF3FA" fill-opacity="0.7" stroke="#1A4584" stroke-width="1.3"/>
+          <text x="112" y="70" text-anchor="middle" font-family="'Space Grotesk',sans-serif" font-size="10" font-weight="700" fill="#12305e">Real user</text>
+          <text x="112" y="84" text-anchor="middle" font-family="'Space Grotesk',sans-serif" font-size="10" font-weight="700" fill="#12305e">need</text>
+          <text x="288" y="70" text-anchor="middle" font-family="'Space Grotesk',sans-serif" font-size="10" font-weight="700" fill="#12305e">Market</text>
+          <text x="288" y="84" text-anchor="middle" font-family="'Space Grotesk',sans-serif" font-size="10" font-weight="700" fill="#12305e">opportunity</text>
+          <text x="200" y="72" text-anchor="middle" font-family="sans-serif" font-size="8.5" font-weight="700" fill="#12305e">prioritize</text>
+          <text x="200" y="83" text-anchor="middle" font-family="sans-serif" font-size="8.5" font-weight="700" fill="#12305e">here</text>
+          <text x="200" y="140" text-anchor="middle" font-family="sans-serif" font-size="9" fill="#9AA3AD">need alone can be niche; opportunity alone can be a solution nobody wants</text>
+        </svg>
       `,
       checks: [
         {
@@ -175,14 +197,14 @@ window.CONTENT_OVERRIDES["discovery-moderate"] = {
           explanation: "Segmentation is the test. Repetition across different kinds of users points at a market need; a single cluster points at a local one."
         },
         {
-          question: "Which features does the lesson say are worth prioritizing?",
+          question: "Feature A is requested loudly by your three largest enterprise accounts and nobody else. Feature B is requested moderately across SMB, mid-market, and enterprise. Which does this course lean toward?",
           options: [
-            "The ones with the most feedback volume, regardless of source",
-            "The ones sitting at the intersection of a real user need and a market opportunity",
-            "The lowest-effort ones, so you can ship quickly"
+            "Feature A — the biggest accounts carry the most weight",
+            "Feature B — a theme that shows up across segments is a market signal, where A's is confined to one",
+            "Whichever is lower effort to build"
           ],
           correct: 1,
-          explanation: "User need alone can be niche; market opportunity alone can be a solution nobody wants. The overlap is where prioritization should focus."
+          explanation: "The segmentation test: repetition across different kinds of customers points at a market need. A single loud cluster, even a valuable one, is a data point to weigh, not a mandate."
         }
       ]
     },

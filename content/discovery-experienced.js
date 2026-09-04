@@ -71,11 +71,11 @@ window.CONTENT_OVERRIDES["discovery-experienced"] = {
       `,
       checks: [
         {
-          question: "Why does a narrow initial scope actually help with adoption, not just development speed?",
+          question: "Two teams pitch the same buyer. Team A leads with one workflow it handles end to end for a single role. Team B leads with a broad platform spanning six use cases, \"so you're covered as you grow.\" Which is the stronger opening, per this lesson?",
           options: [
-            "It's cheaper to build, which is the only real benefit",
-            "It reduces implementation risk for the customer and produces clearer signals about what the market actually values",
-            "It means the product never needs to expand later"
+            "Team B, since covering more use cases lowers the buyer's risk",
+            "Team A, because depth in one place lowers the buyer's implementation risk and gives a cleaner read on what the market actually values",
+            "Neither, the decision comes down to price"
           ],
           correct: 1,
           explanation: "Focus isn't just an engineering shortcut, it's a strategic bet: prove deep value in one place before spreading thin across many."
@@ -97,6 +97,40 @@ window.CONTENT_OVERRIDES["discovery-experienced"] = {
       title: "Lesson 3: Integration and Compliance Aren't Later-Stage Problems",
       body: `
         <p>Standalone healthcare software often struggles to gain traction. Providers and health systems already run on EHRs, billing tools, scheduling systems, and internal reporting. If a new product can't connect to that environment, the integration burden shifts to the customer, and that burden can become a deal breaker. Integration needs to be part of the product strategy from day one, not a "later stage" technical problem.</p>
+        <svg viewBox="0 0 400 180" style="width:100%; height:auto; margin:4px 0 2px;" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <marker id="deArrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+              <path d="M0,0 L10,5 L0,10 z" fill="#9AA3AD"/>
+            </marker>
+          </defs>
+          <text x="8" y="18" font-family="'Space Grotesk',sans-serif" font-size="10" font-weight="700" fill="#C0622A">Integration deferred</text>
+          <rect x="8" y="26" width="90" height="34" rx="5" fill="#FBF0E9" stroke="#C0622A" stroke-width="1.2"/>
+          <rect x="124" y="26" width="84" height="34" rx="5" fill="#FBF0E9" stroke="#C0622A" stroke-width="1.2"/>
+          <rect x="234" y="26" width="158" height="34" rx="5" fill="#F7DCD0" stroke="#C0622A" stroke-width="1.4"/>
+          <g font-family="'IBM Plex Sans',sans-serif" font-size="8" fill="#7a3d18" text-anchor="middle">
+            <text x="53" y="46">Ship standalone</text>
+            <text x="166" y="42">Traction</text>
+            <text x="166" y="52">appears</text>
+            <text x="313" y="42">Customer carries the integration</text>
+            <text x="313" y="52">burden &#8594; deal risk</text>
+          </g>
+          <line x1="100" y1="43" x2="122" y2="43" stroke="#9AA3AD" stroke-width="1.2" marker-end="url(#deArrow)"/>
+          <line x1="210" y1="43" x2="232" y2="43" stroke="#9AA3AD" stroke-width="1.2" marker-end="url(#deArrow)"/>
+          <text x="8" y="102" font-family="'Space Grotesk',sans-serif" font-size="10" font-weight="700" fill="#12305e">Integration in the strategy from day one</text>
+          <rect x="8" y="110" width="112" height="34" rx="5" fill="#E7F7FC" stroke="#35C2E8" stroke-width="1.2"/>
+          <rect x="150" y="110" width="108" height="34" rx="5" fill="#E7F7FC" stroke="#35C2E8" stroke-width="1.2"/>
+          <rect x="288" y="110" width="104" height="34" rx="5" fill="#EEF3FA" stroke="#1A4584" stroke-width="1.4"/>
+          <g font-family="'IBM Plex Sans',sans-serif" font-size="8" fill="#12305e" text-anchor="middle">
+            <text x="64" y="124">Connects to the</text>
+            <text x="64" y="134">systems in place</text>
+            <text x="204" y="124">Switching cost</text>
+            <text x="204" y="134">stays low</text>
+            <text x="340" y="130">Adoption</text>
+          </g>
+          <line x1="122" y1="127" x2="148" y2="127" stroke="#9AA3AD" stroke-width="1.2" marker-end="url(#deArrow)"/>
+          <line x1="260" y1="127" x2="286" y2="127" stroke="#9AA3AD" stroke-width="1.2" marker-end="url(#deArrow)"/>
+          <text x="200" y="170" text-anchor="middle" font-family="'IBM Plex Sans',sans-serif" font-size="8.5" fill="#4B5768">Same product, same integration work &#8212; the difference is who absorbs it, and when.</text>
+        </svg>
         <p>The same is true of security and compliance. Some early teams assume they can address HIPAA, data governance, and security controls once traction appears. That's risky. In healthcare, trust isn't a finishing layer added after the product works, it's part of the product itself. Buyers want to know how data is stored and who can access it long before the conversation reaches pricing.</p>
       `,
       checks: [
