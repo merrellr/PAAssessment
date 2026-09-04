@@ -69,18 +69,51 @@ window.CONTENT_OVERRIDES["strategy-moderate"] = {
       body: `
         <p>Once you know who's in the room, the next step is saying something that actually matters to each of them. A value proposition needs to communicate how your product solves the specific problem faced by that specific persona, in language they'd actually use themselves.</p>
         <p>For the end user, that's usually about time and friction: <em>"Streamline your work so you can focus on what matters."</em> For the economic buyer, it's about cost and measurable return: <em>"Lower costs and improve efficiency with a fully integrated solution."</em> For a technical evaluator, it's about risk: does this fit into what we already run, and can we trust it?</p>
+        <svg viewBox="0 0 400 176" style="width:100%; height:auto; margin:4px 0 2px;" xmlns="http://www.w3.org/2000/svg">
+          <rect x="84" y="8" width="232" height="24" rx="5" fill="#FBF0E9" stroke="#C0622A" stroke-width="1.2"/>
+          <text x="200" y="24" text-anchor="middle" font-family="sans-serif" font-size="8" fill="#7a3d18">One pitch: "the most powerful platform on the market"</text>
+          <line x1="150" y1="32" x2="80" y2="50" stroke="#9AA3AD" stroke-width="1" stroke-dasharray="3 2"/>
+          <line x1="200" y1="32" x2="200" y2="50" stroke="#9AA3AD" stroke-width="1" stroke-dasharray="3 2"/>
+          <line x1="250" y1="32" x2="320" y2="50" stroke="#9AA3AD" stroke-width="1" stroke-dasharray="3 2"/>
+          <g font-family="sans-serif" font-size="7.5" fill="#6b7480" text-anchor="middle">
+            <rect x="20" y="50" width="112" height="22" rx="4" fill="#F2F4F7" stroke="#9AA3AD" stroke-width="1"/>
+            <rect x="144" y="50" width="112" height="22" rx="4" fill="#F2F4F7" stroke="#9AA3AD" stroke-width="1"/>
+            <rect x="268" y="50" width="112" height="22" rx="4" fill="#F2F4F7" stroke="#9AA3AD" stroke-width="1"/>
+            <text x="76" y="64">User: "so what?"</text>
+            <text x="200" y="64">Buyer: "the ROI?"</text>
+            <text x="324" y="64">Tech: "fits our stack?"</text>
+          </g>
+          <text x="200" y="88" text-anchor="middle" font-family="'Space Grotesk',sans-serif" font-size="8" font-weight="700" fill="#C0622A">specific to no one</text>
+          <line x1="14" y1="100" x2="386" y2="100" stroke="#E3E9F0" stroke-width="1"/>
+          <g text-anchor="middle">
+            <rect x="20" y="112" width="112" height="42" rx="4" fill="#E7F7FC" stroke="#35C2E8" stroke-width="1.1"/>
+            <rect x="144" y="112" width="112" height="42" rx="4" fill="#E7F7FC" stroke="#35C2E8" stroke-width="1.1"/>
+            <rect x="268" y="112" width="112" height="42" rx="4" fill="#EEF3FA" stroke="#1A4584" stroke-width="1.1"/>
+            <g font-family="'Space Grotesk',sans-serif" font-size="8" font-weight="700" fill="#12305e">
+              <text x="76" y="128">End user</text>
+              <text x="200" y="128">Economic buyer</text>
+              <text x="324" y="128">Tech evaluator</text>
+            </g>
+            <g font-family="sans-serif" font-size="7" fill="#4B5768">
+              <text x="76" y="143">"less busywork"</text>
+              <text x="200" y="143">"lower cost, tracked ROI"</text>
+              <text x="324" y="143">"fits, and safe to trust"</text>
+            </g>
+          </g>
+          <text x="200" y="170" text-anchor="middle" font-family="'Space Grotesk',sans-serif" font-size="8" font-weight="700" fill="#12305e">each hears their own problem</text>
+        </svg>
         <p>The mistake many teams make is writing one value proposition and repeating it to everyone. It sounds efficient, but it usually lands with nobody, because it's specific to no one.</p>
       `,
       checks: [
         {
-          question: "What makes a value proposition actually effective for a specific persona?",
+          question: "You're writing the pitch line aimed at the end user of a reporting tool. Which is closest to what this lesson recommends?",
           options: [
-            "Using the most impressive-sounding language possible",
-            "Speaking to the specific problem that persona faces, in terms they'd use themselves",
-            "Including as many features as possible in the description"
+            "\"The industry's most comprehensive analytics engine.\"",
+            "\"Stop rebuilding the same report every Monday.\"",
+            "\"Enterprise-grade, SOC 2 compliant, infinitely scalable.\""
           ],
           correct: 1,
-          explanation: "A value proposition works when it's specific to what the listener actually cares about, not a broad, generic claim aimed at no one in particular."
+          explanation: "For the end user, an effective value proposition names the specific friction they feel, in their own words, not a feature list or a claim written for procurement."
         },
         {
           question: "A single value proposition, 'the most powerful platform on the market,' is used for every persona in a sales pitch. What's the likely problem here?",
@@ -101,6 +134,30 @@ window.CONTENT_OVERRIDES["strategy-moderate"] = {
         <p>Once your target market and messaging are defined, it's time to build the actual launch plan, covering communication, pricing, and how you'll actually reach people.</p>
         <p>A communication plan outlines how you'll generate awareness: the marketing channels you'll use, a content strategy (case studies, whitepapers, real examples), and social proof like testimonials or pilot results that build trust before someone even talks to sales.</p>
         <p>Pricing strategy needs just as much intention. A subscription model with tiered plans is the SaaS default for a reason, it aligns naturally with different customer segments. Usage-based pricing makes sense when your product's value scales directly with how much someone uses it. The wrong model doesn't just cost revenue, it can make a genuinely good product feel like a bad fit.</p>
+        <svg viewBox="0 0 400 138" style="width:100%; height:auto; margin:4px 0 2px;" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <marker id="smPrice" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+              <path d="M0,0 L10,5 L0,10 z" fill="#9AA3AD"/>
+            </marker>
+          </defs>
+          <polygon points="200,8 300,40 200,72 100,40" fill="#EEF3FA" stroke="#1A4584" stroke-width="1.2"/>
+          <text x="200" y="37" text-anchor="middle" font-family="'Space Grotesk',sans-serif" font-size="8" font-weight="700" fill="#12305e">Does value scale</text>
+          <text x="200" y="48" text-anchor="middle" font-family="'Space Grotesk',sans-serif" font-size="8" font-weight="700" fill="#12305e">with usage?</text>
+          <line x1="150" y1="56" x2="96" y2="86" stroke="#9AA3AD" stroke-width="1.2" marker-end="url(#smPrice)"/>
+          <line x1="250" y1="56" x2="304" y2="86" stroke="#9AA3AD" stroke-width="1.2" marker-end="url(#smPrice)"/>
+          <text x="120" y="74" text-anchor="middle" font-family="sans-serif" font-size="7.5" fill="#6b7480">no</text>
+          <text x="280" y="74" text-anchor="middle" font-family="sans-serif" font-size="7.5" fill="#6b7480">yes</text>
+          <rect x="18" y="88" width="150" height="40" rx="5" fill="#E7F7FC" stroke="#35C2E8" stroke-width="1.1"/>
+          <rect x="232" y="88" width="150" height="40" rx="5" fill="#E7F7FC" stroke="#35C2E8" stroke-width="1.1"/>
+          <g text-anchor="middle" font-family="'Space Grotesk',sans-serif" font-size="8" font-weight="700" fill="#12305e">
+            <text x="93" y="104">Tiered subscription</text>
+            <text x="307" y="104">Usage-based</text>
+          </g>
+          <g text-anchor="middle" font-family="sans-serif" font-size="7" fill="#4B5768">
+            <text x="93" y="118">plans map to segments</text>
+            <text x="307" y="118">price tracks the value delivered</text>
+          </g>
+        </svg>
       `,
       checks: [
         {
@@ -142,6 +199,16 @@ window.CONTENT_OVERRIDES["strategy-moderate"] = {
           ],
           correct: 1,
           explanation: "Alignment isn't a nice-to-have here, it's what keeps what's promised in the market consistent with what the product and team can actually deliver."
+        },
+        {
+          question: "Marketing's site promises a \"one-click integration\" that sales knows takes about a week of setup. Which practice from this lesson would have caught this before it shipped?",
+          options: [
+            "More frequent sales training on the current pitch deck",
+            "Regular product, marketing, and sales touchpoints, so messaging stays aligned with what the product actually does",
+            "Letting marketing own all external messaging without sales input"
+          ],
+          correct: 1,
+          explanation: "Cross-functional touchpoints are what keep the promise in the market consistent with what the team can deliver. Without them, marketing and product reality drift apart."
         }
       ]
     },

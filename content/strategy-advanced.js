@@ -45,11 +45,11 @@ window.CONTENT_OVERRIDES["strategy-advanced"] = {
       `,
       checks: [
         {
-          question: "What does it mean to treat a product agent as a \"decision participant\" rather than a tool?",
+          question: "Team A prompts its agent ad hoc: \"summarize this PRD.\" Team B gives it a standing role: \"you review PRDs as a skeptical product leader; flag assumptions, risks, and gaps.\" Which is the \"decision participant\" setup this lesson argues for?",
           options: [
-            "Letting the agent make the final call on roadmap items",
-            "Defining it like a human role — the decisions it influences, the context it must hold, the trade-offs it should weigh — so it contributes judgment, not just answers",
-            "Giving it access to every internal system so it always has full context"
+            "Team A, since keeping it flexible avoids over-constraining the model",
+            "Team B, because a scoped role with defined influence, context, and priorities is what makes the agent's contribution reliable",
+            "Neither, an agent is just a tool either way"
           ],
           correct: 1,
           explanation: "A tool responds to requests. A decision participant is scoped like a teammate: clear influence, clear context, clear priorities. That's what makes its contribution reliable."
@@ -161,6 +161,40 @@ window.CONTENT_OVERRIDES["strategy-advanced"] = {
       title: "Lesson 4: Embed the Agent in Real Product Moments",
       body: `
         <p>Agents fail when they exist outside the product lifecycle. They succeed when they're embedded into the moments where judgment matters most. Instead of asking the agent for answers, assign it a role in each moment.</p>
+        <svg viewBox="0 0 400 118" style="width:100%; height:auto; margin:4px 0 2px;" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <marker id="saLife" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+              <path d="M0,0 L10,5 L0,10 z" fill="#9AA3AD"/>
+            </marker>
+          </defs>
+          <g font-family="'Space Grotesk',sans-serif" font-size="7.5" font-weight="700" fill="#12305e" text-anchor="middle">
+            <rect x="6" y="12" width="70" height="30" rx="4" fill="#EEF3FA" stroke="#1A4584" stroke-width="1"/>
+            <rect x="88" y="12" width="70" height="30" rx="4" fill="#EEF3FA" stroke="#1A4584" stroke-width="1"/>
+            <rect x="170" y="12" width="70" height="30" rx="4" fill="#EEF3FA" stroke="#1A4584" stroke-width="1"/>
+            <rect x="252" y="12" width="70" height="30" rx="4" fill="#EEF3FA" stroke="#1A4584" stroke-width="1"/>
+            <rect x="334" y="12" width="60" height="30" rx="4" fill="#EEF3FA" stroke="#1A4584" stroke-width="1"/>
+            <text x="41" y="30">Discovery</text>
+            <text x="123" y="30">PRDs</text>
+            <text x="205" y="30">Roadmap</text>
+            <text x="287" y="30">Launch</text>
+            <text x="364" y="27">Post-</text>
+            <text x="364" y="37">launch</text>
+          </g>
+          <line x1="76" y1="27" x2="87" y2="27" stroke="#9AA3AD" stroke-width="1" marker-end="url(#saLife)"/>
+          <line x1="158" y1="27" x2="169" y2="27" stroke="#9AA3AD" stroke-width="1" marker-end="url(#saLife)"/>
+          <line x1="240" y1="27" x2="251" y2="27" stroke="#9AA3AD" stroke-width="1" marker-end="url(#saLife)"/>
+          <line x1="322" y1="27" x2="333" y2="27" stroke="#9AA3AD" stroke-width="1" marker-end="url(#saLife)"/>
+          <rect x="6" y="58" width="388" height="26" rx="5" fill="#E7F7FC" stroke="#35C2E8" stroke-width="1.2"/>
+          <text x="200" y="75" text-anchor="middle" font-family="'Space Grotesk',sans-serif" font-size="8" font-weight="700" fill="#12305e">Same agent, same skeptic's role, at every stage</text>
+          <g stroke="#35C2E8" stroke-width="1" stroke-dasharray="2 2">
+            <line x1="41" y1="42" x2="41" y2="58"/>
+            <line x1="123" y1="42" x2="123" y2="58"/>
+            <line x1="205" y1="42" x2="205" y2="58"/>
+            <line x1="287" y1="42" x2="287" y2="58"/>
+            <line x1="364" y1="42" x2="364" y2="58"/>
+          </g>
+          <text x="200" y="104" text-anchor="middle" font-family="sans-serif" font-size="8" fill="#4B5768">Assign it a role at each point &#8212; don't wait for a single stage to ask it for answers.</text>
+        </svg>
       `,
       steps: [
         { title: "Discovery and problem framing", detail: "\"Pressure-test this problem statement. What assumptions is it resting on? Whose perspective is missing?\" The agent widens the frame before the team narrows on a solution." },
