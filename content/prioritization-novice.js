@@ -80,16 +80,23 @@ window.CONTENT_OVERRIDES["prioritization-novice"] = {
           <line x1="50" y1="165" x2="370" y2="165" stroke="#9AA3AD" stroke-width="1.2"/>
           <line x1="210" y1="20" x2="210" y2="165" stroke="#E3E9F0" stroke-width="1"/>
           <line x1="50" y1="92" x2="370" y2="92" stroke="#E3E9F0" stroke-width="1"/>
-          <text x="30" y="95" text-anchor="middle" font-family="sans-serif" font-size="9" fill="#4B5768" transform="rotate(-90 30 95)">value &rarr;</text>
-          <text x="210" y="182" text-anchor="middle" font-family="sans-serif" font-size="9" fill="#4B5768">effort &rarr;</text>
+          <text x="30" y="95" text-anchor="middle" font-family="sans-serif" font-size="9" fill="#4B5768" transform="rotate(-90 30 95)">value &#8594;</text>
+          <text x="210" y="182" text-anchor="middle" font-family="sans-serif" font-size="9" fill="#4B5768">effort &#8594;</text>
           <g font-family="'Space Grotesk',sans-serif" font-size="9" font-weight="700">
-            <text x="128" y="58" text-anchor="middle" fill="#2E8B57">Quick wins</text>
-            <text x="292" y="58" text-anchor="middle" fill="#1A4584">Big bets</text>
-            <text x="128" y="132" text-anchor="middle" fill="#9AA3AD">Fill-ins</text>
-            <text x="292" y="132" text-anchor="middle" fill="#C0622A">Money pits</text>
+            <text x="128" y="40" text-anchor="middle" fill="#2E8B57">Quick wins</text>
+            <text x="292" y="40" text-anchor="middle" fill="#1A4584">Big bets</text>
+            <text x="128" y="156" text-anchor="middle" fill="#9AA3AD">Fill-ins</text>
+            <text x="292" y="156" text-anchor="middle" fill="#C0622A">Money pits</text>
+          </g>
+          <g font-family="sans-serif" font-size="7.5" fill="#16213E">
+            <circle cx="104" cy="58" r="3.5" fill="#1A4584"/><text x="110" y="61">inline validation</text>
+            <circle cx="150" cy="74" r="3.5" fill="#1A4584"/><text x="156" y="77">CSV export</text>
+            <circle cx="300" cy="60" r="3.5" fill="#1A4584"/><text x="238" y="52">SSO + audit log</text>
+            <circle cx="120" cy="120" r="3.5" fill="#1A4584"/><text x="126" y="123">theme picker</text>
+            <circle cx="312" cy="126" r="3.5" fill="#1A4584"/><text x="238" y="120">rebuild legacy report</text>
           </g>
         </svg>
-        <p>Four rough zones fall out of it: <strong>quick wins</strong> (high value, low effort, do these now), <strong>big bets</strong> (high value, high effort, plan them deliberately), <strong>fill-ins</strong> (low value, low effort, only when there's slack), and <strong>money pits</strong> (low value, high effort, decline these). The plot doesn't decide for you, but it forces the two questions that matter onto the table.</p>
+        <p>Four rough zones fall out of it: <strong>quick wins</strong> (high value, low effort, do these now), <strong>big bets</strong> (high value, high effort, plan them deliberately), <strong>fill-ins</strong> (low value, low effort, only when there's slack), and <strong>money pits</strong> (low value, high effort, decline these). Plotting a handful of real candidates, as above, makes the trades visible: "rebuild legacy report" and "SSO" cost about the same, but only one is worth it. The plot doesn't decide for you, but it forces the two questions that matter onto the table.</p>
       `,
       checks: [
         {
@@ -119,6 +126,19 @@ window.CONTENT_OVERRIDES["prioritization-novice"] = {
       title: "Lesson 3: Score, Don't Argue",
       body: `
         <p>\"Value\" and \"effort\" are still fuzzy. A lightweight <strong>scoring rubric</strong> breaks them into a few factors you rate quickly, so two people comparing the same item land in roughly the same place.</p>
+        <svg viewBox="0 0 400 96" style="width:100%; height:auto; margin:4px 0 2px;" xmlns="http://www.w3.org/2000/svg">
+          <rect x="10" y="30" width="212" height="36" rx="6" fill="#EEF3FA" stroke="#1A4584" stroke-width="1.2"/>
+          <text x="116" y="46" text-anchor="middle" font-family="'Space Grotesk',sans-serif" font-size="8.5" font-weight="700" fill="#12305e">Impact + Reach + Confidence</text>
+          <text x="116" y="59" text-anchor="middle" font-family="sans-serif" font-size="7.5" fill="#4B5768">each rated 1&#8211;3</text>
+          <text x="238" y="52" text-anchor="middle" font-family="'Space Grotesk',sans-serif" font-size="16" font-weight="700" fill="#9AA3AD">&#247;</text>
+          <rect x="254" y="30" width="66" height="36" rx="6" fill="#FBF0E9" stroke="#C0622A" stroke-width="1.2"/>
+          <text x="287" y="46" text-anchor="middle" font-family="'Space Grotesk',sans-serif" font-size="8.5" font-weight="700" fill="#7a3d18">Effort</text>
+          <text x="287" y="59" text-anchor="middle" font-family="sans-serif" font-size="7.5" fill="#7a3d18">1&#8211;3</text>
+          <text x="336" y="52" text-anchor="middle" font-family="'Space Grotesk',sans-serif" font-size="14" font-weight="700" fill="#9AA3AD">=</text>
+          <rect x="352" y="30" width="40" height="36" rx="6" fill="#EEF9F1" stroke="#2E8B57" stroke-width="1.2"/>
+          <text x="372" y="52" text-anchor="middle" font-family="'Space Grotesk',sans-serif" font-size="8.5" font-weight="700" fill="#12305e">score</text>
+          <text x="200" y="88" text-anchor="middle" font-family="sans-serif" font-size="8" fill="#4B5768">Low confidence drags the score down &#8212; which is the point.</text>
+        </svg>
       `,
       steps: [
         { title: "Impact", detail: "If this works, how much does it move the thing we care about — a lot, some, a little? Rate 1-3." },
@@ -160,11 +180,11 @@ window.CONTENT_OVERRIDES["prioritization-novice"] = {
       `,
       checks: [
         {
-          question: "Why do non-negotiables like a security fix or a regulatory requirement skip the scoring rubric?",
+          question: "A regulator publishes a new data-retention rule with a hard compliance deadline in 90 days. Where does that work go in the two-tier structure, and do you score it?",
           options: [
-            "They always score highest anyway, so scoring is redundant",
-            "The cost of skipping them isn't lost value — it's fines, breaches, or broken contracts — so a value-vs-effort comparison doesn't apply",
-            "They're usually low-effort"
+            "Score it like anything else; if it ranks high, it gets done in time",
+            "Straight to the top, unscored — the downside of missing the deadline is fines, not lost value, so the rubric doesn't apply",
+            "Leave it in the backlog until closer to the deadline so it doesn't crowd out value work"
           ],
           correct: 1,
           explanation: "The rubric compares discretionary value. Non-negotiables carry a severe, non-linear downside that the rubric isn't built to represent, so they go on top by category."

@@ -131,6 +131,23 @@ window.CONTENT_OVERRIDES["prioritization-experienced"] = {
           <li><strong>Kill criteria.</strong> Written in advance: "if we don't see the leading indicator move by X after Y weeks, we stop." Decided before you're emotionally invested.</li>
           <li><strong>A review cadence.</strong> Monthly. Kill or double down based on signal, not on who argues hardest in the room.</li>
         </ul>
+        <svg viewBox="0 0 400 158" style="width:100%; height:auto; margin:4px 0 2px;" xmlns="http://www.w3.org/2000/svg">
+          <rect x="6" y="6" width="388" height="146" rx="8" fill="#F7FAFD" stroke="#1A4584" stroke-width="1.3"/>
+          <path d="M14 6 h372 a8 8 0 0 1 8 8 v12 h-388 v-12 a8 8 0 0 1 8 -8 z" fill="#EEF3FA"/>
+          <text x="16" y="23" font-family="'Space Grotesk',sans-serif" font-size="8.5" font-weight="700" fill="#12305e">Bet: auto-attach patient context for charge nurses at shift change</text>
+          <g font-family="sans-serif" font-size="8" fill="#16213E">
+            <text x="16" y="48" font-weight="700" fill="#12305e">Belief</text>
+            <text x="96" y="48">cuts median Orders time 3:10 &#8594; 1:45</text>
+            <text x="16" y="70" font-weight="700" fill="#12305e">Confidence</text>
+            <text x="96" y="70">Medium &#8212; replay data is clear, sample is small</text>
+            <text x="16" y="92" font-weight="700" fill="#12305e">Leading indicator</text>
+            <text x="132" y="92">step-3 (code search) drop-off rate</text>
+            <text x="16" y="114" font-weight="700" fill="#C0622A">Kill criteria</text>
+            <text x="112" y="114" fill="#7a3d18">drop-off not down 10 pts in 3 weeks &#8594; stop</text>
+            <text x="16" y="136" font-weight="700" fill="#12305e">Review</text>
+            <text x="96" y="136">monthly &#8212; kill or double down on the signal</text>
+          </g>
+        </svg>
         <p>The point of writing kill criteria before you start is that you can't negotiate with a number you set when you were still objective.</p>
       `,
       checks: [
@@ -153,6 +170,16 @@ window.CONTENT_OVERRIDES["prioritization-experienced"] = {
           ],
           correct: 1,
           explanation: "The outcome metric is often slow. A leading indicator gives you a read weeks earlier, which is what makes a monthly kill-or-double-down review possible."
+        },
+        {
+          question: "Three weeks in, the leading indicator hasn't moved and the pre-written kill criteria were met at the last review. The team is confident results are \"about to land.\" What does the bet map say?",
+          options: [
+            "Extend the timeline — conviction from the people closest to the work is a strong signal",
+            "Honor the criteria: stop, or make an explicit, visible re-decision — the number was set precisely so it couldn't be argued away later",
+            "Quietly drop the kill criteria and keep the bet running until the next review"
+          ],
+          correct: 1,
+          explanation: "\"You can't negotiate with a number you set when you were still objective.\" Meeting the kill criteria triggers a real decision, not a silent extension."
         }
       ]
     },
