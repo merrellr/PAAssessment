@@ -114,6 +114,13 @@
   .tier-card.is-complete .tbar-fill{ background:#2E8B57; }
   .tier-card.is-complete .tstatus{ color:#2E8B57; font-weight:600; }
   .tier-card .tcheck{ position:absolute; top:6px; right:8px; width:16px; height:16px; border-radius:50%; background:#2E8B57; color:#fff; font-size:10px; line-height:16px; text-align:center; }
+  .tier-card .tnote{ position:absolute; top:6px; left:8px; font-size:11px; line-height:1; color: var(--cyan); }
+
+  .notes-item{ border-left:3px solid var(--cyan); padding:2px 0 2px 12px; margin-bottom:14px; }
+  .notes-item .notes-course{ font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:0.04em; color: var(--navy); margin-bottom:3px; }
+  .notes-item .notes-prompt{ font-size:12px; color: var(--gray); margin-bottom:4px; }
+  .notes-item .notes-text{ font-size:13.5px; color: var(--ink); white-space:pre-wrap; margin-bottom:5px; }
+  .notes-item a{ font-size:12px; color: var(--navy); text-decoration:underline; }
 
   .tier-card.is-inprogress{ border-color: var(--cyan); }
   .tier-card.is-inprogress .tstatus{ color: var(--navy); font-weight:600; }
@@ -381,6 +388,14 @@
         </div>
         <p style="font-size:12.5px; margin-top:14px; margin-bottom:0;">You'll also get a downloadable badge and reading recommendations targeted to your two weakest areas.</p>
       </div>
+    </div>
+
+    <div class="card" id="myNotesCard" style="display:none; margin-bottom:22px;">
+      <div style="display:flex; align-items:baseline; justify-content:space-between;">
+        <span class="eyebrow" style="margin-bottom:0;">Your notes</span>
+        <a id="notesToggleLink" onclick="toggleNotesPanel()" style="font-size:12.5px; color:var(--navy); cursor:pointer; text-decoration:underline;">Hide</a>
+      </div>
+      <div id="notesList" style="margin-top:14px;"></div>
     </div>
 
     <div style="display:flex; align-items:baseline; justify-content:space-between; margin: 6px 0 14px;">
@@ -802,6 +817,7 @@ async function loadDashboard(user){
 
   const assessmentResult = await fetchAssessmentResult(user.email);
   renderCatalog(progress, assessmentResult);
+  renderMyNotes(progress);
   if (assessmentResult) renderRecommendations(assessmentResult, progress);
   populateProfileProgressSummary(progress, assessmentResult);
   renderAssignedStat(progress, assessmentResult);
@@ -1300,9 +1316,12 @@ function renderCatalog(progress, assessmentResult){
 
       const statusText = isComplete ? 'Completed' : (isInProgress ? pct + '% done' : (isBelowLevel ? 'Below your tested level' : 'Not started'));
       const checkBadge = isComplete ? '<div class="tcheck">✓</div>' : '';
+      const hasNote = Object.values(courseProgress.reflections || {}).some(t => (t || '').trim());
+      const noteBadge = hasNote ? '<div class="tnote" title="You have a note in this course">✎</div>' : '';
 
       a.innerHTML = `
         ${checkBadge}
+        ${noteBadge}
         <div class="tname">${tier.label}</div>
         <div class="tbar"><div class="tbar-fill" style="width:${pct}%;"></div></div>
         <div class="tstatus">${statusText}</div>
@@ -1314,6 +1333,55 @@ function renderCatalog(progress, assessmentResult){
     wrap.appendChild(group);
   });
 }
+
+/* "Your notes" panel — every reflection the learner has saved across
+   every course, newest-authored courses first, each with a jump link
+   back to the lesson it came from. Hidden entirely when there are none. */
+function renderMyNotes(progress){
+  const card = document.getElementById('myNotesCard');
+  const list = document.getElementById('notesList');
+  const courses = (progress && progress.courses) || {};
+  const items = [];
+
+  Object.keys(courses).forEach(cid => {
+    const cat = CATALOG[cid];
+    if (!cat) return;
+    const refl = courses[cid].reflections || {};
+    Object.keys(refl).forEach(lid => {
+      const text = (refl[lid] || '').trim();
+      if (!text) return;
+      const lesson = cat.lessons.find(l => l.id === parseInt(lid, 10));
+      const prompt = lesson && lesson.reflection ? lesson.reflection.prompt : '';
+      items.push({
+        cid, lid,
+        courseTitle: cat.title,
+        prompt, text,
+        updatedAt: courses[cid].updatedAt || ''
+      });
+    });
+  });
+
+  if (!items.length){ card.style.display = 'none'; return; }
+  items.sort((a, b) => (b.updatedAt || '').localeCompare(a.updatedAt || ''));
+
+  list.innerHTML = items.map(n => `
+    <div class="notes-item">
+      <div class="notes-course">${n.courseTitle}</div>
+      ${n.prompt ? `<div class="notes-prompt">${n.prompt}</div>` : ''}
+      <div class="notes-text">${n.text.replace(/</g, '&lt;')}</div>
+      <a href="lesson.html?course=${n.cid}&lesson=${n.lid}&v=${CONTENT_VERSION}">Open the lesson →</a>
+    </div>
+  `).join('');
+  card.style.display = 'block';
+}
+
+window.toggleNotesPanel = function(){
+  const list = document.getElementById('notesList');
+  const link = document.getElementById('notesToggleLink');
+  const hidden = list.style.display === 'none';
+  list.style.display = hidden ? 'block' : 'none';
+  link.textContent = hidden ? 'Hide' : 'Show';
+};
 
 /* Shown instead of the real catalog when someone hasn't taken the
    assessment yet — teases the shape of what's coming without
