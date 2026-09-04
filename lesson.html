@@ -246,6 +246,51 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
+/* Course content is gated behind the assessment. This is the same
+   lookup the dashboard uses to decide whether to show the real
+   catalog or the locked teaser — keep the URL in sync with
+   RESULTS_LOG_URL in lms-dashboard.html and index.html. */
+const RESULTS_LOG_URL = "https://script.google.com/macros/s/AKfycbynJQYF9rv5maL_CGniS9UGhTDfBVeW3gVhEWUsFdGOqquv4osGx4nQvc8jNkaaY6wrrg/exec";
+
+function fetchAssessmentResult(email){
+  return new Promise((resolve) => {
+    if (!RESULTS_LOG_URL) { resolve(null); return; }
+    const callbackName = 'lookupCallback_' + Date.now();
+    window[callbackName] = function(result){
+      delete window[callbackName];
+      script.remove();
+      resolve(result || null);
+    };
+    const script = document.createElement('script');
+    script.src = RESULTS_LOG_URL + '?action=lookup&email=' + encodeURIComponent(email) + '&callback=' + callbackName;
+    script.onerror = function(){ resolve(null); };
+    document.body.appendChild(script);
+  });
+}
+
+/* Shown in place of the lesson when a logged-in user has no
+   assessment result yet. Mirrors the dashboard's locked state. */
+function showAssessmentLock(){
+  document.getElementById('courseTitle').textContent = 'Locked';
+  document.getElementById('lessonTitle').textContent = 'Take the assessment to unlock this course';
+  const nav = document.getElementById('lessonNav');
+  if (nav) nav.style.display = 'none';
+  const navRow = document.querySelector('.nav-row');
+  if (navRow) navRow.style.display = 'none';
+  ['preCheckContainer','chartContainer','stepperContainer','checkContainer','reflectionContainer','sourceLinkRow']
+    .forEach(id => { const el = document.getElementById(id); if (el) el.style.display = 'none'; });
+  document.getElementById('lessonBody').innerHTML = `
+    <div style="background:#F7F9FC; border:1.5px solid var(--line); border-radius:12px; padding:24px; text-align:center; margin-top:8px;">
+      <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="var(--gray)" stroke-width="2" style="margin-bottom:10px;">
+        <rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/>
+      </svg>
+      <p style="margin:0 0 8px; color:var(--ink); font-weight:600;">This course is locked until you take the assessment.</p>
+      <p style="margin:0 0 16px; font-size:13.5px;">The assessment places you at the right level in each skill area, so every course starts where you are. It takes about five minutes.</p>
+      <a href="index.html" class="btn btn-primary" style="text-decoration:none; display:inline-block;">Take the assessment →</a>
+    </div>
+  `;
+}
+
 const params = new URLSearchParams(window.location.search);
 const courseId = params.get('course');
 let lessonNum = parseInt(params.get('lesson') || '1', 10);
@@ -270,6 +315,15 @@ onAuthStateChanged(auth, async (user) => {
   }
   currentUser = user;
   if (!course) return; // already showed a friendly message above
+
+  // Gate content behind the assessment: no result means the courses
+  // aren't unlocked yet, so show the lock panel instead of the lesson.
+  const assessmentResult = await fetchAssessmentResult(user.email);
+  if (!assessmentResult){
+    showAssessmentLock();
+    return;
+  }
+
   try {
     await loadProgress();
     renderLesson();
