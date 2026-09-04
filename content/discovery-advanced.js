@@ -16,6 +16,13 @@ window.CONTENT_OVERRIDES = window.CONTENT_OVERRIDES || {};
 
 window.CONTENT_OVERRIDES["discovery-advanced"] = {
   sourceUrl: "",
+  recap: [
+    "Empathy is immersing in the user's context — their day, constraints, and emotions — not just recording their stated opinions.",
+    "Use empathy maps (says / thinks / does / feels) and personas that stay alive, updated as you learn rather than a one-time slide.",
+    "Advanced discovery is a continuous system: KPIs for user success, learning from failures as much as wins, small validated changes.",
+    "Make user understanding an org-wide habit — real user stories in meetings, cross-functional research, recognizing empathy-driven work.",
+    "In high-stakes work, discovery also de-risks: controlled pilots, continuous expert validation, an ethical check before shipping."
+  ],
   lessons: [
     {
       id: 1,

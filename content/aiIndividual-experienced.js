@@ -11,6 +11,14 @@ window.CONTENT_OVERRIDES = window.CONTENT_OVERRIDES || {};
 
 window.CONTENT_OVERRIDES["aiIndividual-experienced"] = {
   sourceUrl: "https://www.linkedin.com/pulse/how-run-product-discovery-ai-agents-without-losing-voice-merrell-mvrdc",
+  recap: [
+    "AI earned a seat at discovery, not the head of the table — it supports the work, it doesn't own the customer relationship.",
+    "Start with human-led conversations; the agent doesn't replace talking to users.",
+    "Use agents to synthesize, not interpret — they cluster and summarize; the meaning is yours to assign.",
+    "Let humans do the sense-making — deciding what a pattern means and what to do about it.",
+    "Use AI to generate and challenge hypotheses, widening the space rather than picking the answer.",
+    "Close the loop, and watch the most common failure mode: treating the agent's synthesis as the finding."
+  ],
   lessons: [
     {
       id: 1,

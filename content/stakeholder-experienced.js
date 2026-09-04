@@ -14,6 +14,12 @@ window.CONTENT_OVERRIDES = window.CONTENT_OVERRIDES || {};
 
 window.CONTENT_OVERRIDES["stakeholder-experienced"] = {
   sourceUrl: "",
+  recap: [
+    "A shared vision, set with stakeholders involved early, is the starting point for cross-functional alignment.",
+    "Working well with engineering and design means respecting technical constraints and enabling bi-directional feedback.",
+    "Bring risk, legal, and compliance in early — as collaborators who shape the design, not a gate at the end.",
+    "Build a customer-centric culture across teams with standing feedback loops and shared sentiment metrics."
+  ],
   lessons: [
     {
       id: 1,

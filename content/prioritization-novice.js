@@ -16,6 +16,13 @@ window.CONTENT_OVERRIDES = window.CONTENT_OVERRIDES || {};
 
 window.CONTENT_OVERRIDES["prioritization-novice"] = {
   sourceUrl: "",
+  recap: [
+    "Reactive 'loudest voice' prioritization optimizes for advocacy, not value, and leaves an order you can't defend.",
+    "A value-vs-effort view forces the two questions that matter onto the table — quick wins, big bets, fill-ins, money pits.",
+    "Score instead of argue: rate impact, reach, confidence, and effort on a simple scale; when a result feels wrong, fix a bad input, not the ranking.",
+    "Non-negotiables (compliance, security, contractual) go on top unscored — their downside isn't lost value, it's fines and breaches.",
+    "The point of the structure is being able to say 'no' with a reason the requester can inspect."
+  ],
   lessons: [
     {
       id: 1,

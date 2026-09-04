@@ -15,6 +15,13 @@ window.CONTENT_OVERRIDES = window.CONTENT_OVERRIDES || {};
 
 window.CONTENT_OVERRIDES["stakeholder-advanced"] = {
   sourceUrl: "",
+  recap: [
+    "Advanced stakeholder work is shifting from managing your own relationships to designing how the whole org aligns — and mentoring others to run it.",
+    "Build an aligned cross-functional culture: a shared vision, org-wide comms channels, and syncs that are institutions with owners, not favors.",
+    "Run product, marketing, and sales as one motion — joint buyer personas, messaging aligned to real value props, sales enablement kept current.",
+    "Mentor stakeholder skill deliberately — knowledge sharing, modeling empowerment and recognition, coaching through real situations, designing yourself out of the critical path.",
+    "Make the system durable and measurable — feedback loops as standing institutions, action plans communicated org-wide, watching whether decisions get made without escalation."
+  ],
   lessons: [
     {
       id: 1,

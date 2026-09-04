@@ -16,6 +16,13 @@ window.CONTENT_OVERRIDES = window.CONTENT_OVERRIDES || {};
 
 window.CONTENT_OVERRIDES["execution-experienced"] = {
   sourceUrl: "",
+  recap: [
+    "Reliable complex delivery comes from building contingency for the unexpected, not hoping it won't happen.",
+    "Design for failure: redundancy and load balancing, proactive monitoring that beats your users to the problem, an incident plan written before you need it.",
+    "Rehearse the peak — load-test past expected traffic to find the specific bottlenecks while it's cheap to fix them.",
+    "Build compliance and quality checkpoints into the process — involve constrained partners at planning time, not the pre-launch review.",
+    "Handle changing requirements with a standing change-management framework: named assessors, an impact process, update protocols, risk categorization."
+  ],
   lessons: [
     {
       id: 1,

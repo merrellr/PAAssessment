@@ -14,6 +14,13 @@ window.CONTENT_OVERRIDES = window.CONTENT_OVERRIDES || {};
 
 window.CONTENT_OVERRIDES["strategy-experienced"] = {
   sourceUrl: "",
+  recap: [
+    "A roadmap is only as good as its communication: engineers need epics and timing, executives need themes and risks, customers need the improvements that affect them.",
+    "Transparency builds trust — share changes proactively and always explain the 'why' behind a deprioritization.",
+    "Hold short-term and long-term together with a quarterly cadence that checks whether the quarter's work actually advanced the strategy.",
+    "Build resilience in: scenario-plan the likely disruptions, keep prioritization flexible, and re-anchor to the same goal when the path changes.",
+    "Measure the roadmap (time-to-market, satisfaction change, revenue impact) and iterate from evidence, not from re-argued opinion."
+  ],
   lessons: [
     {
       id: 1,

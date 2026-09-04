@@ -11,6 +11,14 @@ window.CONTENT_OVERRIDES = window.CONTENT_OVERRIDES || {};
 
 window.CONTENT_OVERRIDES["aiOrg-experienced"] = {
   sourceUrl: "https://www.linkedin.com/pulse/agentic-ai-internal-product-building-pm-copilots-your-robert-merrell-jlepc",
+  recap: [
+    "Build an internal AI copilot with product rigor, not IT rigor — discovery, pilot, feedback, iteration, adoption.",
+    "Discovery — find the work that's genuinely worth automating.",
+    "Pilot small, real, and closely watched.",
+    "In feedback, listen for corrections, not compliments — the corrections tell you what to fix.",
+    "Iterate to earn the next stage of rollout; scale doesn't fix an unearned tool, it multiplies the frustration.",
+    "Measure adoption like the product metric it is."
+  ],
   lessons: [
     {
       id: 1,

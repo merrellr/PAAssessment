@@ -14,6 +14,13 @@ window.CONTENT_OVERRIDES = window.CONTENT_OVERRIDES || {};
 
 window.CONTENT_OVERRIDES["strategy-novice"] = {
   sourceUrl: "",
+  recap: [
+    "A roadmap bridges vision and execution — not a prioritized request list; if the reason an item exists is 'someone asked', it's a backlog with a layout.",
+    "Keep strategic and tactical separate: themes and milestones belong on the roadmap; epics, features, and tasks belong in the backlog.",
+    "Map every theme to a specific business objective (revenue, expansion, retention); if you can't draw that line, it probably isn't a theme.",
+    "Prioritize themes systematically: non-negotiables first (compliance, security), then by impact on mapped goals, reassessed quarterly.",
+    "Give each theme a realistic, time-bound milestone — a dated checkpoint is what catches strategy-versus-execution drift early."
+  ],
   lessons: [
     {
       id: 1,
