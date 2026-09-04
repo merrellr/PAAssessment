@@ -121,6 +121,8 @@
       </div>
     </div>
 
+    <div id="courseCompleteScreen" style="display:none;"></div>
+
     <div class="nav-row">
       <button class="btn btn-ghost" id="prevBtn" onclick="goToLesson(-1)">← Previous</button>
       <button class="btn btn-primary" id="completeBtn" onclick="markCompleteAndContinue()">Next →</button>
@@ -231,6 +233,7 @@ function buildCatalog(){
       if (CONTENT_OVERRIDES[courseId]) {
         catalog[courseId].lessons = CONTENT_OVERRIDES[courseId].lessons;
         catalog[courseId].sourceUrl = CONTENT_OVERRIDES[courseId].sourceUrl || null;
+        catalog[courseId].recap = CONTENT_OVERRIDES[courseId].recap || null;
       }
     });
   });
@@ -299,6 +302,8 @@ const course = CATALOG[courseId];
 let currentUser = null;
 let completedLessons = [];
 let reflections = {};
+let assessmentResult = null;   // filled by the gating check; reused for "next course"
+let allCourses = {};           // full progress.courses map, for the completion screen
 
 if (!course){
   document.getElementById('lessonTitle').textContent = 'Course not found';
@@ -318,7 +323,7 @@ onAuthStateChanged(auth, async (user) => {
 
   // Gate content behind the assessment: no result means the courses
   // aren't unlocked yet, so show the lock panel instead of the lesson.
-  const assessmentResult = await fetchAssessmentResult(user.email);
+  assessmentResult = await fetchAssessmentResult(user.email);
   if (!assessmentResult){
     showAssessmentLock();
     return;
@@ -326,6 +331,13 @@ onAuthStateChanged(auth, async (user) => {
 
   try {
     await loadProgress();
+    // Revisiting a finished course (no ?lesson= in the URL) lands on
+    // the completion screen rather than re-opening the last lesson.
+    const allDone = course.lessons.every(l => completedLessons.includes(l.id));
+    if (allDone && !params.get('lesson')){
+      showCourseComplete(allCourses);
+      return;
+    }
     renderLesson();
     startActiveTimeTracking();
   } catch (err){
@@ -363,7 +375,8 @@ async function loadProgress(){
   const progressRef = doc(db, 'progress', currentUser.uid);
   const snap = await getDoc(progressRef);
   const data = snap.exists() ? snap.data() : { courses: {} };
-  const courseProgress = (data.courses && data.courses[courseId]) || { completed: [] };
+  allCourses = data.courses || {};
+  const courseProgress = allCourses[courseId] || { completed: [] };
   completedLessons = courseProgress.completed || [];
   reflections = courseProgress.reflections || {};
 
@@ -617,6 +630,131 @@ function renderReflection(reflection, lessonId){
   };
 }
 
+/* ================================================================
+   COURSE COMPLETION SCREEN
+   Shown in place of the lesson after the last lesson is completed,
+   instead of bouncing straight to the dashboard. Pulls together a
+   recap (course.recap if authored, else lesson titles), the
+   learner's saved reflections for this course, a recommended next
+   course (same gap logic the dashboard uses), and — once every
+   assigned course is done — a nudge to retake the assessment.
+   ================================================================ */
+const TIER_SLUGS = ['novice', 'moderate', 'experienced', 'advanced'];
+
+function tierSlugForPct(pct){
+  if (pct > 75) return 'advanced';
+  if (pct > 50) return 'experienced';
+  if (pct > 25) return 'moderate';
+  return 'novice';
+}
+
+function courseIsComplete(coursesMap, cid){
+  const c = CATALOG[cid];
+  if (!c || !c.lessons.length) return false;
+  const done = ((coursesMap[cid] || {}).completed || []).filter(id => c.lessons.some(l => l.id === id));
+  return done.length >= c.lessons.length;
+}
+
+function recommendNext(coursesMap, result){
+  if (!result || !result.categoryPct) return [];
+  const gaps = Object.keys(DOMAINS).map(domainKey => {
+    const assessedIdx = TIER_SLUGS.indexOf(tierSlugForPct(result.categoryPct[domainKey] || 0));
+    let assigned = 0, completed = 0;
+    TIER_SLUGS.forEach((slug, i) => {
+      if (i < assessedIdx) return;
+      assigned++;
+      if (courseIsComplete(coursesMap, domainKey + '-' + slug)) completed++;
+    });
+    return { domainKey, gap: assigned - completed, pct: result.categoryPct[domainKey] || 0 };
+  });
+  gaps.sort((a, b) => (b.gap - a.gap) || (a.pct - b.pct));
+
+  const out = [];
+  gaps.filter(g => g.gap > 0).forEach(({ domainKey }) => {
+    if (out.length >= 2) return;
+    let i = TIER_SLUGS.indexOf(tierSlugForPct(result.categoryPct[domainKey] || 0));
+    let cid = domainKey + '-' + TIER_SLUGS[i];
+    while (CATALOG[cid] && courseIsComplete(coursesMap, cid) && i < TIER_SLUGS.length - 1){
+      i++; cid = domainKey + '-' + TIER_SLUGS[i];
+    }
+    if (CATALOG[cid] && cid !== courseId && !courseIsComplete(coursesMap, cid)){
+      out.push({ cid, title: CATALOG[cid].title });
+    }
+  });
+  return out;
+}
+
+function showCourseComplete(coursesMap){
+  ['lessonNav','preCheckContainer','lessonBody','chartContainer','stepperContainer',
+   'checkContainer','reflectionContainer','sourceLinkRow'].forEach(id => {
+    const el = document.getElementById(id); if (el) el.style.display = 'none';
+  });
+  const navRow = document.querySelector('.nav-row'); if (navRow) navRow.style.display = 'none';
+  document.getElementById('statusMsg').textContent = '';
+  document.getElementById('courseTitle').textContent = course.title;
+  document.getElementById('lessonTitle').textContent = 'Course complete';
+
+  const recapItems = (course.recap && course.recap.length)
+    ? course.recap
+    : course.lessons.map(l => l.title.replace(/^Lesson\s*\d+:\s*/, ''));
+  const recapHtml = `
+    <div style="background:#F7F9FC; border:1px solid var(--line); border-radius:12px; padding:18px 20px; margin-top:8px;">
+      <span class="eyebrow">${course.recap ? 'The takeaways' : 'What this course covered'}</span>
+      <ul style="margin:8px 0 0; padding-left:20px;">
+        ${recapItems.map(t => `<li style="line-height:1.55; color:var(--ink-soft); margin-bottom:6px;">${t}</li>`).join('')}
+      </ul>
+    </div>`;
+
+  const myNotes = Object.keys(reflections)
+    .map(lid => ({ lid: parseInt(lid, 10), text: (reflections[lid] || '').trim() }))
+    .filter(n => n.text)
+    .map(n => {
+      const lesson = course.lessons.find(l => l.id === n.lid);
+      const prompt = lesson && lesson.reflection ? lesson.reflection.prompt : '';
+      return `
+        <div style="border-left:3px solid var(--cyan); padding:2px 0 2px 12px; margin-bottom:12px;">
+          ${prompt ? `<div style="font-size:12px; color:var(--gray); margin-bottom:4px;">${prompt}</div>` : ''}
+          <div style="font-size:13.5px; color:var(--ink); white-space:pre-wrap;">${n.text.replace(/</g, '&lt;')}</div>
+        </div>`;
+    }).join('');
+  const notesHtml = myNotes ? `
+    <div style="margin-top:20px;">
+      <span class="eyebrow">Your notes from this course</span>
+      <div style="margin-top:10px;">${myNotes}</div>
+    </div>` : '';
+
+  const recs = recommendNext(coursesMap, assessmentResult);
+  const recsHtml = recs.length ? `
+    <div style="margin-top:20px;">
+      <span class="eyebrow">Recommended next</span>
+      <div style="margin-top:10px; display:flex; flex-direction:column; gap:8px;">
+        ${recs.map(r => `<a href="lesson.html?course=${r.cid}" class="lesson-pill" style="text-align:left;">${r.title} →</a>`).join('')}
+      </div>
+    </div>` : '';
+
+  const retakeHtml = recs.length ? '' : `
+    <div style="margin-top:20px; background:#EEF3FA; border:1px solid var(--line); border-radius:12px; padding:16px 18px;">
+      <p style="margin:0 0 10px; font-size:13.5px;">You've cleared every course at your assessed level. Retake the assessment to see how far you've moved and unlock the next set.</p>
+      <a href="index.html" class="btn btn-primary" style="text-decoration:none; display:inline-block;">Retake the assessment →</a>
+    </div>`;
+
+  document.getElementById('courseCompleteScreen').innerHTML = `
+    ${recapHtml}
+    ${course.sourceUrl ? `
+      <div class="linkedin-box">
+        <p>This course has a companion article on our Product+ newsletter. Take a look and share your comments.</p>
+        <a class="linkedin-btn" href="${course.sourceUrl}" target="_blank" rel="noopener">Review on Product+ ↗</a>
+      </div>` : ''}
+    ${notesHtml}
+    ${recsHtml}
+    ${retakeHtml}
+    <div style="margin-top:22px;">
+      <a href="lms-dashboard.html?justCompleted=1" class="btn btn-ghost" style="text-decoration:none; display:inline-block;">Back to your dashboard</a>
+    </div>
+  `;
+  document.getElementById('courseCompleteScreen').style.display = 'block';
+}
+
 window.markCompleteAndContinue = async function(){
   if (!completedLessons.includes(lessonNum)) completedLessons.push(lessonNum);
 
@@ -635,8 +773,8 @@ window.markCompleteAndContinue = async function(){
 
   const isLast = lessonNum === course.lessons[course.lessons.length - 1].id;
   if (isLast){
-    document.getElementById('statusMsg').textContent = 'Course complete — nice work. Redirecting to your dashboard…';
-    setTimeout(() => { window.location.href = 'lms-dashboard.html?justCompleted=1'; }, 1200);
+    showCourseComplete(data.courses || {});
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   } else {
     window.location.href = 'lesson.html?course=' + courseId + '&lesson=' + (lessonNum + 1);
   }
