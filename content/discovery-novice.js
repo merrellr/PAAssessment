@@ -45,6 +45,16 @@ window.CONTENT_OVERRIDES["discovery-novice"] = {
           <li><strong>What's the current solution, if any, and why is it insufficient?</strong></li>
         </ul>
         <p>An example: <em>"Clinicians spend so long on documentation in their records system that it cuts into patient time and drives up administrative cost."</em> Notice it names the pain, the people, and the cost, without naming a solution.</p>
+        <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:12px; margin:0 0 16px;">
+          <div style="border-top:3px solid #C0622A; background:#FCEFE9; border-radius:8px; padding:12px 14px;">
+            <div style="font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:0.04em; color:#C0622A; margin-bottom:6px;">Not a problem statement</div>
+            <div style="font-size:13px; line-height:1.5;">"Redesign the billing screen so it feels more modern."<br><span style="color:var(--gray);">Names a solution and a vibe — no pain, no people, no cost.</span></div>
+          </div>
+          <div style="border-top:3px solid #2E8B57; background:#EEF9F1; border-radius:8px; padding:12px 14px;">
+            <div style="font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:0.04em; color:#2E8B57; margin-bottom:6px;">A problem statement</div>
+            <div style="font-size:13px; line-height:1.5;">"Support staff spend about six hours a week reconciling billing by hand, which delays invoicing and introduces errors."<br><span style="color:var(--gray);">Pain, who, and the cost — with no solution baked in.</span></div>
+          </div>
+        </div>
         <p>Writing this down creates a focused foundation. Every later decision, what to build, what to cut, how to tell if it worked, gets checked against it.</p>
       `,
       checks: [
@@ -115,7 +125,23 @@ window.CONTENT_OVERRIDES["discovery-novice"] = {
       id: 3,
       title: "Lesson 3: Do the Research",
       body: `
-        <p>A real market assessment is more than a survey. It's two kinds of research plus a look at the competition.</p>
+        <p>A real market assessment is more than a survey. It's two kinds of research plus a look at the competition — and they all feed one question.</p>
+        <svg viewBox="0 0 400 138" style="width:100%; height:auto; margin:4px 0 2px;">
+          <defs>
+            <marker id="dnResArrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path d="M0 0 L10 5 L0 10 z" fill="#9AA3AD"/>
+            </marker>
+          </defs>
+          <g font-family="'Space Grotesk',sans-serif" font-size="9.5" font-weight="700" fill="#12305e" text-anchor="middle">
+            <rect x="8" y="14" width="120" height="30" rx="8" fill="#EEF3FA" stroke="#1A4584" stroke-width="1.2"/><text x="68" y="27">Primary</text><text x="68" y="39" font-size="7.5" font-weight="400" fill="#4B5768">interviews, pilots</text>
+            <rect x="8" y="54" width="120" height="30" rx="8" fill="#E7F7FC" stroke="#35C2E8" stroke-width="1.2"/><text x="68" y="67">Secondary</text><text x="68" y="79" font-size="7.5" font-weight="400" fill="#4B5768">reports, competitor docs</text>
+            <rect x="8" y="94" width="120" height="30" rx="8" fill="#EEF3FA" stroke="#1A4584" stroke-width="1.2"/><text x="68" y="107">Competitive</text><text x="68" y="119" font-size="7.5" font-weight="400" fill="#4B5768">features, UX, pricing</text>
+            <rect x="250" y="52" width="140" height="34" rx="10" fill="#F7F9FC" stroke="#9AA3AD" stroke-width="1.3"/><text x="320" y="66">Where's the gap?</text><text x="320" y="78" font-size="7.5" font-weight="400" fill="#4B5768">that's your opening</text>
+          </g>
+          <line x1="128" y1="29" x2="248" y2="62" stroke="#9AA3AD" stroke-width="1.4" marker-end="url(#dnResArrow)"/>
+          <line x1="128" y1="69" x2="248" y2="69" stroke="#9AA3AD" stroke-width="1.4" marker-end="url(#dnResArrow)"/>
+          <line x1="128" y1="109" x2="248" y2="76" stroke="#9AA3AD" stroke-width="1.4" marker-end="url(#dnResArrow)"/>
+        </svg>
       `,
       steps: [
         { title: "Primary research", detail: "Talk to people directly — interviews, small focus groups, pilot programs. This is where you learn the workflow frustrations and gaps you'd never guess from the outside. A handful of honest conversations beats a hundred survey responses to a vague question." },
@@ -124,14 +150,14 @@ window.CONTENT_OVERRIDES["discovery-novice"] = {
       ],
       checks: [
         {
-          question: "What's the distinction between primary and secondary research here?",
+          question: "You have two weeks for discovery on a product area you don't know well. What's the most efficient first move?",
           options: [
-            "Primary is more important; secondary is optional",
-            "Primary is talking to people directly (interviews, pilots); secondary is reviewing research and material that already exists",
-            "Primary is quantitative; secondary is qualitative"
+            "Book a full two weeks of user interviews right away",
+            "Spend the first day or two on secondary research — reports, competitor docs, analyst write-ups — to map the landscape before you talk to anyone",
+            "Send a broad survey and wait for the responses to come in"
           ],
           correct: 1,
-          explanation: "Primary research is you engaging stakeholders first-hand. Secondary research is you reading what others have already published. You want both."
+          explanation: "Secondary research is cheap and fast and tells you the shape of the space. Going in with that context makes the primary research (the interviews) far sharper."
         },
         {
           question: "In a competitive analysis, what are you actually looking for?",
@@ -151,12 +177,15 @@ window.CONTENT_OVERRIDES["discovery-novice"] = {
       body: `
         <p>Once you've defined the problem and know who has it, test your assumptions with real users <em>before</em> committing serious engineering effort.</p>
         <p><strong>Build a minimum viable product.</strong> An MVP isn't a half-baked release. It's the smallest thing that delivers real value on the core problem while letting you iterate from feedback. If the core issue is documentation speed, the MVP is a streamlined note-taking flow, not a full redesign.</p>
-        <p><strong>Then put it in front of a small, representative group</strong> and watch:</p>
-        <ul>
-          <li><strong>Usability testing:</strong> watch people use it and note where they hesitate or get confused.</li>
-          <li><strong>Surveys and interviews:</strong> after they've used it, ask what worked and what didn't.</li>
-          <li><strong>Analytics:</strong> track time-to-complete, error rates, and which features actually get used.</li>
-        </ul>
+        <p><strong>Then put it in front of a small, representative group</strong> and watch three things at once:</p>
+        <svg viewBox="0 0 400 118" style="width:100%; height:auto; margin:4px 0 2px;">
+          <g font-family="'Space Grotesk',sans-serif" font-size="9" font-weight="700" fill="#12305e" text-anchor="middle">
+            <rect x="10" y="18" width="118" height="34" rx="8" fill="#EEF3FA" stroke="#1A4584" stroke-width="1.2"/><text x="69" y="32">Usability test</text><text x="69" y="44" font-size="7.5" font-weight="400" fill="#4B5768">where they hesitate</text>
+            <rect x="141" y="18" width="118" height="34" rx="8" fill="#E7F7FC" stroke="#35C2E8" stroke-width="1.2"/><text x="200" y="32">Survey / interview</text><text x="200" y="44" font-size="7.5" font-weight="400" fill="#4B5768">what they say</text>
+            <rect x="272" y="18" width="118" height="34" rx="8" fill="#EEF3FA" stroke="#1A4584" stroke-width="1.2"/><text x="331" y="32">Analytics</text><text x="331" y="44" font-size="7.5" font-weight="400" fill="#4B5768">what they do</text>
+          </g>
+          <text x="200" y="82" text-anchor="middle" font-family="sans-serif" font-size="9.5" fill="#4B5768">A gap between what they <tspan font-style="italic">say</tspan> and what they <tspan font-style="italic">do</tspan> is a finding, not noise.</text>
+        </svg>
       `,
       checks: [
         {
