@@ -46,11 +46,11 @@ window.CONTENT_OVERRIDES["prioritization-moderate"] = {
       `,
       checks: [
         {
-          question: "According to this lesson, why does a value-vs-effort framework produce inconsistent rankings?",
+          question: "The same feature scored \"high value\" in Tuesday's planning meeting and \"medium\" in Thursday's, with no new information in between. What does this lesson blame?",
           options: [
-            "It's the wrong framework for most teams",
-            "The \"value\" input is estimated by feel, so it shifts with the room — and soft inputs produce soft outputs",
-            "The effort estimates from engineering are unreliable"
+            "The framework itself — value-vs-effort is the wrong tool",
+            "The \"value\" input is estimated by feel, so it shifts with the room; soft inputs produce soft outputs",
+            "The effort estimates from engineering changed between the two meetings"
           ],
           correct: 1,
           explanation: "\"A framework built on gut-feel inputs produces gut-feel outputs with a spreadsheet wrapped around them.\" The fix is grounding the inputs, not changing the framework."
@@ -72,6 +72,16 @@ window.CONTENT_OVERRIDES["prioritization-moderate"] = {
       title: "Lesson 2: Put Numbers Behind \"Value\"",
       body: `
         <p>To ground the value estimate, tie every candidate to a <strong>specific metric it should move</strong> and a rough size of that movement.</p>
+        <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(210px, 1fr)); gap:12px; margin:2px 0 14px;">
+          <div style="border-top:3px solid #C0622A; background:#FBF3EF; border-radius:6px; padding:10px 12px;">
+            <strong style="font-size:12px; color:#7a3d18;">Shifts with the room</strong>
+            <p style="margin:6px 0 0; font-size:13px;">"This improves onboarding." <span style="color:#7a3d18;">&#8594; how much? for whom? says who?</span></p>
+          </div>
+          <div style="border-top:3px solid #2E8B57; background:#EEF7F1; border-radius:6px; padding:10px 12px;">
+            <strong style="font-size:12px; color:#256b45;">Debatable with evidence</strong>
+            <p style="margin:6px 0 0; font-size:13px;">"Raises onboarding completion from 58% to ~68%, by cutting two steps before first value."</p>
+          </div>
+        </div>
         <ul>
           <li>Not "this improves onboarding" but "this should raise onboarding completion from 58% to ~68%."</li>
           <li>Not "this helps power users" but "this should lift the retention of the accounts using feature X, currently ~1,200 accounts."</li>

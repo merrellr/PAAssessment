@@ -45,11 +45,11 @@ window.CONTENT_OVERRIDES["prioritization-advanced"] = {
       `,
       checks: [
         {
-          question: "What's the deliverable at the advanced level of prioritization?",
+          question: "You already order your own backlog cleanly every cycle. Two peer teams keep colliding over shared engineering capacity, and it always resolves in favor of whoever escalates to a VP first. What's the advanced move?",
           options: [
-            "A perfectly ordered backlog for your own product",
-            "A prioritization method other teams adopt, plus the ability to resolve cross-team prioritization conflicts through that method",
-            "A prioritization committee that meets weekly"
+            "Order a bigger backlog spanning both teams' work yourself",
+            "Design a prioritization method both teams adopt — shared definitions and data — and resolve their collisions through it rather than by escalation",
+            "Ask leadership to permanently assign the shared capacity to one team"
           ],
           correct: 1,
           explanation: "The output is a shared system and conflict resolution at the org level — not another well-ordered single backlog."
@@ -149,6 +149,20 @@ window.CONTENT_OVERRIDES["prioritization-advanced"] = {
       title: "Lesson 4: Portfolio Thinking",
       body: `
         <p>With multiple products or teams, prioritization isn't only <em>within</em> a backlog, it's allocating capacity <em>across</em> them. That's portfolio management.</p>
+        <svg viewBox="0 0 400 118" style="width:100%; height:auto; margin:4px 0 2px;" xmlns="http://www.w3.org/2000/svg">
+          <text x="8" y="16" font-family="'Space Grotesk',sans-serif" font-size="8.5" font-weight="700" fill="#12305e">Total product + engineering capacity</text>
+          <rect x="8" y="24" width="176" height="30" fill="#EEF3FA" stroke="#1A4584" stroke-width="1.1"/>
+          <rect x="184" y="24" width="112" height="30" fill="#E7F7FC" stroke="#35C2E8" stroke-width="1.1"/>
+          <rect x="296" y="24" width="96" height="30" fill="#EEF3FA" stroke="#1A4584" stroke-width="1.1"/>
+          <g font-family="sans-serif" font-size="7.5" fill="#12305e" text-anchor="middle">
+            <text x="96" y="38" font-weight="700">Product A &#183; 45%</text><text x="96" y="48">growth</text>
+            <text x="240" y="38" font-weight="700">Product B &#183; 28%</text><text x="240" y="48">mature</text>
+            <text x="344" y="38" font-weight="700">C &#183; 27%</text><text x="344" y="48">growth</text>
+          </g>
+          <text x="8" y="76" font-family="sans-serif" font-size="8" fill="#4B5768">Set the cross-product split first &#8212; then each team prioritizes within its slice.</text>
+          <text x="8" y="94" font-family="sans-serif" font-size="8" fill="#4B5768">Skip this step and the loudest team's backlog sets the split by default.</text>
+          <text x="8" y="112" font-family="sans-serif" font-size="8" fill="#9AA3AD">Rebalance on a cadence as products change stage.</text>
+        </svg>
       `,
       steps: [
         { title: "Classify products by stage", detail: "Growth-stage products that need investment to capture a market, and mature products that generate cash but need less. The right prioritization pressure is different for each." },
