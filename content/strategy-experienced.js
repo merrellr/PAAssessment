@@ -43,6 +43,33 @@ window.CONTENT_OVERRIDES["strategy-experienced"] = {
           <li><strong>Executives</strong> need the high-level view: themes, how each aligns to business goals, and the key risks with mitigations. Their question is "is this the right bet and what could derail it?"</li>
           <li><strong>Customers</strong> need the improvements view: what's coming that addresses their pain points or streamlines their workflow. Their question is "what's in it for me and roughly when?"</li>
         </ul>
+        <svg viewBox="0 0 400 150" style="width:100%; height:auto; margin:4px 0 2px;" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <marker id="seCut" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+              <path d="M0,0 L10,5 L0,10 z" fill="#9AA3AD"/>
+            </marker>
+          </defs>
+          <rect x="10" y="56" width="96" height="38" rx="6" fill="#EEF3FA" stroke="#1A4584" stroke-width="1.3"/>
+          <text x="58" y="79" text-anchor="middle" font-family="'Space Grotesk',sans-serif" font-size="9" font-weight="700" fill="#12305e">One roadmap</text>
+          <line x1="106" y1="66" x2="150" y2="28" stroke="#9AA3AD" stroke-width="1.2" marker-end="url(#seCut)"/>
+          <line x1="106" y1="75" x2="150" y2="75" stroke="#9AA3AD" stroke-width="1.2" marker-end="url(#seCut)"/>
+          <line x1="106" y1="84" x2="150" y2="122" stroke="#9AA3AD" stroke-width="1.2" marker-end="url(#seCut)"/>
+          <g>
+            <rect x="152" y="10" width="238" height="34" rx="5" fill="#E7F7FC" stroke="#35C2E8" stroke-width="1.1"/>
+            <rect x="152" y="58" width="238" height="34" rx="5" fill="#E7F7FC" stroke="#35C2E8" stroke-width="1.1"/>
+            <rect x="152" y="106" width="238" height="34" rx="5" fill="#E7F7FC" stroke="#35C2E8" stroke-width="1.1"/>
+          </g>
+          <g font-family="'Space Grotesk',sans-serif" font-size="8.5" font-weight="700" fill="#12305e">
+            <text x="162" y="26">Engineers</text>
+            <text x="162" y="74">Executives</text>
+            <text x="162" y="122">Customers</text>
+          </g>
+          <g font-family="sans-serif" font-size="8" fill="#4B5768">
+            <text x="162" y="38">"what am I building, and when?"</text>
+            <text x="162" y="86">"right bet? what could derail it?"</text>
+            <text x="162" y="134">"what's in it for me, roughly when?"</text>
+          </g>
+        </svg>
         <p>One roadmap, three presentations. Skipping the translation is how a solid roadmap still leaves everyone confused.</p>
       `,
       checks: [
@@ -82,11 +109,11 @@ window.CONTENT_OVERRIDES["strategy-experienced"] = {
       `,
       checks: [
         {
-          question: "According to this lesson, what should always accompany a deprioritization?",
+          question: "A feature three enterprise customers had asked about disappears from the public roadmap with no note. What does this lesson predict?",
           options: [
-            "A new estimated date for when it will be picked back up",
-            "The rationale — what changed, what it makes room for, the trade-off made",
-            "An apology to the stakeholders who requested it"
+            "Customers assume it's still coming and wait patiently",
+            "Trust in the roadmap erodes — a silent disappearance reads as evasion; the fix is stating what changed and what it made room for",
+            "Nothing, as long as it's mentioned at the next quarterly review if someone asks"
           ],
           correct: 1,
           explanation: "\"We're pushing X to fund Y because of Z\" keeps trust. A feature quietly vanishing from the roadmap erodes it."

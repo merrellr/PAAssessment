@@ -82,7 +82,6 @@ window.CONTENT_OVERRIDES["strategy-novice"] = {
             <text x="200" y="90" font-size="11" font-weight="700">Epics / features</text>
             <text x="200" y="134" font-size="11" font-weight="700">Tasks</text>
           </g>
-          <text x="200" y="60" text-anchor="middle" font-family="sans-serif" font-size="7.5" fill="#4B5768"></text>
         </svg>
         <p><strong>Strategic planning</strong> defines the high-level themes and milestones that support the vision, "improve onboarding completion," "reach enterprise readiness," "cut time-to-value in half." That's what belongs on the roadmap.</p>
         <p><strong>Tactical planning</strong> breaks those themes into epics, features, and tasks for the development team. That's what belongs in the backlog and sprint plan.</p>
@@ -116,6 +115,35 @@ window.CONTENT_OVERRIDES["strategy-novice"] = {
       title: "Lesson 3: Link Every Theme to a Business Objective",
       body: `
         <p>A roadmap that reflects strategy is one where each theme maps to a specific business goal, revenue growth, market expansion, retention, adoption. If you can't draw that line for a theme, it probably shouldn't be a theme.</p>
+        <svg viewBox="0 0 400 156" style="width:100%; height:auto; margin:4px 0 2px;" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <marker id="snMap" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+              <path d="M0,0 L10,5 L0,10 z" fill="#9AA3AD"/>
+            </marker>
+          </defs>
+          <g font-family="'Space Grotesk',sans-serif" font-size="8" font-weight="700" text-anchor="middle" fill="#12305e">
+            <text x="86" y="12">Theme</text>
+            <text x="314" y="12">Business objective</text>
+          </g>
+          <rect x="10" y="20" width="152" height="30" rx="5" fill="#EEF3FA" stroke="#1A4584" stroke-width="1.1"/>
+          <rect x="10" y="62" width="152" height="30" rx="5" fill="#EEF3FA" stroke="#1A4584" stroke-width="1.1"/>
+          <rect x="10" y="104" width="152" height="30" rx="5" fill="#F7F9FC" stroke="#9AA3AD" stroke-width="1.1" stroke-dasharray="3 2"/>
+          <rect x="238" y="20" width="152" height="30" rx="5" fill="#E7F7FC" stroke="#35C2E8" stroke-width="1.1"/>
+          <rect x="238" y="62" width="152" height="30" rx="5" fill="#E7F7FC" stroke="#35C2E8" stroke-width="1.1"/>
+          <rect x="238" y="104" width="152" height="30" rx="5" fill="#FBF0E9" stroke="#C0622A" stroke-width="1.1"/>
+          <g font-family="sans-serif" font-size="8" text-anchor="middle">
+            <text x="86" y="39" fill="#12305e">Cut onboarding drop-off</text>
+            <text x="86" y="81" fill="#12305e">Ship SSO + audit log</text>
+            <text x="86" y="123" fill="#6b7480">Refresh the settings screen</text>
+            <text x="314" y="39" fill="#12305e">Retention</text>
+            <text x="314" y="81" fill="#12305e">Enterprise expansion</text>
+            <text x="314" y="123" fill="#7a3d18">? &#8212; no objective</text>
+          </g>
+          <line x1="164" y1="35" x2="236" y2="35" stroke="#9AA3AD" stroke-width="1.2" marker-end="url(#snMap)"/>
+          <line x1="164" y1="77" x2="236" y2="77" stroke="#9AA3AD" stroke-width="1.2" marker-end="url(#snMap)"/>
+          <line x1="164" y1="119" x2="236" y2="119" stroke="#C0622A" stroke-width="1.2" stroke-dasharray="3 2" marker-end="url(#snMap)"/>
+          <text x="200" y="150" text-anchor="middle" font-family="sans-serif" font-size="8.5" fill="#4B5768">If a theme's arrow lands on "?", it belongs in the backlog, not the roadmap.</text>
+        </svg>
         <p>Two moves make this real:</p>
         <ul>
           <li><strong>Map themes to objectives explicitly.</strong> Not "improve the dashboard" but "improve the dashboard <em>to reduce the support volume that's capping our margin.</em>" The objective is part of the theme's definition.</li>
@@ -158,11 +186,11 @@ window.CONTENT_OVERRIDES["strategy-novice"] = {
       ],
       checks: [
         {
-          question: "In this prioritization approach, what's the primary axis for ranking optional themes?",
+          question: "You're ranking five optional themes. One is a two-day change three customers asked for; another is a six-week rebuild the revenue model depends on. How does this lesson say to order them?",
           options: [
-            "How little effort each one takes",
-            "Each theme's expected impact on the business goals it's mapped to",
-            "How many stakeholders requested it"
+            "Quick win first, small effort and fast value, then tackle the big rebuild",
+            "The revenue-model rebuild ranks higher: impact on the mapped goal leads, and effort is only a tiebreaker",
+            "Whichever has more customer requests attached goes first"
           ],
           correct: 1,
           explanation: "Impact on mapped goals leads; effort is a tiebreaker. Ranking primarily by ease is how you end up busy but not moving."
@@ -184,6 +212,16 @@ window.CONTENT_OVERRIDES["strategy-novice"] = {
       title: "Lesson 5: Realistic, Time-Bound Milestones",
       body: `
         <p>The last piece is milestones that are both <strong>realistic</strong> and <strong>time-bound</strong>. Milestones are how a theme stops being an aspiration and becomes something you can track, "onboarding completion at 70% by end of Q2," not "make onboarding better, ongoing."</p>
+        <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:12px; margin:2px 0 14px;">
+          <div style="border-top:3px solid #C0622A; background:#FBF3EF; border-radius:6px; padding:10px 12px;">
+            <strong style="font-size:12px; color:#7a3d18;">Can't catch drift</strong>
+            <p style="margin:6px 0 0; font-size:13px;">"Make onboarding better &mdash; ongoing."</p>
+          </div>
+          <div style="border-top:3px solid #2E8B57; background:#EEF7F1; border-radius:6px; padding:10px 12px;">
+            <strong style="font-size:12px; color:#256b45;">A milestone you can track</strong>
+            <p style="margin:6px 0 0; font-size:13px;">"Onboarding completion at 70% by the end of Q2."</p>
+          </div>
+        </div>
         <p>When milestones are vague or fantasy-dated, strategy and execution drift apart: the roadmap says one thing, the team is doing another, and nobody notices for a quarter. A realistic, dated milestone is the checkpoint that catches the drift early.</p>
         <p>Putting the whole chapter together: a real roadmap is <em>themes tied to business objectives, prioritized systematically, broken into realistic time-bound milestones,</em> and communicated as direction rather than a task list. That's the difference between "we have a roadmap" and "we have a prioritized backlog."</p>
       `,
