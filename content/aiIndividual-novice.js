@@ -121,6 +121,25 @@ window.CONTENT_OVERRIDES["aiIndividual-novice"] = {
       title: "Lesson 4: How to Scale Once You Have Traction",
       body: `
         <p>Once you have a few small wins, scaling gets a lot less scary, you're building on evidence instead of theory. Three things that actually move the needle:</p>
+        <svg viewBox="0 0 400 92" style="width:100%; height:auto; margin:4px 0 2px;" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <marker id="aiNScale" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+              <path d="M0,0 L10,5 L0,10 z" fill="#9AA3AD"/>
+            </marker>
+          </defs>
+          <g text-anchor="middle" font-family="'Space Grotesk',sans-serif" font-size="7.5" font-weight="700" fill="#12305e">
+            <rect x="6" y="30" width="86" height="30" rx="5" fill="#EEF3FA" stroke="#1A4584" stroke-width="1"/><text x="49" y="42">One person's</text><text x="49" y="52">win</text>
+            <rect x="106" y="30" width="86" height="30" rx="5" fill="#E7F7FC" stroke="#35C2E8" stroke-width="1.2"/><text x="149" y="42">Documented</text><text x="149" y="52">as a template</text>
+            <rect x="206" y="30" width="86" height="30" rx="5" fill="#E7F7FC" stroke="#35C2E8" stroke-width="1.2"/><text x="249" y="42">Others pick</text><text x="249" y="52">it up</text>
+            <rect x="306" y="30" width="88" height="30" rx="5" fill="#EEF9F1" stroke="#2E8B57" stroke-width="1.1"/><text x="350" y="42">Org</text><text x="350" y="52">capability</text>
+          </g>
+          <g stroke="#9AA3AD" stroke-width="1.2">
+            <line x1="92" y1="45" x2="104" y2="45" marker-end="url(#aiNScale)"/>
+            <line x1="192" y1="45" x2="204" y2="45" marker-end="url(#aiNScale)"/>
+            <line x1="292" y1="45" x2="304" y2="45" marker-end="url(#aiNScale)"/>
+          </g>
+          <text x="200" y="80" text-anchor="middle" font-family="sans-serif" font-size="7.5" fill="#4B5768">The template is the bridge &#8212; without it the win stays stuck with one person.</text>
+        </svg>
         <ul>
           <li><strong>Share what's working.</strong> A Slack thread, a monthly email, wherever people gather, have team members share prompts, use cases, and results. Peer learning spreads faster and sticks better than formal training.</li>
           <li><strong>Standardize the wins.</strong> When someone finds a great way to use AI for a specific task, document it. Turn it into a template others can pick up without starting from zero. That's how individual experimentation becomes organizational capability.</li>

@@ -175,6 +175,24 @@ window.CONTENT_OVERRIDES["aiIndividual-advanced"] = {
       body: `
         <p>By 5:45, an end-of-day digest arrives before Jordan even closes the laptop: what happened, what's still open, three things flagged for tomorrow, and an honest note about what it couldn't confirm, since one conversation from standup happened outside any tool it can see.</p>
         <p>None of this is about agents making decisions instead of Jordan. Every meaningful call that day, the account risk worth escalating, the PRD framing, the backlog override, came from a person weighing context an agent didn't have. What changed is everything sitting underneath those decisions: the reading, the summarizing, the watching, the first draft, the constant low-grade vigilance that used to eat most of a PM's day now happens quietly in the background.</p>
+        <svg viewBox="0 0 400 132" style="width:100%; height:auto; margin:4px 0 2px;" xmlns="http://www.w3.org/2000/svg">
+          <rect x="6" y="10" width="188" height="112" rx="6" fill="#E7F7FC" stroke="#35C2E8" stroke-width="1.1"/>
+          <rect x="206" y="10" width="188" height="112" rx="6" fill="#EEF3FA" stroke="#1A4584" stroke-width="1.1"/>
+          <text x="100" y="26" text-anchor="middle" font-family="'Space Grotesk',sans-serif" font-size="8.5" font-weight="700" fill="#12305e">Moved to agents</text>
+          <text x="300" y="26" text-anchor="middle" font-family="'Space Grotesk',sans-serif" font-size="8.5" font-weight="700" fill="#12305e">Stayed with you</text>
+          <g font-family="sans-serif" font-size="8" fill="#4B5768">
+            <text x="16" y="44">reading the inbox and threads</text>
+            <text x="16" y="62">summarizing status</text>
+            <text x="16" y="80">watching dashboards</text>
+            <text x="16" y="98">the first-draft PRD</text>
+            <text x="16" y="116">constant low-grade vigilance</text>
+            <text x="216" y="44">what a silence means</text>
+            <text x="216" y="62">whether a drop is churn</text>
+            <text x="216" y="80">the framing of the problem</text>
+            <text x="216" y="98">the backlog override</text>
+            <text x="216" y="116">what to escalate, and when</text>
+          </g>
+        </svg>
         <p>The job hasn't gotten smaller. It's gotten more concentrated.</p>
       `,
       checks: [

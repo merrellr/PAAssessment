@@ -176,6 +176,28 @@ window.CONTENT_OVERRIDES["aiOrg-experienced"] = {
       title: "Lesson 5: Iteration — Earn the Next Stage of Rollout",
       body: `
         <p>Every round of pilot feedback should change something concrete: adjusting the prompt or guardrails, changing what the agent can do without a human checking its work, or narrowing scope because you tried to solve too much at once.</p>
+        <svg viewBox="0 0 400 120" style="width:100%; height:auto; margin:4px 0 2px;" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <marker id="aoeGate" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+              <path d="M0,0 L10,5 L0,10 z" fill="#9AA3AD"/>
+            </marker>
+          </defs>
+          <rect x="6" y="44" width="80" height="30" rx="5" fill="#EEF3FA" stroke="#1A4584" stroke-width="1.2"/>
+          <text x="46" y="63" text-anchor="middle" font-family="'Space Grotesk',sans-serif" font-size="8" font-weight="700" fill="#12305e">Current version</text>
+          <polygon points="170,32 236,59 170,86 104,59" fill="#FBF0E9" stroke="#C0622A" stroke-width="1.2"/>
+          <text x="170" y="55" text-anchor="middle" font-family="'Space Grotesk',sans-serif" font-size="7.5" font-weight="700" fill="#7a3d18">Same corrections</text>
+          <text x="170" y="65" text-anchor="middle" font-family="'Space Grotesk',sans-serif" font-size="7.5" font-weight="700" fill="#7a3d18">every week?</text>
+          <rect x="270" y="10" width="124" height="26" rx="5" fill="#E7F7FC" stroke="#35C2E8" stroke-width="1.2"/>
+          <text x="332" y="26" text-anchor="middle" font-family="sans-serif" font-size="7.5" fill="#12305e">Iterate: prompt / guardrails / scope</text>
+          <rect x="278" y="80" width="116" height="26" rx="5" fill="#EEF9F1" stroke="#2E8B57" stroke-width="1.2"/>
+          <text x="336" y="96" text-anchor="middle" font-family="sans-serif" font-size="7.5" fill="#12305e">Expand the rollout</text>
+          <line x1="86" y1="59" x2="102" y2="59" stroke="#9AA3AD" stroke-width="1.2" marker-end="url(#aoeGate)"/>
+          <line x1="236" y1="50" x2="268" y2="30" stroke="#C0622A" stroke-width="1.2" marker-end="url(#aoeGate)"/>
+          <text x="250" y="34" font-family="sans-serif" font-size="7" fill="#7a3d18">yes</text>
+          <line x1="236" y1="68" x2="276" y2="88" stroke="#2E8B57" stroke-width="1.2" marker-end="url(#aoeGate)"/>
+          <text x="248" y="86" font-family="sans-serif" font-size="7" fill="#256b45">no</text>
+          <path d="M332 36 C332 114, 46 114, 46 76" fill="none" stroke="#9AA3AD" stroke-width="1.1" stroke-dasharray="4 3" marker-end="url(#aoeGate)"/>
+        </svg>
         <p>Here's the rule worth internalizing: <strong>don't expand the rollout until the current version has earned it.</strong> If a copilot is getting corrected on the same kind of task every week, more users won't fix that, they'll just multiply the frustration. Iteration is where you build the trust that adoption actually depends on.</p>
       `,
       checks: [
