@@ -108,6 +108,29 @@ window.CONTENT_OVERRIDES["execution-moderate"] = {
       title: "Lesson 4: The Rollout Playbook",
       body: `
         <p>For teams wondering how to get started, the best approach begins with real user needs, not the technology itself. Step through the six-stage path from there.</p>
+        <svg viewBox="0 0 400 118" style="width:100%; height:auto; margin:4px 0 2px;" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <marker id="emStep" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+              <path d="M0,0 L10,5 L0,10 z" fill="#9AA3AD"/>
+            </marker>
+          </defs>
+          <g text-anchor="middle" font-family="'Space Grotesk',sans-serif" font-size="7.5" font-weight="700" fill="#12305e">
+            <rect x="8" y="14" width="112" height="26" rx="5" fill="#EEF3FA" stroke="#1A4584" stroke-width="1"/><text x="64" y="30">1 &#183; Find friction</text>
+            <rect x="144" y="14" width="112" height="26" rx="5" fill="#EEF3FA" stroke="#1A4584" stroke-width="1"/><text x="200" y="30">2 &#183; Pick 1&#8211;2 cases</text>
+            <rect x="280" y="14" width="112" height="26" rx="5" fill="#EEF3FA" stroke="#1A4584" stroke-width="1"/><text x="336" y="30">3 &#183; Right people</text>
+            <rect x="8" y="70" width="112" height="26" rx="5" fill="#E7F7FC" stroke="#35C2E8" stroke-width="1"/><text x="64" y="86">4 &#183; Success metrics</text>
+            <rect x="144" y="70" width="112" height="26" rx="5" fill="#E7F7FC" stroke="#35C2E8" stroke-width="1"/><text x="200" y="86">5 &#183; Pilot &amp; refine</text>
+            <rect x="280" y="70" width="112" height="26" rx="5" fill="#EEF9F1" stroke="#2E8B57" stroke-width="1"/><text x="336" y="86">6 &#183; Expand</text>
+          </g>
+          <g stroke="#9AA3AD" stroke-width="1.1">
+            <line x1="120" y1="27" x2="142" y2="27" marker-end="url(#emStep)"/>
+            <line x1="256" y1="27" x2="278" y2="27" marker-end="url(#emStep)"/>
+            <path d="M336 40 C336 56, 64 54, 64 68" fill="none" stroke-dasharray="4 3" marker-end="url(#emStep)"/>
+            <line x1="120" y1="83" x2="142" y2="83" marker-end="url(#emStep)"/>
+            <line x1="256" y1="83" x2="278" y2="83" marker-end="url(#emStep)"/>
+          </g>
+          <text x="200" y="112" text-anchor="middle" font-family="sans-serif" font-size="7.5" fill="#4B5768">Start from user friction, not the technology &#8212; and only widen once a case earns it.</text>
+        </svg>
       `,
       steps: [
         { title: "1. Identify friction", detail: "Look at where users struggle to read, hear, navigate, respond, or understand information. Accessibility gaps often become clear when you observe how people actually use a product in the real world." },

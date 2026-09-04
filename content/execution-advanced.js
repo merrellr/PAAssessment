@@ -158,15 +158,25 @@ window.CONTENT_OVERRIDES["execution-advanced"] = {
           <li><strong>Track whether the product is still landing</strong> — retention, satisfaction, the core outcome metric — so a slow decline is noticed early.</li>
           <li><strong>Feed the findings into the next round of prioritization</strong>, so the roadmap is continuously adjusted from evidence rather than re-argued from opinion.</li>
         </ul>
+        <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(210px, 1fr)); gap:12px; margin:2px 0 14px;">
+          <div style="border-top:3px solid #C0622A; background:#FBF3EF; border-radius:6px; padding:10px 12px;">
+            <strong style="font-size:12px; color:#7a3d18;">Habit &mdash; champion-dependent</strong>
+            <p style="margin:6px 0 0; font-size:13px;">One PM checks post-release data when they remember. The other two teams ship and move on.</p>
+          </div>
+          <div style="border-top:3px solid #2E8B57; background:#EEF7F1; border-radius:6px; padding:10px 12px;">
+            <strong style="font-size:12px; color:#256b45;">Standard practice &mdash; built in</strong>
+            <p style="margin:6px 0 0; font-size:13px;">Every team's cadence includes a post-release review; the roadmap step that follows expects its findings.</p>
+          </div>
+        </div>
         <p>Your job is to make this the water the teams swim in: the tooling is there, the cadence includes it, and shipping without looking at what happened feels wrong.</p>
       `,
       checks: [
         {
-          question: "What's the difference between data-driven optimization as a \"habit\" and as a \"standard practice\"?",
+          question: "Across the last three releases, only the one PM who cares about analytics reviewed the post-release data; the other two teams shipped and moved on. What does making this a \"standard practice\" actually require?",
           options: [
-            "A standard practice uses more advanced analytics tools",
-            "A habit depends on someone remembering or championing it; a standard practice is built into every team's delivery loop by default",
-            "There is no meaningful difference"
+            "Ask that PM to review the data for all three teams",
+            "Put the post-release review in every team's cadence, with the next roadmap step expecting its findings — so it happens without a champion",
+            "Add a better analytics dashboard and trust teams to use it"
           ],
           correct: 1,
           explanation: "The advanced move is making it structural — tooling, cadence, expectation — so it happens whether or not a particular person pushes for it."
