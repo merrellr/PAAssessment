@@ -15,6 +15,16 @@ window.CONTENT_OVERRIDES = window.CONTENT_OVERRIDES || {};
 
 window.CONTENT_OVERRIDES["stakeholder-novice"] = {
   sourceUrl: "",
+  template: {
+    title: "Communication cadence plan",
+    intro: "Design the rhythm for one real stakeholder or group, at the altitude this course describes.",
+    fields: [
+      { key: "audience", label: "Audience", type: "text", placeholder: "e.g. Engineering leads" },
+      { key: "cadence", label: "Cadence", type: "text", placeholder: "e.g. Weekly, Fridays" },
+      { key: "channel", label: "Channel", type: "text", placeholder: "e.g. Shared doc + standup" },
+      { key: "content", label: "What they need from you at that altitude", type: "textarea", placeholder: "Delivery detail, on-track/risk/decision, or impact and timing?" }
+    ]
+  },
   recap: [
     "Reactive communication only reaches the people who chase you; every 'quick question' is a preventable interruption.",
     "Build a predictable cadence — standups, a weekly sync, sprint reviews — so people stop needing to ask for status.",

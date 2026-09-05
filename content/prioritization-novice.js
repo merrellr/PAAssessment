@@ -16,6 +16,16 @@ window.CONTENT_OVERRIDES = window.CONTENT_OVERRIDES || {};
 
 window.CONTENT_OVERRIDES["prioritization-novice"] = {
   sourceUrl: "",
+  template: {
+    title: "Score sheet",
+    intro: "Run one real backlog item through the framework from this course — use the ICE calculator above for the score.",
+    fields: [
+      { key: "item", label: "Candidate item", type: "text", placeholder: "e.g. Inline validation on signup" },
+      { key: "nonNegotiable", label: "Non-negotiable? (yes/no, and why)", type: "text", placeholder: "No — this is discretionary" },
+      { key: "score", label: "ICE score", type: "text", placeholder: "e.g. 2.50" },
+      { key: "decision", label: "Decision", type: "text", placeholder: "Do now / plan later / decline" }
+    ]
+  },
   recap: [
     "Reactive 'loudest voice' prioritization optimizes for advocacy, not value, and leaves an order you can't defend.",
     "A value-vs-effort view forces the two questions that matter onto the table — quick wins, big bets, fill-ins, money pits.",

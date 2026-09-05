@@ -85,6 +85,20 @@
   .linkedin-btn{ display:inline-flex; align-items:center; gap:8px; background:var(--navy); color:#fff; font-family:'Space Grotesk', sans-serif; font-weight:600; font-size: 13.5px; padding: 9px 16px; border-radius: 8px; text-decoration:none; }
   .linkedin-btn:hover{ background:var(--navy-deep); }
   .reflection-saved-note{ font-size: 12px; color: var(--gray); }
+
+  .template-box{ background:#F7F9FC; border-radius: 12px; padding: 18px 20px; margin-top: 20px; }
+  .template-field{ margin-bottom: 12px; }
+  .template-field label{ display:block; font-size: 12px; color: var(--ink-soft); margin-bottom: 4px; }
+  .template-field input[type=text], .template-field textarea{ width:100%; padding: 9px 11px; border: 1.5px solid var(--line); border-radius: 8px; font-family:'IBM Plex Sans', sans-serif; font-size: 13.5px; box-sizing:border-box; }
+  .template-field textarea{ min-height: 60px; resize: vertical; }
+  .template-field input:focus, .template-field textarea:focus{ outline:none; border-color: var(--cyan); }
+  .template-actions{ display:flex; justify-content:space-between; align-items:center; margin-top: 14px; flex-wrap: wrap; gap: 10px; }
+  .template-actions .tbtns{ display:flex; gap:8px; flex-wrap: wrap; }
+  .template-actions button{ font-family:'Space Grotesk', sans-serif; font-weight:600; font-size: 12.5px; padding: 8px 14px; border-radius: 7px; cursor:pointer; }
+  .template-actions .tbtn-save{ border:none; background: var(--navy); color:#fff; }
+  .template-actions .tbtn-save:hover{ background: var(--navy-deep); }
+  .template-actions .tbtn-ghost{ border: 1px solid var(--line); background:#fff; color: var(--ink-soft); }
+  .template-saved-note{ font-size: 12px; color: var(--gray); }
   .lesson-nav{ display:flex; gap:8px; margin: 24px 0; flex-wrap:wrap; }
   .lesson-pill{ padding: 7px 12px; border-radius: 7px; font-size: 12.5px; font-weight:500; border: 1px solid var(--line); background:#fff; color: var(--ink-soft); text-decoration:none; }
   .lesson-pill.done{ background:#EEF3FA; border-color: var(--cyan); color: var(--navy); }
@@ -246,6 +260,7 @@ function buildCatalog(){
         catalog[courseId].lessons = CONTENT_OVERRIDES[courseId].lessons;
         catalog[courseId].sourceUrl = CONTENT_OVERRIDES[courseId].sourceUrl || null;
         catalog[courseId].recap = CONTENT_OVERRIDES[courseId].recap || null;
+        catalog[courseId].template = CONTENT_OVERRIDES[courseId].template || null;
       }
     });
   });
@@ -780,6 +795,100 @@ function recommendNext(coursesMap, result){
   return out;
 }
 
+/* A short, fillable worksheet tied to the course's core framework —
+   authored per course as `course.template` (title, optional intro,
+   fields: [{key, label, type:'text'|'textarea', placeholder}]).
+   Values persist to Firestore the same way reflections do, and can
+   also be copied or downloaded as plain text. Shown on the course
+   completion screen, right after the recap. */
+function courseTemplateHtml(tmpl, existing){
+  if (!tmpl || !tmpl.fields || !tmpl.fields.length) return '';
+  const esc = (s) => (s || '').replace(/</g, '&lt;').replace(/"/g, '&quot;');
+  const fieldsHtml = tmpl.fields.map(f => {
+    const val = (existing && existing[f.key]) || '';
+    return f.type === 'textarea'
+      ? `<div class="template-field">
+           <label for="tmpl-${f.key}">${f.label}</label>
+           <textarea id="tmpl-${f.key}" placeholder="${esc(f.placeholder)}">${esc(val)}</textarea>
+         </div>`
+      : `<div class="template-field">
+           <label for="tmpl-${f.key}">${f.label}</label>
+           <input type="text" id="tmpl-${f.key}" placeholder="${esc(f.placeholder)}" value="${esc(val)}">
+         </div>`;
+  }).join('');
+  return `
+    <div class="template-box" id="courseTemplateBox">
+      <span class="eyebrow">${tmpl.title || 'Course template'}</span>
+      ${tmpl.intro ? `<p style="margin:8px 0 14px; font-size:13.5px; color:var(--ink-soft);">${tmpl.intro}</p>` : ''}
+      ${fieldsHtml}
+      <div class="template-actions">
+        <span class="template-saved-note" id="tmplSavedNote">${existing && Object.keys(existing).length ? 'Saved previously' : ''}</span>
+        <div class="tbtns">
+          <button type="button" id="tmplCopyBtn" class="tbtn-ghost">Copy</button>
+          <button type="button" id="tmplDownloadBtn" class="tbtn-ghost">Download .txt</button>
+          <button type="button" id="tmplSaveBtn" class="tbtn-save">Save</button>
+        </div>
+      </div>
+    </div>`;
+}
+
+function templateAsText(tmpl, values){
+  const lines = [tmpl.title || 'Course template', ''];
+  tmpl.fields.forEach(f => { lines.push(f.label + ':', values[f.key] || '(blank)', ''); });
+  return lines.join('\n').trim() + '\n';
+}
+
+function wireCourseTemplate(tmpl){
+  const box = document.getElementById('courseTemplateBox');
+  if (!box || !tmpl) return;
+  const note = box.querySelector('#tmplSavedNote');
+  const readValues = () => {
+    const values = {};
+    tmpl.fields.forEach(f => { values[f.key] = box.querySelector('#tmpl-' + f.key).value.trim(); });
+    return values;
+  };
+
+  box.querySelector('#tmplSaveBtn').onclick = async () => {
+    const values = readValues();
+    try {
+      const progressRef = doc(db, 'progress', currentUser.uid);
+      const snap = await getDoc(progressRef);
+      const data = snap.exists() ? snap.data() : { courses: {} };
+      data.courses = data.courses || {};
+      data.courses[courseId] = data.courses[courseId] || {};
+      data.courses[courseId].template = values;
+      await setDoc(progressRef, data);
+      note.textContent = 'Saved just now';
+    } catch (err){
+      console.error('Saving template failed:', err);
+      note.textContent = 'Could not save — try again';
+    }
+  };
+
+  box.querySelector('#tmplCopyBtn').onclick = async () => {
+    const text = templateAsText(tmpl, readValues());
+    try {
+      await navigator.clipboard.writeText(text);
+      note.textContent = 'Copied to clipboard';
+    } catch (err){
+      note.textContent = 'Could not copy — select and copy manually';
+    }
+  };
+
+  box.querySelector('#tmplDownloadBtn').onclick = () => {
+    const text = templateAsText(tmpl, readValues());
+    const blob = new Blob([text], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = courseId + '-template.txt';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  };
+}
+
 function showCourseComplete(coursesMap){
   ['lessonNav','preCheckContainer','lessonBody','chartContainer','calcContainer','stepperContainer',
    'checkContainer','reflectionContainer','sourceLinkRow'].forEach(id => {
@@ -800,6 +909,8 @@ function showCourseComplete(coursesMap){
         ${recapItems.map(t => `<li style="line-height:1.55; color:var(--ink-soft); margin-bottom:6px;">${t}</li>`).join('')}
       </ul>
     </div>`;
+
+  const templateHtml = courseTemplateHtml(course.template, (coursesMap[courseId] || {}).template);
 
   const myNotes = Object.keys(reflections)
     .map(lid => ({ lid: parseInt(lid, 10), text: (reflections[lid] || '').trim() }))
@@ -836,6 +947,7 @@ function showCourseComplete(coursesMap){
 
   document.getElementById('courseCompleteScreen').innerHTML = `
     ${recapHtml}
+    ${templateHtml}
     ${course.sourceUrl ? `
       <div class="linkedin-box">
         <p>This course has a companion article on our Product+ newsletter. Take a look and share your comments.</p>
@@ -849,6 +961,7 @@ function showCourseComplete(coursesMap){
     </div>
   `;
   document.getElementById('courseCompleteScreen').style.display = 'block';
+  wireCourseTemplate(course.template);
 }
 
 window.markCompleteAndContinue = async function(){
