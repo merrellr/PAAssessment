@@ -50,6 +50,17 @@
   .chart-stat .cval{ font-family:'Space Grotesk', sans-serif; font-weight:700; font-size: 18px; }
   .chart-caption{ font-size: 11.5px; color: var(--gray); text-align:center; margin-top: 6px; }
 
+  .calc-box{ margin-top: 20px; background:#F7F9FC; border:1.5px solid var(--line); border-radius: 12px; padding: 16px 18px; }
+  .calc-title{ font-family:'Space Grotesk', sans-serif; font-weight:700; font-size: 14px; color: var(--ink); margin-bottom: 12px; }
+  .calc-row{ display:flex; align-items:center; gap:12px; margin-bottom: 10px; }
+  .calc-row label{ flex: 0 0 auto; width: 42%; font-size: 12.5px; color: var(--ink-soft); }
+  .calc-row input[type=range]{ flex:1; accent-color: var(--cyan); }
+  .calc-val{ flex: 0 0 30px; text-align:right; font-family:'Space Grotesk', sans-serif; font-weight:700; font-size: 13px; color: var(--navy); }
+  .calc-result{ display:flex; align-items:center; justify-content:space-between; background:#fff; border-radius: 10px; padding: 10px 14px; margin-top: 12px; border: 1.5px solid var(--cyan); }
+  .calc-result-label{ font-size: 12.5px; color: var(--ink-soft); }
+  .calc-result-val{ font-family:'Space Grotesk', sans-serif; font-weight:700; font-size: 20px; color: var(--navy-deep); }
+  .calc-note{ font-size: 11.5px; color: var(--gray); margin-top: 10px; }
+
   .stepper-box{ margin-top: 8px; }
   .stepper-dots{ display:flex; gap:6px; margin-bottom: 14px; }
   .stepper-dot{ flex:1; height:4px; border-radius:2px; background: var(--line); cursor:pointer; }
@@ -110,6 +121,7 @@
     <div id="preCheckContainer"></div>
     <div id="lessonBody">Loading…</div>
     <div id="chartContainer"></div>
+    <div id="calcContainer"></div>
     <div id="stepperContainer"></div>
     <div id="checkContainer"></div>
     <div id="reflectionContainer"></div>
@@ -280,7 +292,7 @@ function showAssessmentLock(){
   if (nav) nav.style.display = 'none';
   const navRow = document.querySelector('.nav-row');
   if (navRow) navRow.style.display = 'none';
-  ['preCheckContainer','chartContainer','stepperContainer','checkContainer','reflectionContainer','sourceLinkRow']
+  ['preCheckContainer','chartContainer','calcContainer','stepperContainer','checkContainer','reflectionContainer','sourceLinkRow']
     .forEach(id => { const el = document.getElementById(id); if (el) el.style.display = 'none'; });
   document.getElementById('lessonBody').innerHTML = `
     <div style="background:#F7F9FC; border:1.5px solid var(--line); border-radius:12px; padding:24px; text-align:center; margin-top:8px;">
@@ -404,6 +416,7 @@ function renderLesson(){
   document.getElementById('lessonBody').innerHTML = imageHtml + lesson.body;
 
   renderChart(lesson.chart);
+  renderCalculator(lesson.calculator);
   renderStepper(lesson.steps);
 
   // Supports either "checks" (an array, for more than one question)
@@ -514,6 +527,67 @@ function renderChart(chart){
 
   slider.oninput = () => draw(parseInt(slider.value, 10));
   draw(chart.maxX);
+}
+
+/* Reusable formula calculator — a handful of sliders feeding a single
+   computed result. Used for things like an ICE/RICE-style score or a
+   value-density (outcome ÷ effort) estimate; the lesson supplies the
+   inputs and the formula, this just wires up the interaction.
+
+   Config shape (course content passes this as `calculator` on a lesson):
+     {
+       title: 'Try the score yourself',        // optional heading
+       inputs: [
+         { key: 'impact', label: 'Impact', min: 1, max: 3, step: 1, default: 2 },
+         ...
+       ],
+       compute: (values) => number,             // values keyed by input.key
+       resultLabel: 'Score',
+       format: (n) => string,                   // optional, default 2dp
+       note: 'optional caption under the result'
+     } */
+function renderCalculator(calc){
+  const container = document.getElementById('calcContainer');
+  container.innerHTML = '';
+  if (!calc || !calc.inputs || !calc.inputs.length) return;
+
+  const box = document.createElement('div');
+  box.className = 'calc-box';
+  const rowsHtml = calc.inputs.map(inp => `
+    <div class="calc-row">
+      <label for="calc-${inp.key}">${inp.label}</label>
+      <input type="range" id="calc-${inp.key}" min="${inp.min}" max="${inp.max}" step="${inp.step || 1}" value="${inp.default}">
+      <span class="calc-val" id="calc-${inp.key}-val">${inp.default}</span>
+    </div>
+  `).join('');
+  box.innerHTML = `
+    ${calc.title ? `<div class="calc-title">${calc.title}</div>` : ''}
+    ${rowsHtml}
+    <div class="calc-result">
+      <div class="calc-result-label">${calc.resultLabel || 'Result'}</div>
+      <div class="calc-result-val" id="calcResultVal"></div>
+    </div>
+    ${calc.note ? `<div class="calc-note">${calc.note}</div>` : ''}
+  `;
+  container.appendChild(box);
+
+  const format = calc.format || (n => (Math.round(n * 100) / 100).toString());
+
+  function recompute(){
+    const values = {};
+    calc.inputs.forEach(inp => {
+      const el = box.querySelector('#calc-' + inp.key);
+      const v = parseFloat(el.value);
+      values[inp.key] = v;
+      box.querySelector('#calc-' + inp.key + '-val').textContent = v;
+    });
+    box.querySelector('#calcResultVal').textContent = format(calc.compute(values));
+  }
+
+  calc.inputs.forEach(inp => {
+    box.querySelector('#calc-' + inp.key).oninput = recompute;
+  });
+  recompute();
 }
 
 /* Click-through stepper for sequential processes. Shows one step
@@ -707,7 +781,7 @@ function recommendNext(coursesMap, result){
 }
 
 function showCourseComplete(coursesMap){
-  ['lessonNav','preCheckContainer','lessonBody','chartContainer','stepperContainer',
+  ['lessonNav','preCheckContainer','lessonBody','chartContainer','calcContainer','stepperContainer',
    'checkContainer','reflectionContainer','sourceLinkRow'].forEach(id => {
     const el = document.getElementById(id); if (el) el.style.display = 'none';
   });

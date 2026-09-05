@@ -121,6 +121,17 @@ window.CONTENT_OVERRIDES["prioritization-advanced"] = {
         </ul>
         <p>This isn't about turning every decision into a spreadsheet. It's about being able to express a prioritization trade-off in terms leadership can weigh against every other investment the company is making.</p>
       `,
+      calculator: {
+        title: "Express a bet as expected ROI",
+        inputs: [
+          { key: "gain", label: "Expected annual value ($k)", min: 10, max: 500, step: 10, default: 150 },
+          { key: "cost", label: "Cost to build ($k)", min: 10, max: 300, step: 10, default: 80 }
+        ],
+        compute: (v) => ((v.gain - v.cost) / v.cost) * 100,
+        resultLabel: "Expected ROI",
+        format: (n) => Math.round(n) + "%",
+        note: "(Value − Cost) ÷ Cost. This is the same number leadership uses to weigh every other investment — which is exactly the point."
+      },
       checks: [
         {
           question: "Why connect the prioritization system to P&L data at the organizational level?",

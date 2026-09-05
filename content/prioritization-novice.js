@@ -139,7 +139,21 @@ window.CONTENT_OVERRIDES["prioritization-novice"] = {
           <text x="372" y="52" text-anchor="middle" font-family="'Space Grotesk',sans-serif" font-size="8.5" font-weight="700" fill="#12305e">score</text>
           <text x="200" y="88" text-anchor="middle" font-family="sans-serif" font-size="8" fill="#4B5768">Low confidence drags the score down &#8212; which is the point.</text>
         </svg>
+        <p>Try it yourself below. Slide confidence down and watch what happens to the score.</p>
       `,
+      calculator: {
+        title: "ICE score calculator",
+        inputs: [
+          { key: "impact", label: "Impact", min: 1, max: 3, step: 1, default: 2 },
+          { key: "reach", label: "Reach", min: 1, max: 3, step: 1, default: 2 },
+          { key: "confidence", label: "Confidence", min: 1, max: 3, step: 1, default: 2 },
+          { key: "effort", label: "Effort", min: 1, max: 3, step: 1, default: 2 }
+        ],
+        compute: (v) => (v.impact + v.reach + v.confidence) / v.effort,
+        resultLabel: "Score",
+        format: (n) => n.toFixed(2),
+        note: "(Impact + Reach + Confidence) ÷ Effort. Drop confidence to 1 and watch the score fall — that's the discount doing its job."
+      },
       steps: [
         { title: "Impact", detail: "If this works, how much does it move the thing we care about — a lot, some, a little? Rate 1-3." },
         { title: "Reach", detail: "How many users does it affect — most of them, a segment, a handful? Rate 1-3." },
