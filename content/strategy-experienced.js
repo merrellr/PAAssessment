@@ -224,7 +224,17 @@ window.CONTENT_OVERRIDES["strategy-experienced"] = {
           <li><strong>Revenue or cost impact</strong> — how a theme actually contributed to the financial goal it was mapped to.</li>
         </ul>
         <p>Then close the loop: <strong>quarterly roadmap reviews</strong> to reassess priorities against progress, and <strong>retrospectives after major releases</strong> to capture what worked and what to change. A roadmap you measure and revise on a cadence is one you can adapt credibly, because the adjustments are evidence-based, not reactive.</p>
+        <p>Time-to-market is a good example of a KPI that responds to that cadence, or doesn't, drag the slider across four quarters:</p>
       `,
+      chart: {
+        unit: "Quarter",
+        maxX: 4,
+        series: [
+          { label: "No review cadence (weeks)", color: "#9AA3AD", at: (q) => 10 + q * 0.5 },
+          { label: "Reviewed & iterated quarterly (weeks)", color: "#1A4584", at: (q) => Math.max(10 - q * 1.8, 4) }
+        ],
+        caption: "Illustrative time-to-market trend, not measured data"
+      },
       checks: [
         {
           question: "Why measure something like \"user satisfaction change after a major initiative ships\"?",

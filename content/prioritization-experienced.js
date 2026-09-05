@@ -43,7 +43,17 @@ window.CONTENT_OVERRIDES["prioritization-experienced"] = {
           <li><strong>Adoption tax.</strong> Features don't adopt themselves. They need activation points, enablement, and discoverability. Shipping without an adoption path is just inventory.</li>
           <li><strong>Quality tax.</strong> More surface area means more edge cases. In regulated spaces the quality debt compounds with safety and compliance risk. It's quiet, until it isn't.</li>
         </ul>
+        <p>Back to Team A and Team B from the prediction above. Drag the slider to see why the team shipping less can still be pulling ahead.</p>
       `,
+      chart: {
+        unit: "Quarter",
+        maxX: 4,
+        series: [
+          { label: "Team A — features shipped", color: "#9AA3AD", at: (q) => q * 10 },
+          { label: "Team B — outcome moved", color: "#1A4584", at: (q) => Math.round(q * q * 3.2) }
+        ],
+        caption: "Illustrative — value density compounds even when shipped count stays modest"
+      },
       checks: [
         {
           question: "What does \"value density\" mean in this lesson?",

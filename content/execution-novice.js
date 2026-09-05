@@ -171,7 +171,17 @@ window.CONTENT_OVERRIDES["execution-novice"] = {
       title: "Lesson 4: Track a Few Quality Numbers",
       body: `
         <p>You can't tell whether execution is actually improving without measuring it. Pick a small set of quality metrics and watch them.</p>
+        <p>Here's the same defect-rate metric under the two structures from this course, drag the slider across six releases:</p>
       `,
+      chart: {
+        unit: "Release",
+        maxX: 6,
+        series: [
+          { label: "One big batch, tested at the end", color: "#C0622A", at: (r) => 4 + r * 3 },
+          { label: "Small increments, automated checks", color: "#2E8B57", at: (r) => Math.max(6 - r * 0.6, 3) }
+        ],
+        caption: "Illustrative defect count per release"
+      },
       steps: [
         { title: "Defect rate", detail: "How many bugs are found per release, or per feature. A rising defect rate as you add scope is an early warning that quality is slipping under the pace." },
         { title: "Downtime / reliability", detail: "How often the product is unavailable or degraded. This is the metric users feel most directly, and the one that turns into an angry escalation if you're not watching it." },
