@@ -122,6 +122,17 @@
   .notes-item .notes-text{ font-size:13.5px; color: var(--ink); white-space:pre-wrap; margin-bottom:5px; }
   .notes-item a{ font-size:12px; color: var(--navy); text-decoration:underline; }
 
+  .check-box{ background:#F7F9FC; border: 1.5px solid var(--line); border-radius: 12px; padding: 16px 18px; }
+  .check-box .check-eyebrow{ font-size: 11px; font-weight:600; letter-spacing:0.06em; text-transform:uppercase; color: var(--cyan); display:block; margin-bottom: 8px; }
+  .check-box .check-q{ font-family:'Space Grotesk', sans-serif; font-weight:600; font-size: 14.5px; color: var(--navy-deep); margin-bottom: 12px; }
+  .check-option{ display:block; width:100%; text-align:left; padding: 10px 13px; margin-bottom: 8px; border: 1.5px solid var(--line); border-radius: 8px; background:#fff; font-family:'IBM Plex Sans', sans-serif; font-size: 13.5px; color: var(--ink); cursor:pointer; }
+  .check-option:hover{ border-color: var(--cyan); }
+  .check-option.correct{ border-color: #2E8B57; background:#EEF9F1; }
+  .check-option.incorrect{ border-color: #C0622A; background:#FCEFE9; }
+  .check-feedback{ font-size: 13px; margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--line); color: var(--ink-soft); display:none; }
+  .check-feedback.show{ display:block; }
+  .check-feedback strong{ color: var(--ink); }
+
   .tier-card.is-inprogress{ border-color: var(--cyan); }
   .tier-card.is-inprogress .tstatus{ color: var(--navy); font-weight:600; }
 
@@ -396,6 +407,13 @@
         <a id="notesToggleLink" onclick="toggleNotesPanel()" style="font-size:12.5px; color:var(--navy); cursor:pointer; text-decoration:underline;">Hide</a>
       </div>
       <div id="notesList" style="margin-top:14px;"></div>
+    </div>
+
+    <div class="card" id="spacedReviewCard" style="display:none; margin-bottom:22px;">
+      <span class="eyebrow">Spaced review</span>
+      <div id="spacedReviewMeta" style="font-size:12.5px; color:var(--gray); margin-bottom:12px;"></div>
+      <div id="spacedReviewCheckContainer"></div>
+      <a id="spacedReviewLink" href="#" style="font-size:12.5px; color:var(--navy); text-decoration:underline; display:inline-block; margin-top:12px;">Revisit this course →</a>
     </div>
 
     <div style="display:flex; align-items:baseline; justify-content:space-between; margin: 6px 0 14px;">
@@ -818,6 +836,7 @@ async function loadDashboard(user){
   const assessmentResult = await fetchAssessmentResult(user.email);
   renderCatalog(progress, assessmentResult);
   renderMyNotes(progress);
+  renderSpacedReview(progress);
   if (assessmentResult) renderRecommendations(assessmentResult, progress);
   populateProfileProgressSummary(progress, assessmentResult);
   renderAssignedStat(progress, assessmentResult);
@@ -1382,6 +1401,82 @@ window.toggleNotesPanel = function(){
   list.style.display = hidden ? 'block' : 'none';
   link.textContent = hidden ? 'Hide' : 'Show';
 };
+
+/* Whole days between an ISO timestamp and now. Infinity for a
+   missing or unparseable timestamp, so it never qualifies below. */
+function daysSince(isoStr){
+  const then = isoStr ? new Date(isoStr).getTime() : NaN;
+  if (isNaN(then)) return Infinity;
+  return Math.floor((Date.now() - then) / 86400000);
+}
+
+/* Resurfaces one quick-check question from a course completed at
+   least a week ago — spaced repetition for material that's likely
+   fading, without tracking any extra "reviewed" state. The course
+   (and the question within it) rotate daily via a date-based index,
+   so a refresh doesn't reshuffle it but tomorrow does. */
+function renderSpacedReview(progress){
+  const card = document.getElementById('spacedReviewCard');
+  const courses = (progress && progress.courses) || {};
+
+  const eligible = Object.keys(courses)
+    .filter(cid => CATALOG[cid] && isCourseComplete(progress, cid))
+    .map(cid => ({ cid, days: daysSince(courses[cid].updatedAt) }))
+    .filter(c => c.days >= 7 && CATALOG[c.cid].lessons.some(l => (l.checks || []).length))
+    .sort((a, b) => a.cid.localeCompare(b.cid));
+
+  if (!eligible.length){ card.style.display = 'none'; return; }
+
+  const dayIndex = Math.floor(Date.now() / 86400000);
+  const pick = eligible[dayIndex % eligible.length];
+  const course = CATALOG[pick.cid];
+  const allChecks = [];
+  course.lessons.forEach(l => (l.checks || []).forEach(c => allChecks.push(c)));
+  if (!allChecks.length){ card.style.display = 'none'; return; }
+  const check = allChecks[dayIndex % allChecks.length];
+
+  document.getElementById('spacedReviewMeta').textContent =
+    course.title + ' — completed ' + pick.days + (pick.days === 1 ? ' day' : ' days') + ' ago';
+  document.getElementById('spacedReviewLink').href = 'lesson.html?course=' + pick.cid + '&v=' + CONTENT_VERSION;
+  renderSpacedReviewCheck(check);
+  card.style.display = 'block';
+}
+
+function renderSpacedReviewCheck(check){
+  const container = document.getElementById('spacedReviewCheckContainer');
+  container.innerHTML = '';
+  const box = document.createElement('div');
+  box.className = 'check-box';
+  box.innerHTML = `
+    <span class="check-eyebrow">${check.label || 'Quick check'}</span>
+    <div class="check-q">${check.question}</div>
+    <div class="check-options-wrap"></div>
+    <div class="check-feedback"></div>
+  `;
+  container.appendChild(box);
+
+  const optionsWrap = box.querySelector('.check-options-wrap');
+  const feedback = box.querySelector('.check-feedback');
+  check.options.forEach((optText, i) => {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'check-option';
+    btn.textContent = optText;
+    btn.onclick = () => {
+      const allButtons = optionsWrap.querySelectorAll('.check-option');
+      allButtons.forEach(b => b.disabled = true);
+      if (i === check.correct){
+        btn.classList.add('correct');
+      } else {
+        btn.classList.add('incorrect');
+        allButtons[check.correct].classList.add('correct');
+      }
+      feedback.classList.add('show');
+      feedback.innerHTML = (i === check.correct ? '<strong>Correct.</strong> ' : '<strong>Not quite.</strong> ') + check.explanation;
+    };
+    optionsWrap.appendChild(btn);
+  });
+}
 
 /* Shown instead of the real catalog when someone hasn't taken the
    assessment yet — teases the shape of what's coming without
