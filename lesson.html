@@ -43,9 +43,9 @@
   .chart-box{ margin-top: 20px; }
   .chart-slider-row{ display:flex; align-items:center; gap:12px; margin-bottom: 14px; }
   .chart-slider-row input[type=range]{ flex:1; accent-color: var(--cyan); }
-  .chart-slider-row .month-label{ font-size: 13px; color: var(--ink-soft); min-width: 68px; text-align:right; }
-  .chart-stats{ display:flex; gap:14px; margin-bottom: 14px; }
-  .chart-stat{ flex:1; background:#F7F9FC; border-radius: 10px; padding: 10px 12px; }
+  .chart-slider-row .chart-x-label{ font-size: 13px; color: var(--ink-soft); min-width: 68px; text-align:right; }
+  .chart-stats{ display:flex; gap:14px; margin-bottom: 14px; flex-wrap: wrap; }
+  .chart-stat{ flex:1; min-width: 120px; background:#F7F9FC; border-radius: 10px; padding: 10px 12px; }
   .chart-stat .clabel{ font-size: 11.5px; color: var(--gray); margin-bottom: 2px; }
   .chart-stat .cval{ font-family:'Space Grotesk', sans-serif; font-weight:700; font-size: 18px; }
   .chart-caption{ font-size: 11.5px; color: var(--gray); text-align:center; margin-top: 6px; }
@@ -436,62 +436,84 @@ function renderLesson(){
   }
 }
 
-/* Interactive line comparison chart. Draws an SVG line chart with
-   a month slider — as the user drags it, both lines redraw up to
-   that point and the two stat numbers update. Purely illustrative
-   (not real measured data), which is called out in the caption. */
+/* Reusable interactive 2-series line chart. Draws an SVG line chart
+   with an x-axis slider — as the user drags it, both lines redraw up
+   to that point and the two stat numbers update. Purely illustrative
+   (not real measured data), which is called out in the caption.
+
+   Config shape (course content passes this as `chart` on a lesson):
+     {
+       unit: 'Month' | 'Week' | 'Quarter' | ...,   // x-axis label prefix
+       maxX: 12,                                    // number of x steps
+       series: [
+         { label: 'Series A name', color: '#9AA3AD', at: (x) => number },
+         { label: 'Series B name', color: '#1A4584', at: (x) => number }
+       ],
+       caption: 'optional override for the note under the chart'
+     }
+   Exactly two series are expected (this is a 2-series component), but
+   the drawing logic itself doesn't hardcode which two. */
 function renderChart(chart){
   const container = document.getElementById('chartContainer');
   container.innerHTML = '';
-  if (!chart) return;
+  if (!chart || !chart.series || chart.series.length < 2) return;
 
+  const [a, b] = chart.series;
   const box = document.createElement('div');
   box.className = 'chart-box';
   box.innerHTML = `
     <div class="chart-slider-row">
-      <input type="range" min="1" max="${chart.maxMonths}" value="${chart.maxMonths}" id="chartSlider">
-      <span class="month-label" id="chartMonthLabel">Month ${chart.maxMonths}</span>
+      <input type="range" min="1" max="${chart.maxX}" value="${chart.maxX}" id="chartSlider">
+      <span class="chart-x-label" id="chartXLabel">${chart.unit} ${chart.maxX}</span>
     </div>
     <svg id="chartSvg" viewBox="0 0 400 180" style="width:100%; height:auto;"></svg>
     <div class="chart-stats">
-      <div class="chart-stat"><div class="clabel">${chart.individualLabel}</div><div class="cval" id="chartIndVal" style="color:var(--gray);"></div></div>
-      <div class="chart-stat"><div class="clabel">${chart.orgLabel}</div><div class="cval" id="chartOrgVal" style="color:var(--navy);"></div></div>
+      <div class="chart-stat"><div class="clabel">${a.label}</div><div class="cval" id="chartVal0" style="color:${a.color};"></div></div>
+      <div class="chart-stat"><div class="clabel">${b.label}</div><div class="cval" id="chartVal1" style="color:${b.color};"></div></div>
     </div>
-    <div class="chart-caption">Illustrative model, not measured data</div>
+    <div class="chart-caption">${chart.caption || 'Illustrative model, not measured data'}</div>
   `;
   container.appendChild(box);
 
   const slider = box.querySelector('#chartSlider');
   const svg = box.querySelector('#chartSvg');
+  const valEls = [box.querySelector('#chartVal0'), box.querySelector('#chartVal1')];
 
-  function draw(monthsShown){
-    const indPoints = [], orgPoints = [];
+  function draw(stepsShown){
     let maxVal = 0;
-    for (let m = 1; m <= chart.maxMonths; m++){
-      maxVal = Math.max(maxVal, chart.individualAt(m), chart.orgAt(m));
+    for (let x = 1; x <= chart.maxX; x++){
+      chart.series.forEach(s => { maxVal = Math.max(maxVal, s.at(x)); });
     }
-    for (let m = 1; m <= monthsShown; m++){
-      const x = 20 + (m - 1) * (360 / (chart.maxMonths - 1));
-      indPoints.push([x, 160 - (chart.individualAt(m) / maxVal) * 140]);
-      orgPoints.push([x, 160 - (chart.orgAt(m) / maxVal) * 140]);
-    }
+    const seriesPoints = chart.series.map(s => {
+      const pts = [];
+      for (let x = 1; x <= stepsShown; x++){
+        const px = 20 + (x - 1) * (360 / (chart.maxX - 1));
+        pts.push([px, 160 - (s.at(x) / maxVal) * 140]);
+      }
+      return pts;
+    });
     const toPath = (pts) => pts.map((p, i) => (i === 0 ? 'M' : 'L') + p[0].toFixed(1) + ' ' + p[1].toFixed(1)).join(' ');
+
+    const linesHtml = chart.series.map((s, i) =>
+      `<path d="${toPath(seriesPoints[i])}" fill="none" stroke="${s.color}" stroke-width="2.5"/>`
+    ).join('');
+    const dotsHtml = chart.series.map((s, i) => {
+      const pts = seriesPoints[i];
+      return pts.length ? `<circle cx="${pts[pts.length-1][0]}" cy="${pts[pts.length-1][1]}" r="4" fill="${s.color}"/>` : '';
+    }).join('');
 
     svg.innerHTML = `
       <line x1="20" y1="160" x2="380" y2="160" stroke="#E3E9F0" stroke-width="1"/>
-      <path d="${toPath(indPoints)}" fill="none" stroke="#9AA3AD" stroke-width="2.5"/>
-      <path d="${toPath(orgPoints)}" fill="none" stroke="#1A4584" stroke-width="2.5"/>
-      ${indPoints.length ? `<circle cx="${indPoints[indPoints.length-1][0]}" cy="${indPoints[indPoints.length-1][1]}" r="4" fill="#9AA3AD"/>` : ''}
-      ${orgPoints.length ? `<circle cx="${orgPoints[orgPoints.length-1][0]}" cy="${orgPoints[orgPoints.length-1][1]}" r="4" fill="#1A4584"/>` : ''}
+      ${linesHtml}
+      ${dotsHtml}
     `;
 
-    box.querySelector('#chartIndVal').textContent = Math.round(chart.individualAt(monthsShown));
-    box.querySelector('#chartOrgVal').textContent = Math.round(chart.orgAt(monthsShown));
-    box.querySelector('#chartMonthLabel').textContent = 'Month ' + monthsShown;
+    chart.series.forEach((s, i) => { valEls[i].textContent = Math.round(s.at(stepsShown)); });
+    box.querySelector('#chartXLabel').textContent = chart.unit + ' ' + stepsShown;
   }
 
   slider.oninput = () => draw(parseInt(slider.value, 10));
-  draw(chart.maxMonths);
+  draw(chart.maxX);
 }
 
 /* Click-through stepper for sequential processes. Shows one step

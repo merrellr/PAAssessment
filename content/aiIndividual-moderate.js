@@ -42,7 +42,17 @@ window.CONTENT_OVERRIDES["aiIndividual-moderate"] = {
           <li><strong>High judgment, high context decisions.</strong> Used well, agents amplify you here, they don't replace you.</li>
         </ul>
         <p>The goal isn't a smarter autocomplete. It's moving from <strong>task execution</strong> to <strong>orchestration and sense-making</strong>.</p>
+        <p>Here's roughly how that split shifts over eight weeks as rituals get agent support, drag the slider:</p>
       `,
+      chart: {
+        unit: "Week",
+        maxX: 8,
+        series: [
+          { label: "Task execution & status-chasing (hrs/wk)", color: "#9AA3AD", at: (w) => Math.max(20 - w * 1.5, 8) },
+          { label: "Orchestration & sense-making (hrs/wk)", color: "#1A4584", at: (w) => Math.min(4 + w * 1.8, 18) }
+        ],
+        caption: "Illustrative hours/week split, not measured data"
+      },
       checks: [
         {
           question: "What distinguishes a \"ritual\" from a one-off task in this lesson?",

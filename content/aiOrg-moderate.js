@@ -87,11 +87,12 @@ window.CONTENT_OVERRIDES["aiOrg-moderate"] = {
         <p>When you build for a process instead, the value becomes <strong>connected and compounding</strong>. Drag the slider below to see how the gap between the two grows over time.</p>
       `,
       chart: {
-        individualLabel: "Individual habit",
-        orgLabel: "Organizational process",
-        maxMonths: 12,
-        individualAt: (m) => Math.min(m * 8, 40),
-        orgAt: (m) => Math.round(m * m * 1.2)
+        unit: "Month",
+        maxX: 12,
+        series: [
+          { label: "Individual habit", color: "#9AA3AD", at: (m) => Math.min(m * 8, 40) },
+          { label: "Organizational process", color: "#1A4584", at: (m) => Math.round(m * m * 1.2) }
+        ]
       },
       checks: [
         {
