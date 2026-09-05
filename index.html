@@ -192,6 +192,21 @@
   .suggest-chip:hover{ border-color: var(--cyan); }
   .suggest-chip b{ font-weight:600; }
 
+  .preview-card{ border: 1.5px solid var(--line); border-radius: 14px; padding: 18px 20px; margin: 4px 0 22px; background: #FBFCFE; }
+  .preview-caption{ font-family:'Space Grotesk', sans-serif; font-weight:600; font-size:13px; color: var(--navy-deep); margin-bottom:14px; }
+  .preview-grid{ display:flex; gap:20px; flex-wrap:wrap; }
+  .preview-col{ flex:1; min-width:180px; }
+  .preview-col-label{ font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:0.04em; color: var(--gray); margin-bottom:10px; }
+  .mini-bar-row{ display:flex; justify-content:space-between; font-size:12px; margin-bottom:4px; }
+  .mini-bar-row b{ color: var(--gray); font-weight:600; }
+  .mini-track{ height:6px; background: var(--line); border-radius:3px; overflow:hidden; margin-bottom:10px; }
+  .mini-fill{ height:100%; border-radius:3px; background: var(--cyan); }
+  .mini-lesson{ border:1px solid var(--line); border-radius:10px; padding:12px 14px; background:#fff; }
+  .mini-lesson-q{ font-size:12.5px; font-weight:600; color: var(--navy-deep); margin-bottom:8px; line-height:1.4; }
+  .mini-opt{ font-size:12px; padding:7px 10px; border:1px solid var(--line); border-radius:6px; margin-bottom:6px; color: var(--ink-soft); }
+  .mini-opt-correct{ border-color:#2E8B57; background:#EEF9F1; color:#1f6b47; font-weight:500; }
+  .preview-note{ font-size:10.5px; color: var(--gray); margin-top:12px; text-align:right; }
+
   .badge-section{ text-align:center; border-top: 1px solid var(--line); margin-top: 24px; padding-top: 24px; }
   .retake-row{ text-align:center; margin-top: 20px; }
   .retake-row button{ background:none; border:none; color:var(--gray); font-size:13px; text-decoration:underline; cursor:pointer; font-family:'IBM Plex Sans',sans-serif; }
@@ -226,7 +241,32 @@
     <div data-screen="intro" class="active">
       <span class="eyebrow">Skill Check</span>
       <h1>How well-rounded is your product + AI practice?</h1>
-      <p>Answer 14 quick questions across core product management skills and how you're using AI — personally and across your organization. You'll get a skill breakdown across seven areas, plus a course plan matched to your level in each one, so your time goes where it counts.</p>
+      <p>Fourteen quick questions about the product skills you use every day, and how you're actually working with AI, both on your own and across your team. Answer honestly, and in a few minutes you'll have a real skill breakdown across seven areas, plus courses built around exactly where you are: scenarios to work through, quick checks, the occasional calculator. Not a reading list. Something to actually work through.</p>
+
+      <div class="preview-card">
+        <div class="preview-caption">A peek at what you get</div>
+        <div class="preview-grid">
+          <div class="preview-col">
+            <div class="preview-col-label">Your skill breakdown</div>
+            <div class="mini-bar-row"><span>Discovery</span><b>72%</b></div>
+            <div class="mini-track"><div class="mini-fill" style="width:72%;"></div></div>
+            <div class="mini-bar-row"><span>Prioritization</span><b>41%</b></div>
+            <div class="mini-track"><div class="mini-fill" style="width:41%; background:var(--warn);"></div></div>
+            <div class="mini-bar-row"><span>AI fluency</span><b>58%</b></div>
+            <div class="mini-track"><div class="mini-fill" style="width:58%;"></div></div>
+          </div>
+          <div class="preview-col">
+            <div class="preview-col-label">Courses matched to you</div>
+            <div class="mini-lesson">
+              <div class="mini-lesson-q">Quick check: what turns a feature list into a roadmap?</div>
+              <div class="mini-opt mini-opt-correct">✓ Each item ties to a business goal</div>
+              <div class="mini-opt">A longer timeline</div>
+            </div>
+          </div>
+        </div>
+        <div class="preview-note">Example only, yours will reflect your own answers</div>
+      </div>
+
       <div class="nav-row" style="justify-content:flex-start;">
         <button class="btn btn-primary" onclick="startQuiz()">Start assessment →</button>
       </div>
@@ -300,7 +340,7 @@
 
       <div class="section-block">
         <h3>Your growth areas</h3>
-        <div class="section-sub">Your two lowest-scoring areas — start here, at the level the assessment placed you</div>
+        <div class="section-sub">Your two lowest-scoring areas. Start here, at the level the assessment placed you</div>
         <div id="growthWrap"></div>
       </div>
 
@@ -314,11 +354,22 @@
       <div class="section-block" id="dashboardAccessSection">
         <h3 id="dashboardAccessHeading">Access your dashboard</h3>
         <div id="dashboardAccessLoggedIn" style="display:none;">
-          <p style="margin-bottom:14px;">You're logged in — your results are already saved to your dashboard.</p>
+          <p style="margin-bottom:14px;">You're logged in, so your results are already saved to your dashboard.</p>
           <a href="lms-dashboard.html" class="btn btn-primary" style="text-decoration:none; display:inline-block;">Go to your dashboard →</a>
         </div>
         <div id="dashboardAccessSignup" style="display:none;">
           <p style="margin-bottom:14px;">Create a password to save these results and access courses matched to your level.</p>
+
+          <div class="preview-card" style="margin-bottom:18px;">
+            <div class="preview-caption">One of the courses waiting for you</div>
+            <div class="mini-lesson">
+              <div class="mini-lesson-q">Quick check: what turns a feature list into a roadmap?</div>
+              <div class="mini-opt mini-opt-correct">✓ Each item ties to a business goal</div>
+              <div class="mini-opt">A longer timeline</div>
+            </div>
+            <div class="preview-note">Example only, yours will be matched to your own results</div>
+          </div>
+
           <input class="text-input has-companion" type="password" id="signupPassword" placeholder="Choose a password">
           <div class="field-error" id="signupPasswordError"></div>
           <input class="text-input has-companion" type="password" id="signupPasswordConfirm" placeholder="Confirm password">
@@ -430,7 +481,7 @@ window.handleCreateAccountFromResults = async function(){
     if (err.code === 'auth/email-already-in-use'){
       generalError.innerHTML = 'An account already exists for this email. <a href="lms-dashboard.html">Log in instead →</a>';
     } else {
-      generalError.textContent = 'Something went wrong creating your account — please try again.';
+      generalError.textContent = 'Something went wrong creating your account. Please try again.';
     }
   }
 };
@@ -610,7 +661,7 @@ const QUESTIONS = [
     cat: "prioritization",
     text: "How comfortable are you saying no to a stakeholder request?",
     options: [
-      { text: "Very uncomfortable — I usually try to fit everything in", points: 0 },
+      { text: "Very uncomfortable, I usually try to fit everything in", points: 0 },
       { text: "I can push back occasionally with support", points: 1 },
       { text: "I regularly say no and explain the trade-off clearly", points: 2 },
       { text: "I'm trusted to make and defend hard trade-off calls org-wide", points: 3 }
@@ -704,10 +755,10 @@ const QUESTIONS = [
    "min"/"max" are percentage-of-total-score cutoffs (0-100).
    ================================================================ */
 const TIERS = [
-  { name: "No Experience", min: 0, max: 25, desc: "You're just getting oriented across product management and AI — a great place to start with intention rather than overwhelm." },
-  { name: "Moderate Experience", min: 25.01, max: 50, desc: "You've got real experience in some areas and are building out the rest — the breakdown below shows exactly where to focus." },
+  { name: "No Experience", min: 0, max: 25, desc: "You're just getting oriented across product management and AI, a great place to start with intention rather than overwhelm." },
+  { name: "Moderate Experience", min: 25.01, max: 50, desc: "You've got real experience in some areas and are building out the rest. The breakdown below shows exactly where to focus." },
   { name: "Lots of Experience", min: 50.01, max: 75, desc: "You're solid across most of the practice, with a couple of areas still worth sharpening." },
-  { name: "Advanced Experience", min: 75.01, max: 100, desc: "You're strong across the board — the growth areas below are refinements, not gaps." }
+  { name: "Advanced Experience", min: 75.01, max: 100, desc: "You're strong across the board. The growth areas below are refinements, not gaps." }
 ];
 
 /* ================================================================
@@ -1053,7 +1104,7 @@ function renderGrowthAreas(catPct){
     card.innerHTML = `
       <span class="growth-tag">Growth area · ${pct}%</span>
       <h4>${cat.label}</h4>
-      <p>This is one of your lowest-scoring areas right now — a good next place to focus.</p>
+      <p>This is one of your lowest-scoring areas right now, a good next place to focus.</p>
       ${articlesHtml}
     `;
     wrap.appendChild(card);
