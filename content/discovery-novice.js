@@ -14,6 +14,16 @@ window.CONTENT_OVERRIDES = window.CONTENT_OVERRIDES || {};
 
 window.CONTENT_OVERRIDES["discovery-novice"] = {
   sourceUrl: "",
+  template: {
+    title: "Problem statement worksheet",
+    intro: "Turn a vague idea into the kind of problem statement Lesson 1 describes.",
+    fields: [
+      { key: "who", label: "Who (a specific user or segment, not \"users\")", type: "text", placeholder: "e.g. Support staff reconciling billing by hand" },
+      { key: "problem", label: "The problem, in their words", type: "textarea", placeholder: "What they'd actually say if you asked what's frustrating" },
+      { key: "evidence", label: "Evidence it's real", type: "textarea", placeholder: "What you observed or heard, not an assumption" },
+      { key: "why", label: "Why it matters now", type: "text", placeholder: "e.g. Costs six hours a week and is getting worse as we scale" }
+    ]
+  },
   recap: [
     "Start every feature with a written problem statement — the pain, who has it, and why current options fall short — before any design.",
     "Your 'users' are usually several groups (daily users, buyers, influencers); build a simple persona for each, covering their day, goals, and constraints.",

@@ -14,6 +14,16 @@ window.CONTENT_OVERRIDES = window.CONTENT_OVERRIDES || {};
 
 window.CONTENT_OVERRIDES["strategy-novice"] = {
   sourceUrl: "",
+  template: {
+    title: "Roadmap theme worksheet",
+    intro: "Turn one item from your backlog into a real roadmap theme, using what this course covered.",
+    fields: [
+      { key: "theme", label: "Theme name", type: "text", placeholder: "e.g. Cut onboarding drop-off" },
+      { key: "objective", label: "Business objective it maps to", type: "text", placeholder: "e.g. Retention" },
+      { key: "milestone", label: "Realistic, dated milestone", type: "text", placeholder: "e.g. 70% completion by end of Q2" },
+      { key: "why", label: "Why this, why now (one sentence)", type: "textarea", placeholder: "The reason this belongs on the roadmap, not just the backlog" }
+    ]
+  },
   recap: [
     "A roadmap bridges vision and execution — not a prioritized request list; if the reason an item exists is 'someone asked', it's a backlog with a layout.",
     "Keep strategic and tactical separate: themes and milestones belong on the roadmap; epics, features, and tasks belong in the backlog.",
