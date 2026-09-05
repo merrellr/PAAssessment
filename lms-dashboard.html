@@ -1357,6 +1357,26 @@ function renderCatalog(progress, assessmentResult){
         <div class="tstatus">${statusText}</div>
       `;
       row.appendChild(a);
+
+      // The tile's own link always opens the course (its complete
+      // screen, if finished) — that's the right default for the tile
+      // as a whole. But the note badge specifically should jump
+      // straight to the lesson the note is on, so clicking it doesn't
+      // land on the summary screen instead of the note. Handled as an
+      // override on the badge itself, since a link can't nest inside
+      // the tile's own <a>.
+      if (hasNote){
+        const noteLessonId = Object.keys(courseProgress.reflections || {})
+          .find(lid => (courseProgress.reflections[lid] || '').trim());
+        const badge = a.querySelector('.tnote');
+        if (badge && noteLessonId){
+          badge.onclick = (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            window.location.href = 'lesson.html?course=' + courseId + '&lesson=' + noteLessonId + '&v=' + CONTENT_VERSION;
+          };
+        }
+      }
     });
 
     group.appendChild(row);
