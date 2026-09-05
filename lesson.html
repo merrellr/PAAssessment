@@ -331,6 +331,7 @@ let completedLessons = [];
 let reflections = {};
 let assessmentResult = null;   // filled by the gating check; reused for "next course"
 let allCourses = {};           // full progress.courses map, for the completion screen
+let userProfile = {};          // progress.profile, for pre-filling a retake link
 
 if (!course){
   document.getElementById('lessonTitle').textContent = 'Course not found';
@@ -403,6 +404,7 @@ async function loadProgress(){
   const snap = await getDoc(progressRef);
   const data = snap.exists() ? snap.data() : { courses: {} };
   allCourses = data.courses || {};
+  userProfile = data.profile || {};
   const courseProgress = allCourses[courseId] || { completed: [] };
   completedLessons = courseProgress.completed || [];
   reflections = courseProgress.reflections || {};
@@ -759,6 +761,23 @@ function tierSlugForPct(pct){
   return 'novice';
 }
 
+/* Same pre-fill logic the dashboard's "Take the assessment" button
+   uses — carries name/email/company/etc. onto index.html so a retake
+   started from here doesn't land on blank fields. Locking the email
+   field there (see index.html) is what actually makes a retake land
+   back on this account; this just gets it there pre-filled. */
+function buildAssessmentPrefillUrl(user, profile){
+  const params = new URLSearchParams();
+  if (user && user.displayName) params.set('name', user.displayName);
+  if (user && user.email) params.set('email', user.email);
+  if (profile.company) params.set('company', profile.company);
+  if (profile.jobTitle) params.set('jobTitle', profile.jobTitle);
+  if (profile.companySize) params.set('companySize', profile.companySize);
+  if (profile.industry) params.set('industry', profile.industry);
+  const query = params.toString();
+  return 'index.html' + (query ? '?' + query : '');
+}
+
 function courseIsComplete(coursesMap, cid){
   const c = CATALOG[cid];
   if (!c || !c.lessons.length) return false;
@@ -942,7 +961,7 @@ function showCourseComplete(coursesMap){
   const retakeHtml = recs.length ? '' : `
     <div style="margin-top:20px; background:#EEF3FA; border:1px solid var(--line); border-radius:12px; padding:16px 18px;">
       <p style="margin:0 0 10px; font-size:13.5px;">You've cleared every course at your assessed level. Retake the assessment to see how far you've moved and unlock the next set.</p>
-      <a href="index.html" class="btn btn-primary" style="text-decoration:none; display:inline-block;">Retake the assessment →</a>
+      <a href="${buildAssessmentPrefillUrl(currentUser, userProfile)}" class="btn btn-primary" style="text-decoration:none; display:inline-block;">Retake the assessment →</a>
     </div>`;
 
   document.getElementById('courseCompleteScreen').innerHTML = `
