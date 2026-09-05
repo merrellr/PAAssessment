@@ -173,10 +173,14 @@
   .text-input.has-companion{ margin-bottom: 4px; }
   .text-input:focus{ outline:none; border-color: var(--cyan); }
   .text-input.invalid{ border-color: #C0622A; }
+  .text-input[readonly]{ background: var(--bg); color: var(--ink-soft); cursor: not-allowed; }
   select.text-input{ appearance:auto; }
 
   .field-error{
     font-size: 12.5px; color: #C0622A; margin: 0 0 10px 2px; min-height: 1px;
+  }
+  .field-hint{
+    font-size: 12px; color: var(--gray); margin: 0 0 10px 2px;
   }
 
   .suggest-chip{
@@ -251,6 +255,7 @@
 
         <input class="text-input has-companion" type="email" id="leadEmail" placeholder="Work email" required oninput="clearFieldError('leadEmail')">
         <div class="field-error" id="leadEmailError"></div>
+        <div class="field-hint" id="leadEmailHint" style="display:none;">Locked to your account email, so these results save to your dashboard.</div>
 
         <input class="text-input has-companion" type="text" id="leadCompany" placeholder="Company (start typing)" list="companyList" required autocomplete="off" oninput="handleCompanyInput()">
         <datalist id="companyList"></datalist>
@@ -361,9 +366,28 @@ const db = getFirestore(app);
 
 let isLoggedIn = false;
 window.isLoggedIn = false;
+
+// Lock the email field to the signed-in account's email. A retake logs
+// results under whatever email is in this field, but the dashboard looks
+// results up by the account's real email — leaving this editable is how
+// a retake can silently fail to show up. Exposed on window and re-run
+// after every reset/prefill of the lead form (goNext(), below) since
+// those overwrite the field's value and would otherwise undo the lock.
+window.lockEmailFieldIfLoggedIn = function(){
+  if (!isLoggedIn || !auth.currentUser || !auth.currentUser.email) return;
+  const emailField = document.getElementById('leadEmail');
+  const hint = document.getElementById('leadEmailHint');
+  if (emailField){
+    emailField.value = auth.currentUser.email;
+    emailField.readOnly = true;
+    if (hint) hint.style.display = 'block';
+  }
+};
+
 onAuthStateChanged(auth, (user) => {
   isLoggedIn = !!user;
   window.isLoggedIn = isLoggedIn; // exposed so the classic script can check it too
+  window.lockEmailFieldIfLoggedIn();
 });
 
 window.handleCreateAccountFromResults = async function(){
@@ -488,37 +512,39 @@ const CATEGORIES = {
   discovery: {
     label: "Customer & Market Discovery",
     color: "#6FA3D6",
-    articles: [{ title: "REPLACE ME: A lightweight discovery process for busy PMs", url: "https://www.productadvisory.co/" }]
+    articles: [{ title: "Overcoming Common Pitfalls in Early-Stage Product Development", url: "https://www.linkedin.com/pulse/overcoming-common-pitfalls-early-stage-product-saas-robert-merrell-eshlc" }]
   },
   strategy: {
     label: "Product Strategy & Roadmapping",
     color: "#4C8FCB",
-    articles: [{ title: "REPLACE ME: Building a roadmap tied to outcomes, not features", url: "https://www.productadvisory.co/" }]
+    articles: [{ title: "How to Build Product-Focused AI Agents That Actually Make Better Decisions", url: "https://www.linkedin.com/pulse/how-build-product-focused-ai-agents-actually-make-merrell-mism-rmu8c" }]
   },
   prioritization: {
     label: "Prioritization & Trade-offs",
     color: "#35C2E8",
-    articles: [{ title: "REPLACE ME: A simple framework for saying no", url: "https://www.productadvisory.co/" }]
+    articles: [{ title: "The Feature Fallacy: Why Shipping More Isn't Helping Your Users", url: "https://www.linkedin.com/pulse/feature-fallacy-why-shipping-more-isnt-helping-your-do-merrell-mism-ozcbc" }]
   },
   execution: {
     label: "Execution & Delivery",
     color: "#2AA0BF",
-    articles: [{ title: "REPLACE ME: Staying close to delivery without micromanaging", url: "https://www.productadvisory.co/" }]
+    articles: [{ title: "Improving Accessibility with AI: Tools and Innovations Making Life Easier", url: "https://www.linkedin.com/pulse/improving-accessibility-ai-tools-innovations-making-life-merrell-wndmc" }]
   },
   stakeholder: {
     label: "Stakeholder Communication & Influence",
     color: "#1A4584",
-    articles: [{ title: "REPLACE ME: Presenting product plans leadership actually buys", url: "https://www.productadvisory.co/" }]
+    // No standalone article for this domain yet — point at our own
+    // framework page instead of a mismatched or dead external link.
+    articles: [{ title: "See the Stakeholder Communication & Influence framework", url: "framework.html" }]
   },
   aiIndividual: {
     label: "AI Fluency — Individual",
     color: "#8AB6DD",
-    articles: [{ title: "REPLACE ME: Getting started with AI tools as a PM", url: "https://www.productadvisory.co/" }]
+    articles: [{ title: "AI Is Not a Project. It's a Practice. Here's How to Build One.", url: "https://www.linkedin.com/pulse/ai-project-its-practice-heres-how-build-one-robert-merrell-4skoc" }]
   },
   aiOrg: {
     label: "AI Fluency — Organizational",
     color: "#12305e",
-    articles: [{ title: "REPLACE ME: Building AI governance your whole org can use", url: "https://www.productadvisory.co/" }]
+    articles: [{ title: "Your First AI Product Team: Designing a Squad of Agents, Not Just One Chatbot", url: "https://www.linkedin.com/pulse/your-first-ai-product-team-designing-squad-agents-just-robert-merrell-vudmc" }]
   }
 };
 
@@ -855,6 +881,7 @@ function goNext(){
     lastScores = computeScores();
     document.getElementById('leadForm').reset();
     prefillLeadFromUrl();
+    if (window.lockEmailFieldIfLoggedIn) window.lockEmailFieldIfLoggedIn();
     showScreen('lead');
   } else {
     current++;

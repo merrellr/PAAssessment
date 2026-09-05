@@ -122,6 +122,11 @@
   .notes-item .notes-text{ font-size:13.5px; color: var(--ink); white-space:pre-wrap; margin-bottom:5px; }
   .notes-item a{ font-size:12px; color: var(--navy); text-decoration:underline; }
 
+  .article-item{ border-left:3px solid var(--cyan); padding:2px 0 2px 12px; margin-bottom:12px; }
+  .article-item .article-course{ font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:0.04em; color: var(--navy); margin-bottom:4px; }
+  .article-item a{ font-size:13.5px; color: var(--ink); text-decoration:none; }
+  .article-item a:hover{ text-decoration:underline; color: var(--navy); }
+
   .check-box{ background:#F7F9FC; border: 1.5px solid var(--line); border-radius: 12px; padding: 16px 18px; }
   .check-box .check-eyebrow{ font-size: 11px; font-weight:600; letter-spacing:0.06em; text-transform:uppercase; color: var(--cyan); display:block; margin-bottom: 8px; }
   .check-box .check-q{ font-family:'Space Grotesk', sans-serif; font-weight:600; font-size: 14.5px; color: var(--navy-deep); margin-bottom: 12px; }
@@ -401,14 +406,6 @@
       </div>
     </div>
 
-    <div class="card" id="myNotesCard" style="display:none; margin-bottom:22px;">
-      <div style="display:flex; align-items:baseline; justify-content:space-between;">
-        <span class="eyebrow" style="margin-bottom:0;">Your notes</span>
-        <a id="notesToggleLink" onclick="toggleNotesPanel()" style="font-size:12.5px; color:var(--navy); cursor:pointer; text-decoration:underline;">Hide</a>
-      </div>
-      <div id="notesList" style="margin-top:14px;"></div>
-    </div>
-
     <div class="card" id="spacedReviewCard" style="display:none; margin-bottom:22px;">
       <span class="eyebrow">Spaced review</span>
       <div id="spacedReviewMeta" style="font-size:12.5px; color:var(--gray); margin-bottom:12px;"></div>
@@ -427,6 +424,19 @@
     </div>
 
     <div id="courseCatalog"></div>
+
+    <div class="card" id="myNotesCard" style="display:none; margin-top:22px;">
+      <div style="display:flex; align-items:baseline; justify-content:space-between;">
+        <span class="eyebrow" style="margin-bottom:0;">Your notes</span>
+        <a id="notesToggleLink" onclick="toggleNotesPanel()" style="font-size:12.5px; color:var(--navy); cursor:pointer; text-decoration:underline;">Hide</a>
+      </div>
+      <div id="notesList" style="margin-top:14px;"></div>
+    </div>
+
+    <div class="card" id="articlesCard" style="display:none; margin-top:22px;">
+      <span class="eyebrow">Companion articles</span>
+      <div id="articlesList" style="margin-top:14px;"></div>
+    </div>
 
     </div>
   </div>
@@ -837,6 +847,7 @@ async function loadDashboard(user){
   renderCatalog(progress, assessmentResult);
   renderMyNotes(progress);
   renderSpacedReview(progress);
+  renderArticlesShortcuts();
   if (assessmentResult) renderRecommendations(assessmentResult, progress);
   populateProfileProgressSummary(progress, assessmentResult);
   renderAssignedStat(progress, assessmentResult);
@@ -1389,6 +1400,29 @@ function renderMyNotes(progress){
       ${n.prompt ? `<div class="notes-prompt">${n.prompt}</div>` : ''}
       <div class="notes-text">${n.text.replace(/</g, '&lt;')}</div>
       <a href="lesson.html?course=${n.cid}&lesson=${n.lid}&v=${CONTENT_VERSION}">Open the lesson →</a>
+    </div>
+  `).join('');
+  card.style.display = 'block';
+}
+
+/* Quick-access shortcuts to every course's companion article, shown
+   regardless of progress — a standing reading list, not tied to what
+   you've unlocked or completed. Courses authored from a book chapter
+   have no sourceUrl and just don't appear here. */
+function renderArticlesShortcuts(){
+  const card = document.getElementById('articlesCard');
+  const list = document.getElementById('articlesList');
+  const items = Object.keys(CATALOG)
+    .filter(cid => CATALOG[cid].sourceUrl)
+    .map(cid => ({ title: CATALOG[cid].title, url: CATALOG[cid].sourceUrl }));
+
+  if (!items.length){ card.style.display = 'none'; return; }
+  items.sort((a, b) => a.title.localeCompare(b.title));
+
+  list.innerHTML = items.map(it => `
+    <div class="article-item">
+      <div class="article-course">${it.title}</div>
+      <a href="${it.url}" target="_blank" rel="noopener">Read the article ↗</a>
     </div>
   `).join('');
   card.style.display = 'block';
