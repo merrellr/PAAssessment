@@ -28,7 +28,7 @@
   .domain-header{ display:flex; align-items:center; gap:12px; margin-bottom:10px; }
   .domain-badge{ width:40px; height:40px; border-radius:10px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
 
-  /* Shared "dot meter": four slots, filled left-to-right — No Experience 1,
+  /* Shared "dot meter": four slots, filled left-to-right — Limited Experience 1,
      Moderate 2, Lots of Experience 3, Advanced 4. Same visual language is
      reused on lms-dashboard.html to show the user their own level. */
   .tier-dots{ display:flex; gap:4px; flex-shrink:0; }
@@ -73,7 +73,7 @@
     <span class="eyebrow">The Training Framework</span>
     <h1>Seven Domains, Four Levels Each</h1>
     <p>Everything in this program is organized around seven core skill areas that make up modern product management, three of them focused specifically on working with AI. Your assessment measures where you stand in each one today, and your course plan is built from that starting point, not a generic curriculum everyone gets.</p>
-    <p>Within each domain, there are four levels: <strong>No Experience</strong>, <strong>Moderate Experience</strong>, <strong>Lots of Experience</strong>, and <strong>Advanced Experience</strong>. These aren't just labels, each one describes a genuinely different way of operating in that domain, not just "knows more facts."</p>
+    <p>Within each domain, there are four levels: <strong>Limited Experience</strong>, <strong>Moderate Experience</strong>, <strong>Lots of Experience</strong>, and <strong>Advanced Experience</strong>. These aren't just labels, each one describes a genuinely different way of operating in that domain, not just "knows more facts."</p>
     <p class="legend-intro"><strong>Reading the levels:</strong> each level carries a four-dot meter that fills as experience grows.</p>
     <div class="tier-legend" id="tierLegend" aria-hidden="true"></div>
   </div>
@@ -107,7 +107,7 @@ const DOMAIN_ICON_PATHS = {
   aiOrg: '<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1L7 17M17 7l2.1-2.1"/>'
 };
 const TIER_LABELS = [
-  ["novice", "No Experience"],
+  ["novice", "Limited Experience"],
   ["moderate", "Moderate Experience"],
   ["experienced", "Lots of Experience"],
   ["advanced", "Advanced Experience"]

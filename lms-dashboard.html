@@ -501,7 +501,7 @@ const DOMAINS = {
 };
 
 const TIERS = [
-  { slug: "novice", label: "No Experience" },
+  { slug: "novice", label: "Limited Experience" },
   { slug: "moderate", label: "Moderate Experience" },
   { slug: "experienced", label: "Lots of Experience" },
   { slug: "advanced", label: "Advanced Experience" }
@@ -888,10 +888,17 @@ function renderAssignedStat(progress, assessmentResult){
   if (!assessmentResult){ tileRow.style.display = 'none'; return; }
   tileRow.style.display = 'block';
 
-  // Defaults to expanded for anyone who hasn't set a preference yet.
-  const shouldBeExpanded = progress.resultCardExpanded !== false;
+  // Defaults to expanded for anyone who hasn't set a preference yet, and
+  // always expands right after an assessment (?justAssessed=1, set by the
+  // redirect from index.html) so a fresh result is shown in full
+  // regardless of a saved collapsed state.
+  const justAssessed = new URLSearchParams(window.location.search).get('justAssessed') === '1';
+  const shouldBeExpanded = justAssessed || progress.resultCardExpanded !== false;
   document.getElementById('summaryDetailsPanel').style.display = shouldBeExpanded ? 'block' : 'none';
   document.getElementById('detailsToggleLink').textContent = shouldBeExpanded ? 'Hide details' : 'View details';
+  if (justAssessed && !new URLSearchParams(window.location.search).get('justCompleted')){
+    history.replaceState(null, '', window.location.pathname);
+  }
 
   let totalAssigned = 0, totalCompletedInPlan = 0;
   Object.keys(DOMAINS).forEach(domainKey => {
@@ -935,7 +942,7 @@ function renderAssignedStat(progress, assessmentResult){
   }
 
   const tierColorFor = (tierName) => {
-    const map = { 'No Experience': '#B9C6DA', 'Moderate Experience': '#6FA3D6', 'Lots of Experience': '#35C2E8', 'Advanced Experience': '#1A4584' };
+    const map = { 'Limited Experience': '#B9C6DA', 'No Experience': '#B9C6DA', 'Moderate Experience': '#6FA3D6', 'Lots of Experience': '#35C2E8', 'Advanced Experience': '#1A4584' };
     return map[tierName] || 'var(--navy)';
   };
 
@@ -1066,10 +1073,10 @@ function domainIconBadgeHtml(domainKey, size){
   `;
 }
 
-const TIER_LABEL_BY_SLUG = { novice: "No Experience", moderate: "Moderate Experience", experienced: "Lots of Experience", advanced: "Advanced Experience" };
+const TIER_LABEL_BY_SLUG = { novice: "Limited Experience", moderate: "Moderate Experience", experienced: "Lots of Experience", advanced: "Advanced Experience" };
 
 /* Four-slot "dot meter" for an experience level — the same visual
-   language used on framework.html. No Experience fills 1 of 4,
+   language used on framework.html. Limited Experience fills 1 of 4,
    Moderate 2, Lots of Experience 3, Advanced 4. Pass a null/unknown
    slug to get an empty (all-hollow) meter. */
 const TIER_METER_FILLED = { novice: 1, moderate: 2, experienced: 3, advanced: 4 };
