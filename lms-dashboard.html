@@ -127,6 +127,16 @@
   .article-item a{ font-size:13.5px; color: var(--ink); text-decoration:none; }
   .article-item a:hover{ text-decoration:underline; color: var(--navy); }
 
+  .tour-highlight{ position:fixed; border:3px solid var(--cyan); border-radius:11px; box-shadow:0 0 0 9999px rgba(18,33,62,0.45); z-index:9999; pointer-events:none; transition:top .2s ease, left .2s ease, width .2s ease, height .2s ease; }
+  .tour-pop{ position:fixed; z-index:10000; width:280px; max-width:calc(100vw - 24px); background:#fff; border-radius:12px; padding:16px 18px; box-shadow:0 14px 44px rgba(0,0,0,0.28); }
+  .tour-pop .tour-title{ font-family:'Space Grotesk', sans-serif; font-weight:700; font-size:14px; color:var(--navy-deep); margin-bottom:6px; }
+  .tour-pop .tour-body{ font-size:13px; color:var(--ink-soft); line-height:1.5; margin-bottom:14px; }
+  .tour-pop .tour-actions{ display:flex; justify-content:space-between; align-items:center; gap:10px; }
+  .tour-pop .tour-skip{ font-size:12px; color:var(--gray); cursor:pointer; text-decoration:underline; background:none; border:none; padding:0; font-family:inherit; }
+  .tour-pop .tour-count{ font-size:11px; color:var(--gray); }
+  .tour-pop .tour-next{ font-family:'Space Grotesk', sans-serif; font-weight:600; font-size:12.5px; padding:7px 16px; border-radius:7px; border:none; background:var(--navy); color:#fff; cursor:pointer; }
+  .tour-pop .tour-next:hover{ background:var(--navy-deep); }
+
   .check-box{ background:#F7F9FC; border: 1.5px solid var(--line); border-radius: 12px; padding: 16px 18px; }
   .check-box .check-eyebrow{ font-size: 11px; font-weight:600; letter-spacing:0.06em; text-transform:uppercase; color: var(--cyan); display:block; margin-bottom: 8px; }
   .check-box .check-q{ font-family:'Space Grotesk', sans-serif; font-weight:600; font-size: 14.5px; color: var(--navy-deep); margin-bottom: 12px; }
@@ -208,12 +218,16 @@
   <div data-screen="auth" class="active">
     <div class="card" style="max-width:420px;margin:0 auto;">
 
+      <span style="display:block; font-size:11px; font-weight:600; letter-spacing:0.06em; text-transform:uppercase; color:var(--cyan); margin-bottom:6px;">Your learning dashboard</span>
+      <h1 style="font-size:19px; margin:0 0 6px;">See your personalized results and course plan</h1>
+      <p style="font-size:13.5px; color:var(--ink-soft); margin:0 0 16px; line-height:1.55;">Log in or create an account to view your assessment score across all seven skill areas and the courses matched to your level. Haven't taken the assessment yet? <a href="index.html" style="color:var(--navy);">Start here</a>.</p>
+
       <div class="auth-tabs">
         <div class="auth-tab active" id="tabLogin" onclick="setAuthMode(false)">Log in</div>
         <div class="auth-tab" id="tabSignup" onclick="setAuthMode(true)">Create account</div>
       </div>
 
-      <p id="authSub">Log in to continue your courses.</p>
+      <p id="authSub">Log in to pick up your courses where you left off.</p>
 
       <div class="input-icon-wrap">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9AA3AD" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>
@@ -501,7 +515,7 @@ const DOMAINS = {
 };
 
 const TIERS = [
-  { slug: "novice", label: "No Experience" },
+  { slug: "novice", label: "Limited Experience" },
   { slug: "moderate", label: "Moderate Experience" },
   { slug: "experienced", label: "Lots of Experience" },
   { slug: "advanced", label: "Advanced Experience" }
@@ -557,7 +571,7 @@ window.setAuthMode = function(signUp){
   isSignUpMode = signUp;
   document.getElementById('tabLogin').classList.toggle('active', !isSignUpMode);
   document.getElementById('tabSignup').classList.toggle('active', isSignUpMode);
-  document.getElementById('authSub').textContent = isSignUpMode ? 'Sign up to start tracking your courses.' : 'Log in to continue your courses.';
+  document.getElementById('authSub').textContent = isSignUpMode ? 'Create an account to save your results and start your courses.' : 'Log in to pick up your courses where you left off.';
   document.getElementById('authSubmitBtn').textContent = isSignUpMode ? 'Create account' : 'Log in';
   document.getElementById('authError').textContent = '';
   document.getElementById('authSuccess').textContent = '';
@@ -819,6 +833,7 @@ window.handleResendVerification = async function(){
 
 window.dismissWelcome = async function(){
   document.getElementById('welcomeCard').style.display = 'none';
+  startDashboardTour();
   if (!currentUser) return;
   try {
     const progressRef = doc(db, 'progress', currentUser.uid);
@@ -830,6 +845,78 @@ window.dismissWelcome = async function(){
     console.error('Could not save welcome-seen flag:', err);
   }
 };
+
+/* A one-time guided tour that runs right after the welcome card is
+   dismissed on a first visit. Points a popover at four spots in turn;
+   any spot that isn't on the page yet (e.g. the recommendations
+   banner when there are no recs) is skipped. Purely additive — a
+   "Skip tour" link ends it at any point. */
+const DASHBOARD_TOUR_STEPS = [
+  { sel: '#heroBand', title: 'Your assessment result', body: 'Where you landed overall. Open "View details" for the full breakdown across all seven skill areas.' },
+  { sel: '#recBanner', title: 'Where to start', body: 'Your best next courses, drawn from your lowest-scoring areas at the level the assessment placed you.' },
+  { sel: '#courseCatalog .tier-card', title: 'Jump into a course', body: 'Click any tile to begin. Progress saves automatically, and the dots beside each domain fill in as you complete its courses.' },
+  { sel: '#articlesCard', title: 'Notes and articles', body: 'A companion article for every course sits here at the bottom. Notes you write during lessons collect just above them.' }
+];
+
+function startDashboardTour(){
+  const steps = DASHBOARD_TOUR_STEPS
+    .map(s => Object.assign({}, s, { el: document.querySelector(s.sel) }))
+    .filter(s => s.el && s.el.offsetParent !== null);
+  if (!steps.length) return;
+
+  let i = 0;
+  const highlight = document.createElement('div');
+  highlight.className = 'tour-highlight';
+  const pop = document.createElement('div');
+  pop.className = 'tour-pop';
+  document.body.appendChild(highlight);
+  document.body.appendChild(pop);
+
+  function cleanup(){
+    highlight.remove();
+    pop.remove();
+    window.removeEventListener('resize', place);
+  }
+
+  function place(){
+    const step = steps[i];
+    const r = step.el.getBoundingClientRect();
+    highlight.style.top = (r.top - 6) + 'px';
+    highlight.style.left = (r.left - 6) + 'px';
+    highlight.style.width = (r.width + 12) + 'px';
+    highlight.style.height = (r.height + 12) + 'px';
+
+    const isLast = i === steps.length - 1;
+    pop.innerHTML =
+      '<div class="tour-title">' + step.title + '</div>' +
+      '<div class="tour-body">' + step.body + '</div>' +
+      '<div class="tour-actions">' +
+        '<button type="button" class="tour-skip">Skip tour</button>' +
+        '<span class="tour-count">' + (i + 1) + ' of ' + steps.length + '</span>' +
+        '<button type="button" class="tour-next">' + (isLast ? 'Done' : 'Next') + '</button>' +
+      '</div>';
+
+    const popH = pop.offsetHeight || 150;
+    const roomBelow = window.innerHeight - r.bottom;
+    pop.style.top = (roomBelow > popH + 24 ? r.bottom + 12 : Math.max(12, r.top - popH - 12)) + 'px';
+    pop.style.left = Math.min(Math.max(12, r.left), window.innerWidth - 12 - (pop.offsetWidth || 280)) + 'px';
+
+    pop.querySelector('.tour-skip').onclick = cleanup;
+    pop.querySelector('.tour-next').onclick = function(){
+      if (isLast) return cleanup();
+      i++;
+      goto();
+    };
+  }
+
+  function goto(){
+    steps[i].el.scrollIntoView({ block: 'center', behavior: 'smooth' });
+    setTimeout(place, 280);
+  }
+
+  window.addEventListener('resize', place);
+  goto();
+}
 
 const TIER_ORDER = ['novice', 'moderate', 'experienced', 'advanced'];
 
@@ -888,10 +975,17 @@ function renderAssignedStat(progress, assessmentResult){
   if (!assessmentResult){ tileRow.style.display = 'none'; return; }
   tileRow.style.display = 'block';
 
-  // Defaults to expanded for anyone who hasn't set a preference yet.
-  const shouldBeExpanded = progress.resultCardExpanded !== false;
+  // Defaults to expanded for anyone who hasn't set a preference yet, and
+  // always expands right after an assessment (?justAssessed=1, set by the
+  // redirect from index.html) so a fresh result is shown in full
+  // regardless of a saved collapsed state.
+  const justAssessed = new URLSearchParams(window.location.search).get('justAssessed') === '1';
+  const shouldBeExpanded = justAssessed || progress.resultCardExpanded !== false;
   document.getElementById('summaryDetailsPanel').style.display = shouldBeExpanded ? 'block' : 'none';
   document.getElementById('detailsToggleLink').textContent = shouldBeExpanded ? 'Hide details' : 'View details';
+  if (justAssessed && !new URLSearchParams(window.location.search).get('justCompleted')){
+    history.replaceState(null, '', window.location.pathname);
+  }
 
   let totalAssigned = 0, totalCompletedInPlan = 0;
   Object.keys(DOMAINS).forEach(domainKey => {
@@ -935,7 +1029,7 @@ function renderAssignedStat(progress, assessmentResult){
   }
 
   const tierColorFor = (tierName) => {
-    const map = { 'No Experience': '#B9C6DA', 'Moderate Experience': '#6FA3D6', 'Lots of Experience': '#35C2E8', 'Advanced Experience': '#1A4584' };
+    const map = { 'Limited Experience': '#B9C6DA', 'No Experience': '#B9C6DA', 'Moderate Experience': '#6FA3D6', 'Lots of Experience': '#35C2E8', 'Advanced Experience': '#1A4584' };
     return map[tierName] || 'var(--navy)';
   };
 
@@ -1066,17 +1160,28 @@ function domainIconBadgeHtml(domainKey, size){
   `;
 }
 
-const TIER_LABEL_BY_SLUG = { novice: "No Experience", moderate: "Moderate Experience", experienced: "Lots of Experience", advanced: "Advanced Experience" };
+const TIER_LABEL_BY_SLUG = { novice: "Limited Experience", moderate: "Moderate Experience", experienced: "Lots of Experience", advanced: "Advanced Experience" };
 
 /* Four-slot "dot meter" for an experience level — the same visual
-   language used on framework.html. No Experience fills 1 of 4,
+   language used on framework.html. Limited Experience fills 1 of 4,
    Moderate 2, Lots of Experience 3, Advanced 4. Pass a null/unknown
    slug to get an empty (all-hollow) meter. */
 const TIER_METER_FILLED = { novice: 1, moderate: 2, experienced: 3, advanced: 4 };
 
-function tierMeterHtml(tierSlug, color){
-  const filled = TIER_METER_FILLED[tierSlug] || 0;
-  const label = TIER_LABEL_BY_SLUG[tierSlug];
+/* How many dots a domain's meter shows: starts at the assessed level
+   and fills proportionally toward 4 as the assigned courses in that
+   domain get completed. `domainAssigned` / `domainCompleted` are the
+   same counts renderCatalog already computes for "% complete". */
+function domainMeterFill(assessedTierSlug, domainCompleted, domainAssigned){
+  const assessedFilled = TIER_METER_FILLED[assessedTierSlug] || 1;
+  const frac = domainAssigned > 0 ? domainCompleted / domainAssigned : 0;
+  const filled = Math.min(4, Math.round(assessedFilled + (4 - assessedFilled) * frac));
+  return { filled, displayedSlug: TIER_ORDER[filled - 1] };
+}
+
+function tierMeterHtml(tierSlug, color, filledOverride){
+  const filled = (typeof filledOverride === 'number') ? filledOverride : (TIER_METER_FILLED[tierSlug] || 0);
+  const label = filled > 0 ? TIER_LABEL_BY_SLUG[TIER_ORDER[filled - 1]] : null;
   let dots = '';
   for (let i = 0; i < 4; i++){
     const on = i < filled;
@@ -1089,13 +1194,21 @@ function tierMeterHtml(tierSlug, color){
 /* Small "i" button + hidden popover, toggled via toggleInfoPopover below.
    Pulls its text from window.FRAMEWORK_DATA (content/framework-data.js),
    the same source the full framework.html page reads from. */
-function infoIconHtml(domainKey, currentTierSlug){
+function infoIconHtml(domainKey, currentTierSlug, meterInfo){
   const uid = 'infoPopover-' + domainKey;
   const framework = (window.FRAMEWORK_DATA && window.FRAMEWORK_DATA[domainKey]) || null;
   const description = framework ? framework.description : '';
-  const tierLine = currentTierSlug
-    ? `<div style="font-size:12px; color:var(--navy); font-weight:600; margin-bottom:10px; display:flex; align-items:center; gap:7px;">Your current level: ${TIER_LABEL_BY_SLUG[currentTierSlug]} ${tierMeterHtml(currentTierSlug, DOMAIN_COLORS[domainKey])}</div>`
-    : '';
+  let tierLine = '';
+  if (meterInfo && meterInfo.filled > 0){
+    const shownLabel = TIER_LABEL_BY_SLUG[meterInfo.displayedSlug];
+    const moved = meterInfo.displayedSlug !== currentTierSlug || meterInfo.done > 0;
+    const sub = moved
+      ? `<div style="font-size:11px; color:var(--gray); font-weight:400; margin-top:3px;">Started at ${TIER_LABEL_BY_SLUG[currentTierSlug]} &middot; ${meterInfo.done} of ${meterInfo.assigned} course${meterInfo.assigned === 1 ? '' : 's'} complete</div>`
+      : '';
+    tierLine = `<div style="font-size:12px; color:var(--navy); font-weight:600; margin-bottom:10px;"><div style="display:flex; align-items:center; gap:7px;">Your current level: ${shownLabel} ${tierMeterHtml(meterInfo.displayedSlug, DOMAIN_COLORS[domainKey], meterInfo.filled)}</div>${sub}</div>`;
+  } else if (currentTierSlug){
+    tierLine = `<div style="font-size:12px; color:var(--navy); font-weight:600; margin-bottom:10px; display:flex; align-items:center; gap:7px;">Your current level: ${TIER_LABEL_BY_SLUG[currentTierSlug]} ${tierMeterHtml(currentTierSlug, DOMAIN_COLORS[domainKey])}</div>`;
+  }
   return `
     <span style="position:relative; display:inline-flex;">
       <button type="button" onclick="toggleInfoPopover('${uid}')" style="width:16px; height:16px; border-radius:50%; border:1.5px solid var(--gray); background:none; color:var(--gray); font-size:10px; font-weight:700; line-height:1; cursor:pointer; display:flex; align-items:center; justify-content:center; padding:0; font-family:'Space Grotesk', sans-serif;" aria-label="About this domain">i</button>
@@ -1311,13 +1424,15 @@ function renderCatalog(progress, assessmentResult){
     const domainPct = domainAssigned > 0 ? Math.round((domainCompleted / domainAssigned) * 100) : 0;
 
     const currentTierSlug = assessmentResult ? tierSlugForPct(assessmentResult.categoryPct[domainKey]) : null;
+    const meter = currentTierSlug ? domainMeterFill(currentTierSlug, domainCompleted, domainAssigned) : { filled: 0, displayedSlug: null };
+    const meterInfo = { filled: meter.filled, displayedSlug: meter.displayedSlug, done: domainCompleted, assigned: domainAssigned };
     const title = document.createElement('div');
     title.className = 'domain-title';
     title.style.cssText = 'display:flex; align-items:center; gap:9px; position:relative;';
     title.innerHTML = domainIconBadgeHtml(domainKey, 24)
       + '<span>' + DOMAINS[domainKey].label + '</span>'
-      + tierMeterHtml(currentTierSlug, DOMAIN_COLORS[domainKey])
-      + infoIconHtml(domainKey, currentTierSlug)
+      + tierMeterHtml(meter.displayedSlug, DOMAIN_COLORS[domainKey], meter.filled)
+      + infoIconHtml(domainKey, currentTierSlug, meterInfo)
       + '<span style="font-size:12px; font-weight:500; color:var(--gray); margin-left:auto;">' + domainPct + '% complete</span>';
     group.appendChild(title);
 
