@@ -471,6 +471,23 @@ onAuthStateChanged(auth, (user) => {
   window.applyAccountPrefill();
 });
 
+/* Everything the "Almost there" form would collect, pulled straight
+   from the signed-in account. Returns null when logged out (the form
+   is still shown then). Used to skip the form entirely on a retake. */
+window.getAccountLead = function(){
+  if (!isLoggedIn || !auth.currentUser) return null;
+  const u = auth.currentUser;
+  const p = accountProfile || {};
+  return {
+    name: u.displayName || '',
+    email: u.email || '',
+    company: p.company || '',
+    jobTitle: p.jobTitle || '',
+    companySize: p.companySize || '',
+    industry: p.industry || ''
+  };
+};
+
 window.handleCreateAccountFromResults = async function(){
   const password = document.getElementById('signupPassword').value;
   const confirmPassword = document.getElementById('signupPasswordConfirm').value;
@@ -960,6 +977,17 @@ function goNext(){
   if (answers[current] === null) return;
   if (current === QUESTIONS.length - 1){
     lastScores = computeScores();
+
+    // Logged in? We already have name / email / company / etc. from the
+    // account, so skip the "Almost there" form and go straight to results.
+    const acctLead = window.getAccountLead && window.getAccountLead();
+    if (acctLead && acctLead.email){
+      window.__leadSnapshot = acctLead;
+      logResult(acctLead, lastScores);
+      showResults(lastScores, acctLead);
+      return;
+    }
+
     document.getElementById('leadForm').reset();
     prefillLeadFromUrl();
     if (window.applyAccountPrefill) window.applyAccountPrefill();

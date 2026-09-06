@@ -218,12 +218,16 @@
   <div data-screen="auth" class="active">
     <div class="card" style="max-width:420px;margin:0 auto;">
 
+      <span style="display:block; font-size:11px; font-weight:600; letter-spacing:0.06em; text-transform:uppercase; color:var(--cyan); margin-bottom:6px;">Your learning dashboard</span>
+      <h1 style="font-size:19px; margin:0 0 6px;">See your personalized results and course plan</h1>
+      <p style="font-size:13.5px; color:var(--ink-soft); margin:0 0 16px; line-height:1.55;">Log in or create an account to view your assessment score across all seven skill areas and the courses matched to your level. Haven't taken the assessment yet? <a href="index.html" style="color:var(--navy);">Start here</a>.</p>
+
       <div class="auth-tabs">
         <div class="auth-tab active" id="tabLogin" onclick="setAuthMode(false)">Log in</div>
         <div class="auth-tab" id="tabSignup" onclick="setAuthMode(true)">Create account</div>
       </div>
 
-      <p id="authSub">Log in to continue your courses.</p>
+      <p id="authSub">Log in to pick up your courses where you left off.</p>
 
       <div class="input-icon-wrap">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9AA3AD" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>
@@ -567,7 +571,7 @@ window.setAuthMode = function(signUp){
   isSignUpMode = signUp;
   document.getElementById('tabLogin').classList.toggle('active', !isSignUpMode);
   document.getElementById('tabSignup').classList.toggle('active', isSignUpMode);
-  document.getElementById('authSub').textContent = isSignUpMode ? 'Sign up to start tracking your courses.' : 'Log in to continue your courses.';
+  document.getElementById('authSub').textContent = isSignUpMode ? 'Create an account to save your results and start your courses.' : 'Log in to pick up your courses where you left off.';
   document.getElementById('authSubmitBtn').textContent = isSignUpMode ? 'Create account' : 'Log in';
   document.getElementById('authError').textContent = '';
   document.getElementById('authSuccess').textContent = '';

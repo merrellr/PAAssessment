@@ -67,7 +67,7 @@
     </a>
   </div>
   <div class="brand-accent-bar"></div>
-  <a class="back-link" href="lms-dashboard.html">← Back to dashboard</a>
+  <a class="back-link" id="backLink" href="lms-dashboard.html">← Back to dashboard</a>
 
   <div class="card">
     <span class="eyebrow">The Training Framework</span>
@@ -81,7 +81,7 @@
   <div id="domainsContainer"></div>
 
   <div class="cta-row">
-    <a href="index.html" class="btn">Take the Assessment →</a>
+    <a href="index.html" class="btn" id="assessmentCta">Take the Assessment →</a>
   </div>
 
   <div style="margin-top:40px; padding:20px 0; border-top:1px solid var(--line); text-align:center; font-size:12px; color:var(--gray);">
@@ -162,6 +162,51 @@ Object.keys(window.FRAMEWORK_DATA).forEach(domainKey => {
 });
 
 document.getElementById('footerYear').textContent = new Date().getFullYear();
+</script>
+
+<script type="module">
+/* Adjusts the two navigation CTAs to who's viewing:
+   - Signed in and already assessed  -> "Retake the Assessment", back to dashboard.
+   - Signed in, not yet assessed     -> "Take the Assessment", back to dashboard.
+   - Signed out                      -> "Take the Assessment", and "Back" points
+     at the assessment rather than the dashboard's bare sign-in screen. */
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
+
+const app = initializeApp({
+  apiKey: "AIzaSyAcECtS5c6WeOhKlwRK-LYFE47npbuq_eU",
+  authDomain: "product-advisory-lms.firebaseapp.com",
+  projectId: "product-advisory-lms",
+  storageBucket: "product-advisory-lms.firebasestorage.app",
+  messagingSenderId: "1081134406437",
+  appId: "1:1081134406437:web:72e28604d093219e7698cc"
+});
+const auth = getAuth(app);
+const RESULTS_LOG_URL = "https://script.google.com/macros/s/AKfycbynJQYF9rv5maL_CGniS9UGhTDfBVeW3gVhEWUsFdGOqquv4osGx4nQvc8jNkaaY6wrrg/exec";
+
+function fetchAssessmentResult(email){
+  return new Promise((resolve) => {
+    if (!RESULTS_LOG_URL || !email){ resolve(null); return; }
+    const cb = 'fwLookup_' + Date.now();
+    const script = document.createElement('script');
+    window[cb] = function(result){ delete window[cb]; script.remove(); resolve(result || null); };
+    script.src = RESULTS_LOG_URL + '?action=lookup&email=' + encodeURIComponent(email) + '&callback=' + cb;
+    script.onerror = function(){ delete window[cb]; script.remove(); resolve(null); };
+    document.body.appendChild(script);
+  });
+}
+
+onAuthStateChanged(auth, async (user) => {
+  const backLink = document.getElementById('backLink');
+  const cta = document.getElementById('assessmentCta');
+  if (!user){
+    if (backLink){ backLink.textContent = '← Back to the assessment'; backLink.setAttribute('href', 'index.html'); }
+    return;
+  }
+  if (backLink){ backLink.textContent = '← Back to dashboard'; backLink.setAttribute('href', 'lms-dashboard.html'); }
+  const result = await fetchAssessmentResult(user.email);
+  if (result && cta) cta.textContent = 'Retake the Assessment →';
+});
 </script>
 </body>
 </html>
