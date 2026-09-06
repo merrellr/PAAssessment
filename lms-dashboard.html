@@ -127,6 +127,16 @@
   .article-item a{ font-size:13.5px; color: var(--ink); text-decoration:none; }
   .article-item a:hover{ text-decoration:underline; color: var(--navy); }
 
+  .tour-highlight{ position:fixed; border:3px solid var(--cyan); border-radius:11px; box-shadow:0 0 0 9999px rgba(18,33,62,0.45); z-index:9999; pointer-events:none; transition:top .2s ease, left .2s ease, width .2s ease, height .2s ease; }
+  .tour-pop{ position:fixed; z-index:10000; width:280px; max-width:calc(100vw - 24px); background:#fff; border-radius:12px; padding:16px 18px; box-shadow:0 14px 44px rgba(0,0,0,0.28); }
+  .tour-pop .tour-title{ font-family:'Space Grotesk', sans-serif; font-weight:700; font-size:14px; color:var(--navy-deep); margin-bottom:6px; }
+  .tour-pop .tour-body{ font-size:13px; color:var(--ink-soft); line-height:1.5; margin-bottom:14px; }
+  .tour-pop .tour-actions{ display:flex; justify-content:space-between; align-items:center; gap:10px; }
+  .tour-pop .tour-skip{ font-size:12px; color:var(--gray); cursor:pointer; text-decoration:underline; background:none; border:none; padding:0; font-family:inherit; }
+  .tour-pop .tour-count{ font-size:11px; color:var(--gray); }
+  .tour-pop .tour-next{ font-family:'Space Grotesk', sans-serif; font-weight:600; font-size:12.5px; padding:7px 16px; border-radius:7px; border:none; background:var(--navy); color:#fff; cursor:pointer; }
+  .tour-pop .tour-next:hover{ background:var(--navy-deep); }
+
   .check-box{ background:#F7F9FC; border: 1.5px solid var(--line); border-radius: 12px; padding: 16px 18px; }
   .check-box .check-eyebrow{ font-size: 11px; font-weight:600; letter-spacing:0.06em; text-transform:uppercase; color: var(--cyan); display:block; margin-bottom: 8px; }
   .check-box .check-q{ font-family:'Space Grotesk', sans-serif; font-weight:600; font-size: 14.5px; color: var(--navy-deep); margin-bottom: 12px; }
@@ -819,6 +829,7 @@ window.handleResendVerification = async function(){
 
 window.dismissWelcome = async function(){
   document.getElementById('welcomeCard').style.display = 'none';
+  startDashboardTour();
   if (!currentUser) return;
   try {
     const progressRef = doc(db, 'progress', currentUser.uid);
@@ -830,6 +841,78 @@ window.dismissWelcome = async function(){
     console.error('Could not save welcome-seen flag:', err);
   }
 };
+
+/* A one-time guided tour that runs right after the welcome card is
+   dismissed on a first visit. Points a popover at four spots in turn;
+   any spot that isn't on the page yet (e.g. the recommendations
+   banner when there are no recs) is skipped. Purely additive — a
+   "Skip tour" link ends it at any point. */
+const DASHBOARD_TOUR_STEPS = [
+  { sel: '#heroBand', title: 'Your assessment result', body: 'Where you landed overall. Open "View details" for the full breakdown across all seven skill areas.' },
+  { sel: '#recBanner', title: 'Where to start', body: 'Your best next courses, drawn from your lowest-scoring areas at the level the assessment placed you.' },
+  { sel: '#courseCatalog .tier-card', title: 'Jump into a course', body: 'Click any tile to begin. Progress saves automatically, and the dots beside each domain fill in as you complete its courses.' },
+  { sel: '#articlesCard', title: 'Notes and articles', body: 'A companion article for every course sits here at the bottom. Notes you write during lessons collect just above them.' }
+];
+
+function startDashboardTour(){
+  const steps = DASHBOARD_TOUR_STEPS
+    .map(s => Object.assign({}, s, { el: document.querySelector(s.sel) }))
+    .filter(s => s.el && s.el.offsetParent !== null);
+  if (!steps.length) return;
+
+  let i = 0;
+  const highlight = document.createElement('div');
+  highlight.className = 'tour-highlight';
+  const pop = document.createElement('div');
+  pop.className = 'tour-pop';
+  document.body.appendChild(highlight);
+  document.body.appendChild(pop);
+
+  function cleanup(){
+    highlight.remove();
+    pop.remove();
+    window.removeEventListener('resize', place);
+  }
+
+  function place(){
+    const step = steps[i];
+    const r = step.el.getBoundingClientRect();
+    highlight.style.top = (r.top - 6) + 'px';
+    highlight.style.left = (r.left - 6) + 'px';
+    highlight.style.width = (r.width + 12) + 'px';
+    highlight.style.height = (r.height + 12) + 'px';
+
+    const isLast = i === steps.length - 1;
+    pop.innerHTML =
+      '<div class="tour-title">' + step.title + '</div>' +
+      '<div class="tour-body">' + step.body + '</div>' +
+      '<div class="tour-actions">' +
+        '<button type="button" class="tour-skip">Skip tour</button>' +
+        '<span class="tour-count">' + (i + 1) + ' of ' + steps.length + '</span>' +
+        '<button type="button" class="tour-next">' + (isLast ? 'Done' : 'Next') + '</button>' +
+      '</div>';
+
+    const popH = pop.offsetHeight || 150;
+    const roomBelow = window.innerHeight - r.bottom;
+    pop.style.top = (roomBelow > popH + 24 ? r.bottom + 12 : Math.max(12, r.top - popH - 12)) + 'px';
+    pop.style.left = Math.min(Math.max(12, r.left), window.innerWidth - 12 - (pop.offsetWidth || 280)) + 'px';
+
+    pop.querySelector('.tour-skip').onclick = cleanup;
+    pop.querySelector('.tour-next').onclick = function(){
+      if (isLast) return cleanup();
+      i++;
+      goto();
+    };
+  }
+
+  function goto(){
+    steps[i].el.scrollIntoView({ block: 'center', behavior: 'smooth' });
+    setTimeout(place, 280);
+  }
+
+  window.addEventListener('resize', place);
+  goto();
+}
 
 const TIER_ORDER = ['novice', 'moderate', 'experienced', 'advanced'];
 
