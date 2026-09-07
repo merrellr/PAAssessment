@@ -351,7 +351,16 @@ onAuthStateChanged(auth, async (user) => {
 
   // Gate content behind the assessment: no result means the courses
   // aren't unlocked yet, so show the lock panel instead of the lesson.
-  assessmentResult = await fetchAssessmentResult(user.email);
+  // Prefer the result saved on the person's own progress doc; fall back
+  // to the Google Sheet lookup for older accounts that predate the
+  // Firestore mirror.
+  try {
+    const gateSnap = await getDoc(doc(db, 'progress', user.uid));
+    assessmentResult = (gateSnap.exists() && gateSnap.data().assessmentResult) || null;
+  } catch (e){ /* fall through to the Sheet lookup */ }
+  if (!assessmentResult){
+    assessmentResult = await fetchAssessmentResult(user.email);
+  }
   if (!assessmentResult){
     showAssessmentLock();
     return;
