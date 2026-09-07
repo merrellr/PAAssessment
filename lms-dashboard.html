@@ -930,7 +930,10 @@ async function loadDashboard(user){
   const assessmentUrl = buildAssessmentPrefillUrl(user, progress.profile || {});
   document.getElementById('takeAssessmentLink').href = assessmentUrl;
 
-  const assessmentResult = await fetchAssessmentResult(user.email);
+  // Prefer the result saved on the person's own progress doc (written
+  // when they finish the assessment). Fall back to the Google Sheet
+  // lookup for accounts created before results were mirrored to Firestore.
+  const assessmentResult = progress.assessmentResult || await fetchAssessmentResult(user.email);
   renderCatalog(progress, assessmentResult);
   renderMyNotes(progress);
   renderSpacedReview(progress);
