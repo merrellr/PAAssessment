@@ -382,6 +382,47 @@
 
     </div>
 
+    <div class="card" id="profilePromptCard" style="display:none; margin-bottom:22px; background:linear-gradient(135deg, #EEF3FA 0%, #EAF7FB 100%); border-color: var(--line);">
+      <div style="display:flex; align-items:baseline; justify-content:space-between;">
+        <span class="eyebrow" style="font-size:11px; font-weight:600; letter-spacing:0.06em; text-transform:uppercase; color:var(--cyan);">One quick thing</span>
+        <a onclick="dismissProfilePrompt()" style="font-size:12.5px; color:var(--ink-soft); cursor:pointer; text-decoration:underline;">Not now</a>
+      </div>
+      <h2 style="font-size:16px; margin:10px 0 4px;">Tell us a bit about your team</h2>
+      <p style="margin:0 0 16px;">This lets us shape the examples and course material around the kind of product work you actually do. About fifteen seconds, and you can change it any time from <a href="profile.html" style="color:var(--navy);">your profile</a>.</p>
+      <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:0 16px;">
+        <div>
+          <label class="profile-field-label" for="profilePromptCompany">Company</label>
+          <input class="text-input" type="text" id="profilePromptCompany" placeholder="Company" autocomplete="organization">
+        </div>
+        <div>
+          <label class="profile-field-label" for="profilePromptJobTitle">Role / job title</label>
+          <input class="text-input" type="text" id="profilePromptJobTitle" placeholder="Job title" list="ppJobTitleList" autocomplete="organization-title">
+          <datalist id="ppJobTitleList"></datalist>
+        </div>
+        <div>
+          <label class="profile-field-label" for="profilePromptCompanySize">Company size</label>
+          <select class="text-input" id="profilePromptCompanySize">
+            <option value="">Select one</option>
+            <option value="1-10">1-10 employees</option>
+            <option value="11-50">11-50 employees</option>
+            <option value="51-200">51-200 employees</option>
+            <option value="201-1000">201-1,000 employees</option>
+            <option value="1000+">1,000+ employees</option>
+          </select>
+        </div>
+        <div>
+          <label class="profile-field-label" for="profilePromptIndustry">Industry</label>
+          <input class="text-input" type="text" id="profilePromptIndustry" placeholder="Industry" list="ppIndustryList">
+          <datalist id="ppIndustryList"></datalist>
+        </div>
+      </div>
+      <div class="field-error" id="profilePromptError"></div>
+      <div style="display:flex; align-items:center; gap:14px; margin-top:4px;">
+        <button class="btn btn-primary btn-gradient" style="width:auto; padding:10px 22px;" onclick="saveProfilePrompt()">Save</button>
+        <span id="profilePromptSaved" style="display:none; font-size:12.5px; color:#2E8B57;">Saved, thanks.</span>
+      </div>
+    </div>
+
     <div id="progressToast" style="display:none; background:#EEF9F1; border:1px solid #2E8B57; border-radius:10px; padding:10px 14px; margin-bottom:14px; font-size:13.5px; color:#1f6b47; text-align:center;">Nice work! Updating your progress…</div>
 
     <div class="card" id="assessmentPromptCard" style="display:none; margin-bottom:22px;">
@@ -938,6 +979,7 @@ async function loadDashboard(user){
   renderMyNotes(progress);
   renderSpacedReview(progress);
   renderArticlesShortcuts();
+  renderProfilePrompt(progress);
   if (assessmentResult) renderRecommendations(assessmentResult, progress);
   populateProfileProgressSummary(progress, assessmentResult);
   renderAssignedStat(progress, assessmentResult);
@@ -1091,6 +1133,112 @@ function populateProfileTile(progress, assessmentResult){
   document.getElementById('profileDropdownIndustry').textContent = 'Industry: ' + (profile.industry || 'Not set');
   document.getElementById('profileDropdownCompanySize').textContent = 'Company size: ' + (profile.companySize || 'Not set');
 }
+
+/* ================================================================
+   PROGRESSIVE PROFILE PROMPT
+   The assessment funnel no longer asks for company / title / size /
+   industry up front (results-first). This dismissible card collects
+   it here instead, once, after the person is already in. Same option
+   lists as profile.html so the two stay consistent.
+   ================================================================ */
+const PP_JOB_TITLE_OPTIONS = [
+  "Product Manager", "Senior Product Manager", "Director of Product",
+  "VP of Product", "Chief Product Officer", "Head of Product",
+  "Product Owner", "Product Marketing Manager", "Program Manager",
+  "Project Manager", "Business Analyst", "UX Designer", "UX Researcher",
+  "Engineering Manager", "CTO", "CEO / Founder", "Quality Director",
+  "VP of Quality", "Clinical Quality Manager", "Healthcare Administrator",
+  "Consultant"
+];
+const PP_INDUSTRY_OPTIONS = [
+  "Healthcare Technology / Health IT", "Healthcare Provider (Hospital / Health System)",
+  "Healthcare Payer", "Pharmaceuticals / Biotech", "Software / SaaS",
+  "Financial Services", "Insurance", "Government / Public Sector",
+  "Education", "Nonprofit / Association", "Manufacturing",
+  "Retail / E-commerce", "Consulting", "Telecommunications", "Consumer Products"
+];
+
+function fillDatalist(id, options){
+  const dl = document.getElementById(id);
+  if (!dl || dl.children.length) return;
+  options.forEach(opt => {
+    const el = document.createElement('option');
+    el.value = opt;
+    dl.appendChild(el);
+  });
+}
+
+const PROFILE_FIELDS = ['company', 'jobTitle', 'companySize', 'industry'];
+
+function profileIsComplete(profile){
+  return PROFILE_FIELDS.every(k => (profile[k] || '').toString().trim());
+}
+
+/* Show the prompt only when there's something still to collect and the
+   person hasn't waved it away. Pre-fills whatever we already have. */
+function renderProfilePrompt(progress){
+  const card = document.getElementById('profilePromptCard');
+  const profile = progress.profile || {};
+  // Hold off on a first visit — the welcome card and tour own that
+  // moment. This surfaces on the next load instead.
+  if (!progress.hasSeenWelcome || progress.profilePromptDismissed || profileIsComplete(profile)){
+    card.style.display = 'none';
+    return;
+  }
+  fillDatalist('ppJobTitleList', PP_JOB_TITLE_OPTIONS);
+  fillDatalist('ppIndustryList', PP_INDUSTRY_OPTIONS);
+  document.getElementById('profilePromptCompany').value = profile.company || '';
+  document.getElementById('profilePromptJobTitle').value = profile.jobTitle || '';
+  document.getElementById('profilePromptCompanySize').value = profile.companySize || '';
+  document.getElementById('profilePromptIndustry').value = profile.industry || '';
+  document.getElementById('profilePromptError').textContent = '';
+  document.getElementById('profilePromptSaved').style.display = 'none';
+  card.style.display = 'block';
+}
+
+window.saveProfilePrompt = async function(){
+  const errorEl = document.getElementById('profilePromptError');
+  errorEl.textContent = '';
+  const profile = {
+    company: document.getElementById('profilePromptCompany').value.trim(),
+    jobTitle: document.getElementById('profilePromptJobTitle').value.trim(),
+    companySize: document.getElementById('profilePromptCompanySize').value,
+    industry: document.getElementById('profilePromptIndustry').value.trim()
+  };
+  if (!PROFILE_FIELDS.some(k => profile[k])){
+    errorEl.textContent = 'Fill in at least one field, or choose "Not now".';
+    return;
+  }
+  if (!currentUser) return;
+  try {
+    const progressRef = doc(db, 'progress', currentUser.uid);
+    const snap = await getDoc(progressRef);
+    const existing = (snap.exists() && snap.data().profile) || {};
+    const merged = Object.assign({}, existing, profile);
+    await setDoc(progressRef, { profile: merged }, { merge: true });
+    document.getElementById('profilePromptIndustry').blur();
+    document.getElementById('profilePromptSaved').style.display = 'inline';
+    document.getElementById('profileDropdownIndustry').textContent = 'Industry: ' + (merged.industry || 'Not set');
+    document.getElementById('profileDropdownCompanySize').textContent = 'Company size: ' + (merged.companySize || 'Not set');
+    setTimeout(() => {
+      const card = document.getElementById('profilePromptCard');
+      if (card) card.style.display = 'none';
+    }, 1200);
+  } catch (err){
+    console.error('Could not save profile prompt:', err);
+    errorEl.textContent = 'Something went wrong saving that — please try again.';
+  }
+};
+
+window.dismissProfilePrompt = async function(){
+  document.getElementById('profilePromptCard').style.display = 'none';
+  if (!currentUser) return;
+  try {
+    await setDoc(doc(db, 'progress', currentUser.uid), { profilePromptDismissed: true }, { merge: true });
+  } catch (err){
+    console.error('Could not save profile-prompt-dismissed flag:', err);
+  }
+};
 
 /* Auto-generated plain-language summary — no LLM involved, just finds
    the highest and lowest scoring domains from data already on hand. */
