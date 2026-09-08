@@ -239,6 +239,12 @@
 
     <!-- SCREEN 1: INTRO -->
     <div data-screen="intro" class="active">
+      <div id="resumeBar" style="display:none; background:#EEF3FA; border:1px solid var(--line); border-radius:10px; padding:12px 14px; margin-bottom:18px; font-size:13.5px; color:var(--ink);">
+        You have an assessment in progress.
+        <button type="button" onclick="resumeQuiz()" style="background:none; border:none; padding:0; margin-left:4px; color:var(--navy); font-weight:600; font-family:inherit; font-size:13.5px; cursor:pointer; text-decoration:underline;">Resume</button>
+        <span style="color:var(--gray);"> · </span>
+        <button type="button" onclick="discardSavedQuiz()" style="background:none; border:none; padding:0; color:var(--ink-soft); font-family:inherit; font-size:13.5px; cursor:pointer; text-decoration:underline;">Start over</button>
+      </div>
       <span class="eyebrow">Skill Check</span>
       <h1>How well-rounded is your product + AI practice?</h1>
       <p>Fourteen quick questions about the product skills you use every day, and how you're actually working with AI, both on your own and across your team. Answer honestly, and in a few minutes you'll have a real skill breakdown across seven areas, plus courses built around exactly where you are: scenarios to work through, quick checks, the occasional calculator. Not a reading list. Something to actually work through.</p>
@@ -722,7 +728,52 @@ function showScreen(name){
   document.querySelector('[data-screen="' + name + '"]').classList.add('active');
 }
 
+/* ================================================================
+   QUIZ RESUME
+   A refresh or an accidental back-navigation mid-assessment used to
+   wipe every answer. Progress is mirrored to sessionStorage (this
+   tab only, cleared on tab close) so it can be picked back up.
+   ================================================================ */
+const QUIZ_STORE_KEY = 'pa_quiz_progress';
+
+function saveQuizProgress(){
+  try {
+    sessionStorage.setItem(QUIZ_STORE_KEY, JSON.stringify({ answers: answers, current: current }));
+  } catch (e) { /* storage disabled — resume just won't be offered */ }
+}
+function loadQuizProgress(){
+  try {
+    const data = JSON.parse(sessionStorage.getItem(QUIZ_STORE_KEY) || 'null');
+    if (!data || !Array.isArray(data.answers) || data.answers.length !== QUESTIONS.length) return null;
+    if (typeof data.current !== 'number' || data.current < 0 || data.current >= QUESTIONS.length) return null;
+    if (data.current === 0 && !data.answers.some(a => a !== null)) return null; // nothing worth resuming
+    return data;
+  } catch (e) { return null; }
+}
+function clearQuizProgress(){
+  try { sessionStorage.removeItem(QUIZ_STORE_KEY); } catch (e) {}
+}
+
+window.resumeQuiz = function(){
+  const data = loadQuizProgress();
+  const bar = document.getElementById('resumeBar');
+  if (!data){ if (bar) bar.style.display = 'none'; return; }
+  answers = data.answers.slice();
+  current = data.current;
+  buildProgressRail();
+  renderQuestion();
+  showScreen('quiz');
+};
+window.discardSavedQuiz = function(){
+  clearQuizProgress();
+  const bar = document.getElementById('resumeBar');
+  if (bar) bar.style.display = 'none';
+};
+
 function startQuiz(){
+  clearQuizProgress();
+  const bar = document.getElementById('resumeBar');
+  if (bar) bar.style.display = 'none';
   current = 0;
   answers = new Array(QUESTIONS.length).fill(null);
   buildProgressRail();
@@ -803,6 +854,7 @@ function renderQuestion(){
 
 function selectOption(i){
   answers[current] = i;
+  saveQuizProgress();
   renderQuestion();
 }
 
@@ -826,6 +878,7 @@ function buildResultObj(scores){
 async function goNext(){
   if (answers[current] === null) return;
   if (current === QUESTIONS.length - 1){
+    clearQuizProgress(); // assessment finished — nothing left to resume
     lastScores = computeScores();
     window.__assessmentResultObj = buildResultObj(lastScores);
 
@@ -845,6 +898,7 @@ async function goNext(){
     showResults(lastScores, null);
   } else {
     current++;
+    saveQuizProgress();
     renderQuestion();
   }
 }
@@ -893,10 +947,14 @@ function logResult(lead, scores){
 function goBack(){
   if (current === 0) return;
   current--;
+  saveQuizProgress();
   renderQuestion();
 }
 
 function restart(){
+  clearQuizProgress();
+  const bar = document.getElementById('resumeBar');
+  if (bar) bar.style.display = 'none';
   showScreen('intro');
 }
 
@@ -1086,6 +1144,12 @@ function downloadBadge(){
     a.click();
   };
   img.src = url;
+}
+
+// On load, offer to pick up an assessment left in progress this tab.
+if (loadQuizProgress()){
+  const bar = document.getElementById('resumeBar');
+  if (bar) bar.style.display = 'block';
 }
 </script>
 <script>document.getElementById("footerYear").textContent = new Date().getFullYear();</script>
