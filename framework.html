@@ -148,6 +148,8 @@ Object.keys(window.FRAMEWORK_DATA).forEach(domainKey => {
 
   const card = document.createElement('div');
   card.className = 'card';
+  card.id = domainKey; // lets index.html link straight to a domain: framework.html#strategy
+  card.style.scrollMarginTop = '20px';
   card.innerHTML = `
     <div class="domain-header">
       <div class="domain-badge" style="background:${color}18;">
@@ -160,6 +162,14 @@ Object.keys(window.FRAMEWORK_DATA).forEach(domainKey => {
   `;
   container.appendChild(card);
 });
+
+// The domain cards are built here at runtime, so a #domain hash in the
+// URL (e.g. arriving from a growth-area link on the results screen)
+// won't have auto-scrolled. Do it once the cards exist.
+if (location.hash){
+  const target = document.getElementById(decodeURIComponent(location.hash.slice(1)));
+  if (target) requestAnimationFrame(() => target.scrollIntoView());
+}
 
 document.getElementById('footerYear').textContent = new Date().getFullYear();
 </script>
