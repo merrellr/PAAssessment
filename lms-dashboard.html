@@ -165,6 +165,27 @@
 
   [data-screen]{ display:none; }
   [data-screen].active{ display:block; }
+
+  /* --- Narrow screens: hero band + guided-tour popover --- */
+  @media (max-width: 560px){
+    #heroBand .hero-row{ gap: 12px 14px; }
+    /* The stat blocks and action links sit in a row on desktop with
+       left dividers; stack them full-width with a top divider instead. */
+    #heroBand .hero-stat,
+    #heroBand .hero-actions{
+      width: 100%;
+      border-left: none !important;
+      padding-left: 0 !important;
+      padding-right: 0 !important;
+      text-align: left !important;
+      border-top: 1px solid var(--line);
+      padding-top: 12px !important;
+    }
+    #heroBand .hero-actions{ flex-direction: row; gap: 18px; }
+    #heroBand #summaryRingSvg{ width: 44px; height: 44px; }
+
+    .tour-pop{ width: calc(100vw - 24px) !important; left: 12px !important; }
+  }
 </style>
 </head>
 <body>
@@ -343,7 +364,7 @@
     <div id="tileRow" style="display:none;">
 
       <div class="card" id="heroBand" style="margin-bottom:12px;">
-        <div style="display:flex; align-items:center; gap:20px; flex-wrap:wrap;">
+        <div class="hero-row" style="display:flex; align-items:center; gap:20px; flex-wrap:wrap;">
           <svg id="summaryRingSvg" width="58" height="58" viewBox="0 0 36 36" style="flex-shrink:0;">
             <circle cx="18" cy="18" r="15" fill="none" stroke="var(--line)" stroke-width="4"/>
             <circle id="summaryRingFill" cx="18" cy="18" r="15" fill="none" stroke-width="4" stroke-linecap="round" transform="rotate(-90 18 18)"/>
@@ -354,16 +375,16 @@
               <span id="summaryTimeSinceFirst"></span><span id="summaryTimeSince"></span><span id="summaryActiveTime"></span>
             </div>
           </div>
-          <div style="text-align:center; padding:0 16px; border-left:1px solid var(--line);">
+          <div class="hero-stat" style="text-align:center; padding:0 16px; border-left:1px solid var(--line);">
             <div><span style="font-family:'Space Grotesk', sans-serif; font-weight:700; font-size:20px; color:var(--navy);" id="statAssignedCompleted">0</span><span style="font-size:13px; color:var(--gray);"> of </span><span style="font-family:'Space Grotesk', sans-serif; font-weight:700; font-size:20px; color:var(--navy);" id="statAssignedTotal">0</span></div>
             <div style="font-size:10.5px; color:var(--gray);">completed in plan</div>
             <div style="font-size:10px; color:var(--gray); margin-top:2px;"><span id="statTotalCompletedAllTime">0</span> all-time</div>
           </div>
-          <div id="growthCard" style="display:none; text-align:center; padding:0 16px; border-left:1px solid var(--line);">
+          <div id="growthCard" class="hero-stat" style="display:none; text-align:center; padding:0 16px; border-left:1px solid var(--line);">
             <div id="growthDelta" style="font-family:'Space Grotesk', sans-serif; font-weight:700; font-size:20px;"></div>
             <div style="font-size:10.5px; color:var(--gray);">growth since <span id="growthFirstTier"></span></div>
           </div>
-          <div style="display:flex; flex-direction:column; gap:6px; white-space:nowrap;">
+          <div class="hero-actions" style="display:flex; flex-direction:column; gap:6px; white-space:nowrap;">
             <a onclick="toggleSummaryDetails()" style="font-size:12.5px; color:var(--navy); cursor:pointer; text-decoration:underline;" id="detailsToggleLink">Hide details</a>
             <a onclick="handleRetakeAssessment()" style="font-size:12.5px; color:var(--ink-soft); cursor:pointer; text-decoration:underline;">Retake</a>
           </div>
