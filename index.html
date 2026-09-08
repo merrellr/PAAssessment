@@ -337,7 +337,8 @@
           <div class="field-error" id="signupNameError"></div>
           <input class="text-input" type="email" id="signupEmail" placeholder="Work email" oninput="clearFieldError('signupEmail')">
           <div class="field-error" id="signupEmailError"></div>
-          <input class="text-input has-companion" type="password" id="signupPassword" placeholder="Choose a password">
+          <input class="text-input has-companion" type="password" id="signupPassword" placeholder="Choose a password (8+ characters)" oninput="updateSignupStrength()">
+          <div class="field-hint" id="signupPasswordStrength" style="display:none;"></div>
           <div class="field-error" id="signupPasswordError"></div>
           <input class="text-input has-companion" type="password" id="signupPasswordConfirm" placeholder="Confirm password">
           <div class="field-error" id="signupConfirmError"></div>
@@ -367,7 +368,7 @@
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
-import { getAuth, onAuthStateChanged, createUserWithEmailAndPassword, updateProfile } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
+import { getAuth, onAuthStateChanged, createUserWithEmailAndPassword, updateProfile, sendEmailVerification } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
 import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -464,6 +465,7 @@ window.handleCreateAccountFromResults = async function(){
   try {
     const cred = await createUserWithEmailAndPassword(auth, email, password);
     await updateProfile(cred.user, { displayName: name });
+    sendEmailVerification(cred.user).catch(() => {}); // same as the dashboard signup; not enforced yet
     await setDoc(doc(db, 'progress', cred.user.uid), {
       courses: {},
       agreedToTermsAt: new Date().toISOString()
@@ -969,6 +971,33 @@ function showResults(scores, lead){
 window.refreshBadgeName = function(){
   const nameEl = document.getElementById('signupName');
   if (nameEl && window.__resultsTier) drawBadge(window.__resultsTier, nameEl.value.trim());
+};
+
+/* Plain-language password strength: length gate first, then a point per
+   character class. Same wording used on the dashboard signup. */
+function passwordStrength(pw){
+  if (!pw) return { label: '', ok: false };
+  if (pw.length < 8) return { label: 'Too short: use at least 8 characters', ok: false };
+  let score = 0;
+  if (/[a-z]/.test(pw)) score++;
+  if (/[A-Z]/.test(pw)) score++;
+  if (/[0-9]/.test(pw)) score++;
+  if (/[^A-Za-z0-9]/.test(pw)) score++;
+  if (pw.length >= 12) score++;
+  if (score <= 2) return { label: 'Weak: add capitals, numbers, or symbols', ok: true };
+  if (score === 3) return { label: 'OK', ok: true };
+  return { label: 'Strong', ok: true };
+}
+
+window.updateSignupStrength = function(){
+  const pw = document.getElementById('signupPassword').value;
+  const hint = document.getElementById('signupPasswordStrength');
+  clearFieldError('signupPassword');
+  if (!pw){ hint.style.display = 'none'; return; }
+  const s = passwordStrength(pw);
+  hint.textContent = s.label;
+  hint.style.color = s.ok ? (s.label === 'Strong' ? '#2E8B57' : 'var(--gray)') : '#C0622A';
+  hint.style.display = 'block';
 };
 
 function renderBars(catPct){

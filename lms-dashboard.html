@@ -234,18 +234,25 @@
 
       <p id="authSub">Log in to pick up your courses where you left off.</p>
 
-      <div class="input-icon-wrap">
+      <div class="input-icon-wrap" id="nameWrap" style="display:none;">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9AA3AD" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>
+        <input class="text-input" type="text" id="authName" placeholder="Full name">
+      </div>
+
+      <div class="input-icon-wrap">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9AA3AD" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg>
         <input class="text-input" type="email" id="authEmail" placeholder="Email address">
       </div>
 
       <div class="input-icon-wrap">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9AA3AD" stroke-width="2"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
-        <input class="text-input" type="password" id="authPassword" placeholder="Password">
+        <input class="text-input" type="password" id="authPassword" placeholder="Password" oninput="updateAuthStrength()">
         <button type="button" class="password-toggle" id="passwordToggleBtn" onclick="togglePasswordVisibility()" aria-label="Show password">
           <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#9AA3AD" stroke-width="2"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/></svg>
         </button>
       </div>
+
+      <div id="authPasswordStrength" style="display:none; font-size:12px; color:var(--gray); margin:-4px 0 10px 2px;"></div>
 
       <div class="input-icon-wrap" id="confirmPasswordWrap" style="display:none;">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9AA3AD" stroke-width="2"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
@@ -602,7 +609,7 @@ import {
   getAuth, onAuthStateChanged, signOut,
   createUserWithEmailAndPassword, signInWithEmailAndPassword,
   GoogleAuthProvider, signInWithPopup, getAdditionalUserInfo,
-  sendPasswordResetEmail, sendEmailVerification,
+  sendPasswordResetEmail, sendEmailVerification, updateProfile,
   updatePassword, reauthenticateWithCredential, EmailAuthProvider
 } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
 import { getFirestore, doc, getDoc, setDoc, increment } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
@@ -623,14 +630,45 @@ window.setAuthMode = function(signUp){
   isSignUpMode = signUp;
   document.getElementById('tabLogin').classList.toggle('active', !isSignUpMode);
   document.getElementById('tabSignup').classList.toggle('active', isSignUpMode);
-  document.getElementById('authSub').textContent = isSignUpMode ? 'Create an account to save your results and start your courses.' : 'Log in to pick up your courses where you left off.';
+  document.getElementById('authSub').textContent = isSignUpMode ? "Create an account, then take a short assessment to unlock the courses matched to your level." : 'Log in to pick up your courses where you left off.';
   document.getElementById('authSubmitBtn').textContent = isSignUpMode ? 'Create account' : 'Log in';
   document.getElementById('authError').textContent = '';
   document.getElementById('authSuccess').textContent = '';
   document.getElementById('forgotRow').style.display = isSignUpMode ? 'none' : 'block';
+  document.getElementById('nameWrap').style.display = isSignUpMode ? 'block' : 'none';
   document.getElementById('confirmPasswordWrap').style.display = isSignUpMode ? 'block' : 'none';
   document.getElementById('termsCheckRow').style.display = isSignUpMode ? 'flex' : 'none';
   document.getElementById('googleTermsNote').style.display = isSignUpMode ? 'block' : 'none';
+  const strength = document.getElementById('authPasswordStrength');
+  strength.style.display = 'none';
+  strength.textContent = '';
+};
+
+/* Plain-language password strength: length gate first, then a point per
+   character class. Same wording as the assessment signup. */
+function passwordStrength(pw){
+  if (!pw) return { label: '', ok: false };
+  if (pw.length < 8) return { label: 'Too short: use at least 8 characters', ok: false };
+  let score = 0;
+  if (/[a-z]/.test(pw)) score++;
+  if (/[A-Z]/.test(pw)) score++;
+  if (/[0-9]/.test(pw)) score++;
+  if (/[^A-Za-z0-9]/.test(pw)) score++;
+  if (pw.length >= 12) score++;
+  if (score <= 2) return { label: 'Weak: add capitals, numbers, or symbols', ok: true };
+  if (score === 3) return { label: 'OK', ok: true };
+  return { label: 'Strong', ok: true };
+}
+
+window.updateAuthStrength = function(){
+  const hint = document.getElementById('authPasswordStrength');
+  if (!isSignUpMode){ hint.style.display = 'none'; return; }
+  const pw = document.getElementById('authPassword').value;
+  if (!pw){ hint.style.display = 'none'; return; }
+  const s = passwordStrength(pw);
+  hint.textContent = s.label;
+  hint.style.color = s.ok ? (s.label === 'Strong' ? '#2E8B57' : 'var(--gray)') : '#C0622A';
+  hint.style.display = 'block';
 };
 
 window.togglePasswordVisibility = function(){
@@ -677,7 +715,17 @@ window.handleAuthSubmit = async function(){
     return;
   }
 
+  let name = '';
   if (isSignUpMode){
+    name = document.getElementById('authName').value.trim();
+    if (!name){
+      errorEl.textContent = 'Enter your name so we can label your results.';
+      return;
+    }
+    if (password.length < 8){
+      errorEl.textContent = 'Password should be at least 8 characters.';
+      return;
+    }
     const confirmPassword = document.getElementById('authPasswordConfirm').value;
     if (!confirmPassword){
       errorEl.textContent = 'Confirm your password in the second field.';
@@ -696,8 +744,12 @@ window.handleAuthSubmit = async function(){
   try {
     if (isSignUpMode){
       const cred = await createUserWithEmailAndPassword(auth, email, password);
-      await sendEmailVerification(cred.user);
-      await setDoc(doc(db, 'progress', cred.user.uid), { agreedToTermsAt: new Date().toISOString() }, { merge: true });
+      await updateProfile(cred.user, { displayName: name });
+      sendEmailVerification(cred.user).catch(() => {});
+      await setDoc(doc(db, 'progress', cred.user.uid), {
+        courses: {},
+        agreedToTermsAt: new Date().toISOString()
+      }, { merge: true });
     } else {
       await signInWithEmailAndPassword(auth, email, password);
     }
