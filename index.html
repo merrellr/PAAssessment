@@ -5,6 +5,16 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Product Management + AI Skill Assessment</title>
+<link rel="canonical" href="https://assessment.productadvisory.co/">
+<meta name="description" content="A 14-question check on your product management skills and how you're working with AI, on your own and across your team. Get a skill breakdown across seven areas plus courses matched to your level.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://assessment.productadvisory.co/">
+<meta property="og:site_name" content="Product Advisory Learning">
+<meta property="og:title" content="How well-rounded is your product + AI practice?">
+<meta property="og:description" content="A 14-question skill check across product management and AI fluency. Get a breakdown across seven areas, plus courses matched to your level in each one.">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="How well-rounded is your product + AI practice?">
+<meta name="twitter:description" content="A 14-question skill check across product management and AI fluency, with courses matched to your level.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
@@ -309,8 +319,9 @@
 
       <div class="badge-section">
         <svg id="badgeSvg" width="180" height="165" viewBox="0 0 180 165"></svg>
-        <div style="margin-top:10px;">
+        <div style="margin-top:10px; display:flex; gap:10px; justify-content:center; flex-wrap:wrap;">
           <button class="btn btn-primary" onclick="downloadBadge()">Download your badge</button>
+          <button class="btn btn-ghost" style="border:1.5px solid var(--line); text-decoration:none;" onclick="shareResultOnLinkedIn()">Share on LinkedIn</button>
         </div>
       </div>
 
@@ -1091,6 +1102,20 @@ function drawBadge(tier, name){
     <text x="90" y="128" text-anchor="middle" font-family="Space Grotesk" font-weight="600" font-size="13" fill="#1A4584">${tier.name}</text>
     <text x="90" y="148" text-anchor="middle" font-family="IBM Plex Sans" font-size="11" fill="#9AA3AD">Product Advisory · ${dateStr}</text>
   `;
+}
+
+/* Opens LinkedIn's post composer with the assessment link and a short
+   line pre-filled. LinkedIn unfurls the link into a card from the OG
+   tags in this page's <head>. The person still writes/edits and posts
+   it themselves — nothing is posted on their behalf. */
+function shareResultOnLinkedIn(){
+  const shareUrl = 'https://assessment.productadvisory.co/';
+  const tier = (window.__resultsTier && window.__resultsTier.name) || '';
+  const line = tier
+    ? 'I just checked how well-rounded my product + AI practice is and landed at "' + tier + '". Takes about five minutes if you want your own breakdown:'
+    : 'I just took this product + AI skills assessment. Takes about five minutes for a breakdown across seven areas:';
+  const url = 'https://www.linkedin.com/feed/?shareActive=true&text=' + encodeURIComponent(line + ' ' + shareUrl);
+  window.open(url, '_blank', 'noopener,noreferrer,width=600,height=680');
 }
 
 function downloadBadge(){
