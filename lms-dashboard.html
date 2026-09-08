@@ -212,6 +212,7 @@
 
         <a class="profile-dropdown-item" href="profile.html">My Profile</a>
         <a class="profile-dropdown-item" id="changePasswordMenuItem" onclick="openChangePassword()">Change password</a>
+        <a class="profile-dropdown-item" onclick="replayDashboardTour()">Replay the tour</a>
         <a class="profile-dropdown-item" href="https://www.productadvisory.co/" target="_blank" rel="noopener">Visit Product Advisory ↗</a>
         <a class="profile-dropdown-item" onclick="handleSignOut()">Log out</a>
       </div>
@@ -962,7 +963,11 @@ const DASHBOARD_TOUR_STEPS = [
   { sel: '#articlesCard', title: 'Notes and articles', body: 'A companion article for every course sits here at the bottom. Notes you write during lessons collect just above them.' }
 ];
 
+let dashboardTourCleanup = null;
+
 function startDashboardTour(){
+  if (dashboardTourCleanup) dashboardTourCleanup(); // never stack two tours
+
   const steps = DASHBOARD_TOUR_STEPS
     .map(s => Object.assign({}, s, { el: document.querySelector(s.sel) }))
     .filter(s => s.el && s.el.offsetParent !== null);
@@ -976,11 +981,16 @@ function startDashboardTour(){
   document.body.appendChild(highlight);
   document.body.appendChild(pop);
 
+  function onKey(e){ if (e.key === 'Escape') cleanup(); }
+
   function cleanup(){
     highlight.remove();
     pop.remove();
     window.removeEventListener('resize', place);
+    document.removeEventListener('keydown', onKey);
+    dashboardTourCleanup = null;
   }
+  dashboardTourCleanup = cleanup;
 
   function place(){
     const step = steps[i];
@@ -1019,8 +1029,16 @@ function startDashboardTour(){
   }
 
   window.addEventListener('resize', place);
+  document.addEventListener('keydown', onKey);
   goto();
 }
+
+/* Replayable from the profile menu. Closes the menu first so the
+   popover isn't hidden behind it. */
+window.replayDashboardTour = function(){
+  document.getElementById('profileDropdown').style.display = 'none';
+  startDashboardTour();
+};
 
 const TIER_ORDER = ['novice', 'moderate', 'experienced', 'advanced'];
 
