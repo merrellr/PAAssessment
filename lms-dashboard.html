@@ -368,6 +368,10 @@
             <a onclick="handleRetakeAssessment()" style="font-size:12.5px; color:var(--ink-soft); cursor:pointer; text-decoration:underline;">Retake</a>
           </div>
         </div>
+        <div id="staleAssessmentNudge" style="display:none; margin-top:12px; padding-top:12px; border-top:1px solid var(--line); font-size:12px; color:var(--ink-soft);">
+          <span id="staleAssessmentText"></span>
+          <a onclick="handleRetakeAssessment()" style="color:var(--navy); cursor:pointer; text-decoration:underline; white-space:nowrap;">Retake it &rarr;</a>
+        </div>
         <div id="summaryDetailsPanel" style="display:none; margin-top:16px; padding-top:16px; border-top:1px solid var(--line);">
           <div id="detailsFlex" style="display:flex; flex-direction:column; gap:16px; align-items:center;">
             <svg id="radarChartSvg" width="240" height="240" viewBox="0 0 300 300" style="display:block; flex-shrink:0;"></svg>
@@ -1218,6 +1222,21 @@ function renderAssignedStat(progress, assessmentResult){
   }
 
   document.getElementById('summaryActiveTime').textContent = 'Active time in courses: ' + formatDuration(progress.totalActiveMs || 0);
+
+  // Quiet nudge once the result is a few months old — a stale placement
+  // drifts as someone's role and AI habits change.
+  const lastAssessed = assessmentResult.submittedAt || assessmentResult.firstSubmittedAt;
+  const staleDays = lastAssessed ? Math.floor((Date.now() - new Date(lastAssessed).getTime()) / 86400000) : 0;
+  const staleNudge = document.getElementById('staleAssessmentNudge');
+  if (staleDays >= 120){
+    const months = Math.round(staleDays / 30);
+    const when = months >= 12 ? 'over a year ago' : ('about ' + months + ' months ago');
+    document.getElementById('staleAssessmentText').textContent =
+      'Your last assessment was ' + when + '. If your role or your AI habits have shifted since, a retake will re-tune your plan. ';
+    staleNudge.style.display = 'block';
+  } else {
+    staleNudge.style.display = 'none';
+  }
 
   document.getElementById('domainBarsContainer').innerHTML = buildDomainBarsHtml(assessmentResult);
   drawRadarChart(assessmentResult);
