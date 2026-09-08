@@ -315,6 +315,11 @@
         <h3>Your growth areas</h3>
         <div class="section-sub">Your two lowest-scoring areas. Start here, at the level the assessment placed you</div>
         <div id="growthWrap"></div>
+        <div id="firstCourseCta" style="margin-top:14px; border:1.5px solid var(--navy); border-radius:12px; padding:16px; background:#EEF3FA;">
+          <span class="growth-tag" style="color:var(--navy);">Start here</span>
+          <p id="firstCourseCtaText" style="margin:6px 0 12px;"></p>
+          <button class="btn btn-primary" id="firstCourseCtaBtn" onclick="firstCourseCtaAction()">Create your account to start →</button>
+        </div>
       </div>
 
       <div class="badge-section">
@@ -1050,6 +1055,32 @@ function renderGrowthAreas(catPct){
     `;
     wrap.appendChild(card);
   });
+
+  // Point at the single course the plan opens with: the lowest-scoring
+  // domain, at the tier the assessment placed you in there. Same course
+  // the dashboard recommends first for a brand-new account.
+  const first = sorted[0];
+  const ctaText = document.getElementById('firstCourseCtaText');
+  if (first && ctaText){
+    const firstTier = getTier(catPct[first]).name;
+    ctaText.innerHTML = `Your lowest area is <strong>${CATEGORIES[first].label}</strong>. Your plan opens with the <strong>${firstTier}</strong> course there: a scenario to work through with a quick check at the end, not a reading list.`;
+    document.getElementById('firstCourseCtaBtn').textContent =
+      window.isLoggedIn ? 'Go to your dashboard →' : 'Create your account to start →';
+  }
+}
+
+/* Results-screen "Start here" button. Logged out: jump to the signup
+   box further down the page and focus it. Logged in: straight to the
+   dashboard, where this course is already the top recommendation. */
+function firstCourseCtaAction(){
+  if (window.isLoggedIn){
+    window.location.href = 'lms-dashboard.html?justAssessed=1';
+    return;
+  }
+  const box = document.getElementById('dashboardAccessSection');
+  if (box) box.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  const name = document.getElementById('signupName');
+  if (name) setTimeout(() => name.focus(), 400);
 }
 
 /* Signature element: semicircular "journey gauge" for the overall score */
