@@ -47,6 +47,9 @@
   .tier-cell-label{ font-family:'Space Grotesk', sans-serif; font-weight:700; font-size:12.5px; }
   .tier-cell p{ font-size:13px; margin:0; line-height:1.55; }
 
+  .overview-scroll{ overflow-x:auto; }
+  #frameworkOverviewSvg{ display:block; min-width:380px; width:100%; height:auto; }
+
   .cta-row{ text-align:center; margin-top:28px; }
   .btn{ display:inline-block; background:linear-gradient(135deg, var(--navy) 0%, var(--navy-deep) 100%); color:#fff; padding:12px 26px; border-radius:24px; text-decoration:none; font-weight:600; font-size:14.5px; }
 </style>
@@ -76,6 +79,17 @@
     <p>Within each domain, there are four levels: <strong>Limited Experience</strong>, <strong>Moderate Experience</strong>, <strong>Lots of Experience</strong>, and <strong>Advanced Experience</strong>. These aren't just labels, each one describes a genuinely different way of operating in that domain, not just "knows more facts."</p>
     <p class="legend-intro"><strong>Reading the levels:</strong> each level carries a four-dot meter that fills as experience grows.</p>
     <div class="tier-legend" id="tierLegend" aria-hidden="true"></div>
+  </div>
+
+  <div class="card">
+    <span class="eyebrow">At a glance</span>
+    <h2 style="font-size:19px; margin-bottom:6px;">The seven skill domains</h2>
+    <p style="margin-bottom:16px;">Everything below is organized under these seven areas. Each one carries the four experience levels described above, in full detail in the cards below.</p>
+    <div class="overview-scroll">
+      <figure style="margin:0;">
+        <svg id="frameworkOverviewSvg" role="img" aria-label="The seven Product Advisory skill domains, each shown as a colored icon with its name."></svg>
+      </figure>
+    </div>
   </div>
 
   <div id="domainsContainer"></div>
@@ -162,6 +176,64 @@ Object.keys(window.FRAMEWORK_DATA).forEach(domainKey => {
   `;
   container.appendChild(card);
 });
+
+/* "At a glance" overview: seven tiles, icon + name only, three per row
+   (the last row's single tile centered). Built from the same
+   FRAMEWORK_DATA + DOMAIN_COLORS + icon set as the detail cards below,
+   so the two can never drift out of sync. What the framework covers,
+   not how deep it goes — the four levels are explained in the intro
+   above and in depth on each card below, not repeated here. */
+function renderFrameworkOverview(){
+  const svg = document.getElementById('frameworkOverviewSvg');
+  if (!svg) return;
+
+  const domainKeys = Object.keys(window.FRAMEWORK_DATA);
+  const COLS = 3, TILE_W = 196, TILE_H = 116, COL_GAP = 18, ROW_GAP = 18, PAD = 16;
+  const rows = Math.ceil(domainKeys.length / COLS);
+  const gridW = COLS * TILE_W + (COLS - 1) * COL_GAP;
+  const svgW = gridW + PAD * 2;
+  const svgH = rows * TILE_H + (rows - 1) * ROW_GAP + PAD * 2;
+  svg.setAttribute('viewBox', `0 0 ${svgW} ${svgH}`);
+
+  // Two-line, shortened labels — the full domain name is already on the
+  // matching detail card just below.
+  const TILE_LABEL = {
+    discovery: ['Customer &amp; Market', 'Discovery'],
+    strategy: ['Product Strategy', '&amp; Roadmapping'],
+    prioritization: ['Prioritization', '&amp; Trade-offs'],
+    execution: ['Execution', '&amp; Delivery'],
+    stakeholder: ['Stakeholder', 'Communication'],
+    aiIndividual: ['AI Fluency', 'Individual'],
+    aiOrg: ['AI Fluency', 'Organizational']
+  };
+
+  let s = '';
+  domainKeys.forEach((key, i) => {
+    const color = DOMAIN_COLORS[key];
+    const label = TILE_LABEL[key];
+    const row = Math.floor(i / COLS);
+    const itemsInRow = Math.min(COLS, domainKeys.length - row * COLS);
+    const rowW = itemsInRow * TILE_W + (itemsInRow - 1) * COL_GAP;
+    const rowX0 = PAD + (gridW - rowW) / 2; // centers a short last row
+    const col = i % COLS;
+
+    const tileX = rowX0 + col * (TILE_W + COL_GAP);
+    const tileY = PAD + row * (TILE_H + ROW_GAP);
+    const cx = tileX + TILE_W / 2;
+    const iconCy = tileY + 36;
+
+    // Bold, solid icon badge — full color and a white glyph, since the
+    // domain is what's meant to read first here.
+    s += `<circle cx="${cx}" cy="${iconCy}" r="25" fill="${color}"/>`;
+    s += `<svg x="${cx - 14}" y="${iconCy - 14}" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" color="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${DOMAIN_ICON_PATHS[key]}</svg>`;
+
+    s += `<text x="${cx}" y="${iconCy + 41}" text-anchor="middle" font-family="'Space Grotesk', sans-serif" font-weight="700" font-size="13" fill="var(--ink)">${label[0]}</text>`;
+    s += `<text x="${cx}" y="${iconCy + 57}" text-anchor="middle" font-family="'Space Grotesk', sans-serif" font-weight="700" font-size="13" fill="var(--ink)">${label[1]}</text>`;
+  });
+
+  svg.innerHTML = s;
+}
+renderFrameworkOverview();
 
 // The domain cards are built here at runtime, so a #domain hash in the
 // URL (e.g. arriving from a growth-area link on the results screen)
