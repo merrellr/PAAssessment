@@ -301,6 +301,22 @@
       </div>
     </div>
 
+    <!-- SCREEN: AI ADOPTION SCENARIO (a 15th step, shown only when the two
+         AI Fluency — Organizational questions already scored moderate or
+         higher — see the gate in goNext()). Free text, graded server-side. -->
+    <div data-screen="scenario">
+      <span class="q-category">AI Fluency — Organizational</span>
+      <div class="q-text" style="margin-bottom:16px;">One more thing: a real scenario</div>
+      <p style="margin-bottom:14px;">You're a product manager at a mid-size company. Leadership has asked teams to bring forward AI opportunities, but six months ago a different team's AI pilot (an automated customer-support triage tool) was quietly shut down after costing more than expected and never showing clear results. Your VP of Engineering, who has to allocate a team to build anything you propose, was burned by that project and is now wary of "AI" pitches in general.</p>
+      <p style="margin-bottom:14px;">You believe there's a real opportunity to use AI to reduce manual work in customer onboarding, and you have two engineers' worth of time available for one quarter, no more.</p>
+      <p style="margin-bottom:16px;"><strong>In a few sentences, write what you'd actually say to this VP to get a pilot approved.</strong> Be specific about how you'd address their skepticism and what you'd propose doing with that limited time.</p>
+      <textarea id="scenarioTextarea" rows="6" placeholder="What would you actually say to get this approved?" style="width:100%; padding:12px 14px; border:1.5px solid var(--line); border-radius:9px; font-family:'IBM Plex Sans', sans-serif; font-size:14.5px; color:var(--ink); resize:vertical;" oninput="updateScenarioButton()"></textarea>
+      <div class="field-error" id="scenarioError"></div>
+      <div class="nav-row" style="justify-content:flex-end;">
+        <button class="btn btn-primary" id="scenarioSubmitBtn" onclick="submitScenario()" disabled>See my results →</button>
+      </div>
+    </div>
+
     <!-- SCREEN 3: RESULTS (shown straight after the last question — no form wall) -->
     <div data-screen="results">
       <span class="eyebrow">Your result</span>
@@ -315,6 +331,15 @@
         <h3>Skill breakdown</h3>
         <div class="section-sub">How you scored across each area</div>
         <div id="barsWrap"></div>
+      </div>
+
+      <div class="section-block" id="scenarioFeedbackSection" style="display:none;">
+        <h3>Applying it in practice</h3>
+        <div class="section-sub">Your answer to the AI adoption scenario is folded into your AI Fluency — Organizational score above</div>
+        <button type="button" class="btn btn-ghost" id="scenarioFeedbackToggle" onclick="toggleScenarioFeedback()" style="padding:0; text-decoration:underline;">Why this score? →</button>
+        <div id="scenarioFeedbackBody" style="display:none; margin-top:10px;">
+          <p id="scenarioFeedbackText" style="margin:0;"></p>
+        </div>
       </div>
 
       <div class="section-block">
@@ -798,6 +823,9 @@ function startQuiz(){
   if (bar) bar.style.display = 'none';
   current = 0;
   answers = new Array(QUESTIONS.length).fill(null);
+  scenarioGradingPromise = null; // discard any stale grade from a previous attempt this page load
+  scenarioGradeResult = null;
+  quizAttemptId++;
   buildProgressRail();
   renderQuestion();
   showScreen('quiz');
@@ -897,33 +925,160 @@ function buildResultObj(scores){
   };
 }
 
+// Set once the scenario question is submitted; resolves to the grading
+// API's response (or null on outright failure). Read by
+// applyScenarioGradeWhenReady() after results are already on screen —
+// grading never blocks getting there.
+let scenarioGradingPromise = null;
+let scenarioGradeResult = null;
+
+// Bumped on every fresh "Start assessment" click. A grading call from a
+// retaken-before-it-resolved attempt checks this before touching
+// anything, so it can never clobber a newer attempt's saved result.
+let quizAttemptId = 0;
+
 async function goNext(){
   if (answers[current] === null) return;
   if (current === QUESTIONS.length - 1){
-    clearQuizProgress(); // assessment finished — nothing left to resume
-    lastScores = computeScores();
-    window.__assessmentResultObj = buildResultObj(lastScores);
+    const mcScores = computeScores();
 
-    // Logged in already? Their results and courses live on the dashboard.
-    // Mirror the fresh result to Firestore, log the row, and hand off —
-    // no signup box needed.
-    const acctLead = window.getAccountLead && window.getAccountLead();
-    if (acctLead && acctLead.email){
-      if (window.saveAssessmentResult) await window.saveAssessmentResult(window.__assessmentResultObj);
-      logResult(acctLead, lastScores);
-      showResults(lastScores, acctLead);
+    // Gate: only respondents already showing some org AI-adoption
+    // engagement (moderate or better on the two multiple-choice
+    // questions) get the scenario — asking it of someone who just said
+    // their org has no AI strategy at all would be a non sequitur.
+    if (mcScores.catPct.aiOrg > 25){
+      lastScores = mcScores;
+      showScenarioScreen();
       return;
     }
 
-    // Logged out: no form wall. Straight to the full breakdown. The
-    // signup box on that screen is the only ask, and it stays optional.
-    showResults(lastScores, null);
+    clearQuizProgress(); // assessment finished — nothing left to resume
+    await finishAssessment(mcScores);
   } else {
     current++;
     saveQuizProgress();
     renderQuestion();
   }
 }
+
+function showScenarioScreen(){
+  document.getElementById('scenarioTextarea').value = '';
+  document.getElementById('scenarioError').textContent = '';
+  document.getElementById('scenarioSubmitBtn').disabled = true;
+  showScreen('scenario');
+}
+
+function updateScenarioButton(){
+  const words = document.getElementById('scenarioTextarea').value.trim().split(/\s+/).filter(Boolean);
+  document.getElementById('scenarioSubmitBtn').disabled = words.length < 12;
+}
+
+const SCENARIO_GRADE_URL = "https://us-central1-product-advisory-lms.cloudfunctions.net/gradeApplicationScenario";
+
+function gradeScenario(answer){
+  return fetch(SCENARIO_GRADE_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ answer: answer })
+  }).then(r => r.json()).catch(() => null);
+}
+
+async function submitScenario(){
+  const answer = document.getElementById('scenarioTextarea').value.trim();
+  const words = answer.split(/\s+/).filter(Boolean);
+  if (words.length < 12){
+    document.getElementById('scenarioError').textContent = 'A few more sentences would help us grade this fairly.';
+    return;
+  }
+
+  // Fire the grading request now, with the longest possible head start —
+  // it almost always resolves before anyone finishes typing a password
+  // on the signup box a few seconds from now.
+  scenarioGradingPromise = gradeScenario(answer);
+  clearQuizProgress();
+  await finishAssessment(lastScores);
+}
+
+/* Shared by both the gated (scenario) and ungated paths: builds the
+   saved result, hands off to Firestore/the Sheet if logged in, and shows
+   results immediately. If a scenario grading call is in flight, it's
+   folded in afterward without blocking any of this. */
+async function finishAssessment(scores){
+  lastScores = scores;
+  window.__assessmentResultObj = buildResultObj(scores);
+
+  const acctLead = window.getAccountLead && window.getAccountLead();
+  if (acctLead && acctLead.email){
+    if (window.saveAssessmentResult) await window.saveAssessmentResult(window.__assessmentResultObj);
+    logResult(acctLead, scores);
+    showResults(scores, acctLead);
+  } else {
+    // Logged out: no form wall. Straight to the full breakdown. The
+    // signup box on that screen is the only ask, and it stays optional.
+    showResults(scores, null);
+  }
+
+  if (scenarioGradingPromise) applyScenarioGradeWhenReady(quizAttemptId);
+}
+
+/* Runs in the background after results are already visible. Folds the
+   scenario's tier into aiOrg, re-renders whatever's currently on the
+   results screen with the updated numbers, and re-saves to Firestore if
+   an account already exists (or exists by the time this resolves).
+   `attemptId` is captured at submit time — if the person has since
+   retaken the assessment (bumping quizAttemptId) before this resolves,
+   bail out rather than clobber a newer attempt's saved result. */
+async function applyScenarioGradeWhenReady(attemptId){
+  const grading = await scenarioGradingPromise;
+  scenarioGradingPromise = null;
+  if (attemptId !== quizAttemptId) return; // superseded by a retake
+  if (!grading || !grading.tier || grading.skipped_grading) return; // leave the MC-only score as final
+
+  scenarioGradeResult = grading;
+  const patched = patchScoresWithScenarioTier(lastScores, grading.tier);
+  lastScores = patched;
+  window.__assessmentResultObj = buildResultObj(patched);
+
+  // Logged-in visitors never see this breakdown at all — showResults()
+  // replaces the whole screen with a "Saving your results…" redirect
+  // notice, so every element below is gone from the DOM. Only touch it
+  // for the logged-out results view.
+  const resultsVisible = !window.isLoggedIn
+    && document.querySelector('[data-screen="results"]').classList.contains('active')
+    && document.getElementById('tierLabel');
+  if (resultsVisible){
+    const tier = getTier(patched.overallPct);
+    window.__resultsTier = tier;
+    document.getElementById('tierLabel').textContent = tier.name;
+    document.getElementById('scoreSub').textContent = 'Overall score: ' + patched.overallTotal + ' / ' + patched.overallMax;
+    document.getElementById('tierDesc').textContent = tier.desc;
+    drawGauge(patched.overallPct);
+    drawBadge(tier, (document.getElementById('signupName') || {}).value || '');
+    renderBars(patched.catPct);
+    renderGrowthAreas(patched.catPct);
+    renderScenarioFeedback(grading);
+  }
+
+  if (window.isLoggedIn && window.saveAssessmentResult){
+    window.saveAssessmentResult(window.__assessmentResultObj);
+  }
+}
+
+function renderScenarioFeedback(grading){
+  const section = document.getElementById('scenarioFeedbackSection');
+  document.getElementById('scenarioFeedbackText').textContent = grading.user_facing_feedback || '';
+  document.getElementById('scenarioFeedbackBody').style.display = 'none';
+  document.getElementById('scenarioFeedbackToggle').textContent = 'Why this score? →';
+  section.style.display = 'block';
+}
+
+window.toggleScenarioFeedback = function(){
+  const body = document.getElementById('scenarioFeedbackBody');
+  const btn = document.getElementById('scenarioFeedbackToggle');
+  const showing = body.style.display !== 'none';
+  body.style.display = showing ? 'none' : 'block';
+  btn.textContent = showing ? 'Why this score? →' : 'Hide ↑';
+};
 
 /* Called from the results-screen signup (module script) once we have a
    name + email. Writes the full row — scores plus every per-question
@@ -1002,7 +1157,37 @@ function computeScores(){
   return {
     overallPct: (overallTotal / overallMax) * 100,
     overallTotal, overallMax,
-    catPct
+    catPct, catTotals, catMax
+  };
+}
+
+/* Folds the AI adoption scenario's graded tier into the aiOrg domain as
+   a 3rd "question" worth up to 3 points, on the same 0-3 scale every
+   multiple-choice option already uses. Everything downstream (bars,
+   radar, growth areas, overall tier) is re-derived from the patched
+   totals, so nothing needs special-casing for the scenario's existence. */
+function patchScoresWithScenarioTier(scores, tier){
+  const TIER_POINTS = { no_experience: 0, moderate: 1, lots: 2, advanced: 3 };
+  const bonus = TIER_POINTS[tier];
+  if (bonus === undefined) return scores; // unrecognized tier — leave the MC-only score as final
+
+  const catTotals = Object.assign({}, scores.catTotals);
+  const catMax = Object.assign({}, scores.catMax);
+  catTotals.aiOrg += bonus;
+  catMax.aiOrg += 3;
+
+  const catPct = {};
+  Object.keys(CATEGORIES).forEach(k => {
+    catPct[k] = catMax[k] > 0 ? (catTotals[k] / catMax[k]) * 100 : 0;
+  });
+
+  const overallTotal = scores.overallTotal + bonus;
+  const overallMax = scores.overallMax + 3;
+
+  return {
+    overallPct: (overallTotal / overallMax) * 100,
+    overallTotal, overallMax,
+    catPct, catTotals, catMax
   };
 }
 
@@ -1038,6 +1223,13 @@ function showResults(scores, lead){
   renderBars(catPct);
   renderGrowthAreas(catPct);
   if (window.renderDashboardAccessSection) window.renderDashboardAccessSection();
+
+  // Reset to a clean slate on every fresh render — a retake within the
+  // same page load shouldn't leave a previous attempt's scenario
+  // feedback showing before (or instead of) this attempt's own.
+  document.getElementById('scenarioFeedbackSection').style.display = 'none';
+  document.getElementById('scenarioFeedbackBody').style.display = 'none';
+  document.getElementById('scenarioFeedbackToggle').textContent = 'Why this score? →';
 
   showScreen('results');
   funnelEvent('resultsViewed', { tier: tier.name });

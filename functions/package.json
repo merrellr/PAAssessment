@@ -1,0 +1,18 @@
+{
+  "name": "paassessment-functions",
+  "description": "Cloud Functions for assessment.productadvisory.co (LLM-graded scenario question)",
+  "private": true,
+  "engines": {
+    "node": "20"
+  },
+  "main": "index.js",
+  "scripts": {
+    "logs": "firebase functions:log",
+    "deploy": "firebase deploy --only functions"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "firebase-admin": "^12.0.0",
+    "firebase-functions": "^5.0.0"
+  }
+}
