@@ -1,11 +1,22 @@
 # PAAssessment
 This is a Product Advisory Repository Assessment
 
-## Cloud Functions (scenario grading)
+## Scenario grading (the "VP buy-in" free-text question)
 
-`functions/` holds `gradeApplicationScenario`, which grades the free-text
-"VP buy-in" scenario question via Groq's free tier. One-time setup on a
-machine with Node 20+ and the Firebase CLI:
+**Currently live:** `apps-script/grade-scenario.gs` — grades it via the
+same Apps Script backend that already handles results logging
+(`RESULTS_LOG_URL` in index.html), so trying this out needs no new
+accounts, no billing plan, and no local Node install. See the setup
+notes at the top of that file (a Script Property for `GROQ_API_KEY`,
+then redeploy the web app). `index.html`'s `gradeScenario()` calls it via
+the same JSONP pattern already used for `action=lookup`.
+
+**Not currently wired up — a later upgrade path, not dead code:**
+`functions/gradeApplicationScenario` (Cloud Functions v2) does the same
+grading with a cleaner architecture (real secrets, a queryable Firestore
+audit log instead of a sheet tab). If the Apps Script version proves the
+feature's worth keeping, this is what to switch `SCENARIO_GRADE_URL`
+back to. One-time setup on a machine with Node 20+ and the Firebase CLI:
 
 ```bash
 npm install -g firebase-tools   # if not already installed

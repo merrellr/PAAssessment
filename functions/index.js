@@ -1,6 +1,15 @@
 /**
  * Cloud Function: gradeApplicationScenario
  *
+ * NOT CURRENTLY WIRED UP. index.html calls apps-script/grade-scenario.gs
+ * instead, so this can be tried out without a Blaze-plan billing account.
+ * This file is the upgrade path if that proves the feature's worth
+ * keeping — same grading logic, a cleaner architecture (real secrets, a
+ * queryable Firestore audit log instead of a sheet tab). To switch to
+ * it, deploy this (see the repo README) and point index.html's
+ * SCENARIO_GRADE_URL / gradeScenario() at the deployed URL with a plain
+ * POST instead of the JSONP call it uses today.
+ *
  * Grades a respondent's answer to the "VP of Engineering buy-in" scenario
  * on the assessment. Uses Groq's free tier so this runs at effectively $0
  * marginal cost within Groq's daily request limits (the Firebase project

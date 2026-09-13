@@ -310,7 +310,8 @@
       <p style="margin-bottom:14px;">You're a product manager at a mid-size company. Leadership has asked teams to bring forward AI opportunities, but six months ago a different team's AI pilot (an automated customer-support triage tool) was quietly shut down after costing more than expected and never showing clear results. Your VP of Engineering, who has to allocate a team to build anything you propose, was burned by that project and is now wary of "AI" pitches in general.</p>
       <p style="margin-bottom:14px;">You believe there's a real opportunity to use AI to reduce manual work in customer onboarding, and you have two engineers' worth of time available for one quarter, no more.</p>
       <p style="margin-bottom:16px;"><strong>In a few sentences, write what you'd actually say to this VP to get a pilot approved.</strong> Be specific about how you'd address their skepticism and what you'd propose doing with that limited time.</p>
-      <textarea id="scenarioTextarea" rows="6" placeholder="What would you actually say to get this approved?" style="width:100%; padding:12px 14px; border:1.5px solid var(--line); border-radius:9px; font-family:'IBM Plex Sans', sans-serif; font-size:14.5px; color:var(--ink); resize:vertical;" oninput="updateScenarioButton()"></textarea>
+      <textarea id="scenarioTextarea" rows="6" maxlength="800" placeholder="What would you actually say to get this approved?" style="width:100%; padding:12px 14px; border:1.5px solid var(--line); border-radius:9px; font-family:'IBM Plex Sans', sans-serif; font-size:14.5px; color:var(--ink); resize:vertical;" oninput="updateScenarioButton()"></textarea>
+      <div class="field-hint" id="scenarioCharCount" style="text-align:right;"></div>
       <div class="field-error" id="scenarioError"></div>
       <div class="nav-row" style="justify-content:flex-end;">
         <button class="btn btn-primary" id="scenarioSubmitBtn" onclick="submitScenario()" disabled>See my results →</button>
@@ -961,32 +962,61 @@ async function goNext(){
   }
 }
 
+const SCENARIO_MIN_WORDS = 12;
+const SCENARIO_MAX_CHARS = 800; // matches the textarea's maxlength and the Apps Script handler
+
 function showScenarioScreen(){
   document.getElementById('scenarioTextarea').value = '';
   document.getElementById('scenarioError').textContent = '';
   document.getElementById('scenarioSubmitBtn').disabled = true;
+  updateScenarioButton();
   showScreen('scenario');
 }
 
 function updateScenarioButton(){
-  const words = document.getElementById('scenarioTextarea').value.trim().split(/\s+/).filter(Boolean);
-  document.getElementById('scenarioSubmitBtn').disabled = words.length < 12;
+  const val = document.getElementById('scenarioTextarea').value;
+  const words = val.trim().split(/\s+/).filter(Boolean);
+  document.getElementById('scenarioSubmitBtn').disabled = words.length < SCENARIO_MIN_WORDS;
+  document.getElementById('scenarioCharCount').textContent = val.length + ' / ' + SCENARIO_MAX_CHARS;
 }
 
-const SCENARIO_GRADE_URL = "https://us-central1-product-advisory-lms.cloudfunctions.net/gradeApplicationScenario";
-
+/* Graded by the same Apps Script backend as everything else in this
+   file (RESULTS_LOG_URL) — no separate paid backend needed to try this
+   out. A GET + JSONP callback, not a POST the client reads: Apps Script
+   web apps don't reliably expose CORS headers on POST responses, and
+   this project already has a proven JSONP pattern for exactly this
+   (see fetchAssessmentResult in lms-dashboard.html / lesson.html /
+   framework.html). See apps-script/grade-scenario.gs for the handler. */
 function gradeScenario(answer){
-  return fetch(SCENARIO_GRADE_URL, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ answer: answer })
-  }).then(r => r.json()).catch(() => null);
+  return new Promise((resolve) => {
+    if (!RESULTS_LOG_URL){ resolve(null); return; }
+    const cb = 'scenarioGradeCallback_' + Date.now();
+    const script = document.createElement('script');
+    let settled = false;
+    const finish = (value) => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timeoutId);
+      delete window[cb];
+      script.remove();
+      resolve(value);
+    };
+    // Guards against the handler not being deployed yet (or Apps Script
+    // returning something that never calls back) — a plain 404/network
+    // failure is already caught by onerror below, but a "loads fine,
+    // never calls the callback" response wouldn't otherwise resolve.
+    const timeoutId = setTimeout(() => finish(null), 8000);
+    window[cb] = (result) => finish(result || null);
+    script.onerror = () => finish(null);
+    script.src = RESULTS_LOG_URL + '?action=gradeScenario&answer=' + encodeURIComponent(answer.slice(0, SCENARIO_MAX_CHARS)) + '&callback=' + cb;
+    document.body.appendChild(script);
+  });
 }
 
 async function submitScenario(){
   const answer = document.getElementById('scenarioTextarea').value.trim();
   const words = answer.split(/\s+/).filter(Boolean);
-  if (words.length < 12){
+  if (words.length < SCENARIO_MIN_WORDS){
     document.getElementById('scenarioError').textContent = 'A few more sentences would help us grade this fairly.';
     return;
   }
