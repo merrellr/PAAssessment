@@ -449,6 +449,12 @@ window.getAccountLead = function(){
   return { name: u.displayName || '', email: u.email || '' };
 };
 
+/* Exposed so the classic script can key the scenario-grading daily limit
+   to the account when there is one (see getScenarioClientId). */
+window.getAuthUid = function(){
+  return (isLoggedIn && auth.currentUser) ? auth.currentUser.uid : null;
+};
+
 /* Mirror the finished assessment onto the person's own progress doc, so
    the dashboard and the lesson gate can read it straight from Firestore
    without depending on the Google Sheet lookup (a single point of
@@ -947,7 +953,7 @@ async function goNext(){
     // engagement (moderate or better on the two multiple-choice
     // questions) get the scenario — asking it of someone who just said
     // their org has no AI strategy at all would be a non sequitur.
-    if (mcScores.catPct.aiOrg > 25){
+    if (SCENARIO_ENABLED && mcScores.catPct.aiOrg > 25){
       lastScores = mcScores;
       showScenarioScreen();
       return;
@@ -961,6 +967,11 @@ async function goNext(){
     renderQuestion();
   }
 }
+
+// Master switch for the free-text "VP buy-in" question. While false, nobody
+// is shown it and the assessment ends after the multiple-choice questions.
+// Flip to true to bring it back; the grading code below is untouched.
+const SCENARIO_ENABLED = false;
 
 const SCENARIO_MIN_WORDS = 12;
 const SCENARIO_MAX_CHARS = 800; // matches the textarea's maxlength and the Apps Script handler
@@ -987,6 +998,26 @@ function updateScenarioButton(){
    this project already has a proven JSONP pattern for exactly this
    (see fetchAssessmentResult in lms-dashboard.html / lesson.html /
    framework.html). See apps-script/grade-scenario.gs for the handler. */
+/* Identifies the respondent for the backend's per-day grading limit: the
+   Firebase uid when signed in, otherwise a random id kept in localStorage.
+   Clearing storage resets the anonymous id, so this is a courtesy limit —
+   the backend's global daily cap is what actually bounds cost. Returns ''
+   if storage is unavailable, in which case only the global cap applies. */
+function getScenarioClientId(){
+  try {
+    const uid = window.getAuthUid && window.getAuthUid();
+    if (uid) return 'u_' + uid;
+    let id = localStorage.getItem('pa_cid');
+    if (!id){
+      id = 'a_' + (window.crypto && crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(36) + Math.random().toString(36).slice(2));
+      localStorage.setItem('pa_cid', id);
+    }
+    return id;
+  } catch (e){
+    return '';
+  }
+}
+
 function gradeScenario(answer){
   return new Promise((resolve) => {
     if (!RESULTS_LOG_URL){ resolve(null); return; }
@@ -1008,7 +1039,7 @@ function gradeScenario(answer){
     const timeoutId = setTimeout(() => finish(null), 8000);
     window[cb] = (result) => finish(result || null);
     script.onerror = () => finish(null);
-    script.src = RESULTS_LOG_URL + '?action=gradeScenario&answer=' + encodeURIComponent(answer.slice(0, SCENARIO_MAX_CHARS)) + '&callback=' + cb;
+    script.src = RESULTS_LOG_URL + '?action=gradeScenario&answer=' + encodeURIComponent(answer.slice(0, SCENARIO_MAX_CHARS)) + '&cid=' + encodeURIComponent(getScenarioClientId()) + '&callback=' + cb;
     document.body.appendChild(script);
   });
 }

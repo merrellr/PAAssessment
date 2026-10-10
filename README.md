@@ -11,6 +11,20 @@ notes at the top of that file (a Script Property for `GROQ_API_KEY`,
 then redeploy the web app). `index.html`'s `gradeScenario()` calls it via
 the same JSONP pattern already used for `action=lookup`.
 
+**Currently switched off.** The question is hidden from everyone by
+`SCENARIO_ENABLED = false` in `index.html`. Set it to `true` and push to bring
+it back; no other code needs to change.
+
+**Daily limits and usage report.** `gradeScenarioWithQuota_` in the same
+file allows 2 scored responses per respondent per day (keyed to the
+Firebase uid when signed in, otherwise a random id in localStorage) and 100
+in total per day, which sits under Groq's published 200K-tokens/day limit
+for `openai/gpt-oss-120b`. Over the limit, the client keeps the
+multiple-choice score. The same handler maintains a `Usage` tab (assessments
+started, graded, blocked and errored per day, plus a plain-English signal for
+when volume outgrows the free tier) and writes `blocked:` rows to the
+`ScenarioGrading` tab.
+
 **Not currently wired up — a later upgrade path, not dead code:**
 `functions/gradeApplicationScenario` (Cloud Functions v2) does the same
 grading with a cleaner architecture (real secrets, a queryable Firestore

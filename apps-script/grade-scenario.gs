@@ -56,7 +56,7 @@
 
 // function doGet(e) {
 //   if (e.parameter.action === 'gradeScenario') {
-//     return jsonpOut_(e.parameter.callback, gradeScenario_(e.parameter.answer || ''));
+//     return jsonpOut_(e.parameter.callback, gradeScenarioWithQuota_(e.parameter.answer || '', e.parameter.cid || ''));
 //   }
 //
 //   // ...existing action === 'lookup' / 'companies' branches continue here...
@@ -267,4 +267,174 @@ function gradeScenario_(answer) {
 
   logScenarioGrading_(answer, result, null);
   return { tier: result.tier, total: result.total, user_facing_feedback: result.user_facing_feedback };
+}
+
+
+/* ===================================================================
+   3. Daily limits + usage report
+   =================================================================== */
+
+// Two scored responses per respondent per day, plus a global ceiling that
+// bounds cost no matter how many ids someone invents. 100 sits under Groq's
+// published openai/gpt-oss-120b limits (1K requests but only 200K tokens a
+// day; each grading uses roughly 1.5-2K tokens). Confirm your own account's
+// limits at console.groq.com before raising it.
+var SCENARIO_DAILY_LIMIT_PER_CLIENT_ = 2;
+var SCENARIO_DAILY_LIMIT_GLOBAL_ = 100;
+
+function takeScenarioQuota_(clientId) {
+  var props = PropertiesService.getScriptProperties();
+  var today = Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'yyyy-MM-dd');
+  var cid = String(clientId || '').replace(/[^A-Za-z0-9_-]/g, '').slice(0, 64);
+  var globalKey = 'quota_' + today + '_global';
+  var clientKey = 'quota_' + today + '_c_' + cid;
+
+  var lock = null;
+  var locked = false;
+  try {
+    lock = LockService.getScriptLock();
+    locked = lock.tryLock(5000);
+  } catch (e) { /* proceed unlocked; worst case a rare miscount */ }
+  try {
+    if (!props.getProperty(globalKey)) {
+      // First request of the day: drop yesterday's counters.
+      var keys = props.getKeys();
+      for (var i = 0; i < keys.length; i++) {
+        if (keys[i].indexOf('quota_') === 0 && keys[i].indexOf('quota_' + today) !== 0) {
+          props.deleteProperty(keys[i]);
+        }
+      }
+    }
+
+    var globalCount = Number(props.getProperty(globalKey) || 0);
+    if (globalCount >= SCENARIO_DAILY_LIMIT_GLOBAL_) {
+      return { ok: false, reason: 'global daily cap reached' };
+    }
+
+    // An empty id (old cached page, storage blocked) is held only to the
+    // global cap - a shared "anonymous" bucket would lock everyone out.
+    if (cid) {
+      var clientCount = Number(props.getProperty(clientKey) || 0);
+      if (clientCount >= SCENARIO_DAILY_LIMIT_PER_CLIENT_) {
+        return { ok: false, reason: 'per-respondent daily limit reached' };
+      }
+      props.setProperty(clientKey, String(clientCount + 1));
+    }
+    props.setProperty(globalKey, String(globalCount + 1));
+    return { ok: true };
+  } finally {
+    if (locked) lock.releaseLock();
+  }
+}
+
+/**
+ * What doGet calls for action=gradeScenario. Too-short or gibberish answers
+ * never reach Groq, so they don't use up one of the respondent's turns.
+ */
+function gradeScenarioWithQuota_(answer, clientId) {
+  if (looksLikeGibberish_(answer)) return gradeScenario_(answer);
+
+  var quota = takeScenarioQuota_(clientId);
+  if (!quota.ok) {
+    logScenarioGrading_(answer, null, 'blocked: ' + quota.reason);
+    refreshUsageReportIfStale_();
+    return {
+      tier: 'moderate',
+      total: null,
+      user_facing_feedback: "You've reached today's limit for scored scenario responses. Your results are based on the multiple-choice questions - try the scenario again tomorrow.",
+      skipped_grading: true,
+      rate_limited: true
+    };
+  }
+
+  var result = gradeScenario_(answer);
+  refreshUsageReportIfStale_();
+  return result;
+}
+
+var USAGE_SHEET_NAME_ = 'Usage';
+// Tier 0 ceiling from the architecture plan: roughly 1,000 assessments a month.
+var USAGE_TIER0_MONTHLY_CEILING_ = 1000;
+
+/**
+ * Rebuilds the "Usage" tab from the Funnel and ScenarioGrading tabs: one row
+ * per day, plus a last-30-days total and a plain-English tier signal. Runs
+ * itself at most once an hour when the grading endpoint is hit, and can also
+ * be run by hand from the editor.
+ */
+function refreshUsageReport() {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var tz = Session.getScriptTimeZone();
+  var days = {};
+  function day(d) {
+    var key = Utilities.formatDate(d, tz, 'yyyy-MM-dd');
+    if (!days[key]) days[key] = { started: 0, graded: 0, blocked: 0, errors: 0 };
+    return days[key];
+  }
+
+  var funnel = ss.getSheetByName('Funnel');
+  if (funnel && funnel.getLastRow() > 1) {
+    funnel.getRange(2, 1, funnel.getLastRow() - 1, 3).getValues().forEach(function (r) {
+      if (r[2] === 'assessmentStarted' && r[0] instanceof Date) day(r[0]).started++;
+    });
+  }
+
+  var grading = ss.getSheetByName('ScenarioGrading');
+  if (grading && grading.getLastRow() > 1) {
+    grading.getRange(2, 1, grading.getLastRow() - 1, 7).getValues().forEach(function (r) {
+      if (!(r[0] instanceof Date)) return;
+      var note = String(r[6] || '');
+      var d = day(r[0]);
+      if (note.indexOf('blocked') === 0) d.blocked++;
+      else if (note.indexOf('skipped') === 0) return;
+      else if (note) d.errors++;
+      else d.graded++;
+    });
+  }
+
+  var dates = Object.keys(days).sort().reverse();
+  var rows = dates.map(function (k) {
+    var d = days[k];
+    return [k, d.started, d.graded, d.blocked, d.errors];
+  });
+
+  var cutoff = new Date();
+  cutoff.setDate(cutoff.getDate() - 30);
+  var cutoffKey = Utilities.formatDate(cutoff, tz, 'yyyy-MM-dd');
+  var last30 = 0;
+  dates.forEach(function (k) { if (k >= cutoffKey) last30 += days[k].started; });
+
+  var todayKey = Utilities.formatDate(new Date(), tz, 'yyyy-MM-dd');
+  var gradedToday = days[todayKey] ? days[todayKey].graded : 0;
+
+  var signal;
+  if (last30 >= USAGE_TIER0_MONTHLY_CEILING_) signal = 'Over Tier 0 volume - time to plan the Tier 1 upgrade';
+  else if (last30 >= USAGE_TIER0_MONTHLY_CEILING_ * 0.8) signal = 'Approaching the Tier 0 ceiling - start planning Tier 1';
+  else signal = 'Comfortably inside Tier 0 (free)';
+  if (gradedToday >= SCENARIO_DAILY_LIMIT_GLOBAL_ * 0.8) signal += ' | grading is near its daily cap';
+
+  var sheet = ss.getSheetByName(USAGE_SHEET_NAME_) || ss.insertSheet(USAGE_SHEET_NAME_);
+  sheet.clear();
+  sheet.getRange(1, 1, 1, 5)
+    .setValues([['Date', 'Assessments started', 'Scenario graded', 'Scenario blocked (limit)', 'Grading errors']])
+    .setFontWeight('bold');
+  if (rows.length) sheet.getRange(2, 1, rows.length, 5).setValues(rows);
+  sheet.getRange(1, 7, 3, 2).setValues([
+    ['Assessments started, last 30 days', last30],
+    ['Tier signal', signal],
+    ['Refreshed', new Date()]
+  ]);
+  sheet.setFrozenRows(1);
+}
+
+function refreshUsageReportIfStale_() {
+  try {
+    var props = PropertiesService.getScriptProperties();
+    var last = Number(props.getProperty('usage_refreshed_at') || 0);
+    if (Date.now() - last < 60 * 60 * 1000) return;
+    props.setProperty('usage_refreshed_at', String(Date.now()));
+    refreshUsageReport();
+  } catch (err) {
+    // best-effort only
+  }
 }
