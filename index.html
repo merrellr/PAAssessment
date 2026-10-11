@@ -940,7 +940,19 @@ function buildResultObj(scores){
     overallMax: scores.overallMax,
     tier: getTier(scores.overallPct).name,
     categoryPct: categoryPct,
-    assessmentId: currentAssessmentId
+    assessmentId: currentAssessmentId,
+    // The wording is stored with each answer (not just its index) so a
+    // result stays readable even after the questions are edited later.
+    answers: QUESTIONS.map((q, i) => {
+      const picked = q.options[answers[i]];
+      return {
+        n: i + 1,
+        cat: q.cat,
+        question: q.text,
+        answer: picked ? picked.text : '',
+        points: picked ? picked.points : 0
+      };
+    })
   };
 }
 

@@ -1,0 +1,19 @@
+// Copy of the Firestore rules published in the Firebase console for project
+// product-advisory-lms, as of 2026-10-11.
+//
+// Editing this file does NOT change the live rules. To change them, paste the
+// new text into Firebase console > Firestore Database > Rules and click
+// Publish (or run `firebase deploy --only firestore:rules`), then update this
+// file so the two stay identical.
+//
+// What these allow: a signed-in person can read, write and delete only their
+// own progress/{uid} document. Everything else is denied by default. Deleting
+// the document is what the profile page's "Delete account" flow relies on.
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /progress/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+  }
+}
