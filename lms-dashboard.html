@@ -232,6 +232,7 @@
         <div class="profile-dropdown-divider"></div>
 
         <a class="profile-dropdown-item" href="profile.html">My Profile</a>
+        <a class="profile-dropdown-item" id="ownerConsoleMenuItem" href="owner.html" style="display:none;">Owner Console</a>
         <a class="profile-dropdown-item" id="changePasswordMenuItem" onclick="openChangePassword()">Change password</a>
         <a class="profile-dropdown-item" onclick="replayDashboardTour()">Replay the tour</a>
         <a class="profile-dropdown-item" href="https://www.productadvisory.co/" target="_blank" rel="noopener">Visit Product Advisory ↗</a>
@@ -343,6 +344,10 @@
     </div>
 
     <div id="dashboardContent" style="display:none;">
+
+    <div class="rec-banner" id="orgBanner" style="display:none; background:#EEF6FD; border-color:#C9E0F2;">
+      <span style="font-size:13px; color:var(--ink-soft);" id="orgBannerText"></span>
+    </div>
 
     <div class="rec-banner" id="verifyBanner" style="display:none; background:#FFF8E8; border-color:#F0DDA8;">
       <span style="font-size:13px; color:var(--ink-soft);">Please verify your email — check your inbox for a link.</span>
@@ -818,6 +823,8 @@ onAuthStateChanged(auth, async (user) => {
     document.getElementById('profileMenuWrap').style.display = 'block';
     document.getElementById('verifyBanner').style.display = user.emailVerified ? 'none' : 'block';
     showScreen('dashboard');
+    showOwnerLinkIfOwner(user);
+    showCompanyNoticeIfMember(user);
 
     document.getElementById('dashboardSkeleton').style.display = 'block';
     document.getElementById('dashboardContent').style.display = 'none';
@@ -858,6 +865,29 @@ function startActiveTimeTracking(){
   });
   window.addEventListener('pagehide', flushActiveTime);
   setInterval(flushActiveTime, 60000); // periodic safety flush every minute
+}
+
+/* Only the platform owner has a platformAdmins/{uid} record. For everyone
+   else this finds nothing and the menu link stays hidden. */
+function showOwnerLinkIfOwner(user){
+  getDoc(doc(db, 'platformAdmins', user.uid))
+    .then(snap => { if (snap.exists()) document.getElementById('ownerConsoleMenuItem').style.display = 'block'; })
+    .catch(() => { /* not the owner, or the rules are not published: keep it hidden */ });
+}
+
+/* People who joined a company see a plain notice saying so. */
+function showCompanyNoticeIfMember(user){
+  getDoc(doc(db, 'memberships', user.uid))
+    .then(snap => {
+      const m = snap.exists() ? snap.data() : null;
+      const banner = document.getElementById('orgBanner');
+      if (!m || m.status !== 'active'){ banner.style.display = 'none'; return; }
+      document.getElementById('orgBannerText').textContent =
+        "You're a member of " + m.orgName + ". Your assessment results, answers and course progress are shared with " +
+        m.orgName + "'s admins while you're a member. Your account stays yours.";
+      banner.style.display = 'block';
+    })
+    .catch(() => { /* no membership or rules not published: show nothing */ });
 }
 
 function populateProfileMenu(user){

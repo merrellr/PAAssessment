@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>Join your team — Product Advisory Learning</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy: #1A4584; --navy-deep: #12305e; --gray: #9AA3AD; --cyan: #35C2E8;
+    --bg: #F5F8FB; --surface: #FFFFFF; --ink: #16213E; --ink-soft: #4B5768; --line: #E3E9F0;
+    --warn: #C0622A; --ok: #2E8B57;
+  }
+  *{ box-sizing: border-box; }
+  body{ margin:0; background: var(--bg); font-family:'IBM Plex Sans', system-ui, sans-serif; color: var(--ink); }
+  .wrap{ max-width: 520px; margin: 0 auto; padding: 24px 16px 48px; }
+  .brand-header{ display:flex; align-items:center; gap:9px; padding: 0 0 14px; text-decoration:none; }
+  .brand-word{ font-family:'Space Grotesk', sans-serif; font-weight:700; font-size: 19px; line-height:1.3; color: var(--navy-deep); }
+  .brand-accent-bar{ height: 3px; background: linear-gradient(90deg, var(--navy) 0%, var(--cyan) 100%); border-radius: 2px; margin-bottom: 24px; }
+  .card{ background: var(--surface); border-radius: 16px; border: 1px solid var(--line); padding: 28px; box-shadow: 0 1px 2px rgba(22,33,62,0.04), 0 12px 32px rgba(22,33,62,0.06); margin-bottom: 22px; }
+  .eyebrow{ display:block; font-size:11px; font-weight:600; letter-spacing:0.06em; text-transform:uppercase; color: var(--cyan); margin-bottom: 6px; }
+  h1{ font-family:'Space Grotesk', sans-serif; font-size: 21px; margin: 0 0 8px; color: var(--navy-deep); line-height: 1.25; }
+  h2{ font-family:'Space Grotesk', sans-serif; font-size: 13px; margin: 18px 0 6px; color: var(--navy-deep); text-transform: uppercase; letter-spacing: 0.04em; }
+  p, li{ line-height:1.55; color: var(--ink-soft); font-size: 14px; }
+  ul{ margin: 0 0 8px; padding-left: 20px; }
+  li{ margin-bottom: 4px; }
+  a{ color: var(--navy); }
+
+  .tabs{ display:flex; border-bottom: 1.5px solid var(--line); margin: 14px 0 16px; }
+  .tab{ flex:1; text-align:center; padding: 9px 0; font-family:'Space Grotesk', sans-serif; font-weight:600; font-size:14px; color: var(--gray); cursor:pointer; border-bottom: 2.5px solid transparent; margin-bottom: -1.5px; background:none; border-left:none; border-right:none; border-top:none; }
+  .tab.active{ color: var(--navy); border-bottom-color: var(--navy); }
+
+  .text-input{ width:100%; padding: 12px 14px; margin-bottom: 12px; border: 1.5px solid var(--line); border-radius: 9px; font-family:'IBM Plex Sans', sans-serif; font-size: 14.5px; background:#fff; color: var(--ink); }
+  .text-input:focus{ outline:none; border-color: var(--cyan); }
+  .field-error{ font-size: 12.5px; color: var(--warn); margin: -4px 0 12px 2px; min-height: 1px; }
+  .check-row{ display:flex; align-items:flex-start; gap:8px; font-size:13px; color: var(--ink-soft); margin: 10px 0 14px; cursor:pointer; line-height: 1.5; }
+  .check-row input{ margin-top: 3px; }
+
+  button.btn{ font-family:'Space Grotesk', sans-serif; font-weight:600; font-size: 14.5px; border-radius: 8px; padding: 12px 20px; border: none; cursor:pointer; width: 100%; }
+  button.btn.btn-primary{ background: linear-gradient(90deg, var(--navy) 0%, var(--navy-deep) 100%); color:#fff; }
+  button.btn.btn-primary:hover{ opacity:0.92; }
+  button.btn.btn-ghost{ background:#fff; color: var(--ink); border: 1.5px solid var(--line); margin-top: 10px; }
+  button.btn:disabled{ opacity:0.55; cursor: default; }
+  a.btn-link{ display:block; text-align:center; font-family:'Space Grotesk', sans-serif; font-weight:600; font-size:14.5px; border-radius:8px; padding:12px 20px; text-decoration:none; background: linear-gradient(90deg, var(--navy) 0%, var(--navy-deep) 100%); color:#fff; }
+  .divider{ text-align:center; font-size:12.5px; color: var(--gray); margin: 14px 0; }
+  .small{ font-size: 12.5px; color: var(--gray); text-align:center; margin: 14px 0 0; }
+  .callout{ background:#F2FAFD; border:1px solid #BFE6F2; border-radius: 12px; padding: 14px 16px; margin: 14px 0; }
+  .callout p{ margin: 0; }
+  .ok-mark{ width:44px; height:44px; border-radius:50%; background:#E4F3EA; color: var(--ok); display:flex; align-items:center; justify-content:center; font-size: 22px; margin-bottom: 12px; }
+</style>
+
+<script>
+/* Pure logic for the join page, kept free of Firebase so it can be tested on
+   its own. */
+const JoinLogic = (function(){
+  function readToken(search){
+    const raw = new URLSearchParams(search || '').get('token') || '';
+    return /^[A-Za-z0-9_-]{16,64}$/.test(raw) ? raw : null;
+  }
+
+  // Decides what to show for an invite. `membership` is the signed-in
+  // person's own membership record, or null if they have none.
+  function evaluate(o){
+    const inv = o.inv, m = o.membership;
+    if (!inv) return { state: 'notfound' };
+    if (inv.status === 'revoked') return { state: 'revoked' };
+    if (inv.status === 'used'){
+      if (m && m.status === 'active' && m.orgId === inv.orgId && inv.usedBy === o.uid) return { state: 'already_joined_here' };
+      return { state: 'used' };
+    }
+    if (typeof inv.expiresAtMs === 'number' && inv.expiresAtMs < o.nowMs) return { state: 'expired' };
+    if (m && m.status === 'active'){
+      return m.orgId === inv.orgId ? { state: 'already_member_here' } : { state: 'member_elsewhere', otherOrg: m.orgName };
+    }
+    return { state: 'ready', rejoin: !!(m && m.status === 'removed') };
+  }
+
+  const MESSAGES = {
+    notfound: ['This invite link isn\'t valid', 'Check that you copied the whole link from your invitation, or ask the person who invited you to send it again.'],
+    revoked: ['This invite was withdrawn', 'The person who invited you cancelled this link. Ask them to send you a new one.'],
+    used: ['This invite has already been used', 'Each link works once. If that wasn\'t you, ask the person who invited you for a new link.'],
+    expired: ['This invite has expired', 'Ask the person who invited you to send you a new link.'],
+    paused: ['This invitation can\'t be accepted right now', 'The company may have paused invitations, or the invite was just withdrawn. Ask the person who invited you.']
+  };
+
+  const ROLE_LABEL = { admin: 'an admin', member: 'a member' };
+
+  function buildMembership(user, inv, token){
+    const data = {
+      orgId: inv.orgId,
+      orgName: inv.orgName,
+      role: inv.role,
+      status: 'active',
+      inviteToken: token,
+      endedAt: null,
+      email: String(user.email || '').toLowerCase(),
+      displayName: String(user.displayName || inv.name || '').slice(0, 100)
+    };
+    if (inv.phone) data.phone = inv.phone;
+    return data;
+  }
+
+  return { readToken, evaluate, MESSAGES, ROLE_LABEL, buildMembership };
+})();
+</script>
+</head>
+<body>
+<div class="wrap">
+  <a href="lms-dashboard.html" class="brand-header">
+    <svg width="28" height="28" viewBox="0 0 40 40" aria-hidden="true">
+      <polygon points="20,3 35,11.5 35,28.5 20,37 5,28.5 5,11.5" fill="#1A4584"/>
+      <polygon points="20,10 29,15 29,25 20,30 11,25 11,15" fill="none" stroke="#35C2E8" stroke-width="1.5"/>
+    </svg>
+    <div>
+      <div style="font-family:'IBM Plex Sans', sans-serif; font-weight:600; font-size:10.5px; letter-spacing:0.06em; color:var(--gray); line-height:1;">PRODUCT ADVISORY</div>
+      <div class="brand-word">Learning</div>
+    </div>
+  </a>
+  <div class="brand-accent-bar"></div>
+
+  <div class="card" id="stateLoading"><p style="margin:0;">Checking your invitation…</p></div>
+
+  <!-- Sign in or create an account (shown when signed out) -->
+  <div class="card" id="stateAuth" style="display:none;">
+    <span class="eyebrow">You've been invited</span>
+    <h1>Join your team on Product Advisory Learning</h1>
+    <p>Sign in, or create an account, to see your invitation. You can use any email address. It doesn't have to be the one the invitation was sent to.</p>
+
+    <div class="tabs">
+      <button class="tab active" id="tabLogin" type="button">Log in</button>
+      <button class="tab" id="tabSignup" type="button">Create account</button>
+    </div>
+
+    <input class="text-input" type="text" id="authName" placeholder="Full name" autocomplete="name" style="display:none;">
+    <input class="text-input" type="email" id="authEmail" placeholder="Email address" autocomplete="email">
+    <input class="text-input" type="password" id="authPassword" placeholder="Password" autocomplete="current-password">
+    <input class="text-input" type="password" id="authPasswordConfirm" placeholder="Confirm password" autocomplete="new-password" style="display:none;">
+
+    <label class="check-row" id="termsRow" style="display:none;">
+      <input type="checkbox" id="agreeTerms">
+      <span>I agree to the <a href="https://www.productadvisory.co/terms-of-use" target="_blank" rel="noopener">Terms of Use</a>, which includes our Privacy Policy.</span>
+    </label>
+
+    <div class="field-error" id="authError"></div>
+    <button class="btn btn-primary" id="authSubmit" type="button">Log in</button>
+    <div class="divider">or</div>
+    <button class="btn btn-ghost" id="googleBtn" type="button" style="margin-top:0;">Continue with Google</button>
+    <p class="small">By continuing with Google, you agree to our <a href="https://www.productadvisory.co/terms-of-use" target="_blank" rel="noopener">Terms of Use</a>.</p>
+  </div>
+
+  <!-- Something is wrong with the invite -->
+  <div class="card" id="stateProblem" style="display:none;">
+    <h1 id="problemTitle"></h1>
+    <p id="problemText"></p>
+    <a class="btn-link" href="lms-dashboard.html" id="problemLink">Go to your dashboard</a>
+    <p class="small" id="problemSwitch" style="display:none;">Signed in as <span id="problemEmail"></span>. <a href="#" id="problemSignOut">Use a different account</a></p>
+  </div>
+
+  <!-- Consent and accept -->
+  <div class="card" id="stateConsent" style="display:none;">
+    <span class="eyebrow">You've been invited</span>
+    <h1 id="consentTitle"></h1>
+    <p id="consentSub"></p>
+
+    <div class="callout"><p><strong>Your account stays yours.</strong> It isn't created under the company, and nothing about it is locked to them. If your membership ever ends, you keep your account, your results and your access.</p></div>
+
+    <h2>What <span class="org-name"></span> can see while you're a member</h2>
+    <ul>
+      <li>Your name and email address</li>
+      <li>Your latest assessment results, including your individual answers</li>
+      <li>Your course progress and when you were last active</li>
+    </ul>
+    <h2>What they cannot see</h2>
+    <ul>
+      <li>Your private course reflections and saved templates</li>
+      <li>Your phone number and the rest of your profile</li>
+    </ul>
+    <h2>If your membership ends</h2>
+    <p>They keep the information they already received, but they won't see anything new. You can delete your account at any time from your profile page.</p>
+
+    <label class="check-row">
+      <input type="checkbox" id="agreeShare">
+      <span>I understand, and I agree to share this with <strong class="org-name"></strong>.</span>
+    </label>
+    <div class="field-error" id="consentError"></div>
+    <button class="btn btn-primary" id="acceptBtn" type="button" disabled>Accept and join</button>
+    <p class="small">Signed in as <span id="consentEmail"></span>. <a href="#" id="consentSignOut">Use a different account</a></p>
+  </div>
+
+  <!-- Done -->
+  <div class="card" id="stateDone" style="display:none;">
+    <div class="ok-mark">✓</div>
+    <h1 id="doneTitle"></h1>
+    <p id="doneText"></p>
+    <a class="btn-link" href="lms-dashboard.html">Go to your dashboard</a>
+  </div>
+</div>
+
+<script type="module">
+const firebaseConfig = {
+  apiKey: "AIzaSyAcECtS5c6WeOhKlwRK-LYFE47npbuq_eU",
+  authDomain: "product-advisory-lms.firebaseapp.com",
+  projectId: "product-advisory-lms",
+  storageBucket: "product-advisory-lms.firebasestorage.app",
+  messagingSenderId: "1081134406437",
+  appId: "1:1081134406437:web:72e28604d093219e7698cc"
+};
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
+import {
+  getAuth, onAuthStateChanged, signOut, createUserWithEmailAndPassword, signInWithEmailAndPassword,
+  GoogleAuthProvider, signInWithPopup, getAdditionalUserInfo, updateProfile, sendEmailVerification
+} from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
+import { getFirestore, doc, getDoc, setDoc, writeBatch, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+const $ = (id) => document.getElementById(id);
+
+const token = JoinLogic.readToken(location.search);
+let currentUser = null;
+let loaded = null;          // { inv, membership, verdict } once the invite is loaded
+let signUpMode = false;
+
+function show(id){
+  ['stateLoading', 'stateAuth', 'stateProblem', 'stateConsent', 'stateDone'].forEach(s => {
+    $(s).style.display = (s === id) ? 'block' : 'none';
+  });
+}
+
+function showProblem(title, text, user, linkText){
+  $('problemTitle').textContent = title;
+  $('problemText').textContent = text;
+  $('problemLink').textContent = linkText || 'Go to your dashboard';
+  $('problemSwitch').style.display = user ? 'block' : 'none';
+  if (user) $('problemEmail').textContent = user.email || '';
+  show('stateProblem');
+}
+
+const msOf = (ts) => (ts && ts.toMillis) ? ts.toMillis() : null;
+
+async function signOutAndStay(e){
+  e.preventDefault();
+  await signOut(auth);
+}
+$('problemSignOut').addEventListener('click', signOutAndStay);
+$('consentSignOut').addEventListener('click', signOutAndStay);
+
+onAuthStateChanged(auth, async (user) => {
+  currentUser = user;
+  if (!token){
+    showProblem(JoinLogic.MESSAGES.notfound[0], JoinLogic.MESSAGES.notfound[1], user);
+    return;
+  }
+  if (!user){
+    show('stateAuth');
+    return;
+  }
+  show('stateLoading');
+
+  let inv = null, membership = null;
+  try {
+    const invSnap = await getDoc(doc(db, 'invites', token));
+    if (invSnap.exists()){
+      const d = invSnap.data();
+      inv = Object.assign({}, d, { expiresAtMs: msOf(d.expiresAt) });
+    }
+    const mSnap = await getDoc(doc(db, 'memberships', user.uid));
+    membership = mSnap.exists() ? mSnap.data() : null;
+  } catch (err){
+    console.error('Could not load the invitation:', err);
+    showProblem('We couldn\'t load your invitation', 'Please check your connection and try again in a moment.', user, 'Try again');
+    $('problemLink').setAttribute('href', location.href);
+    return;
+  }
+
+  const verdict = JoinLogic.evaluate({ inv: inv, membership: membership, uid: user.uid, nowMs: Date.now() });
+  loaded = { inv: inv, membership: membership, verdict: verdict };
+
+  if (verdict.state === 'ready'){
+    const org = inv.orgName;
+    document.querySelectorAll('.org-name').forEach(n => { n.textContent = org; });
+    $('consentTitle').textContent = 'Join ' + org + ' as ' + JoinLogic.ROLE_LABEL[inv.role];
+    $('consentSub').textContent = org + ' invited you' + (inv.email ? ' (at ' + inv.email + ')' : '') + '. Please read what joining means before you accept.';
+    $('consentEmail').textContent = user.email || '';
+    $('agreeShare').checked = false;
+    $('acceptBtn').disabled = true;
+    $('consentError').textContent = '';
+    show('stateConsent');
+    return;
+  }
+  if (verdict.state === 'already_joined_here' || verdict.state === 'already_member_here'){
+    $('doneTitle').textContent = 'You\'re already part of ' + (membership ? membership.orgName : inv.orgName);
+    $('doneText').textContent = 'Nothing more to do here.';
+    show('stateDone');
+    return;
+  }
+  if (verdict.state === 'member_elsewhere'){
+    showProblem('You\'re already a member of ' + verdict.otherOrg,
+      'A person can belong to one company at a time. Ask your admin at ' + verdict.otherOrg + ' to end your membership there first, then open this link again.', user);
+    return;
+  }
+  const msg = JoinLogic.MESSAGES[verdict.state];
+  showProblem(msg[0], msg[1], user);
+});
+
+$('agreeShare').addEventListener('change', () => { $('acceptBtn').disabled = !$('agreeShare').checked; });
+
+$('acceptBtn').addEventListener('click', async () => {
+  if (!loaded || loaded.verdict.state !== 'ready' || !currentUser) return;
+  $('consentError').textContent = '';
+  $('acceptBtn').disabled = true;
+  $('acceptBtn').textContent = 'Joining…';
+  try {
+    const data = Object.assign(JoinLogic.buildMembership(currentUser, loaded.inv, token), { joinedAt: serverTimestamp() });
+    const batch = writeBatch(db);
+    batch.set(doc(db, 'memberships', currentUser.uid), data);
+    batch.update(doc(db, 'invites', token), { status: 'used', usedBy: currentUser.uid, usedAt: serverTimestamp() });
+    await batch.commit();
+    $('doneTitle').textContent = 'Welcome to ' + loaded.inv.orgName;
+    $('doneText').textContent = 'You\'ve joined as ' + JoinLogic.ROLE_LABEL[loaded.inv.role] + '. Your dashboard is ready whenever you are.';
+    show('stateDone');
+  } catch (err){
+    console.error('Could not join:', err);
+    if (err && err.code === 'permission-denied'){
+      showProblem(JoinLogic.MESSAGES.paused[0], JoinLogic.MESSAGES.paused[1], currentUser);
+    } else {
+      $('consentError').textContent = 'Something went wrong. Please try again.';
+      $('acceptBtn').disabled = !$('agreeShare').checked;
+      $('acceptBtn').textContent = 'Accept and join';
+    }
+  }
+});
+
+/* ---------------------------------------------------- sign in / create account */
+function setMode(signUp){
+  signUpMode = signUp;
+  $('tabLogin').classList.toggle('active', !signUp);
+  $('tabSignup').classList.toggle('active', signUp);
+  $('authName').style.display = signUp ? 'block' : 'none';
+  $('authPasswordConfirm').style.display = signUp ? 'block' : 'none';
+  $('termsRow').style.display = signUp ? 'flex' : 'none';
+  $('authSubmit').textContent = signUp ? 'Create account' : 'Log in';
+  $('authPassword').setAttribute('autocomplete', signUp ? 'new-password' : 'current-password');
+  $('authError').textContent = '';
+}
+$('tabLogin').addEventListener('click', () => setMode(false));
+$('tabSignup').addEventListener('click', () => setMode(true));
+
+function friendlyAuthError(code){
+  const map = {
+    'auth/email-already-in-use': 'That email already has an account. Try logging in instead.',
+    'auth/invalid-email': 'That email address looks invalid.',
+    'auth/weak-password': 'Password should be at least 6 characters.',
+    'auth/wrong-password': 'Incorrect password.',
+    'auth/user-not-found': 'No account found with that email.',
+    'auth/invalid-credential': 'Incorrect email or password.',
+    'auth/popup-closed-by-user': ''
+  };
+  return code in map ? map[code] : 'Something went wrong. Please try again.';
+}
+
+$('authSubmit').addEventListener('click', async () => {
+  const email = $('authEmail').value.trim();
+  const password = $('authPassword').value;
+  const errorEl = $('authError');
+  errorEl.textContent = '';
+  if (!email || !password){ errorEl.textContent = 'Enter both an email and a password.'; return; }
+
+  let name = '';
+  if (signUpMode){
+    name = $('authName').value.trim();
+    if (!name){ errorEl.textContent = 'Enter your name so we can label your results.'; return; }
+    if (password.length < 8){ errorEl.textContent = 'Password should be at least 8 characters.'; return; }
+    if (password !== $('authPasswordConfirm').value){ errorEl.textContent = 'Passwords do not match.'; return; }
+    if (!$('agreeTerms').checked){ errorEl.textContent = 'Please agree to the Terms of Use to create an account.'; return; }
+  }
+
+  $('authSubmit').disabled = true;
+  try {
+    if (signUpMode){
+      const cred = await createUserWithEmailAndPassword(auth, email, password);
+      await updateProfile(cred.user, { displayName: name });
+      sendEmailVerification(cred.user).catch(() => {});
+      await setDoc(doc(db, 'progress', cred.user.uid), { courses: {}, agreedToTermsAt: new Date().toISOString() }, { merge: true });
+    } else {
+      await signInWithEmailAndPassword(auth, email, password);
+    }
+  } catch (err){
+    errorEl.textContent = friendlyAuthError(err.code);
+  } finally {
+    $('authSubmit').disabled = false;
+  }
+});
+
+$('googleBtn').addEventListener('click', async () => {
+  try {
+    const result = await signInWithPopup(auth, new GoogleAuthProvider());
+    if (getAdditionalUserInfo(result)?.isNewUser){
+      await setDoc(doc(db, 'progress', result.user.uid), { agreedToTermsAt: new Date().toISOString() }, { merge: true });
+    }
+  } catch (err){
+    $('authError').textContent = friendlyAuthError(err.code);
+  }
+});
+</script>
+</body>
+</html>

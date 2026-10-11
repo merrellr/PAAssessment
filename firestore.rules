@@ -1,22 +1,29 @@
 // Firestore rules for project product-advisory-lms.
 //
-// STATUS: checkpoint 1 of the company-accounts build. The progress/{userId}
-// rule below is the one already published in the Firebase console (as of
-// 2026-10-11). The platformAdmins and orgs rules are NEW and only take effect
-// once pasted into Firebase console > Firestore Database > Rules and
-// published. Update this status line when that is done.
+// STATUS: checkpoint 2 of the company-accounts build. Only the progress and
+// the first platformAdmins/orgs rules are published in the Firebase console
+// today. Everything about invites, memberships and company admins below is
+// NEW and only takes effect once this whole file is pasted into Firebase
+// console > Firestore Database > Rules and published. Update this status line
+// when that is done.
 //
 // Editing this file does NOT change the live rules. Paste the whole file into
-// the console Rules tab and click Publish, so the two stay identical.
+// the console Rules tab and click Publish, so the two stay identical. These
+// rules are tested against the local Firestore emulator (see
+// tests/firestore-rules.test.mjs).
 //
-// What these allow:
-//   - A signed-in person can read, write and delete only their own
-//     progress/{uid} document (unchanged). Deleting it is what the profile
-//     page's "Delete account" flow relies on.
-//   - Only the platform owner (an account with a platformAdmins/{uid}
-//     document, created by hand in the console) can read or write companies
-//     (orgs). Nobody can delete a company; it is archived instead.
-//   - Everything else is denied by default.
+// WHO CAN DO WHAT
+//   Anyone signed in:   read/write/delete ONLY their own progress/{uid}.
+//   Platform owner:     (an account with a platformAdmins/{uid} document,
+//                       created by hand in the console) creates and edits
+//                       companies, creates and revokes invites, reads every
+//                       membership. Nobody can delete a company.
+//   Company admin:      (an ACTIVE membership with role "admin") reads their
+//                       own company, creates and revokes its invites, reads
+//                       its memberships, and may change ONLY its focusAreas.
+//   Invited person:     reads an invite if they know its secret link, then
+//                       accepts it, which creates their own membership.
+//   Everything else is denied by default.
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
@@ -30,36 +37,150 @@ service cloud.firestore {
         && exists(/databases/$(database)/documents/platformAdmins/$(request.auth.uid));
     }
 
+    function myMembership() {
+      return get(/databases/$(database)/documents/memberships/$(request.auth.uid)).data;
+    }
+
+    function isActiveAdminOf(orgId) {
+      return isSignedIn()
+        && exists(/databases/$(database)/documents/memberships/$(request.auth.uid))
+        && myMembership().orgId == orgId
+        && myMembership().role == 'admin'
+        && myMembership().status == 'active';
+    }
+
+    // ---------------------------------------------------------------- progress
     match /progress/{userId} {
       allow read, write: if request.auth != null && request.auth.uid == userId;
     }
 
+    // ----------------------------------------------------------- platformAdmins
     // Lets a signed-in person check whether THEIR OWN account is the platform
     // owner. Nobody can list these documents or write them from the app.
     match /platformAdmins/{uid} {
       allow get: if isSignedIn() && request.auth.uid == uid;
     }
 
+    // -------------------------------------------------------------------- orgs
     function validOrg(d) {
-      return d.keys().hasOnly(['name', 'plan', 'seatLimit', 'focusAreas', 'status', 'createdAt', 'createdBy', 'updatedAt'])
+      return d.keys().hasOnly(['name', 'plan', 'seatLimit', 'focusAreas', 'notes',
+          'contactName', 'contactEmail', 'contactPhone', 'billingAddress',
+          'status', 'createdAt', 'createdBy', 'updatedAt'])
         && d.name is string && d.name.size() > 0 && d.name.size() <= 100
         && d.plan in ['flat', 'seat']
         && (d.seatLimit == null || (d.seatLimit is int && d.seatLimit >= 1 && d.seatLimit <= 100000))
         && d.focusAreas is list && d.focusAreas.size() <= 7
         && d.focusAreas.hasOnly(['discovery', 'strategy', 'prioritization', 'execution', 'stakeholder', 'aiIndividual', 'aiOrg'])
         && d.focusAreas.toSet().size() == d.focusAreas.size()
+        && d.get('notes', '') is string && d.get('notes', '').size() <= 2000
+        && d.get('contactName', '') is string && d.get('contactName', '').size() <= 100
+        && d.get('contactEmail', '') is string && d.get('contactEmail', '').size() <= 254
+        && d.get('contactPhone', '') is string && d.get('contactPhone', '').size() <= 40
+        && d.get('billingAddress', '') is string && d.get('billingAddress', '').size() <= 500
         && d.status in ['active', 'archived'];
     }
 
     match /orgs/{orgId} {
-      allow read: if isPlatformOwner();
+      allow read: if isPlatformOwner() || isActiveAdminOf(orgId);
       allow create: if isPlatformOwner()
         && validOrg(request.resource.data)
         && request.resource.data.createdBy == request.auth.uid;
-      allow update: if isPlatformOwner()
-        && validOrg(request.resource.data)
-        && request.resource.data.createdAt == resource.data.createdAt
-        && request.resource.data.createdBy == resource.data.createdBy;
+      allow update: if (isPlatformOwner()
+          && validOrg(request.resource.data)
+          && request.resource.data.createdAt == resource.data.createdAt
+          && request.resource.data.createdBy == resource.data.createdBy)
+        || (isActiveAdminOf(orgId)
+          && validOrg(request.resource.data)
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['focusAreas', 'updatedAt']));
+      allow delete: if false;
+    }
+
+    // ----------------------------------------------------------------- invites
+    // The document id IS the secret token in the invite link. Anyone signed in
+    // who knows a token can read that one invite (listing is not allowed).
+    function validInvite(d) {
+      return d.keys().hasOnly(['orgId', 'orgName', 'email', 'name', 'phone', 'role', 'status', 'createdAt', 'createdBy', 'expiresAt', 'usedBy', 'usedAt'])
+        && d.get('name', '') is string && d.get('name', '').size() <= 100
+        && d.get('phone', '') is string && d.get('phone', '').size() <= 40
+        && d.orgId is string
+        && d.orgName is string && d.orgName.size() > 0 && d.orgName.size() <= 100
+        && d.email is string && d.email.size() > 0 && d.email.size() <= 254
+        && d.role in ['member', 'admin']
+        && d.status == 'open'
+        && d.usedBy == null && d.usedAt == null
+        && d.createdAt == request.time
+        && d.createdBy == request.auth.uid
+        && d.expiresAt is timestamp
+        && d.expiresAt > request.time
+        && d.expiresAt < request.time + duration.value(120, 'd');
+    }
+
+    match /invites/{token} {
+      allow get: if isSignedIn();
+      allow list: if isSignedIn() && (isPlatformOwner() || isActiveAdminOf(resource.data.orgId));
+
+      allow create: if (isPlatformOwner() || isActiveAdminOf(request.resource.data.orgId))
+        && validInvite(request.resource.data)
+        && get(/databases/$(database)/documents/orgs/$(request.resource.data.orgId)).data.status == 'active'
+        && get(/databases/$(database)/documents/orgs/$(request.resource.data.orgId)).data.name == request.resource.data.orgName;
+
+      allow update: if isSignedIn() && (
+        // 1. The owner or one of the company's admins revokes an open invite.
+        ((isPlatformOwner() || isActiveAdminOf(resource.data.orgId))
+          && resource.data.status == 'open'
+          && request.resource.data.status == 'revoked'
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status']))
+        ||
+        // 2. The person accepting it, in the same batch that creates their membership.
+        (resource.data.status == 'open'
+          && request.time < resource.data.expiresAt
+          && request.resource.data.status == 'used'
+          && request.resource.data.usedBy == request.auth.uid
+          && request.resource.data.usedAt == request.time
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'usedBy', 'usedAt'])
+          && getAfter(/databases/$(database)/documents/memberships/$(request.auth.uid)).data.inviteToken == token)
+      );
+
+      allow delete: if false;
+    }
+
+    // ------------------------------------------------------------- memberships
+    // One document per person (their uid), holding their CURRENT company
+    // membership. A removed member can join a new company by accepting a new
+    // invite, which rewrites the document.
+    function validJoin(d, uid) {
+      return d.keys().hasOnly(['orgId', 'orgName', 'role', 'status', 'inviteToken', 'joinedAt', 'endedAt', 'email', 'displayName', 'phone'])
+        && d.get('phone', '') is string && d.get('phone', '').size() <= 40
+        && d.get('phone', '') == get(/databases/$(database)/documents/invites/$(d.inviteToken)).data.get('phone', '')
+        && d.orgId is string
+        && d.orgName is string
+        && d.role in ['member', 'admin']
+        && d.status == 'active'
+        && d.endedAt == null
+        && d.joinedAt == request.time
+        && d.inviteToken is string
+        && d.email is string && d.email == request.auth.token.email.lower()
+        && d.displayName is string && d.displayName.size() <= 100
+        && get(/databases/$(database)/documents/invites/$(d.inviteToken)).data.status == 'open'
+        && get(/databases/$(database)/documents/invites/$(d.inviteToken)).data.orgId == d.orgId
+        && get(/databases/$(database)/documents/invites/$(d.inviteToken)).data.orgName == d.orgName
+        && get(/databases/$(database)/documents/invites/$(d.inviteToken)).data.role == d.role
+        && request.time < get(/databases/$(database)/documents/invites/$(d.inviteToken)).data.expiresAt
+        && getAfter(/databases/$(database)/documents/invites/$(d.inviteToken)).data.status == 'used'
+        && getAfter(/databases/$(database)/documents/invites/$(d.inviteToken)).data.usedBy == uid
+        && get(/databases/$(database)/documents/orgs/$(d.orgId)).data.status == 'active';
+    }
+
+    match /memberships/{uid} {
+      allow get: if isSignedIn()
+        && (request.auth.uid == uid || isPlatformOwner() || isActiveAdminOf(resource.data.orgId));
+      allow list: if isSignedIn() && (isPlatformOwner() || isActiveAdminOf(resource.data.orgId));
+
+      allow create: if isSignedIn() && request.auth.uid == uid
+        && validJoin(request.resource.data, uid);
+      allow update: if isSignedIn() && request.auth.uid == uid
+        && resource.data.status == 'removed'
+        && validJoin(request.resource.data, uid);
       allow delete: if false;
     }
   }

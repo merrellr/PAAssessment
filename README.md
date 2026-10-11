@@ -40,6 +40,26 @@ started, graded, blocked and errored per day, plus a plain-English signal for
 when volume outgrows the free tier) and writes `blocked:` rows to the
 `ScenarioGrading` tab.
 
+## Company accounts (in progress)
+
+- `owner.html` is the platform owner's console (linked from the Profile menu on
+  the dashboard, owner only): a searchable list of companies, and a page per
+  company with point of contact, billing address, notes, seats, ranked focus
+  areas, admins and users. Admins and users join through single-use invite
+  links created there.
+- `join.html?token=…` is the page an invited person opens. It shows exactly
+  what the company can see, and only joins them after they agree.
+- `firestore.rules` holds the rules for all of this. They are tested against
+  the local Firestore emulator by `tests/firestore-rules.test.mjs`; the header
+  of that file says how to run it. Publish the rules by pasting the whole file
+  into Firebase console > Firestore Database > Rules.
+- `vendor/Sortable.min.js` (MIT, v1.15.2) powers the drag-and-drop ranking. It
+  is kept in the repo so the page does not depend on a third-party host.
+- Not built yet: the shared record that keeps each member's results visible to
+  their company, the company admin dashboard, focus areas shaping
+  recommendations, and removing members. Until the shared record exists, joining
+  a company shares nothing yet, so use test accounts only.
+
 ## Closing an account
 
 `profile.html` has a "Delete account" card. It re-checks the person's
