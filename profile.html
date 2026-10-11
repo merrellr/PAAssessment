@@ -50,6 +50,10 @@
   .btn-primary:hover{ opacity:0.92; }
   .btn-ghost{ background:none; color: var(--gray); border: 1px solid var(--line); }
 
+  .btn-danger{ background: var(--warn); color:#fff; }
+  .btn-danger:hover{ opacity:0.92; }
+  button.btn:disabled{ opacity:0.6; cursor: default; }
+
   .divider{ height:1px; background:var(--line); margin: 20px 0; }
 </style>
 </head>
@@ -141,6 +145,22 @@
     <button class="btn btn-primary" onclick="handleChangeEmail()">Send confirmation link</button>
   </div>
 
+  <div class="card" id="deleteCard" style="border-color:#E8C9B8;">
+    <h2 style="color:var(--warn);">Delete account</h2>
+    <p>This permanently deletes your sign-in, your course progress and assessment results, and the records we keep about you in our results spreadsheet. It can't be undone. You're welcome to take the assessment again later with a new account.</p>
+    <input class="text-input" type="password" id="deletePassword" placeholder="Current password" style="display:none;" autocomplete="current-password">
+    <label class="profile-field-label" for="deleteConfirmText">Type DELETE to confirm</label>
+    <input class="text-input" type="text" id="deleteConfirmText" placeholder="DELETE" autocomplete="off">
+    <div class="field-error" id="deleteError"></div>
+    <button class="btn btn-danger" id="deleteBtn" onclick="handleDeleteAccount()">Delete my account</button>
+  </div>
+
+  <div class="card" id="deletedNotice" style="display:none;">
+    <h1>Your account has been deleted</h1>
+    <p>Your sign-in, progress and results have been removed. Thank you for spending time with us.</p>
+    <p><a href="index.html" style="color:var(--navy);">Back to the assessment →</a></p>
+  </div>
+
   <div style="margin-top:40px; padding:20px 0; border-top:1px solid var(--line); text-align:center; font-size:12px; color:var(--gray);">
     © <span id="footerYear"></span> Product Advisory, LLC. All rights reserved. &nbsp;·&nbsp;
     <a href="https://www.productadvisory.co/privacy-policy" target="_blank" rel="noopener" style="color:var(--gray); text-decoration:underline;">Privacy Policy</a> &nbsp;·&nbsp;
@@ -162,9 +182,9 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/fireba
 import {
   getAuth, onAuthStateChanged, GoogleAuthProvider,
   reauthenticateWithCredential, reauthenticateWithPopup, EmailAuthProvider,
-  updateProfile, verifyBeforeUpdateEmail
+  updateProfile, verifyBeforeUpdateEmail, deleteUser
 } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
-import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+import { getFirestore, doc, getDoc, setDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
@@ -290,8 +310,13 @@ function friendlyAuthError(code){
   return map[code] || 'Something went wrong — please try again.';
 }
 
+// Set just before the auth user is deleted, so the sign-out that follows
+// shows the "account deleted" notice instead of bouncing to the dashboard.
+let accountDeleted = false;
+
 onAuthStateChanged(auth, async (user) => {
   if (!user){
+    if (accountDeleted) return;
     window.location.href = 'lms-dashboard.html';
     return;
   }
@@ -309,6 +334,7 @@ onAuthStateChanged(auth, async (user) => {
 
   const hasPasswordProvider = user.providerData.some(p => p.providerId === 'password');
   document.getElementById('editEmailCurrentPassword').style.display = hasPasswordProvider ? 'block' : 'none';
+  document.getElementById('deletePassword').style.display = hasPasswordProvider ? 'block' : 'none';
 
   const progressRef = doc(db, 'progress', user.uid);
   const snap = await getDoc(progressRef);
@@ -388,6 +414,98 @@ window.handleChangeEmail = async function(){
   } catch (err){
     errorEl.textContent = friendlyAuthError(err.code);
   }
+};
+
+/* Asks the Apps Script backend to remove this person's rows from the
+   results spreadsheet. The Firebase ID token proves who is asking; the
+   backend checks it with Google before deleting anything. Resolves to the
+   backend's reply, or null on timeout/failure. Same JSONP pattern as the
+   other lookups, since POST replies aren't reliably readable cross-origin. */
+function requestSheetDeletion(idToken){
+  return new Promise((resolve) => {
+    const cb = 'deleteAccountCallback_' + Date.now();
+    const script = document.createElement('script');
+    let settled = false;
+    const finish = (value) => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timeoutId);
+      delete window[cb];
+      script.remove();
+      resolve(value);
+    };
+    const timeoutId = setTimeout(() => finish(null), 30000);
+    window[cb] = (result) => finish(result || null);
+    script.onerror = () => finish(null);
+    script.src = RESULTS_LOG_URL + '?action=deleteAccount&token=' + encodeURIComponent(idToken) + '&callback=' + cb;
+    document.body.appendChild(script);
+  });
+}
+
+/* Order matters: spreadsheet rows first (needs the person still signed in
+   to prove who they are), then the Firestore record, then the sign-in
+   itself. If any step fails nothing later runs, and every step is safe to
+   repeat, so "try again" always works. */
+window.handleDeleteAccount = async function(){
+  const errorEl = document.getElementById('deleteError');
+  const btn = document.getElementById('deleteBtn');
+  errorEl.textContent = '';
+
+  if (document.getElementById('deleteConfirmText').value.trim() !== 'DELETE'){
+    errorEl.textContent = 'Type DELETE in capital letters to confirm.';
+    return;
+  }
+
+  const hasPasswordProvider = currentUser.providerData.some(p => p.providerId === 'password');
+  const password = document.getElementById('deletePassword').value;
+  if (hasPasswordProvider && !password){
+    errorEl.textContent = 'Enter your current password to confirm.';
+    return;
+  }
+
+  const resetButton = () => { btn.disabled = false; btn.textContent = 'Delete my account'; };
+  btn.disabled = true;
+  btn.textContent = 'Deleting…';
+
+  try {
+    if (hasPasswordProvider){
+      await reauthenticateWithCredential(currentUser, EmailAuthProvider.credential(currentUser.email, password));
+    } else {
+      await reauthenticateWithPopup(currentUser, new GoogleAuthProvider());
+    }
+  } catch (err){
+    errorEl.textContent = friendlyAuthError(err.code);
+    resetButton();
+    return;
+  }
+
+  const uid = currentUser.uid;
+  let sheetResult = null;
+  try {
+    sheetResult = await requestSheetDeletion(await currentUser.getIdToken(true));
+  } catch (err){ /* treated as a failed attempt below */ }
+  if (!sheetResult || sheetResult.ok !== true){
+    errorEl.textContent = "We couldn't remove your records from our results spreadsheet, so nothing has been deleted. Please try again in a minute.";
+    resetButton();
+    return;
+  }
+
+  try {
+    await deleteDoc(doc(db, 'progress', uid));
+    accountDeleted = true;
+    await deleteUser(currentUser);
+  } catch (err){
+    accountDeleted = false;
+    console.error('Could not finish deleting the account:', err);
+    errorEl.textContent = "Your records were removed, but we couldn't finish closing your account. Please try again.";
+    resetButton();
+    return;
+  }
+
+  try { localStorage.removeItem('pa_cid'); } catch (e){ /* storage unavailable */ }
+  document.querySelectorAll('.wrap > .card').forEach(card => { card.style.display = 'none'; });
+  document.getElementById('deletedNotice').style.display = 'block';
+  window.scrollTo(0, 0);
 };
 </script>
 <script>document.getElementById("footerYear").textContent = new Date().getFullYear();</script>

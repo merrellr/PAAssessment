@@ -438,3 +438,84 @@ function refreshUsageReportIfStale_() {
     // best-effort only
   }
 }
+
+
+/* ===================================================================
+   4. Account deletion (the "Delete account" card on profile.html)
+   ===================================================================
+   Wire-up: add this at the top of doGet(e), next to the gradeScenario line:
+
+   if (e.parameter.action === "deleteAccount") {
+     return jsonpOut_(e.parameter.callback, deleteAccountData_(e.parameter.token || ""));
+   }
+
+   The browser sends the person's Firebase ID token. This asks Google to
+   confirm who it belongs to, then removes that email's rows from the
+   Responses and Progress tabs. It cannot reach the ScenarioGrading and
+   Funnel tabs, which hold no identity. Rows saved under an email address
+   the person has since changed are also not matched.
+*/
+
+// Public by design: this is the same web API key shipped in every page's
+// firebaseConfig. It only identifies the Firebase project.
+var FIREBASE_WEB_API_KEY_ = 'AIzaSyAcECtS5c6WeOhKlwRK-LYFE47npbuq_eU';
+
+function verifyFirebaseIdToken_(idToken) {
+  if (!idToken) return null;
+  var response = UrlFetchApp.fetch(
+    'https://identitytoolkit.googleapis.com/v1/accounts:lookup?key=' + FIREBASE_WEB_API_KEY_,
+    {
+      method: 'post',
+      contentType: 'application/json',
+      headers: { Referer: 'https://assessment.productadvisory.co/' },
+      payload: JSON.stringify({ idToken: idToken }),
+      muteHttpExceptions: true
+    }
+  );
+  if (response.getResponseCode() !== 200) return null;
+  var users = JSON.parse(response.getContentText()).users;
+  if (!users || !users.length || !users[0].email) return null;
+  return { uid: users[0].localId, email: String(users[0].email).toLowerCase().trim() };
+}
+
+// Deletes every row whose email column matches, bottom-up so row numbers
+// stay valid. emailIndex is zero-based. Returns how many rows were removed.
+function deleteRowsByEmail_(sheet, emailIndex, email) {
+  if (!sheet || sheet.getLastRow() < 2) return 0;
+  var values = sheet.getRange(2, emailIndex + 1, sheet.getLastRow() - 1, 1).getValues();
+  var removed = 0;
+  for (var i = values.length - 1; i >= 0; i--) {
+    if (String(values[i][0]).toLowerCase().trim() === email) {
+      sheet.deleteRow(i + 2);
+      removed++;
+    }
+  }
+  return removed;
+}
+
+function deleteAccountData_(idToken) {
+  var who = null;
+  try { who = verifyFirebaseIdToken_(idToken); } catch (err) { who = null; }
+  if (!who) return { ok: false, error: 'not_verified' };
+
+  var lock = null;
+  var locked = false;
+  try {
+    lock = LockService.getScriptLock();
+    locked = lock.tryLock(15000);
+  } catch (e) { /* proceed unlocked */ }
+  try {
+    var ss = SpreadsheetApp.getActiveSpreadsheet();
+    return {
+      ok: true,
+      removed: {
+        responses: deleteRowsByEmail_(ss.getSheetByName(SHEET_NAME), 2, who.email),
+        progress: deleteRowsByEmail_(ss.getSheetByName(PROGRESS_SHEET_NAME), 1, who.email)
+      }
+    };
+  } catch (err) {
+    return { ok: false, error: 'sheet_error' };
+  } finally {
+    if (locked) lock.releaseLock();
+  }
+}

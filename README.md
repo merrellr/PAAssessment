@@ -25,6 +25,21 @@ started, graded, blocked and errored per day, plus a plain-English signal for
 when volume outgrows the free tier) and writes `blocked:` rows to the
 `ScenarioGrading` tab.
 
+## Closing an account
+
+`profile.html` has a "Delete account" card. It re-checks the person's
+password (or Google sign-in), then in this order: asks the Apps Script
+(`action=deleteAccount`, section 4 of `apps-script/grade-scenario.gs`) to remove
+their rows from the `Responses` and `Progress` tabs, deletes their
+`progress/{uid}` Firestore document, and finally deletes the Firebase sign-in.
+Each step is safe to repeat, and a failure stops everything after it. The
+Apps Script verifies the Firebase ID token with Google before deleting
+anything, so it can't be used to delete someone else's rows.
+
+Not removed, because it holds no identity: the `ScenarioGrading` and `Funnel`
+tabs. Also not matched: rows saved under an email address the person has
+since changed.
+
 **Not currently wired up — a later upgrade path, not dead code:**
 `functions/gradeApplicationScenario` (Cloud Functions v2) does the same
 grading with a cleaner architecture (real secrets, a queryable Firestore
