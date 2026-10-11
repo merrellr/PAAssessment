@@ -50,6 +50,8 @@
   .btn-primary:hover{ opacity:0.92; }
   .btn-ghost{ background:none; color: var(--gray); border: 1px solid var(--line); }
 
+  a.btn-link{ display:inline-block; font-family:'Space Grotesk', sans-serif; font-weight:600; font-size:14px; border-radius:8px; padding:11px 20px; text-decoration:none; background: linear-gradient(90deg, var(--navy) 0%, var(--navy-deep) 100%); color:#fff; }
+  a.btn-link:hover{ opacity:0.92; }
   .btn-danger{ background: var(--warn); color:#fff; }
   .btn-danger:hover{ opacity:0.92; }
   button.btn:disabled{ opacity:0.6; cursor: default; }
@@ -143,6 +145,12 @@
     <div class="field-error" id="editEmailError"></div>
     <div class="field-error" id="editEmailSuccess" style="color:#2E8B57;"></div>
     <button class="btn btn-primary" onclick="handleChangeEmail()">Send confirmation link</button>
+  </div>
+
+  <div class="card" id="ownerCard" style="display:none;">
+    <h2>Platform owner</h2>
+    <p>Create and edit companies, set seats and focus areas.</p>
+    <a class="btn-link" href="owner.html">Open the owner console →</a>
   </div>
 
   <div class="card" id="deleteCard" style="border-color:#E8C9B8;">
@@ -335,6 +343,12 @@ onAuthStateChanged(auth, async (user) => {
   const hasPasswordProvider = user.providerData.some(p => p.providerId === 'password');
   document.getElementById('editEmailCurrentPassword').style.display = hasPasswordProvider ? 'block' : 'none';
   document.getElementById('deletePassword').style.display = hasPasswordProvider ? 'block' : 'none';
+
+  // Only the platform owner has a platformAdmins/{uid} document; for
+  // everyone else this finds nothing and the card stays hidden.
+  getDoc(doc(db, 'platformAdmins', user.uid))
+    .then(ownerSnap => { if (ownerSnap.exists()) document.getElementById('ownerCard').style.display = 'block'; })
+    .catch(() => { /* not the owner, or the rules are not published: keep it hidden */ });
 
   const progressRef = doc(db, 'progress', user.uid);
   const snap = await getDoc(progressRef);

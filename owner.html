@@ -44,16 +44,23 @@
   button.btn:disabled{ opacity:0.6; cursor: default; }
   .btn-row{ display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
 
-  .focus-list{ list-style:none; margin: 0 0 10px; padding: 0; }
-  .focus-item{ display:flex; align-items:center; gap:10px; padding: 8px 10px; border:1px solid var(--line); border-radius: 9px; margin-bottom: 6px; background: var(--bg); }
-  .focus-rank{ font-family:'Space Grotesk', sans-serif; font-weight:700; color: var(--navy); width: 20px; }
-  .focus-name{ flex:1; font-size: 13.5px; }
-  .focus-empty{ font-size: 13px; color: var(--gray); margin: 0 0 10px 2px; }
-  .icon-btn{ background:none; border:1px solid var(--line); border-radius:6px; width:28px; height:28px; cursor:pointer; color: var(--ink-soft); }
+  .focus-board{ display:grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 6px; }
+  @media (max-width: 640px){ .focus-board{ grid-template-columns: 1fr; } }
+  .focus-col{ border: 1.5px dashed var(--line); border-radius: 12px; padding: 10px; background: #FBFCFE; transition: border-color .12s, background .12s; }
+  .focus-col.over{ border-color: var(--cyan); background: #F2FAFD; }
+  .focus-col-title{ font-family:'Space Grotesk', sans-serif; font-weight:600; font-size: 12.5px; color: var(--ink-soft); margin: 0 0 8px 2px; }
+  .focus-list{ list-style:none; margin: 0; padding: 0; min-height: 70px; }
+  .focus-item{ display:flex; align-items:center; gap:8px; padding: 8px 10px; border:1px solid var(--line); border-radius: 9px; margin-bottom: 6px; background: #fff; cursor: grab; user-select: none; }
+  .focus-item.dragging{ opacity: 0.35; }
+  .focus-item.drop-before{ box-shadow: 0 -3px 0 var(--cyan); }
+  .focus-list.drop-end{ box-shadow: inset 0 -3px 0 var(--cyan); }
+  .focus-grip{ color: var(--gray); font-size: 14px; line-height: 1; }
+  .focus-rank{ font-family:'Space Grotesk', sans-serif; font-weight:700; color: var(--navy); min-width: 16px; }
+  .focus-name{ flex:1; font-size: 13px; line-height: 1.3; }
+  .focus-placeholder{ font-size: 12.5px; color: var(--gray); padding: 14px 6px; text-align: center; }
+  .icon-btn{ background:none; border:1px solid var(--line); border-radius:6px; width:26px; height:26px; cursor:pointer; color: var(--ink-soft); font-size: 12px; padding: 0; }
   .icon-btn:hover{ border-color: var(--cyan); }
   .icon-btn:disabled{ opacity:0.35; cursor:default; }
-  .focus-add{ display:flex; gap:8px; }
-  .focus-add select{ flex:1; margin-bottom:0; }
 
   .org-row{ padding: 16px 0; border-top: 1px solid var(--line); }
   .org-row:first-child{ border-top: none; }
@@ -128,6 +135,20 @@ const OwnerLogic = (function(){
     return DOMAINS.map(d => d[0]).filter(k => list.indexOf(k) === -1);
   }
 
+  // Moves `key` to position `index` of the ranked list (inserting it if it
+  // was not ranked yet). `index` counts positions in the list WITHOUT `key`.
+  function placeFocus(list, key, index){
+    if (!(key in labels)) return list.slice();
+    const without = list.filter(k => k !== key);
+    const i = Math.max(0, Math.min(index, without.length));
+    without.splice(i, 0, key);
+    return without;
+  }
+
+  function removeFocus(list, key){
+    return list.filter(k => k !== key);
+  }
+
   function describeFocus(list){
     if (!list || !list.length) return 'No company focus set';
     return list.map((k, i) => (i + 1) + '. ' + domainLabel(k)).join('  ·  ');
@@ -138,7 +159,154 @@ const OwnerLogic = (function(){
     return 'Flat enterprise';
   }
 
-  return { DOMAINS, domainLabel, validateOrgForm, buildOrgFields, moveItem, availableFocus, describeFocus, describePlan };
+  return { DOMAINS, domainLabel, validateOrgForm, buildOrgFields, moveItem, availableFocus, placeFocus, removeFocus, describeFocus, describePlan };
+})();
+
+/* The drag-and-drop ranking board: a numbered "Priority order" list and a
+   "Not a priority" bucket. Drag a skill area between and within the lists;
+   the arrow and + / ✕ buttons do the same thing for touch screens and
+   keyboards. It only edits a list of keys through getList/setList, so it
+   knows nothing about Firebase. */
+const FocusBoard = (function(){
+  let rankedEl, bucketEl, getList, setList;
+  let dragKey = null;
+
+  function change(next){ setList(next); render(); }
+
+  function button(text, title, disabled, onClick){
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'icon-btn';
+    b.textContent = text;
+    b.title = title;
+    b.setAttribute('aria-label', title);
+    b.disabled = !!disabled;
+    b.addEventListener('click', onClick);
+    return b;
+  }
+
+  function makeItem(key, rankIndex, total){
+    const li = document.createElement('li');
+    li.className = 'focus-item';
+    li.draggable = true;
+    li.dataset.key = key;
+
+    const grip = document.createElement('span');
+    grip.className = 'focus-grip';
+    grip.textContent = '⠿';
+    li.appendChild(grip);
+
+    if (rankIndex >= 0){
+      const rank = document.createElement('span');
+      rank.className = 'focus-rank';
+      rank.textContent = String(rankIndex + 1);
+      li.appendChild(rank);
+    }
+
+    const name = document.createElement('span');
+    name.className = 'focus-name';
+    name.textContent = OwnerLogic.domainLabel(key);
+    li.appendChild(name);
+
+    if (rankIndex >= 0){
+      li.appendChild(button('↑', 'Move up', rankIndex === 0, () => change(OwnerLogic.moveItem(getList(), rankIndex, -1))));
+      li.appendChild(button('↓', 'Move down', rankIndex === total - 1, () => change(OwnerLogic.moveItem(getList(), rankIndex, 1))));
+      li.appendChild(button('✕', 'Remove from priorities', false, () => change(OwnerLogic.removeFocus(getList(), key))));
+    } else {
+      li.appendChild(button('+', 'Add to priorities', false, () => change(OwnerLogic.placeFocus(getList(), key, getList().length))));
+    }
+
+    li.addEventListener('dragstart', (e) => {
+      dragKey = key;
+      li.classList.add('dragging');
+      if (e.dataTransfer){
+        e.dataTransfer.effectAllowed = 'move';
+        e.dataTransfer.setData('text/plain', key);
+      }
+    });
+    li.addEventListener('dragend', () => { dragKey = null; li.classList.remove('dragging'); clearMarks(); });
+    return li;
+  }
+
+  function placeholder(text){
+    const li = document.createElement('li');
+    li.className = 'focus-placeholder';
+    li.textContent = text;
+    return li;
+  }
+
+  function render(){
+    const list = getList();
+    rankedEl.innerHTML = '';
+    bucketEl.innerHTML = '';
+    if (!list.length) rankedEl.appendChild(placeholder('Drag skill areas here, most important first.'));
+    list.forEach((key, i) => rankedEl.appendChild(makeItem(key, i, list.length)));
+    const rest = OwnerLogic.availableFocus(list);
+    if (!rest.length) bucketEl.appendChild(placeholder('Every skill area is ranked.'));
+    rest.forEach(key => bucketEl.appendChild(makeItem(key, -1, 0)));
+  }
+
+  function itemsExcludingDragged(zone){
+    return Array.prototype.filter.call(zone.querySelectorAll('.focus-item'), li => li.dataset.key !== dragKey);
+  }
+
+  function dropIndexFor(zone, clientY){
+    const items = itemsExcludingDragged(zone);
+    for (let i = 0; i < items.length; i++){
+      const r = items[i].getBoundingClientRect();
+      if (clientY < r.top + r.height / 2) return i;
+    }
+    return items.length;
+  }
+
+  function clearMarks(){
+    Array.prototype.forEach.call(document.querySelectorAll('.drop-before, .drop-end'), el => {
+      el.classList.remove('drop-before');
+      el.classList.remove('drop-end');
+    });
+    Array.prototype.forEach.call(document.querySelectorAll('.focus-col.over'), el => el.classList.remove('over'));
+  }
+
+  function wireZone(zone, ranked){
+    const col = zone.parentElement;
+    zone.addEventListener('dragover', (e) => {
+      if (!dragKey) return;
+      e.preventDefault();
+      if (e.dataTransfer) e.dataTransfer.dropEffect = 'move';
+      clearMarks();
+      col.classList.add('over');
+      if (ranked){
+        const items = itemsExcludingDragged(zone);
+        const idx = dropIndexFor(zone, e.clientY);
+        if (idx < items.length) items[idx].classList.add('drop-before');
+        else zone.classList.add('drop-end');
+      }
+    });
+    zone.addEventListener('dragleave', (e) => {
+      if (!col.contains(e.relatedTarget)) clearMarks();
+    });
+    zone.addEventListener('drop', (e) => {
+      if (!dragKey) return;
+      e.preventDefault();
+      const key = dragKey;
+      const idx = ranked ? dropIndexFor(zone, e.clientY) : -1;
+      clearMarks();
+      dragKey = null;
+      change(ranked ? OwnerLogic.placeFocus(getList(), key, idx) : OwnerLogic.removeFocus(getList(), key));
+    });
+  }
+
+  function init(opts){
+    rankedEl = opts.rankedEl;
+    bucketEl = opts.bucketEl;
+    getList = opts.getList;
+    setList = opts.setList;
+    wireZone(rankedEl, true);
+    wireZone(bucketEl, false);
+    render();
+  }
+
+  return { init, render };
 })();
 </script>
 </head>
@@ -196,13 +364,17 @@ const OwnerLogic = (function(){
         </div>
       </div>
 
-      <label class="field-label">Focus areas, in priority order</label>
-      <div class="hint">The top item matters most. These raise the chosen skill areas in each member's recommended courses. Leave it empty and recommendations work exactly as they do today.</div>
-      <ul class="focus-list" id="focusList"></ul>
-      <p class="focus-empty" id="focusEmpty">No focus areas yet.</p>
-      <div class="focus-add">
-        <select class="text-input" id="focusSelect"></select>
-        <button class="btn btn-ghost" id="focusAddBtn" type="button">Add</button>
+      <label class="field-label">Focus areas</label>
+      <div class="hint">Drag skill areas into <strong>Priority order</strong>, most important at the top. These raise the chosen areas in each member's recommended courses. Anything left in <strong>Not a priority</strong> is treated normally, and if you rank nothing, recommendations work exactly as they do today. On a phone or tablet, use the arrow and + buttons instead of dragging.</div>
+      <div class="focus-board">
+        <div class="focus-col">
+          <div class="focus-col-title">Priority order</div>
+          <ul class="focus-list" id="focusRanked"></ul>
+        </div>
+        <div class="focus-col">
+          <div class="focus-col-title">Not a priority</div>
+          <ul class="focus-list" id="focusBucket"></ul>
+        </div>
       </div>
       <div class="field-error" id="focusError"></div>
 
@@ -278,63 +450,17 @@ onAuthStateChanged(auth, async (user) => {
   await loadOrgs();
 });
 
-/* ---------- focus areas (ranked) ---------- */
-function renderFocus(){
-  const list = $('focusList');
-  list.innerHTML = '';
-  focusAreas.forEach((key, i) => {
-    const li = document.createElement('li');
-    li.className = 'focus-item';
-
-    const rank = document.createElement('span');
-    rank.className = 'focus-rank';
-    rank.textContent = String(i + 1);
-
-    const name = document.createElement('span');
-    name.className = 'focus-name';
-    name.textContent = OwnerLogic.domainLabel(key);
-
-    const up = document.createElement('button');
-    up.type = 'button'; up.className = 'icon-btn'; up.textContent = '↑';
-    up.title = 'Move up'; up.disabled = i === 0;
-    up.addEventListener('click', () => { focusAreas = OwnerLogic.moveItem(focusAreas, i, -1); renderFocus(); });
-
-    const down = document.createElement('button');
-    down.type = 'button'; down.className = 'icon-btn'; down.textContent = '↓';
-    down.title = 'Move down'; down.disabled = i === focusAreas.length - 1;
-    down.addEventListener('click', () => { focusAreas = OwnerLogic.moveItem(focusAreas, i, 1); renderFocus(); });
-
-    const remove = document.createElement('button');
-    remove.type = 'button'; remove.className = 'icon-btn'; remove.textContent = '✕';
-    remove.title = 'Remove';
-    remove.addEventListener('click', () => { focusAreas = focusAreas.filter(k => k !== key); renderFocus(); });
-
-    li.append(rank, name, up, down, remove);
-    list.appendChild(li);
-  });
-
-  $('focusEmpty').style.display = focusAreas.length ? 'none' : 'block';
-
-  const select = $('focusSelect');
-  select.innerHTML = '';
-  const available = OwnerLogic.availableFocus(focusAreas);
-  available.forEach(key => {
-    const opt = document.createElement('option');
-    opt.value = key;
-    opt.textContent = OwnerLogic.domainLabel(key);
-    select.appendChild(opt);
-  });
-  $('focusAddBtn').disabled = available.length === 0;
-  select.disabled = available.length === 0;
-}
-
-$('focusAddBtn').addEventListener('click', () => {
-  const key = $('focusSelect').value;
-  if (key && focusAreas.indexOf(key) === -1){
-    focusAreas = focusAreas.concat([key]);
-    renderFocus();
-  }
+/* ---------- focus areas (ranked, drag and drop) ---------- */
+FocusBoard.init({
+  rankedEl: $('focusRanked'),
+  bucketEl: $('focusBucket'),
+  getList: () => focusAreas,
+  setList: (next) => { focusAreas = next; }
 });
+
+function renderFocus(){
+  FocusBoard.render();
+}
 
 $('orgPlan').addEventListener('change', () => {
   $('seatWrap').style.display = $('orgPlan').value === 'seat' ? 'block' : 'none';
