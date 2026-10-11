@@ -1,19 +1,66 @@
-// Copy of the Firestore rules published in the Firebase console for project
-// product-advisory-lms, as of 2026-10-11.
+// Firestore rules for project product-advisory-lms.
 //
-// Editing this file does NOT change the live rules. To change them, paste the
-// new text into Firebase console > Firestore Database > Rules and click
-// Publish (or run `firebase deploy --only firestore:rules`), then update this
-// file so the two stay identical.
+// STATUS: checkpoint 1 of the company-accounts build. The progress/{userId}
+// rule below is the one already published in the Firebase console (as of
+// 2026-10-11). The platformAdmins and orgs rules are NEW and only take effect
+// once pasted into Firebase console > Firestore Database > Rules and
+// published. Update this status line when that is done.
 //
-// What these allow: a signed-in person can read, write and delete only their
-// own progress/{uid} document. Everything else is denied by default. Deleting
-// the document is what the profile page's "Delete account" flow relies on.
+// Editing this file does NOT change the live rules. Paste the whole file into
+// the console Rules tab and click Publish, so the two stay identical.
+//
+// What these allow:
+//   - A signed-in person can read, write and delete only their own
+//     progress/{uid} document (unchanged). Deleting it is what the profile
+//     page's "Delete account" flow relies on.
+//   - Only the platform owner (an account with a platformAdmins/{uid}
+//     document, created by hand in the console) can read or write companies
+//     (orgs). Nobody can delete a company; it is archived instead.
+//   - Everything else is denied by default.
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isPlatformOwner() {
+      return isSignedIn()
+        && exists(/databases/$(database)/documents/platformAdmins/$(request.auth.uid));
+    }
+
     match /progress/{userId} {
       allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // Lets a signed-in person check whether THEIR OWN account is the platform
+    // owner. Nobody can list these documents or write them from the app.
+    match /platformAdmins/{uid} {
+      allow get: if isSignedIn() && request.auth.uid == uid;
+    }
+
+    function validOrg(d) {
+      return d.keys().hasOnly(['name', 'plan', 'seatLimit', 'focusAreas', 'status', 'createdAt', 'createdBy', 'updatedAt'])
+        && d.name is string && d.name.size() > 0 && d.name.size() <= 100
+        && d.plan in ['flat', 'seat']
+        && (d.seatLimit == null || (d.seatLimit is int && d.seatLimit >= 1 && d.seatLimit <= 100000))
+        && d.focusAreas is list && d.focusAreas.size() <= 7
+        && d.focusAreas.hasOnly(['discovery', 'strategy', 'prioritization', 'execution', 'stakeholder', 'aiIndividual', 'aiOrg'])
+        && d.focusAreas.toSet().size() == d.focusAreas.size()
+        && d.status in ['active', 'archived'];
+    }
+
+    match /orgs/{orgId} {
+      allow read: if isPlatformOwner();
+      allow create: if isPlatformOwner()
+        && validOrg(request.resource.data)
+        && request.resource.data.createdBy == request.auth.uid;
+      allow update: if isPlatformOwner()
+        && validOrg(request.resource.data)
+        && request.resource.data.createdAt == resource.data.createdAt
+        && request.resource.data.createdBy == resource.data.createdBy;
+      allow delete: if false;
     }
   }
 }
