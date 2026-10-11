@@ -1,6 +1,21 @@
 # PAAssessment
 This is a Product Advisory Repository Assessment
 
+## The Apps Script backend
+
+`apps-script/Code.gs` is the complete script that runs behind
+`RESULTS_LOG_URL`: results logging, course-progress sync, funnel events,
+scenario grading with daily limits, the `Usage` report, and account deletion.
+To change the live script, edit this file, select-all and paste it into the
+Apps Script editor, then Deploy → Manage deployments → pencil → New version.
+`grade-scenario.gs` and `funnel-handler.gs` are older partial copies kept for
+the explanations in their header comments; `Code.gs` is the one that matches
+what is deployed.
+
+Every finished assessment gets an `assessmentId`, saved on the person's
+Firestore result (`progress/{uid}.assessmentResult.assessmentId`) and in the
+last column of the `Responses` tab, so the two records can be matched.
+
 ## Scenario grading (the "VP buy-in" free-text question)
 
 **Currently live:** `apps-script/grade-scenario.gs` — grades it via the

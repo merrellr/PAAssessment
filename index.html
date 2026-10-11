@@ -846,10 +846,11 @@ function startQuiz(){
    and a timestamp (plus the tier band on the results/convert steps).
    Fire-and-forget: a logging failure never blocks the person.
 
-   BACKEND: the Apps Script needs to handle POST bodies where
-   `action === 'funnel'` and append { event, ts, tier } to a
-   separate "Funnel" sheet/tab. Until that handler exists these
-   POSTs are simply ignored server-side, which is harmless.
+   BACKEND: the Apps Script must handle POST bodies where
+   `action === 'funnel'` (see apps-script/Code.gs) and append them to
+   the "Funnel" tab. Without that handler each event is saved as a
+   blank assessment result in the Responses tab, which skews every
+   total and average.
    ================================================================ */
 function funnelEvent(event, extra){
   if (!RESULTS_LOG_URL) return;
@@ -917,6 +918,16 @@ function selectOption(i){
 
 let lastScores = null; // cached so the results screen + logging use the same computed scores
 
+// One id per finished assessment, saved on both the Firestore result and
+// the Google Sheet row so the two records of the same attempt can be
+// matched. Set in finishAssessment(); the scenario re-score reuses it.
+let currentAssessmentId = null;
+function newAssessmentId(){
+  return (window.crypto && crypto.randomUUID)
+    ? crypto.randomUUID()
+    : 'a' + Date.now().toString(36) + Math.random().toString(36).slice(2, 10);
+}
+
 /* The compact result object saved to the person's Firestore progress
    doc and read back by the dashboard + lesson gate. Shape matches what
    those pages already expect from the Google Sheet lookup. */
@@ -928,7 +939,8 @@ function buildResultObj(scores){
     overallTotal: scores.overallTotal,
     overallMax: scores.overallMax,
     tier: getTier(scores.overallPct).name,
-    categoryPct: categoryPct
+    categoryPct: categoryPct,
+    assessmentId: currentAssessmentId
   };
 }
 
@@ -1066,6 +1078,7 @@ async function submitScenario(){
    folded in afterward without blocking any of this. */
 async function finishAssessment(scores){
   lastScores = scores;
+  currentAssessmentId = newAssessmentId();
   window.__assessmentResultObj = buildResultObj(scores);
 
   const acctLead = window.getAccountLead && window.getAccountLead();
@@ -1162,7 +1175,8 @@ function logResult(lead, scores){
     overallPct: Math.round(scores.overallPct),
     overallScore: scores.overallTotal,
     overallMax: scores.overallMax,
-    tier: tier.name
+    tier: tier.name,
+    assessmentId: currentAssessmentId
   });
   Object.keys(CATEGORIES).forEach(key => {
     payload[key + 'Pct'] = Math.round(scores.catPct[key]);
