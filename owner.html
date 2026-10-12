@@ -101,6 +101,7 @@
   .links-box code{ display:block; font-size: 12px; word-break: break-all; color: var(--ink-soft); }
   .result-line{ font-size: 13px; line-height: 1.6; color: var(--ink-soft); }
   td.cell-error{ color: var(--warn); font-size: 12.5px; }
+  .inline-check{ display:flex; align-items:center; gap:8px; font-size:13px; color: var(--ink-soft); margin: 0 0 12px 2px; cursor:pointer; }
 </style>
 
 <script src="vendor/Sortable.min.js"></script>
@@ -264,14 +265,14 @@ const OwnerLogic = (function(){
     const rows = [];
     memberships.forEach(m => {
       if (m.role !== role) return;
-      rows.push({ kind: 'member', id: m.id, name: m.displayName || '', email: m.email || '', phone: m.phone || '',
+      rows.push({ kind: 'member', id: m.id, role: role, name: m.displayName || '', email: m.email || '', phone: m.phone || '',
         status: m.status === 'removed' ? 'removed' : 'active', dateMs: m.joinedAtMs || 0 });
     });
     invites.forEach(inv => {
       if (inv.role !== role) return;
       const st = inviteStatus(inv, nowMs);
       if (st === 'used' || st === 'revoked') return;
-      rows.push({ kind: 'invite', id: inv.id, token: inv.id, name: inv.name || '', email: inv.email || '', phone: inv.phone || '',
+      rows.push({ kind: 'invite', id: inv.id, token: inv.id, role: role, name: inv.name || '', email: inv.email || '', phone: inv.phone || '',
         status: st === 'open' ? 'invited' : 'expired', dateMs: inv.createdAtMs || 0, expiresAtMs: inv.expiresAtMs || 0 });
     });
     rows.sort((a, b) => (ORDER[a.status] - ORDER[b.status]) || (a.name || a.email).toLowerCase().localeCompare((b.name || b.email).toLowerCase()));
@@ -567,6 +568,7 @@ const FocusBoard = (function(){
               <input class="text-input" type="tel" id="firstAdminPhone" maxlength="40" autocomplete="off">
             </div>
           </div>
+          <label class="inline-check"><input type="checkbox" id="firstAdminSendEmail" checked> <span>Email the invitation now</span></label>
         </div>
 
         <div class="field-error" id="saveError"></div>
@@ -621,7 +623,10 @@ const FocusBoard = (function(){
             <h2>Admins</h2>
             <div class="hint" style="margin:4px 0 0;">Admins manage this company's team. A company can have several.</div>
           </div>
-          <button class="btn btn-primary btn-small" id="addAdminBtn" type="button">+ Add admin</button>
+          <div class="btn-row">
+            <button class="btn btn-ghost btn-small" id="resendAdminsBtn" type="button" style="display:none;">Resend to everyone pending</button>
+            <button class="btn btn-primary btn-small" id="addAdminBtn" type="button">+ Add admin</button>
+          </div>
         </div>
         <div id="adminForm" style="display:none; margin-bottom:16px;">
           <div class="grid-3">
@@ -638,9 +643,10 @@ const FocusBoard = (function(){
               <input class="text-input" type="tel" id="adminPhone" maxlength="40" autocomplete="off">
             </div>
           </div>
+          <label class="inline-check"><input type="checkbox" id="adminSendEmail" checked> <span>Email the invitation now</span></label>
           <div class="field-error" id="adminError"></div>
           <div class="btn-row">
-            <button class="btn btn-primary btn-small" id="adminCreateBtn" type="button">Create invite link</button>
+            <button class="btn btn-primary btn-small" id="adminCreateBtn" type="button">Create invite</button>
             <button class="btn btn-ghost btn-small" id="adminCancelBtn" type="button">Cancel</button>
           </div>
         </div>
@@ -653,7 +659,10 @@ const FocusBoard = (function(){
             <h2>Users</h2>
             <div class="hint" style="margin:4px 0 0;" id="usersHint"></div>
           </div>
-          <button class="btn btn-primary btn-small" id="addUsersBtn" type="button">+ Add users</button>
+          <div class="btn-row">
+            <button class="btn btn-ghost btn-small" id="resendUsersBtn" type="button" style="display:none;">Resend to everyone pending</button>
+            <button class="btn btn-primary btn-small" id="addUsersBtn" type="button">+ Add users</button>
+          </div>
         </div>
         <div id="usersForm" style="display:none; margin-bottom:16px;">
           <label class="field-label" for="usersText">One person per line: email, then optional name and phone</label>
@@ -674,10 +683,11 @@ const FocusBoard = (function(){
               </select>
             </div>
           </div>
+          <label class="inline-check"><input type="checkbox" id="usersSendEmail" checked> <span>Email the invitations now</span></label>
           <div class="field-error" id="usersError"></div>
           <div class="result-line" id="usersPreview"></div>
           <div class="btn-row" style="margin-top:8px;">
-            <button class="btn btn-primary btn-small" id="usersCreateBtn" type="button">Create invite links</button>
+            <button class="btn btn-primary btn-small" id="usersCreateBtn" type="button">Create invites</button>
             <button class="btn btn-ghost btn-small" id="usersCancelBtn" type="button">Cancel</button>
           </div>
         </div>
@@ -999,12 +1009,15 @@ $('saveBtn').addEventListener('click', async () => {
       formMode = null;
       await loadOrgs();
       newLinks = [];
+      let emailFirstAdmin = false;
       if (firstAdmin){
         const org = orgs.find(o => o.id === ref.id);
+        emailFirstAdmin = $('firstAdminSendEmail').checked;
         newLinks = await createInvites(org, [firstAdmin], 'admin', 30);
       }
       if (location.hash === '#company=' + ref.id) showDetail(ref.id); else location.hash = '#company=' + ref.id;
       $('detailNotice').textContent = 'Created ' + fields.name + '.';
+      if (emailFirstAdmin) sendEmailsToLinks(newLinks);
     }
   } catch (err){
     console.error('Could not save company:', err);
@@ -1112,12 +1125,19 @@ function personRow(p){
     : (p.status === 'removed' ? 'Left' : 'Joined') + (p.dateMs ? ' ' + fmtDate(p.dateMs) : '');
   const actions = el('div', { class: 'btn-row' });
   if (p.kind === 'invite'){
-    const sentBefore = (emailState[p.token] && emailState[p.token].sent) || 0;
-    if (p.status === 'invited'){
+    const es0 = emailState[p.token] || {};
+    const sentBefore = es0.sent || 0;
+    const tooMany = es0.code === 'too_many_for_invite';
+    if (p.status === 'invited' && !tooMany){
       actions.appendChild(el('button', { class: 'btn btn-primary btn-small', type: 'button', text: sentBefore ? 'Resend email' : 'Send email',
         onclick: (e) => sendOneEmail(p.token, p.email, e.currentTarget, true) }));
     }
-    actions.appendChild(el('button', { class: 'btn btn-ghost btn-small', type: 'button', text: 'Copy link', onclick: () => copyText(inviteLink(p.token), 'Link copied.') }));
+    // An expired invite, or one already emailed three times, gets a brand-new link in one click.
+    if (p.status === 'expired' || tooMany){
+      actions.appendChild(el('button', { class: 'btn btn-primary btn-small', type: 'button', text: p.status === 'expired' ? 'Renew & email' : 'New link & email',
+        onclick: (e) => renewInvite(p, e.currentTarget) }));
+    }
+    if (p.status === 'invited') actions.appendChild(el('button', { class: 'btn btn-ghost btn-small', type: 'button', text: 'Copy link', onclick: () => copyText(inviteLink(p.token), 'Link copied.') }));
     actions.appendChild(el('button', { class: 'btn btn-danger btn-small', type: 'button', text: 'Revoke', onclick: () => revokeInvite(p.token) }));
   }
   const es = p.kind === 'invite' ? emailState[p.token] : null;
@@ -1137,6 +1157,8 @@ function peopleTable(rows, emptyText){
 
 function renderPeople(){
   const now = Date.now();
+  $('resendAdminsBtn').style.display = pendingInviteLinks('admin').length ? 'inline-block' : 'none';
+  $('resendUsersBtn').style.display = pendingInviteLinks('member').length ? 'inline-block' : 'none';
   const admins = L.buildPeopleRows('admin', detail.memberships, detail.invites, now);
   $('adminTableWrap').innerHTML = '';
   $('adminTableWrap').appendChild(peopleTable(admins, 'No admins yet. Add one to let this company manage its own team.'));
@@ -1280,7 +1302,8 @@ const EMAIL_NOT_SET_UP = "The email service isn't set up yet, or didn't answer. 
 
 function emailErrorText(result){
   if (!result) return EMAIL_NOT_SET_UP;
-  return EMAIL_ERRORS[result.error] || 'Something went wrong sending that email.';
+  const base = EMAIL_ERRORS[result.error] || 'Something went wrong sending that email.';
+  return result.detail ? base + ' (' + result.detail + ')' : base;
 }
 
 async function sendOneEmail(token, email, button, announce){
@@ -1292,7 +1315,7 @@ async function sendOneEmail(token, email, button, announce){
   } catch (e){ result = null; }
   const ok = !!(result && result.ok === true);
   const prior = emailState[token] || { sent: 0, error: '' };
-  emailState[token] = { sent: prior.sent + (ok ? 1 : 0), error: ok ? '' : emailErrorText(result) };
+  emailState[token] = { sent: prior.sent + (ok ? 1 : 0), error: ok ? '' : emailErrorText(result), code: ok ? '' : (result && result.error) || '' };
   if (announce){
     if (ok) $('detailNotice').textContent = 'Email sent to ' + email + '.';
     else $('detailError').textContent = email + ': ' + emailErrorText(result);
@@ -1302,34 +1325,81 @@ async function sendOneEmail(token, email, button, announce){
   return { ok: ok, error: ok ? '' : emailErrorText(result), code: result && result.error };
 }
 
-$('sendAllBtn').addEventListener('click', async () => {
-  const pending = newLinks.slice();
-  if (!pending.length) return;
+/* Emails every invite in `list`, three at a time, and reports progress and any
+   problem in the new-links box. It stops early when every remaining email
+   would fail the same way: the daily limit is reached, or the email service is
+   not answering at all. */
+async function sendEmailsToLinks(list){
+  const pending = list.slice();
+  if (!pending.length) return { sent: 0, failed: 0 };
   const btn = $('sendAllBtn');
   btn.disabled = true;
-  $('sendStatus').textContent = '';
+  $('sendStatus').textContent = 'Sending ' + pending.length + ' email' + (pending.length === 1 ? '' : 's') + '…';
   $('detailError').textContent = '';
-  let done = 0, sentOk = 0, failed = 0, stopCode = '';
+  let sentOk = 0, failed = 0, stop = false;
   let next = 0;
   async function worker(){
-    while (next < pending.length && !stopCode){
+    while (next < pending.length && !stop){
       const r = pending[next++];
       const res = await sendOneEmail(r.token, r.email, null, false);
-      done++;
       if (res.ok) sentOk++; else failed++;
-      // A daily limit or missing setup will fail every remaining email the same way.
-      if (res.code === 'daily_limit' || res.code === 'quota' || res.code === undefined) stopCode = res.code === undefined ? 'unset' : res.code;
+      if (!res.ok && (res.code === 'daily_limit' || res.code === 'quota' || res.code === null || res.code === undefined)) stop = true;
       $('sendStatus').textContent = 'Sent ' + sentOk + ' of ' + pending.length + (failed ? ', ' + failed + ' could not be sent' : '') + '…';
       renderNewLinks();
     }
   }
   await Promise.all([worker(), worker(), worker()]);
-  const first = pending.map(r => emailState[r.token]).find(s => s && s.error);
-  $('sendStatus').textContent = sentOk + ' of ' + pending.length + ' emails sent' + (failed ? '. ' + (first ? first.error : '') : '.');
+  const firstError = pending.map(r => emailState[r.token]).find(s => s && s.error);
+  $('sendStatus').textContent = sentOk + ' of ' + pending.length + ' emails sent' + (failed ? '. ' + (firstError ? firstError.error : '') : '.');
+  // The new-links box may be hidden (for example when resending to people
+  // already listed), so the outcome is also shown under the company name.
+  if (failed) $('detailError').textContent = firstError ? firstError.error : 'Some emails could not be sent.';
+  else $('detailNotice').textContent = sentOk + ' email' + (sentOk === 1 ? '' : 's') + ' sent.';
   renderNewLinks();
   renderPeople();
   btn.disabled = false;
-});
+  return { sent: sentOk, failed: failed };
+}
+
+$('sendAllBtn').addEventListener('click', () => { sendEmailsToLinks(newLinks); });
+
+/* Gives an expired invite (or one already emailed three times) a fresh link
+   without revoking and re-adding by hand: creates a new invite for the same
+   person, role, name and phone, retires the old one, then emails the new link. */
+async function renewInvite(p, button){
+  const org = currentOrg();
+  if (!org) return;
+  $('detailNotice').textContent = '';
+  $('detailError').textContent = '';
+  if (org.status === 'archived'){ $('detailError').textContent = 'This company is archived. Restore it first.'; return; }
+  button.disabled = true;
+  button.textContent = 'Renewing…';
+  try {
+    const fresh = await createInvites(org, [{ email: p.email, name: p.name, phone: p.phone }], p.role, 30);
+    try { await updateDoc(doc(db, 'invites', p.token), { status: 'revoked' }); } catch (e){ /* the old link is no longer usable anyway */ }
+    delete emailState[p.token];
+    newLinks = fresh;
+    await loadDetail();
+    renderDetail();
+    await sendEmailsToLinks(newLinks);
+  } catch (err){
+    console.error('Could not renew invite:', err);
+    $('detailError').textContent = err && err.code === 'permission-denied'
+      ? 'The security rules refused this. Check that the latest rules are published.'
+      : 'Something went wrong renewing that invite, please try again.';
+    button.disabled = false;
+    button.textContent = p.status === 'expired' ? 'Renew & email' : 'New link & email';
+  }
+}
+
+// Everyone with an open invite for a role, for "Resend to everyone pending".
+function pendingInviteLinks(role){
+  const now = Date.now();
+  return detail.invites.filter(i => i.role === role && L.inviteStatus(i, now) === 'open')
+    .map(i => ({ token: i.id, email: i.email }));
+}
+$('resendAdminsBtn').addEventListener('click', () => { sendEmailsToLinks(pendingInviteLinks('admin')); });
+$('resendUsersBtn').addEventListener('click', () => { sendEmailsToLinks(pendingInviteLinks('member')); });
 
 $('copyAllBtn').addEventListener('click', () => {
   copyText(newLinks.map(r => r.email + '\t' + r.link).join('\n'), 'Copied. Each line is the email, a tab, then the link.');
@@ -1390,6 +1460,7 @@ $('adminCreateBtn').addEventListener('click', async () => {
     await loadDetail();
     renderDetail();
     $('detailNotice').textContent = 'Admin invite created.';
+    if ($('adminSendEmail').checked) await sendEmailsToLinks(newLinks);
   } catch (err){
     console.error('Could not create admin invite:', err);
     $('adminError').textContent = err && err.code === 'permission-denied'
@@ -1453,6 +1524,7 @@ $('usersCreateBtn').addEventListener('click', async () => {
     $('detailNotice').textContent = cls.toCreate.length + ' invite' + (cls.toCreate.length === 1 ? '' : 's') + ' created' +
       (cls.skipped.length ? ', ' + cls.skipped.length + ' skipped.' : '.');
     $('linksCard').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    if ($('usersSendEmail').checked) await sendEmailsToLinks(newLinks);
   } catch (err){
     console.error('Could not create invites:', err);
     $('usersError').textContent = err && err.code === 'permission-denied'

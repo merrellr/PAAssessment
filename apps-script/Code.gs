@@ -746,7 +746,7 @@ function fetchInviteViaRest_(token, idToken) {
     headers: { Authorization: 'Bearer ' + idToken },
     muteHttpExceptions: true
   });
-  if (res.getResponseCode() !== 200) return null;
+  if (res.getResponseCode() !== 200) return { error: 'Firestore answered ' + res.getResponseCode() };
   var f = JSON.parse(res.getContentText()).fields || {};
   function str(k) { return f[k] && f[k].stringValue !== undefined ? f[k].stringValue : ''; }
   return {
@@ -794,12 +794,14 @@ function sendInviteEmail_(token, idToken) {
   if (!/^[A-Za-z0-9_-]{16,64}$/.test(String(token || ''))) return { ok: false, error: 'bad_token' };
 
   var who = null;
-  try { who = verifyFirebaseIdToken_(idToken); } catch (err) { who = null; }
-  if (!who) return { ok: false, error: 'not_verified' };
+  var verifyDetail = '';
+  try { who = verifyFirebaseIdToken_(idToken); } catch (err) { who = null; verifyDetail = String(err && err.message || err).slice(0, 200); }
+  if (!who) return { ok: false, error: 'not_verified', detail: verifyDetail || 'Google did not accept the sign-in token' };
 
   var inv = null;
-  try { inv = fetchInviteViaRest_(token, idToken); } catch (err) { inv = null; }
-  if (!inv) return { ok: false, error: 'invite_not_found' };
+  var readDetail = '';
+  try { inv = fetchInviteViaRest_(token, idToken); } catch (err) { inv = null; readDetail = String(err && err.message || err).slice(0, 200); }
+  if (!inv || inv.error) return { ok: false, error: 'invite_not_found', detail: readDetail || (inv && inv.error) || 'Could not read the invite' };
   if (inv.createdBy !== who.uid) return { ok: false, error: 'not_your_invite' };
   if (inv.status !== 'open' || inv.expiresAtMs < Date.now()) return { ok: false, error: 'invite_not_open' };
   if (!/^[^\s@,;]+@[^\s@,;]+\.[^\s@,;]+$/.test(inv.email)) return { ok: false, error: 'bad_recipient' };
@@ -848,7 +850,7 @@ function sendInviteEmail_(token, idToken) {
         replyTo: who.email
       });
     } catch (err) {
-      return { ok: false, error: 'mail_error' };
+      return { ok: false, error: 'mail_error', detail: String(err && err.message || err).slice(0, 200) };
     }
 
     props.setProperty(dayKey, String(sentToday + 1));
