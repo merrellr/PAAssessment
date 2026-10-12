@@ -100,6 +100,7 @@
   .links-box{ border:1px solid #BFE6F2; background:#F2FAFD; border-radius:12px; padding: 16px; }
   .links-box code{ display:block; font-size: 12px; word-break: break-all; color: var(--ink-soft); }
   .result-line{ font-size: 13px; line-height: 1.6; color: var(--ink-soft); }
+  td.cell-error{ color: var(--warn); font-size: 12.5px; }
 </style>
 
 <script src="vendor/Sortable.min.js"></script>
@@ -592,6 +593,7 @@ const FocusBoard = (function(){
           </div>
         </div>
         <div class="notice" id="detailNotice"></div>
+        <div class="field-error" id="detailError" style="margin:0 0 12px;"></div>
         <dl class="summary" id="detailSummary"></dl>
       </div>
 
@@ -604,9 +606,11 @@ const FocusBoard = (function(){
         <div class="links-box">
           <div class="result-line" id="linksResult"></div>
           <div class="btn-row" style="margin-top:12px;">
-            <button class="btn btn-primary btn-small" id="copyAllBtn" type="button">Copy all links</button>
+            <button class="btn btn-primary btn-small" id="sendAllBtn" type="button">Send emails to everyone</button>
+            <button class="btn btn-ghost btn-small" id="copyAllBtn" type="button">Copy all links</button>
             <button class="btn btn-ghost btn-small" id="downloadCsvBtn" type="button">Download as spreadsheet (CSV)</button>
           </div>
+          <div class="result-line" id="sendStatus" style="margin-top:10px;"></div>
           <div class="table-wrap" style="margin-top:12px;"><table class="data" id="linksTable"></table></div>
         </div>
       </div>
@@ -742,7 +746,12 @@ function fmtDateTime(ms){
   return new Date(ms).toLocaleString(undefined, { year: 'numeric', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
 }
 
+// Same Apps Script web app the assessment uses. It sends invite emails from the
+// Gmail account that owns the script (see apps-script/Code.gs).
+const RESULTS_LOG_URL = "https://script.google.com/macros/s/AKfycbynJQYF9rv5maL_CGniS9UGhTDfBVeW3gVhEWUsFdGOqquv4osGx4nQvc8jNkaaY6wrrg/exec";
+
 let currentUser = null;
+let emailState = {};   // invite token -> { sent: number, error: string }
 let orgs = [];
 let focusAreas = [];
 let formMode = null;      // null | 'create' | 'edit'
@@ -1103,13 +1112,20 @@ function personRow(p){
     : (p.status === 'removed' ? 'Left' : 'Joined') + (p.dateMs ? ' ' + fmtDate(p.dateMs) : '');
   const actions = el('div', { class: 'btn-row' });
   if (p.kind === 'invite'){
+    const sentBefore = (emailState[p.token] && emailState[p.token].sent) || 0;
+    if (p.status === 'invited'){
+      actions.appendChild(el('button', { class: 'btn btn-primary btn-small', type: 'button', text: sentBefore ? 'Resend email' : 'Send email',
+        onclick: (e) => sendOneEmail(p.token, p.email, e.currentTarget, true) }));
+    }
     actions.appendChild(el('button', { class: 'btn btn-ghost btn-small', type: 'button', text: 'Copy link', onclick: () => copyText(inviteLink(p.token), 'Link copied.') }));
     actions.appendChild(el('button', { class: 'btn btn-danger btn-small', type: 'button', text: 'Revoke', onclick: () => revokeInvite(p.token) }));
   }
+  const es = p.kind === 'invite' ? emailState[p.token] : null;
+  const emailLine = es && es.sent ? el('div', { class: 'cell-sub', text: 'Emailed ✓' + (es.sent > 1 ? ' (' + es.sent + ' times)' : '') }) : null;
   return el('tr', null,
     el('td', null, el('div', { class: 'cell-name', text: p.name || '—' })),
     el('td', { text: p.email || '—' }), el('td', { class: 'nowrap', text: p.phone || '—' }),
-    el('td', null, status, el('div', { class: 'cell-sub', text: when })), el('td', null, actions));
+    el('td', null, status, el('div', { class: 'cell-sub', text: when }), emailLine), el('td', null, actions));
 }
 
 function peopleTable(rows, emptyText){
@@ -1213,11 +1229,107 @@ function renderNewLinks(){
   $('linksResult').textContent = newLinks.length + ' invite link' + (newLinks.length === 1 ? '' : 's') + ' created.';
   const table = $('linksTable');
   table.innerHTML = '';
-  table.appendChild(el('thead', null, el('tr', null, el('th', { text: 'Email' }), el('th', { text: 'Role' }), el('th', { text: 'Link' }), el('th', { text: 'Expires' }))));
-  table.appendChild(el('tbody', null, ...newLinks.map(r => el('tr', null,
-    el('td', { text: r.email }), el('td', { text: r.role === 'admin' ? 'Admin' : 'User' }),
-    el('td', null, el('code', { text: r.link })), el('td', { class: 'nowrap', text: r.expires })))));
+  table.appendChild(el('thead', null, el('tr', null, el('th', { text: 'Email' }), el('th', { text: 'Role' }), el('th', { text: 'Link' }), el('th', { text: 'Expires' }), el('th', { text: 'Email status' }))));
+  table.appendChild(el('tbody', null, ...newLinks.map(r => {
+    const es = emailState[r.token] || {};
+    const statusText = es.error ? es.error : (es.sent ? 'Emailed ✓' : 'Not sent');
+    return el('tr', null,
+      el('td', { text: r.email }), el('td', { text: r.role === 'admin' ? 'Admin' : 'User' }),
+      el('td', null, el('code', { text: r.link })), el('td', { class: 'nowrap', text: r.expires }),
+      el('td', { class: es.error ? 'cell-error' : '', text: statusText }));
+  })));
 }
+
+/* ------------------------------------------------------------- invite emails */
+// Asks the Apps Script backend to email one invite. The backend re-reads the
+// invite as the signed-in person and only sends invites that person created.
+function callBackend(params){
+  return new Promise((resolve) => {
+    const cb = 'ownerCb_' + Date.now() + '_' + Math.floor(Math.random() * 1e6);
+    const script = document.createElement('script');
+    let settled = false;
+    const finish = (value) => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timer);
+      delete window[cb];
+      script.remove();
+      resolve(value);
+    };
+    const timer = setTimeout(() => finish(null), 30000);
+    window[cb] = (result) => finish(result || null);
+    script.onerror = () => finish(null);
+    script.src = RESULTS_LOG_URL + '?' + new URLSearchParams(Object.assign({}, params, { callback: cb })).toString();
+    document.body.appendChild(script);
+  });
+}
+
+const EMAIL_ERRORS = {
+  not_verified: 'Your sign-in could not be confirmed. Reload the page and try again.',
+  invite_not_found: 'That invite could not be found.',
+  not_your_invite: 'Only the person who created an invite can email it. Copy the link instead.',
+  invite_not_open: 'That invite is no longer open (used, revoked or expired).',
+  bad_recipient: 'The email address on that invite is not valid.',
+  daily_limit: "Today's email limit has been reached. Try again tomorrow, or copy the links.",
+  too_many_for_invite: 'That invite has already been emailed 3 times. Copy the link instead.',
+  quota: "Gmail's daily sending limit has been reached. Try again tomorrow, or copy the links.",
+  mail_error: 'Gmail could not send that message. Try again, or copy the link.',
+  bad_token: 'That invite link is not valid.'
+};
+const EMAIL_NOT_SET_UP = "The email service isn't set up yet, or didn't answer. Copy the link instead, or finish the email setup.";
+
+function emailErrorText(result){
+  if (!result) return EMAIL_NOT_SET_UP;
+  return EMAIL_ERRORS[result.error] || 'Something went wrong sending that email.';
+}
+
+async function sendOneEmail(token, email, button, announce){
+  if (button){ button.disabled = true; button.textContent = 'Sending…'; }
+  if (announce){ $('detailNotice').textContent = ''; $('detailError').textContent = ''; }
+  let result = null;
+  try {
+    result = await callBackend({ action: 'sendInvite', token: token, idToken: await currentUser.getIdToken() });
+  } catch (e){ result = null; }
+  const ok = !!(result && result.ok === true);
+  const prior = emailState[token] || { sent: 0, error: '' };
+  emailState[token] = { sent: prior.sent + (ok ? 1 : 0), error: ok ? '' : emailErrorText(result) };
+  if (announce){
+    if (ok) $('detailNotice').textContent = 'Email sent to ' + email + '.';
+    else $('detailError').textContent = email + ': ' + emailErrorText(result);
+    renderPeople();
+    renderNewLinks();
+  }
+  return { ok: ok, error: ok ? '' : emailErrorText(result), code: result && result.error };
+}
+
+$('sendAllBtn').addEventListener('click', async () => {
+  const pending = newLinks.slice();
+  if (!pending.length) return;
+  const btn = $('sendAllBtn');
+  btn.disabled = true;
+  $('sendStatus').textContent = '';
+  $('detailError').textContent = '';
+  let done = 0, sentOk = 0, failed = 0, stopCode = '';
+  let next = 0;
+  async function worker(){
+    while (next < pending.length && !stopCode){
+      const r = pending[next++];
+      const res = await sendOneEmail(r.token, r.email, null, false);
+      done++;
+      if (res.ok) sentOk++; else failed++;
+      // A daily limit or missing setup will fail every remaining email the same way.
+      if (res.code === 'daily_limit' || res.code === 'quota' || res.code === undefined) stopCode = res.code === undefined ? 'unset' : res.code;
+      $('sendStatus').textContent = 'Sent ' + sentOk + ' of ' + pending.length + (failed ? ', ' + failed + ' could not be sent' : '') + '…';
+      renderNewLinks();
+    }
+  }
+  await Promise.all([worker(), worker(), worker()]);
+  const first = pending.map(r => emailState[r.token]).find(s => s && s.error);
+  $('sendStatus').textContent = sentOk + ' of ' + pending.length + ' emails sent' + (failed ? '. ' + (first ? first.error : '') : '.');
+  renderNewLinks();
+  renderPeople();
+  btn.disabled = false;
+});
 
 $('copyAllBtn').addEventListener('click', () => {
   copyText(newLinks.map(r => r.email + '\t' + r.link).join('\n'), 'Copied. Each line is the email, a tab, then the link.');

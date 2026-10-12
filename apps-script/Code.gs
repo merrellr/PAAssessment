@@ -101,6 +101,10 @@ function getOrCreateProgressSheet() {
 // assessment page requests the list of known company names or a
 // scenario grading, or when someone closes their account.
 function doGet(e) {
+  if (e.parameter.action === "sendInvite") {
+    return jsonpOut_(e.parameter.callback, sendInviteEmail_(e.parameter.token || "", e.parameter.idToken || ""));
+  }
+
   if (e.parameter.action === "deleteAccount") {
     return jsonpOut_(e.parameter.callback, deleteAccountData_(e.parameter.token || ""));
   }
@@ -706,6 +710,160 @@ function jsonOut_(obj) {
   return ContentService
     .createTextOutput(JSON.stringify(obj))
     .setMimeType(ContentService.MimeType.JSON);
+}
+
+
+// ================== Invite emails (added) ==================
+//
+// The owner console's "Send email" button calls this with an invite's secret
+// token and the signed-in person's Firebase ID token. The script re-reads the
+// invite from Firestore AS THAT PERSON (so the security rules decide what it
+// may see), and only sends if that same person created the invite, it is still
+// open, and it has not been emailed too often. The recipient and the link
+// always come from the stored invite, never from the request, so this cannot
+// be used to send arbitrary mail.
+
+var FIRESTORE_PROJECT_ID_ = 'product-advisory-lms';
+var SITE_BASE_URL_ = 'https://assessment.productadvisory.co/';
+// A Gmail account may send to 100 recipients a day; stay under that so other
+// mail from this account keeps working.
+var INVITE_EMAIL_DAILY_CAP_ = 80;
+var INVITE_EMAIL_MAX_PER_INVITE_ = 3;
+
+function escapeHtml_(s) {
+  return String(s == null ? '' : s)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+
+// Reads one invite document over Firestore's REST API using the caller's own
+// ID token. Returns null if it cannot be read.
+function fetchInviteViaRest_(token, idToken) {
+  var url = 'https://firestore.googleapis.com/v1/projects/' + FIRESTORE_PROJECT_ID_ +
+    '/databases/(default)/documents/invites/' + encodeURIComponent(token);
+  var res = UrlFetchApp.fetch(url, {
+    method: 'get',
+    headers: { Authorization: 'Bearer ' + idToken },
+    muteHttpExceptions: true
+  });
+  if (res.getResponseCode() !== 200) return null;
+  var f = JSON.parse(res.getContentText()).fields || {};
+  function str(k) { return f[k] && f[k].stringValue !== undefined ? f[k].stringValue : ''; }
+  return {
+    orgName: str('orgName'),
+    email: str('email'),
+    name: str('name'),
+    role: str('role'),
+    status: str('status'),
+    createdBy: str('createdBy'),
+    expiresAtMs: f.expiresAt && f.expiresAt.timestampValue ? Date.parse(f.expiresAt.timestampValue) : 0
+  };
+}
+
+function buildInviteEmail_(inv, inviterEmail, link) {
+  var org = inv.orgName;
+  var roleText = inv.role === 'admin' ? 'an admin' : 'a member';
+  var expires = Utilities.formatDate(new Date(inv.expiresAtMs), Session.getScriptTimeZone(), 'MMMM d, yyyy');
+  var greeting = inv.name ? 'Hi ' + inv.name + ',' : 'Hi,';
+
+  var text = greeting + '\n\n' +
+    inviterEmail + ' has invited you to join ' + org + ' on Product Advisory Learning as ' + roleText + '.\n\n' +
+    'Open your invitation:\n' + link + '\n\n' +
+    'The link works once and expires on ' + expires + '. When you open it you can sign in or create an account ' +
+    '(any email address works), and you will see exactly what ' + org + ' can see before you agree to join.\n\n' +
+    'If you were not expecting this, you can ignore this email.\n';
+
+  var html = '<div style="font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:1.55;color:#16213E;max-width:520px;">' +
+    '<p>' + escapeHtml_(greeting) + '</p>' +
+    '<p>' + escapeHtml_(inviterEmail) + ' has invited you to join <strong>' + escapeHtml_(org) +
+    '</strong> on Product Advisory Learning as ' + roleText + '.</p>' +
+    '<p style="margin:24px 0;"><a href="' + escapeHtml_(link) + '" style="background:#1A4584;color:#ffffff;text-decoration:none;' +
+    'padding:12px 22px;border-radius:8px;font-weight:bold;display:inline-block;">Open your invitation</a></p>' +
+    '<p>The link works once and expires on ' + escapeHtml_(expires) + '. When you open it you can sign in or create an ' +
+    'account (any email address works), and you will see exactly what ' + escapeHtml_(org) + ' can see before you agree to join.</p>' +
+    '<p style="color:#6B7686;font-size:13px;">If you were not expecting this, you can ignore this email.</p></div>';
+
+  return {
+    subject: "You're invited to join " + org + ' on Product Advisory Learning',
+    text: text,
+    html: html
+  };
+}
+
+function sendInviteEmail_(token, idToken) {
+  if (!/^[A-Za-z0-9_-]{16,64}$/.test(String(token || ''))) return { ok: false, error: 'bad_token' };
+
+  var who = null;
+  try { who = verifyFirebaseIdToken_(idToken); } catch (err) { who = null; }
+  if (!who) return { ok: false, error: 'not_verified' };
+
+  var inv = null;
+  try { inv = fetchInviteViaRest_(token, idToken); } catch (err) { inv = null; }
+  if (!inv) return { ok: false, error: 'invite_not_found' };
+  if (inv.createdBy !== who.uid) return { ok: false, error: 'not_your_invite' };
+  if (inv.status !== 'open' || inv.expiresAtMs < Date.now()) return { ok: false, error: 'invite_not_open' };
+  if (!/^[^\s@,;]+@[^\s@,;]+\.[^\s@,;]+$/.test(inv.email)) return { ok: false, error: 'bad_recipient' };
+
+  var props = PropertiesService.getScriptProperties();
+  var today = Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'yyyy-MM-dd');
+  var dayKey = 'mailday_' + today;
+  var tokKey = 'mailtok_' + token;
+
+  var lock = null;
+  var locked = false;
+  try {
+    lock = LockService.getScriptLock();
+    locked = lock.tryLock(10000);
+  } catch (err) { /* proceed unlocked */ }
+  try {
+    if (!props.getProperty(dayKey)) {
+      // First email of the day: drop old daily counters, and per-invite counters older than 120 days.
+      var keys = props.getKeys();
+      var cutoff = Date.now() - 120 * 86400000;
+      for (var i = 0; i < keys.length; i++) {
+        if (keys[i].indexOf('mailday_') === 0 && keys[i] !== dayKey) props.deleteProperty(keys[i]);
+        if (keys[i].indexOf('mailtok_') === 0) {
+          var parts = String(props.getProperty(keys[i])).split('|');
+          if (Number(parts[1]) < cutoff) props.deleteProperty(keys[i]);
+        }
+      }
+    }
+
+    var sentToday = Number(props.getProperty(dayKey) || 0);
+    if (sentToday >= INVITE_EMAIL_DAILY_CAP_) return { ok: false, error: 'daily_limit' };
+
+    var prior = String(props.getProperty(tokKey) || '0|0').split('|');
+    if (Number(prior[0]) >= INVITE_EMAIL_MAX_PER_INVITE_) return { ok: false, error: 'too_many_for_invite' };
+
+    if (MailApp.getRemainingDailyQuota() < 1) return { ok: false, error: 'quota' };
+
+    var mail = buildInviteEmail_(inv, who.email, SITE_BASE_URL_ + 'join.html?token=' + token);
+    try {
+      MailApp.sendEmail({
+        to: inv.email,
+        subject: mail.subject,
+        body: mail.text,
+        htmlBody: mail.html,
+        name: 'Product Advisory Learning',
+        replyTo: who.email
+      });
+    } catch (err) {
+      return { ok: false, error: 'mail_error' };
+    }
+
+    props.setProperty(dayKey, String(sentToday + 1));
+    props.setProperty(tokKey, (Number(prior[0]) + 1) + '|' + Date.now());
+    return { ok: true, to: inv.email, remainingToday: Math.max(0, INVITE_EMAIL_DAILY_CAP_ - sentToday - 1) };
+  } finally {
+    if (locked) lock.releaseLock();
+  }
+}
+
+// Run this ONCE from the Apps Script editor to give the script permission to
+// send email. It sends one test message to the account that owns the script.
+function authorizeInviteEmails() {
+  MailApp.sendEmail(Session.getEffectiveUser().getEmail(), 'Product Advisory invite emails are set up',
+    'This confirms the script can send invite emails. You can delete this message.');
 }
 
 
