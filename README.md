@@ -55,10 +55,19 @@ when volume outgrows the free tier) and writes `blocked:` rows to the
   into Firebase console > Firestore Database > Rules.
 - `vendor/Sortable.min.js` (MIT, v1.15.2) powers the drag-and-drop ranking. It
   is kept in the repo so the page does not depend on a third-party host.
-- Not built yet: the shared record that keeps each member's results visible to
-  their company, the company admin dashboard, focus areas shaping
-  recommendations, and removing members. Until the shared record exists, joining
-  a company shares nothing yet, so use test accounts only.
+- The shared record: while someone is an active member, `org-share.js` keeps
+  `orgs/{orgId}/members/{uid}` up to date (their name and email, latest
+  assessment including individual answers, per-course lesson progress, and when
+  they were last active). `org-share-core.js` builds it from an explicit list of
+  fields, so private reflections, saved templates, phone number and profile
+  details can never reach it. It refreshes when the member joins, opens their
+  dashboard, or finishes a lesson. When the membership ends it stops updating, so
+  the company keeps what it had. On account deletion the person's name and email
+  are blanked on every company's copy (the results stay) before anything else is
+  deleted. The owner console shows each member's shared data under **Details**.
+- Not built yet: the company admin dashboard, focus areas shaping
+  recommendations, and removing members.
+- Tests: see `tests/README.md`.
 
 ## Closing an account
 

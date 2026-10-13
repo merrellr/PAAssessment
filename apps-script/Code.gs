@@ -101,6 +101,10 @@ function getOrCreateProgressSheet() {
 // assessment page requests the list of known company names or a
 // scenario grading, or when someone closes their account.
 function doGet(e) {
+  if (e.parameter.action === "mailCheck") {
+    return jsonpOut_(e.parameter.callback, mailCheck_());
+  }
+
   if (e.parameter.action === "sendInvite") {
     return jsonpOut_(e.parameter.callback, sendInviteEmail_(e.parameter.token || "", e.parameter.idToken || ""));
   }
@@ -859,6 +863,31 @@ function sendInviteEmail_(token, idToken) {
   } finally {
     if (locked) lock.releaseLock();
   }
+}
+
+// Diagnostic: sends one short message to the account that owns this script (never
+// to anyone else) and reports exactly what happened, including Gmail's own error
+// text. Limited to 5 a day. Safe to leave in; it reveals nothing but a masked address.
+function mailCheck_() {
+  var props = PropertiesService.getScriptProperties();
+  var today = Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'yyyy-MM-dd');
+  var key = 'mailcheck_' + today;
+  var used = Number(props.getProperty(key) || 0);
+  if (used >= 5) return { ok: false, error: 'limit', detail: 'Mail check already run 5 times today' };
+  props.setProperty(key, String(used + 1));
+
+  var to = Session.getEffectiveUser().getEmail();
+  var masked = to ? to.charAt(0) + '***' + to.slice(to.indexOf('@')) : '(no address)';
+  var quota = null;
+  try { quota = MailApp.getRemainingDailyQuota(); } catch (err) {
+    return { ok: false, step: 'quota', detail: String(err && err.message || err).slice(0, 300), to: masked };
+  }
+  try {
+    MailApp.sendEmail(to, 'Product Advisory mail check', 'If you can read this, the script can send email from your account.');
+  } catch (err) {
+    return { ok: false, step: 'send', quota: quota, detail: String(err && err.message || err).slice(0, 300), to: masked };
+  }
+  return { ok: true, quotaBeforeSending: quota, to: masked };
 }
 
 // Run this ONCE from the Apps Script editor to give the script permission to

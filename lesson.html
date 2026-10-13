@@ -271,6 +271,7 @@ const CATALOG = buildCatalog();
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
 import { getFirestore, doc, getDoc, setDoc, increment } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+import { syncOrgShare } from "./org-share.js";
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
@@ -1007,6 +1008,13 @@ window.markCompleteAndContinue = async function(){
     reflections: existingCourseData.reflections || reflections
   };
   await setDoc(progressRef, data);
+  // If this person belongs to a company, refresh the copy their company sees.
+  // Wait for it (but never longer than a few seconds, and never fail the lesson)
+  // so the page change just below cannot cut the update off.
+  await Promise.race([
+    syncOrgShare(db, currentUser).catch(() => { /* never blocks the lesson */ }),
+    new Promise(resolve => setTimeout(resolve, 4000))
+  ]);
 
   const isLast = lessonNum === course.lessons[course.lessons.length - 1].id;
   if (isLast){

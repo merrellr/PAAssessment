@@ -1,11 +1,11 @@
 // Firestore rules for project product-advisory-lms.
 //
-// STATUS: checkpoint 2 of the company-accounts build. Only the progress and
-// the first platformAdmins/orgs rules are published in the Firebase console
-// today. Everything about invites, memberships and company admins below is
-// NEW and only takes effect once this whole file is pasted into Firebase
-// console > Firestore Database > Rules and published. Update this status line
-// when that is done.
+// STATUS: checkpoint 3 of the company-accounts build. Published in the console
+// today: progress, platformAdmins, orgs, invites and memberships (checkpoint 2).
+// The shared-record rules at the bottom (orgs/{orgId}/members) and the
+// membership identity-scrub rule are NEW and only take effect once this whole
+// file is pasted into Firebase console > Firestore Database > Rules and
+// published. Update this status line when that is done.
 //
 // Editing this file does NOT change the live rules. Paste the whole file into
 // the console Rules tab and click Publish, so the two stay identical. These
@@ -23,6 +23,9 @@
 //                       its memberships, and may change ONLY its focusAreas.
 //   Invited person:     reads an invite if they know its secret link, then
 //                       accepts it, which creates their own membership.
+//   Active member:      writes their own shared record (orgs/{orgId}/members/
+//                       {uid}) for their current company; company admins and
+//                       the platform owner can read it, nobody else can.
 //   Everything else is denied by default.
 rules_version = '2';
 service cloud.firestore {
@@ -181,6 +184,63 @@ service cloud.firestore {
       allow update: if isSignedIn() && request.auth.uid == uid
         && resource.data.status == 'removed'
         && validJoin(request.resource.data, uid);
+      // When someone deletes their account they blank the name, email and phone
+      // on their membership record. Nothing else about it may change.
+      allow update: if isSignedIn() && request.auth.uid == uid
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['email', 'displayName', 'phone'])
+        && request.resource.data.email == ''
+        && request.resource.data.displayName == ''
+        && request.resource.data.get('phone', '') == '';
+      allow delete: if false;
+    }
+
+    // ------------------------------------------------- shared record per member
+    // orgs/{orgId}/members/{uid} is the copy of a member's results that their
+    // company can see. It holds ONLY: name and email, the latest assessment
+    // (scores and individual answers), per-course lesson progress, and when
+    // they were last active. It never holds private reflections, saved
+    // templates, phone number or profile details.
+    //
+    // The member writes it, and only while their membership in THIS company is
+    // active. When the membership ends, nothing can update it any more, so the
+    // company keeps it exactly as it was. The only later change allowed is the
+    // person blanking their own name and email (identity = null) when they
+    // delete their account.
+    function isActiveMemberOf(orgId) {
+      return isSignedIn()
+        && exists(/databases/$(database)/documents/memberships/$(request.auth.uid))
+        && myMembership().orgId == orgId
+        && myMembership().status == 'active';
+    }
+
+    function validShare(d) {
+      return d.keys().hasOnly(['identity', 'assessment', 'courses', 'lastActiveAt', 'updatedAt'])
+        && d.identity is map
+        && d.identity.keys().hasOnly(['name', 'email'])
+        && d.identity.name is string && d.identity.name.size() <= 100
+        && d.identity.email is string && d.identity.email == request.auth.token.email.lower()
+        && (d.assessment == null || d.assessment is map)
+        && d.courses is map
+        && (d.lastActiveAt == null || (d.lastActiveAt is string && d.lastActiveAt.size() <= 40))
+        && d.updatedAt == request.time;
+    }
+
+    match /orgs/{orgId}/members/{uid} {
+      // The company's admins and the platform owner can read it. The person
+      // can read their OWN record too, so the app can show them exactly what
+      // their company sees.
+      allow read: if isPlatformOwner() || isActiveAdminOf(orgId)
+        || (isSignedIn() && request.auth.uid == uid);
+
+      allow create, update: if request.auth.uid == uid
+        && isActiveMemberOf(orgId)
+        && validShare(request.resource.data);
+
+      allow update: if request.auth.uid == uid
+        && request.resource.data.identity == null
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['identity', 'updatedAt'])
+        && request.resource.data.updatedAt == request.time;
+
       allow delete: if false;
     }
   }

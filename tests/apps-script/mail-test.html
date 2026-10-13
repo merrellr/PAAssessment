@@ -1,0 +1,143 @@
+<!doctype html><html><head><title>PENDING</title>
+<script>
+window.__err = null;
+window.addEventListener('error', function(e){ window.__err = (e.message || 'error') + ' @line ' + e.lineno; });
+
+/* ---- stand-ins for Google's services ---- */
+var props = {};
+var PropertiesService = { getScriptProperties: function(){ return {
+  getProperty: function(k){ return k in props ? props[k] : null; },
+  setProperty: function(k, v){ props[k] = String(v); },
+  deleteProperty: function(k){ delete props[k]; },
+  getKeys: function(){ return Object.keys(props); } }; } };
+var LockService = { getScriptLock: function(){ return { tryLock: function(){ return true; }, releaseLock: function(){} }; } };
+var Session = { getScriptTimeZone: function(){ return 'America/Los_Angeles'; }, getEffectiveUser: function(){ return { getEmail: function(){ return 'owner@gmail.com'; } }; } };
+var Utilities = { formatDate: function(d, tz, f){
+  if (f === 'yyyy-MM-dd') return d.toLocaleDateString('sv-SE', { timeZone: tz });
+  return d.toLocaleDateString('en-US', { timeZone: tz, year: 'numeric', month: 'long', day: 'numeric' }); } };
+var sent = []; var quota = 100; var mailThrows = false;
+var MailApp = { getRemainingDailyQuota: function(){ return quota; },
+  sendEmail: function(m){ if (mailThrows) throw new Error('mail down'); sent.push(m); } };
+var ContentService = { MimeType: { JSON: 'json', JAVASCRIPT: 'js' }, createTextOutput: function(t){ return { text: t, setMimeType: function(){ return this; } }; } };
+var SpreadsheetApp = {};
+
+var day = 864e5;
+var restDocs = {};
+function ts(ms){ return { timestampValue: new Date(ms).toISOString() }; }
+function inviteDoc(over){
+  var o = Object.assign({ orgName: 'Acme & Sons', email: 'jane@acme.com', name: 'Jane', role: 'member', status: 'open', createdBy: 'owner1', exp: Date.now() + 10 * day }, over || {});
+  var f = { orgName: { stringValue: o.orgName }, email: { stringValue: o.email }, role: { stringValue: o.role }, status: { stringValue: o.status },
+    createdBy: { stringValue: o.createdBy }, expiresAt: ts(o.exp) };
+  if (o.name !== null) f.name = { stringValue: o.name };
+  return { fields: f };
+}
+var calls = [];
+var UrlFetchApp = { fetch: function(url, opts){
+  calls.push({ url: url, auth: opts && opts.headers && opts.headers.Authorization });
+  function res(code, body){ return { getResponseCode: function(){ return code; }, getContentText: function(){ return JSON.stringify(body); } }; }
+  if (url.indexOf('identitytoolkit') > -1){
+    var t = JSON.parse(opts.payload).idToken;
+    if (t === 'good-owner') return res(200, { users: [{ localId: 'owner1', email: 'Rob@Owner.com' }] });
+    if (t === 'good-other') return res(200, { users: [{ localId: 'someoneElse', email: 'x@y.com' }] });
+    return res(400, { error: { message: 'INVALID_ID_TOKEN' } });
+  }
+  if (url.indexOf('firestore.googleapis.com') > -1){
+    var m = url.match(/invites\/([^?]+)$/);
+    var token = m ? decodeURIComponent(m[1]) : '';
+    if (opts.headers.Authorization !== 'Bearer good-owner' && opts.headers.Authorization !== 'Bearer good-other') return res(401, {});
+    return restDocs[token] ? res(200, restDocs[token]) : res(404, {});
+  }
+  throw new Error('unexpected url ' + url);
+} };
+</script>
+<script src="../../apps-script/Code.gs"></script>
+<script>
+var out = [];
+function t(label, ok, extra){ out.push((ok ? 'PASS ' : 'FAIL ') + label + (ok || !extra ? '' : '   [' + extra + ']')); }
+function reset(){ props = {}; sent = []; quota = 100; mailThrows = false; calls = []; restDocs = {}; INVITE_EMAIL_DAILY_CAP_ = 80; }
+var TOK = '0123456789abcdef0123456789abcdef';
+function send(token, idToken){ return sendInviteEmail_(token === undefined ? TOK : token, idToken === undefined ? 'good-owner' : idToken); }
+try {
+  reset(); restDocs[TOK] = inviteDoc();
+  var r = send();
+  t('valid invite is emailed', r.ok === true && sent.length === 1, JSON.stringify(r));
+  var m = sent[0];
+  t('sent to the address stored on the invite', m.to === 'jane@acme.com');
+  t('subject names the company', m.subject === "You're invited to join Acme & Sons on Product Advisory Learning", m.subject);
+  t('reply-to is the person who sent the invite', m.replyTo === 'rob@owner.com');
+  t('sender name is Product Advisory Learning', m.name === 'Product Advisory Learning');
+  t('plain-text body has the greeting, the company, the inviter and the link', /^Hi Jane,/.test(m.body) && /Acme & Sons/.test(m.body) && /rob@owner\.com/.test(m.body) && m.body.indexOf('https://assessment.productadvisory.co/join.html?token=' + TOK) > -1);
+  t('the link always uses the real site address', /href="https:\/\/assessment\.productadvisory\.co\/join\.html\?token=0123456789abcdef0123456789abcdef"/.test(m.htmlBody));
+  t('role wording: member', /as a member/.test(m.body));
+  t('expiry date is shown', /expires on [A-Z][a-z]+ \d{1,2}, \d{4}/.test(m.body));
+  t('the company name is HTML-escaped', m.htmlBody.indexOf('Acme &amp; Sons') > -1 && m.htmlBody.indexOf('Acme & Sons') === -1);
+  t('REST call used the caller\'s own token', calls.some(function(c){ return c.url.indexOf('firestore.googleapis.com') > -1 && c.auth === 'Bearer good-owner'; }));
+  t('counters recorded', Object.keys(props).some(function(k){ return k.indexOf('mailday_') === 0; }) && /^1\|/.test(props['mailtok_' + TOK]));
+  t('remaining count reported', r.remainingToday === 79);
+
+  reset(); restDocs[TOK] = inviteDoc({ role: 'admin', name: null });
+  r = send();
+  t('admin invite wording, and a plain greeting when no name was given', r.ok && /as an admin/.test(sent[0].body) && /^Hi,/.test(sent[0].body));
+
+  reset(); restDocs[TOK] = inviteDoc({ name: '<scr' + 'ipt>alert(1)</scr' + 'ipt>' });
+  send();
+  t('a hostile name cannot inject HTML', sent.length === 1 && sent[0].htmlBody.indexOf('<scr' + 'ipt>') === -1 && sent[0].htmlBody.indexOf('&lt;scr' + 'ipt&gt;') > -1);
+
+  reset(); restDocs[TOK] = inviteDoc();
+  t('malformed token refused', send('abc').error === 'bad_token' && sent.length === 0);
+  t('token with path tricks refused', send('../../etc/passwd0000000').error === 'bad_token');
+  t('empty token refused', send('').error === 'bad_token');
+  t('missing ID token refused', send(TOK, '').error === 'not_verified' && sent.length === 0);
+  t('invalid ID token refused', send(TOK, 'forged').error === 'not_verified' && sent.length === 0);
+  var unk = send('ffffffffffffffffffffffffffffffff');
+  t('unknown invite refused, with the reason from Firestore', unk.error === 'invite_not_found' && unk.detail === 'Firestore answered 404' && sent.length === 0, JSON.stringify(unk));
+  var forged = send(TOK, 'forged');
+  t('a forged sign-in token gets a plain-language detail', forged.error === 'not_verified' && /sign-in token/.test(forged.detail || ''), JSON.stringify(forged));
+  t('someone else\'s invite refused (not the creator)', send(TOK, 'good-other').error === 'not_your_invite' && sent.length === 0);
+
+  reset(); restDocs[TOK] = inviteDoc({ status: 'revoked' });
+  t('revoked invite not emailed', send().error === 'invite_not_open' && sent.length === 0);
+  reset(); restDocs[TOK] = inviteDoc({ status: 'used' });
+  t('used invite not emailed', send().error === 'invite_not_open' && sent.length === 0);
+  reset(); restDocs[TOK] = inviteDoc({ exp: Date.now() - day });
+  t('expired invite not emailed', send().error === 'invite_not_open' && sent.length === 0);
+  reset(); restDocs[TOK] = inviteDoc({ email: 'not an email' });
+  t('invalid stored address refused', send().error === 'bad_recipient' && sent.length === 0);
+
+  reset(); restDocs[TOK] = inviteDoc();
+  var results = [send(), send(), send(), send()].map(function(x){ return x.ok ? 'ok' : x.error; });
+  t('one invite can be emailed 3 times, not 4', results.join() === 'ok,ok,ok,too_many_for_invite' && sent.length === 3, results.join());
+
+  reset(); restDocs[TOK] = inviteDoc(); INVITE_EMAIL_DAILY_CAP_ = 2;
+  var toks = ['aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb', 'cccccccccccccccccccccccccccccccc'];
+  toks.forEach(function(k){ restDocs[k] = inviteDoc({ email: k.slice(0, 3) + '@acme.com' }); });
+  var daily = toks.map(function(k){ var x = send(k); return x.ok ? 'ok' : x.error; });
+  t('daily cap stops further emails', daily.join() === 'ok,ok,daily_limit' && sent.length === 2, daily.join());
+
+  reset(); restDocs[TOK] = inviteDoc(); quota = 0;
+  t('Gmail\'s own quota being used up is reported', send().error === 'quota' && sent.length === 0);
+
+  reset(); restDocs[TOK] = inviteDoc(); mailThrows = true;
+  r = send();
+  t('a Gmail failure is reported and not counted', r.error === 'mail_error' && r.detail === 'mail down' && !Object.keys(props).some(function(k){ return k.indexOf('mailday_') === 0; }));
+
+  reset(); props['mailday_2020-01-01'] = '50'; props['mailtok_old'] = '2|' + (Date.now() - 200 * day); props['mailtok_new'] = '1|' + Date.now(); props['GROQ_API_KEY'] = 'keep';
+  restDocs[TOK] = inviteDoc(); send();
+  t('old counters are cleaned up, recent ones and other settings survive', !('mailday_2020-01-01' in props) && !('mailtok_old' in props) && 'mailtok_new' in props && props.GROQ_API_KEY === 'keep');
+
+  reset();
+  authorizeInviteEmails();
+  t('the one-time authorize function emails the script owner', sent.length === 1 && sent[0] !== undefined);
+  reset(); sent = [];
+  var mc = mailCheck_();
+  t('mail check emails only the script owner and masks the address', mc.ok === true && sent.length === 1 && sent[0] === 'owner@gmail.com' && mc.to === 'o***@gmail.com' && mc.quotaBeforeSending === 100, JSON.stringify(mc));
+  reset(); mailThrows = true;
+  var mc2 = mailCheck_();
+  t('mail check reports the real Gmail error and where it failed', mc2.ok === false && mc2.step === 'send' && mc2.detail === 'mail down', JSON.stringify(mc2));
+  reset(); var runs = [1, 2, 3, 4, 5, 6].map(function(){ return mailCheck_(); });
+  t('mail check is limited to 5 a day', runs[4].ok === true && runs[5].ok === false && runs[5].error === 'limit');
+  var d = doGet({ parameter: { action: 'mailCheck', callback: 'cb' } });
+  t('doGet routes mailCheck', typeof d.text === 'string' && /^cb\(/.test(d.text));
+} catch (e) { out.push('FAIL crashed: ' + e.message); }
+document.title = window.__err ? 'LOAD ERROR: ' + window.__err : out.join(' || ');
+</script></head><body></body></html>

@@ -644,6 +644,7 @@ import {
   updatePassword, reauthenticateWithCredential, EmailAuthProvider
 } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
 import { getFirestore, doc, getDoc, setDoc, increment } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+import { syncOrgShare } from "./org-share.js";
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
@@ -829,6 +830,9 @@ onAuthStateChanged(auth, async (user) => {
     document.getElementById('dashboardSkeleton').style.display = 'block';
     document.getElementById('dashboardContent').style.display = 'none';
     await loadDashboard(user);
+    // If this person belongs to a company, refresh the copy their company sees
+    // (a finished assessment or lesson shows up here the next time they visit).
+    syncOrgShare(db, user).catch(() => { /* never blocks the dashboard */ });
     document.getElementById('dashboardSkeleton').style.display = 'none';
     document.getElementById('dashboardContent').style.display = 'block';
 

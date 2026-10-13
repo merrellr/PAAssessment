@@ -173,6 +173,7 @@ const JoinLogic = (function(){
       <li>Your latest assessment results, including your individual answers</li>
       <li>Your course progress and when you were last active</li>
     </ul>
+    <p>Product Advisory, which runs this platform, can also see this information in order to support the service.</p>
     <h2>What they cannot see</h2>
     <ul>
       <li>Your private course reflections and saved templates</li>
@@ -215,6 +216,7 @@ import {
   GoogleAuthProvider, signInWithPopup, getAdditionalUserInfo, updateProfile, sendEmailVerification
 } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
 import { getFirestore, doc, getDoc, setDoc, writeBatch, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+import { syncOrgShare, recordOrgMembership } from "./org-share.js";
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
@@ -321,6 +323,14 @@ $('acceptBtn').addEventListener('click', async () => {
     batch.set(doc(db, 'memberships', currentUser.uid), data);
     batch.update(doc(db, 'invites', token), { status: 'used', usedBy: currentUser.uid, usedAt: serverTimestamp() });
     await batch.commit();
+    // Start the shared record straight away, so the company sees where this
+    // person already stands. Best effort: the dashboard refreshes it on every visit.
+    try {
+      await recordOrgMembership(db, currentUser.uid, loaded.inv.orgId);
+      await syncOrgShare(db, currentUser, { force: true });
+    } catch (shareErr){
+      console.error('Joined, but could not share current results yet:', shareErr);
+    }
     $('doneTitle').textContent = 'Welcome to ' + loaded.inv.orgName;
     $('doneText').textContent = 'You\'ve joined as ' + JoinLogic.ROLE_LABEL[loaded.inv.role] + '. Your dashboard is ready whenever you are.';
     show('stateDone');

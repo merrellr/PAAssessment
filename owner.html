@@ -101,6 +101,12 @@
   .links-box code{ display:block; font-size: 12px; word-break: break-all; color: var(--ink-soft); }
   .result-line{ font-size: 13px; line-height: 1.6; color: var(--ink-soft); }
   td.cell-error{ color: var(--warn); font-size: 12.5px; }
+  tr.detail-row td{ background:#F7FAFD; padding: 4px 10px 18px; }
+  .share-box{ border:1px solid var(--line); border-radius: 10px; background:#fff; padding: 14px 16px; font-size: 13px; line-height: 1.55; }
+  .share-box h4{ font-family:'Space Grotesk', sans-serif; font-size: 11.5px; letter-spacing: 0.04em; text-transform: uppercase; color: var(--gray); margin: 12px 0 4px; }
+  .share-box h4:first-child{ margin-top: 0; }
+  .answer-list{ margin: 4px 0 0; padding-left: 20px; }
+  .answer-list li{ margin-bottom: 8px; }
   .inline-check{ display:flex; align-items:center; gap:8px; font-size:13px; color: var(--ink-soft); margin: 0 0 12px 2px; cursor:pointer; }
 </style>
 
@@ -291,6 +297,37 @@ const OwnerLogic = (function(){
     return list;
   }
 
+  /* ---- the shared record (what a company sees about a member) ---- */
+  // Course ids look like "aiOrg-moderate": a skill area, then a level.
+  const LEVEL_LABELS = { novice: 'Limited Experience', moderate: 'Moderate Experience', experienced: 'Lots of Experience', advanced: 'Advanced Experience' };
+  function prettyCourseId(id){
+    const s = String(id);
+    const i = s.lastIndexOf('-');
+    const area = i > -1 ? s.slice(0, i) : s;
+    const level = i > -1 ? s.slice(i + 1) : '';
+    const areaLabel = labels[area] || (area.charAt(0).toUpperCase() + area.slice(1));
+    return level ? areaLabel + ' · ' + (LEVEL_LABELS[level] || level) : areaLabel;
+  }
+
+  // Boils a shared record down to the few facts shown in the people list.
+  function summarizeShare(share){
+    if (!share) return null;
+    const a = share.assessment || null;
+    const courses = share.courses || {};
+    const ids = Object.keys(courses);
+    let lessons = 0;
+    ids.forEach(id => { lessons += ((courses[id] && courses[id].completed) || []).length; });
+    return {
+      anonymous: share.identity === null,
+      tier: a ? (a.tier || null) : null,
+      overallPct: a && typeof a.overallPct === 'number' ? Math.round(a.overallPct) : null,
+      answers: a && Array.isArray(a.answers) ? a.answers.length : 0,
+      courseCount: ids.length,
+      lessonsDone: lessons,
+      lastActiveAt: share.lastActiveAt || null
+    };
+  }
+
   function csvCell(v){
     const s = String(v == null ? '' : v);
     return /[",\n\r]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
@@ -310,7 +347,7 @@ const OwnerLogic = (function(){
 
   return { DOMAINS, DEFAULT_FOCUS_ORDER, domainLabel, validateOrgForm, buildOrgFields, moveItem, availableFocus, placeFocus,
     removeFocus, describePlan, parseInviteLines, classifyInvites, inviteStatus, seatInfo, buildPeopleRows, filterOrgs,
-    buildInviteCsv, csvCell, randomToken, EMAIL_RE };
+    buildInviteCsv, csvCell, randomToken, EMAIL_RE, summarizeShare, prettyCourseId };
 })();
 
 /* The ranking board: a numbered "Priority order" list and a "Not a priority"
@@ -767,7 +804,8 @@ let focusAreas = [];
 let formMode = null;      // null | 'create' | 'edit'
 let editingId = null;
 let currentOrgId = null;
-let detail = { memberships: [], invites: [] };
+let detail = { memberships: [], invites: [], shares: {}, sharesError: false };
+let expandedShares = {};   // uid -> true while the "Details" panel is open
 let newLinks = [];
 
 /* ---------------------------------------------------------------- sign-in */
@@ -1039,6 +1077,18 @@ async function loadDetail(){
   if (id !== currentOrgId) return;
   detail.memberships = mSnap.docs.map(d => Object.assign({ id: d.id }, d.data(), { joinedAtMs: msOf(d.data().joinedAt) }));
   detail.invites = iSnap.docs.map(d => Object.assign({ id: d.id }, d.data(), { createdAtMs: msOf(d.data().createdAt), expiresAtMs: msOf(d.data().expiresAt) }));
+
+  // The shared records (what the company sees). Read separately so that a
+  // problem here never hides the people list itself.
+  detail.shares = {};
+  try {
+    const sSnap = await getDocs(collection(db, 'orgs', id, 'members'));
+    if (id !== currentOrgId) return;
+    sSnap.docs.forEach(d => { detail.shares[d.id] = d.data(); });
+  } catch (err){
+    console.error('Could not read shared records:', err);
+    detail.sharesError = true;
+  }
 }
 
 function currentOrg(){ return orgs.find(o => o.id === currentOrgId); }
@@ -1052,7 +1102,8 @@ async function showDetail(id){
   $('adminForm').style.display = 'none';
   $('usersForm').style.display = 'none';
   $('userSearch').value = '';
-  detail = { memberships: [], invites: [] };
+  detail = { memberships: [], invites: [], shares: {}, sharesError: false };
+  expandedShares = {};
   renderDetail();
   try {
     await loadDetail();
@@ -1142,17 +1193,85 @@ function personRow(p){
   }
   const es = p.kind === 'invite' ? emailState[p.token] : null;
   const emailLine = es && es.sent ? el('div', { class: 'cell-sub', text: 'Emailed ✓' + (es.sent > 1 ? ' (' + es.sent + ' times)' : '') }) : null;
+  if (p.kind === 'member'){
+    actions.appendChild(el('button', { class: 'btn btn-ghost btn-small', type: 'button', text: expandedShares[p.id] ? 'Hide details' : 'Details',
+      onclick: () => { expandedShares[p.id] = !expandedShares[p.id]; renderPeople(); } }));
+  }
   return el('tr', null,
     el('td', null, el('div', { class: 'cell-name', text: p.name || '—' })),
     el('td', { text: p.email || '—' }), el('td', { class: 'nowrap', text: p.phone || '—' }),
-    el('td', null, status, el('div', { class: 'cell-sub', text: when }), emailLine), el('td', null, actions));
+    el('td', null, status, el('div', { class: 'cell-sub', text: when }), emailLine, shareSummaryLine(p)), el('td', null, actions));
 }
 
 function peopleTable(rows, emptyText){
   if (!rows.length) return el('p', { class: 'empty', text: emptyText });
+  const body = [];
+  rows.forEach(p => {
+    body.push(personRow(p));
+    if (p.kind === 'member' && expandedShares[p.id]) body.push(shareDetailRow(p));
+  });
   return el('table', { class: 'data' },
     el('thead', null, el('tr', null, el('th', { text: 'Name' }), el('th', { text: 'Email' }), el('th', { text: 'Phone' }), el('th', { text: 'Status' }), el('th', { text: '' }))),
-    el('tbody', null, ...rows.map(personRow)));
+    el('tbody', null, ...body));
+}
+
+/* One line under an active or former member's status: what their company sees. */
+function shareSummaryLine(p){
+  if (p.kind !== 'member') return null;
+  const share = detail.shares[p.id];
+  if (!share) return el('div', { class: 'cell-sub', text: detail.sharesError ? 'Shared data unavailable' : 'Nothing shared yet' });
+  const s = L.summarizeShare(share);
+  const bits = [];
+  bits.push(s.tier ? s.tier + (s.overallPct !== null ? ' (' + s.overallPct + '%)' : '') : 'No assessment yet');
+  bits.push(s.courseCount + ' course' + (s.courseCount === 1 ? '' : 's') + ', ' + s.lessonsDone + ' lesson' + (s.lessonsDone === 1 ? '' : 's') + ' done');
+  bits.push(s.lastActiveAt ? 'Last active ' + fmtDate(Date.parse(s.lastActiveAt)) : 'No activity yet');
+  return el('div', { class: 'cell-sub', text: bits.join(' · ') });
+}
+
+/* The full shared record for one member, as their company sees it. */
+function shareDetailRow(p){
+  const share = detail.shares[p.id];
+  const box = el('div', { class: 'share-box' });
+  if (!share){
+    box.appendChild(el('p', { class: 'empty', text: 'Nothing has been shared for this person yet. It appears after they join, finish the assessment, or open their dashboard.' }));
+  } else {
+    const a = share.assessment;
+    box.appendChild(el('h4', { text: 'Who' }));
+    box.appendChild(el('div', { text: share.identity ? share.identity.name + ' · ' + share.identity.email : 'Name and email removed (the person deleted their account)' }));
+    box.appendChild(el('h4', { text: 'Latest assessment' }));
+    if (!a){
+      box.appendChild(el('div', { text: 'Not taken yet.' }));
+    } else {
+      box.appendChild(el('div', { text: (a.tier || '—') + (typeof a.overallPct === 'number' ? ' · ' + Math.round(a.overallPct) + '% overall' : '') +
+        (a.submittedAt ? ' · taken ' + fmtDate(Date.parse(a.submittedAt)) : '') }));
+      if (a.categoryPct){
+        box.appendChild(el('div', { class: 'chips', style: 'margin-top:6px;' },
+          ...Object.keys(a.categoryPct).map(k => el('span', { class: 'pill', text: L.domainLabel(k) + ' ' + Math.round(a.categoryPct[k]) + '%' }))));
+      }
+      if (Array.isArray(a.answers) && a.answers.length){
+        box.appendChild(el('h4', { text: 'Individual answers' }));
+        box.appendChild(el('ol', { class: 'answer-list' }, ...a.answers.map(x =>
+          el('li', null, el('div', { class: 'cell-name', text: x.question || ('Question ' + x.n) }), el('div', { text: (x.answer || '—') + (typeof x.points === 'number' ? '  (' + x.points + ' pts)' : '') })))));
+      } else {
+        box.appendChild(el('div', { class: 'cell-sub', text: 'No individual answers recorded for this assessment (taken before answers were saved).' }));
+      }
+    }
+    box.appendChild(el('h4', { text: 'Courses' }));
+    const ids = Object.keys(share.courses || {});
+    if (!ids.length){
+      box.appendChild(el('div', { text: 'No course activity yet.' }));
+    } else {
+      box.appendChild(el('ul', { class: 'answer-list' }, ...ids.map(id => {
+        const c = share.courses[id];
+        return el('li', null, el('span', { class: 'cell-name', text: L.prettyCourseId(id) }),
+          ' — ' + (c.completed || []).length + ' lesson' + ((c.completed || []).length === 1 ? '' : 's') + ' done' +
+          (c.lastLesson ? ', last lesson ' + c.lastLesson : '') + (c.updatedAt ? ', updated ' + fmtDate(Date.parse(c.updatedAt)) : ''));
+      })));
+    }
+    box.appendChild(el('div', { class: 'cell-sub', style: 'margin-top:10px;', text: 'Last active: ' + (share.lastActiveAt ? fmtDateTime(Date.parse(share.lastActiveAt)) : 'no activity yet') }));
+  }
+  const td = el('td', { colspan: '5' }, box);
+  return el('tr', { class: 'detail-row' }, td);
 }
 
 function renderPeople(){

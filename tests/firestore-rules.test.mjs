@@ -69,6 +69,15 @@ await env.withSecurityRulesDisabled(async (ctx) => {
   await setDoc(doc(db, 'invites/tokRevokeMe'), invite('orgA', 'Acme', 'member', 'open', inDays(10)));
   await setDoc(doc(db, 'invites/tokRevokeMe2'), invite('orgA', 'Acme', 'member', 'open', inDays(10)));
   await setDoc(doc(db, 'progress/memberA'), { courses: {}, profile: { phone: '555' } });
+  await setDoc(doc(db, 'memberships/scrubMe'), member('orgA', 'Acme', 'member'));
+  await setDoc(doc(db, 'memberships/scrubMe2'), member('orgA', 'Acme', 'member'));
+  const share = (email) => ({ identity: { name: 'Seed', email }, assessment: { tier: 'Moderate Experience', overallPct: 50 },
+    courses: {}, lastActiveAt: '2026-10-01T00:00:00.000Z', updatedAt: now() });
+  await setDoc(doc(db, 'orgs/orgA/members/memberA'), share('member@a.com'));
+  await setDoc(doc(db, 'orgs/orgA/members/removedR'), share('r@a.com'));
+  await setDoc(doc(db, 'orgs/orgA/members/scrubMe'), share('scrub@a.com'));
+  await setDoc(doc(db, 'orgs/orgA/members/scrubMe2'), share('scrub2@a.com'));
+  await setDoc(doc(db, 'orgs/orgB/members/adminB'), share('admin@b.com'));
 });
 
 const owner = env.authenticatedContext('owner1', { email: 'owner@x.com' }).firestore();
@@ -239,6 +248,92 @@ await deny('company admin cannot list another company\'s memberships', () => get
 await deny('company admin cannot list ALL memberships', () => getDocs(collection(adminA, 'memberships')));
 await deny('plain member cannot list memberships', () => getDocs(query(collection(memberA, 'memberships'), where('orgId', '==', 'orgA'))));
 await deny('a removed admin cannot read members', () => getDoc(doc(exAdminA, 'memberships/memberA')));
+
+console.log('\n--- shared record: who can write it ---');
+const goodShare = (email, over = {}) => Object.assign({
+  identity: { name: 'Member Name', email },
+  assessment: { tier: 'Lots of Experience', overallPct: 72, categoryPct: { discovery: 80 }, answers: [{ n: 1, question: 'q', answer: 'a', points: 2 }] },
+  courses: { 'discovery-novice': { completed: [1, 2], lastLesson: 2, updatedAt: '2026-10-01T12:00:00.000Z' } },
+  lastActiveAt: '2026-10-01T12:00:00.000Z',
+  updatedAt: serverTimestamp()
+}, over);
+await allow('an active member writes their own shared record for their company',
+  () => setDoc(doc(memberA, 'orgs/orgA/members/memberA'), goodShare('member@a.com')));
+await allow('a record with no assessment yet is fine',
+  () => setDoc(doc(memberA, 'orgs/orgA/members/memberA'), goodShare('member@a.com', { assessment: null, courses: {}, lastActiveAt: null })));
+await allow('an active company ADMIN also writes their own shared record (admins are members too)',
+  () => setDoc(doc(adminA, 'orgs/orgA/members/adminA'), goodShare('admin@a.com')));
+await deny('a member cannot write someone else\'s shared record', () => setDoc(doc(memberA, 'orgs/orgA/members/adminA'), goodShare('member@a.com')));
+await deny('a member cannot write into a company they do not belong to', () => setDoc(doc(memberA, 'orgs/orgB/members/memberA'), goodShare('member@a.com')));
+await deny('a REMOVED member can no longer update their shared record (it stays frozen)',
+  () => setDoc(doc(asUser('removedR', 'r@a.com'), 'orgs/orgA/members/removedR'), goodShare('r@a.com')));
+await deny('someone who never joined cannot write one', () => setDoc(doc(stranger, 'orgs/orgA/members/stranger'), goodShare('stranger@x.com')));
+await deny('a removed admin cannot write one', () => setDoc(doc(exAdminA, 'orgs/orgA/members/exAdminA'), goodShare('ex@a.com')));
+await deny('a company admin cannot write a member\'s record', () => setDoc(doc(adminA, 'orgs/orgA/members/memberA'), goodShare('member@a.com')));
+await deny('the platform owner cannot write a member\'s record', () => setDoc(doc(owner, 'orgs/orgA/members/memberA'), goodShare('member@a.com')));
+await deny('the identity must be the signed-in account\'s own email', () => setDoc(doc(memberA, 'orgs/orgA/members/memberA'), goodShare('someone.else@a.com')));
+await deny('private reflections cannot be added to the shared record', () => setDoc(doc(memberA, 'orgs/orgA/members/memberA'), goodShare('member@a.com', { reflections: { c: 'private' } })));
+await deny('a profile or phone number cannot be added', () => setDoc(doc(memberA, 'orgs/orgA/members/memberA'), goodShare('member@a.com', { profile: { phone: '555' } })));
+await deny('a phone number cannot ride along inside the identity', () => setDoc(doc(memberA, 'orgs/orgA/members/memberA'), goodShare('member@a.com', { identity: { name: 'N', email: 'member@a.com', phone: '555' } })));
+await deny('courses must be a map', () => setDoc(doc(memberA, 'orgs/orgA/members/memberA'), goodShare('member@a.com', { courses: ['x'] })));
+await deny('last-active must be text or empty', () => setDoc(doc(memberA, 'orgs/orgA/members/memberA'), goodShare('member@a.com', { lastActiveAt: 12345 })));
+await deny('the update time must be the server\'s', () => setDoc(doc(memberA, 'orgs/orgA/members/memberA'), goodShare('member@a.com', { updatedAt: inDays(-30) })));
+await deny('the identity cannot be left out of a normal update', () => setDoc(doc(memberA, 'orgs/orgA/members/memberA'), (() => { const g = goodShare('member@a.com'); delete g.identity; return g; })()));
+await deny('a name over 100 characters is refused', () => setDoc(doc(memberA, 'orgs/orgA/members/memberA'), goodShare('member@a.com', { identity: { name: 'n'.repeat(101), email: 'member@a.com' } })));
+await deny('nobody can delete a shared record, even the member', () => deleteDoc(doc(memberA, 'orgs/orgA/members/memberA')));
+await deny('nobody can delete a shared record, even the owner', () => deleteDoc(doc(owner, 'orgs/orgA/members/memberA')));
+await deny('signed-out visitor cannot write one', () => setDoc(doc(anon, 'orgs/orgA/members/memberA'), goodShare('member@a.com')));
+
+console.log('\n--- shared record: who can read it ---');
+await allow('a company admin reads a member\'s shared record', () => getDoc(doc(adminA, 'orgs/orgA/members/memberA')));
+await allow('a company admin reads a FORMER member\'s record (the company keeps it)', () => getDoc(doc(adminA, 'orgs/orgA/members/removedR')));
+await allow('a company admin lists all of their company\'s shared records', () => getDocs(collection(adminA, 'orgs/orgA/members')));
+await deny('a company admin cannot read another company\'s shared records', () => getDoc(doc(adminA, 'orgs/orgB/members/adminB')));
+await deny('a company admin cannot list another company\'s shared records', () => getDocs(collection(adminA, 'orgs/orgB/members')));
+await deny('another company\'s admin cannot read this company\'s records', () => getDoc(doc(adminB, 'orgs/orgA/members/memberA')));
+await allow('the platform owner reads shared records', () => getDoc(doc(owner, 'orgs/orgA/members/memberA')));
+await allow('the platform owner lists a company\'s shared records', () => getDocs(collection(owner, 'orgs/orgA/members')));
+await allow('a member can read their OWN shared record (to see what their company sees)', () => getDoc(doc(memberA, 'orgs/orgA/members/memberA')));
+await deny('a member cannot read a colleague\'s record', () => getDoc(doc(memberA, 'orgs/orgA/members/removedR')));
+await deny('a member cannot list the company\'s records', () => getDocs(collection(memberA, 'orgs/orgA/members')));
+await deny('a removed admin cannot read records', () => getDoc(doc(exAdminA, 'orgs/orgA/members/memberA')));
+await deny('a stranger cannot read records', () => getDoc(doc(stranger, 'orgs/orgA/members/memberA')));
+await deny('a signed-out visitor cannot read records', () => getDoc(doc(anon, 'orgs/orgA/members/memberA')));
+
+console.log('\n--- shared record: removing a name after account deletion ---');
+const scrub = asUser('scrubMe', 'scrub@a.com');
+await deny('blanking the identity must not also change anything else',
+  () => updateDoc(doc(scrub, 'orgs/orgA/members/scrubMe'), { identity: null, assessment: null, updatedAt: serverTimestamp() }));
+await deny('blanking the identity needs a server update time',
+  () => updateDoc(doc(scrub, 'orgs/orgA/members/scrubMe'), { identity: null, updatedAt: inDays(-3) }));
+await deny('a member cannot blank someone else\'s identity',
+  () => updateDoc(doc(memberA, 'orgs/orgA/members/scrubMe'), { identity: null, updatedAt: serverTimestamp() }));
+await deny('a company admin cannot blank a member\'s identity',
+  () => updateDoc(doc(adminA, 'orgs/orgA/members/scrubMe'), { identity: null, updatedAt: serverTimestamp() }));
+await allow('a person blanks THEIR OWN name and email on the company\'s copy (account deletion)',
+  () => updateDoc(doc(scrub, 'orgs/orgA/members/scrubMe'), { identity: null, updatedAt: serverTimestamp() }));
+await allow('the company still reads the record, now without a name',
+  async () => { const s = await getDoc(doc(adminA, 'orgs/orgA/members/scrubMe')); if (s.data().identity !== null || s.data().assessment.tier !== 'Moderate Experience') throw new Error('unexpected content'); });
+const scrubRemoved = asUser('removedR', 'r@a.com');
+await allow('a REMOVED member can still blank their name on the frozen copy when they delete their account',
+  () => updateDoc(doc(scrubRemoved, 'orgs/orgA/members/removedR'), { identity: null, updatedAt: serverTimestamp() }));
+
+console.log('\n--- membership: blanking identity on account deletion ---');
+const scrub2 = asUser('scrubMe2', 'scrub2@a.com');
+await allow('a person blanks the name, email and phone on their own membership',
+  () => updateDoc(doc(scrub2, 'memberships/scrubMe2'), { email: '', displayName: '', phone: '' }));
+await deny('blanking cannot also promote them to admin',
+  () => updateDoc(doc(scrub, 'memberships/scrubMe'), { email: '', displayName: '', phone: '', role: 'admin' }));
+await deny('blanking cannot also end or restart the membership',
+  () => updateDoc(doc(scrub, 'memberships/scrubMe'), { email: '', displayName: '', phone: '', status: 'removed' }));
+await deny('it cannot be used to put a different email in place',
+  () => updateDoc(doc(scrub, 'memberships/scrubMe'), { email: 'new@evil.com', displayName: '', phone: '' }));
+await deny('it cannot blank only the email and keep the name',
+  () => updateDoc(doc(scrub, 'memberships/scrubMe'), { email: '', displayName: 'Still Here' }));
+await deny('another person cannot blank someone else\'s membership',
+  () => updateDoc(doc(memberA, 'memberships/scrubMe'), { email: '', displayName: '', phone: '' }));
+await deny('a company admin cannot blank a member\'s identity on the membership',
+  () => updateDoc(doc(adminA, 'memberships/scrubMe'), { email: '', displayName: '', phone: '' }));
 
 console.log('\n--- memberships: joining with an invite ---');
 await allow('person joins as a member with a valid invite',

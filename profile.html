@@ -193,6 +193,7 @@ import {
   updateProfile, verifyBeforeUpdateEmail, deleteUser
 } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
 import { getFirestore, doc, getDoc, setDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+import { anonymizeOrgShares } from "./org-share.js";
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
@@ -494,6 +495,19 @@ window.handleDeleteAccount = async function(){
   }
 
   const uid = currentUser.uid;
+
+  // If this person has been in a company, blank their name and email on the
+  // copy the company keeps (the results stay with the company). This runs
+  // first, while their records still exist, and stops everything if it fails.
+  try {
+    await anonymizeOrgShares(db, currentUser);
+  } catch (err){
+    console.error('Could not remove your name from your company\'s copy:', err);
+    errorEl.textContent = "We couldn't remove your name from the copy your company holds, so nothing has been deleted. Please try again in a minute.";
+    resetButton();
+    return;
+  }
+
   let sheetResult = null;
   try {
     sheetResult = await requestSheetDeletion(await currentUser.getIdToken(true));
