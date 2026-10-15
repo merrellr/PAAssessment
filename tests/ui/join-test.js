@@ -34,6 +34,7 @@ async function settle(){ for (let i = 0; i < 80 && $('stateLoading').style.displ
         t('a temporary failure keeps them on the page with an error and a working button', shown() === 'stateConsent' && /try again/i.test(txt('consentError')) && $('acceptBtn').disabled === false && $('acceptBtn').textContent === 'Accept and join', shown() + ' ' + txt('consentError'));
       } else {
         t('joining moves to the welcome screen', shown() === 'stateDone' && /Welcome to Acme Health/.test(txt('doneTitle')), shown() + ' ' + txt('doneTitle'));
+        t('only a new admin is offered a link to the company dashboard', ($('doneAdminLink').style.display !== 'none') === (scn === 'admin'), $('doneAdminLink').style.display);
         t('membership saved: company, role, active, no end date, link back to the invite',
           m && m.orgId === 'orgA' && m.orgName === 'Acme Health' && m.role === (scn === 'admin' ? 'admin' : 'member') && m.status === 'active' && m.endedAt === null && m.inviteToken === TOKEN, JSON.stringify(m));
         t('email stored lower-case from the signed-in account, name from their account', m && m.email === 'new@a.com' && m.displayName === 'New Person');

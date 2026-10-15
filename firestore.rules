@@ -1,11 +1,8 @@
 // Firestore rules for project product-advisory-lms.
 //
-// STATUS: checkpoint 3 of the company-accounts build. Published in the console
-// today: progress, platformAdmins, orgs, invites and memberships (checkpoint 2).
-// The shared-record rules at the bottom (orgs/{orgId}/members) and the
-// membership identity-scrub rule are NEW and only take effect once this whole
-// file is pasted into Firebase console > Firestore Database > Rules and
-// published. Update this status line when that is done.
+// STATUS: this whole file is published in the console (checkpoint 3 of the
+// company-accounts build). Checkpoint 4, the company admin dashboard, needs no
+// rule changes: it only uses what admins were already allowed to do below.
 //
 // Editing this file does NOT change the live rules. Paste the whole file into
 // the console Rules tab and click Publish, so the two stay identical. These

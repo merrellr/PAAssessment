@@ -65,8 +65,23 @@ when volume outgrows the free tier) and writes `blocked:` rows to the
   the company keeps what it had. On account deletion the person's name and email
   are blanked on every company's copy (the results stay) before anything else is
   deleted. The owner console shows each member's shared data under **Details**.
-- Not built yet: the company admin dashboard, focus areas shaping
-  recommendations, and removing members.
+- `company.html` is the company admin dashboard. A company admin reaches it from
+  Profile > Company dashboard (or the link after joining as an admin); the
+  platform owner reaches it with the **Team dashboard** button on a company's
+  page in the owner console (`company.html?org=<id>`). It shows a roll-up (how
+  many have taken the assessment, are learning, finished their plan, or have been
+  quiet for 30+ days; level spread; average score per skill area), the team
+  table with each person's level, plan progress and status, a **Details** panel
+  per person (scores, individual answers, course progress), CSV downloads (team
+  report, individual answers), and adding/resending/renewing/revoking
+  invitations for admins and users. Former members are listed separately.
+- `company-core.js` holds the logic both `owner.html` and `company.html` share:
+  invite helpers, and the team report (what "assessed", "learning" and "finished"
+  mean, and the numbers). Progress is counted against each course's real lesson
+  count, in `LESSON_COUNTS`; `tests/company-core.test.mjs` fails if a course in
+  `content/` gains or loses a lesson without that table being updated.
+- Not built yet: focus areas shaping recommendations (admins editing the ranked
+  list), and removing members.
 - Tests: see `tests/README.md`.
 
 ## Closing an account

@@ -1,0 +1,1125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>Company Dashboard — Product Advisory Learning</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy: #1A4584; --navy-deep: #12305e; --gray: #9AA3AD; --cyan: #35C2E8;
+    --bg: #F5F8FB; --surface: #FFFFFF; --ink: #16213E; --ink-soft: #4B5768; --line: #E3E9F0;
+    --warn: #C0622A; --ok: #2E8B57;
+    --t0: #B9C6DA; --t1: #6FA3D6; --t2: #35C2E8; --t3: #1A4584;
+  }
+  *{ box-sizing: border-box; }
+  body{ margin:0; background: var(--bg); font-family:'IBM Plex Sans', system-ui, sans-serif; color: var(--ink); }
+  .wrap{ max-width: 1040px; margin: 0 auto; padding: 24px 16px 64px; }
+  .brand-header{ display:flex; align-items:center; gap:9px; padding: 0 0 14px; text-decoration:none; }
+  .brand-word{ font-family:'Space Grotesk', sans-serif; font-weight:700; font-size: 19px; line-height:1.3; color: var(--navy-deep); }
+  .brand-accent-bar{ height: 3px; background: linear-gradient(90deg, var(--navy) 0%, var(--cyan) 100%); border-radius: 2px; margin-bottom: 24px; }
+  .back-link{ font-size: 13px; color: var(--gray); text-decoration:none; display:inline-block; margin-bottom: 16px; cursor:pointer; background:none; border:none; padding:0; font-family:inherit; }
+  .back-link:hover{ color: var(--navy); }
+
+  .card{ background: var(--surface); border-radius: 16px; border: 1px solid var(--line); padding: 26px; box-shadow: 0 1px 2px rgba(22,33,62,0.04), 0 12px 32px rgba(22,33,62,0.06); margin-bottom: 22px; }
+  h1{ font-family:'Space Grotesk', sans-serif; font-size: 22px; margin: 0 0 4px; color: var(--navy-deep); }
+  h2{ font-family:'Space Grotesk', sans-serif; font-size: 16px; margin: 0; color: var(--navy-deep); }
+  h3{ font-family:'Space Grotesk', sans-serif; font-size: 13px; margin: 20px 0 8px; color: var(--navy-deep); text-transform: uppercase; letter-spacing: 0.04em; }
+  p{ line-height:1.55; color: var(--ink-soft); font-size: 13.5px; }
+  .hint{ font-size: 12.5px; color: var(--gray); margin: 0 0 12px 2px; line-height: 1.5; }
+  .section-head{ display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap; margin-bottom: 14px; }
+
+  .field-label{ display:block; font-size:12px; font-weight:600; color: var(--ink-soft); margin: 0 0 5px 2px; }
+  .text-input{ width:100%; padding: 11px 13px; margin-bottom: 14px; border: 1.5px solid var(--line); border-radius: 9px; font-family:'IBM Plex Sans', sans-serif; font-size: 14px; background:#fff; color: var(--ink); }
+  textarea.text-input{ resize: vertical; min-height: 72px; line-height: 1.5; }
+  .text-input:focus{ outline:none; border-color: var(--cyan); }
+  .field-error{ font-size: 12.5px; color: var(--warn); margin: -8px 0 12px 2px; min-height: 1px; }
+  .grid-2{ display:grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 0 16px; }
+  .grid-3{ display:grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 0 16px; }
+
+  button.btn{ font-family:'Space Grotesk', sans-serif; font-weight:600; font-size: 14px; border-radius: 8px; padding: 10px 18px; border: none; cursor:pointer; }
+  button.btn.btn-primary{ background: linear-gradient(90deg, var(--navy) 0%, var(--navy-deep) 100%); color:#fff; }
+  button.btn.btn-primary:hover{ opacity:0.92; }
+  button.btn.btn-ghost{ background:none; color: var(--ink-soft); border: 1px solid var(--line); }
+  button.btn.btn-ghost:hover{ border-color: var(--cyan); }
+  button.btn.btn-small{ padding: 6px 12px; font-size: 12.5px; }
+  button.btn.btn-danger{ background:none; color: var(--warn); border: 1px solid #E8C9B8; }
+  button.btn:disabled{ opacity:0.55; cursor: default; }
+  button.btn:focus-visible, .text-input:focus-visible{ outline: 2px solid var(--cyan); outline-offset: 2px; }
+  .btn-row{ display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
+
+  .pill{ display:inline-block; font-size: 11.5px; font-weight:600; padding: 2px 9px; border-radius: 20px; background:#EEF3FA; color: var(--navy); white-space: nowrap; }
+  .pill.archived, .pill.expired{ background:#F6E9E1; color: var(--warn); }
+  .pill.active, .pill.s-finished{ background:#E4F3EA; color: var(--ok); }
+  .pill.invited, .pill.quiet{ background:#FFF4D6; color:#8A6410; }
+  .pill.s-learning{ background:#E1F5FB; color:#12708F; }
+  .pill.s-assessed{ background:#EAF0FA; color: var(--navy); }
+  .pill.s-not_assessed{ background:#F0F2F5; color: var(--ink-soft); }
+  .pill.s-removed{ background:#F0F2F5; color: var(--ink-soft); }
+  .notice{ font-size: 13px; color: var(--ok); margin: 0 0 12px; min-height: 1px; }
+  .error-line{ font-size: 13px; color: var(--warn); margin: 0 0 12px; min-height: 1px; }
+  .banner{ border:1px solid #E8D9A6; background:#FFF9E6; color:#6E5410; border-radius: 12px; padding: 12px 16px; font-size: 13px; line-height: 1.5; margin-bottom: 18px; }
+  .banner.info{ border-color:#C9E0F2; background:#EEF6FD; color: var(--ink-soft); }
+  .empty{ font-size: 13.5px; color: var(--gray); margin: 8px 0; }
+
+  .toolbar{ display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin-bottom: 14px; }
+  .toolbar .text-input{ margin-bottom: 0; }
+  .toolbar .search{ flex: 1 1 220px; }
+  .toolbar select.text-input{ width:auto; }
+
+  .table-wrap{ overflow-x:auto; }
+  table.data{ width:100%; border-collapse: collapse; font-size: 13.5px; }
+  table.data th{ text-align:left; font-family:'Space Grotesk', sans-serif; font-size: 11.5px; letter-spacing: 0.04em; text-transform: uppercase; color: var(--gray); padding: 8px 10px; border-bottom: 1.5px solid var(--line); white-space: nowrap; }
+  table.data td{ padding: 12px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  table.data tr:last-child td{ border-bottom: none; }
+  td.num, th.num{ text-align:right; font-variant-numeric: tabular-nums; white-space:nowrap; }
+  td.cell-error{ color: var(--warn); font-size: 12.5px; }
+  .cell-name{ font-family:'Space Grotesk', sans-serif; font-weight:600; }
+  .cell-sub{ font-size: 12px; color: var(--gray); margin-top: 2px; }
+  .nowrap{ white-space: nowrap; }
+  tr.detail-row td{ background:#F7FAFD; padding: 4px 10px 18px; }
+
+  .summary{ display:grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 18px 24px; margin: 14px 0 0; }
+  .summary dt{ font-size: 11.5px; letter-spacing: 0.04em; text-transform: uppercase; color: var(--gray); margin-bottom: 4px; font-weight:600; }
+  .summary dd{ margin: 0; font-size: 14px; line-height: 1.5; white-space: pre-line; }
+  .chips{ display:flex; gap:6px; flex-wrap:wrap; }
+
+  /* roll-up */
+  .tiles{ display:grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 8px; }
+  .tile{ border:1px solid var(--line); border-radius: 12px; padding: 14px 16px; background:#FBFCFE; }
+  .tile .num{ font-family:'Space Grotesk', sans-serif; font-weight:700; font-size: 28px; color: var(--navy-deep); line-height:1.1; font-variant-numeric: tabular-nums; }
+  .tile .lbl{ font-size: 12px; color: var(--ink-soft); margin-top: 4px; line-height: 1.35; }
+  .tile.attn .num{ color: var(--warn); }
+  .split{ display:grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 8px 36px; }
+  .stackbar{ display:flex; height: 18px; border-radius: 9px; overflow:hidden; background:#EEF2F7; margin: 6px 0 10px; }
+  .stackbar span{ display:block; height:100%; }
+  .legend{ display:flex; flex-wrap:wrap; gap: 6px 16px; font-size: 12.5px; color: var(--ink-soft); }
+  .legend i{ display:inline-block; width:10px; height:10px; border-radius:3px; margin-right:6px; vertical-align:-1px; }
+  .barrow{ display:grid; grid-template-columns: minmax(120px, 1.1fr) 2fr 44px; gap: 10px; align-items:center; margin-bottom: 9px; font-size: 13px; }
+  .barrow .track{ height: 10px; border-radius: 5px; background:#EEF2F7; overflow:hidden; }
+  .barrow .fill{ display:block; height:100%; background: var(--navy); border-radius: 5px; }
+  .barrow.low .fill{ background: var(--warn); }
+  .barrow.high .fill{ background: var(--ok); }
+  .barrow .val{ text-align:right; font-variant-numeric: tabular-nums; color: var(--ink-soft); }
+  .barrow .tag{ display:block; font-size: 11px; color: var(--gray); }
+  .meter{ width: 120px; height: 7px; border-radius: 4px; background:#EEF2F7; overflow:hidden; margin-bottom: 4px; }
+  .meter span{ display:block; height:100%; background: var(--cyan); }
+  .role-tag{ font-size: 11px; color: var(--gray); margin-left: 6px; font-family:'IBM Plex Sans', sans-serif; font-weight:500; }
+
+  .share-box{ border:1px solid var(--line); border-radius: 10px; background:#fff; padding: 14px 16px; font-size: 13px; line-height: 1.55; }
+  .share-box h4{ font-family:'Space Grotesk', sans-serif; font-size: 11.5px; letter-spacing: 0.04em; text-transform: uppercase; color: var(--gray); margin: 12px 0 4px; }
+  .share-box h4:first-child{ margin-top: 0; }
+  .answer-list{ margin: 4px 0 0; padding-left: 20px; }
+  .answer-list li{ margin-bottom: 8px; }
+  .inline-check{ display:flex; align-items:center; gap:8px; font-size:13px; color: var(--ink-soft); margin: 0 0 12px 2px; cursor:pointer; }
+  .links-box{ border:1px solid #BFE6F2; background:#F2FAFD; border-radius:12px; padding: 16px; }
+  .links-box code{ display:block; font-size: 12px; word-break: break-all; color: var(--ink-soft); }
+  .result-line{ font-size: 13px; line-height: 1.6; color: var(--ink-soft); }
+  .foot-note{ font-size: 12.5px; color: var(--gray); line-height: 1.55; }
+</style>
+
+<script src="company-core.js"></script>
+</head>
+<body>
+<div class="wrap">
+  <a href="lms-dashboard.html" class="brand-header">
+    <svg width="28" height="28" viewBox="0 0 40 40" aria-hidden="true">
+      <polygon points="20,3 35,11.5 35,28.5 20,37 5,28.5 5,11.5" fill="#1A4584"/>
+      <polygon points="20,10 29,15 29,25 20,30 11,25 11,15" fill="none" stroke="#35C2E8" stroke-width="1.5"/>
+    </svg>
+    <div>
+      <div style="font-family:'IBM Plex Sans', sans-serif; font-weight:600; font-size:10.5px; letter-spacing:0.06em; color:var(--gray); line-height:1;">PRODUCT ADVISORY</div>
+      <div class="brand-word">Company Dashboard</div>
+    </div>
+  </a>
+  <div class="brand-accent-bar"></div>
+
+  <div class="card" id="stateLoading"><p style="margin:0;">Checking your account…</p></div>
+
+  <div class="card" id="stateSignedOut" style="display:none;">
+    <h1>Please sign in first</h1>
+    <p>Sign in with your usual account on the dashboard, then come back to this page.</p>
+    <p style="margin-bottom:0;"><a href="lms-dashboard.html" style="color:var(--navy);">Go to the dashboard →</a></p>
+  </div>
+
+  <div class="card" id="stateNoAccess" style="display:none;">
+    <h1 id="noAccessTitle">This page is for company admins</h1>
+    <p id="noAccessMessage" style="margin-bottom:0;">Your account isn't an admin of a company.</p>
+    <p style="margin:12px 0 0;"><a id="noAccessLink" href="lms-dashboard.html" style="color:var(--navy);">Go to your dashboard →</a></p>
+  </div>
+
+  <div id="page" style="display:none;">
+
+    <div class="card">
+      <div class="section-head" style="margin-bottom:6px;">
+        <div>
+          <h1 id="orgName"></h1>
+          <div id="orgPills" style="margin-top:6px;"></div>
+        </div>
+        <div class="btn-row">
+          <a id="ownerBackLink" href="owner.html" class="back-link" style="display:none; margin:0;">← Owner console</a>
+          <button class="btn btn-ghost btn-small" id="refreshBtn" type="button">Refresh</button>
+        </div>
+      </div>
+      <div class="notice" id="notice" role="status"></div>
+      <div class="error-line" id="errorLine" role="alert"></div>
+      <div class="banner" id="archivedBanner" style="display:none;">This company is archived, so the dashboard is read-only. You can still see everything it holds. New invitations are switched off.</div>
+      <div class="banner info" id="ownerBanner" style="display:none;">You are looking at this company as the platform owner.</div>
+      <dl class="summary" id="orgSummary"></dl>
+    </div>
+
+    <div class="card" id="rollupCard">
+      <div class="section-head">
+        <div>
+          <h2>Team at a glance</h2>
+          <div class="hint" style="margin:4px 0 0;" id="rollupHint"></div>
+        </div>
+      </div>
+      <div class="tiles" id="tiles"></div>
+      <div class="split" id="rollupCharts"></div>
+    </div>
+
+    <div class="card">
+      <div class="section-head">
+        <div>
+          <h2>People</h2>
+          <div class="hint" style="margin:4px 0 0;">What each person agreed to share when they joined: their assessment, individual answers and course progress. <strong>Learning</strong> means they have finished at least one lesson.</div>
+        </div>
+        <div class="btn-row">
+          <button class="btn btn-ghost btn-small" id="csvTeamBtn" type="button">Download team report (CSV)</button>
+          <button class="btn btn-ghost btn-small" id="csvAnswersBtn" type="button">Download answers (CSV)</button>
+        </div>
+      </div>
+      <div class="toolbar">
+        <input class="text-input search" type="search" id="teamSearch" placeholder="Search by name or email…" autocomplete="off" aria-label="Search people">
+        <select class="text-input" id="teamFilter" aria-label="Filter by status">
+          <option value="all">Everyone</option>
+          <option value="not_assessed">Not assessed yet</option>
+          <option value="assessed">Assessed, not started</option>
+          <option value="learning">Learning</option>
+          <option value="finished">Finished their plan</option>
+          <option value="inactive">Quiet for 30+ days</option>
+        </select>
+      </div>
+      <div class="table-wrap" id="teamWrap"><p class="empty">Loading…</p></div>
+    </div>
+
+    <div class="card" id="linksCard" style="display:none;">
+      <div class="section-head">
+        <h2>New invite links</h2>
+        <button class="btn btn-ghost btn-small" id="linksDismissBtn" type="button">Dismiss</button>
+      </div>
+      <p>Send each person their own link. A link works once and expires on the date shown. These links are also available in the invitations list until they are used.</p>
+      <div class="links-box">
+        <div class="result-line" id="linksResult"></div>
+        <div class="btn-row" style="margin-top:12px;">
+          <button class="btn btn-primary btn-small" id="sendAllBtn" type="button">Send emails to everyone</button>
+          <button class="btn btn-ghost btn-small" id="copyAllBtn" type="button">Copy all links</button>
+          <button class="btn btn-ghost btn-small" id="downloadCsvBtn" type="button">Download as spreadsheet (CSV)</button>
+        </div>
+        <div class="result-line" id="sendStatus" style="margin-top:10px;"></div>
+        <div class="table-wrap" style="margin-top:12px;"><table class="data" id="linksTable"></table></div>
+      </div>
+    </div>
+
+    <div class="card" id="inviteCard">
+      <div class="section-head">
+        <div>
+          <h2>Add people</h2>
+          <div class="hint" style="margin:4px 0 0;" id="seatHint"></div>
+        </div>
+        <div class="btn-row">
+          <button class="btn btn-ghost btn-small" id="resendAllBtn" type="button" style="display:none;">Resend to everyone pending</button>
+          <button class="btn btn-ghost btn-small" id="addAdminBtn" type="button">+ Add admin</button>
+          <button class="btn btn-primary btn-small" id="addUsersBtn" type="button">+ Add users</button>
+        </div>
+      </div>
+
+      <div id="adminForm" style="display:none; margin-bottom:16px;">
+        <h3 style="margin-top:0;">New admin</h3>
+        <div class="grid-3">
+          <div>
+            <label class="field-label" for="adminName">Name</label>
+            <input class="text-input" type="text" id="adminName" maxlength="100" autocomplete="off">
+          </div>
+          <div>
+            <label class="field-label" for="adminEmail">Email</label>
+            <input class="text-input" type="email" id="adminEmail" maxlength="254" autocomplete="off">
+          </div>
+          <div>
+            <label class="field-label" for="adminPhone">Phone</label>
+            <input class="text-input" type="tel" id="adminPhone" maxlength="40" autocomplete="off">
+          </div>
+        </div>
+        <label class="inline-check"><input type="checkbox" id="adminSendEmail" checked> <span>Email the invitation now</span></label>
+        <div class="field-error" id="adminError"></div>
+        <div class="btn-row">
+          <button class="btn btn-primary btn-small" id="adminCreateBtn" type="button">Create invite</button>
+          <button class="btn btn-ghost btn-small" id="adminCancelBtn" type="button">Cancel</button>
+        </div>
+      </div>
+
+      <div id="usersForm" style="display:none; margin-bottom:16px;">
+        <h3 style="margin-top:0;">New users</h3>
+        <label class="field-label" for="usersText">One person per line: email, then optional name and phone</label>
+        <textarea class="text-input" id="usersText" style="min-height:120px;" placeholder="jane@acme.com, Jane Smith, 555-0100&#10;sam@acme.com, Sam Lee"></textarea>
+        <div class="grid-2">
+          <div>
+            <label class="field-label" for="usersFile">Or choose a CSV file</label>
+            <input class="text-input" type="file" id="usersFile" accept=".csv,.txt,text/csv,text/plain">
+          </div>
+          <div>
+            <label class="field-label" for="usersExpiry">Links expire after</label>
+            <select class="text-input" id="usersExpiry">
+              <option value="7">7 days</option>
+              <option value="14">14 days</option>
+              <option value="30" selected>30 days</option>
+              <option value="60">60 days</option>
+              <option value="90">90 days</option>
+            </select>
+          </div>
+        </div>
+        <label class="inline-check"><input type="checkbox" id="usersSendEmail" checked> <span>Email the invitations now</span></label>
+        <div class="field-error" id="usersError"></div>
+        <div class="result-line" id="usersPreview"></div>
+        <div class="btn-row" style="margin-top:8px;">
+          <button class="btn btn-primary btn-small" id="usersCreateBtn" type="button">Create invites</button>
+          <button class="btn btn-ghost btn-small" id="usersCancelBtn" type="button">Cancel</button>
+        </div>
+      </div>
+
+      <h3 style="margin-top:6px;">Invitations waiting</h3>
+      <div class="table-wrap" id="inviteWrap"></div>
+    </div>
+
+    <div class="card" id="formerCard" style="display:none;">
+      <div class="section-head">
+        <div>
+          <h2>Former members</h2>
+          <div class="hint" style="margin:4px 0 0;">People who are no longer part of this company. You keep what they had shared up to the day they left, and nothing new is added.</div>
+        </div>
+      </div>
+      <div class="table-wrap" id="formerWrap"></div>
+    </div>
+
+    <p class="foot-note">Everyone sees, before they join, exactly what this company can see about them. Please treat this information as confidential and use it only to support their development.</p>
+  </div>
+</div>
+
+<script type="module">
+const firebaseConfig = {
+  apiKey: "AIzaSyAcECtS5c6WeOhKlwRK-LYFE47npbuq_eU",
+  authDomain: "product-advisory-lms.firebaseapp.com",
+  projectId: "product-advisory-lms",
+  storageBucket: "product-advisory-lms.firebasestorage.app",
+  messagingSenderId: "1081134406437",
+  appId: "1:1081134406437:web:72e28604d093219e7698cc"
+};
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
+import {
+  getFirestore, doc, getDoc, getDocs, updateDoc, collection, query, where, writeBatch,
+  serverTimestamp, Timestamp
+} from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+const $ = (id) => document.getElementById(id);
+const C = CompanyCore;
+
+function el(tag, attrs, ...kids){
+  const node = document.createElement(tag);
+  Object.keys(attrs || {}).forEach(k => {
+    const v = attrs[k];
+    if (k === 'class') node.className = v;
+    else if (k === 'text') node.textContent = v;
+    else if (k.slice(0, 2) === 'on') node.addEventListener(k.slice(2), v);
+    else node.setAttribute(k, v);
+  });
+  kids.forEach(c => {
+    if (c === null || c === undefined) return;
+    node.append(c.nodeType ? c : document.createTextNode(String(c)));
+  });
+  return node;
+}
+
+function showOnly(id){
+  ['stateLoading', 'stateSignedOut', 'stateNoAccess', 'page'].forEach(s => {
+    $(s).style.display = (s === id) ? 'block' : 'none';
+  });
+}
+
+const msOf = (ts) => (ts && ts.toMillis) ? ts.toMillis() : 0;
+function fmtDate(ms){
+  if (!ms) return '—';
+  return new Date(ms).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
+}
+function fmtDateTime(ms){
+  if (!ms) return '';
+  return new Date(ms).toLocaleString(undefined, { year: 'numeric', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
+}
+const plural = (n, one, many) => n + ' ' + (n === 1 ? one : (many || one + 's'));
+
+// Same Apps Script web app the assessment uses. It sends invite emails from the
+// Gmail account that owns the script (see apps-script/Code.gs).
+const RESULTS_LOG_URL = "https://script.google.com/macros/s/AKfycbynJQYF9rv5maL_CGniS9UGhTDfBVeW3gVhEWUsFdGOqquv4osGx4nQvc8jNkaaY6wrrg/exec";
+
+let currentUser = null;
+let viewerIsOwner = false;
+let orgId = null;
+let org = null;
+let data = { memberships: [], invites: [], shares: {}, sharesError: false };
+let teamRows = [];          // everyone, active and former, with progress worked out
+let expanded = {};          // uid -> true while the "Details" panel is open
+let newLinks = [];
+let emailState = {};        // invite token -> { sent, error, code }
+
+/* ---------------------------------------------------------------- sign-in */
+function noAccess(title, message, linkText, linkHref){
+  $('noAccessTitle').textContent = title;
+  $('noAccessMessage').textContent = message;
+  $('noAccessLink').textContent = linkText || 'Go to your dashboard →';
+  $('noAccessLink').setAttribute('href', linkHref || 'lms-dashboard.html');
+  showOnly('stateNoAccess');
+}
+
+onAuthStateChanged(auth, async (user) => {
+  if (!user){ showOnly('stateSignedOut'); return; }
+  currentUser = user;
+
+  const wanted = new URLSearchParams(location.search).get('org');
+  let membership = null;
+  try {
+    const m = await getDoc(doc(db, 'memberships', user.uid));
+    membership = m.exists() ? m.data() : null;
+  } catch (err){ membership = null; }
+
+  try {
+    const o = await getDoc(doc(db, 'platformAdmins', user.uid));
+    viewerIsOwner = o.exists();
+  } catch (err){ viewerIsOwner = false; }
+
+  const isAdmin = !!membership && membership.status === 'active' && membership.role === 'admin';
+  if (viewerIsOwner && wanted){
+    orgId = wanted;
+  } else if (isAdmin){
+    orgId = membership.orgId;
+  } else if (viewerIsOwner){
+    noAccess('Choose a company', 'Open a company from the owner console, then use its "Team dashboard" button.', 'Go to the owner console →', 'owner.html');
+    return;
+  } else {
+    noAccess('This page is for company admins',
+      membership && membership.status === 'active'
+        ? "You're a member of " + membership.orgName + ", but not one of its admins."
+        : "Your account isn't an admin of a company.");
+    return;
+  }
+
+  $('ownerBackLink').style.display = viewerIsOwner ? 'inline-block' : 'none';
+  $('ownerBanner').style.display = (viewerIsOwner && !(isAdmin && membership.orgId === orgId)) ? 'block' : 'none';
+  const ok = await loadAll();
+  if (!ok) return;
+  showOnly('page');
+  renderAll();
+});
+
+/* ------------------------------------------------------------------ loading */
+async function loadAll(){
+  const id = orgId;
+  try {
+    const [orgSnap, mSnap, iSnap] = await Promise.all([
+      getDoc(doc(db, 'orgs', id)),
+      getDocs(query(collection(db, 'memberships'), where('orgId', '==', id))),
+      getDocs(query(collection(db, 'invites'), where('orgId', '==', id)))
+    ]);
+    if (!orgSnap.exists()){
+      noAccess('Company not found', 'That company could not be found.', viewerIsOwner ? 'Go to the owner console →' : undefined, viewerIsOwner ? 'owner.html' : undefined);
+      return false;
+    }
+    org = Object.assign({ id: id }, orgSnap.data(), { createdAtMs: msOf(orgSnap.data().createdAt), updatedAtMs: msOf(orgSnap.data().updatedAt) });
+    data.memberships = mSnap.docs.map(d => Object.assign({ id: d.id }, d.data(), { joinedAtMs: msOf(d.data().joinedAt), endedAtMs: msOf(d.data().endedAt) }));
+    data.invites = iSnap.docs.map(d => Object.assign({ id: d.id }, d.data(), { createdAtMs: msOf(d.data().createdAt), expiresAtMs: msOf(d.data().expiresAt) }));
+  } catch (err){
+    console.error('Could not load the company:', err);
+    noAccess("We couldn't load this company", 'The latest security rules may not be published yet, or your admin access has ended.');
+    return false;
+  }
+
+  // The shared records are read separately so a problem here never hides the
+  // list of people itself.
+  data.shares = {};
+  data.sharesError = false;
+  try {
+    const sSnap = await getDocs(collection(db, 'orgs', id, 'members'));
+    sSnap.docs.forEach(d => { data.shares[d.id] = d.data(); });
+  } catch (err){
+    console.error('Could not read shared records:', err);
+    data.sharesError = true;
+  }
+  return true;
+}
+
+$('refreshBtn').addEventListener('click', async () => {
+  $('refreshBtn').disabled = true;
+  $('errorLine').textContent = '';
+  const ok = await loadAll();
+  $('refreshBtn').disabled = false;
+  if (ok){ renderAll(); $('notice').textContent = 'Updated.'; }
+});
+
+/* ------------------------------------------------------------------ drawing */
+const activeRows = () => teamRows.filter(r => r.status === 'active');
+const formerRows = () => teamRows.filter(r => r.status === 'removed');
+const pendingCount = () => data.invites.filter(i => C.inviteStatus(i, Date.now()) === 'open').length;
+const isArchived = () => org && org.status === 'archived';
+
+function renderAll(){
+  teamRows = C.buildTeamRows(data.memberships, data.shares, Date.now());
+  renderHeader();
+  renderRollup();
+  renderTeam();
+  renderInvites();
+  renderFormer();
+  renderNewLinks();
+}
+
+function renderHeader(){
+  $('orgName').textContent = org.name;
+  document.title = org.name + ' — Company Dashboard';
+  $('archivedBanner').style.display = isArchived() ? 'block' : 'none';
+
+  const pills = $('orgPills');
+  pills.innerHTML = '';
+  pills.appendChild(el('span', { class: 'pill', text: org.plan === 'seat' ? plural(org.seatLimit || 0, 'seat') : 'Flat enterprise' }));
+  pills.append(' ');
+  pills.appendChild(el('span', { class: 'pill' + (isArchived() ? ' archived' : ' active'), text: isArchived() ? 'Archived' : 'Active' }));
+
+  const active = activeRows().length;
+  const pending = pendingCount();
+  const pendingText = pending ? ', ' + plural(pending, 'invitation') + ' waiting' : '';
+  const seatsText = org.plan === 'seat'
+    ? active + ' of ' + org.seatLimit + ' seats in use' + pendingText
+    : plural(active, 'active person', 'active people') + pendingText;
+
+  const focus = el('div', { class: 'chips' });
+  if (org.focusAreas && org.focusAreas.length){
+    org.focusAreas.forEach((k, i) => focus.appendChild(el('span', { class: 'pill', text: (i + 1) + '. ' + C.domainLabel(k) })));
+  } else {
+    focus.appendChild(el('span', { text: 'No company focus set' }));
+  }
+  const summary = $('orgSummary');
+  summary.innerHTML = '';
+  const item = (label, node) => summary.appendChild(el('div', null, el('dt', { text: label }), el('dd', null, node)));
+  item('Seats', seatsText);
+  item('Point of contact', [org.contactName, org.contactEmail, org.contactPhone].filter(Boolean).join('\n') || '—');
+  item('Focus areas, in priority order', focus);
+}
+
+function tile(num, label, attn){
+  return el('div', { class: 'tile' + (attn ? ' attn' : '') }, el('div', { class: 'num', text: String(num) }), el('div', { class: 'lbl', text: label }));
+}
+
+function renderRollup(){
+  const rows = activeRows();
+  const r = C.rollup(rows);
+  $('rollupHint').textContent = r.people
+    ? 'Based on the ' + plural(r.people, 'active person', 'active people') + ' in this company.'
+    : '';
+
+  const tiles = $('tiles');
+  tiles.innerHTML = '';
+  const charts = $('rollupCharts');
+  charts.innerHTML = '';
+  if (!r.people){
+    tiles.appendChild(el('p', { class: 'empty', text: 'No one has joined yet. Add people below and this page fills in as they take the assessment and start their courses.' }));
+    return;
+  }
+  tiles.appendChild(tile(r.people, 'People'));
+  tiles.appendChild(tile(r.assessed, 'Took the assessment' + (r.notAssessed ? ' (' + r.notAssessed + ' have not)' : '')));
+  tiles.appendChild(tile(r.learning, 'Learning now'));
+  tiles.appendChild(tile(r.finished, 'Finished their plan'));
+  tiles.appendChild(tile(r.inactive, 'Quiet for 30+ days', r.inactive > 0));
+  if (r.avgPlanPct !== null) tiles.appendChild(tile(r.avgPlanPct + '%', 'Average plan complete'));
+
+  // Where the team sits, level by level.
+  const colors = ['var(--t0)', 'var(--t1)', 'var(--t2)', 'var(--t3)'];
+  const levels = el('div', null, el('h3', { text: 'Overall level', style: 'margin-top:8px;' }));
+  if (!r.assessed){
+    levels.appendChild(el('p', { class: 'empty', text: 'No assessments yet.' }));
+  } else {
+    const bar = el('div', { class: 'stackbar', role: 'img', 'aria-label': r.byTier.map(b => b.label + ': ' + b.count).join(', ') });
+    r.byTier.forEach((b, i) => { if (b.count) bar.appendChild(el('span', { style: 'width:' + (b.count / r.assessed * 100) + '%; background:' + colors[i] + ';', title: b.label + ': ' + b.count })); });
+    levels.appendChild(bar);
+    levels.appendChild(el('div', { class: 'legend' }, ...r.byTier.map((b, i) =>
+      el('span', null, el('i', { style: 'background:' + colors[i] + ';' }), b.label + ' · ' + b.count))));
+    if (r.avgOverall !== null) levels.appendChild(el('p', { class: 'hint', style: 'margin-top:10px;', text: 'Average overall score: ' + r.avgOverall + '%' }));
+  }
+  charts.appendChild(levels);
+
+  // Average score in each skill area.
+  const areas = el('div', null, el('h3', { text: 'Average score by skill area', style: 'margin-top:8px;' }));
+  if (!r.assessed){
+    areas.appendChild(el('p', { class: 'empty', text: 'No assessments yet.' }));
+  } else {
+    r.domains.forEach(d => {
+      const mark = r.weakest && d.key === r.weakest.key ? 'low' : r.strongest && d.key === r.strongest.key ? 'high' : '';
+      const tag = mark === 'low' ? 'Lowest on average' : mark === 'high' ? 'Highest on average' : '';
+      areas.appendChild(el('div', { class: 'barrow ' + mark },
+        el('div', null, d.label, tag ? el('span', { class: 'tag', text: tag }) : null),
+        el('div', { class: 'track', role: 'img', 'aria-label': d.label + ': ' + (d.avg === null ? 'no scores' : d.avg + ' percent') },
+          el('span', { class: 'fill', style: 'width:' + (d.avg || 0) + '%;' })),
+        el('div', { class: 'val', text: d.avg === null ? '—' : d.avg + '%' })));
+    });
+  }
+  charts.appendChild(areas);
+}
+
+/* ------------------------------------------------------------------- people */
+function statusPills(r){
+  const p = r.progress;
+  const out = [el('span', { class: 'pill s-' + p.status, text: C.STATUS_LABELS[p.status] })];
+  if (p.inactive){ out.push(' '); out.push(el('span', { class: 'pill quiet', text: 'Quiet 30+ days' })); }
+  return out;
+}
+
+function nameCell(r){
+  const label = r.name || r.email || '—';
+  const sub = r.name && r.email ? r.email : (r.removedIdentity ? 'Name and email removed (account deleted)' : '');
+  return el('td', null,
+    el('div', { class: 'cell-name' }, label, r.role === 'admin' ? el('span', { class: 'role-tag', text: 'Admin' }) : null),
+    sub ? el('div', { class: 'cell-sub', text: sub }) : null);
+}
+
+function progressCell(p){
+  if (!p.assessed) return el('td', null, el('span', { class: 'cell-sub', text: p.hasShare ? 'Waiting for the assessment' : 'Nothing shared yet' }));
+  return el('td', null,
+    el('div', { class: 'meter', role: 'img', 'aria-label': (p.planPct || 0) + ' percent of the plan done' }, el('span', { style: 'width:' + (p.planPct || 0) + '%;' })),
+    el('div', { class: 'cell-sub', text: p.planDone + ' of ' + p.planTotal + ' lessons · ' + p.coursesFinished + ' of ' + p.coursesAssigned + ' courses' }));
+}
+
+function levelCell(p){
+  if (!p.assessed) return el('td', { text: '—' });
+  return el('td', null, el('div', { text: p.tierLabel || '—' }), p.overallPct !== null ? el('div', { class: 'cell-sub', text: p.overallPct + '% overall' }) : null);
+}
+
+function lastActiveCell(p){
+  return el('td', { class: 'nowrap', text: p.lastActiveAt ? fmtDate(Date.parse(p.lastActiveAt)) : '—' });
+}
+
+function teamRow(r){
+  return el('tr', { 'data-uid': r.id },
+    nameCell(r), levelCell(r.progress), progressCell(r.progress),
+    el('td', null, ...statusPills(r)), lastActiveCell(r.progress),
+    el('td', null, el('button', { class: 'btn btn-ghost btn-small', type: 'button', text: expanded[r.id] ? 'Hide details' : 'Details',
+      onclick: () => { expanded[r.id] = !expanded[r.id]; renderTeam(); renderFormer(); } })));
+}
+
+/* The full shared record for one person, as the company sees it. */
+function detailRow(r, cols){
+  const p = r.progress;
+  const box = el('div', { class: 'share-box' });
+  if (!p.hasShare){
+    box.appendChild(el('p', { class: 'empty', text: data.sharesError
+      ? "We couldn't read this person's shared data."
+      : 'Nothing has been shared yet. It appears after they join, finish the assessment, or open their dashboard.' }));
+  } else {
+    box.appendChild(el('h4', { text: 'Latest assessment' }));
+    if (!p.assessed){
+      box.appendChild(el('div', { text: 'Not taken yet.' }));
+    } else {
+      box.appendChild(el('div', { text: (p.tierLabel || '—') + (p.overallPct !== null ? ' · ' + p.overallPct + '% overall' : '') +
+        (p.takenAt ? ' · taken ' + fmtDate(Date.parse(p.takenAt)) : '') }));
+      if (p.categoryPct){
+        box.appendChild(el('div', { class: 'chips', style: 'margin-top:6px;' },
+          ...Object.keys(p.categoryPct).map(k => el('span', { class: 'pill', text: C.domainLabel(k) + ' ' + Math.round(p.categoryPct[k]) + '%' }))));
+      }
+      box.appendChild(el('h4', { text: 'Individual answers' }));
+      if (p.answers.length){
+        box.appendChild(el('ol', { class: 'answer-list' }, ...p.answers.map(x =>
+          el('li', null, el('div', { class: 'cell-name', text: x.question || ('Question ' + x.n) }),
+            el('div', { text: (x.answer || '—') + (typeof x.points === 'number' ? '  (' + x.points + ' pts)' : '') })))));
+      } else {
+        box.appendChild(el('div', { class: 'cell-sub', text: 'No individual answers were recorded for this assessment (it was taken before answers were saved).' }));
+      }
+    }
+
+    box.appendChild(el('h4', { text: 'Courses' }));
+    const courses = (data.shares[r.id] && data.shares[r.id].courses) || {};
+    const ids = Object.keys(courses);
+    const assigned = {};
+    p.planCourses.forEach(c => { assigned[c.id] = true; });
+    if (!ids.length && !p.planCourses.length){
+      box.appendChild(el('div', { text: 'No course activity yet.' }));
+    } else {
+      const items = [];
+      p.planCourses.forEach(c => {
+        if (!c.done && !courses[c.id]) return;
+        items.push(el('li', null, el('span', { class: 'cell-name', text: C.prettyCourseId(c.id) }),
+          ' — ' + c.done + ' of ' + c.lessons + ' lessons' + (c.finished ? ' ✓ finished' : '')));
+      });
+      ids.filter(id => !assigned[id]).forEach(id => {
+        const total = C.LESSON_COUNTS[id] || 0;
+        const done = C.lessonsDone(courses, id);
+        if (!done && !(courses[id] && courses[id].completed && courses[id].completed.length)) return;
+        items.push(el('li', null, el('span', { class: 'cell-name', text: C.prettyCourseId(id) }),
+          ' — ' + done + (total ? ' of ' + total : '') + ' lessons (not in their current plan)'));
+      });
+      box.appendChild(items.length ? el('ul', { class: 'answer-list' }, ...items) : el('div', { text: 'No lessons finished yet.' }));
+      box.appendChild(el('div', { class: 'cell-sub', style: 'margin-top:6px;', text: 'Their plan: ' + p.planDone + ' of ' + p.planTotal + ' lessons across ' + plural(p.coursesAssigned, 'course') + '.' }));
+    }
+    box.appendChild(el('div', { class: 'cell-sub', style: 'margin-top:10px;', text: 'Last active: ' + (p.lastActiveAt ? fmtDateTime(Date.parse(p.lastActiveAt)) : 'no activity yet') }));
+  }
+  return el('tr', { class: 'detail-row' }, el('td', { colspan: String(cols) }, box));
+}
+
+function teamTable(rows, emptyText){
+  if (!rows.length) return el('p', { class: 'empty', text: emptyText });
+  const body = [];
+  rows.forEach(r => {
+    body.push(teamRow(r));
+    if (expanded[r.id]) body.push(detailRow(r, 6));
+  });
+  return el('table', { class: 'data' },
+    el('thead', null, el('tr', null, el('th', { text: 'Person' }), el('th', { text: 'Level' }), el('th', { text: 'Plan progress' }),
+      el('th', { text: 'Status' }), el('th', { text: 'Last active' }), el('th', { text: '' }))),
+    el('tbody', null, ...body));
+}
+
+function renderTeam(){
+  const all = activeRows();
+  const rows = C.filterTeamRows(all, $('teamSearch').value, $('teamFilter').value);
+  const filtered = $('teamSearch').value.trim() || $('teamFilter').value !== 'all';
+  const wrap = $('teamWrap');
+  wrap.innerHTML = '';
+  wrap.appendChild(teamTable(rows, filtered ? 'No one matches that.' : 'No one has joined yet. Add people below.'));
+  $('csvTeamBtn').disabled = !teamRows.length;
+  $('csvAnswersBtn').disabled = !teamRows.some(r => r.progress.answers.length);
+}
+$('teamSearch').addEventListener('input', renderTeam);
+$('teamFilter').addEventListener('change', renderTeam);
+
+function renderFormer(){
+  const rows = formerRows();
+  $('formerCard').style.display = rows.length ? 'block' : 'none';
+  if (!rows.length) return;
+  const body = [];
+  rows.forEach(r => {
+    body.push(el('tr', null,
+      nameCell(r), levelCell(r.progress), progressCell(r.progress),
+      el('td', null, el('span', { class: 'pill s-removed', text: 'Left' }), el('div', { class: 'cell-sub', text: r.endedAtMs ? 'Left ' + fmtDate(r.endedAtMs) : '' })),
+      lastActiveCell(r.progress),
+      el('td', null, el('button', { class: 'btn btn-ghost btn-small', type: 'button', text: expanded[r.id] ? 'Hide details' : 'Details',
+        onclick: () => { expanded[r.id] = !expanded[r.id]; renderFormer(); renderTeam(); } }))));
+    if (expanded[r.id]) body.push(detailRow(r, 6));
+  });
+  const wrap = $('formerWrap');
+  wrap.innerHTML = '';
+  wrap.appendChild(el('table', { class: 'data' },
+    el('thead', null, el('tr', null, el('th', { text: 'Person' }), el('th', { text: 'Level' }), el('th', { text: 'Plan progress' }),
+      el('th', { text: 'Status' }), el('th', { text: 'Last active' }), el('th', { text: '' }))),
+    el('tbody', null, ...body)));
+}
+
+/* ------------------------------------------------------------------ exports */
+function download(name, text){
+  const blob = new Blob(['﻿' + text], { type: 'text/csv;charset=utf-8' });
+  const a = el('a', { href: URL.createObjectURL(blob), download: name });
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+}
+function fileStem(){
+  return (org.name || 'company').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '') || 'company';
+}
+const today = () => new Date().toISOString().slice(0, 10);
+
+$('csvTeamBtn').addEventListener('click', () => {
+  download(fileStem() + '-team-report-' + today() + '.csv', C.buildTeamCsv(activeRows().concat(formerRows())));
+});
+$('csvAnswersBtn').addEventListener('click', () => {
+  download(fileStem() + '-answers-' + today() + '.csv', C.buildAnswersCsv(activeRows().concat(formerRows())));
+});
+
+/* ------------------------------------------------------------- invitations */
+function inviteLink(token){
+  return location.origin + location.pathname.replace(/[^/]*$/, '') + 'join.html?token=' + token;
+}
+
+async function copyText(text, notice){
+  try {
+    await navigator.clipboard.writeText(text);
+  } catch (e){
+    const ta = el('textarea', { style: 'position:fixed;left:-9999px;' });
+    ta.value = text;
+    document.body.appendChild(ta);
+    ta.select();
+    try { document.execCommand('copy'); } catch (e2){ /* nothing more to try */ }
+    ta.remove();
+  }
+  $('notice').textContent = notice;
+}
+
+function inviteRows(){
+  const now = Date.now();
+  const rows = [];
+  data.invites.forEach(inv => {
+    const st = C.inviteStatus(inv, now);
+    if (st === 'used' || st === 'revoked') return;
+    rows.push({ token: inv.id, email: inv.email || '', name: inv.name || '', phone: inv.phone || '', role: inv.role,
+      status: st === 'open' ? 'invited' : 'expired', expiresAtMs: inv.expiresAtMs, mine: inv.createdBy === currentUser.uid });
+  });
+  rows.sort((a, b) => (a.status === b.status ? 0 : a.status === 'invited' ? -1 : 1) || (a.name || a.email).toLowerCase().localeCompare((b.name || b.email).toLowerCase()));
+  return rows;
+}
+
+function inviteRow(p){
+  const es = emailState[p.token] || {};
+  const tooMany = es.code === 'too_many_for_invite';
+  const actions = el('div', { class: 'btn-row' });
+  if (!isArchived()){
+    if (p.status === 'invited' && p.mine && !tooMany){
+      actions.appendChild(el('button', { class: 'btn btn-primary btn-small', type: 'button', text: es.sent ? 'Resend email' : 'Send email',
+        onclick: (e) => sendOneEmail(p.token, p.email, e.currentTarget, true) }));
+    }
+    // An expired invite, one already emailed three times, or one somebody else created
+    // gets a brand-new link made (and emailed) in one click.
+    if (p.status === 'expired' || tooMany || (p.status === 'invited' && !p.mine)){
+      actions.appendChild(el('button', { class: 'btn btn-primary btn-small', type: 'button',
+        text: p.status === 'expired' ? 'Renew & email' : 'New link & email',
+        onclick: (e) => renewInvite(p, e.currentTarget) }));
+    }
+    if (p.status === 'invited') actions.appendChild(el('button', { class: 'btn btn-ghost btn-small', type: 'button', text: 'Copy link', onclick: () => copyText(inviteLink(p.token), 'Link copied.') }));
+    actions.appendChild(el('button', { class: 'btn btn-danger btn-small', type: 'button', text: 'Revoke', onclick: () => revokeInvite(p.token) }));
+  }
+  const status = el('span', { class: 'pill ' + (p.status === 'invited' ? 'invited' : 'expired'), text: p.status === 'invited' ? 'Invited' : 'Invite expired' });
+  return el('tr', null,
+    el('td', null, el('div', { class: 'cell-name', text: p.name || '—' })),
+    el('td', { text: p.email || '—' }),
+    el('td', { text: p.role === 'admin' ? 'Admin' : 'User' }),
+    el('td', null, status, el('div', { class: 'cell-sub', text: (p.status === 'expired' ? 'Expired ' : 'Expires ') + fmtDate(p.expiresAtMs) }),
+      es.sent ? el('div', { class: 'cell-sub', text: 'Emailed ✓' + (es.sent > 1 ? ' (' + es.sent + ' times)' : '') }) : null),
+    el('td', null, actions));
+}
+
+function renderInvites(){
+  const archived = isArchived();
+  $('addAdminBtn').disabled = archived;
+  $('addUsersBtn').disabled = archived;
+  if (archived){ $('adminForm').style.display = 'none'; $('usersForm').style.display = 'none'; }
+  $('seatHint').textContent = (org.plan === 'seat' ? 'Every active person, including admins, uses one seat. ' : '') + 'People join with their own invite link.';
+
+  const rows = inviteRows();
+  $('resendAllBtn').style.display = (!archived && rows.some(r => r.status === 'invited' && r.mine)) ? 'inline-block' : 'none';
+  const wrap = $('inviteWrap');
+  wrap.innerHTML = '';
+  if (!rows.length){
+    wrap.appendChild(el('p', { class: 'empty', text: 'No invitations waiting. Everyone you invite appears here until they join.' }));
+    return;
+  }
+  wrap.appendChild(el('table', { class: 'data' },
+    el('thead', null, el('tr', null, el('th', { text: 'Name' }), el('th', { text: 'Email' }), el('th', { text: 'Role' }), el('th', { text: 'Status' }), el('th', { text: '' }))),
+    el('tbody', null, ...rows.map(inviteRow))));
+}
+
+async function createInvites(entries, role, days){
+  const created = [];
+  const expiresAt = Timestamp.fromMillis(Date.now() + days * 86400000);
+  for (let i = 0; i < entries.length; i += 400){
+    const batch = writeBatch(db);
+    entries.slice(i, i + 400).forEach(en => {
+      const token = C.randomToken();
+      const d = {
+        orgId: org.id, orgName: org.name, email: en.email, role: role, status: 'open',
+        createdAt: serverTimestamp(), createdBy: currentUser.uid, expiresAt: expiresAt, usedBy: null, usedAt: null
+      };
+      if (en.name) d.name = en.name;
+      if (en.phone) d.phone = en.phone;
+      batch.set(doc(db, 'invites', token), d);
+      created.push({ email: en.email, name: en.name || '', phone: en.phone || '', role: role, token: token,
+        link: inviteLink(token), expires: fmtDate(expiresAt.toMillis()) });
+    });
+    await batch.commit();
+  }
+  return created;
+}
+
+function renderNewLinks(){
+  const card = $('linksCard');
+  if (!newLinks.length){ card.style.display = 'none'; return; }
+  card.style.display = 'block';
+  $('linksResult').textContent = plural(newLinks.length, 'invite link') + ' created.';
+  const table = $('linksTable');
+  table.innerHTML = '';
+  table.appendChild(el('thead', null, el('tr', null, el('th', { text: 'Email' }), el('th', { text: 'Role' }), el('th', { text: 'Link' }), el('th', { text: 'Expires' }), el('th', { text: 'Email status' }))));
+  table.appendChild(el('tbody', null, ...newLinks.map(r => {
+    const es = emailState[r.token] || {};
+    return el('tr', null,
+      el('td', { text: r.email }), el('td', { text: r.role === 'admin' ? 'Admin' : 'User' }),
+      el('td', null, el('code', { text: r.link })), el('td', { class: 'nowrap', text: r.expires }),
+      el('td', { class: es.error ? 'cell-error' : '', text: es.error ? es.error : (es.sent ? 'Emailed ✓' : 'Not sent') }));
+  })));
+}
+
+/* ------------------------------------------------------------ invite emails */
+// Asks the Apps Script backend to email one invite. The backend re-reads the
+// invite as the signed-in person and only sends invites that person created.
+function callBackend(params){
+  return new Promise((resolve) => {
+    const cb = 'companyCb_' + Date.now() + '_' + Math.floor(Math.random() * 1e6);
+    const script = document.createElement('script');
+    let settled = false;
+    const finish = (value) => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timer);
+      delete window[cb];
+      script.remove();
+      resolve(value);
+    };
+    const timer = setTimeout(() => finish(null), 30000);
+    window[cb] = (result) => finish(result || null);
+    script.onerror = () => finish(null);
+    script.src = RESULTS_LOG_URL + '?' + new URLSearchParams(Object.assign({}, params, { callback: cb })).toString();
+    document.body.appendChild(script);
+  });
+}
+
+const EMAIL_ERRORS = {
+  not_verified: 'Your sign-in could not be confirmed. Reload the page and try again.',
+  invite_not_found: 'That invite could not be found.',
+  not_your_invite: 'Only the person who created an invite can email it. Use "New link & email" or copy the link.',
+  invite_not_open: 'That invite is no longer open (used, revoked or expired).',
+  bad_recipient: 'The email address on that invite is not valid.',
+  daily_limit: "Today's email limit has been reached. Try again tomorrow, or copy the links.",
+  too_many_for_invite: 'That invite has already been emailed 3 times. Use "New link & email" or copy the link.',
+  quota: "Gmail's daily sending limit has been reached. Try again tomorrow, or copy the links.",
+  mail_error: 'Gmail could not send that message. Try again, or copy the link.',
+  bad_token: 'That invite link is not valid.'
+};
+const EMAIL_NOT_SET_UP = "The email service isn't set up yet, or didn't answer. Copy the link instead.";
+
+function emailErrorText(result){
+  if (!result) return EMAIL_NOT_SET_UP;
+  const base = EMAIL_ERRORS[result.error] || 'Something went wrong sending that email.';
+  return result.detail ? base + ' (' + result.detail + ')' : base;
+}
+
+async function sendOneEmail(token, email, button, announce){
+  if (button){ button.disabled = true; button.textContent = 'Sending…'; }
+  if (announce){ $('notice').textContent = ''; $('errorLine').textContent = ''; }
+  let result = null;
+  try {
+    result = await callBackend({ action: 'sendInvite', token: token, idToken: await currentUser.getIdToken() });
+  } catch (e){ result = null; }
+  const ok = !!(result && result.ok === true);
+  const prior = emailState[token] || { sent: 0, error: '' };
+  emailState[token] = { sent: prior.sent + (ok ? 1 : 0), error: ok ? '' : emailErrorText(result), code: ok ? '' : (result && result.error) || '' };
+  if (announce){
+    if (ok) $('notice').textContent = 'Email sent to ' + email + '.';
+    else $('errorLine').textContent = email + ': ' + emailErrorText(result);
+    renderInvites();
+    renderNewLinks();
+  }
+  return { ok: ok, error: ok ? '' : emailErrorText(result), code: result && result.error };
+}
+
+/* Emails every invite in `list`, three at a time. It stops early when every
+   remaining email would fail the same way: the daily limit is reached, or the
+   email service is not answering at all. */
+async function sendEmailsToLinks(list){
+  const pending = list.slice();
+  if (!pending.length) return { sent: 0, failed: 0 };
+  const btn = $('sendAllBtn');
+  btn.disabled = true;
+  $('sendStatus').textContent = 'Sending ' + plural(pending.length, 'email') + '…';
+  $('errorLine').textContent = '';
+  let sentOk = 0, failed = 0, stop = false, next = 0;
+  async function worker(){
+    while (next < pending.length && !stop){
+      const r = pending[next++];
+      const res = await sendOneEmail(r.token, r.email, null, false);
+      if (res.ok) sentOk++; else failed++;
+      if (!res.ok && (res.code === 'daily_limit' || res.code === 'quota' || res.code === null || res.code === undefined)) stop = true;
+      $('sendStatus').textContent = 'Sent ' + sentOk + ' of ' + pending.length + (failed ? ', ' + failed + ' could not be sent' : '') + '…';
+      renderNewLinks();
+    }
+  }
+  await Promise.all([worker(), worker(), worker()]);
+  const firstError = pending.map(r => emailState[r.token]).find(s => s && s.error);
+  $('sendStatus').textContent = sentOk + ' of ' + pending.length + ' emails sent' + (failed ? '. ' + (firstError ? firstError.error : '') : '.');
+  if (failed) $('errorLine').textContent = firstError ? firstError.error : 'Some emails could not be sent.';
+  else $('notice').textContent = plural(sentOk, 'email') + ' sent.';
+  renderNewLinks();
+  renderInvites();
+  btn.disabled = false;
+  return { sent: sentOk, failed: failed };
+}
+$('sendAllBtn').addEventListener('click', () => { sendEmailsToLinks(newLinks); });
+
+/* Gives an expired invite (or one already emailed three times, or one made by
+   somebody else) a fresh link: creates a new invite for the same person and
+   role, retires the old one, then emails the new link. */
+async function renewInvite(p, button){
+  $('notice').textContent = '';
+  $('errorLine').textContent = '';
+  if (isArchived()){ $('errorLine').textContent = 'This company is archived, so new invitations are switched off.'; return; }
+  button.disabled = true;
+  button.textContent = 'Renewing…';
+  try {
+    const fresh = await createInvites([{ email: p.email, name: p.name, phone: p.phone }], p.role, 30);
+    try { await updateDoc(doc(db, 'invites', p.token), { status: 'revoked' }); } catch (e){ /* the old link is no longer usable anyway */ }
+    delete emailState[p.token];
+    newLinks = fresh;
+    await refreshInvitesOnly();
+    await sendEmailsToLinks(newLinks);
+  } catch (err){
+    console.error('Could not renew invite:', err);
+    $('errorLine').textContent = err && err.code === 'permission-denied'
+      ? 'The security rules refused this. Ask the platform owner to check that the latest rules are published.'
+      : 'Something went wrong renewing that invite, please try again.';
+    button.disabled = false;
+    button.textContent = p.status === 'expired' ? 'Renew & email' : 'New link & email';
+  }
+}
+
+async function refreshInvitesOnly(){
+  const iSnap = await getDocs(query(collection(db, 'invites'), where('orgId', '==', orgId)));
+  data.invites = iSnap.docs.map(d => Object.assign({ id: d.id }, d.data(), { createdAtMs: msOf(d.data().createdAt), expiresAtMs: msOf(d.data().expiresAt) }));
+  renderHeader();
+  renderInvites();
+  renderNewLinks();
+}
+
+$('resendAllBtn').addEventListener('click', () => {
+  sendEmailsToLinks(inviteRows().filter(r => r.status === 'invited' && r.mine).map(r => ({ token: r.token, email: r.email })));
+});
+$('copyAllBtn').addEventListener('click', () => {
+  copyText(newLinks.map(r => r.email + '\t' + r.link).join('\n'), 'Copied. Each line is the email, a tab, then the link.');
+});
+$('downloadCsvBtn').addEventListener('click', () => { download('invite-links.csv', C.buildInviteCsv(newLinks)); });
+$('linksDismissBtn').addEventListener('click', () => { newLinks = []; renderNewLinks(); });
+
+async function revokeInvite(token){
+  if (!window.confirm('Revoke this invite? The link will stop working.')) return;
+  $('errorLine').textContent = '';
+  try {
+    await updateDoc(doc(db, 'invites', token), { status: 'revoked' });
+    newLinks = newLinks.filter(r => r.token !== token);
+    await refreshInvitesOnly();
+    $('notice').textContent = 'Invite revoked.';
+  } catch (err){
+    console.error('Could not revoke invite:', err);
+    $('errorLine').textContent = 'That invite could not be revoked, please try again.';
+  }
+}
+
+function confirmSeats(adding){
+  const seat = C.seatInfo(org, activeRows().length, pendingCount(), adding);
+  if (!seat.wouldExceed) return true;
+  return window.confirm(org.name + ' has ' + org.seatLimit + ' seats, and ' + seat.active + ' are in use with ' + plural(seat.pending, 'invitation') +
+    ' waiting. Adding ' + adding + ' more goes over the limit. Create the invites anyway?');
+}
+
+function openEmails(){ return data.invites.filter(i => C.inviteStatus(i, Date.now()) === 'open').map(i => i.email); }
+function activeEmails(){ return activeRows().map(r => r.email).filter(Boolean); }
+
+/* --- add admin --- */
+$('addAdminBtn').addEventListener('click', () => {
+  $('usersForm').style.display = 'none';
+  $('adminForm').style.display = 'block';
+  $('adminError').textContent = '';
+  $('adminName').focus();
+});
+$('adminCancelBtn').addEventListener('click', () => { $('adminForm').style.display = 'none'; });
+$('adminCreateBtn').addEventListener('click', async () => {
+  $('adminError').textContent = '';
+  const email = $('adminEmail').value.trim().toLowerCase();
+  if (!C.EMAIL_RE.test(email)){ $('adminError').textContent = 'Enter a valid email address for the admin.'; return; }
+  const dup = C.classifyInvites([{ email: email }], activeEmails(), openEmails());
+  if (dup.skipped.length){ $('adminError').textContent = dup.skipped[0].reason + '.'; return; }
+  if (isArchived()){ $('adminError').textContent = 'This company is archived, so new invitations are switched off.'; return; }
+  if (!confirmSeats(1)) return;
+  $('adminCreateBtn').disabled = true;
+  try {
+    newLinks = await createInvites([{ email: email, name: $('adminName').value.trim().slice(0, 100), phone: $('adminPhone').value.trim().slice(0, 40) }], 'admin', 30);
+    ['adminName', 'adminEmail', 'adminPhone'].forEach(id => { $(id).value = ''; });
+    $('adminForm').style.display = 'none';
+    await refreshInvitesOnly();
+    $('notice').textContent = 'Admin invite created.';
+    if ($('adminSendEmail').checked) await sendEmailsToLinks(newLinks);
+  } catch (err){
+    console.error('Could not create admin invite:', err);
+    $('adminError').textContent = err && err.code === 'permission-denied'
+      ? 'The security rules refused this. Ask the platform owner to check that the latest rules are published.'
+      : 'Something went wrong, please try again.';
+  } finally {
+    $('adminCreateBtn').disabled = false;
+  }
+});
+
+/* --- add users --- */
+function previewUsers(){
+  const parsed = C.parseInviteLines($('usersText').value);
+  const cls = C.classifyInvites(parsed.entries, activeEmails(), openEmails());
+  const bits = [];
+  if (parsed.entries.length) bits.push(cls.toCreate.length + ' ready to invite');
+  if (cls.skipped.length) bits.push(cls.skipped.length + ' skipped (already in this company or invited)');
+  if (parsed.errors.length) bits.push(plural(parsed.errors.length, 'line') + ' not understood');
+  $('usersPreview').textContent = bits.join(' · ');
+  return { parsed: parsed, cls: cls };
+}
+$('usersText').addEventListener('input', previewUsers);
+$('usersFile').addEventListener('change', async () => {
+  const f = $('usersFile').files[0];
+  if (!f) return;
+  $('usersText').value = await f.text();
+  previewUsers();
+});
+$('addUsersBtn').addEventListener('click', () => {
+  $('adminForm').style.display = 'none';
+  $('usersForm').style.display = 'block';
+  $('usersError').textContent = '';
+  $('usersText').focus();
+});
+$('usersCancelBtn').addEventListener('click', () => { $('usersForm').style.display = 'none'; });
+
+$('usersCreateBtn').addEventListener('click', async () => {
+  $('usersError').textContent = '';
+  const { parsed, cls } = previewUsers();
+  if (!cls.toCreate.length){
+    $('usersError').textContent = parsed.errors.length
+      ? 'No valid email addresses found. Check line ' + parsed.errors[0].line + ': ' + parsed.errors[0].reason + '.'
+      : (cls.skipped.length ? 'Everyone listed is already in this company or invited.' : 'Add at least one email address.');
+    return;
+  }
+  if (isArchived()){ $('usersError').textContent = 'This company is archived, so new invitations are switched off.'; return; }
+  if (!confirmSeats(cls.toCreate.length)) return;
+  $('usersCreateBtn').disabled = true;
+  try {
+    newLinks = await createInvites(cls.toCreate, 'member', Number($('usersExpiry').value));
+    $('usersText').value = '';
+    $('usersFile').value = '';
+    $('usersPreview').textContent = '';
+    $('usersForm').style.display = 'none';
+    await refreshInvitesOnly();
+    $('notice').textContent = plural(cls.toCreate.length, 'invite') + ' created' + (cls.skipped.length ? ', ' + cls.skipped.length + ' skipped.' : '.');
+    $('linksCard').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    if ($('usersSendEmail').checked) await sendEmailsToLinks(newLinks);
+  } catch (err){
+    console.error('Could not create invites:', err);
+    $('usersError').textContent = err && err.code === 'permission-denied'
+      ? 'The security rules refused this. Ask the platform owner to check that the latest rules are published.'
+      : 'Something went wrong, please try again.';
+  } finally {
+    $('usersCreateBtn').disabled = false;
+  }
+});
+</script>
+</body>
+</html>

@@ -197,6 +197,7 @@ const JoinLogic = (function(){
     <h1 id="doneTitle"></h1>
     <p id="doneText"></p>
     <a class="btn-link" href="lms-dashboard.html">Go to your dashboard</a>
+    <p style="margin:14px 0 0;"><a id="doneAdminLink" href="company.html" style="display:none; color:var(--navy);">Open the company dashboard →</a></p>
   </div>
 </div>
 
@@ -333,6 +334,7 @@ $('acceptBtn').addEventListener('click', async () => {
     }
     $('doneTitle').textContent = 'Welcome to ' + loaded.inv.orgName;
     $('doneText').textContent = 'You\'ve joined as ' + JoinLogic.ROLE_LABEL[loaded.inv.role] + '. Your dashboard is ready whenever you are.';
+    $('doneAdminLink').style.display = loaded.inv.role === 'admin' ? 'inline' : 'none';
     show('stateDone');
   } catch (err){
     console.error('Could not join:', err);

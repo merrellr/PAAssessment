@@ -233,6 +233,7 @@
 
         <a class="profile-dropdown-item" href="profile.html">My Profile</a>
         <a class="profile-dropdown-item" id="ownerConsoleMenuItem" href="owner.html" style="display:none;">Owner Console</a>
+        <a class="profile-dropdown-item" id="companyDashMenuItem" href="company.html" style="display:none;">Company dashboard</a>
         <a class="profile-dropdown-item" id="changePasswordMenuItem" onclick="openChangePassword()">Change password</a>
         <a class="profile-dropdown-item" onclick="replayDashboardTour()">Replay the tour</a>
         <a class="profile-dropdown-item" href="https://www.productadvisory.co/" target="_blank" rel="noopener">Visit Product Advisory ↗</a>
@@ -885,6 +886,8 @@ function showCompanyNoticeIfMember(user){
     .then(snap => {
       const m = snap.exists() ? snap.data() : null;
       const banner = document.getElementById('orgBanner');
+      // Company admins get a link to their team dashboard.
+      document.getElementById('companyDashMenuItem').style.display = (m && m.status === 'active' && m.role === 'admin') ? 'block' : 'none';
       if (!m || m.status !== 'active'){ banner.style.display = 'none'; return; }
       document.getElementById('orgBannerText').textContent =
         "You're a member of " + m.orgName + ". Your assessment results, answers and course progress are shared with " +

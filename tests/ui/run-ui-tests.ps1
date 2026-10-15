@@ -21,6 +21,7 @@ New-Item -ItemType Directory -Path $site | Out-Null
 
 Copy-Item "$ui\*.js" $site
 Copy-Item "$repo\org-share-core.js" $site
+Copy-Item "$repo\company-core.js" $site
 Copy-Item "$repo\vendor" "$site\vendor" -Recurse
 Copy-Item "$repo\content" "$site\content" -Recurse
 
@@ -44,6 +45,7 @@ Build-Page 'join.html' 'join-test.html' 'join-seed.js' 'join-test.js'
 Build-Page 'lms-dashboard.html' 'dash-test.html' 'dash-seed.js' 'dash-test.js'
 Build-Page 'profile.html' 'del-test.html' 'del-seed.js' 'del-test.js'
 Build-Page 'lesson.html' 'les-test.html' 'les-seed.js' 'les-test.js'
+Build-Page 'company.html' 'company-test.html' 'company-seed.js' 'company-test.js'
 [System.IO.File]::WriteAllText("$site\share-test.html", "<!doctype html><html><head>$errHook</head><body><script type=`"module`" src=`"share-test.js`"></script></body></html>")
 
 # a tiny web server, because browsers will not load ES modules from files
@@ -94,9 +96,13 @@ try {
     $results += Run-Page "join page: $s" "$base/join-test.html?scn=$s&token=$tok" 20000
   }
   $results += Run-Page 'join page: badtoken' "$base/join-test.html?scn=badtoken&token=abc" 20000
-  foreach ($s in 'member', 'plain', 'removed', 'owner') { $results += Run-Page "dashboard: $s" "$base/dash-test.html?scn=$s" 25000 }
+  foreach ($s in 'member', 'admin', 'plain', 'removed', 'owner') { $results += Run-Page "dashboard: $s" "$base/dash-test.html?scn=$s" 25000 }
   foreach ($s in 'member', 'nonmember', 'blocked') { $results += Run-Page "delete account: $s" "$base/del-test.html?scn=$s" 25000 }
   foreach ($s in 'member', 'plain') { $results += Run-Page "last lesson: $s" "$base/les-test.html?scn=$s&course=discovery-novice&lesson=5" 30000 }
+  foreach ($s in 'admin', 'empty', 'archived', 'owner', 'ownernoorg', 'plain', 'member', 'removedadmin', 'denied', 'sharesdenied', 'signedout') {
+    $org = if ($s -eq 'owner') { '&org=orgA' } else { '' }
+    $results += Run-Page "company dashboard: $s" "$base/company-test.html?scn=$s$org" 40000
+  }
   $results += Run-Page 'shared-record sync' "$base/share-test.html" 40000
 } finally {
   Stop-Job $server -ErrorAction SilentlyContinue

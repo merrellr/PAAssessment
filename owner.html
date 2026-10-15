@@ -111,19 +111,12 @@
 </style>
 
 <script src="vendor/Sortable.min.js"></script>
+<script src="company-core.js"></script>
 <script>
 /* Pure logic for the owner console, kept free of Firebase so it can be tested
    on its own. */
 const OwnerLogic = (function(){
-  const DOMAINS = [
-    ['discovery', 'Customer & Market Discovery'],
-    ['strategy', 'Product Strategy & Roadmapping'],
-    ['prioritization', 'Prioritization & Trade-offs'],
-    ['execution', 'Execution & Delivery'],
-    ['stakeholder', 'Stakeholder Communication & Influence'],
-    ['aiIndividual', 'AI Fluency — Individual'],
-    ['aiOrg', 'AI Fluency — Organizational']
-  ];
+  const DOMAINS = CompanyCore.DOMAINS;
   // New companies start with every skill area ranked in the framework's own
   // order. The ranking only breaks ties in a member's recommendations, so a
   // company that wants real emphasis moves its chosen areas to the top.
@@ -131,7 +124,10 @@ const OwnerLogic = (function(){
 
   const labels = {};
   DOMAINS.forEach(d => { labels[d[0]] = d[1]; });
-  const EMAIL_RE = /^[^\s@,;]+@[^\s@,;]+\.[^\s@,;]+$/;
+  const EMAIL_RE = CompanyCore.EMAIL_RE;
+  // Invite, people and spreadsheet helpers live in company-core.js, shared with company.html.
+  const { parseInviteLines, classifyInvites, inviteStatus, seatInfo, buildPeopleRows, csvCell, buildInviteCsv,
+    randomToken, prettyCourseId } = CompanyCore;
 
   function domainLabel(key){ return labels[key] || key; }
 
@@ -204,87 +200,6 @@ const OwnerLogic = (function(){
     return 'Flat enterprise';
   }
 
-  /* ---- invites ---- */
-  // One person per line: email, then optional name, then optional phone,
-  // separated by commas, tabs or semicolons. A header line is ignored, and a
-  // line written as "name, email" is understood too.
-  function parseInviteLines(text){
-    const entries = [], errors = [], seen = {};
-    String(text || '').split(/\r?\n/).forEach((raw, idx) => {
-      const line = raw.trim();
-      if (!line) return;
-      const cells = line.split(/[,\t;]/).map(s => s.trim().replace(/^"|"$/g, '').trim());
-      if (idx === 0 && /^e-?mail/i.test(cells[0]) && cells[0].indexOf('@') === -1) return;
-      let emailAt = cells.findIndex(c => c.indexOf('@') !== -1);
-      if (emailAt === -1) emailAt = 0;
-      const email = (cells[emailAt] || '').toLowerCase();
-      const others = cells.filter((c, i) => i !== emailAt);
-      if (!EMAIL_RE.test(email) || email.length > 254){
-        errors.push({ line: idx + 1, text: line, reason: 'Not a valid email address' });
-        return;
-      }
-      if (seen[email]){
-        errors.push({ line: idx + 1, text: line, reason: 'Listed more than once' });
-        return;
-      }
-      seen[email] = true;
-      entries.push({ email: email, name: (others[0] || '').slice(0, 100), phone: (others[1] || '').slice(0, 40) });
-    });
-    return { entries: entries, errors: errors };
-  }
-
-  // Splits parsed entries into ones to invite and ones to skip because the
-  // person is already active in this company or already has an open invite.
-  function classifyInvites(entries, activeEmails, openInviteEmails){
-    const active = {}, open = {};
-    (activeEmails || []).forEach(e => { active[String(e).toLowerCase()] = true; });
-    (openInviteEmails || []).forEach(e => { open[String(e).toLowerCase()] = true; });
-    const toCreate = [], skipped = [];
-    entries.forEach(en => {
-      if (active[en.email]) skipped.push({ email: en.email, reason: 'Already a member of this company' });
-      else if (open[en.email]) skipped.push({ email: en.email, reason: 'Already has an open invite' });
-      else toCreate.push(en);
-    });
-    return { toCreate: toCreate, skipped: skipped };
-  }
-
-  function inviteStatus(inv, nowMs){
-    if (inv.status === 'used') return 'used';
-    if (inv.status === 'revoked') return 'revoked';
-    const exp = inv.expiresAtMs;
-    if (typeof exp === 'number' && exp < nowMs) return 'expired';
-    return 'open';
-  }
-
-  // Seats count every ACTIVE person (admins and members). Pending invites are
-  // shown separately and only warn, they do not block.
-  function seatInfo(org, activeCount, pendingInvites, newInvites){
-    const limit = org.plan === 'seat' ? (org.seatLimit || 0) : null;
-    const wanted = activeCount + pendingInvites + (newInvites || 0);
-    return { limit: limit, active: activeCount, pending: pendingInvites, wouldExceed: limit !== null && wanted > limit };
-  }
-
-  const ORDER = { active: 0, invited: 1, expired: 2, removed: 3 };
-
-  // Combines memberships and invites into one list of people for one role.
-  function buildPeopleRows(role, memberships, invites, nowMs){
-    const rows = [];
-    memberships.forEach(m => {
-      if (m.role !== role) return;
-      rows.push({ kind: 'member', id: m.id, role: role, name: m.displayName || '', email: m.email || '', phone: m.phone || '',
-        status: m.status === 'removed' ? 'removed' : 'active', dateMs: m.joinedAtMs || 0 });
-    });
-    invites.forEach(inv => {
-      if (inv.role !== role) return;
-      const st = inviteStatus(inv, nowMs);
-      if (st === 'used' || st === 'revoked') return;
-      rows.push({ kind: 'invite', id: inv.id, token: inv.id, role: role, name: inv.name || '', email: inv.email || '', phone: inv.phone || '',
-        status: st === 'open' ? 'invited' : 'expired', dateMs: inv.createdAtMs || 0, expiresAtMs: inv.expiresAtMs || 0 });
-    });
-    rows.sort((a, b) => (ORDER[a.status] - ORDER[b.status]) || (a.name || a.email).toLowerCase().localeCompare((b.name || b.email).toLowerCase()));
-    return rows;
-  }
-
   function filterOrgs(orgs, term, sortKey){
     const t = String(term || '').trim().toLowerCase();
     let list = orgs.filter(o => !t || [o.name, o.notes, o.contactName, o.contactEmail].join(' ').toLowerCase().indexOf(t) !== -1);
@@ -298,17 +213,6 @@ const OwnerLogic = (function(){
   }
 
   /* ---- the shared record (what a company sees about a member) ---- */
-  // Course ids look like "aiOrg-moderate": a skill area, then a level.
-  const LEVEL_LABELS = { novice: 'Limited Experience', moderate: 'Moderate Experience', experienced: 'Lots of Experience', advanced: 'Advanced Experience' };
-  function prettyCourseId(id){
-    const s = String(id);
-    const i = s.lastIndexOf('-');
-    const area = i > -1 ? s.slice(0, i) : s;
-    const level = i > -1 ? s.slice(i + 1) : '';
-    const areaLabel = labels[area] || (area.charAt(0).toUpperCase() + area.slice(1));
-    return level ? areaLabel + ' · ' + (LEVEL_LABELS[level] || level) : areaLabel;
-  }
-
   // Boils a shared record down to the few facts shown in the people list.
   function summarizeShare(share){
     if (!share) return null;
@@ -326,23 +230,6 @@ const OwnerLogic = (function(){
       lessonsDone: lessons,
       lastActiveAt: share.lastActiveAt || null
     };
-  }
-
-  function csvCell(v){
-    const s = String(v == null ? '' : v);
-    return /[",\n\r]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
-  }
-
-  function buildInviteCsv(rows){
-    const lines = [['Email', 'Name', 'Phone', 'Role', 'Invite link', 'Expires'].map(csvCell).join(',')];
-    rows.forEach(r => lines.push([r.email, r.name, r.phone, r.role, r.link, r.expires].map(csvCell).join(',')));
-    return lines.join('\r\n');
-  }
-
-  function randomToken(){
-    const bytes = new Uint8Array(16);
-    (window.crypto || window.msCrypto).getRandomValues(bytes);
-    return Array.prototype.map.call(bytes, b => ('0' + b.toString(16)).slice(-2)).join('');
   }
 
   return { DOMAINS, DEFAULT_FOCUS_ORDER, domainLabel, validateOrgForm, buildOrgFields, moveItem, availableFocus, placeFocus,
@@ -627,6 +514,7 @@ const FocusBoard = (function(){
             <div id="detailPills" style="margin-top:6px;"></div>
           </div>
           <div class="btn-row">
+            <a class="btn btn-ghost" id="teamDashLink" href="#" style="text-decoration:none; display:inline-block; font-family:'Space Grotesk', sans-serif; font-weight:600; font-size:14px; border-radius:8px; padding:10px 18px; border:1px solid var(--line); color:var(--ink-soft);">Team dashboard</a>
             <button class="btn btn-ghost" id="editBtn" type="button">Edit details</button>
             <button class="btn btn-ghost" id="archiveBtn" type="button">Archive</button>
           </div>
@@ -1128,6 +1016,7 @@ function renderDetail(){
   const org = currentOrg();
   if (!org){ return; }
   $('detailName').textContent = org.name;
+  $('teamDashLink').setAttribute('href', 'company.html?org=' + encodeURIComponent(org.id));
   $('archiveBtn').textContent = org.status === 'archived' ? 'Restore' : 'Archive';
 
   const pills = $('detailPills');

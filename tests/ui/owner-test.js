@@ -248,6 +248,7 @@ function finish(){
     const view = Array.prototype.slice.call($('orgTableWrap').querySelectorAll('button')).find(b => b.textContent === 'View');
     view.click(); await until(() => vis('viewDetail')); await sleep(200);
     t('View opens that company', /Acme Health/.test($('detailName').textContent));
+    t('the company page links to that company\'s team dashboard', /^company\.html\?org=/.test($('teamDashLink').getAttribute('href')), $('teamDashLink').getAttribute('href'));
     t('people counts appear on the page: 1 admin and 1 user active',
       rowsIn('adminTableWrap').some(r => /Active/.test(textOf(r)) && /Sam Admin/.test(textOf(r))) && rowsIn('userTableWrap').some(r => /Active/.test(textOf(r)) && /Jane Smith/.test(textOf(r))));
     /* ---- what the company sees about each member (checkpoint 3) ---- */

@@ -18,6 +18,14 @@ const sleep = (ms) => new Promise(r => setTimeout(r, ms));
       const writes = window.__writeLog.filter(w => w.path === 'orgs/orgA/members/uDash').length;
       t('exactly one write for the shared record on this visit', writes === 1, String(writes));
     }
+    const companyLink = document.getElementById('companyDashMenuItem');
+    if (window.__scn === 'admin'){
+      t('a company admin sees "Company dashboard" under Profile, pointing at company.html', companyLink.style.display === 'block' && companyLink.getAttribute('href') === 'company.html');
+      t('and still gets their own shared record like any member', !!share);
+      t('but not the Owner Console link', ownerLink.style.display === 'none');
+    } else {
+      t('everyone else (member, no company, former member, owner) does not see "Company dashboard"', companyLink.style.display === 'none');
+    }
     if (window.__scn === 'plain'){
       t('a person with no company: no shared record is made anywhere', Object.keys(store).filter(p => p.indexOf('orgs/') === 0).length === 0);
       t('and no company notice is shown', banner.style.display !== 'block');

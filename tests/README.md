@@ -6,7 +6,8 @@ None of these touch the live site, your Firebase project, or send real email.
 |---|---|---|
 | Security rules (who may read or write what) | `firestore-rules.test.mjs` | Needs Node 20 and Java 21. `npm install firebase-tools@13 @firebase/rules-unit-testing@3 firebase@10`, then `RULES_PATH=../firestore.rules npx firebase emulators:exec --only firestore --project demo-pa "node tests/firestore-rules.test.mjs"` |
 | What the company sees about a member (and what it never sees) | `org-share-core.test.mjs` | `node --experimental-default-type=module tests/org-share-core.test.mjs` |
-| Every page's real code: owner console, join page, dashboard, delete account, lessons, shared-record sync | `ui/` | `powershell -ExecutionPolicy Bypass -File tests\ui\run-ui-tests.ps1` (needs Microsoft Edge) |
+| The team report (statuses, roll-up numbers, CSV exports) and that the lesson counts match `content/` | `company-core.test.mjs` | `node --experimental-default-type=module tests/company-core.test.mjs` |
+| Every page's real code: owner console, join page, dashboard, company dashboard, delete account, lessons, shared-record sync | `ui/` | `powershell -ExecutionPolicy Bypass -File tests\ui\run-ui-tests.ps1` (needs Microsoft Edge) |
 | Invite emails and the Gmail self-check | `apps-script/mail-test.html` | `msedge --headless --allow-file-access-from-files --virtual-time-budget=5000 --dump-dom file:///<path>/tests/apps-script/mail-test.html` and read the page title (PASS / FAIL lines) |
 
 ## How the page tests work
