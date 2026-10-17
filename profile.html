@@ -192,12 +192,29 @@ import {
   reauthenticateWithCredential, reauthenticateWithPopup, EmailAuthProvider,
   updateProfile, verifyBeforeUpdateEmail, deleteUser
 } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
-import { getFirestore, doc, getDoc, setDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+import { getFirestore, doc, getDoc, getDocs, setDoc, deleteDoc, collection, query, where, writeBatch, increment } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
 import { anonymizeOrgShares } from "./org-share.js";
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
+
+/* Each vote is deleted together with taking one off its tool's public count (the
+   security rules require the two to happen together). A tool that no longer
+   exists, or whose count is already zero, needs no change to the count. */
+async function removeToolActivity(user){
+  const snap = await getDocs(query(collection(db, 'toolVotes'), where('uid', '==', user.uid)));
+  for (const d of snap.docs){
+    const toolId = d.data().toolId;
+    const toolRef = doc(db, 'tools', toolId);
+    const tool = await getDoc(toolRef);
+    const batch = writeBatch(db);
+    batch.delete(doc(db, 'toolVotes', d.id));
+    if (tool.exists() && (tool.data().voteCount || 0) > 0) batch.update(toolRef, { voteCount: increment(-1) });
+    await batch.commit();
+  }
+  await deleteDoc(doc(db, 'toolSuggestions', user.uid));
+}
 
 let currentUser = null;
 
@@ -504,6 +521,17 @@ window.handleDeleteAccount = async function(){
   } catch (err){
     console.error('Could not remove your name from your company\'s copy:', err);
     errorEl.textContent = "We couldn't remove your name from the copy your company holds, so nothing has been deleted. Please try again in a minute.";
+    resetButton();
+    return;
+  }
+
+  // Withdraw their Tool Roadmap votes (taking each off the tool's public total)
+  // and delete any tool suggestion. Stops everything if it fails.
+  try {
+    await removeToolActivity(currentUser);
+  } catch (err){
+    console.error('Could not remove the Tool Roadmap votes:', err);
+    errorEl.textContent = "We couldn't remove your Tool Roadmap votes, so nothing has been deleted. Please try again in a minute.";
     resetButton();
     return;
   }

@@ -27,6 +27,24 @@ const $ = (id) => document.getElementById(id);
       t('order: blank the company copies first, then the spreadsheet, then the progress record, then the sign-in',
         firstBlank > -1 && firstBlank < delProgress && delProgress < delUser && !!sheetAt && Number(sheetAt.split('@')[1]) >= 3, log.join(' | ') + ' / ' + window.__calls.join(','));
     }
+    if (scn === 'member' || scn === 'nonmember'){
+      t('their Tool Roadmap votes are deleted', !store['toolVotes/uDel_t1'] && !store['toolVotes/uDel_t2'] && !store['toolVotes/uDel_tGone']);
+      t('each vote is taken off its tool\'s public total (4 becomes 3)', store['tools/t1'].voteCount === 3, String(store['tools/t1'].voteCount));
+      t('a total that was already 0 is left at 0, never negative', store['tools/t2'].voteCount === 0);
+      t('somebody else\'s vote is untouched', !!store['toolVotes/uOther_t1']);
+      t('their tool suggestion is deleted', !store['toolSuggestions/uDel']);
+      const firstVoteDelete = log.findIndex(x => /delete:toolVotes\//.test(x));
+      const delProg = log.findIndex(x => x === 'delete:progress/uDel');
+      t('the votes go before the progress record and the sign-in', firstVoteDelete > -1 && firstVoteDelete < delProg, log.join(' | '));
+    }
+    if (scn === 'votefail'){
+      t('if the votes cannot be removed, NOTHING is deleted', store['progress/uDel'] !== undefined && window.__deleted !== true && $('deletedNotice').style.display !== 'block');
+      t('the person is told what happened and can try again', /couldn't remove your Tool Roadmap votes/.test($('deleteError').textContent) && $('deleteBtn').disabled === false, $('deleteError').textContent);
+      t('the spreadsheet clean-up was not attempted', !window.__calls.some(c => /^deleteAccount@/.test(c)));
+    }
+    if (scn === 'blocked'){
+      t('the votes are untouched when an earlier step fails', !!store['toolVotes/uDel_t1'] && store['tools/t1'].voteCount === 4 && !!store['toolSuggestions/uDel']);
+    }
     if (scn === 'nonmember'){
       t('a person who was never in a company deletes normally', window.__deleted === true && $('deletedNotice').style.display === 'block');
       t('and nothing is written for any company', log.filter(x => /orgs\//.test(x) || /memberships\//.test(x)).length === 0, log.join(' | '));

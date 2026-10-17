@@ -22,6 +22,16 @@
       store['orgs/orgA/members/uDel'] = sh();
       store['orgs/orgOld/members/uDel'] = sh();
     }
+    // Tool Roadmap activity: two live tools (one whose count has drifted to 0), a vote for a tool that was
+    // since deleted, a vote by somebody else, and a pending suggestion
+    store['tools/t1'] = { title: 'One', description: '', category: '', status: 'planned', order: 1, voteCount: 4, createdAt: ts, updatedAt: ts };
+    store['tools/t2'] = { title: 'Two', description: '', category: '', status: 'planned', order: 2, voteCount: 0, createdAt: ts, updatedAt: ts };
+    store['toolVotes/uDel_t1'] = { uid: 'uDel', toolId: 't1', email: 'del@acme.com', notify: true, createdAt: ts };
+    store['toolVotes/uDel_t2'] = { uid: 'uDel', toolId: 't2', email: 'del@acme.com', notify: false, createdAt: ts };
+    store['toolVotes/uDel_tGone'] = { uid: 'uDel', toolId: 'tGone', email: 'del@acme.com', notify: false, createdAt: ts };
+    store['toolVotes/uOther_t1'] = { uid: 'uOther', toolId: 't1', email: 'other@x.com', notify: true, createdAt: ts };
+    store['toolSuggestions/uDel'] = { uid: 'uDel', email: 'del@acme.com', text: 'A pricing worksheet', status: 'pending', createdAt: ts };
     if (scn === 'blocked') window.__failWrite = /^orgs\/orgA\/members\/uDel$/;
+    if (scn === 'votefail') window.__failWrite = /^toolVotes\//;
   };
 })();

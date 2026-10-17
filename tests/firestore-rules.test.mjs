@@ -12,7 +12,7 @@ import fs from 'node:fs';
 import { initializeTestEnvironment, assertSucceeds, assertFails } from '@firebase/rules-unit-testing';
 import {
   doc, getDoc, setDoc, updateDoc, deleteDoc, getDocs, collection, query, where,
-  writeBatch, serverTimestamp, Timestamp
+  writeBatch, serverTimestamp, Timestamp, increment
 } from 'firebase/firestore';
 
 const rulesPath = process.env.RULES_PATH || './firestore.rules';
@@ -37,6 +37,16 @@ await env.withSecurityRulesDisabled(async (ctx) => {
   await setDoc(doc(db, 'orgs/orgB'), org('Beta'));
   await setDoc(doc(db, 'orgs/orgOld'), org('Old Co', 'archived'));
   await setDoc(doc(db, 'memberships/oldMember'), { orgId: 'orgOld', orgName: 'Old Co', role: 'member', status: 'active', inviteToken: 'seed', joinedAt: now(), endedAt: null, email: 'old@x.com', displayName: 'Old' });
+  const tool = (status, count) => ({ title: 'Tool', description: 'd', category: 'c', status: status, order: 1, voteCount: count, createdAt: now(), updatedAt: now() });
+  await setDoc(doc(db, 'tools/tA'), tool('planned', 0));
+  await setDoc(doc(db, 'tools/tB'), tool('considering', 0));
+  await setDoc(doc(db, 'tools/tC'), tool('in_progress', 0));
+  await setDoc(doc(db, 'tools/tR'), tool('released', 3));
+  await setDoc(doc(db, 'tools/tW'), tool('planned', 3));
+  await setDoc(doc(db, 'tools/tZ'), tool('planned', 0));
+  await setDoc(doc(db, 'toolVotes/vZero_tZ'), { uid: 'vZero', toolId: 'tZ', email: 'vZero@x.com', notify: false, createdAt: now() });   // count drifted to 0
+  await setDoc(doc(db, 'toolVotes/vOrph_tGone'), { uid: 'vOrph', toolId: 'tGone', email: 'vOrph@x.com', notify: false, createdAt: now() }); // the tool was deleted
+  for (const u of ['v7', 'v8', 'v9']) await setDoc(doc(db, 'toolVotes/' + u + '_tW'), { uid: u, toolId: 'tW', email: u + '@x.com', notify: false, createdAt: now() });
   await setDoc(doc(db, 'orgs/orgEdit'), org('Edit Me')); // edited by tests, so no invite may depend on its name
 
   const member = (orgId, orgName, role, status = 'active') => ({
@@ -528,6 +538,128 @@ await allow('but they can still blank their own name on it (account deletion)', 
   return updateDoc(doc(asUser('oldMember', 'old@x.com'), 'orgs/orgOld/members/oldMember'), { identity: null, updatedAt: serverTimestamp() });
 });
 await allow('while an active company still receives updates as before', () => setDoc(doc(memberA, 'orgs/orgA/members/memberA'), goodShare('member@a.com')));
+
+console.log('\n--- tool roadmap: reading the list ---');
+const verified = (uid) => env.authenticatedContext(uid, { email: uid + '@x.com', email_verified: true }).firestore();
+const unverified = (uid) => env.authenticatedContext(uid, { email: uid + '@x.com', email_verified: false }).firestore();
+await allow('anyone, even signed out, can read a tool', () => getDoc(doc(anon, 'tools/tA')));
+await allow('and list the tools with their vote counts', () => getDocs(collection(anon, 'tools')));
+
+console.log('\n--- tool roadmap: voting ---');
+const castVote = (db, uid, toolId, over = {}, opts = {}) => {
+  const b = writeBatch(db);
+  b.set(doc(db, 'toolVotes/' + (opts.id || uid + '_' + toolId)), Object.assign({ uid: uid, toolId: toolId, email: uid + '@x.com', notify: false, createdAt: serverTimestamp() }, over));
+  if (!opts.noCount) b.update(doc(db, 'tools/' + toolId), { voteCount: increment(opts.delta === undefined ? 1 : opts.delta) });
+  return b.commit();
+};
+const withdraw = (db, uid, toolId, opts = {}) => {
+  const b = writeBatch(db);
+  b.delete(doc(db, 'toolVotes/' + uid + '_' + toolId));
+  if (!opts.noCount) b.update(doc(db, 'tools/' + toolId), { voteCount: increment(-1) });
+  return b.commit();
+};
+await allow('a verified person votes: their vote and +1 on the tool, together', () => castVote(verified('v1'), 'v1', 'tA'));
+await allow('they can back a second tool', () => castVote(verified('v1'), 'v1', 'tB'));
+await allow('and a third', () => castVote(verified('v1'), 'v1', 'tC'));
+await allow('the vote can ask to be emailed at launch', () => castVote(verified('v2'), 'v2', 'tA', { notify: true }));
+await deny('the same person cannot vote for the same tool twice', () => castVote(verified('v1'), 'v1', 'tA'));
+await deny('nor by replacing their vote document (to count again)', () => castVote(verified('v1'), 'v1', 'tA', { notify: true }));
+await deny('a vote document with no +1 on the tool is refused', () => castVote(verified('v3'), 'v3', 'tA', {}, { noCount: true }));
+await deny('a +1 on the tool with no vote document is refused', () => updateDoc(doc(verified('v3'), 'tools/tA'), { voteCount: increment(1) }));
+await deny('a +2 is refused', () => castVote(verified('v3'), 'v3', 'tA', {}, { delta: 2 }));
+await deny('a -1 together with a new vote is refused', () => castVote(verified('v3'), 'v3', 'tA', {}, { delta: -1 }));
+await deny('voting on a released tool is refused', () => castVote(verified('v3'), 'v3', 'tR'));
+await deny('a person whose email is not verified cannot vote', () => castVote(unverified('u1'), 'u1', 'tA'));
+await deny('a signed-out visitor cannot vote', () => castVote(anon, 'anon', 'tA'));
+await deny('nobody can vote as somebody else (wrong uid inside)', () => castVote(verified('v3'), 'v3', 'tA', { uid: 'v4' }));
+await deny('nor under somebody else\'s document id', () => castVote(verified('v3'), 'v3', 'tA', {}, { id: 'v4_tA' }));
+await deny('nor with somebody else\'s email', () => castVote(verified('v3'), 'v3', 'tA', { email: 'other@x.com' }));
+await deny('extra fields on a vote are refused', () => castVote(verified('v3'), 'v3', 'tA', { bonus: 1 }));
+await deny('notify must be true or false', () => castVote(verified('v3'), 'v3', 'tA', { notify: 'yes' }));
+await deny('the vote time must be the server\'s', () => castVote(verified('v3'), 'v3', 'tA', { createdAt: Timestamp.fromDate(new Date(2020, 1, 1)) }));
+await deny('a vote for a tool that does not exist is refused', () => castVote(verified('v3'), 'v3', 'nope'));
+const v3 = verified('v3');
+await deny('a voter cannot also change a tool\'s title in the same update', () => {
+  const bb = writeBatch(v3);
+  bb.set(doc(v3, 'toolVotes/v3_tB'), { uid: 'v3', toolId: 'tB', email: 'v3@x.com', notify: false, createdAt: serverTimestamp() });
+  bb.update(doc(v3, 'tools/tB'), { voteCount: increment(1), title: 'Hacked' });
+  return bb.commit();
+});
+await deny('a -1 with no vote document to delete is refused', () => updateDoc(doc(verified('v3'), 'tools/tA'), { voteCount: increment(-1) }));
+
+console.log('\n--- tool roadmap: withdrawing a vote ---');
+await allow('a person withdraws their vote: vote deleted and -1 together', () => withdraw(verified('v9'), 'v9', 'tW'));
+await deny('withdrawing the same vote again is refused', () => withdraw(verified('v9'), 'v9', 'tW'));
+await deny('deleting a vote without the -1 is refused (the count would drift)', () => withdraw(verified('v8'), 'v8', 'tW', { noCount: true }));
+await deny('a -1 without deleting the vote is refused', () => updateDoc(doc(verified('v8'), 'tools/tW'), { voteCount: increment(-1) }));
+await deny('nobody can delete somebody else\'s vote', () => withdraw(verified('v3'), 'v8', 'tW'));
+await allow('they can vote for that tool again afterwards', () => castVote(verified('v9'), 'v9', 'tW'));
+await allow('someone can withdraw even if their email is no longer verified', () => withdraw(unverified('v7'), 'v7', 'tW'));
+await allow('a vote for a tool the owner has since deleted can still be removed (no count to change)', () => deleteDoc(doc(verified('vOrph'), 'toolVotes/vOrph_tGone')));
+await allow('a vote can be removed when the tool\'s count has drifted to zero', () => withdraw(verified('vZero'), 'vZero', 'tZ', { noCount: true }));
+await deny('but not by pushing the count below zero', () => updateDoc(doc(verified('v8'), 'tools/tZ'), { voteCount: increment(-1) }));
+
+console.log('\n--- tool roadmap: the launch-email choice ---');
+await allow('a voter changes their launch-email choice', () => updateDoc(doc(verified('v2'), 'toolVotes/v2_tA'), { notify: false }));
+await deny('they cannot change anything else on the vote (the tool)', () => updateDoc(doc(verified('v2'), 'toolVotes/v2_tA'), { toolId: 'tB' }));
+await deny('or the email', () => updateDoc(doc(verified('v2'), 'toolVotes/v2_tA'), { email: 'new@x.com' }));
+await deny('somebody else cannot change it', () => updateDoc(doc(verified('v3'), 'toolVotes/v2_tA'), { notify: true }));
+
+console.log('\n--- tool roadmap: who can read the votes ---');
+await allow('a voter reads their own votes', () => getDocs(query(collection(verified('v1'), 'toolVotes'), where('uid', '==', 'v1'))));
+await allow('and a single one', () => getDoc(doc(verified('v1'), 'toolVotes/v1_tA')));
+await deny('a voter cannot read somebody else\'s vote', () => getDoc(doc(verified('v3'), 'toolVotes/v1_tA')));
+await deny('nor list everybody\'s', () => getDocs(collection(verified('v3'), 'toolVotes')));
+await deny('a company admin has no special access to votes', () => getDocs(collection(adminA, 'toolVotes')));
+await deny('a signed-out visitor cannot read votes', () => getDocs(collection(anon, 'toolVotes')));
+await allow('the owner reads every vote (to email the people who asked)', () => getDocs(collection(owner, 'toolVotes')));
+await allow('and can filter to one tool\'s launch-email list', () => getDocs(query(collection(owner, 'toolVotes'), where('toolId', '==', 'tA'), where('notify', '==', true))));
+
+console.log('\n--- tool roadmap: managing the tools ---');
+const goodTool = (over = {}) => Object.assign({ title: 'New tool', description: 'What it does', category: 'Strategy', status: 'considering', order: 3, voteCount: 0, createdAt: serverTimestamp(), updatedAt: serverTimestamp() }, over);
+await allow('the owner adds a tool', () => setDoc(doc(owner, 'tools/new1'), goodTool()));
+await deny('a new tool cannot start with votes', () => setDoc(doc(owner, 'tools/new2'), goodTool({ voteCount: 5 })));
+await deny('a plain voter cannot add a tool', () => setDoc(doc(verified('v1'), 'tools/new3'), goodTool()));
+await deny('a company admin cannot add a tool', () => setDoc(doc(adminA, 'tools/new4'), goodTool()));
+await deny('a tool needs a title', () => setDoc(doc(owner, 'tools/new5'), goodTool({ title: '' })));
+await deny('an unknown status is refused', () => setDoc(doc(owner, 'tools/new6'), goodTool({ status: 'soonish' })));
+await deny('extra fields are refused', () => setDoc(doc(owner, 'tools/new7'), goodTool({ secret: 1 })));
+await deny('a launch link must be https', () => setDoc(doc(owner, 'tools/new8'), goodTool({ status: 'released', launchUrl: 'http://example.com' })));
+await allow('an https launch link is fine', () => setDoc(doc(owner, 'tools/new9'), goodTool({ status: 'released', launchUrl: 'https://example.com/tool' })));
+await allow('the owner edits a tool', () => updateDoc(doc(owner, 'tools/tA'), { title: 'Renamed', updatedAt: serverTimestamp() }));
+await allow('the owner can mark a tool in progress', () => updateDoc(doc(owner, 'tools/tB'), { status: 'in_progress', updatedAt: serverTimestamp() }));
+await allow('the owner can repair a vote count (recount)', () => updateDoc(doc(owner, 'tools/tA'), { voteCount: 2, updatedAt: serverTimestamp() }));
+await deny('a voter cannot edit a tool', () => updateDoc(doc(verified('v1'), 'tools/tA'), { title: 'Hacked' }));
+await deny('a voter cannot set a vote count directly', () => updateDoc(doc(verified('v1'), 'tools/tA'), { voteCount: 99 }));
+await deny('a voter cannot change a tool\'s status', () => updateDoc(doc(verified('v1'), 'tools/tA'), { status: 'released' }));
+await allow('the owner can delete a tool', () => deleteDoc(doc(owner, 'tools/new1')));
+await deny('a voter cannot delete a tool', () => deleteDoc(doc(verified('v1'), 'tools/tA')));
+
+console.log('\n--- tool roadmap: suggestions ---');
+const goodSuggestion = (uid, over = {}) => Object.assign({ uid: uid, email: uid + '@x.com', text: 'A pricing and packaging worksheet', status: 'pending', createdAt: serverTimestamp() }, over);
+await allow('a verified person suggests a tool', () => setDoc(doc(verified('s1'), 'toolSuggestions/s1'), goodSuggestion('s1')));
+await allow('and can reword it while it is pending', () => setDoc(doc(verified('s1'), 'toolSuggestions/s1'), goodSuggestion('s1', { text: 'A pricing worksheet for B2B products' })));
+await deny('not under somebody else\'s id', () => setDoc(doc(verified('s2'), 'toolSuggestions/s3'), goodSuggestion('s2')));
+await deny('an unverified person cannot suggest', () => setDoc(doc(unverified('s4'), 'toolSuggestions/s4'), goodSuggestion('s4')));
+await deny('a signed-out visitor cannot suggest', () => setDoc(doc(anon, 'toolSuggestions/s5'), goodSuggestion('s5')));
+await deny('a suggestion cannot arrive already approved', () => setDoc(doc(verified('s6'), 'toolSuggestions/s6'), goodSuggestion('s6', { status: 'approved' })));
+await deny('too short is refused', () => setDoc(doc(verified('s7'), 'toolSuggestions/s7'), goodSuggestion('s7', { text: 'hi' })));
+await deny('too long is refused', () => setDoc(doc(verified('s8'), 'toolSuggestions/s8'), goodSuggestion('s8', { text: 'x'.repeat(301) })));
+await deny('extra fields are refused', () => setDoc(doc(verified('s9'), 'toolSuggestions/s9'), goodSuggestion('s9', { admin: true })));
+await deny('somebody else\'s email is refused', () => setDoc(doc(verified('s10'), 'toolSuggestions/s10'), goodSuggestion('s10', { email: 'other@x.com' })));
+await deny('a person cannot approve their own suggestion', () => updateDoc(doc(verified('s1'), 'toolSuggestions/s1'), { status: 'approved', reviewedAt: serverTimestamp() }));
+await allow('the person can read their own suggestion', () => getDoc(doc(verified('s1'), 'toolSuggestions/s1')));
+await deny('and not anyone else\'s', () => getDoc(doc(verified('s2'), 'toolSuggestions/s1')));
+await deny('nobody but the owner can list suggestions', () => getDocs(collection(verified('s1'), 'toolSuggestions')));
+await allow('the owner lists all suggestions', () => getDocs(collection(owner, 'toolSuggestions')));
+await allow('the owner approves one', () => updateDoc(doc(owner, 'toolSuggestions/s1'), { status: 'approved', reviewedAt: serverTimestamp() }));
+await deny('the owner cannot edit the text while reviewing', () => updateDoc(doc(owner, 'toolSuggestions/s1'), { status: 'rejected', reviewedAt: serverTimestamp(), text: 'changed' }));
+await deny('the review must be approved or rejected', () => updateDoc(doc(owner, 'toolSuggestions/s1'), { status: 'maybe', reviewedAt: serverTimestamp() }));
+await allow('after a review the person can suggest something new', () => setDoc(doc(verified('s1'), 'toolSuggestions/s1'), goodSuggestion('s1', { text: 'A vendor evaluation scorecard' })));
+await deny('nobody can delete somebody else\'s suggestion', () => deleteDoc(doc(verified('s2'), 'toolSuggestions/s1')));
+await allow('a person can delete their own suggestion (for example when they delete their account)', () => deleteDoc(doc(verified('s1'), 'toolSuggestions/s1')));
+await allow('deleting when there is none is harmless', () => deleteDoc(doc(verified('s11'), 'toolSuggestions/s11')));
+await allow('the owner can delete one', async () => { await setDoc(doc(verified('s12'), 'toolSuggestions/s12'), goodSuggestion('s12')); return deleteDoc(doc(owner, 'toolSuggestions/s12')); });
 
 console.log('\n==============================');
 console.log(passes + ' passed, ' + failures + ' failed');

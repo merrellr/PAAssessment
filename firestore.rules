@@ -1,10 +1,9 @@
 // Firestore rules for project product-advisory-lms.
 //
-// STATUS: checkpoint 7 of the company-accounts build. The newest parts are the
-// activity log (orgs/{orgId}/audit), the private owner notes (orgPrivate), and
-// "an archived company receives no new member data". They only take effect once
-// this whole file is pasted into the console Rules tab and published. Update
-// this status line when that is done.
+// STATUS: the company-accounts rules (through checkpoint 7) are published. The
+// tool roadmap rules at the very bottom (tools, toolVotes, toolSuggestions) are
+// NEW and only take effect once this whole file is pasted into the console
+// Rules tab and published. Update this status line when that is done.
 //
 // Editing this file does NOT change the live rules. Paste the whole file into
 // the console Rules tab and click Publish, so the two stay identical. These
@@ -29,6 +28,10 @@
 //                       the platform owner can read it, nobody else can.
 //   Company focus list: a copy of the company's ranked focus areas that its
 //                       active members can read (see orgFocus below).
+//   Tool roadmap:       anyone can read the list of tools and their vote counts.
+//                       A signed-in person with a verified email can back up to 3
+//                       tools (one vote each), and suggest a tool. Only the
+//                       platform owner manages the tools and reviews suggestions.
 //   Everything else is denied by default.
 rules_version = '2';
 service cloud.firestore {
@@ -317,6 +320,124 @@ service cloud.firestore {
         && request.resource.data.notes is string && request.resource.data.notes.size() <= 2000
         && request.resource.data.updatedAt == request.time;
       allow delete: if false;
+    }
+
+    // ------------------------------------------------------------ tool roadmap
+    // Public list of tools people can vote for. The vote COUNT lives on the tool
+    // so everyone can see it, which means signed-in people have to be allowed to
+    // change it: but only by exactly one, and only together with creating (or
+    // deleting) their own vote document for that tool. That is how the count
+    // stays honest without a server. One vote per person per tool is enforced by
+    // the vote document's id (uid_toolId): it can only be created once. Voting
+    // needs a verified email address so one email is one voter.
+    function isVerifiedUser() {
+      return isSignedIn() && request.auth.token.email_verified == true;
+    }
+
+    function validTool(d) {
+      return d.keys().hasOnly(['title', 'description', 'category', 'status', 'order', 'voteCount', 'launchUrl', 'createdAt', 'updatedAt'])
+        && d.title is string && d.title.size() > 0 && d.title.size() <= 80
+        && d.description is string && d.description.size() <= 240
+        && d.category is string && d.category.size() <= 40
+        && d.status in ['considering', 'planned', 'in_progress', 'released']
+        && d.order is int && d.order >= 0 && d.order <= 10000
+        && d.voteCount is int && d.voteCount >= 0
+        && d.get('launchUrl', '') is string && d.get('launchUrl', '').size() <= 300
+        && (d.get('launchUrl', '') == '' || d.launchUrl.matches('https://.*'))
+        && d.updatedAt == request.time;
+    }
+
+    match /tools/{toolId} {
+      allow get, list: if true;
+
+      allow create: if isPlatformOwner()
+        && validTool(request.resource.data)
+        && request.resource.data.voteCount == 0
+        && request.resource.data.createdAt == request.time;
+
+      allow update: if (isPlatformOwner()
+          && validTool(request.resource.data)
+          && request.resource.data.createdAt == resource.data.createdAt)
+        || (isSignedIn()
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['voteCount'])
+          && (
+            // +1: only for a verified person, only while the tool is open, and only if this person's vote document is created in the same batch
+            (isVerifiedUser()
+              && request.resource.data.voteCount == resource.data.voteCount + 1
+              && resource.data.status in ['considering', 'planned', 'in_progress']
+              && !exists(/databases/$(database)/documents/toolVotes/$(request.auth.uid + '_' + toolId))
+              && existsAfter(/databases/$(database)/documents/toolVotes/$(request.auth.uid + '_' + toolId)))
+            ||
+            // -1: only if this person's vote document is deleted in the same batch
+            (request.resource.data.voteCount == resource.data.voteCount - 1
+              && request.resource.data.voteCount >= 0
+              && exists(/databases/$(database)/documents/toolVotes/$(request.auth.uid + '_' + toolId))
+              && !existsAfter(/databases/$(database)/documents/toolVotes/$(request.auth.uid + '_' + toolId)))
+          ));
+
+      allow delete: if isPlatformOwner();
+    }
+
+    // One document per person per tool they back. Private to that person and the owner
+    // (the owner needs the emails of people who asked to be told about a launch).
+    match /toolVotes/{voteId} {
+      allow get, list: if isSignedIn() && (resource.data.uid == request.auth.uid || isPlatformOwner());
+
+      allow create: if isVerifiedUser()
+        && request.resource.data.keys().hasOnly(['uid', 'toolId', 'email', 'notify', 'createdAt'])
+        && request.resource.data.uid == request.auth.uid
+        && request.resource.data.toolId is string
+        && voteId == request.auth.uid + '_' + request.resource.data.toolId
+        && request.resource.data.email == request.auth.token.email.lower()
+        && request.resource.data.notify is bool
+        && request.resource.data.createdAt == request.time
+        && get(/databases/$(database)/documents/tools/$(request.resource.data.toolId)).data.status in ['considering', 'planned', 'in_progress']
+        && getAfter(/databases/$(database)/documents/tools/$(request.resource.data.toolId)).data.voteCount
+            == get(/databases/$(database)/documents/tools/$(request.resource.data.toolId)).data.voteCount + 1;
+
+      // Changing your mind about the launch email.
+      allow update: if isVerifiedUser()
+        && resource.data.uid == request.auth.uid
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['notify'])
+        && request.resource.data.notify is bool;
+
+      // Withdrawing a vote also takes exactly one off the tool's count. Two
+      // exceptions keep people able to withdraw (and to delete their account):
+      // the tool no longer exists, or its count is already zero (and stays zero).
+      allow delete: if isSignedIn()
+        && resource.data.uid == request.auth.uid
+        && (!exists(/databases/$(database)/documents/tools/$(resource.data.toolId))
+          || getAfter(/databases/$(database)/documents/tools/$(resource.data.toolId)).data.voteCount
+              == get(/databases/$(database)/documents/tools/$(resource.data.toolId)).data.voteCount - 1
+          || (get(/databases/$(database)/documents/tools/$(resource.data.toolId)).data.voteCount == 0
+              && getAfter(/databases/$(database)/documents/tools/$(resource.data.toolId)).data.voteCount == 0));
+    }
+
+    // At most one suggestion per person (the document id is their uid). The owner
+    // reads them all, approves or rejects, and approved ones become tools.
+    function validSuggestion(d) {
+      return d.keys().hasOnly(['uid', 'email', 'text', 'status', 'createdAt'])
+        && d.uid == request.auth.uid
+        && d.email == request.auth.token.email.lower()
+        && d.text is string && d.text.size() >= 5 && d.text.size() <= 300
+        && d.status == 'pending'
+        && d.createdAt == request.time;
+    }
+
+    match /toolSuggestions/{uid} {
+      allow get: if isSignedIn() && (uid == request.auth.uid || isPlatformOwner());
+      allow list: if isPlatformOwner();
+
+      allow create: if isVerifiedUser() && uid == request.auth.uid && validSuggestion(request.resource.data);
+
+      allow update: if (isVerifiedUser() && uid == request.auth.uid && validSuggestion(request.resource.data))
+        || (isPlatformOwner()
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'reviewedAt'])
+          && request.resource.data.status in ['approved', 'rejected']
+          && request.resource.data.reviewedAt == request.time);
+
+      // The owner can delete any; people can delete their own (for example when they delete their account).
+      allow delete: if isPlatformOwner() || (isSignedIn() && uid == request.auth.uid);
     }
   }
 }

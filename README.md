@@ -170,3 +170,30 @@ change needed. Check console.groq.com/docs/models first.
 Graded answers (including the internal rationale never shown to
 respondents) land in the `scenarioGradingLog` Firestore collection for
 manual review — it holds no uid and isn't read by the app.
+
+## Tool Roadmap (vote for the next toolkit)
+
+- `tool-requests.html` is the public page (link it from the toolkits page on
+  productadvisory.co as `https://assessment.productadvisory.co/tool-requests.html`).
+  Anyone can see each tool and its vote total. To vote you sign in (email and
+  password, or Google) with a **verified** email address. You can back up to three
+  tools, one vote each, and change your mind. A box on each voted tool asks for a
+  one-off email when it launches. Signed-in people can also suggest a tool.
+- `owner-tools.html` (button **Tool roadmap** in the Owner Console) is where the
+  owner adds the 10 starting tools with one click, adds and edits tools, marks them
+  released (with a link), reviews suggestions (approve opens the form pre-filled),
+  repairs vote counts (**Recount votes**), and copies or downloads the launch-email
+  lists.
+- `tool-core.js` holds the shared logic and the starting list (tested in
+  `tests/tool-core.test.mjs`).
+- How the count stays honest without a server (free plan): each vote is its own
+  document `toolVotes/{uid}_{toolId}` (so one vote per person per tool), and the
+  tool's public `voteCount` can only change by exactly one, in the same step as that
+  person's own vote document is created or deleted. The security rules enforce
+  both (see the tool roadmap section of `firestore.rules`, tested in
+  `tests/firestore-rules.test.mjs`). The limit of three tools is applied by the
+  page, not the rules, and someone creating many accounts could still stuff the
+  vote, so treat totals as a signal, not a poll.
+- Deleting an account (Profile > Delete account) withdraws the person's votes
+  (taking each off the public total) and deletes their suggestion, before anything
+  else is deleted.

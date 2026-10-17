@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>Tool Roadmap Admin — Product Advisory Learning</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy: #1A4584; --navy-deep: #12305e; --gray: #9AA3AD; --cyan: #35C2E8;
+    --bg: #F5F8FB; --surface: #FFFFFF; --ink: #16213E; --ink-soft: #4B5768; --line: #E3E9F0;
+    --warn: #C0622A; --ok: #2E8B57;
+  }
+  *{ box-sizing: border-box; }
+  body{ margin:0; background: var(--bg); font-family:'IBM Plex Sans', system-ui, sans-serif; color: var(--ink); }
+  .wrap{ max-width: 960px; margin: 0 auto; padding: 24px 16px 64px; }
+  .brand-header{ display:flex; align-items:center; gap:9px; padding: 0 0 14px; text-decoration:none; }
+  .brand-word{ font-family:'Space Grotesk', sans-serif; font-weight:700; font-size: 19px; line-height:1.3; color: var(--navy-deep); }
+  .brand-accent-bar{ height: 3px; background: linear-gradient(90deg, var(--navy) 0%, var(--cyan) 100%); border-radius: 2px; margin-bottom: 24px; }
+  .back-link{ font-size: 13px; color: var(--gray); text-decoration:none; display:inline-block; margin-bottom: 16px; }
+  .back-link:hover{ color: var(--navy); }
+  .card{ background: var(--surface); border-radius: 16px; border: 1px solid var(--line); padding: 24px; box-shadow: 0 1px 2px rgba(22,33,62,0.04), 0 12px 32px rgba(22,33,62,0.06); margin-bottom: 22px; }
+  h1{ font-family:'Space Grotesk', sans-serif; font-size: 20px; margin: 0 0 4px; color: var(--navy-deep); }
+  h2{ font-family:'Space Grotesk', sans-serif; font-size: 16px; margin: 0; color: var(--navy-deep); }
+  p{ line-height:1.55; color: var(--ink-soft); font-size: 13.5px; }
+  .hint{ font-size: 12.5px; color: var(--gray); margin: 4px 0 0; line-height: 1.5; }
+  .section-head{ display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap; margin-bottom: 14px; }
+  .btn-row{ display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
+  .field-label{ display:block; font-size:12px; font-weight:600; color: var(--ink-soft); margin: 0 0 5px 2px; }
+  .text-input{ width:100%; padding: 11px 13px; margin-bottom: 14px; border: 1.5px solid var(--line); border-radius: 9px; font-family:'IBM Plex Sans', sans-serif; font-size: 14px; background:#fff; color: var(--ink); }
+  textarea.text-input{ resize: vertical; min-height: 72px; line-height: 1.5; }
+  .text-input:focus{ outline:none; border-color: var(--cyan); }
+  .field-error{ font-size: 12.5px; color: var(--warn); margin: -8px 0 12px 2px; min-height: 1px; }
+  .grid-2{ display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 0 16px; }
+  button.btn{ font-family:'Space Grotesk', sans-serif; font-weight:600; font-size: 14px; border-radius: 8px; padding: 10px 18px; border: none; cursor:pointer; }
+  button.btn.btn-primary{ background: linear-gradient(90deg, var(--navy) 0%, var(--navy-deep) 100%); color:#fff; }
+  button.btn.btn-ghost{ background:none; color: var(--ink-soft); border: 1px solid var(--line); }
+  button.btn.btn-ghost:hover{ border-color: var(--cyan); }
+  button.btn.btn-danger{ background:none; color: var(--warn); border: 1px solid #E8C9B8; }
+  button.btn.btn-small{ padding: 6px 12px; font-size: 12.5px; }
+  button.btn:disabled{ opacity:0.55; cursor: default; }
+  .pill{ display:inline-block; font-size: 11.5px; font-weight:600; padding: 2px 9px; border-radius: 20px; background:#EEF3FA; color: var(--navy); white-space: nowrap; }
+  .pill.s-planned{ background:#E1F5FB; color:#12708F; }
+  .pill.s-in_progress{ background:#FFF4D6; color:#8A6410; }
+  .pill.s-released{ background:#E4F3EA; color: var(--ok); }
+  .pill.s-considering{ background:#F0F2F5; color: var(--ink-soft); }
+  .notice{ font-size: 13px; color: var(--ok); margin: 0 0 12px; min-height: 1px; }
+  .error-line{ font-size: 13px; color: var(--warn); margin: 0 0 12px; min-height: 1px; }
+  .empty{ font-size: 13.5px; color: var(--gray); margin: 8px 0; }
+  .table-wrap{ overflow-x:auto; }
+  table.data{ width:100%; border-collapse: collapse; font-size: 13.5px; }
+  table.data th{ text-align:left; font-family:'Space Grotesk', sans-serif; font-size: 11.5px; letter-spacing: 0.04em; text-transform: uppercase; color: var(--gray); padding: 8px 10px; border-bottom: 1.5px solid var(--line); white-space: nowrap; }
+  table.data td{ padding: 12px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  table.data tr:last-child td{ border-bottom: none; }
+  td.num, th.num{ text-align:right; font-variant-numeric: tabular-nums; white-space:nowrap; }
+  .cell-name{ font-family:'Space Grotesk', sans-serif; font-weight:600; }
+  .cell-sub{ font-size: 12px; color: var(--gray); margin-top: 2px; }
+  .tiles{ display:grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; }
+  .tile{ border:1px solid var(--line); border-radius: 12px; padding: 14px 16px; background:#FBFCFE; }
+  .tile .num{ font-family:'Space Grotesk', sans-serif; font-weight:700; font-size: 26px; color: var(--navy-deep); line-height:1.1; font-variant-numeric: tabular-nums; }
+  .tile .lbl{ font-size: 12px; color: var(--ink-soft); margin-top: 4px; }
+</style>
+<script src="tool-core.js"></script>
+</head>
+<body>
+<div class="wrap">
+  <a href="lms-dashboard.html" class="brand-header">
+    <svg width="28" height="28" viewBox="0 0 40 40" aria-hidden="true">
+      <polygon points="20,3 35,11.5 35,28.5 20,37 5,28.5 5,11.5" fill="#1A4584"/>
+      <polygon points="20,10 29,15 29,25 20,30 11,25 11,15" fill="none" stroke="#35C2E8" stroke-width="1.5"/>
+    </svg>
+    <div>
+      <div style="font-family:'IBM Plex Sans', sans-serif; font-weight:600; font-size:10.5px; letter-spacing:0.06em; color:var(--gray); line-height:1;">PRODUCT ADVISORY</div>
+      <div class="brand-word">Tool Roadmap Admin</div>
+    </div>
+  </a>
+  <div class="brand-accent-bar"></div>
+
+  <div class="card" id="stateLoading"><p style="margin:0;">Checking your account…</p></div>
+  <div class="card" id="stateSignedOut" style="display:none;">
+    <h1>Please sign in first</h1>
+    <p>Sign in with your usual account on the dashboard, then come back to this page.</p>
+    <p style="margin-bottom:0;"><a href="lms-dashboard.html" style="color:var(--navy);">Go to the dashboard →</a></p>
+  </div>
+  <div class="card" id="stateNotOwner" style="display:none;">
+    <h1>This page is for the platform owner</h1>
+    <p id="notOwnerMessage" style="margin-bottom:0;">Your account isn't set up as the platform owner.</p>
+  </div>
+
+  <div id="page" style="display:none;">
+    <a href="owner.html" class="back-link">← Owner console</a>
+    <div class="notice" id="notice" role="status"></div>
+    <div class="error-line" id="errorLine" role="alert"></div>
+
+    <div class="card">
+      <div class="section-head">
+        <div>
+          <h1>Tool roadmap</h1>
+          <div class="hint">The public page is <a href="tool-requests.html" target="_blank" rel="noopener">tool-requests.html</a>. Anyone can see the tools and totals; people vote after signing in with a verified email.</div>
+        </div>
+      </div>
+      <div class="tiles" id="tiles"></div>
+    </div>
+
+    <div class="card">
+      <div class="section-head">
+        <h2>Tools</h2>
+        <div class="btn-row">
+          <button class="btn btn-ghost btn-small" id="starterBtn" type="button" style="display:none;">Add the starting tools</button>
+          <button class="btn btn-ghost btn-small" id="recountBtn" type="button">Recount votes</button>
+          <button class="btn btn-primary btn-small" id="addToolBtn" type="button">+ Add tool</button>
+        </div>
+      </div>
+
+      <div id="toolForm" style="display:none; margin-bottom:18px; border:1px solid var(--line); border-radius:12px; padding:16px;">
+        <h2 id="formTitle" style="margin-bottom:12px;">Add a tool</h2>
+        <div class="grid-2">
+          <div>
+            <label class="field-label" for="fTitle">Name</label>
+            <input class="text-input" type="text" id="fTitle" maxlength="80" autocomplete="off">
+            <div class="field-error" id="fTitleError"></div>
+          </div>
+          <div>
+            <label class="field-label" for="fCategory">Category</label>
+            <input class="text-input" type="text" id="fCategory" maxlength="40" placeholder="e.g. Strategy" autocomplete="off">
+            <div class="field-error" id="fCategoryError"></div>
+          </div>
+        </div>
+        <label class="field-label" for="fDescription">Short description (shown to voters)</label>
+        <textarea class="text-input" id="fDescription" maxlength="240"></textarea>
+        <div class="field-error" id="fDescriptionError"></div>
+        <div class="grid-2">
+          <div>
+            <label class="field-label" for="fStatus">Status</label>
+            <select class="text-input" id="fStatus">
+              <option value="considering">Under consideration</option>
+              <option value="planned">Planned</option>
+              <option value="in_progress">In progress</option>
+              <option value="released">Released</option>
+            </select>
+            <div class="field-error" id="fStatusError"></div>
+          </div>
+          <div>
+            <label class="field-label" for="fOrder">Order (lower shows first when votes tie)</label>
+            <input class="text-input" type="number" id="fOrder" min="0" step="1" value="0">
+            <div class="field-error" id="fOrderError"></div>
+          </div>
+        </div>
+        <label class="field-label" for="fLaunchUrl">Link to the released tool (required when Released)</label>
+        <input class="text-input" type="url" id="fLaunchUrl" placeholder="https://" autocomplete="off">
+        <div class="field-error" id="fLaunchUrlError"></div>
+        <div class="field-error" id="formError"></div>
+        <div class="btn-row">
+          <button class="btn btn-primary btn-small" id="saveToolBtn" type="button">Save tool</button>
+          <button class="btn btn-ghost btn-small" id="cancelToolBtn" type="button">Cancel</button>
+        </div>
+      </div>
+
+      <div class="table-wrap" id="toolsWrap"><p class="empty">Loading…</p></div>
+    </div>
+
+    <div class="card">
+      <div class="section-head">
+        <div>
+          <h2>Suggestions waiting for review</h2>
+          <div class="hint">Nothing here is public. Approving opens the form with the idea filled in so you can tidy it before it appears.</div>
+        </div>
+      </div>
+      <div class="table-wrap" id="suggestionsWrap"><p class="empty">Loading…</p></div>
+    </div>
+
+    <div class="card">
+      <div class="section-head">
+        <div>
+          <h2>Launch emails</h2>
+          <div class="hint">People who ticked "Email me when this launches". When a tool is released, copy its list into the BCC line of one email (Gmail allows about 100 recipients a day). Only use these addresses for that launch notice.</div>
+        </div>
+        <button class="btn btn-ghost btn-small" id="csvBtn" type="button">Download all (CSV)</button>
+      </div>
+      <div class="table-wrap" id="notifyWrap"><p class="empty">Loading…</p></div>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+const firebaseConfig = {
+  apiKey: "AIzaSyAcECtS5c6WeOhKlwRK-LYFE47npbuq_eU",
+  authDomain: "product-advisory-lms.firebaseapp.com",
+  projectId: "product-advisory-lms",
+  storageBucket: "product-advisory-lms.firebasestorage.app",
+  messagingSenderId: "1081134406437",
+  appId: "1:1081134406437:web:72e28604d093219e7698cc"
+};
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
+import {
+  getFirestore, doc, getDoc, getDocs, setDoc, updateDoc, deleteDoc, collection, writeBatch, serverTimestamp
+} from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+const $ = (id) => document.getElementById(id);
+const TC = ToolCore;
+
+function el(tag, attrs, ...kids){
+  const node = document.createElement(tag);
+  Object.keys(attrs || {}).forEach(k => {
+    const v = attrs[k];
+    if (v === null || v === undefined) return;
+    if (k === 'class') node.className = v;
+    else if (k === 'text') node.textContent = v;
+    else if (k.slice(0, 2) === 'on') node.addEventListener(k.slice(2), v);
+    else node.setAttribute(k, v);
+  });
+  kids.forEach(c => {
+    if (c === null || c === undefined) return;
+    node.append(c.nodeType ? c : document.createTextNode(String(c)));
+  });
+  return node;
+}
+function showOnly(id){
+  ['stateLoading', 'stateSignedOut', 'stateNotOwner', 'page'].forEach(s => { $(s).style.display = (s === id) ? 'block' : 'none'; });
+}
+const msOf = (ts) => (ts && ts.toMillis) ? ts.toMillis() : 0;
+const fmtDate = (ms) => ms ? new Date(ms).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' }) : '—';
+const plural = (n, one, many) => n + ' ' + (n === 1 ? one : (many || one + 's'));
+
+let tools = [];
+let votes = [];          // every toolVotes document
+let suggestions = [];
+let editingId = null;    // null = adding
+let fromSuggestion = null;  // the suggestion being approved, while its form is open
+
+onAuthStateChanged(auth, async (user) => {
+  if (!user){ showOnly('stateSignedOut'); return; }
+  try {
+    const snap = await getDoc(doc(db, 'platformAdmins', user.uid));
+    if (!snap.exists()){ showOnly('stateNotOwner'); return; }
+  } catch (err){
+    $('notOwnerMessage').textContent = "We couldn't check your account. The latest security rules may not be published yet.";
+    showOnly('stateNotOwner');
+    return;
+  }
+  showOnly('page');
+  await loadAll();
+});
+
+async function loadAll(){
+  $('errorLine').textContent = '';
+  try {
+    const [tSnap, vSnap, sSnap] = await Promise.all([
+      getDocs(collection(db, 'tools')), getDocs(collection(db, 'toolVotes')), getDocs(collection(db, 'toolSuggestions'))
+    ]);
+    tools = tSnap.docs.map(d => Object.assign({ id: d.id }, d.data(), { createdAtMs: msOf(d.data().createdAt) }));
+    votes = vSnap.docs.map(d => Object.assign({ id: d.id }, d.data()));
+    suggestions = sSnap.docs.map(d => Object.assign({ uid: d.id }, d.data(), { createdAtMs: msOf(d.data().createdAt) }));
+  } catch (err){
+    console.error('Could not load the roadmap:', err);
+    $('errorLine').textContent = "We couldn't load the roadmap. The latest security rules may not be published yet.";
+  }
+  renderAll();
+}
+
+function renderAll(){
+  renderTiles();
+  renderTools();
+  renderSuggestions();
+  renderNotify();
+  const missing = TC.STARTER_TOOLS.filter(s => !tools.some(t => t.id === s.id));
+  $('starterBtn').style.display = missing.length ? 'inline-block' : 'none';
+  $('starterBtn').textContent = tools.length ? 'Add the missing starting tools (' + missing.length + ')' : 'Add the 10 starting tools';
+}
+
+function renderTiles(){
+  const voters = new Set(votes.map(v => v.uid)).size;
+  const asked = votes.filter(v => v.notify).length;
+  const pending = suggestions.filter(s => s.status === 'pending').length;
+  const tiles = $('tiles');
+  tiles.innerHTML = '';
+  [[tools.length, 'Tools'], [votes.length, 'Votes cast'], [voters, 'People who voted'], [asked, 'Asked for a launch email'], [pending, 'Suggestions to review']]
+    .forEach(([n, l]) => tiles.appendChild(el('div', { class: 'tile' }, el('div', { class: 'num', text: String(n) }), el('div', { class: 'lbl', text: l }))));
+}
+
+/* -------------------------------------------------------------------- tools */
+function renderTools(){
+  const wrap = $('toolsWrap');
+  wrap.innerHTML = '';
+  if (!tools.length){
+    wrap.appendChild(el('p', { class: 'empty', text: 'No tools yet. Add the starting tools, or add one by hand.' }));
+    return;
+  }
+  const rows = TC.sortTools(tools).map(t => {
+    const real = votes.filter(v => v.toolId === t.id).length;
+    return el('tr', { 'data-tool': t.id },
+      el('td', null, el('div', { class: 'cell-name', text: t.title }), el('div', { class: 'cell-sub', text: (t.category || '') + (t.description ? ' · ' + t.description : '') })),
+      el('td', null, el('span', { class: 'pill s-' + t.status, text: TC.STATUS_LABELS[t.status] || t.status })),
+      el('td', { class: 'num', text: String(t.voteCount || 0) }),
+      el('td', { class: 'num', text: real === (t.voteCount || 0) ? '✓' : 'counted ' + real, title: 'Votes actually recorded for this tool' }),
+      el('td', { class: 'num', text: String(t.order || 0) }),
+      el('td', null, el('div', { class: 'btn-row' },
+        el('button', { class: 'btn btn-ghost btn-small', type: 'button', text: 'Edit', onclick: () => openForm(t) }),
+        el('button', { class: 'btn btn-danger btn-small', type: 'button', text: 'Delete', onclick: () => deleteTool(t) }))));
+  });
+  wrap.appendChild(el('table', { class: 'data' },
+    el('thead', null, el('tr', null, el('th', { text: 'Tool' }), el('th', { text: 'Status' }), el('th', { class: 'num', text: 'Votes' }), el('th', { class: 'num', text: 'Check' }), el('th', { class: 'num', text: 'Order' }), el('th', { text: '' }))),
+    el('tbody', null, ...rows)));
+}
+
+function clearFormErrors(){
+  ['fTitleError', 'fCategoryError', 'fDescriptionError', 'fStatusError', 'fOrderError', 'fLaunchUrlError', 'formError'].forEach(id => { $(id).textContent = ''; });
+}
+
+function openForm(tool, suggestion){
+  clearFormErrors();
+  editingId = tool ? tool.id : null;
+  fromSuggestion = suggestion || null;
+  $('formTitle').textContent = tool ? 'Edit ' + tool.title : (suggestion ? 'Add the suggested tool' : 'Add a tool');
+  $('fTitle').value = tool ? tool.title : (suggestion ? suggestion.text.slice(0, 80) : '');
+  $('fCategory').value = tool ? (tool.category || '') : '';
+  $('fDescription').value = tool ? (tool.description || '') : (suggestion ? suggestion.text.slice(0, 240) : '');
+  $('fStatus').value = tool ? tool.status : 'considering';
+  $('fOrder').value = tool ? (tool.order || 0) : (tools.reduce((m, t) => Math.max(m, t.order || 0), 0) + 10);
+  $('fLaunchUrl').value = tool ? (tool.launchUrl || '') : '';
+  $('toolForm').style.display = 'block';
+  $('toolForm').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  $('fTitle').focus();
+}
+$('addToolBtn').addEventListener('click', () => openForm(null));
+$('cancelToolBtn').addEventListener('click', () => { $('toolForm').style.display = 'none'; editingId = null; fromSuggestion = null; });
+
+$('saveToolBtn').addEventListener('click', async () => {
+  clearFormErrors();
+  $('notice').textContent = '';
+  const form = { title: $('fTitle').value, category: $('fCategory').value, description: $('fDescription').value, status: $('fStatus').value, order: $('fOrder').value, launchUrl: $('fLaunchUrl').value };
+  const check = TC.validateTool(form);
+  if (!check.ok){
+    Object.keys(check.errors).forEach(k => {
+      const id = 'f' + k.charAt(0).toUpperCase() + k.slice(1) + 'Error';
+      if ($(id)) $(id).textContent = check.errors[k];
+    });
+    return;
+  }
+  const fields = TC.buildToolFields(form);
+  $('saveToolBtn').disabled = true;
+  try {
+    if (editingId){
+      await updateDoc(doc(db, 'tools', editingId), Object.assign({ launchUrl: '' }, fields, { updatedAt: serverTimestamp() }));
+      $('notice').textContent = 'Saved ' + fields.title + '.';
+    } else {
+      let id = TC.slugify(fields.title), n = 2;
+      while (tools.some(t => t.id === id)) id = TC.slugify(fields.title) + '-' + (n++);
+      const batch = writeBatch(db);
+      batch.set(doc(db, 'tools', id), Object.assign({}, fields, { voteCount: 0, createdAt: serverTimestamp(), updatedAt: serverTimestamp() }));
+      if (fromSuggestion) batch.update(doc(db, 'toolSuggestions', fromSuggestion.uid), { status: 'approved', reviewedAt: serverTimestamp() });
+      await batch.commit();
+      $('notice').textContent = 'Added ' + fields.title + (fromSuggestion ? ' and marked the suggestion approved.' : '.');
+    }
+    $('toolForm').style.display = 'none';
+    editingId = null; fromSuggestion = null;
+    await loadAll();
+  } catch (err){
+    console.error('Could not save the tool:', err);
+    $('formError').textContent = err && err.code === 'permission-denied'
+      ? 'The security rules refused this. Check that the latest rules are published.'
+      : 'Something went wrong saving, please try again.';
+  } finally {
+    $('saveToolBtn').disabled = false;
+  }
+});
+
+async function deleteTool(t){
+  const real = votes.filter(v => v.toolId === t.id).length;
+  if (!window.confirm('Delete "' + t.title + '"? ' + (real ? plural(real, 'person') + ' voted for it, and those votes will stop counting. ' : '') + 'This cannot be undone.')) return;
+  $('notice').textContent = '';
+  $('errorLine').textContent = '';
+  try {
+    await deleteDoc(doc(db, 'tools', t.id));
+    $('notice').textContent = 'Deleted ' + t.title + '.';
+    await loadAll();
+  } catch (err){
+    console.error('Could not delete the tool:', err);
+    $('errorLine').textContent = 'Could not delete that tool, please try again.';
+  }
+}
+
+$('starterBtn').addEventListener('click', async () => {
+  $('notice').textContent = '';
+  $('errorLine').textContent = '';
+  const missing = TC.STARTER_TOOLS.filter(s => !tools.some(t => t.id === s.id));
+  if (!missing.length) return;
+  $('starterBtn').disabled = true;
+  try {
+    const batch = writeBatch(db);
+    missing.forEach(s => {
+      const idx = TC.STARTER_TOOLS.indexOf(s);
+      batch.set(doc(db, 'tools', s.id), { title: s.title, description: s.description, category: s.category, status: s.status, order: idx * 10, voteCount: 0, createdAt: serverTimestamp(), updatedAt: serverTimestamp() });
+    });
+    await batch.commit();
+    $('notice').textContent = 'Added ' + plural(missing.length, 'starting tool') + '. They start with zero votes.';
+    await loadAll();
+  } catch (err){
+    console.error('Could not add the starting tools:', err);
+    $('errorLine').textContent = err && err.code === 'permission-denied'
+      ? 'The security rules refused this. Check that the latest rules are published.'
+      : 'Something went wrong, please try again.';
+  } finally {
+    $('starterBtn').disabled = false;
+  }
+});
+
+/* The public vote counts are kept by the voters' own browsers (that is what keeps
+   this free), so now and then check them against the votes actually recorded. */
+$('recountBtn').addEventListener('click', async () => {
+  $('notice').textContent = '';
+  $('errorLine').textContent = '';
+  $('recountBtn').disabled = true;
+  try {
+    await loadAll();
+    const counts = TC.countVotes(votes);
+    const off = tools.filter(t => (t.voteCount || 0) !== (counts[t.id] || 0));
+    if (!off.length){
+      $('notice').textContent = 'Every count matches the votes recorded.';
+    } else {
+      const batch = writeBatch(db);
+      off.forEach(t => batch.update(doc(db, 'tools', t.id), { voteCount: counts[t.id] || 0, updatedAt: serverTimestamp() }));
+      await batch.commit();
+      $('notice').textContent = 'Corrected ' + plural(off.length, 'count') + ': ' + off.map(t => t.title).join(', ') + '.';
+      await loadAll();
+    }
+  } catch (err){
+    console.error('Could not recount:', err);
+    $('errorLine').textContent = 'Could not recount, please try again.';
+  } finally {
+    $('recountBtn').disabled = false;
+  }
+});
+
+/* -------------------------------------------------------------- suggestions */
+function renderSuggestions(){
+  const wrap = $('suggestionsWrap');
+  wrap.innerHTML = '';
+  const pending = suggestions.filter(s => s.status === 'pending').sort((a, b) => b.createdAtMs - a.createdAtMs);
+  if (!pending.length){
+    wrap.appendChild(el('p', { class: 'empty', text: 'Nothing waiting.' }));
+    return;
+  }
+  wrap.appendChild(el('table', { class: 'data' },
+    el('thead', null, el('tr', null, el('th', { text: 'Suggestion' }), el('th', { text: 'From' }), el('th', { text: 'Sent' }), el('th', { text: '' }))),
+    el('tbody', null, ...pending.map(s => el('tr', { 'data-suggestion': s.uid },
+      el('td', { text: s.text }), el('td', { text: s.email }), el('td', { text: fmtDate(s.createdAtMs) }),
+      el('td', null, el('div', { class: 'btn-row' },
+        el('button', { class: 'btn btn-primary btn-small', type: 'button', text: 'Approve…', onclick: () => openForm(null, s) }),
+        el('button', { class: 'btn btn-ghost btn-small', type: 'button', text: 'Reject', onclick: () => reject(s) }))))))));
+}
+
+async function reject(s){
+  $('notice').textContent = '';
+  $('errorLine').textContent = '';
+  try {
+    await updateDoc(doc(db, 'toolSuggestions', s.uid), { status: 'rejected', reviewedAt: serverTimestamp() });
+    $('notice').textContent = 'Rejected. It stays private.';
+    await loadAll();
+  } catch (err){
+    console.error('Could not reject:', err);
+    $('errorLine').textContent = 'Could not reject that suggestion, please try again.';
+  }
+}
+
+/* ------------------------------------------------------------ launch emails */
+function renderNotify(){
+  const wrap = $('notifyWrap');
+  wrap.innerHTML = '';
+  const rows = TC.sortTools(tools).map(t => ({ tool: t, emails: TC.notifyList(votes, t.id) })).filter(r => r.emails.length);
+  $('csvBtn').disabled = !rows.length;
+  if (!rows.length){
+    wrap.appendChild(el('p', { class: 'empty', text: 'Nobody has asked for a launch email yet.' }));
+    return;
+  }
+  wrap.appendChild(el('table', { class: 'data' },
+    el('thead', null, el('tr', null, el('th', { text: 'Tool' }), el('th', { class: 'num', text: 'People' }), el('th', { text: '' }))),
+    el('tbody', null, ...rows.map(r => el('tr', { 'data-notify': r.tool.id },
+      el('td', null, el('div', { class: 'cell-name', text: r.tool.title }), el('span', { class: 'pill s-' + r.tool.status, text: TC.STATUS_LABELS[r.tool.status] })),
+      el('td', { class: 'num', text: String(r.emails.length) }),
+      el('td', null, el('button', { class: 'btn btn-ghost btn-small', type: 'button', text: 'Copy emails', onclick: () => copyEmails(r) })))))));
+}
+
+async function copyEmails(r){
+  const text = r.emails.join(', ');
+  try {
+    // some browsers leave the clipboard request waiting; give up on it after a second and use the older way
+    await Promise.race([navigator.clipboard.writeText(text), new Promise((_, reject) => setTimeout(() => reject(new Error('clipboard timeout')), 1000))]);
+  } catch (e){
+    const ta = el('textarea', { style: 'position:fixed;left:-9999px;' });
+    ta.value = text; document.body.appendChild(ta); ta.select();
+    try { document.execCommand('copy'); } catch (e2){ /* nothing more to try */ }
+    ta.remove();
+  }
+  $('notice').textContent = 'Copied ' + plural(r.emails.length, 'address', 'addresses') + ' for ' + r.tool.title + '. Paste them into the BCC line.';
+}
+
+$('csvBtn').addEventListener('click', () => {
+  const blob = new Blob(['﻿' + TC.buildNotifyCsv(TC.sortTools(tools), votes)], { type: 'text/csv;charset=utf-8' });
+  const a = el('a', { href: URL.createObjectURL(blob), download: 'launch-email-list.csv' });
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+});
+</script>
+</body>
+</html>

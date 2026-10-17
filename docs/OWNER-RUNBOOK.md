@@ -119,6 +119,7 @@ Do this once before real customers, and any time you want a fresh start.
 **Test companies and records:** Firebase console → **Firestore Database → Data**.
 - Delete the company document under **orgs**. Deleting it does *not* delete its sub-collections, so also open the company, and for **members** and **audit** use the three dots → **Delete collection**.
 - Delete the matching documents under **orgFocus**, **orgPrivate**, and any rows under **invites** and **memberships** that belong to the test company.
+- Test votes: open **toolVotes** and delete the test accounts' documents (their names start with the test account's id), then in Owner Console → Tool roadmap click **Recount votes** so the public totals match. Delete test entries in **toolSuggestions** the same way.
 - A person's `progress` document is theirs; delete it only for test accounts you are removing.
 
 The Google Sheet: delete test rows from the **Responses** and **Progress** tabs.
@@ -138,7 +139,32 @@ The Google Sheet: delete test rows from the **Responses** and **Progress** tabs.
 
 ---
 
-## 11. Costs and limits (free plan)
+## 11. The Tool Roadmap (people vote for the next toolkit)
+
+**Public page:** `https://assessment.productadvisory.co/tool-requests.html`. This is the link for the "Request a tool" button on the toolkits page (set it to open in a new tab).
+
+**First time:** Owner Console → **Tool roadmap** → **Add the 10 starting tools**. They start with zero votes.
+
+**Day to day**
+- **Suggestions:** the page lists what people sent. **Approve…** opens the form with the idea filled in. Tidy the name and description and click **Save tool**. **Reject** keeps it private. Nothing is public until you approve it.
+- **Change a tool's status:** click **Edit**. Statuses: Under consideration, Planned, In progress, Released. A Released tool needs the link to it, and stops taking votes.
+- **If the numbers look wrong:** click **Recount votes**. It compares each tool's public total with the votes actually recorded and fixes any difference. (The "Check" column shows ✓ when they match.)
+
+**When you release a tool**
+1. Edit the tool: set it to **Released** and paste the link. Click **Save tool**.
+2. In **Launch emails**, click **Copy emails** beside that tool.
+3. Open a new email in Gmail. Put yourself in **To** and paste the addresses into **BCC** (never in To or Cc). Gmail allows about 100 recipients a day, so send in batches if the list is long.
+4. Keep the message short: say you are writing because they asked to hear when it launched, link the tool, and thank them. Do not use the addresses for anything else.
+
+**Rules of thumb**
+- Start with about 10 tools. Add the best suggestions over time.
+- Never add votes yourself. Counts start at zero and stay honest.
+- Totals are a signal of interest, not a poll. Someone could make extra accounts.
+- People can only vote after verifying their email. If someone says voting does not work, ask them to click the link in the verification email and then press **I've verified my email** on the page.
+
+---
+
+## 12. Costs and limits (free plan)
 
 You are on the Firebase free plan (Spark). It is enough for a pilot. You will
 want the paid plan (Blaze) when you have paying customers: it removes the daily
@@ -147,7 +173,7 @@ grace period). Ask Claude to plan that move when you are ready.
 
 ---
 
-## 12. Checking the system still works (for whoever maintains it)
+## 13. Checking the system still works (for whoever maintains it)
 
 Claude keeps automated tests in `tests/`. `tests/README.md` says how to run
 them: the security-rule tests, the report-logic tests, and the page tests.

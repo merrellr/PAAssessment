@@ -141,14 +141,14 @@ const JoinLogic = (function(){
 
     <label class="check-row" id="termsRow" style="display:none;">
       <input type="checkbox" id="agreeTerms">
-      <span>I agree to the <a href="https://www.productadvisory.co/terms-of-use" target="_blank" rel="noopener">Terms of Use</a>, which includes our Privacy Policy.</span>
+      <span>By creating an account you agree to the <a href="https://www.productadvisory.co/terms-of-use" target="_blank" rel="noopener">Terms of Use</a> and <a href="https://www.productadvisory.co/privacy-policy" target="_blank" rel="noopener">Privacy Policy</a>.</span>
     </label>
 
     <div class="field-error" id="authError"></div>
     <button class="btn btn-primary" id="authSubmit" type="button">Log in</button>
     <div class="divider">or</div>
     <button class="btn btn-ghost" id="googleBtn" type="button" style="margin-top:0;">Continue with Google</button>
-    <p class="small">By continuing with Google, you agree to our <a href="https://www.productadvisory.co/terms-of-use" target="_blank" rel="noopener">Terms of Use</a>.</p>
+    <p class="small">By continuing with Google, you agree to the <a href="https://www.productadvisory.co/terms-of-use" target="_blank" rel="noopener">Terms of Use</a> and <a href="https://www.productadvisory.co/privacy-policy" target="_blank" rel="noopener">Privacy Policy</a>.</p>
   </div>
 
   <!-- Something is wrong with the invite -->
@@ -395,7 +395,7 @@ $('authSubmit').addEventListener('click', async () => {
     if (!name){ errorEl.textContent = 'Enter your name so we can label your results.'; return; }
     if (password.length < 8){ errorEl.textContent = 'Password should be at least 8 characters.'; return; }
     if (password !== $('authPasswordConfirm').value){ errorEl.textContent = 'Passwords do not match.'; return; }
-    if (!$('agreeTerms').checked){ errorEl.textContent = 'Please agree to the Terms of Use to create an account.'; return; }
+    if (!$('agreeTerms').checked){ errorEl.textContent = 'Please agree to the Terms of Use and Privacy Policy to create an account.'; return; }
   }
 
   $('authSubmit').disabled = true;

@@ -62,6 +62,11 @@ async function settle(){ for (let i = 0; i < 80 && $('stateLoading').style.displ
       t('it starts on Log in', $('tabLogin').classList.contains('active') && $('authName').style.display === 'none' && $('termsRow').style.display === 'none');
       $('tabSignup').click();
       t('Create account reveals name, confirm password and the terms box', $('authName').style.display === 'block' && $('authPasswordConfirm').style.display === 'block' && $('termsRow').style.display === 'flex' && $('authSubmit').textContent === 'Create account');
+      {
+        const links = Array.prototype.map.call(document.querySelectorAll('#termsRow a'), a => a.textContent + '=' + a.getAttribute('href'));
+        t('the sign-up notice says "By creating an account you agree to the Terms of Use and Privacy Policy", both linked', /By creating an account you agree to the Terms of Use and Privacy Policy/.test($('termsRow').textContent.replace(/\s+/g, ' ')) && links.join() === 'Terms of Use=https://www.productadvisory.co/terms-of-use,Privacy Policy=https://www.productadvisory.co/privacy-policy', links.join());
+        const g = document.querySelector('#stateAuth .small'); t('the Google button has the same notice, both linked', !!g && /By continuing with Google, you agree to the Terms of Use and Privacy Policy/.test(g.textContent.replace(/\s+/g, ' ')) && g.querySelectorAll('a').length === 2);
+      }
       $('authEmail').value = 'x@y.com'; $('authPassword').value = 'longenough1'; $('authSubmit').click(); await sleep(60);
       t('creating an account without a name is refused', /name/i.test(txt('authError')));
       $('authName').value = 'Pat'; $('authPasswordConfirm').value = 'different'; $('authSubmit').click(); await sleep(60);

@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tool Roadmap — Product Advisory Learning</title>
+<meta name="description" content="Vote for the next product management toolkit we build, see how others voted, and suggest your own.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy: #1A4584; --navy-deep: #12305e; --gray: #9AA3AD; --cyan: #35C2E8;
+    --bg: #F5F8FB; --surface: #FFFFFF; --ink: #16213E; --ink-soft: #4B5768; --line: #E3E9F0;
+    --warn: #C0622A; --ok: #2E8B57;
+  }
+  *{ box-sizing: border-box; }
+  body{ margin:0; background: var(--bg); font-family:'IBM Plex Sans', system-ui, sans-serif; color: var(--ink); }
+  .wrap{ max-width: 720px; margin: 0 auto; padding: 24px 16px 56px; }
+  .brand-header{ display:flex; align-items:center; gap:9px; padding: 0 0 14px; text-decoration:none; }
+  .brand-word{ font-family:'Space Grotesk', sans-serif; font-weight:700; font-size: 19px; line-height:1.3; color: var(--navy-deep); }
+  .brand-accent-bar{ height: 3px; background: linear-gradient(90deg, var(--navy) 0%, var(--cyan) 100%); border-radius: 2px; margin-bottom: 24px; }
+  .card{ background: var(--surface); border-radius: 16px; border: 1px solid var(--line); padding: 24px; box-shadow: 0 1px 2px rgba(22,33,62,0.04), 0 12px 32px rgba(22,33,62,0.06); margin-bottom: 20px; }
+  .eyebrow{ display:block; font-size:11px; font-weight:600; letter-spacing:0.06em; text-transform:uppercase; color: var(--cyan); margin-bottom: 6px; }
+  h1{ font-family:'Space Grotesk', sans-serif; font-size: 24px; margin: 0 0 8px; color: var(--navy-deep); line-height: 1.2; }
+  h2{ font-family:'Space Grotesk', sans-serif; font-size: 16px; margin: 0 0 6px; color: var(--navy-deep); }
+  p{ line-height:1.55; color: var(--ink-soft); font-size: 14px; margin: 0 0 10px; }
+  a{ color: var(--navy); }
+  .small{ font-size: 12.5px; color: var(--gray); }
+
+  .status-bar{ display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap; font-size: 13px; color: var(--ink-soft); margin-bottom: 16px; }
+  .votes-left{ font-family:'Space Grotesk', sans-serif; font-weight:600; color: var(--navy); }
+  .linklike{ background:none; border:none; padding:0; font:inherit; color: var(--navy); text-decoration: underline; cursor:pointer; }
+
+  .tabs{ display:flex; border-bottom: 1.5px solid var(--line); margin: 14px 0 16px; }
+  .tab{ flex:1; text-align:center; padding: 9px 0; font-family:'Space Grotesk', sans-serif; font-weight:600; font-size:14px; color: var(--gray); cursor:pointer; border:none; background:none; border-bottom: 2.5px solid transparent; }
+  .tab.active{ color: var(--navy); border-bottom-color: var(--navy); }
+  .text-input{ width:100%; padding: 12px 14px; margin-bottom: 12px; border: 1.5px solid var(--line); border-radius: 9px; font-family:'IBM Plex Sans', sans-serif; font-size: 14.5px; background:#fff; color: var(--ink); }
+  textarea.text-input{ resize: vertical; min-height: 84px; line-height: 1.5; }
+  .text-input:focus{ outline:none; border-color: var(--cyan); }
+  .field-error{ font-size: 12.5px; color: var(--warn); margin: -4px 0 12px 2px; min-height: 1px; }
+  .notice{ font-size: 13px; color: var(--ok); margin: 0 0 10px; min-height: 1px; }
+  .check-row{ display:flex; align-items:flex-start; gap:8px; font-size:13px; color: var(--ink-soft); margin: 10px 0 14px; cursor:pointer; line-height: 1.5; }
+  .check-row input{ margin-top: 3px; }
+  .divider{ text-align:center; font-size:12.5px; color: var(--gray); margin: 14px 0; }
+
+  button.btn{ font-family:'Space Grotesk', sans-serif; font-weight:600; font-size:14px; border-radius: 8px; padding: 11px 18px; border: none; cursor:pointer; }
+  button.btn.block{ width:100%; }
+  button.btn.btn-primary{ background: linear-gradient(90deg, var(--navy) 0%, var(--navy-deep) 100%); color:#fff; }
+  button.btn.btn-primary:hover{ opacity:0.92; }
+  button.btn.btn-ghost{ background:#fff; color: var(--ink); border: 1.5px solid var(--line); }
+  button.btn.btn-ghost:hover{ border-color: var(--cyan); }
+  button.btn.btn-small{ padding: 8px 14px; font-size: 13px; }
+  button.btn:disabled{ opacity:0.55; cursor: default; }
+  button.btn:focus-visible, .text-input:focus-visible, .tab:focus-visible{ outline: 2px solid var(--cyan); outline-offset: 2px; }
+  a.btn-link{ display:inline-block; text-align:center; font-family:'Space Grotesk', sans-serif; font-weight:600; font-size:14px; border-radius:8px; padding:11px 18px; text-decoration:none; background: linear-gradient(90deg, var(--navy) 0%, var(--navy-deep) 100%); color:#fff; }
+
+  .banner{ border:1px solid #E8D9A6; background:#FFF9E6; color:#6E5410; border-radius: 12px; padding: 14px 16px; font-size: 13px; line-height: 1.5; margin-bottom: 20px; }
+  .banner p{ color: inherit; font-size: 13px; }
+  .banner .row{ display:flex; gap:10px; flex-wrap:wrap; margin-top: 8px; }
+  .cta{ border:1px solid #BFE6F2; background:#F2FAFD; border-radius: 12px; padding: 16px 18px; margin-bottom: 20px; }
+  .cta h2{ margin-bottom: 4px; }
+
+  .tool{ background: var(--surface); border:1px solid var(--line); border-radius: 14px; padding: 18px 20px; margin-bottom: 12px; }
+  .tool.voted{ border-color: var(--cyan); box-shadow: 0 0 0 1px var(--cyan) inset; }
+  .tool.released{ background:#F8FBF9; }
+  .tool-top{ display:flex; justify-content:space-between; gap:14px; align-items:flex-start; }
+  .tool-title{ font-family:'Space Grotesk', sans-serif; font-weight:600; font-size: 16px; color: var(--navy-deep); margin: 0 0 4px; }
+  .tool-meta{ display:flex; gap:6px; flex-wrap:wrap; margin-bottom: 8px; }
+  .pill{ display:inline-block; font-size: 11.5px; font-weight:600; padding: 2px 9px; border-radius: 20px; background:#EEF3FA; color: var(--navy); white-space: nowrap; }
+  .pill.s-planned{ background:#E1F5FB; color:#12708F; }
+  .pill.s-in_progress{ background:#FFF4D6; color:#8A6410; }
+  .pill.s-released{ background:#E4F3EA; color: var(--ok); }
+  .pill.s-considering{ background:#F0F2F5; color: var(--ink-soft); }
+  .tool-desc{ margin: 0; font-size: 13.5px; }
+  .count{ text-align:right; min-width: 74px; }
+  .count .num{ font-family:'Space Grotesk', sans-serif; font-weight:700; font-size: 26px; line-height:1; color: var(--navy-deep); font-variant-numeric: tabular-nums; }
+  .count .lbl{ font-size: 11.5px; color: var(--gray); }
+  .bar{ height: 6px; border-radius: 3px; background:#EEF2F7; overflow:hidden; margin: 12px 0 12px; }
+  .bar span{ display:block; height:100%; background: linear-gradient(90deg, var(--navy), var(--cyan)); border-radius: 3px; }
+  .tool-actions{ display:flex; gap:12px; align-items:center; flex-wrap:wrap; }
+  .tool-actions .check-row{ margin: 0; font-size: 12.5px; }
+  .tool-note{ font-size: 12.5px; color: var(--gray); }
+  .empty{ font-size: 14px; color: var(--gray); text-align:center; padding: 26px 0; }
+  @media (max-width: 480px){ .tool-top{ flex-direction: column; } .count{ text-align:left; } }
+</style>
+<script src="tool-core.js"></script>
+</head>
+<body>
+<div class="wrap">
+  <a href="https://www.productadvisory.co/toolkits" class="brand-header">
+    <svg width="28" height="28" viewBox="0 0 40 40" aria-hidden="true">
+      <polygon points="20,3 35,11.5 35,28.5 20,37 5,28.5 5,11.5" fill="#1A4584"/>
+      <polygon points="20,10 29,15 29,25 20,30 11,25 11,15" fill="none" stroke="#35C2E8" stroke-width="1.5"/>
+    </svg>
+    <div>
+      <div style="font-family:'IBM Plex Sans', sans-serif; font-weight:600; font-size:10.5px; letter-spacing:0.06em; color:var(--gray); line-height:1;">PRODUCT ADVISORY</div>
+      <div class="brand-word">Tool Roadmap</div>
+    </div>
+  </a>
+  <div class="brand-accent-bar"></div>
+
+  <div class="card">
+    <span class="eyebrow">Help us choose</span>
+    <h1>Which toolkit should we build next?</h1>
+    <p>Back the tools you would actually use. You can vote for up to <strong>3 tools</strong>, one vote each, and change your mind any time. The tool with the most votes gets built first. Everyone can see the totals.</p>
+    <div class="status-bar" id="statusBar" style="display:none;">
+      <span id="signedInAs"></span>
+      <span><span class="votes-left" id="votesLeft"></span> &nbsp;·&nbsp; <button class="linklike" id="signOutBtn" type="button">Sign out</button></span>
+    </div>
+  </div>
+
+  <!-- Sign in or create an account (shown when signed out) -->
+  <div class="card" id="authCard" style="display:none;">
+    <h2>Sign in to vote</h2>
+    <p>One vote per person, so we ask you to sign in. You need an account anyway to take the Product Learning Assessment. It's free.</p>
+    <div class="tabs">
+      <button class="tab active" id="tabLogin" type="button">Log in</button>
+      <button class="tab" id="tabSignup" type="button">Create account</button>
+    </div>
+    <input class="text-input" type="text" id="authName" placeholder="Full name" autocomplete="name" style="display:none;">
+    <input class="text-input" type="email" id="authEmail" placeholder="Email address" autocomplete="email">
+    <input class="text-input" type="password" id="authPassword" placeholder="Password" autocomplete="current-password">
+    <input class="text-input" type="password" id="authPasswordConfirm" placeholder="Confirm password" autocomplete="new-password" style="display:none;">
+    <label class="check-row" id="termsRow" style="display:none;">
+      <input type="checkbox" id="agreeTerms">
+      <span>By creating an account you agree to the <a href="https://www.productadvisory.co/terms-of-use" target="_blank" rel="noopener">Terms of Use</a> and <a href="https://www.productadvisory.co/privacy-policy" target="_blank" rel="noopener">Privacy Policy</a>.</span>
+    </label>
+    <div class="field-error" id="authError"></div>
+    <button class="btn btn-primary block" id="authSubmit" type="button">Log in</button>
+    <div class="divider">or</div>
+    <button class="btn btn-ghost block" id="googleBtn" type="button">Continue with Google</button>
+    <p class="small" style="margin-top:12px;">By continuing with Google, you agree to the <a href="https://www.productadvisory.co/terms-of-use" target="_blank" rel="noopener">Terms of Use</a> and <a href="https://www.productadvisory.co/privacy-policy" target="_blank" rel="noopener">Privacy Policy</a>. We use your email address to make sure each person votes once and, only if you tick the box on a tool, to tell you when it launches.</p>
+  </div>
+
+  <!-- Verify email (shown when signed in but not verified) -->
+  <div class="banner" id="verifyBanner" style="display:none;">
+    <p><strong>Please verify your email to vote.</strong> We sent a link to <span id="verifyEmail"></span>. Open it, then come back and press the button below. (Signing in with Google skips this step.)</p>
+    <div class="row">
+      <button class="btn btn-primary btn-small" id="verifiedBtn" type="button">I've verified my email</button>
+      <button class="btn btn-ghost btn-small" id="resendBtn" type="button">Send the link again</button>
+    </div>
+    <div class="field-error" id="verifyMsg" style="margin:8px 0 0;"></div>
+  </div>
+
+  <div class="notice" id="notice" role="status"></div>
+  <div class="field-error" id="errorLine" role="alert" style="margin:0 0 12px;"></div>
+
+  <div id="toolList"><p class="empty">Loading the roadmap…</p></div>
+
+  <!-- Suggest a tool -->
+  <div class="card" id="suggestCard" style="display:none;">
+    <h2>Suggest a tool</h2>
+    <p>Not on the list? Tell us what you would use. We read every suggestion and add the good ones to the roadmap so others can vote on them.</p>
+    <div id="suggestStatus" class="small" style="margin-bottom:8px;"></div>
+    <textarea class="text-input" id="suggestText" maxlength="300" placeholder="e.g. A pricing and packaging worksheet for B2B products"></textarea>
+    <div class="field-error" id="suggestError"></div>
+    <button class="btn btn-primary btn-small" id="suggestBtn" type="button">Send suggestion</button>
+  </div>
+
+  <!-- What next (shown when signed in) -->
+  <div class="cta" id="nextCard" style="display:none;">
+    <h2 id="nextTitle">Now that you have an account, take the assessment</h2>
+    <p id="nextText">The Product Learning Assessment shows where you are strongest across seven product management skill areas, and gives you a course plan to match. It takes about 15 minutes.</p>
+    <a class="btn-link" id="nextLink" href="index.html">Take the assessment</a>
+  </div>
+
+  <p class="small" style="text-align:center;">Totals reflect the people who chose to vote, so treat them as a guide to what's wanted, not a poll.</p>
+</div>
+
+<script type="module">
+const firebaseConfig = {
+  apiKey: "AIzaSyAcECtS5c6WeOhKlwRK-LYFE47npbuq_eU",
+  authDomain: "product-advisory-lms.firebaseapp.com",
+  projectId: "product-advisory-lms",
+  storageBucket: "product-advisory-lms.firebasestorage.app",
+  messagingSenderId: "1081134406437",
+  appId: "1:1081134406437:web:72e28604d093219e7698cc"
+};
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
+import {
+  getAuth, onAuthStateChanged, signOut, createUserWithEmailAndPassword, signInWithEmailAndPassword,
+  GoogleAuthProvider, signInWithPopup, getAdditionalUserInfo, updateProfile, sendEmailVerification
+} from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
+import {
+  getFirestore, doc, getDoc, getDocs, setDoc, updateDoc, collection, query, where, writeBatch, increment, serverTimestamp
+} from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+const $ = (id) => document.getElementById(id);
+const TC = ToolCore;
+
+function el(tag, attrs, ...kids){
+  const node = document.createElement(tag);
+  Object.keys(attrs || {}).forEach(k => {
+    const v = attrs[k];
+    if (v === null || v === undefined) return;
+    if (k === 'class') node.className = v;
+    else if (k === 'text') node.textContent = v;
+    else if (k.slice(0, 2) === 'on') node.addEventListener(k.slice(2), v);
+    else node.setAttribute(k, v);
+  });
+  kids.forEach(c => {
+    if (c === null || c === undefined) return;
+    node.append(c.nodeType ? c : document.createTextNode(String(c)));
+  });
+  return node;
+}
+
+let currentUser = null;
+let tools = [];                 // { id, title, ..., voteCount }
+let myVotes = {};               // toolId -> { notify }
+let loadError = false;
+let signUpMode = false;
+let busy = {};                  // toolId -> true while a vote is being saved
+
+const verified = () => !!(currentUser && currentUser.emailVerified);
+const myVoteIds = () => Object.keys(myVotes);
+const plural = (n, one, many) => n + ' ' + (n === 1 ? one : (many || one + 's'));
+
+/* ---------------------------------------------------------------- loading */
+async function loadTools(){
+  try {
+    const snap = await getDocs(collection(db, 'tools'));
+    tools = snap.docs.map(d => Object.assign({ id: d.id }, d.data()));
+    loadError = false;
+  } catch (err){
+    console.error('Could not load the tools:', err);
+    loadError = true;
+  }
+}
+
+async function loadMyVotes(){
+  myVotes = {};
+  if (!currentUser) return;
+  try {
+    const snap = await getDocs(query(collection(db, 'toolVotes'), where('uid', '==', currentUser.uid)));
+    snap.docs.forEach(d => { const v = d.data(); myVotes[v.toolId] = { notify: !!v.notify }; });
+  } catch (err){
+    console.error('Could not load your votes:', err);
+  }
+}
+
+onAuthStateChanged(auth, async (user) => {
+  currentUser = user;
+  $('notice').textContent = '';
+  $('errorLine').textContent = '';
+  await Promise.all([loadTools(), loadMyVotes()]);
+  render();
+  if (user) { loadSuggestion(); loadNextStep(); }
+});
+
+/* -------------------------------------------------------------- the page */
+function render(){
+  const signedIn = !!currentUser;
+  $('authCard').style.display = signedIn ? 'none' : 'block';
+  $('statusBar').style.display = signedIn ? 'flex' : 'none';
+  $('suggestCard').style.display = signedIn && verified() ? 'block' : 'none';
+  $('nextCard').style.display = signedIn ? $('nextCard').style.display : 'none';
+  $('verifyBanner').style.display = signedIn && !verified() ? 'block' : 'none';
+  if (signedIn){
+    $('signedInAs').textContent = 'Signed in as ' + (currentUser.email || 'your account');
+    $('verifyEmail').textContent = currentUser.email || 'your email address';
+    const left = TC.votesLeft(myVoteIds());
+    $('votesLeft').textContent = left === 0 ? 'All 3 votes used' : plural(left, 'vote') + ' left';
+  }
+  renderTools();
+}
+
+function renderTools(){
+  const wrap = $('toolList');
+  wrap.innerHTML = '';
+  if (loadError){
+    wrap.appendChild(el('p', { class: 'empty', text: "We couldn't load the roadmap just now. Please refresh the page in a moment." }));
+    return;
+  }
+  if (!tools.length){
+    wrap.appendChild(el('p', { class: 'empty', text: 'The first tools are being added. Check back soon.' }));
+    return;
+  }
+  const sorted = TC.sortTools(tools);
+  const max = Math.max.apply(null, sorted.map(t => t.voteCount || 0).concat([1]));
+  sorted.forEach(tool => wrap.appendChild(toolCard(tool, max)));
+}
+
+function toolCard(tool, max){
+  const mine = myVotes[tool.id];
+  const blocker = TC.voteBlocker(tool, myVoteIds(), verified());
+  const released = tool.status === 'released';
+  const count = tool.voteCount || 0;
+
+  const actions = el('div', { class: 'tool-actions' });
+  if (released){
+    actions.appendChild(tool.launchUrl
+      ? el('a', { class: 'btn-link', href: tool.launchUrl, target: '_blank', rel: 'noopener', text: 'Open the tool' })
+      : el('span', { class: 'tool-note', text: 'Released.' }));
+    if (mine) actions.appendChild(el('span', { class: 'tool-note', text: 'You voted for this one. Thank you!' }));
+  } else if (!currentUser){
+    actions.appendChild(el('button', { class: 'btn btn-primary btn-small', type: 'button', text: 'Sign in to vote',
+      onclick: () => { $('authCard').scrollIntoView({ behavior: 'smooth', block: 'start' }); $('authEmail').focus(); } }));
+  } else if (mine){
+    actions.appendChild(el('button', { class: 'btn btn-ghost btn-small', type: 'button', text: '✓ Voted · Remove my vote', disabled: busy[tool.id] ? 'disabled' : null,
+      onclick: () => withdraw(tool) }));
+    const box = el('input', { type: 'checkbox', 'aria-label': 'Email me when ' + tool.title + ' launches' });
+    box.checked = !!mine.notify;
+    box.addEventListener('change', () => setNotify(tool, box.checked));
+    actions.appendChild(el('label', { class: 'check-row' }, box, el('span', { text: 'Email me when this launches' })));
+  } else if (blocker === 'verify'){
+    actions.appendChild(el('span', { class: 'tool-note', text: 'Verify your email to vote.' }));
+  } else if (blocker === 'full'){
+    actions.appendChild(el('span', { class: 'tool-note', text: 'You have used all 3 votes. Remove one to vote here.' }));
+  } else if (blocker === 'closed'){
+    actions.appendChild(el('span', { class: 'tool-note', text: 'Voting is closed for this tool.' }));
+  } else {
+    actions.appendChild(el('button', { class: 'btn btn-primary btn-small', type: 'button', text: 'Vote for this', disabled: busy[tool.id] ? 'disabled' : null,
+      onclick: () => vote(tool) }));
+  }
+
+  return el('div', { class: 'tool' + (mine ? ' voted' : '') + (released ? ' released' : ''), 'data-tool': tool.id },
+    el('div', { class: 'tool-top' },
+      el('div', null,
+        el('h2', { class: 'tool-title', text: tool.title }),
+        el('div', { class: 'tool-meta' },
+          el('span', { class: 'pill s-' + tool.status, text: TC.STATUS_LABELS[tool.status] || tool.status }),
+          tool.category ? el('span', { class: 'pill', text: tool.category }) : null),
+        el('p', { class: 'tool-desc', text: tool.description || '' })),
+      el('div', { class: 'count' }, el('div', { class: 'num', text: String(count) }), el('div', { class: 'lbl', text: count === 1 ? 'vote' : 'votes' }))),
+    el('div', { class: 'bar', role: 'img', 'aria-label': plural(count, 'vote') }, el('span', { style: 'width:' + (count / max * 100) + '%;' })),
+    actions);
+}
+
+function showError(err, fallback){
+  console.error(err);
+  $('errorLine').textContent = err && err.code === 'permission-denied'
+    ? "That didn't go through. Check that your email is verified and that you haven't used all 3 votes, then try again."
+    : fallback;
+}
+
+/* ---------------------------------------------------------------- voting */
+async function vote(tool){
+  $('notice').textContent = '';
+  $('errorLine').textContent = '';
+  const blocker = TC.voteBlocker(tool, myVoteIds(), verified());
+  if (blocker){ $('errorLine').textContent = { verify: 'Please verify your email first.', voted: 'You already voted for this one.', closed: 'Voting is closed for this tool.', full: 'You have used all 3 votes.' }[blocker]; return; }
+  busy[tool.id] = true; renderTools();
+  try {
+    const batch = writeBatch(db);
+    batch.set(doc(db, 'toolVotes', TC.voteId(currentUser.uid, tool.id)),
+      Object.assign(TC.buildVote(currentUser, tool.id, false), { createdAt: serverTimestamp() }));
+    batch.update(doc(db, 'tools', tool.id), { voteCount: increment(1) });
+    await batch.commit();
+    myVotes[tool.id] = { notify: false };
+    tool.voteCount = (tool.voteCount || 0) + 1;
+    $('notice').textContent = 'Thanks! Your vote for ' + tool.title + ' is in. Tick the box if you want an email when it launches.';
+  } catch (err){
+    showError(err, 'Something went wrong saving your vote. Please try again.');
+  } finally {
+    delete busy[tool.id];
+    render();
+  }
+}
+
+async function withdraw(tool){
+  $('notice').textContent = '';
+  $('errorLine').textContent = '';
+  busy[tool.id] = true; renderTools();
+  try {
+    const batch = writeBatch(db);
+    batch.delete(doc(db, 'toolVotes', TC.voteId(currentUser.uid, tool.id)));
+    batch.update(doc(db, 'tools', tool.id), { voteCount: increment(-1) });
+    await batch.commit();
+    delete myVotes[tool.id];
+    tool.voteCount = Math.max(0, (tool.voteCount || 0) - 1);
+    $('notice').textContent = 'Your vote for ' + tool.title + ' was removed. You can vote for something else.';
+  } catch (err){
+    showError(err, 'Something went wrong removing your vote. Please try again.');
+  } finally {
+    delete busy[tool.id];
+    render();
+  }
+}
+
+async function setNotify(tool, on){
+  $('notice').textContent = '';
+  $('errorLine').textContent = '';
+  try {
+    await updateDoc(doc(db, 'toolVotes', TC.voteId(currentUser.uid, tool.id)), { notify: !!on });
+    myVotes[tool.id].notify = !!on;
+    $('notice').textContent = on ? "We'll email you once when " + tool.title + ' launches.' : "OK, we won't email you about " + tool.title + '.';
+  } catch (err){
+    showError(err, "We couldn't save that choice. Please try again.");
+    if (myVotes[tool.id]) renderTools();
+  }
+}
+
+/* ------------------------------------------------------------ suggestions */
+async function loadSuggestion(){
+  $('suggestStatus').textContent = '';
+  if (!currentUser || !verified()) return;
+  try {
+    const snap = await getDoc(doc(db, 'toolSuggestions', currentUser.uid));
+    if (snap.exists()){
+      const s = snap.data();
+      const word = s.status === 'approved' ? 'added to the roadmap. Thank you!' : s.status === 'rejected' ? 'not added this time. Thank you for the idea, and feel free to send another.' : 'waiting for review.';
+      $('suggestStatus').textContent = 'Your last suggestion, "' + s.text + '", is ' + word;
+    }
+  } catch (err){ /* nothing to show */ }
+}
+
+$('suggestBtn').addEventListener('click', async () => {
+  $('suggestError').textContent = '';
+  $('notice').textContent = '';
+  const check = TC.validateSuggestion($('suggestText').value);
+  if (!check.ok){ $('suggestError').textContent = check.error; return; }
+  $('suggestBtn').disabled = true;
+  try {
+    await setDoc(doc(db, 'toolSuggestions', currentUser.uid), {
+      uid: currentUser.uid, email: String(currentUser.email || '').toLowerCase(), text: check.text, status: 'pending', createdAt: serverTimestamp()
+    });
+    $('suggestText').value = '';
+    $('suggestStatus').textContent = 'Thank you! Your suggestion, "' + check.text + '", is waiting for review.';
+    $('notice').textContent = 'Suggestion sent.';
+  } catch (err){
+    $('suggestError').textContent = err && err.code === 'permission-denied'
+      ? 'That was not accepted. Check that your email is verified, then try again.'
+      : 'Something went wrong. Please try again.';
+  } finally {
+    $('suggestBtn').disabled = false;
+  }
+});
+
+/* ------------------------------------------------------ what happens next */
+async function loadNextStep(){
+  $('nextCard').style.display = 'none';
+  if (!currentUser) return;
+  try {
+    const snap = await getDoc(doc(db, 'progress', currentUser.uid));
+    const p = snap.exists() ? snap.data() : {};
+    if (p.assessmentResult){
+      $('nextTitle').textContent = 'Keep learning';
+      $('nextText').textContent = 'Your assessment results and course plan are waiting on your dashboard.';
+      $('nextLink').textContent = 'Go to my dashboard';
+      $('nextLink').setAttribute('href', 'lms-dashboard.html');
+    } else {
+      $('nextTitle').textContent = 'Now that you have an account, take the assessment';
+      $('nextText').textContent = 'The Product Learning Assessment shows where you are strongest across seven product management skill areas, and gives you a course plan to match. It takes about 15 minutes.';
+      $('nextLink').textContent = 'Take the assessment';
+      $('nextLink').setAttribute('href', 'index.html');
+    }
+    $('nextCard').style.display = 'block';
+  } catch (err){ /* optional extra: show nothing */ }
+}
+
+/* ---------------------------------------------------- sign in / create account */
+function setMode(signUp){
+  signUpMode = signUp;
+  $('tabLogin').classList.toggle('active', !signUp);
+  $('tabSignup').classList.toggle('active', signUp);
+  $('authName').style.display = signUp ? 'block' : 'none';
+  $('authPasswordConfirm').style.display = signUp ? 'block' : 'none';
+  $('termsRow').style.display = signUp ? 'flex' : 'none';
+  $('authSubmit').textContent = signUp ? 'Create account' : 'Log in';
+  $('authPassword').setAttribute('autocomplete', signUp ? 'new-password' : 'current-password');
+  $('authError').textContent = '';
+}
+$('tabLogin').addEventListener('click', () => setMode(false));
+$('tabSignup').addEventListener('click', () => setMode(true));
+
+function friendlyAuthError(code){
+  const map = {
+    'auth/email-already-in-use': 'That email already has an account. Try logging in instead.',
+    'auth/invalid-email': 'That email address looks invalid.',
+    'auth/weak-password': 'Password should be at least 8 characters.',
+    'auth/wrong-password': 'Incorrect password.',
+    'auth/user-not-found': 'No account found with that email.',
+    'auth/invalid-credential': 'Incorrect email or password.',
+    'auth/popup-closed-by-user': ''
+  };
+  return code in map ? map[code] : 'Something went wrong. Please try again.';
+}
+
+$('authSubmit').addEventListener('click', async () => {
+  const email = $('authEmail').value.trim();
+  const password = $('authPassword').value;
+  const errorEl = $('authError');
+  errorEl.textContent = '';
+  if (!email || !password){ errorEl.textContent = 'Enter both an email and a password.'; return; }
+  let name = '';
+  if (signUpMode){
+    name = $('authName').value.trim();
+    if (!name){ errorEl.textContent = 'Enter your name.'; return; }
+    if (password.length < 8){ errorEl.textContent = 'Password should be at least 8 characters.'; return; }
+    if (password !== $('authPasswordConfirm').value){ errorEl.textContent = 'Passwords do not match.'; return; }
+    if (!$('agreeTerms').checked){ errorEl.textContent = 'Please agree to the Terms of Use and Privacy Policy to create an account.'; return; }
+  }
+  $('authSubmit').disabled = true;
+  try {
+    if (signUpMode){
+      const cred = await createUserWithEmailAndPassword(auth, email, password);
+      await updateProfile(cred.user, { displayName: name });
+      sendEmailVerification(cred.user).catch(() => {});
+      await setDoc(doc(db, 'progress', cred.user.uid), { courses: {}, agreedToTermsAt: new Date().toISOString() }, { merge: true });
+    } else {
+      await signInWithEmailAndPassword(auth, email, password);
+    }
+  } catch (err){
+    errorEl.textContent = friendlyAuthError(err.code);
+  } finally {
+    $('authSubmit').disabled = false;
+  }
+});
+
+$('googleBtn').addEventListener('click', async () => {
+  try {
+    const result = await signInWithPopup(auth, new GoogleAuthProvider());
+    if (getAdditionalUserInfo(result)?.isNewUser){
+      await setDoc(doc(db, 'progress', result.user.uid), { agreedToTermsAt: new Date().toISOString() }, { merge: true });
+    }
+  } catch (err){
+    $('authError').textContent = friendlyAuthError(err.code);
+  }
+});
+
+$('signOutBtn').addEventListener('click', () => signOut(auth));
+
+/* ---------------------------------------------------------- email verification */
+$('verifiedBtn').addEventListener('click', async () => {
+  $('verifyMsg').textContent = '';
+  try {
+    await currentUser.reload();
+    await currentUser.getIdToken(true);   // the vote rules read the verified flag from this token
+    if (currentUser.emailVerified){
+      $('notice').textContent = 'Email verified. You can vote now.';
+      render();
+      loadSuggestion();
+    } else {
+      $('verifyMsg').textContent = "We can't see the verification yet. Open the link in the email we sent, then press this button again.";
+    }
+  } catch (err){
+    $('verifyMsg').textContent = 'Something went wrong. Please try again.';
+  }
+});
+
+$('resendBtn').addEventListener('click', async () => {
+  $('verifyMsg').textContent = '';
+  try {
+    await sendEmailVerification(currentUser);
+    $('verifyMsg').textContent = 'Sent. Check your inbox (and spam).';
+  } catch (err){
+    $('verifyMsg').textContent = 'We could not send that just now. Please wait a minute and try again.';
+  }
+});
+</script>
+</body>
+</html>

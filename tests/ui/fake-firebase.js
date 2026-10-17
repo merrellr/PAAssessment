@@ -126,12 +126,16 @@ export async function updateDoc(ref, data){
 export async function deleteDoc(ref){ window.__writeLog.push({ op: 'delete', path: ref.path }); delete store[ref.path]; }
 export function writeBatch(){
   const ops = [];
+  const add = (path, run) => { ops.push({ path, run }); };
   return {
-    set(ref, data){ ops.push(() => { window.__writeLog.push({ op: 'set', path: ref.path }); store[ref.path] = stripMarkers(resolve(data)); }); },
-    update(ref, data){ ops.push(() => { window.__writeLog.push({ op: 'update', path: ref.path }); applyUpdate(store[ref.path], resolve(data)); }); },
+    set(ref, data){ add(ref.path, () => { window.__writeLog.push({ op: 'set', path: ref.path }); store[ref.path] = stripMarkers(resolve(data)); }); },
+    update(ref, data){ add(ref.path, () => { window.__writeLog.push({ op: 'update', path: ref.path }); applyUpdate(store[ref.path], resolve(data)); }); },
+    delete(ref){ add(ref.path, () => { window.__writeLog.push({ op: 'delete', path: ref.path }); delete store[ref.path]; }); },
     async commit(){
       if (window.__failCommit) throw Object.assign(new Error('fail'), { code: window.__failCommit });
-      ops.forEach(f => f());
+      // like the real thing, one refused write refuses the whole batch
+      if (window.__failWrite && ops.some(o => window.__failWrite.test(o.path))) throw Object.assign(new Error('denied'), { code: 'permission-denied' });
+      ops.forEach(o => o.run());
     }
   };
 }

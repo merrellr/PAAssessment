@@ -24,6 +24,7 @@ Copy-Item "$repo\org-share-core.js" $site
 Copy-Item "$repo\company-core.js" $site
 Copy-Item "$repo\focus-board.js" $site
 Copy-Item "$repo\focus-board.css" $site
+Copy-Item "$repo\tool-core.js" $site
 Copy-Item "$repo\vendor" "$site\vendor" -Recurse
 Copy-Item "$repo\content" "$site\content" -Recurse
 
@@ -48,6 +49,8 @@ Build-Page 'lms-dashboard.html' 'dash-test.html' 'dash-seed.js' 'dash-test.js'
 Build-Page 'profile.html' 'del-test.html' 'del-seed.js' 'del-test.js'
 Build-Page 'lesson.html' 'les-test.html' 'les-seed.js' 'les-test.js'
 Build-Page 'company.html' 'company-test.html' 'company-seed.js' 'company-test.js'
+Build-Page 'tool-requests.html' 'tool-requests-test.html' 'tool-seed.js' 'tool-test.js'
+Build-Page 'owner-tools.html' 'owner-tools-test.html' 'owner-tools-seed.js' 'owner-tools-test.js'
 [System.IO.File]::WriteAllText("$site\share-test.html", "<!doctype html><html><head>$errHook</head><body><script type=`"module`" src=`"share-test.js`"></script></body></html>")
 
 # a tiny web server, because browsers will not load ES modules from files
@@ -99,11 +102,17 @@ try {
   }
   $results += Run-Page 'join page: badtoken' "$base/join-test.html?scn=badtoken&token=abc" 20000
   foreach ($s in 'member', 'focus', 'focusdefault', 'admin', 'plain', 'removed', 'owner', 'threelessons', 'allfive', 'removedold') { $results += Run-Page "dashboard: $s" "$base/dash-test.html?scn=$s" 25000 }
-  foreach ($s in 'member', 'nonmember', 'blocked') { $results += Run-Page "delete account: $s" "$base/del-test.html?scn=$s" 25000 }
+  foreach ($s in 'member', 'nonmember', 'blocked', 'votefail') { $results += Run-Page "delete account: $s" "$base/del-test.html?scn=$s" 25000 }
   foreach ($s in 'member', 'plain') { $results += Run-Page "last lesson: $s" "$base/les-test.html?scn=$s&course=discovery-novice&lesson=5" 30000 }
   foreach ($s in 'admin', 'empty', 'archived', 'nocopy', 'auditdenied', 'owner', 'ownernoorg', 'plain', 'member', 'removedadmin', 'denied', 'sharesdenied', 'signedout') {
     $org = if ($s -eq 'owner') { '&org=orgA' } else { '' }
     $results += Run-Page "company dashboard: $s" "$base/company-test.html?scn=$s$org" 40000
+  }
+  foreach ($s in 'anon', 'fresh', 'unverified', 'voter', 'suggested', 'approved', 'empty', 'loaderror') {
+    $results += Run-Page "tool roadmap: $s" "$base/tool-requests-test.html?scn=$s" 40000
+  }
+  foreach ($s in 'main', 'empty', 'notowner', 'signedout') {
+    $results += Run-Page "tool roadmap admin: $s" "$base/owner-tools-test.html?scn=$s" 40000
   }
   $results += Run-Page 'shared-record sync' "$base/share-test.html" 40000
 } finally {
