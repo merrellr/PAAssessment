@@ -46,7 +46,7 @@ function done(){
       {
         const links = Array.prototype.map.call(document.querySelectorAll('#termsRow a'), a => a.textContent + '=' + a.getAttribute('href'));
         t('the sign-up notice says "By creating an account you agree to the Terms of Use and Privacy Policy", both linked', /By creating an account you agree to the Terms of Use and Privacy Policy/.test($('termsRow').textContent.replace(/\s+/g, ' ')) && links.join() === 'Terms of Use=https://www.productadvisory.co/terms-of-use,Privacy Policy=https://www.productadvisory.co/privacy-policy', links.join());
-        const g = Array.prototype.find.call(document.querySelectorAll('#authCard .small'), p => /continuing with Google/.test(p.textContent)); t('the Google button has the same notice, both linked', !!g && /By continuing with Google, you agree to the Terms of Use and Privacy Policy/.test(g.textContent.replace(/\s+/g, ' ')) && g.querySelectorAll('a').length === 2);
+        const g = Array.prototype.find.call(document.querySelectorAll('#authCard .small'), p => /continuing with account creation/.test(p.textContent)); t('the notice under the buttons covers both password and Google sign-up, both linked, and explains why we use the email', !!g && /By continuing with account creation, you agree to the Terms of Use and Privacy Policy\. We use your email address to make sure each person votes once and, only if you tick the box on a tool, to tell you when it launches\./.test(g.textContent.replace(/\s+/g, ' ')) && g.querySelectorAll('a').length === 2);
       }
       setVal('authEmail', 'new@person.com'); setVal('authPassword', 'longenough1');
       $('authSubmit').click(); await sleep(60);
