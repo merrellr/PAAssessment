@@ -147,6 +147,24 @@
     'aiOrg-novice': 5, 'aiOrg-moderate': 5, 'aiOrg-experienced': 6, 'aiOrg-advanced': 5
   };
 
+  // The companion article for the courses that have one (12 of 28). Kept in step
+  // with the files in content/ by tests/company-core.test.mjs, which fails if a
+  // course's sourceUrl changes without this table being updated.
+  const COURSE_ARTICLES = {
+    'aiIndividual-advanced': 'https://www.linkedin.com/pulse/day-life-product-manager-working-ai-agents-2026-edition-merrell-uwsic',
+    'aiIndividual-experienced': 'https://www.linkedin.com/pulse/how-run-product-discovery-ai-agents-without-losing-voice-merrell-mvrdc',
+    'aiIndividual-moderate': 'https://www.linkedin.com/pulse/from-roadmaps-rituals-how-agentic-ai-rewriting-job-merrell-mism-r8pnc',
+    'aiIndividual-novice': 'https://www.linkedin.com/pulse/ai-project-its-practice-heres-how-build-one-robert-merrell-4skoc',
+    'aiOrg-advanced': 'https://www.linkedin.com/pulse/beyond-automation-win-customers-life-robert-merrell-bxltc',
+    'aiOrg-experienced': 'https://www.linkedin.com/pulse/agentic-ai-internal-product-building-pm-copilots-your-robert-merrell-jlepc',
+    'aiOrg-moderate': 'https://www.linkedin.com/pulse/stop-enabling-individuals-start-organization-robert-merrell-uoboc/',
+    'aiOrg-novice': 'https://www.linkedin.com/pulse/your-first-ai-product-team-designing-squad-agents-just-robert-merrell-vudmc',
+    'discovery-experienced': 'https://www.linkedin.com/pulse/overcoming-common-pitfalls-early-stage-product-saas-robert-merrell-eshlc',
+    'execution-moderate': 'https://www.linkedin.com/pulse/improving-accessibility-ai-tools-innovations-making-life-merrell-wndmc',
+    'prioritization-experienced': 'https://www.linkedin.com/pulse/feature-fallacy-why-shipping-more-isnt-helping-your-do-merrell-mism-ozcbc',
+    'strategy-advanced': 'https://www.linkedin.com/pulse/how-build-product-focused-ai-agents-actually-make-merrell-mism-rmu8c'
+  };
+
   function prettyCourseId(id) {
     const s = String(id);
     const i = s.lastIndexOf('-');
@@ -477,7 +495,7 @@
   }
 
   root.CompanyCore = {
-    DOMAINS, EMAIL_RE, TIER_SLUGS, LEVEL_LABELS, LESSON_COUNTS, STATUS_LABELS, INACTIVE_DAYS,
+    DOMAINS, EMAIL_RE, TIER_SLUGS, LEVEL_LABELS, LESSON_COUNTS, COURSE_ARTICLES, STATUS_LABELS, INACTIVE_DAYS,
     domainLabel, parseInviteLines, classifyInvites, inviteStatus, seatInfo, buildPeopleRows, randomToken,
     csvCell, buildInviteCsv, prettyCourseId, tierSlugForPct,
     assignedCourses, lessonsDone, memberProgress, buildTeamRows, filterTeamRows, rollup, buildTeamCsv, buildAnswersCsv,

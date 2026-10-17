@@ -16,7 +16,10 @@
     if (scn === 'member' || scn === 'focus' || scn === 'focusdefault') store['memberships/uDash'] = { orgId: 'orgA', orgName: 'Acme Health', role: 'member', status: 'active', inviteToken: 't', joinedAt: Timestamp.now(), endedAt: null, email: 'dash@acme.com', displayName: 'Dash User' };
     // a course counts as complete only when ALL its real lessons are done (discovery-moderate has 5)
     if (scn === 'threelessons') store['progress/uDash'].courses['discovery-moderate'] = { completed: [1, 2, 3], lastLesson: 3, updatedAt: '2026-10-08T09:00:00.000Z' };
-    if (scn === 'allfive') store['progress/uDash'].courses['discovery-moderate'] = { completed: [1, 2, 3, 4, 5], lastLesson: 5, updatedAt: '2026-10-08T09:00:00.000Z' };
+    // finished long ago, with a saved reflection on its last lesson: eligible for spaced review
+    if (scn === 'allfive') store['progress/uDash'].courses['discovery-moderate'] = { completed: [1, 2, 3, 4, 5], lastLesson: 5, updatedAt: '2026-10-08T09:00:00.000Z', reflections: { '5': 'My own answer to the final question' } };
+    // finished only 3 days ago: too soon to review
+    if (scn === 'recentdone') store['progress/uDash'].courses['discovery-moderate'] = { completed: [1, 2, 3, 4, 5], lastLesson: 5, updatedAt: new Date(Date.now() - 3 * 864e5).toISOString() };
     // a company ranking: customised for 'focus', the untouched standard order for 'focusdefault', none at all for 'member'
     if (scn === 'focus') store['orgFocus/orgA'] = { focusAreas: ['strategy', 'aiIndividual', 'discovery'], updatedAt: Timestamp.now() };
     if (scn === 'focusdefault') store['orgFocus/orgA'] = { focusAreas: ['discovery', 'strategy', 'prioritization', 'execution', 'stakeholder', 'aiIndividual', 'aiOrg'], updatedAt: Timestamp.now() };

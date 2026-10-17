@@ -34,6 +34,20 @@ console.log('--- lesson counts match the real course files ---');
   });
 }
 
+console.log('--- companion articles match the real course files ---');
+{
+  const dir = path.join(here, '..', 'content');
+  const files = fs.readdirSync(dir).filter(f => f.endsWith('.js') && f !== 'framework-data.js');
+  const fromFiles = {};
+  files.forEach(f => {
+    const m = fs.readFileSync(path.join(dir, f), 'utf8').match(/sourceUrl:\s*"([^"]*)"/);
+    if (m && m[1]) fromFiles[f.replace(/\.js$/, '')] = m[1];
+  });
+  t('the table lists exactly the courses that have an article (' + Object.keys(fromFiles).length + ')', same(Object.keys(C.COURSE_ARTICLES).sort(), Object.keys(fromFiles).sort()), Object.keys(fromFiles).length + ' in files vs ' + Object.keys(C.COURSE_ARTICLES).length + ' in table');
+  Object.keys(fromFiles).forEach(id => t(id + ' links to the same article as its course file', C.COURSE_ARTICLES[id] === fromFiles[id]));
+  t('every link is https', Object.values(C.COURSE_ARTICLES).every(u => /^https:\/\//.test(u)));
+}
+
 console.log('--- which courses are assigned ---');
 {
   const none = C.assignedCourses(null);

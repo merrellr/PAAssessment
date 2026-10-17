@@ -623,6 +623,7 @@ function buildCatalog(){
         domain: domainKey,
         tier: tier.slug,
         title: DOMAINS[domainKey].label + " — " + tier.label,
+        sourceUrl: (window.CompanyCore && CompanyCore.COURSE_ARTICLES[courseId]) || null,
         // A course is complete when every one of its REAL lessons is done, so the
         // number of lessons comes from company-core.js (checked against content/
         // by tests/company-core.test.mjs). 3 is only a fallback for an unknown id.
@@ -1887,7 +1888,7 @@ function renderCatalog(progress, assessmentResult, view){
 /* "Your notes" panel — every reflection the learner has saved across
    every course, newest-authored courses first, each with a jump link
    back to the lesson it came from. Hidden entirely when there are none. */
-function renderMyNotes(progress){
+async function renderMyNotes(progress){
   const card = document.getElementById('myNotesCard');
   const list = document.getElementById('notesList');
   const courses = (progress && progress.courses) || {};
@@ -1900,12 +1901,10 @@ function renderMyNotes(progress){
     Object.keys(refl).forEach(lid => {
       const text = (refl[lid] || '').trim();
       if (!text) return;
-      const lesson = cat.lessons.find(l => l.id === parseInt(lid, 10));
-      const prompt = lesson && lesson.reflection ? lesson.reflection.prompt : '';
       items.push({
         cid, lid,
         courseTitle: cat.title,
-        prompt, text,
+        prompt: '', text,
         updatedAt: courses[cid].updatedAt || ''
       });
     });
@@ -1914,6 +1913,23 @@ function renderMyNotes(progress){
   if (!items.length){ card.style.display = 'none'; return; }
   items.sort((a, b) => (b.updatedAt || '').localeCompare(a.updatedAt || ''));
 
+  paintNotes(items, list, card);
+
+  // The question each note answers lives in that course's lesson text, which is
+  // fetched only for the few courses that have notes. Then the notes are redrawn with it.
+  const ids = Array.from(new Set(items.map(n => n.cid)));
+  const contents = await Promise.all(ids.map(loadCourseContent));
+  ids.forEach((cid, i) => {
+    const lessons = (contents[i] && contents[i].lessons) || [];
+    items.filter(n => n.cid === cid).forEach(n => {
+      const lesson = lessons.find(l => l.id === parseInt(n.lid, 10));
+      n.prompt = lesson && lesson.reflection ? lesson.reflection.prompt : '';
+    });
+  });
+  paintNotes(items, list, card);
+}
+
+function paintNotes(items, list, card){
   list.innerHTML = items.map(n => `
     <div class="notes-item">
       <div class="notes-course">${n.courseTitle}</div>
@@ -1969,31 +1985,55 @@ function daysSince(isoStr){
    fading, without tracking any extra "reviewed" state. The course
    (and the question within it) rotate daily via a date-based index,
    so a refresh doesn't reshuffle it but tomorrow does. */
-function renderSpacedReview(progress){
+async function renderSpacedReview(progress){
   const card = document.getElementById('spacedReviewCard');
   const courses = (progress && progress.courses) || {};
 
   const eligible = Object.keys(courses)
     .filter(cid => CATALOG[cid] && isCourseComplete(progress, cid))
     .map(cid => ({ cid, days: daysSince(courses[cid].updatedAt) }))
-    .filter(c => c.days >= 7 && CATALOG[c.cid].lessons.some(l => (l.checks || []).length))
+    .filter(c => c.days >= 7)
     .sort((a, b) => a.cid.localeCompare(b.cid));
 
   if (!eligible.length){ card.style.display = 'none'; return; }
 
+  // The quiz questions live in the course's lesson text, fetched only for the
+  // course picked today. If it has none (or cannot be fetched), try the next one.
   const dayIndex = Math.floor(Date.now() / 86400000);
-  const pick = eligible[dayIndex % eligible.length];
-  const course = CATALOG[pick.cid];
-  const allChecks = [];
-  course.lessons.forEach(l => (l.checks || []).forEach(c => allChecks.push(c)));
-  if (!allChecks.length){ card.style.display = 'none'; return; }
-  const check = allChecks[dayIndex % allChecks.length];
+  for (let k = 0; k < Math.min(eligible.length, 3); k++){
+    const pick = eligible[(dayIndex + k) % eligible.length];
+    const content = await loadCourseContent(pick.cid);
+    const allChecks = [];
+    ((content && content.lessons) || []).forEach(l => (l.checks || []).forEach(c => allChecks.push(c)));
+    if (!allChecks.length) continue;
+    const check = allChecks[dayIndex % allChecks.length];
 
-  document.getElementById('spacedReviewMeta').textContent =
-    course.title + ' — completed ' + pick.days + (pick.days === 1 ? ' day' : ' days') + ' ago';
-  document.getElementById('spacedReviewLink').href = 'lesson.html?course=' + pick.cid + '&v=' + CONTENT_VERSION;
-  renderSpacedReviewCheck(check);
-  card.style.display = 'block';
+    document.getElementById('spacedReviewMeta').textContent =
+      CATALOG[pick.cid].title + ' — completed ' + pick.days + (pick.days === 1 ? ' day' : ' days') + ' ago';
+    document.getElementById('spacedReviewLink').href = 'lesson.html?course=' + pick.cid + '&v=' + CONTENT_VERSION;
+    renderSpacedReviewCheck(check);
+    card.style.display = 'block';
+    return;
+  }
+  card.style.display = 'none';
+}
+
+/* The text of a lesson (its quiz questions and reflection prompts) lives in
+   content/<course>.js, which the lesson page loads. The dashboard needs it for
+   only a few courses at a time, so it fetches just those files, on demand, once. */
+const courseContentLoads = {};
+function loadCourseContent(courseId){
+  if (courseContentLoads[courseId]) return courseContentLoads[courseId];
+  courseContentLoads[courseId] = new Promise(resolve => {
+    const read = () => resolve((window.CONTENT_OVERRIDES && window.CONTENT_OVERRIDES[courseId]) || null);
+    const script = document.createElement('script');
+    script.src = 'content/' + courseId + '.js?v=' + CONTENT_VERSION;
+    script.onload = read;
+    script.onerror = () => resolve(null);
+    document.head.appendChild(script);
+    setTimeout(() => resolve(null), 8000);
+  });
+  return courseContentLoads[courseId];
 }
 
 function renderSpacedReviewCheck(check){

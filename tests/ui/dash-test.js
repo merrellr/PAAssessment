@@ -33,6 +33,37 @@ const sleep = (ms) => new Promise(r => setTimeout(r, ms));
     if (window.__scn === 'admin' || window.__scn === 'plain' || window.__scn === 'removed' || window.__scn === 'owner'){
       t('people with no (active) company ranking get the normal recommendations', chips.length === 2 && /Organizational/.test(chips[0]) && chips.every(c => !/company priority/.test(c)), chips.join(' | '));
     }
+    /* ---- the pieces that need the lesson text: spaced review, notes, article links ---- */
+    const reviewCard = document.getElementById('spacedReviewCard');
+    const lessonsOf = (cid) => ((window.CONTENT_OVERRIDES && window.CONTENT_OVERRIDES[cid] && window.CONTENT_OVERRIDES[cid].lessons) || []);
+    if (window.__scn === 'allfive'){
+      const checks = []; lessonsOf('discovery-moderate').forEach(l => (l.checks || []).forEach(c => checks.push(c)));
+      const shownQ = (document.querySelector('#spacedReviewCheckContainer .check-q') || {}).textContent;
+      t('a course finished over a week ago brings up the spaced-review card', reviewCard.style.display === 'block');
+      t('it names the course and how long ago', /Customer & Market Discovery — Moderate Experience — completed \d+ days ago/.test(document.getElementById('spacedReviewMeta').textContent), document.getElementById('spacedReviewMeta').textContent);
+      t('the question is a real one from that course\'s lessons', checks.length > 0 && checks.some(c => c.question === shownQ), String(shownQ));
+      t('and it links back to the course', /lesson\.html\?course=discovery-moderate/.test(document.getElementById('spacedReviewLink').getAttribute('href')));
+      const q = checks.find(c => c.question === shownQ);
+      const opts = Array.prototype.slice.call(document.querySelectorAll('#spacedReviewCheckContainer .check-option'));
+      t('every answer option is shown', !!q && opts.length === q.options.length);
+      if (q && opts.length){
+        opts[q.correct].click(); await sleep(60);
+        t('choosing the right answer marks it correct and explains why', opts[q.correct].classList.contains('correct') && /Correct\./.test(document.querySelector('#spacedReviewCheckContainer .check-feedback').textContent));
+      }
+      /* saved notes show the question they answer */
+      const last = lessonsOf('discovery-moderate').find(l => l.id === 5);
+      const notesCard = document.getElementById('myNotesCard');
+      t('a saved reflection appears under Your notes', notesCard.style.display === 'block' && /My own answer to the final question/.test(notesCard.textContent));
+      t('together with the question it answers (taken from the lesson text)', !!last && !!last.reflection && notesCard.textContent.indexOf(last.reflection.prompt.slice(0, 40)) > -1, notesCard.textContent.slice(0, 200));
+    }
+    if (window.__scn === 'threelessons' || window.__scn === 'recentdone' || window.__scn === 'plain'){
+      t('no review card when nothing was finished a week ago (an unfinished course, a very recent one, or none)', reviewCard.style.display === 'none');
+    }
+    if (window.__scn === 'plain'){
+      const articles = Array.prototype.slice.call(document.querySelectorAll('#articlesList .article-item'));
+      t('every course that has a companion article is listed under Notes and articles (12)', document.getElementById('articlesCard').style.display === 'block' && articles.length === 12, String(articles.length));
+      t('each links to its article', articles.every(a => /^https:\/\/www\.linkedin\.com\/pulse\//.test(a.querySelector('a').getAttribute('href'))));
+    }
     const doneStat = document.getElementById('statAssignedCompleted').textContent.trim();
     if (window.__scn === 'threelessons') t('3 of a course\'s 5 lessons does NOT count as a finished course', doneStat === '0', doneStat);
     if (window.__scn === 'allfive') t('all 5 of its 5 lessons does', doneStat === '1', doneStat);
