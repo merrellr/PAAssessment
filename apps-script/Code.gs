@@ -929,7 +929,12 @@ function authorizeInviteEmails() {
 
 var LEAD_NOTIFY_EMAIL_ = 'rob@productadvisory.co';
 var LEAD_SHEET_NAME_ = 'Leads';
-var LEAD_DAILY_CAP_ = 60;
+// Each saved request sends two emails (one to Rob, one thank-you to the person) and Gmail allows about 100 a
+// day for the whole script, so this stays well under half of that.
+var LEAD_DAILY_CAP_ = 40;
+var LEAD_REPLY_TO_ = 'info@productadvisory.co';             // where a reply to the thank-you email goes
+var LEAD_REPLY_WINDOW_ = 'within two business days';        // keep the same as REPLY_WINDOW in lead-core.js (a test checks)
+var LEAD_BOOKING_URL_ = 'https://calendly.com/productadvisory/30min';
 var LEAD_PER_EMAIL_DAILY_ = 3;
 var LEAD_MIN_FILL_MS_ = 2500;
 var LEAD_HEADERS_ = ['Received', 'Lead ID', 'Name', 'Email', 'Company', 'Phone', 'I am', 'Interested in', 'Team size', 'Timeline',
@@ -1101,6 +1106,50 @@ function leadBuildEmail_(lead, scored, assess, sheetUrl) {
   return { subject: subject, text: text, html: html };
 }
 
+// The thank-you the person gets straight after sending the form. It only goes to a request that was
+// accepted and saved, never to one that was refused or dropped as spam.
+function leadBuildAck_(lead) {
+  var first = lead.name.split(' ')[0] || 'there';
+  var wantsBooking = lead.who === 'leader' || lead.who === 'org' || lead.contactPref === 'call';
+  var interests = lead.interests.map(function (c) { return LEAD_OPTIONS_.interests[c]; }).join(', ');
+  var assessUrl = SITE_BASE_URL_ + 'index.html';
+  var recap = [
+    ['You are', LEAD_OPTIONS_.who[lead.who]],
+    ['You are interested in', interests],
+    ['When you would like to start', LEAD_OPTIONS_.timeline[lead.timeline]]
+  ];
+  if (lead.message) recap.push(['Your note', lead.message]);
+
+  var text = 'Hi ' + first + ',\n\n' +
+    'Welcome, and thanks for sharing a little about what you need. We have your request and we will get back to you ' + LEAD_REPLY_WINDOW_ + '.\n\n' +
+    'What you told us:\n' + recap.map(function (r) { return '- ' + r[0] + ': ' + r[1]; }).join('\n') + '\n\n' +
+    'While you wait:\n' +
+    (wantsBooking ? '- Pick a time that suits you: ' + LEAD_BOOKING_URL_ + '\n' : '') +
+    '- Take the free Product Learning Assessment: ' + assessUrl + '\n\n' +
+    'If you did not make this request, you can ignore this email. Nothing more will happen.\n\n' +
+    'Product Advisory\n';
+
+  var button = function (href, label, solid) {
+    return '<a href="' + escapeHtml_(href) + '" style="display:inline-block;margin:0 10px 10px 0;padding:12px 20px;border-radius:8px;font-weight:bold;text-decoration:none;' +
+      (solid ? 'background:#1A4584;color:#ffffff;' : 'background:#ffffff;color:#12305e;border:2px solid #1A4584;') + '">' + escapeHtml_(label) + '</a>';
+  };
+  var html = '<div style="font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:1.55;color:#16213E;max-width:540px;">' +
+    '<p>Hi ' + escapeHtml_(first) + ',</p>' +
+    '<p>Welcome, and thanks for sharing a little about what you need. We have your request and we will get back to you <strong>' + escapeHtml_(LEAD_REPLY_WINDOW_) + '</strong>.</p>' +
+    '<p style="margin:18px 0 6px;color:#6B7686;font-size:13px;text-transform:uppercase;letter-spacing:.04em;">What you told us</p>' +
+    '<table style="border-collapse:collapse;width:100%;font-size:14px;">' +
+    recap.map(function (r) {
+      return '<tr><td style="padding:5px 10px 5px 0;color:#6B7686;vertical-align:top;white-space:nowrap;">' + escapeHtml_(r[0]) + '</td><td style="padding:5px 0;">' + escapeHtml_(r[1]) + '</td></tr>';
+    }).join('') + '</table>' +
+    '<p style="margin:20px 0 10px;">While you wait:</p><p style="margin:0;">' +
+    (wantsBooking ? button(LEAD_BOOKING_URL_, 'Pick a time that suits you', true) : '') +
+    button(assessUrl, 'Take the free assessment', !wantsBooking) + '</p>' +
+    '<p style="color:#6B7686;font-size:13px;margin-top:20px;">If you did not make this request, you can ignore this email. Nothing more will happen.</p>' +
+    '<p style="margin-top:18px;">Product Advisory</p></div>';
+
+  return { subject: 'Thanks, ' + first + ' - we have your request', text: text, html: html };
+}
+
 // Called by doPost. The browser cannot read a reply to a POST, so the answer is
 // left in the cache for leadStatus_ to hand back.
 function handleLeadRequest_(data) {
@@ -1152,7 +1201,17 @@ function handleLeadRequest_(data) {
         emailed = true;
       }
     } catch (mailErr) { emailed = false; }
-    remember({ ok: true, emailed: emailed });
+
+    // Then thank the person. If Gmail is running low this is skipped before Rob's notice or the invitation emails are.
+    var acked = false;
+    try {
+      if (MailApp.getRemainingDailyQuota() >= 5) {
+        var ack = leadBuildAck_(lead);
+        MailApp.sendEmail({ to: lead.email, replyTo: LEAD_REPLY_TO_, subject: ack.subject, body: ack.text, htmlBody: ack.html, name: 'Product Advisory' });
+        acked = true;
+      }
+    } catch (ackErr) { acked = false; }
+    remember({ ok: true, emailed: emailed, acked: acked });
   } catch (err) {
     remember({ ok: false, error: 'server_error' });
   } finally {

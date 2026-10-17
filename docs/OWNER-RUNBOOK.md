@@ -172,7 +172,8 @@ Change the word after `src=` to match the page the button is on (for example `sr
 
 **What happens when someone sends it**
 1. You get an email at rob@productadvisory.co. The subject starts with **[Hot]**, **[Warm]** or **[Nurture]**, then their name and company. Press **Reply** to answer them directly.
-2. The same request is added as a row on the **Leads** tab of your results Google Sheet (open the sheet and click the Leads tab at the bottom). Use the **Status** and **Notes** columns to keep track: change `New` to `Contacted`, `Call booked`, `Won`, `Not a fit`, and so on.
+2. The person also gets a short thank-you email straight away: "Welcome, and thanks for sharing a little about what you need. We have your request and we will get back to you within two business days." It recaps what they told you, offers your Calendly page to team leaders, organizations and anyone who asked for a call, and offers the free assessment to everyone. If they reply to it, the reply goes to info@productadvisory.co. It is only sent for real requests that were saved, never for spam.
+3. The same request is added as a row on the **Leads** tab of your results Google Sheet (open the sheet and click the Leads tab at the bottom). Use the **Status** and **Notes** columns to keep track: change `New` to `Contacted`, `Call booked`, `Won`, `Not a fit`, and so on.
 
 **What Hot, Warm and Nurture mean** (only you see this; the person never does)
 - **Hot** (80+ out of 100): an organization or team leader, a real team size, wants to start soon, and makes or shapes the decision. Reply today.
@@ -181,7 +182,7 @@ Change the word after `src=` to match the page the button is on (for example `sr
 - The email lists exactly why it scored that way. If someone shared their assessment, you also see their level and skill-area scores, which makes your reply much more specific.
 
 **Limits and safety**
-- One email address can send 3 requests a day, and the whole form takes 60 a day. Past that, the person is shown an email link instead.
+- One email address can send 3 requests a day, and the whole form takes 40 a day (each one sends two emails, and Gmail allows about 100 a day in total). Past that, the person is shown an email link instead.
 - Robots are quietly ignored. You will not see them.
 - If an email fails to send, the row is still saved on the Leads tab. Check it now and then.
 - To delete someone's request (they ask you to), delete their row on the Leads tab.

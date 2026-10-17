@@ -59,7 +59,7 @@ try {
   var row = leads()[0];
   t('the lead is saved as one row, with the real words (not codes)', leads().length === 1 && row[COL['Name']] === 'Jane Smith' && row[COL['Email']] === 'jane@acme-health.com' && row[COL['I am']] === "I'm looking for my organization" && row[COL['Team size']] === '51 to 200 people' && row[COL['Timeline']] === 'This month' && row[COL['Who decides']] === 'I make the decision' && row[COL['Interested in']] === 'AI fluency for my organization, Assessing my whole team', JSON.stringify(row));
   t('the row starts as "New" with room for Rob\'s notes, and records where it came from', row[COL['Status']] === 'New' && row[COL['Notes']] === '' && row[COL['Source']] === 'toolkits');
-  t('exactly one email goes out, to Rob', sent.length === 1 && sent[0].to === 'rob@productadvisory.co');
+  t('two emails go out: the notice to Rob, then a thank-you to the person', sent.length === 2 && sent[0].to === 'rob@productadvisory.co' && sent[1].to === 'jane@acme-health.com', JSON.stringify(sent.map(function(m){ return m.to; })));
   t('replying to it answers the lead', sent[0].replyTo === 'jane@acme-health.com');
   t('the subject says how hot it is and who it is from', /^\[Hot\] Info request: Jane Smith, Acme Health \(org, this month\)$/.test(sent[0].subject), sent[0].subject);
   t('the email carries every answer and the reasons for the score', /Why: Organization|Why: I'm looking for my organization/.test(sent[0].body) && /Team size: 51 to 200 people/.test(sent[0].body) && /Message: We want to assess all 60/.test(sent[0].body) && /docs\.google\.com\/spreadsheets\/d\/FAKE/.test(sent[0].body));
@@ -99,7 +99,7 @@ try {
 
   /* ---- robots ---- */
   reset(); var bot = submit(good({ website: 'http://spam.example' }));
-  t('a filled-in hidden field is quietly dropped: it looks like success, but nothing is saved or sent', bot.status.ok === true && leads().length === 0 && sent.length === 0);
+  t('a filled-in hidden field is quietly dropped: it looks like success, but nothing is saved or sent (and no thank-you goes to an address a robot typed)', bot.status.ok === true && leads().length === 0 && sent.length === 0);
   reset(); var fast = submit(good({ elapsedMs: 900 }));
   t('finishing in under 2.5 seconds is quietly dropped', fast.status.ok === true && leads().length === 0 && sent.length === 0);
   reset(); var noTime = good(); delete noTime.elapsedMs; var nt = submit(noTime);
@@ -107,11 +107,11 @@ try {
 
   /* ---- repeats and limits ---- */
   reset(); var d1 = good(); submit(d1); submit(d1); submit(d1);
-  t('the same request sent three times is saved and emailed once', leads().length === 1 && sent.length === 1);
+  t('the same request sent three times is saved once, with one notice and one thank-you', leads().length === 1 && sent.length === 2);
   reset();
   var okCount = 0, last;
   for (var i = 0; i < 5; i++){ last = submit(good()); if (last.status.ok) okCount++; }
-  t('one email address can send 3 requests a day, then is told to wait', okCount === 3 && last.status.error === 'rate_limited' && leads().length === 3 && sent.length === 3, okCount + ' ' + JSON.stringify(last.status));
+  t('one email address can send 3 requests a day, then is told to wait', okCount === 3 && last.status.error === 'rate_limited' && leads().length === 3 && sent.length === 6, okCount + ' ' + JSON.stringify(last.status));
   reset(); LEAD_DAILY_CAP_ = 4; var oks = 0, cap;
   for (var j = 0; j < 6; j++){ cap = submit(good({ email: 'p' + j + '@x.com' })); if (cap.status.ok) oks++; }
   t('there is also a cap on the whole day', oks === 4 && cap.status.error === 'rate_limited' && leads().length === 4);
@@ -144,6 +144,35 @@ try {
   /* ---- when email fails, the lead is not lost ---- */
   reset(); mailThrows = true; var mf = submit(good());
   t('if Gmail fails the lead is still saved and the person is still told it worked', leads().length === 1 && mf.status.ok === true);
+
+  /* ---- the thank-you email ---- */
+  reset(); submit(good({ name: 'Jane Smith' }));
+  var ack = sent[1];
+  t('the thank-you comes from Product Advisory, and a reply goes to info@', ack.name === 'Product Advisory' && ack.replyTo === 'info@productadvisory.co');
+  t('it welcomes them by first name and promises a reply within two business days', /^Thanks, Jane - we have your request$/.test(ack.subject) && /Hi Jane,/.test(ack.body) && /Welcome, and thanks for sharing/.test(ack.body) && /within two business days/.test(ack.body) && /within two business days/.test(ack.htmlBody), ack.subject);
+  t('the promise is worded the same on the page and in the email', LEAD_REPLY_WINDOW_ === LeadCore.REPLY_WINDOW);
+  t('it recaps what they said, including their note', /You are interested in: AI fluency for my organization/.test(ack.body) && /Your note: We want to assess all 60/.test(ack.body));
+  t('a team leader, organization or anyone who asked for a call is offered the booking page', /calendly\.com\/productadvisory\/30min/.test(ack.body) && ack.htmlBody.indexOf('calendly.com/productadvisory/30min') > -1);
+  t('and everyone is offered the free assessment', /assessment\.productadvisory\.co\/index\.html/.test(ack.body));
+  t('the booking address is the same as the page\'s', LEAD_BOOKING_URL_ === LeadCore.BOOKING_URL);
+  t('it says what to do if they did not make the request', /If you did not make this request, you can ignore this email/.test(ack.body));
+  reset(); submit(good({ who: 'individual', size: '', role: '', contactPref: 'email', message: '' }));
+  t('an individual who did not ask for a call is not offered the booking page', sent[1].body.indexOf('calendly.com') === -1 && /free Product Learning Assessment/.test(sent[1].body));
+  reset(); submit(good({ name: '<b>Eve</b> Smith' }));
+  t('a name with markup in it is escaped in the thank-you', sent[1].htmlBody.indexOf('<b>Eve') === -1 && sent[1].htmlBody.indexOf('&lt;b&gt;Eve') > -1);
+  reset(); submit(good({ id: newId() })); submit(good({ id: newId(), website: 'x' }));
+  t('a refused or dropped request gets no thank-you (so the form cannot be used to send mail to strangers)', sent.length === 2);
+  reset(); quota = 4; submit(good());
+  t('when Gmail is running low, the notice to Rob still goes but the thank-you waits', sent.length === 1 && sent[0].to === 'rob@productadvisory.co' && leads().length === 1);
+  reset(); LEAD_PER_EMAIL_DAILY_ = 1; submit(good({ email: 'x@y.com' })); submit(good({ email: 'x@y.com' })); LEAD_PER_EMAIL_DAILY_ = 3;
+  t('one address cannot trigger more than its daily share of thank-yous', sent.filter(function(m){ return m.to === 'x@y.com'; }).length === 1);
+  reset(); LEAD_DAILY_CAP_ = 40;
+  t('the daily cap leaves room for the notices, thank-yous and invitation emails inside Gmail\'s limit', LEAD_DAILY_CAP_ * 2 <= 80);
+  reset(); var ackOnly = false; var origSend = MailApp.sendEmail;
+  MailApp.sendEmail = function(m){ if (m.to !== 'rob@productadvisory.co') throw new Error('thank-you failed'); origSend(m); };
+  var af = submit(good());
+  MailApp.sendEmail = origSend;
+  t('if only the thank-you fails, the lead is saved, Rob is still told, and the person is not shown an error', leads().length === 1 && sent.length === 1 && af.status.ok === true);
   reset(); quota = 0; var mq = submit(good());
   t('if the Gmail quota is used up the lead is still saved', leads().length === 1 && sent.length === 0 && mq.status.ok === true);
 
@@ -151,7 +180,7 @@ try {
   reset();
   var d = JSON.stringify(good());
   var post = doPost({ postData: { contents: d } });
-  t('doPost routes requestInfo', post.text === 'OK' && leads().length === 1 && sent.length === 1);
+  t('doPost routes requestInfo', post.text === 'OK' && leads().length === 1 && sent.length === 2);
   var chk = doGet({ parameter: { action: 'leadsCheck', callback: 'cb' } });
   t('doGet answers leadsCheck so the page can tell this version is deployed', /^cb\(\{"ok":true,"leads":true\}\);$/.test(chk.text), chk.text);
   var st = doGet({ parameter: { action: 'leadStatus', callback: 'cb', id: JSON.parse(d).id } });
