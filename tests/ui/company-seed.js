@@ -28,6 +28,9 @@
       notes: 'secret owner notes', contactName: 'Pat Contact', contactEmail: 'pat@acme.com', contactPhone: '555-0000', billingAddress: '1 Main St',
       status: scn === 'archived' ? 'archived' : 'active', createdAt: T(100), createdBy: 'owner1', updatedAt: T(10) };
 
+    // the member-readable copy of the focus list (the 'nocopy' scenario has none, as for companies made before it existed)
+    if (scn !== 'nocopy') store['orgFocus/orgA'] = { focusAreas: store['orgs/orgA'].focusAreas.slice(), updatedAt: T(10) };
+
     if (scn === 'ownernoorg' || scn === 'plain' || scn === 'signedout') {
       if (scn === 'plain') store['progress/uNobody'] = {};
       return;

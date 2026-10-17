@@ -411,6 +411,43 @@ await deny('a company admin cannot remove a member yet (planned for a later step
 await allow('a removed member can join a NEW company with a new invite',
   () => join(asUser('removedR', 'r@a.com'), 'removedR', 'r@a.com', 'tokB', { orgId: 'orgB', orgName: 'Beta' }, {}, true));
 
+console.log('\n--- company focus list (orgFocus) ---');
+const saveFocus = (db, orgId, list, over = {}) => {
+  const b = writeBatch(db);
+  b.update(doc(db, 'orgs/' + orgId), { focusAreas: list, updatedAt: serverTimestamp() });
+  b.set(doc(db, 'orgFocus/' + orgId), Object.assign({ focusAreas: list, updatedAt: serverTimestamp() }, over));
+  return b.commit();
+};
+await allow('the owner saves a company\'s focus list together with the copy', () => saveFocus(owner, 'orgEdit', ['aiOrg', 'strategy']));
+await allow('a company admin saves their own company\'s focus list together with the copy', () => saveFocus(adminA, 'orgA', ['stakeholder', 'discovery', 'aiOrg']));
+await allow('an admin can reorder again (update of the copy)', () => saveFocus(adminA, 'orgA', ['discovery', 'stakeholder']));
+await allow('an empty list is allowed (no priorities)', () => saveFocus(adminA, 'orgA', []));
+await allow('and a full list', () => saveFocus(adminA, 'orgA', ['discovery', 'strategy', 'prioritization', 'execution', 'stakeholder', 'aiIndividual', 'aiOrg']));
+await deny('a copy that does not match the company\'s own list is refused', () => setDoc(doc(adminA, 'orgFocus/orgA'), { focusAreas: ['aiOrg'], updatedAt: serverTimestamp() }));
+await deny('even the owner cannot write a mismatching copy', () => setDoc(doc(owner, 'orgFocus/orgEdit'), { focusAreas: ['discovery'], updatedAt: serverTimestamp() }));
+await deny('an admin cannot save another company\'s focus list', () => saveFocus(adminA, 'orgB', ['aiOrg']));
+await deny('an admin of another company cannot write this company\'s copy', () => saveFocus(adminB, 'orgA', ['aiOrg']));
+await deny('a plain member cannot write the copy', () => setDoc(doc(memberA, 'orgFocus/orgA'), { focusAreas: [], updatedAt: serverTimestamp() }));
+await deny('a removed admin cannot write the copy', () => setDoc(doc(exAdminA, 'orgFocus/orgA'), { focusAreas: [], updatedAt: serverTimestamp() }));
+await deny('a stranger cannot write the copy', () => setDoc(doc(stranger, 'orgFocus/orgA'), { focusAreas: [], updatedAt: serverTimestamp() }));
+await deny('duplicates are refused', () => saveFocus(adminA, 'orgA', ['aiOrg', 'aiOrg']));
+await deny('unknown areas are refused', () => saveFocus(adminA, 'orgA', ['nope']));
+await deny('extra fields on the copy are refused', () => saveFocus(adminA, 'orgA', ['aiOrg'], { notes: 'hi' }));
+await deny('a client-chosen timestamp on the copy is refused', () => saveFocus(adminA, 'orgA', ['aiOrg'], { updatedAt: Timestamp.fromDate(new Date(2020, 1, 1)) }));
+await deny('the copy cannot be deleted', () => deleteDoc(doc(adminA, 'orgFocus/orgA')));
+await deny('not even by the owner', () => deleteDoc(doc(owner, 'orgFocus/orgA')));
+await allow('an active member reads their company\'s focus list', () => getDoc(doc(memberA, 'orgFocus/orgA')));
+await allow('a company admin reads it', () => getDoc(doc(adminA, 'orgFocus/orgA')));
+await allow('the owner reads it', () => getDoc(doc(owner, 'orgFocus/orgA')));
+await deny('a member of one company cannot read another\'s', () => getDoc(doc(memberA, 'orgFocus/orgB')));
+await deny('an admin of another company cannot read it', () => getDoc(doc(adminB, 'orgFocus/orgA')));
+await deny('a former member cannot read it', () => getDoc(doc(asUser('removedR', 'r@a.com'), 'orgFocus/orgA')));
+await deny('a removed admin cannot read it', () => getDoc(doc(exAdminA, 'orgFocus/orgA')));
+await deny('a stranger cannot read it', () => getDoc(doc(stranger, 'orgFocus/orgA')));
+await deny('a signed-out visitor cannot read it', () => getDoc(doc(anon, 'orgFocus/orgA')));
+await deny('nobody can list the copies', () => getDocs(collection(memberA, 'orgFocus')));
+await deny('a plain member still cannot read the company record itself (contacts, billing, notes stay private)', () => getDoc(doc(memberA, 'orgs/orgA')));
+
 console.log('\n==============================');
 console.log(passes + ' passed, ' + failures + ' failed');
 await env.cleanup();

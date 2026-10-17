@@ -93,6 +93,8 @@ function finish(){
       org && org.name === 'Acme Health' && org.plan === 'seat' && org.seatLimit === 3 && org.contactName === 'Pat Jones' &&
       org.contactEmail === 'pat@acme.com' && org.billingAddress.indexOf('Springfield') > -1 && org.notes.indexOf('Pilot') === 0 &&
       org.focusAreas.length === 7 && org.status === 'active' && org.createdBy === 'owner1');
+    const focusCopy = window.__store['orgFocus/' + orgPath.split('/')[1]];
+    t('creating a company also saves the member-readable copy of its focus list, identical to the company\'s', !!focusCopy && focusCopy.focusAreas.join() === org.focusAreas.join() && focusCopy.updatedAt && typeof focusCopy.updatedAt.toMillis === 'function', JSON.stringify(focusCopy));
     const summaryText = textOf($('detailSummary'));
     t('company page shows point of contact and billing address', /Pat Jones/.test(summaryText) && /pat@acme\.com/.test(summaryText) && /Springfield/.test(summaryText));
     t('company page shows seats, notes and created / last modified', /of 3 seats in use/.test(summaryText) && /Pilot customer/.test(summaryText) && /Created/.test(summaryText) && /Last modified/.test(summaryText));
@@ -289,11 +291,17 @@ function finish(){
     t('edit form hides the first-admin block', $('firstAdminBlock').style.display === 'none');
     t('edit form shows the saved focus order', $('focusRanked').querySelectorAll('.focus-item').length === 7);
     setVal('orgName', 'Acme Health Systems'); setVal('orgSeats', '10');
+    $('focusRanked').querySelector('.icon-btn[title="Move down"]').click(); await sleep(60);
     const before = window.__store[orgPath].updatedAt.toMillis();
     await sleep(20);
     click('saveBtn'); await until(() => vis('viewDetail')); await sleep(200);
     t('saving an edit returns to the company page with the new name', /Acme Health Systems/.test($('detailName').textContent) && /of 10 seats/.test(textOf($('detailSummary'))));
     t('last modified time moved forward', window.__store[orgPath].updatedAt.toMillis() > before);
+    const editedCopy = window.__store['orgFocus/' + orgPath.split('/')[1]];
+    t('editing the focus order updates the company AND the member-readable copy together', window.__store[orgPath].focusAreas[0] === 'strategy' && editedCopy && editedCopy.focusAreas.join() === window.__store[orgPath].focusAreas.join(), JSON.stringify(editedCopy));
+    delete window.__store['orgFocus/' + orgPath.split('/')[1]];
+    location.hash = ''; await sleep(80); location.hash = '#company=' + orgPath.split('/')[1]; await sleep(400);
+    t('a company with no member-readable copy (made before this existed) gets one when the owner opens it', !!window.__store['orgFocus/' + orgPath.split('/')[1]] && window.__store['orgFocus/' + orgPath.split('/')[1]].focusAreas.join() === window.__store[orgPath].focusAreas.join());
     click('archiveBtn'); await sleep(250);
     t('archiving marks the company archived', window.__store[orgPath].status === 'archived' && /Archived/.test($('detailPills').textContent) && $('archiveBtn').textContent === 'Restore');
     click('addUsersBtn'); setVal('usersText', 'late@acme.com'); click('usersCreateBtn'); await sleep(120);

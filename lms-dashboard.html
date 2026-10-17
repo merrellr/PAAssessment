@@ -555,6 +555,7 @@
 </div>
 
 <script src="content/framework-data.js"></script>
+<script src="company-core.js"></script>
 <script type="module">
 /* ================================================================
    EASY-EDIT ZONE 1: FIREBASE CONFIG
@@ -621,11 +622,11 @@ function buildCatalog(){
         domain: domainKey,
         tier: tier.slug,
         title: DOMAINS[domainKey].label + " — " + tier.label,
-        lessons: [
-          { id: 1, title: "Lesson 1: Placeholder introduction" },
-          { id: 2, title: "Lesson 2: Placeholder core concept" },
-          { id: 3, title: "Lesson 3: Placeholder practice + wrap-up" }
-        ]
+        // A course is complete when every one of its REAL lessons is done, so the
+        // number of lessons comes from company-core.js (checked against content/
+        // by tests/company-core.test.mjs). 3 is only a fallback for an unknown id.
+        lessons: Array.from({ length: (window.CompanyCore && CompanyCore.LESSON_COUNTS[courseId]) || 3 },
+          (_, i) => ({ id: i + 1, title: "Lesson " + (i + 1) }))
       };
     });
   });
@@ -881,6 +882,20 @@ function showOwnerLinkIfOwner(user){
 }
 
 /* People who joined a company see a plain notice saying so. */
+/* A company's ranked focus areas, for people who are active members of one.
+   Anyone else, or any failure, simply gets no ranking (an empty list). */
+async function fetchCompanyFocus(user){
+  try {
+    const m = await getDoc(doc(db, 'memberships', user.uid));
+    if (!m.exists() || m.data().status !== 'active') return [];
+    const f = await getDoc(doc(db, 'orgFocus', m.data().orgId));
+    const list = f.exists() ? f.data().focusAreas : [];
+    return Array.isArray(list) ? list : [];
+  } catch (err){
+    return [];
+  }
+}
+
 function showCompanyNoticeIfMember(user){
   getDoc(doc(db, 'memberships', user.uid))
     .then(snap => {
@@ -1146,7 +1161,7 @@ async function loadDashboard(user){
   renderSpacedReview(progress);
   renderArticlesShortcuts();
   renderProfilePrompt(progress);
-  if (assessmentResult) renderRecommendations(assessmentResult, progress);
+  if (assessmentResult) renderRecommendations(assessmentResult, progress, await fetchCompanyFocus(user));
   populateProfileProgressSummary(progress, assessmentResult);
   renderAssignedStat(progress, assessmentResult);
 
@@ -2051,7 +2066,7 @@ function fetchAssessmentResult(email){
    fall back to lowest score first. Within a domain, the course
    recommended is always the one at the person's current tier level,
    walking forward automatically if that one's already done. */
-function renderRecommendations(result, progress){
+function renderRecommendations(result, progress, companyFocus){
   const domainGaps = Object.keys(DOMAINS).map(domainKey => {
     const assessedTierIndex = TIER_ORDER.indexOf(tierSlugForPct(result.categoryPct[domainKey]));
     let assigned = 0, completed = 0;
@@ -2063,7 +2078,13 @@ function renderRecommendations(result, progress){
     return { domainKey, gap: assigned - completed, pct: result.categoryPct[domainKey] || 0 };
   });
 
-  domainGaps.sort((a, b) => (b.gap - a.gap) || (a.pct - b.pct));
+  // A company's own ranking only breaks ties between equal gaps, and only once
+  // the company has actually chosen one (not just the standard order). Anything
+  // not ranked comes after everything ranked; the lowest score still decides last.
+  const focus = (window.CompanyCore && CompanyCore.focusIsCustom(companyFocus)) ? companyFocus : [];
+  domainGaps.sort((a, b) => (b.gap - a.gap)
+    || (focus.length ? CompanyCore.focusRank(focus, a.domainKey) - CompanyCore.focusRank(focus, b.domainKey) : 0)
+    || (a.pct - b.pct));
   const topDomains = domainGaps.filter(d => d.gap > 0).slice(0, 2);
 
   const banner = document.getElementById('recBanner');
@@ -2088,6 +2109,8 @@ function renderRecommendations(result, progress){
     a.className = 'rec-chip';
     a.href = 'lesson.html?course=' + courseId + '&v=' + CONTENT_VERSION;
     a.textContent = course.title;
+    // Tell people when a recommendation is also one of their company's top priorities.
+    if (focus.length && CompanyCore.focusRank(focus, domainKey) < CompanyCore.FOCUS_TOP) a.appendChild(document.createTextNode(' · company priority'));
     chips.appendChild(a);
   });
 

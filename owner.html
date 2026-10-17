@@ -79,55 +79,24 @@
   .summary dd{ margin: 0; font-size: 14px; line-height: 1.5; white-space: pre-line; }
   .chips{ display:flex; gap:6px; flex-wrap:wrap; }
 
-  .focus-board{ display:grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 8px; }
-  @media (max-width: 640px){ .focus-board{ grid-template-columns: 1fr; } }
-  .focus-col{ border: 1.5px dashed var(--line); border-radius: 12px; padding: 10px; background: #FBFCFE; }
-  .focus-col-title{ font-family:'Space Grotesk', sans-serif; font-weight:600; font-size: 12.5px; color: var(--ink-soft); margin: 0 0 8px 2px; }
-  .focus-list{ list-style:none; margin: 0; padding: 0; min-height: 76px; }
-  .focus-item{ display:flex; align-items:center; gap:8px; padding: 9px 10px; border:1px solid var(--line); border-radius: 10px; margin-bottom: 6px; background: #fff; cursor: grab; user-select: none; -webkit-user-select: none; touch-action: manipulation; }
-  .focus-item:active{ cursor: grabbing; }
-  .focus-ghost{ opacity: 0.35; background: #E8F6FB; border-color: var(--cyan); }
-  .focus-chosen{ box-shadow: 0 6px 18px rgba(22,33,62,0.14); }
-  .focus-drag{ opacity: 1 !important; box-shadow: 0 12px 28px rgba(22,33,62,0.22); transform: scale(1.02); }
-  .focus-grip{ color: var(--gray); font-size: 14px; line-height: 1; }
-  .focus-rank{ font-family:'Space Grotesk', sans-serif; font-weight:700; color: var(--navy); min-width: 16px; }
-  .focus-name{ flex:1; font-size: 13px; line-height: 1.3; }
-  .focus-placeholder{ font-size: 12.5px; color: var(--gray); padding: 14px 6px; text-align: center; pointer-events: none; }
-  .icon-btn{ background:none; border:1px solid var(--line); border-radius:6px; width:26px; height:26px; cursor:pointer; color: var(--ink-soft); font-size: 12px; padding: 0; }
-  .icon-btn:hover{ border-color: var(--cyan); }
-  .icon-btn:disabled{ opacity:0.35; cursor:default; }
-
-  .links-box{ border:1px solid #BFE6F2; background:#F2FAFD; border-radius:12px; padding: 16px; }
-  .links-box code{ display:block; font-size: 12px; word-break: break-all; color: var(--ink-soft); }
-  .result-line{ font-size: 13px; line-height: 1.6; color: var(--ink-soft); }
-  td.cell-error{ color: var(--warn); font-size: 12.5px; }
-  tr.detail-row td{ background:#F7FAFD; padding: 4px 10px 18px; }
-  .share-box{ border:1px solid var(--line); border-radius: 10px; background:#fff; padding: 14px 16px; font-size: 13px; line-height: 1.55; }
-  .share-box h4{ font-family:'Space Grotesk', sans-serif; font-size: 11.5px; letter-spacing: 0.04em; text-transform: uppercase; color: var(--gray); margin: 12px 0 4px; }
-  .share-box h4:first-child{ margin-top: 0; }
-  .answer-list{ margin: 4px 0 0; padding-left: 20px; }
-  .answer-list li{ margin-bottom: 8px; }
   .inline-check{ display:flex; align-items:center; gap:8px; font-size:13px; color: var(--ink-soft); margin: 0 0 12px 2px; cursor:pointer; }
 </style>
+<link rel="stylesheet" href="focus-board.css">
 
 <script src="vendor/Sortable.min.js"></script>
 <script src="company-core.js"></script>
+<script src="focus-board.js"></script>
 <script>
 /* Pure logic for the owner console, kept free of Firebase so it can be tested
    on its own. */
 const OwnerLogic = (function(){
   const DOMAINS = CompanyCore.DOMAINS;
-  // New companies start with every skill area ranked in the framework's own
-  // order. The ranking only breaks ties in a member's recommendations, so a
-  // company that wants real emphasis moves its chosen areas to the top.
-  const DEFAULT_FOCUS_ORDER = DOMAINS.map(d => d[0]);
-
   const labels = {};
   DOMAINS.forEach(d => { labels[d[0]] = d[1]; });
   const EMAIL_RE = CompanyCore.EMAIL_RE;
   // Invite, people and spreadsheet helpers live in company-core.js, shared with company.html.
   const { parseInviteLines, classifyInvites, inviteStatus, seatInfo, buildPeopleRows, csvCell, buildInviteCsv,
-    randomToken, prettyCourseId } = CompanyCore;
+    randomToken, prettyCourseId, DEFAULT_FOCUS_ORDER, moveItem, availableFocus, placeFocus, removeFocus } = CompanyCore;
 
   function domainLabel(key){ return labels[key] || key; }
 
@@ -173,28 +142,6 @@ const OwnerLogic = (function(){
     };
   }
 
-  function moveItem(list, index, delta){
-    const target = index + delta;
-    if (index < 0 || index >= list.length || target < 0 || target >= list.length) return list.slice();
-    const copy = list.slice();
-    const tmp = copy[index]; copy[index] = copy[target]; copy[target] = tmp;
-    return copy;
-  }
-
-  function availableFocus(list){
-    return DOMAINS.map(d => d[0]).filter(k => list.indexOf(k) === -1);
-  }
-
-  function placeFocus(list, key, index){
-    if (!(key in labels)) return list.slice();
-    const without = list.filter(k => k !== key);
-    const i = Math.max(0, Math.min(index, without.length));
-    without.splice(i, 0, key);
-    return without;
-  }
-
-  function removeFocus(list, key){ return list.filter(k => k !== key); }
-
   function describePlan(plan, seatLimit){
     if (plan === 'seat') return (seatLimit || 0) + ' seat' + (seatLimit === 1 ? '' : 's');
     return 'Flat enterprise';
@@ -237,124 +184,6 @@ const OwnerLogic = (function(){
     buildInviteCsv, csvCell, randomToken, EMAIL_RE, summarizeShare, prettyCourseId };
 })();
 
-/* The ranking board: a numbered "Priority order" list and a "Not a priority"
-   bucket. Dragging is handled by the Sortable library (smooth, animated, and it
-   works with a finger as well as a mouse); the arrow, + and x buttons do the
-   same thing for keyboards. It only edits a list of keys through
-   getList/setList, so it knows nothing about Firebase. */
-const FocusBoard = (function(){
-  let rankedEl, bucketEl, getList, setList, defaultOrder;
-
-  function change(next){ setList(next); render(); }
-
-  function button(text, title, disabled, onClick){
-    const b = document.createElement('button');
-    b.type = 'button';
-    b.className = 'icon-btn';
-    b.textContent = text;
-    b.title = title;
-    b.setAttribute('aria-label', title);
-    b.disabled = !!disabled;
-    b.addEventListener('click', onClick);
-    return b;
-  }
-
-  function makeItem(key, rankIndex, total){
-    const li = document.createElement('li');
-    li.className = 'focus-item';
-    li.dataset.key = key;
-
-    const grip = document.createElement('span');
-    grip.className = 'focus-grip';
-    grip.textContent = '⠿';
-    li.appendChild(grip);
-
-    if (rankIndex >= 0){
-      const rank = document.createElement('span');
-      rank.className = 'focus-rank';
-      rank.textContent = String(rankIndex + 1);
-      li.appendChild(rank);
-    }
-
-    const name = document.createElement('span');
-    name.className = 'focus-name';
-    name.textContent = OwnerLogic.domainLabel(key);
-    li.appendChild(name);
-
-    if (rankIndex >= 0){
-      li.appendChild(button('↑', 'Move up', rankIndex === 0, () => change(OwnerLogic.moveItem(getList(), rankIndex, -1))));
-      li.appendChild(button('↓', 'Move down', rankIndex === total - 1, () => change(OwnerLogic.moveItem(getList(), rankIndex, 1))));
-      li.appendChild(button('✕', 'Remove from priorities', false, () => change(OwnerLogic.removeFocus(getList(), key))));
-    } else {
-      li.appendChild(button('+', 'Add to priorities', false, () => change(OwnerLogic.placeFocus(getList(), key, getList().length))));
-    }
-    return li;
-  }
-
-  function placeholder(text){
-    const li = document.createElement('li');
-    li.className = 'focus-placeholder';
-    li.textContent = text;
-    return li;
-  }
-
-  function render(){
-    const list = getList();
-    rankedEl.innerHTML = '';
-    bucketEl.innerHTML = '';
-    if (!list.length) rankedEl.appendChild(placeholder('Drag skill areas here, most important first.'));
-    list.forEach((key, i) => rankedEl.appendChild(makeItem(key, i, list.length)));
-    const rest = OwnerLogic.availableFocus(list);
-    if (!rest.length) bucketEl.appendChild(placeholder('Every skill area is ranked.'));
-    rest.forEach(key => bucketEl.appendChild(makeItem(key, -1, 0)));
-  }
-
-  // After any drop, the ranked list on screen IS the new ranking.
-  function readRanked(){
-    return Array.prototype.map.call(rankedEl.querySelectorAll('.focus-item'), li => li.dataset.key);
-  }
-
-  function onDragEnd(){
-    const next = readRanked();
-    setTimeout(() => { setList(next); render(); }, 0);
-  }
-
-  function init(opts){
-    rankedEl = opts.rankedEl;
-    bucketEl = opts.bucketEl;
-    getList = opts.getList;
-    setList = opts.setList;
-    defaultOrder = opts.defaultOrder || [];
-    if (window.Sortable){
-      const common = {
-        group: 'focus',
-        draggable: '.focus-item',
-        animation: 180,
-        easing: 'cubic-bezier(0.2, 0.8, 0.2, 1)',
-        forceFallback: true,
-        fallbackOnBody: true,
-        fallbackTolerance: 3,
-        filter: '.icon-btn',
-        preventOnFilter: false,
-        ghostClass: 'focus-ghost',
-        chosenClass: 'focus-chosen',
-        dragClass: 'focus-drag',
-        delay: 120,
-        delayOnTouchOnly: true,
-        touchStartThreshold: 4,
-        emptyInsertThreshold: 30,
-        onEnd: onDragEnd
-      };
-      Sortable.create(rankedEl, common);
-      Sortable.create(bucketEl, Object.assign({}, common, { sort: false }));
-    }
-    render();
-  }
-
-  function resetToDefault(){ change(defaultOrder.slice()); }
-
-  return { init, render, resetToDefault };
-})();
 </script>
 </head>
 <body>
@@ -638,7 +467,7 @@ const firebaseConfig = {
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
 import {
-  getFirestore, doc, getDoc, getDocs, addDoc, updateDoc, collection, query, where, writeBatch,
+  getFirestore, doc, getDoc, getDocs, setDoc, addDoc, updateDoc, collection, query, where, writeBatch,
   getCountFromServer, serverTimestamp, Timestamp
 } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
 
@@ -923,15 +752,23 @@ $('saveBtn').addEventListener('click', async () => {
   try {
     if (formMode === 'edit'){
       const id = editingId;
-      await updateDoc(doc(db, 'orgs', id), Object.assign({}, fields, { updatedAt: serverTimestamp() }));
+      // The company record and its member-readable focus copy are saved together.
+      const editBatch = writeBatch(db);
+      editBatch.update(doc(db, 'orgs', id), Object.assign({}, fields, { updatedAt: serverTimestamp() }));
+      editBatch.set(doc(db, 'orgFocus', id), { focusAreas: fields.focusAreas, updatedAt: serverTimestamp() });
+      await editBatch.commit();
       formMode = null; editingId = null;
       await loadOrgs();
       if (location.hash === '#company=' + id) showDetail(id); else location.hash = '#company=' + id;
       $('detailNotice').textContent = 'Saved changes.';
     } else {
-      const ref = await addDoc(collection(db, 'orgs'), Object.assign({}, fields, {
+      const ref = doc(collection(db, 'orgs'));
+      const createBatch = writeBatch(db);
+      createBatch.set(ref, Object.assign({}, fields, {
         status: 'active', createdAt: serverTimestamp(), createdBy: currentUser.uid, updatedAt: serverTimestamp()
       }));
+      createBatch.set(doc(db, 'orgFocus', ref.id), { focusAreas: fields.focusAreas, updatedAt: serverTimestamp() });
+      await createBatch.commit();
       formMode = null;
       await loadOrgs();
       newLinks = [];
@@ -1002,6 +839,21 @@ async function showDetail(id){
     return;
   }
   renderDetail();
+  syncFocusCopy(currentOrg());
+}
+
+/* Companies created before the member-readable focus copy existed get it the
+   first time the owner opens them. Best effort: nothing depends on it here. */
+async function syncFocusCopy(org){
+  if (!org) return;
+  try {
+    const want = (org.focusAreas || []).slice();
+    const snap = await getDoc(doc(db, 'orgFocus', org.id));
+    if (snap.exists() && (snap.data().focusAreas || []).join() === want.join()) return;
+    await setDoc(doc(db, 'orgFocus', org.id), { focusAreas: want, updatedAt: serverTimestamp() });
+  } catch (err){
+    console.error('Could not update the focus copy:', err);
+  }
 }
 
 function activeCountNow(){

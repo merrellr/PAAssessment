@@ -80,8 +80,19 @@ when volume outgrows the free tier) and writes `blocked:` rows to the
   mean, and the numbers). Progress is counted against each course's real lesson
   count, in `LESSON_COUNTS`; `tests/company-core.test.mjs` fails if a course in
   `content/` gains or loses a lesson without that table being updated.
-- Not built yet: focus areas shaping recommendations (admins editing the ranked
-  list), and removing members.
+- Company focus: the company's ranked list of skill areas (`orgs/{id}.focusAreas`,
+  default = the framework's order). Company admins and the owner edit it by
+  dragging (`focus-board.js` / `.css`, shared with the owner console) on the
+  **Our focus** card of `company.html`, which also shows the team's progress on
+  the top three ranked areas. Members cannot read the company record (it holds
+  contacts and billing), so every save also writes a copy to `orgFocus/{id}`,
+  which active members can read; the rules refuse a copy that does not match the
+  company's list. On the learner dashboard the list only **breaks ties** between
+  skill areas that have equally many courses left, and only once a company has
+  chosen something other than the standard order; the lowest score still decides
+  last, and nobody's other gaps are hidden. Companies made before the copy existed
+  get it the first time their admin or the owner opens them.
+- Not built yet: removing members.
 - Tests: see `tests/README.md`.
 
 ## Closing an account

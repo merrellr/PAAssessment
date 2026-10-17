@@ -1,8 +1,10 @@
 // Firestore rules for project product-advisory-lms.
 //
-// STATUS: this whole file is published in the console (checkpoint 3 of the
-// company-accounts build). Checkpoint 4, the company admin dashboard, needs no
-// rule changes: it only uses what admins were already allowed to do below.
+// STATUS: everything down to the shared-record rules is published in the console
+// (checkpoint 3 of the company-accounts build; checkpoint 4 needed no changes).
+// The orgFocus rules at the very bottom (checkpoint 5) are NEW and only take
+// effect once this whole file is pasted into the console Rules tab and
+// published. Update this status line when that is done.
 //
 // Editing this file does NOT change the live rules. Paste the whole file into
 // the console Rules tab and click Publish, so the two stay identical. These
@@ -23,6 +25,8 @@
 //   Active member:      writes their own shared record (orgs/{orgId}/members/
 //                       {uid}) for their current company; company admins and
 //                       the platform owner can read it, nobody else can.
+//   Company focus list: a copy of the company's ranked focus areas that its
+//                       active members can read (see orgFocus below).
 //   Everything else is denied by default.
 rules_version = '2';
 service cloud.firestore {
@@ -237,6 +241,28 @@ service cloud.firestore {
         && request.resource.data.identity == null
         && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['identity', 'updatedAt'])
         && request.resource.data.updatedAt == request.time;
+
+      allow delete: if false;
+    }
+
+    // ------------------------------------------------------ company focus list
+    // The company's ranked focus areas, copied from orgs/{orgId}.focusAreas into a
+    // document that its ACTIVE MEMBERS may read (members cannot read the company
+    // record itself, which holds contacts, billing and notes). The learner
+    // dashboard uses it only to break ties between equally good recommendations.
+    // It can only be written together with the company record: the rule below
+    // refuses any copy that does not match the company's own list.
+    match /orgFocus/{orgId} {
+      allow get: if isPlatformOwner() || isActiveAdminOf(orgId) || isActiveMemberOf(orgId);
+
+      allow create, update: if (isPlatformOwner() || isActiveAdminOf(orgId))
+        && request.resource.data.keys().hasOnly(['focusAreas', 'updatedAt'])
+        && request.resource.data.focusAreas is list
+        && request.resource.data.focusAreas.size() <= 7
+        && request.resource.data.focusAreas.hasOnly(['discovery', 'strategy', 'prioritization', 'execution', 'stakeholder', 'aiIndividual', 'aiOrg'])
+        && request.resource.data.focusAreas.toSet().size() == request.resource.data.focusAreas.size()
+        && request.resource.data.updatedAt == request.time
+        && getAfter(/databases/$(database)/documents/orgs/$(orgId)).data.focusAreas == request.resource.data.focusAreas;
 
       allow delete: if false;
     }

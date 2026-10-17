@@ -73,7 +73,10 @@ export class GoogleAuthProvider {}
 export async function signInWithPopup(){ window.__fakeUser = { uid: 'uGoogle', email: 'g@x.com', displayName: 'G User' }; if (authCb) authCb(window.__fakeUser); return { user: window.__fakeUser }; }
 export function getAdditionalUserInfo(){ return { isNewUser: false }; }
 export function getFirestore(){ return {}; }
-export function doc(db, ...segs){ const path = segs.join('/'); return { path, id: segs[segs.length - 1] }; }
+export function doc(db, ...segs){
+  // doc(collectionRef) makes a new document id, as in the real SDK
+  if (db && db.col && segs.length === 0){ const id = 'auto' + (++counter); return { path: db.col + '/' + id, id }; }
+  const path = segs.join('/'); return { path, id: segs[segs.length - 1] }; }
 export function collection(db, ...segs){ return { col: segs.join('/') }; }
 export function where(f, op, v){ return { f, op, v }; }
 export function query(c, ...wheres){ return { col: c.col, wheres }; }

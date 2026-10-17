@@ -18,6 +18,24 @@ const sleep = (ms) => new Promise(r => setTimeout(r, ms));
       const writes = window.__writeLog.filter(w => w.path === 'orgs/orgA/members/uDash').length;
       t('exactly one write for the shared record on this visit', writes === 1, String(writes));
     }
+    const chips = Array.prototype.map.call(document.querySelectorAll('#recChips .rec-chip'), c => c.textContent.trim());
+    // Four areas are tied for the most work left (3 courses each): AI Org (35%), Discovery (40%), AI Individual (45%), Strategy (50%).
+    // Without a ranking the lowest scores win; with a customised company ranking the ranking breaks the tie.
+    if (window.__scn === 'member' || window.__scn === 'focusdefault'){
+      t('with no company ranking (or just the untouched standard order) the two lowest scores are recommended, as before',
+        chips.length === 2 && /Organizational/.test(chips[0]) && /Customer & Market Discovery/.test(chips[1]) && chips.every(c => !/company priority/.test(c)), chips.join(' | '));
+    }
+    if (window.__scn === 'focus'){
+      t('a customised company ranking breaks the tie: its top areas are recommended first',
+        chips.length === 2 && /Product Strategy/.test(chips[0]) && /AI Fluency — Individual/.test(chips[1]), chips.join(' | '));
+      t('and each is marked as a company priority', chips.every(c => /company priority/.test(c)), chips.join(' | '));
+    }
+    if (window.__scn === 'admin' || window.__scn === 'plain' || window.__scn === 'removed' || window.__scn === 'owner'){
+      t('people with no (active) company ranking get the normal recommendations', chips.length === 2 && /Organizational/.test(chips[0]) && chips.every(c => !/company priority/.test(c)), chips.join(' | '));
+    }
+    const doneStat = document.getElementById('statAssignedCompleted').textContent.trim();
+    if (window.__scn === 'threelessons') t('3 of a course\'s 5 lessons does NOT count as a finished course', doneStat === '0', doneStat);
+    if (window.__scn === 'allfive') t('all 5 of its 5 lessons does', doneStat === '1', doneStat);
     const companyLink = document.getElementById('companyDashMenuItem');
     if (window.__scn === 'admin'){
       t('a company admin sees "Company dashboard" under Profile, pointing at company.html', companyLink.style.display === 'block' && companyLink.getAttribute('href') === 'company.html');

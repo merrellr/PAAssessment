@@ -121,7 +121,10 @@
   .foot-note{ font-size: 12.5px; color: var(--gray); line-height: 1.55; }
 </style>
 
+<link rel="stylesheet" href="focus-board.css">
+<script src="vendor/Sortable.min.js"></script>
 <script src="company-core.js"></script>
+<script src="focus-board.js"></script>
 </head>
 <body>
 <div class="wrap">
@@ -180,6 +183,40 @@
       </div>
       <div class="tiles" id="tiles"></div>
       <div class="split" id="rollupCharts"></div>
+    </div>
+
+    <div class="card" id="focusCard">
+      <div class="section-head">
+        <div>
+          <h2>Our focus</h2>
+          <div class="hint" style="margin:4px 0 0;" id="focusHint"></div>
+        </div>
+        <div class="btn-row">
+          <button class="btn btn-ghost btn-small" id="focusEditBtn" type="button">Edit priorities</button>
+        </div>
+      </div>
+      <div id="focusSummary"></div>
+
+      <div id="focusEditor" style="display:none; margin-top:18px;">
+        <h3 style="margin-top:0;">Priority order</h3>
+        <div class="hint">Drag skill areas into <strong>Priority order</strong>, most important at the top, or use the arrow and + buttons. When two areas are equally good next steps for someone, the higher-ranked one is recommended first. It never hides a person's other gaps.</div>
+        <div class="focus-board">
+          <div class="focus-col">
+            <div class="focus-col-title">Priority order</div>
+            <ul class="focus-list" id="focusRanked"></ul>
+          </div>
+          <div class="focus-col">
+            <div class="focus-col-title">Not a priority</div>
+            <ul class="focus-list" id="focusBucket"></ul>
+          </div>
+        </div>
+        <div class="field-error" id="focusError"></div>
+        <div class="btn-row">
+          <button class="btn btn-primary btn-small" id="focusSaveBtn" type="button">Save priorities</button>
+          <button class="btn btn-ghost btn-small" id="focusResetBtn" type="button">Reset to default order</button>
+          <button class="btn btn-ghost btn-small" id="focusCancelBtn" type="button">Cancel</button>
+        </div>
+      </div>
     </div>
 
     <div class="card">
@@ -322,7 +359,7 @@ const firebaseConfig = {
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
 import {
-  getFirestore, doc, getDoc, getDocs, updateDoc, collection, query, where, writeBatch,
+  getFirestore, doc, getDoc, getDocs, setDoc, updateDoc, collection, query, where, writeBatch,
   serverTimestamp, Timestamp
 } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
 
@@ -427,6 +464,7 @@ onAuthStateChanged(auth, async (user) => {
   if (!ok) return;
   showOnly('page');
   renderAll();
+  syncFocusCopy();
 });
 
 /* ------------------------------------------------------------------ loading */
@@ -483,6 +521,7 @@ function renderAll(){
   teamRows = C.buildTeamRows(data.memberships, data.shares, Date.now());
   renderHeader();
   renderRollup();
+  renderFocus();
   renderTeam();
   renderInvites();
   renderFormer();
@@ -578,6 +617,102 @@ function renderRollup(){
     });
   }
   charts.appendChild(areas);
+}
+
+/* -------------------------------------------------------------- our focus */
+let editingFocus = false;
+let focusDraft = [];
+let boardReady = false;
+
+function renderFocus(){
+  const list = org.focusAreas || [];
+  const fp = C.focusProgress(activeRows(), list);
+  $('focusEditBtn').style.display = (isArchived() || editingFocus) ? 'none' : 'inline-block';
+  $('focusHint').textContent = fp.custom
+    ? 'Your priorities shape what each person is recommended next, and this shows how the team is doing on them.'
+    : "These are in the standard order, so recommendations are not tilted towards anything yet. Edit the priorities to choose what matters most.";
+
+  const box = $('focusSummary');
+  box.innerHTML = '';
+  if (!list.length){
+    box.appendChild(el('p', { class: 'empty', text: 'No priorities set.' }));
+  } else {
+    const names = fp.top.keys.map(C.domainLabel).join(', ');
+    box.appendChild(el('p', { style: 'margin:0 0 12px;' },
+      el('strong', { text: fp.top.pct === null ? 'Progress on our focus: —' : 'Progress on our focus: ' + fp.top.pct + '%' }),
+      el('span', { class: 'cell-sub', style: 'display:block;',
+        text: fp.top.pct === null
+          ? 'Appears once people have taken the assessment.'
+          : fp.top.done + ' of ' + fp.top.total + ' assigned lessons done in the top ' + plural(fp.top.keys.length, 'area') + ' (' + names + ').' })));
+    fp.areas.forEach(a => {
+      box.appendChild(el('div', { class: 'barrow' },
+        el('div', null, a.rank + '. ' + a.label, a.rank <= C.FOCUS_TOP ? el('span', { class: 'tag', text: 'Counts towards our focus' }) : null),
+        el('div', { class: 'track', role: 'img', 'aria-label': a.label + ': ' + (a.pct === null ? 'no data yet' : a.pct + ' percent of assigned lessons done') },
+          el('span', { class: 'fill', style: 'width:' + (a.pct || 0) + '%;' })),
+        el('div', { class: 'val', text: a.pct === null ? '—' : a.pct + '%' })));
+    });
+  }
+  $('focusEditor').style.display = editingFocus ? 'block' : 'none';
+}
+
+function openFocusEditor(){
+  focusDraft = (org.focusAreas || []).slice();
+  editingFocus = true;
+  $('focusError').textContent = '';
+  if (!boardReady){
+    FocusBoard.init({
+      rankedEl: $('focusRanked'), bucketEl: $('focusBucket'),
+      getList: () => focusDraft, setList: (next) => { focusDraft = next; },
+      defaultOrder: C.DEFAULT_FOCUS_ORDER
+    });
+    boardReady = true;
+  } else {
+    FocusBoard.render();
+  }
+  renderFocus();
+}
+
+$('focusEditBtn').addEventListener('click', openFocusEditor);
+$('focusCancelBtn').addEventListener('click', () => { editingFocus = false; renderFocus(); });
+$('focusResetBtn').addEventListener('click', () => FocusBoard.resetToDefault());
+
+$('focusSaveBtn').addEventListener('click', async () => {
+  $('focusError').textContent = '';
+  $('notice').textContent = '';
+  if (isArchived()){ $('focusError').textContent = 'This company is archived, so priorities cannot be changed.'; return; }
+  $('focusSaveBtn').disabled = true;
+  try {
+    // The company record and its member-readable copy are saved together.
+    const batch = writeBatch(db);
+    batch.update(doc(db, 'orgs', org.id), { focusAreas: focusDraft.slice(), updatedAt: serverTimestamp() });
+    batch.set(doc(db, 'orgFocus', org.id), { focusAreas: focusDraft.slice(), updatedAt: serverTimestamp() });
+    await batch.commit();
+    org.focusAreas = focusDraft.slice();
+    editingFocus = false;
+    renderHeader();
+    renderFocus();
+    $('notice').textContent = 'Priorities saved. Your team\'s recommendations now use this order.';
+  } catch (err){
+    console.error('Could not save priorities:', err);
+    $('focusError').textContent = err && err.code === 'permission-denied'
+      ? 'The security rules refused this. Ask the platform owner to check that the latest rules are published.'
+      : 'Something went wrong saving, please try again.';
+  } finally {
+    $('focusSaveBtn').disabled = false;
+  }
+});
+
+/* Companies set up before members could read the focus list get their copy the
+   first time an admin or the owner opens this page. Best effort. */
+async function syncFocusCopy(){
+  try {
+    const want = (org.focusAreas || []).slice();
+    const snap = await getDoc(doc(db, 'orgFocus', org.id));
+    if (snap.exists() && (snap.data().focusAreas || []).join() === want.join()) return;
+    await setDoc(doc(db, 'orgFocus', org.id), { focusAreas: want, updatedAt: serverTimestamp() });
+  } catch (err){
+    console.error('Could not update the focus copy:', err);
+  }
 }
 
 /* ------------------------------------------------------------------- people */

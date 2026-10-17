@@ -133,6 +133,34 @@ console.log('--- roll-up ---');
   t('an empty team has no averages and no crash', empty.people === 0 && empty.avgOverall === null && empty.weakest === null && empty.domains.every(d => d.avg === null));
 }
 
+console.log('--- focus areas ---');
+{
+  const std = C.DEFAULT_FOCUS_ORDER;
+  t('the standard order is the framework order, all seven', std.join() === 'discovery,strategy,prioritization,execution,stakeholder,aiIndividual,aiOrg');
+  t('the standard order is NOT a customised ranking (so it changes nothing)', C.focusIsCustom(std) === false);
+  t('an empty list is not customised either', C.focusIsCustom([]) === false && C.focusIsCustom(null) === false && C.focusIsCustom(undefined) === false);
+  t('any other order is customised', C.focusIsCustom(['aiOrg']) === true && C.focusIsCustom(std.slice().reverse()) === true);
+  t('rank 0 is the top; unranked areas come after every ranked one', C.focusRank(['b', 'a'], 'b') === 0 && C.focusRank(['b', 'a'], 'a') === 1 && C.focusRank(['b', 'a'], 'zzz') === 99 && C.focusRank(null, 'a') === 99);
+  t('moving, adding and removing keep the list valid', same(C.moveItem(['a', 'b', 'c'], 0, 1), ['b', 'a', 'c']) && same(C.moveItem(['a'], 0, -1), ['a']));
+  t('placing an area puts it where asked and never duplicates it', same(C.placeFocus(['discovery', 'strategy'], 'aiOrg', 1), ['discovery', 'aiOrg', 'strategy']) && same(C.placeFocus(['discovery', 'strategy'], 'strategy', 0), ['strategy', 'discovery']));
+  t('an unknown area cannot be placed', same(C.placeFocus(['discovery'], 'nope', 0), ['discovery']));
+  t('areas not in the list are offered back', same(C.availableFocus(['discovery', 'aiOrg']), ['strategy', 'prioritization', 'execution', 'stakeholder', 'aiIndividual']));
+  t('removing drops just that area', same(C.removeFocus(['discovery', 'aiOrg'], 'aiOrg'), ['discovery']));
+
+  const fp = C.focusProgress(active, ['aiOrg', 'discovery', 'strategy', 'prioritization']);
+  t('progress is listed in the company\'s order with ranks', same(fp.areas.map(a => a.key + ':' + a.rank), ['aiOrg:1', 'discovery:2', 'strategy:3', 'prioritization:4']));
+  const disc = fp.areas.find(a => a.key === 'discovery');
+  // Ann: discovery-advanced, 5 of 5 done. Ben: all four discovery levels, 21 lessons, 0 done. The deleted account: moderate and up, 16 lessons, 1 done.
+  t('lessons done and assigned are added up over assessed people only', disc.total === 5 + 21 + 16 && disc.done === 5 + 0 + 1, JSON.stringify(disc));
+  t('area percentage', disc.pct === Math.round(6 / 42 * 100));
+  t('the headline figure covers the top three ranked areas only', same(fp.top.keys, ['aiOrg', 'discovery', 'strategy']) && fp.top.done === fp.areas.slice(0, 3).reduce((s, a) => s + a.done, 0) && fp.top.total === fp.areas.slice(0, 3).reduce((s, a) => s + a.total, 0));
+  t('it is flagged as customised', fp.custom === true);
+  t('people who have not taken the assessment are not counted', fp.assessed === 3);
+  const none = C.focusProgress([], ['discovery']);
+  t('with nobody assessed there is no percentage and no crash', none.top.pct === null && none.areas[0].pct === null);
+  t('with no priorities there is nothing to report', C.focusProgress(active, []).areas.length === 0 && C.focusProgress(active, []).top.pct === null);
+}
+
 console.log('--- spreadsheet exports ---');
 {
   const csv = C.buildTeamCsv(rows);

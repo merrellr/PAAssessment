@@ -90,6 +90,7 @@ async function readBlob(d){ return await d.blob.text(); }
       t('roll-up counts one person who has not taken the assessment', tileNum('People') === '1' && /1 have not/.test($('tiles').textContent), $('tiles').textContent);
       t('charts say there are no assessments yet instead of drawing empty bars', /No assessments yet/.test($('rollupCharts').textContent) && !$('rollupCharts').querySelector('.stackbar'));
       t('no former members card', !vis('formerCard'));
+      t('with nobody assessed, the focus card shows no percentage yet and says why', /Progress on our focus: —/.test(txt('focusSummary')) && /once people have taken the assessment/.test(txt('focusSummary')), txt('focusSummary'));
       t('both download buttons: team report enabled, answers disabled (no answers)', $('csvTeamBtn').disabled === false && $('csvAnswersBtn').disabled === true);
       t('invitations list is empty with a friendly message', /No invitations waiting/.test($('inviteWrap').textContent));
     } else if (scn === 'archived'){
@@ -98,6 +99,7 @@ async function readBlob(d){ return await d.blob.text(); }
       const r = rowFor('inviteWrap', 'newone@acme.com');
       t('pending invitations can be seen but not acted on', !!r && r.querySelectorAll('button').length === 0, r && textOf(r));
       t('people and results are still readable', rowsIn('teamWrap').length === 6);
+      t('priorities can be seen but not edited', $('focusEditBtn').style.display === 'none' && /Progress on our focus/.test(txt('focusSummary')));
     } else if (scn === 'owner'){
       t('the owner can open a company by its id', shown() === 'page' && txt('orgName') === 'Acme Health', shown());
       t('with a banner saying they are viewing as the owner and a way back', vis('ownerBanner') && $('ownerBackLink').style.display !== 'none');
@@ -284,6 +286,60 @@ async function readBlob(d){ return await d.blob.text(); }
       window.__store['memberships/uCy'].status = 'removed';
       $('refreshBtn').click(); await sleep(200);
       t('Refresh re-reads everything: Cy moves to former members', !rowFor('teamWrap', 'Cy C') && /Cy C/.test($('formerWrap').textContent) && /Updated/.test(txt('notice')), txt('notice'));
+
+      /* ---------------- our focus ---------------- */
+      const focusText = txt('focusSummary');
+      t('"Progress on our focus" counts the top three ranked areas: 22 of 222 assigned lessons is 10%',
+        /Progress on our focus: 10%/.test(focusText) && /22 of 222 assigned lessons done in the top 3 areas \(AI Fluency — Organizational, Customer & Market Discovery, Product Strategy & Roadmapping\)/.test(focusText), focusText);
+      const fbars = Array.prototype.slice.call($('focusSummary').querySelectorAll('.barrow'));
+      t('every ranked area has a row in the company\'s order, with its own percentage', fbars.length === 7 && /1\. AI Fluency — Organizational/.test(textOf(fbars[0])) && /6%/.test(textOf(fbars[0])) && /2\. Customer & Market Discovery/.test(textOf(fbars[1])) && /18%/.test(textOf(fbars[1])) && /3\. Product Strategy/.test(textOf(fbars[2])) && /7%/.test(textOf(fbars[2])), fbars.map(textOf).join(' | '));
+      t('only the top three are marked as counting towards the focus', fbars.slice(0, 3).every(b => /Counts towards our focus/.test(textOf(b))) && fbars.slice(3).every(b => !/Counts towards/.test(textOf(b))));
+      t('the hint explains that the priorities are in use', /shape what each person is recommended/.test(txt('focusHint')), txt('focusHint'));
+      t('the editor starts closed', $('focusEditor').style.display === 'none' && $('focusEditBtn').style.display !== 'none');
+
+      const rankedKeys = () => Array.prototype.map.call($('focusRanked').querySelectorAll('.focus-item'), li => li.dataset.key);
+      const bucketKeys = () => Array.prototype.map.call($('focusBucket').querySelectorAll('.focus-item'), li => li.dataset.key);
+      $('focusEditBtn').click(); await sleep(80);
+      t('Edit priorities opens the board with the saved order', $('focusEditor').style.display === 'block' && rankedKeys().join() === 'aiOrg,discovery,strategy,prioritization,execution,stakeholder,aiIndividual', rankedKeys().join());
+      $('focusRanked').querySelectorAll('.focus-item')[1].querySelector('.icon-btn[title="Move up"]').click(); await sleep(60);
+      t('moving an area up reorders the board', rankedKeys()[0] === 'discovery' && rankedKeys()[1] === 'aiOrg', rankedKeys().join());
+      $('focusCancelBtn').click(); await sleep(40);
+      t('Cancel closes the editor and saves nothing', $('focusEditor').style.display === 'none' && window.__store['orgs/orgA'].focusAreas[0] === 'aiOrg' && window.__store['orgFocus/orgA'].focusAreas[0] === 'aiOrg');
+
+      $('focusEditBtn').click(); await sleep(60);
+      t('reopening starts again from the saved order, not the abandoned edit', rankedKeys()[0] === 'aiOrg', rankedKeys().join());
+      $('focusRanked').querySelectorAll('.focus-item')[1].querySelector('.icon-btn[title="Move up"]').click(); await sleep(60);
+      const lastItem = Array.prototype.slice.call($('focusRanked').querySelectorAll('.focus-item')).pop();
+      lastItem.querySelector('.icon-btn[title="Remove from priorities"]').click(); await sleep(60);
+      t('removing an area moves it to "Not a priority"', bucketKeys().join() === 'aiIndividual' && rankedKeys().length === 6, bucketKeys().join());
+      const orgBefore = JSON.parse(JSON.stringify(window.__store['orgs/orgA']));
+      window.__writeLog.length = 0;
+      $('focusSaveBtn').click(); await until(() => $('focusEditor').style.display === 'none'); await sleep(80);
+      const savedOrg = window.__store['orgs/orgA'], savedCopy = window.__store['orgFocus/orgA'];
+      t('saving updates the company record and the member-readable copy to the new order', savedOrg.focusAreas.join() === 'discovery,aiOrg,strategy,prioritization,execution,stakeholder' && savedCopy.focusAreas.join() === savedOrg.focusAreas.join(), savedOrg.focusAreas.join());
+      t('nothing else on the company record changed (name, plan, seats, notes, contacts, billing)', ['name', 'plan', 'seatLimit', 'notes', 'contactName', 'contactEmail', 'contactPhone', 'billingAddress', 'status'].every(k => savedOrg[k] === orgBefore[k]));
+      t('only those two documents were written', window.__writeLog.map(w => w.op + ':' + w.path).sort().join() === 'set:orgFocus/orgA,update:orgs/orgA', window.__writeLog.map(w => w.op + ':' + w.path).join());
+      t('the page confirms, and the header and progress rows follow the new order', /Priorities saved/.test(txt('notice')) && /1\. Customer & Market Discovery/.test(txt('orgSummary')) && /1\. Customer & Market Discovery/.test(textOf($('focusSummary').querySelector('.barrow'))) && $('focusSummary').querySelectorAll('.barrow').length === 6, txt('notice'));
+
+      $('focusEditBtn').click(); await sleep(60);
+      $('focusResetBtn').click(); await sleep(60);
+      t('"Reset to default order" restores the standard ranking of all seven', rankedKeys().join() === 'discovery,strategy,prioritization,execution,stakeholder,aiIndividual,aiOrg' && bucketKeys().length === 0, rankedKeys().join());
+      $('focusSaveBtn').click(); await until(() => $('focusEditor').style.display === 'none'); await sleep(80);
+      t('saving the standard order stores it, and the page says it changes nothing yet', window.__store['orgFocus/orgA'].focusAreas.join() === 'discovery,strategy,prioritization,execution,stakeholder,aiIndividual,aiOrg' && /standard order, so recommendations are not tilted/.test(txt('focusHint')), txt('focusHint'));
+
+      $('focusEditBtn').click(); await sleep(60);
+      $('focusRanked').querySelectorAll('.focus-item')[1].querySelector('.icon-btn[title="Move up"]').click(); await sleep(60);
+      window.__failCommit = 'permission-denied';
+      $('focusSaveBtn').click(); await sleep(150);
+      t('a refusal by the security rules shows a plain message and keeps the editor open', /security rules refused/.test(txt('focusError')) && $('focusEditor').style.display === 'block', txt('focusError'));
+      t('and nothing was saved', window.__store['orgFocus/orgA'].focusAreas[0] === 'discovery' && window.__store['orgs/orgA'].focusAreas[0] === 'discovery');
+      window.__failCommit = null;
+      $('focusCancelBtn').click();
+    } else if (scn === 'nocopy'){
+      t('the page opens', shown() === 'page');
+      await sleep(150);
+      const copy = window.__store['orgFocus/orgA'];
+      t('a company made before the member-readable copy existed gets one when its admin opens the page', !!copy && copy.focusAreas.join() === window.__store['orgs/orgA'].focusAreas.join() && !!copy.updatedAt, JSON.stringify(copy));
     } else if (scn === 'sharesdenied'){
       t('if shared records cannot be read, the people list still shows', shown() === 'page' && rowsIn('teamWrap').length === 6);
       t('and each person simply shows nothing shared yet', /Nothing shared yet/.test(textOf(rowFor('teamWrap', 'Ben B'))));

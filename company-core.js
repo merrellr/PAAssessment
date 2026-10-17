@@ -333,6 +333,76 @@
     return out;
   }
 
+  /* ----------------------------------------------------------- focus areas */
+  // New companies start with every skill area ranked in the framework's own
+  // order. The ranking only breaks ties in a member's recommendations, so a
+  // company that wants real emphasis moves its chosen areas to the top.
+  const DEFAULT_FOCUS_ORDER = DOMAINS.map(d => d[0]);
+  const FOCUS_TOP = 3;   // "our focus" for the progress number = the top three ranked areas
+
+  function moveItem(list, index, delta) {
+    const target = index + delta;
+    if (index < 0 || index >= list.length || target < 0 || target >= list.length) return list.slice();
+    const copy = list.slice();
+    const tmp = copy[index]; copy[index] = copy[target]; copy[target] = tmp;
+    return copy;
+  }
+
+  function availableFocus(list) {
+    return DOMAINS.map(d => d[0]).filter(k => list.indexOf(k) === -1);
+  }
+
+  function placeFocus(list, key, index) {
+    if (!(key in labels)) return list.slice();
+    const without = list.filter(k => k !== key);
+    const i = Math.max(0, Math.min(index, without.length));
+    without.splice(i, 0, key);
+    return without;
+  }
+
+  function removeFocus(list, key) { return list.filter(k => k !== key); }
+
+  // True when a company has actually chosen something: a list that is not
+  // empty and not just the standard order. Only then does it affect anyone's
+  // recommendations, so a company that never touched it changes nothing.
+  function focusIsCustom(list) {
+    return Array.isArray(list) && list.length > 0 && list.join() !== DEFAULT_FOCUS_ORDER.join();
+  }
+
+  // Where a skill area sits in a company's ranking (0 = top). Areas that are
+  // not ranked come after every ranked one.
+  function focusRank(list, key) {
+    const i = Array.isArray(list) ? list.indexOf(key) : -1;
+    return i === -1 ? 99 : i;
+  }
+
+  // "Progress on our focus": for each ranked area, how much of the team's
+  // assigned lessons in it are done, and one headline figure for the top areas.
+  // rows are the ACTIVE people with their progress worked out.
+  function focusProgress(rows, list) {
+    const areas = (list || []).map((key, i) => ({ key: key, label: domainLabel(key), rank: i + 1, done: 0, total: 0, pct: null }));
+    const byKey = {};
+    areas.forEach(a => { byKey[a.key] = a; });
+    let assessed = 0;
+    rows.forEach(r => {
+      const p = r.progress;
+      if (!p.assessed) return;
+      assessed++;
+      p.planCourses.forEach(c => {
+        const a = byKey[c.domain];
+        if (a) { a.done += c.done; a.total += c.lessons; }
+      });
+    });
+    areas.forEach(a => { a.pct = a.total > 0 ? Math.round(a.done / a.total * 100) : null; });
+    const top = areas.slice(0, FOCUS_TOP);
+    const done = top.reduce((s, a) => s + a.done, 0);
+    const total = top.reduce((s, a) => s + a.total, 0);
+    return {
+      areas: areas, assessed: assessed, custom: focusIsCustom(list),
+      top: { keys: top.map(a => a.key), done: done, total: total, pct: total > 0 ? Math.round(done / total * 100) : null }
+    };
+  }
+
   /* ---------------------------------------------------------- the exports */
   function isoDay(ms) {
     return ms ? new Date(ms).toISOString().slice(0, 10) : '';
@@ -377,6 +447,7 @@
     DOMAINS, EMAIL_RE, TIER_SLUGS, LEVEL_LABELS, LESSON_COUNTS, STATUS_LABELS, INACTIVE_DAYS,
     domainLabel, parseInviteLines, classifyInvites, inviteStatus, seatInfo, buildPeopleRows, randomToken,
     csvCell, buildInviteCsv, prettyCourseId, tierSlugForPct,
-    assignedCourses, lessonsDone, memberProgress, buildTeamRows, filterTeamRows, rollup, buildTeamCsv, buildAnswersCsv
+    assignedCourses, lessonsDone, memberProgress, buildTeamRows, filterTeamRows, rollup, buildTeamCsv, buildAnswersCsv,
+    DEFAULT_FOCUS_ORDER, FOCUS_TOP, moveItem, availableFocus, placeFocus, removeFocus, focusIsCustom, focusRank, focusProgress
   };
 })(typeof globalThis !== 'undefined' ? globalThis : window);
