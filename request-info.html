@@ -95,7 +95,7 @@
   </a>
   <div class="brand-accent-bar"></div>
 
-  <div class="banner" id="backendNote" hidden>Our request form is being set up, so it can't send your answers just yet. Fill it in anyway: at the end you'll get a ready-to-send email to <strong>rob@productadvisory.co</strong> with everything filled in.</div>
+  <div class="banner" id="backendNote" hidden>Our request form is being set up, so it can't send your answers just yet. Fill it in anyway: at the end you'll get a ready-to-send email to <strong class="contact-email"></strong> with everything filled in.</div>
 
   <div class="card" id="formCard">
     <div class="progress" id="progress" role="progressbar" aria-label="Progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><span id="progressFill" style="width:0%"></span></div>
@@ -130,7 +130,7 @@
       <a class="btn btn-primary" id="fallbackMail" href="#">Open the email, ready to send</a>
       <button class="btn btn-ghost" id="fallbackRetry" type="button">Try again</button>
     </div>
-    <p class="hint" style="margin-top:16px;">The email is addressed to rob@productadvisory.co with your answers already filled in. Nothing is lost.</p>
+    <p class="hint" style="margin-top:16px;">The email is addressed to <span class="contact-email"></span> with your answers already filled in. Nothing is lost.</p>
   </div>
 
   <p class="foot">We only use what you share here to reply to you. <a href="https://www.productadvisory.co/privacy-policy" target="_blank" rel="noopener">Privacy Policy</a> · <a href="https://www.productadvisory.co/terms-of-use" target="_blank" rel="noopener">Terms of Use</a></p>
@@ -303,6 +303,16 @@ function renderContact(stage){
     el('div', null, el('label', { class: 'field-label', for: 'f-company', text: needsCompany ? 'Company or organization' : 'Company or organization (optional)' }), el('input', { class: 'text-input', id: 'f-company', type: 'text', autocomplete: 'organization', maxlength: String(LC.LIMITS.company) })),
     el('div', null, el('label', { class: 'field-label', for: 'f-phone', text: 'Phone (optional)' }), el('input', { class: 'text-input', id: 'f-phone', type: 'tel', autocomplete: 'tel', maxlength: String(LC.LIMITS.phone) }))));
   bind('f-name', 'name'); bind('f-email', 'email'); bind('f-company', 'company'); bind('f-phone', 'phone');
+  // The phone number lays itself out as (222) 123-1234 while it is typed. It waits if the cursor is in the
+  // middle of the number, so editing there is not jumpy, and is tidied again when the box is left.
+  const phone = $('f-phone');
+  phone.setAttribute('inputmode', 'tel');
+  phone.setAttribute('placeholder', '(222) 123-1234');
+  phone.addEventListener('input', () => {
+    if (phone.selectionStart === phone.value.length || phone.selectionStart === null) phone.value = LC.formatPhone(phone.value);
+    state.phone = phone.value; persist();
+  });
+  phone.addEventListener('blur', () => { phone.value = LC.formatPhone(phone.value); state.phone = phone.value; persist(); });
 
   // Signed-in people with a result can choose to share it, so the reply can be specific.
   if (assessment){
@@ -361,6 +371,7 @@ function callBackend(params){
 }
 
 const sleep = (ms) => new Promise(r => setTimeout(r, ms));
+Array.prototype.forEach.call(document.querySelectorAll('.contact-email'), e => { e.textContent = LC.CONTACT_EMAIL; });
 function show(id){ ['formCard', 'sendingCard', 'doneCard', 'fallbackCard'].forEach(c => { $(c).hidden = (c !== id); }); window.scrollTo(0, 0); }
 
 function showFallback(message){

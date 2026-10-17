@@ -9,7 +9,9 @@
 (function (root) {
   'use strict';
 
-  const NOTIFY_EMAIL = 'rob@productadvisory.co';
+  // The address people are told to email when the form can't send (it is NOT where requests are
+  // announced: that is LEAD_NOTIFY_EMAIL_ in apps-script/Code.gs).
+  const CONTACT_EMAIL = 'info@productadvisory.co';
   const REPLY_WINDOW = 'within two business days';
 
   // The online booking page. People who lead a team, represent an organization, or asked for
@@ -105,6 +107,26 @@
     return String(s == null ? '' : s).replace(/[\u0000-\u001F\u007F]+/g, ' ').replace(/\s+/g, ' ').trim().slice(0, max);
   }
 
+  // Lays a phone number out as (222) 123-1234 while it is being typed. A number that starts with +
+  // is international and only has its spacing tidied. Anything after the 10th digit is dropped,
+  // except an extension written as "x123" or "ext 123".
+  function formatPhone(raw) {
+    const s = String(raw == null ? '' : raw);
+    if (/^\s*\+/.test(s)) return ('+' + s.replace(/[^\d ()-]/g, '').replace(/\s+/g, ' ').trim()).slice(0, LIMITS.phone);
+    const extAt = s.search(/x|ext/i);
+    const main = extAt === -1 ? s : s.slice(0, extAt);
+    const ext = extAt === -1 ? '' : s.slice(extAt).replace(/\D/g, '').slice(0, 6);
+    let d = main.replace(/\D/g, '');
+    if (d.length === 11 && d[0] === '1') d = d.slice(1);       // a leading US country code is not needed
+    d = d.slice(0, 10);
+    let out = '';
+    if (d.length > 0) out = '(' + d.slice(0, 3);
+    if (d.length > 3) out += ') ' + d.slice(3, 6);
+    if (d.length > 6) out += '-' + d.slice(6);
+    if (ext && d.length === 10) out += ' x' + ext;
+    return out;
+  }
+
   // Returns the problem to show for a screen, or '' when it can move on.
   function validateStep(id, state) {
     switch (id) {
@@ -167,7 +189,7 @@
       name: clean(state.name, LIMITS.name),
       email: clean(state.email, LIMITS.email).toLowerCase(),
       company: clean(state.company, LIMITS.company),
-      phone: clean(state.phone, LIMITS.phone),
+      phone: formatPhone(clean(state.phone, LIMITS.phone)),
       consent: state.consent === true
     };
     if (meta.assessment && typeof meta.assessment === 'object') {
@@ -197,7 +219,7 @@
 
   function mailtoFallback(state) {
     const subject = 'Request for more information' + (clean(state.company, LIMITS.company) ? ' - ' + clean(state.company, LIMITS.company) : '');
-    return 'mailto:' + NOTIFY_EMAIL + '?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(summaryText(state)).slice(0, 1500);
+    return 'mailto:' + CONTACT_EMAIL + '?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(summaryText(state)).slice(0, 1500);
   }
 
   // The screen shown after a successful send.
@@ -226,8 +248,8 @@
   }
 
   root.LeadCore = {
-    NOTIFY_EMAIL, REPLY_WINDOW, BOOKING_URL, OPTIONS, MAX_INTERESTS, LIMITS, EMAIL_RE,
-    codesOf, labelOf, emptyState, stepsFor, toggleInterest, clean, validateStep, newLeadId, readSource, readWho, readCall,
+    CONTACT_EMAIL, REPLY_WINDOW, BOOKING_URL, OPTIONS, MAX_INTERESTS, LIMITS, EMAIL_RE,
+    codesOf, labelOf, emptyState, stepsFor, toggleInterest, clean, formatPhone, validateStep, newLeadId, readSource, readWho, readCall,
     buildPayload, summaryText, mailtoFallback, thankYou
   };
 })(typeof globalThis !== 'undefined' ? globalThis : window);

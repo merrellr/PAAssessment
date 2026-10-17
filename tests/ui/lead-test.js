@@ -55,11 +55,16 @@ async function walkOrg(){
   t('organizations are asked for a work email and must give a company', /Work email/.test($('stage').textContent) && /Company or organization(?! \(optional\))/.test($('stage').textContent));
   $('sendBtn').click(); await sleep(40);
   t('sending with nothing filled in is stopped, in plain words', /Enter your name/.test(txt('stepError')) && window.__posts.length === 0, txt('stepError'));
+  fill('f-phone', '2221231234');
+  t('the phone number lays itself out as (222) 123-1234 as it is typed', $('f-phone').value === '(222) 123-1234' && $('f-phone').getAttribute('placeholder') === '(222) 123-1234', $('f-phone').value);
+  fill('f-phone', '222');
+  t('and part-way through', $('f-phone').value === '(222', $('f-phone').value);
+  fill('f-phone', '5550100');
   fill('f-name', 'Jane Smith'); fill('f-email', 'jane@acme'); $('sendBtn').click(); await sleep(40);
   t('a half-finished email address is caught', /valid email/.test(txt('stepError')));
   fill('f-email', 'Jane@Acme-Health.com'); $('sendBtn').click(); await sleep(40);
   t('a company is required for an organization', /company or organization/i.test(txt('stepError')));
-  fill('f-company', 'Acme Health'); fill('f-phone', '555-0100'); $('sendBtn').click(); await sleep(40);
+  fill('f-company', 'Acme Health'); fill('f-phone', '2221231234'); $('sendBtn').click(); await sleep(40);
   t('the consent box must be ticked, and nothing has been sent yet', /tick the box/.test(txt('stepError')) && window.__posts.length === 0, txt('stepError'));
   $('f-consent').checked = true; $('f-consent').dispatchEvent(new Event('change'));
   $('sendBtn').click();
@@ -78,7 +83,7 @@ async function walkOrg(){
       t('exactly one request was sent, as a plain POST to the Apps Script address', window.__posts.length === 1 && p.opts.method === 'POST' && /script\.google\.com/.test(p.url) && p.opts.mode === 'no-cors');
       const b = p.body;
       t('it carries the action, a 24-character id, and the answers', b.action === 'requestInfo' && /^[0-9a-f]{24}$/.test(b.id) && b.who === 'org' && b.size === 's51_200' && b.timeline === 'this_month' && b.role === 'decide' && b.contactPref === 'call' && b.interests.join() === 'aiOrg,team_assessment,strategy', JSON.stringify(b));
-      t('and the contact details, tidied (email lower-cased) with consent true', b.name === 'Jane Smith' && b.email === 'jane@acme-health.com' && b.company === 'Acme Health' && b.phone === '555-0100' && b.consent === true && /assess all 60/.test(b.message));
+      t('and the contact details, tidied (email lower-cased) with consent true', b.name === 'Jane Smith' && b.email === 'jane@acme-health.com' && b.company === 'Acme Health' && b.phone === '(222) 123-1234' && b.consent === true && /assess all 60/.test(b.message));
       t('the robot trap is empty, and the time taken is a number', b.website === '' && typeof b.elapsedMs === 'number');
       t('no assessment is attached for someone who is not signed in', !('assessment' in b));
       t('the page asked the server to confirm it arrived, using the id (not the person\'s details)', window.__calls.filter(c => c === 'leadStatus').length >= 2 && !/jane/i.test(JSON.stringify(window.__calls)));
@@ -182,14 +187,14 @@ async function walkOrg(){
     }
 
     if (scn === 'nobackend'){
-      t('if this version of the server is not live, a note at the top says what will happen', !$('backendNote').hidden && /rob@productadvisory\.co/.test(txt('backendNote')));
+      t('if this version of the server is not live, a note at the top says what will happen', !$('backendNote').hidden && /info@productadvisory\.co/.test(txt('backendNote')));
       await pick('individual'); opt('notsure').click(); $('continueBtn').click(); await sleep(60); await pick('exploring'); $('continueBtn').click(); await sleep(60);
       fill('f-name', 'Pat Lee'); fill('f-email', 'pat@x.com'); fill('f-company', 'Acme');
       $('f-consent').checked = true; $('f-consent').dispatchEvent(new Event('change'));
       $('sendBtn').click(); await sleep(150);
       t('nothing is sent to a server that cannot take it; they go straight to an email with their answers', window.__posts.length === 0 && shown() === 'fallbackCard' && /isn't switched on/.test(txt('fallbackText')), shown());
       const href = $('fallbackMail').getAttribute('href');
-      t('the email is addressed to Rob and already filled in', /^mailto:rob@productadvisory\.co\?subject=/.test(href) && decodeURIComponent(href).indexOf('Pat Lee') > -1 && decodeURIComponent(href).indexOf('pat@x.com') > -1 && decodeURIComponent(href).indexOf('Acme') > -1, href.slice(0, 200));
+      t('the email is addressed to info@ and already filled in', /^mailto:info@productadvisory\.co\?subject=/.test(href) && decodeURIComponent(href).indexOf('Pat Lee') > -1 && decodeURIComponent(href).indexOf('pat@x.com') > -1 && decodeURIComponent(href).indexOf('Acme') > -1, href.slice(0, 200));
     }
 
     if (scn === 'fail' || scn === 'unconfirmed' || scn === 'ratelimit' || scn === 'rejected'){
@@ -201,7 +206,7 @@ async function walkOrg(){
       await until(() => !$('fallbackCard').hidden, 25000);
       const want = { fail: /couldn't reach our server/, unconfirmed: /couldn't confirm/, ratelimit: /already sent a few requests/, rejected: /couldn't accept/ }[scn];
       t('the person is told plainly what happened', shown() === 'fallbackCard' && want.test(txt('fallbackText')), txt('fallbackText'));
-      t('and offered an email to Rob with their answers filled in, so nothing is lost', /^mailto:rob@productadvisory\.co/.test($('fallbackMail').getAttribute('href')) && decodeURIComponent($('fallbackMail').getAttribute('href')).indexOf('Acme') > -1);
+      t('and offered an email to info@ with their answers filled in, so nothing is lost', /^mailto:info@productadvisory\.co/.test($('fallbackMail').getAttribute('href')) && /info@productadvisory\.co/.test(txt('fallbackCard')) && decodeURIComponent($('fallbackMail').getAttribute('href')).indexOf('Acme') > -1);
       $('fallbackRetry').click(); await sleep(60);
       t('"Try again" brings back the form with their answers intact', shown() === 'formCard' && $('f-name').value === 'Jane Smith' && $('f-company').value === 'Acme');
     }

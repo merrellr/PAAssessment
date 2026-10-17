@@ -49,7 +49,7 @@ try {
     var page = {}; LeadCore.OPTIONS[k].forEach(function(o){ page[o.code] = o.label; });
     t('the answers the server accepts for "' + k + '" are exactly the ones the form offers, with the same words', JSON.stringify(page) === JSON.stringify(LEAD_OPTIONS_[k]), JSON.stringify(Object.keys(page)) + ' vs ' + JSON.stringify(Object.keys(LEAD_OPTIONS_[k])));
   });
-  t('the notice goes to Rob, on both the page and the server', LEAD_NOTIFY_EMAIL_ === 'rob@productadvisory.co' && LeadCore.NOTIFY_EMAIL === LEAD_NOTIFY_EMAIL_);
+  t('requests are announced to Rob, while the page tells people to email info@ if the form cannot send', LEAD_NOTIFY_EMAIL_ === 'rob@productadvisory.co' && LeadCore.CONTACT_EMAIL === 'info@productadvisory.co');
 
   /* ---- a good request ---- */
   reset();

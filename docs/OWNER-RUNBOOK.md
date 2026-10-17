@@ -186,7 +186,7 @@ Change the word after `src=` to match the page the button is on (for example `sr
 - If an email fails to send, the row is still saved on the Leads tab. Check it now and then.
 - To delete someone's request (they ask you to), delete their row on the Leads tab.
 
-**If it stops working** the page falls back by itself: people get an email to you with their answers filled in. To fix the form itself, check that the latest `Code.gs` is deployed (section 7), then open the page in a private window and send a test.
+**If it stops working** the page falls back by itself: people are given an email to info@productadvisory.co with their answers filled in (make sure that mailbox reaches you). To fix the form itself, check that the latest `Code.gs` is deployed (section 7), then open the page in a private window and send a test.
 
 ---
 

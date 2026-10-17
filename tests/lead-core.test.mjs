@@ -11,8 +11,8 @@ function t(label, ok, extra){
 const same = (a, b) => JSON.stringify(a) === JSON.stringify(b);
 const withState = (over) => Object.assign(L.emptyState(), over);
 
-console.log('--- where notifications go ---');
-t('every request is announced to Rob', L.NOTIFY_EMAIL === 'rob@productadvisory.co');
+console.log('--- the contact address ---');
+t('people are told to email info@ when the form cannot send', L.CONTACT_EMAIL === 'info@productadvisory.co');
 
 console.log('--- the screens each person sees ---');
 t('someone exploring for themselves skips team size and who-decides', same(L.stepsFor(withState({ who: 'individual' })), ['who', 'interests', 'timeline', 'message', 'contact']));
@@ -67,6 +67,24 @@ console.log('--- what is sent ---');
   t('at most three interests are sent', L.buildPayload(withState({ interests: ['discovery', 'strategy', 'aiOrg', 'execution'] }), { id: 'x' }).interests.length === 3);
 }
 
+console.log('--- phone numbers ---');
+{
+  const f = L.formatPhone;
+  t('ten digits become (222) 123-1234', f('2221231234') === '(222) 123-1234');
+  t('it is laid out step by step while typing', f('2') === '(2' && f('222') === '(222' && f('2221') === '(222) 1' && f('222123') === '(222) 123' && f('2221231') === '(222) 123-1');
+  t('already-formatted numbers stay the same', f('(222) 123-1234') === '(222) 123-1234');
+  t('dashes, dots and spaces are tidied', f('222-123-1234') === '(222) 123-1234' && f('222.123.1234') === '(222) 123-1234' && f('222 123 1234') === '(222) 123-1234');
+  t('a leading 1 is dropped when it makes 11 digits', f('1 222 123 1234') === '(222) 123-1234' && f('+1 (222) 123-1234').indexOf('+1') === 0);
+  t('extra digits past ten are ignored', f('222123123499') === '(222) 123-1234');
+  t('letters are ignored', f('abc222def') === '(222');
+  t('an extension is kept', f('2221231234 x55') === '(222) 123-1234 x55' && f('(222) 123-1234 ext. 7') === '(222) 123-1234 x7');
+  t('an extension is not added to an unfinished number', f('222 x5') === '(222');
+  t('an international number is only tidied, not forced into the US layout', f('+44 20 7946 0958') === '+44 20 7946 0958' && f('+44  20   7946') === '+44 20 7946');
+  t('empty stays empty', f('') === '' && f(null) === '' && f(undefined) === '');
+  t('the number that is sent is formatted', L.buildPayload(withState({ phone: '2221231234' }), { id: 'x' }).phone === '(222) 123-1234');
+  t('and stays within the 40-character limit', L.formatPhone('+' + '1'.repeat(100)).length <= 40);
+}
+
 console.log('--- ids and links from the address ---');
 {
   const a = L.newLeadId(), b = L.newLeadId();
@@ -79,7 +97,7 @@ console.log('--- the fallback and the thank-you ---');
 {
   const s = withState({ who: 'org', interests: ['aiOrg', 'toolkits'], size: 's11_50', timeline: 'later', role: 'influence', message: 'Need help', name: 'Jane Smith', email: 'jane@acme.com', company: 'Acme' });
   const m = L.mailtoFallback(s);
-  t('the email-us link goes to Rob with the answers filled in', m.indexOf('mailto:rob@productadvisory.co?subject=') === 0 && decodeURIComponent(m).indexOf('Acme') > -1 && decodeURIComponent(m).indexOf('AI fluency for my organization') > -1 && decodeURIComponent(m).indexOf('Need help') > -1);
+  t('the email-us link goes to info@ with the answers filled in', m.indexOf('mailto:info@productadvisory.co?subject=') === 0 && decodeURIComponent(m).indexOf('Acme') > -1 && decodeURIComponent(m).indexOf('AI fluency for my organization') > -1 && decodeURIComponent(m).indexOf('Need help') > -1);
   t('the text summary reads in plain words', /I am: I'm looking for my organization/.test(L.summaryText(s)) && /Team size: 11 to 50 people/.test(L.summaryText(s)));
   const ty = L.thankYou(s);
   t('a company contact is told Rob will reply, and is offered the assessment', /Thanks, Jane/.test(ty.title) && /Rob will reply to jane@acme\.com within two business days/.test(ty.text) && ty.cta.href === 'index.html');
