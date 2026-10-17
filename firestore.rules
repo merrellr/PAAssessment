@@ -1,10 +1,10 @@
 // Firestore rules for project product-advisory-lms.
 //
-// STATUS: everything down to the shared-record rules is published in the console
-// (checkpoint 3 of the company-accounts build; checkpoint 4 needed no changes).
-// The orgFocus rules at the very bottom (checkpoint 5) are NEW and only take
-// effect once this whole file is pasted into the console Rules tab and
-// published. Update this status line when that is done.
+// STATUS: checkpoint 7 of the company-accounts build. The newest parts are the
+// activity log (orgs/{orgId}/audit), the private owner notes (orgPrivate), and
+// "an archived company receives no new member data". They only take effect once
+// this whole file is pasted into the console Rules tab and published. Update
+// this status line when that is done.
 //
 // Editing this file does NOT change the live rules. Paste the whole file into
 // the console Rules tab and click Publish, so the two stay identical. These
@@ -247,8 +247,11 @@ service cloud.firestore {
       allow read: if isPlatformOwner() || isActiveAdminOf(orgId)
         || (isSignedIn() && request.auth.uid == uid);
 
+      // An archived company (for example one that has stopped paying) receives
+      // nothing new: members' copies stop updating, exactly as if they had left.
       allow create, update: if request.auth.uid == uid
         && isActiveMemberOf(orgId)
+        && get(/databases/$(database)/documents/orgs/$(orgId)).data.status == 'active'
         && validShare(request.resource.data);
 
       allow update: if request.auth.uid == uid
@@ -278,6 +281,41 @@ service cloud.firestore {
         && request.resource.data.updatedAt == request.time
         && getAfter(/databases/$(database)/documents/orgs/$(orgId)).data.focusAreas == request.resource.data.focusAreas;
 
+      allow delete: if false;
+    }
+
+    // ------------------------------------------------------------ activity log
+    // A record of what the company's admins and the platform owner did: invites
+    // created or withdrawn, people removed, priorities changed, details edited.
+    // Entries are added by the person who did it (they cannot sign as somebody
+    // else), carry the server's time, and can never be changed or deleted. The
+    // company's admins and the owner read it; members cannot. It is kept by the
+    // app on a best-effort basis, so it is an accountability aid, not a
+    // tamper-proof legal record.
+    match /orgs/{orgId}/audit/{entryId} {
+      allow read: if isPlatformOwner() || isActiveAdminOf(orgId);
+      allow create: if (isPlatformOwner() || isActiveAdminOf(orgId))
+        && request.resource.data.keys().hasOnly(['action', 'actorUid', 'actorEmail', 'targetEmail', 'detail', 'at'])
+        && request.resource.data.action in ['company.created', 'company.edited', 'company.archived', 'company.restored',
+            'invite.created', 'invite.revoked', 'invite.renewed', 'member.removed', 'focus.changed']
+        && request.resource.data.actorUid == request.auth.uid
+        && request.resource.data.actorEmail == request.auth.token.email.lower()
+        && request.resource.data.get('targetEmail', '') is string && request.resource.data.get('targetEmail', '').size() <= 254
+        && request.resource.data.get('detail', '') is string && request.resource.data.get('detail', '').size() <= 300
+        && request.resource.data.at == request.time;
+      allow update, delete: if false;
+    }
+
+    // --------------------------------------------------- owner-only company notes
+    // The platform owner's private notes about a company. They used to live on the
+    // company record itself, which that company's admins can read, so they are
+    // kept here where only the platform owner can.
+    match /orgPrivate/{orgId} {
+      allow get, list: if isPlatformOwner();
+      allow create, update: if isPlatformOwner()
+        && request.resource.data.keys().hasOnly(['notes', 'updatedAt'])
+        && request.resource.data.notes is string && request.resource.data.notes.size() <= 2000
+        && request.resource.data.updatedAt == request.time;
       allow delete: if false;
     }
   }

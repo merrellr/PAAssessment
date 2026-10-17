@@ -103,7 +103,22 @@ when volume outgrows the free tier) and writes `blocked:` rows to the
   longer a member. They can join a company again only with a new invite. Someone who
   deletes their account while still a member leaves an active row with their name
   and email removed; the admin removes that row to free the seat.
-- Not built yet: audit log, final privacy wording and the owner runbook (checkpoint 7).
+- Activity log: what admins and the owner do (invitations, removals, priority
+  changes, company edits) is written to `orgs/{id}/audit` and shown on the company
+  dashboard as **Recent activity**. Entries are signed with the real signed-in
+  account and carry the server's time, and can never be changed or deleted. It is
+  written by the app on a best-effort basis, so it is an accountability aid, not a
+  tamper-proof legal record.
+- Private owner notes: the owner's notes about a company are kept in
+  `orgPrivate/{id}`, readable only by the platform owner, because the company
+  record itself can be read by that company's admins. Notes saved on the company
+  record before this existed are moved across automatically the first time the
+  owner console loads.
+- An **archived** company receives no new member data: members' copies stop
+  updating, exactly as if they had left.
+- `docs/OWNER-RUNBOOK.md` is the click-by-click guide for running all of this;
+  `docs/PRIVACY-WORDING-FOR-REVIEW.md` is draft policy wording for a lawyer, written
+  to match what the software does.
 - Tests: see `tests/README.md`.
 
 ## Closing an account

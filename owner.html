@@ -494,6 +494,24 @@ function el(tag, attrs, ...kids){
   return node;
 }
 
+/* Records what the owner did in the company's activity log (which the company's
+   admins can also read). Best effort: it never stops the action itself. */
+async function logAudit(orgId, action, targetEmail, detail){
+  try {
+    const entry = CompanyCore.buildAuditEntry(currentUser, action, targetEmail, detail);
+    await addDoc(collection(db, 'orgs', orgId, 'audit'), Object.assign({}, entry, { at: serverTimestamp() }));
+  } catch (err){
+    console.error('Could not write to the activity log:', err);
+  }
+}
+function logInvites(orgId, created, role, action){
+  if (created.length > 25){
+    logAudit(orgId, action, '', created.length + ' invitations as ' + (role === 'admin' ? 'admin' : 'member'));
+  } else {
+    created.forEach(c => logAudit(orgId, action, c.email, role === 'admin' ? 'admin' : 'member'));
+  }
+}
+
 function showOnly(id){
   ['stateLoading', 'stateSignedOut', 'stateNotOwner', 'console'].forEach(s => {
     $(s).style.display = (s === id) ? 'block' : 'none';
@@ -590,16 +608,26 @@ function applyListLayout(){
 async function loadOrgs(){
   try {
     const snap = await getDocs(collection(db, 'orgs'));
+    // The owner's private notes live in orgPrivate, where company admins cannot read them.
+    const priv = {};
+    try {
+      const ps = await getDocs(collection(db, 'orgPrivate'));
+      ps.docs.forEach(d => { priv[d.id] = d.data().notes || ''; });
+    } catch (e){ console.error('Could not read the private notes:', e); }
     const previous = {};
     orgs.forEach(o => { previous[o.id] = o.activeCount; });
     orgs = snap.docs.map(d => {
       const o = d.data();
+      const legacy = (o.notes || '').trim();
       return Object.assign({ id: d.id }, o, {
+        notes: priv[d.id] ? priv[d.id] : legacy,
+        legacyNotes: legacy,
         createdAtMs: msOf(o.createdAt), updatedAtMs: msOf(o.updatedAt),
         activeCount: previous[d.id] === undefined ? null : previous[d.id]
       });
     });
     renderOrgList();
+    orgs.filter(o => o.legacyNotes).forEach(moveNotesToPrivate);
     await Promise.all(orgs.map(async (o) => {
       try {
         const c = await getCountFromServer(query(collection(db, 'memberships'), where('orgId', '==', o.id), where('status', '==', 'active')));
@@ -611,6 +639,22 @@ async function loadOrgs(){
     console.error('Could not load companies:', err);
     $('orgTableWrap').innerHTML = '';
     $('orgTableWrap').appendChild(el('p', { class: 'empty', text: "We couldn't load your companies. The new security rules may not be published yet." }));
+  }
+}
+
+/* Notes written before they had their own private home were stored on the
+   company record, which that company's admins can read. Move each one across the
+   first time the owner loads the list. Best effort; the notes stay visible here
+   either way. */
+async function moveNotesToPrivate(o){
+  try {
+    const batch = writeBatch(db);
+    batch.set(doc(db, 'orgPrivate', o.id), { notes: o.notes, updatedAt: serverTimestamp() });
+    batch.update(doc(db, 'orgs', o.id), { notes: '' });
+    await batch.commit();
+    o.legacyNotes = '';
+  } catch (err){
+    console.error('Could not move the private notes:', err);
   }
 }
 
@@ -754,9 +798,11 @@ $('saveBtn').addEventListener('click', async () => {
       const id = editingId;
       // The company record and its member-readable focus copy are saved together.
       const editBatch = writeBatch(db);
-      editBatch.update(doc(db, 'orgs', id), Object.assign({}, fields, { updatedAt: serverTimestamp() }));
+      editBatch.update(doc(db, 'orgs', id), Object.assign({}, fields, { notes: '', updatedAt: serverTimestamp() }));
       editBatch.set(doc(db, 'orgFocus', id), { focusAreas: fields.focusAreas, updatedAt: serverTimestamp() });
+      editBatch.set(doc(db, 'orgPrivate', id), { notes: fields.notes, updatedAt: serverTimestamp() });
       await editBatch.commit();
+      logAudit(id, 'company.edited', '', '');
       formMode = null; editingId = null;
       await loadOrgs();
       if (location.hash === '#company=' + id) showDetail(id); else location.hash = '#company=' + id;
@@ -765,10 +811,12 @@ $('saveBtn').addEventListener('click', async () => {
       const ref = doc(collection(db, 'orgs'));
       const createBatch = writeBatch(db);
       createBatch.set(ref, Object.assign({}, fields, {
-        status: 'active', createdAt: serverTimestamp(), createdBy: currentUser.uid, updatedAt: serverTimestamp()
+        notes: '', status: 'active', createdAt: serverTimestamp(), createdBy: currentUser.uid, updatedAt: serverTimestamp()
       }));
       createBatch.set(doc(db, 'orgFocus', ref.id), { focusAreas: fields.focusAreas, updatedAt: serverTimestamp() });
+      createBatch.set(doc(db, 'orgPrivate', ref.id), { notes: fields.notes, updatedAt: serverTimestamp() });
       await createBatch.commit();
+      logAudit(ref.id, 'company.created', '', '');
       formMode = null;
       await loadOrgs();
       newLinks = [];
@@ -967,6 +1015,7 @@ async function removeMember(p, button){
   button.disabled = true;
   try {
     await updateDoc(doc(db, 'memberships', p.id), { status: 'removed', endedAt: serverTimestamp() });
+    logAudit(org.id, 'member.removed', p.email || '', p.name || '');
     await loadDetail();
     renderDetail();
     $('detailNotice').textContent = who + ' was removed.';
@@ -1087,6 +1136,7 @@ $('archiveBtn').addEventListener('click', async () => {
   $('archiveBtn').disabled = true;
   try {
     await updateDoc(doc(db, 'orgs', org.id), { status: archiving ? 'archived' : 'active', updatedAt: serverTimestamp() });
+    logAudit(org.id, archiving ? 'company.archived' : 'company.restored', '', '');
     await loadOrgs();
     renderDetail();
     $('detailNotice').textContent = archiving ? 'Archived.' : 'Restored.';
@@ -1117,7 +1167,7 @@ async function copyText(text, notice){
   $('detailNotice').textContent = notice;
 }
 
-async function createInvites(org, entries, role, days){
+async function createInvites(org, entries, role, days, action){
   const created = [];
   const expiresAt = Timestamp.fromMillis(Date.now() + days * 86400000);
   for (let i = 0; i < entries.length; i += 400){
@@ -1136,6 +1186,7 @@ async function createInvites(org, entries, role, days){
     });
     await batch.commit();
   }
+  logInvites(org.id, created, role, action || 'invite.created');
   return created;
 }
 
@@ -1270,7 +1321,7 @@ async function renewInvite(p, button){
   button.disabled = true;
   button.textContent = 'Renewing…';
   try {
-    const fresh = await createInvites(org, [{ email: p.email, name: p.name, phone: p.phone }], p.role, 30);
+    const fresh = await createInvites(org, [{ email: p.email, name: p.name, phone: p.phone }], p.role, 30, 'invite.renewed');
     try { await updateDoc(doc(db, 'invites', p.token), { status: 'revoked' }); } catch (e){ /* the old link is no longer usable anyway */ }
     delete emailState[p.token];
     newLinks = fresh;
@@ -1312,6 +1363,8 @@ async function revokeInvite(token){
   if (!window.confirm('Revoke this invite? The link will stop working.')) return;
   try {
     await updateDoc(doc(db, 'invites', token), { status: 'revoked' });
+    const revoked = detail.invites.find(i => i.id === token);
+    logAudit(currentOrgId, 'invite.revoked', revoked ? revoked.email : '', revoked ? revoked.role : '');
     await loadDetail();
     newLinks = newLinks.filter(r => r.token !== token);
     renderDetail();

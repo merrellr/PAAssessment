@@ -85,6 +85,12 @@
     store['invites/othercompany'] = { orgId: 'orgZ', orgName: 'Other Co', email: 'x@z.com', role: 'member', status: 'open', createdAt: T(1), createdBy: 'owner1',
       expiresAt: Timestamp.fromMillis(Date.now() + 5 * day), usedBy: null, usedAt: null };
 
+    // a little history for the Recent activity card
+    store['orgs/orgA/audit/a1'] = { action: 'company.created', actorUid: 'owner1', actorEmail: 'owner@x.com', targetEmail: '', detail: '', at: T(100) };
+    store['orgs/orgA/audit/a2'] = { action: 'invite.created', actorUid: 'uAdmin', actorEmail: 'ann@acme.com', targetEmail: 'ben@acme.com', detail: 'member', at: T(60) };
+    store['orgs/orgA/audit/a3'] = { action: 'focus.changed', actorUid: 'uAdmin', actorEmail: 'ann@acme.com', targetEmail: '', detail: '1. AI Fluency — Organizational', at: T(10) };
+
+    if (scn === 'auditdenied') window.__failList = /^orgs\/orgA\/audit$/;
     if (scn === 'denied') window.__failList = /^memberships$/;
     if (scn === 'sharesdenied') window.__failList = /^orgs\/orgA\/members$/;
   };

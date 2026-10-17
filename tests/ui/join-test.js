@@ -19,6 +19,8 @@ async function settle(){ for (let i = 0; i < 80 && $('stateLoading').style.displ
       t('states what they cannot see', /reflections/.test(consent) && /phone number/.test(consent));
       t('says the platform operator can also see it', /Product Advisory, which runs this platform/.test(consent));
       t('explains the account stays theirs and what happens on leaving', /account stays yours/.test(consent) && /keep the information/.test(consent));
+      t('says plainly that only the company can end the membership, and what the person keeps', /Only Acme Health's admins can end your membership/.test(consent.replace(/\s+/g, ' ')) && /can't leave it on your own/.test(consent) && /You keep your account, your results and your course access/.test(consent), consent.replace(/\s+/g, ' ').slice(0, 400));
+      t('says what happens to their name if they delete their account', /Your name and email are then removed from their copy/.test(consent.replace(/\s+/g, ' ')) && /without your name/.test(consent));
       t('company name appears in the consent checkbox', /Acme Health/.test($('stateConsent').querySelector('.check-row').textContent));
       t('shows which account they are signed in as', /New@A\.com/.test(txt('consentEmail')));
       t('accept button is disabled until they agree', $('acceptBtn').disabled === true);

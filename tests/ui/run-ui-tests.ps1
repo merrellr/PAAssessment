@@ -101,7 +101,7 @@ try {
   foreach ($s in 'member', 'focus', 'focusdefault', 'admin', 'plain', 'removed', 'owner', 'threelessons', 'allfive', 'removedold') { $results += Run-Page "dashboard: $s" "$base/dash-test.html?scn=$s" 25000 }
   foreach ($s in 'member', 'nonmember', 'blocked') { $results += Run-Page "delete account: $s" "$base/del-test.html?scn=$s" 25000 }
   foreach ($s in 'member', 'plain') { $results += Run-Page "last lesson: $s" "$base/les-test.html?scn=$s&course=discovery-novice&lesson=5" 30000 }
-  foreach ($s in 'admin', 'empty', 'archived', 'nocopy', 'owner', 'ownernoorg', 'plain', 'member', 'removedadmin', 'denied', 'sharesdenied', 'signedout') {
+  foreach ($s in 'admin', 'empty', 'archived', 'nocopy', 'auditdenied', 'owner', 'ownernoorg', 'plain', 'member', 'removedadmin', 'denied', 'sharesdenied', 'signedout') {
     $org = if ($s -eq 'owner') { '&org=orgA' } else { '' }
     $results += Run-Page "company dashboard: $s" "$base/company-test.html?scn=$s$org" 40000
   }

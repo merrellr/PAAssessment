@@ -161,6 +161,17 @@ console.log('--- focus areas ---');
   t('with no priorities there is nothing to report', C.focusProgress(active, []).areas.length === 0 && C.focusProgress(active, []).top.pct === null);
 }
 
+console.log('--- activity log ---');
+{
+  const e = C.buildAuditEntry({ uid: 'u1', email: 'Ann@Acme.com' }, 'member.removed', 'ben@acme.com', 'x'.repeat(500));
+  t('an entry carries who did it (lower-cased), what, to whom', e.actorUid === 'u1' && e.actorEmail === 'ann@acme.com' && e.action === 'member.removed' && e.targetEmail === 'ben@acme.com');
+  t('long details are cut to fit the rule (300)', e.detail.length === 300);
+  t('missing target and detail become empty text, never undefined', C.buildAuditEntry({ uid: 'u', email: 'a@b.com' }, 'company.edited').targetEmail === '' && C.buildAuditEntry({ uid: 'u' }, 'company.edited').actorEmail === '');
+  t('every kind of action reads as a sentence', C.AUDIT_ACTIONS.every(a => C.describeAudit({ action: a, targetEmail: 'p@q.com', detail: 'd' }).length > 8 && C.describeAudit({ action: a }).indexOf('undefined') === -1));
+  t('sentences name the person', /ben@acme\.com/.test(C.describeAudit({ action: 'member.removed', targetEmail: 'ben@acme.com' })) && /invited cy@acme\.com \(admin\)/.test(C.describeAudit({ action: 'invite.created', targetEmail: 'cy@acme.com', detail: 'admin' })));
+  t('an unknown action is shown as is, not hidden', C.describeAudit({ action: 'odd.thing' }) === 'odd.thing');
+}
+
 console.log('--- spreadsheet exports ---');
 {
   const csv = C.buildTeamCsv(rows);

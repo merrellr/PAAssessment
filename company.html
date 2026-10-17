@@ -342,6 +342,16 @@
       <div class="table-wrap" id="formerWrap"></div>
     </div>
 
+    <div class="card" id="activityCard">
+      <div class="section-head">
+        <div>
+          <h2>Recent activity</h2>
+          <div class="hint" style="margin:4px 0 0;">The latest changes made by this company's admins and by Product Advisory: invitations, removals, priorities and company details.</div>
+        </div>
+      </div>
+      <div class="table-wrap" id="activityWrap"><p class="empty">Loading…</p></div>
+    </div>
+
     <p class="foot-note">Everyone sees, before they join, exactly what this company can see about them. Please treat this information as confidential and use it only to support their development.</p>
   </div>
 </div>
@@ -359,7 +369,7 @@ const firebaseConfig = {
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
 import {
-  getFirestore, doc, getDoc, getDocs, setDoc, updateDoc, collection, query, where, writeBatch,
+  getFirestore, doc, getDoc, getDocs, setDoc, addDoc, updateDoc, collection, query, where, orderBy, limit, writeBatch,
   serverTimestamp, Timestamp
 } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
 
@@ -411,7 +421,7 @@ let currentUser = null;
 let viewerIsOwner = false;
 let orgId = null;
 let org = null;
-let data = { memberships: [], invites: [], shares: {}, sharesError: false };
+let data = { memberships: [], invites: [], shares: {}, sharesError: false, audit: [], auditError: false };
 let teamRows = [];          // everyone, active and former, with progress worked out
 let expanded = {};          // uid -> true while the "Details" panel is open
 let newLinks = [];
@@ -500,6 +510,16 @@ async function loadAll(){
     console.error('Could not read shared records:', err);
     data.sharesError = true;
   }
+  // The activity log is read separately too, so it can never hide the rest of the page.
+  data.audit = [];
+  data.auditError = false;
+  try {
+    const aSnap = await getDocs(query(collection(db, 'orgs', id, 'audit'), orderBy('at', 'desc'), limit(50)));
+    data.audit = aSnap.docs.map(d => Object.assign({ id: d.id }, d.data(), { atMs: msOf(d.data().at) }));
+  } catch (err){
+    console.error('Could not read the activity log:', err);
+    data.auditError = true;
+  }
   return true;
 }
 
@@ -526,6 +546,7 @@ function renderAll(){
   renderInvites();
   renderFormer();
   renderNewLinks();
+  renderActivity();
 }
 
 function renderHeader(){
@@ -543,7 +564,7 @@ function renderHeader(){
   const pending = pendingCount();
   const pendingText = pending ? ', ' + plural(pending, 'invitation') + ' waiting' : '';
   const seatsText = org.plan === 'seat'
-    ? active + ' of ' + org.seatLimit + ' seats in use' + pendingText
+    ? active + ' of ' + org.seatLimit + ' seats in use' + (active > org.seatLimit ? ' (over the limit)' : '') + pendingText
     : plural(active, 'active person', 'active people') + pendingText;
 
   const focus = el('div', { class: 'chips' });
@@ -619,6 +640,50 @@ function renderRollup(){
   charts.appendChild(areas);
 }
 
+/* ----------------------------------------------------------- activity log */
+function renderActivity(){
+  const wrap = $('activityWrap');
+  wrap.innerHTML = '';
+  if (data.auditError){
+    wrap.appendChild(el('p', { class: 'empty', text: "We couldn't read the activity log. The latest security rules may not be published yet." }));
+    return;
+  }
+  if (!data.audit.length){
+    wrap.appendChild(el('p', { class: 'empty', text: 'Nothing yet. Changes you make from now on are listed here.' }));
+    return;
+  }
+  wrap.appendChild(el('table', { class: 'data' },
+    el('thead', null, el('tr', null, el('th', { text: 'When' }), el('th', { text: 'Who' }), el('th', { text: 'What' }))),
+    el('tbody', null, ...data.audit.map(e => el('tr', null,
+      el('td', { class: 'nowrap', text: fmtDateTime(e.atMs) || 'just now' }),
+      el('td', { text: e.actorEmail || '—' }),
+      el('td', { text: C.describeAudit(e) }))))));
+}
+
+/* Records what an admin did. Best effort: if it cannot be written, whatever the
+   admin was doing still goes ahead. */
+async function logAudit(action, targetEmail, detail){
+  try {
+    const entry = C.buildAuditEntry(currentUser, action, targetEmail, detail);
+    await addDoc(collection(db, 'orgs', org.id, 'audit'), Object.assign({}, entry, { at: serverTimestamp() }));
+    data.audit.unshift(Object.assign({ id: 'local' + Date.now() }, entry, { atMs: Date.now() }));
+    data.audit = data.audit.slice(0, 50);
+    data.auditError = false;
+    renderActivity();
+  } catch (err){
+    console.error('Could not write to the activity log:', err);
+  }
+}
+
+function logInvites(created, role, action){
+  // A long list is recorded as one line so the log stays readable.
+  if (created.length > 25){
+    logAudit(action, '', plural(created.length, 'invitation') + ' as ' + (role === 'admin' ? 'admin' : 'member'));
+  } else {
+    created.forEach(c => logAudit(action, c.email, role === 'admin' ? 'admin' : 'member'));
+  }
+}
+
 /* -------------------------------------------------------------- our focus */
 let editingFocus = false;
 let focusDraft = [];
@@ -688,6 +753,7 @@ $('focusSaveBtn').addEventListener('click', async () => {
     batch.set(doc(db, 'orgFocus', org.id), { focusAreas: focusDraft.slice(), updatedAt: serverTimestamp() });
     await batch.commit();
     org.focusAreas = focusDraft.slice();
+    logAudit('focus.changed', '', focusDraft.length ? focusDraft.map((k, i) => (i + 1) + '. ' + C.domainLabel(k)).join(', ') : 'no priorities');
     editingFocus = false;
     renderHeader();
     renderFocus();
@@ -781,6 +847,7 @@ async function removeMember(r, button){
     const m = data.memberships.find(x => x.id === r.id);
     if (m){ m.status = 'removed'; m.endedAtMs = Date.now(); }
     delete expanded[r.id];
+    logAudit('member.removed', r.email || '', r.name || '');
     renderAll();
     $('notice').textContent = who + ' was removed. They are listed under Former members, and their seat is free.';
   } catch (err){
@@ -999,7 +1066,7 @@ function renderInvites(){
     el('tbody', null, ...rows.map(inviteRow))));
 }
 
-async function createInvites(entries, role, days){
+async function createInvites(entries, role, days, action){
   const created = [];
   const expiresAt = Timestamp.fromMillis(Date.now() + days * 86400000);
   for (let i = 0; i < entries.length; i += 400){
@@ -1018,6 +1085,7 @@ async function createInvites(entries, role, days){
     });
     await batch.commit();
   }
+  logInvites(created, role, action || 'invite.created');
   return created;
 }
 
@@ -1144,7 +1212,7 @@ async function renewInvite(p, button){
   button.disabled = true;
   button.textContent = 'Renewing…';
   try {
-    const fresh = await createInvites([{ email: p.email, name: p.name, phone: p.phone }], p.role, 30);
+    const fresh = await createInvites([{ email: p.email, name: p.name, phone: p.phone }], p.role, 30, 'invite.renewed');
     try { await updateDoc(doc(db, 'invites', p.token), { status: 'revoked' }); } catch (e){ /* the old link is no longer usable anyway */ }
     delete emailState[p.token];
     newLinks = fresh;
@@ -1182,6 +1250,8 @@ async function revokeInvite(token){
   $('errorLine').textContent = '';
   try {
     await updateDoc(doc(db, 'invites', token), { status: 'revoked' });
+    const revoked = data.invites.find(i => i.id === token);
+    logAudit('invite.revoked', revoked ? revoked.email : '', revoked ? revoked.role : '');
     newLinks = newLinks.filter(r => r.token !== token);
     await refreshInvitesOnly();
     $('notice').textContent = 'Invite revoked.';

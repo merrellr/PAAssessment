@@ -78,8 +78,12 @@ export function doc(db, ...segs){
   if (db && db.col && segs.length === 0){ const id = 'auto' + (++counter); return { path: db.col + '/' + id, id }; }
   const path = segs.join('/'); return { path, id: segs[segs.length - 1] }; }
 export function collection(db, ...segs){ return { col: segs.join('/') }; }
-export function where(f, op, v){ return { f, op, v }; }
-export function query(c, ...wheres){ return { col: c.col, wheres }; }
+export function where(f, op, v){ return { kind: 'where', f, op, v }; }
+export function orderBy(f, dir){ return { kind: 'orderBy', f, dir: dir || 'asc' }; }
+export function limit(n){ return { kind: 'limit', n }; }
+export function query(c, ...parts){
+  return { col: c.col, wheres: parts.filter(p => p.kind === 'where'), orders: parts.filter(p => p.kind === 'orderBy'), limit: (parts.find(p => p.kind === 'limit') || {}).n };
+}
 export async function getDoc(ref){
   const d = store[ref.path];
   return { id: ref.id, exists: () => d !== undefined, data: () => (d === undefined ? undefined : clone(d)) };
@@ -91,10 +95,22 @@ export async function getDocs(q){
   const docs = Object.keys(store).filter(p => p.indexOf(prefix) === 0 && p.slice(prefix.length).indexOf('/') === -1)
     .map(p => ({ id: p.slice(prefix.length), data: () => clone(store[p]) }))
     .filter(d => wheres.every(w => d.data()[w.f] === w.v));
+  const keyOf = (d, f) => { const v = d.data()[f]; return v && v.toMillis ? v.toMillis() : v; };
+  (q.orders || []).slice().reverse().forEach(o => {
+    docs.sort((a, b) => { const x = keyOf(a, o.f), y = keyOf(b, o.f); return (x < y ? -1 : x > y ? 1 : 0) * (o.dir === 'desc' ? -1 : 1); });
+  });
+  if (q.limit) docs.length = Math.min(docs.length, q.limit);
   return { docs, empty: docs.length === 0 };
 }
 export async function getCountFromServer(q){ const s = await getDocs(q); return { data: () => ({ count: s.docs.length }) }; }
-export async function addDoc(c, data){ const id = 'auto' + (++counter); store[c.col + '/' + id] = resolve(data); return { id }; }
+export async function addDoc(c, data){
+  const id = 'auto' + (++counter);
+  const path = c.col + '/' + id;
+  if (window.__failWrite && window.__failWrite.test(path)) throw Object.assign(new Error('denied'), { code: 'permission-denied' });
+  window.__writeLog.push({ op: 'add', path });
+  store[path] = resolve(data);
+  return { id };
+}
 export async function setDoc(ref, data, opts){
   if (window.__failWrite && window.__failWrite.test(ref.path)) throw Object.assign(new Error('denied'), { code: 'permission-denied' });
   window.__writeLog.push({ op: 'set', path: ref.path });

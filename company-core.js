@@ -403,6 +403,39 @@
     };
   }
 
+  /* ------------------------------------------------------------ activity log */
+  // What admins and the owner did, kept in orgs/{id}/audit (see firestore.rules).
+  const AUDIT_ACTIONS = ['company.created', 'company.edited', 'company.archived', 'company.restored',
+    'invite.created', 'invite.revoked', 'invite.renewed', 'member.removed', 'focus.changed'];
+
+  // The fields of one log entry. The page adds the server's time ("at").
+  function buildAuditEntry(actor, action, targetEmail, detail) {
+    return {
+      action: action,
+      actorUid: actor.uid,
+      actorEmail: String(actor.email || '').toLowerCase(),
+      targetEmail: String(targetEmail || '').slice(0, 254),
+      detail: String(detail || '').slice(0, 300)
+    };
+  }
+
+  // One plain sentence for an entry, without who did it.
+  function describeAudit(e) {
+    const who = e.targetEmail || 'someone';
+    switch (e.action) {
+      case 'company.created': return 'created the company';
+      case 'company.edited': return 'edited the company details';
+      case 'company.archived': return 'archived the company';
+      case 'company.restored': return 'restored the company';
+      case 'invite.created': return 'invited ' + who + (e.detail ? ' (' + e.detail + ')' : '');
+      case 'invite.revoked': return 'withdrew the invitation to ' + who;
+      case 'invite.renewed': return 'sent a new invitation to ' + who;
+      case 'member.removed': return 'removed ' + who + ' from the company';
+      case 'focus.changed': return 'changed the focus priorities' + (e.detail ? ': ' + e.detail : '');
+      default: return e.action || 'did something';
+    }
+  }
+
   /* ---------------------------------------------------------- the exports */
   function isoDay(ms) {
     return ms ? new Date(ms).toISOString().slice(0, 10) : '';
@@ -448,6 +481,7 @@
     domainLabel, parseInviteLines, classifyInvites, inviteStatus, seatInfo, buildPeopleRows, randomToken,
     csvCell, buildInviteCsv, prettyCourseId, tierSlugForPct,
     assignedCourses, lessonsDone, memberProgress, buildTeamRows, filterTeamRows, rollup, buildTeamCsv, buildAnswersCsv,
+    AUDIT_ACTIONS, buildAuditEntry, describeAudit,
     DEFAULT_FOCUS_ORDER, FOCUS_TOP, moveItem, availableFocus, placeFocus, removeFocus, focusIsCustom, focusRank, focusProgress
   };
 })(typeof globalThis !== 'undefined' ? globalThis : window);

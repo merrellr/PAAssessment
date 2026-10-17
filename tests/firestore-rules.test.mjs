@@ -36,6 +36,7 @@ await env.withSecurityRulesDisabled(async (ctx) => {
   await setDoc(doc(db, 'orgs/orgA'), org('Acme'));
   await setDoc(doc(db, 'orgs/orgB'), org('Beta'));
   await setDoc(doc(db, 'orgs/orgOld'), org('Old Co', 'archived'));
+  await setDoc(doc(db, 'memberships/oldMember'), { orgId: 'orgOld', orgName: 'Old Co', role: 'member', status: 'active', inviteToken: 'seed', joinedAt: now(), endedAt: null, email: 'old@x.com', displayName: 'Old' });
   await setDoc(doc(db, 'orgs/orgEdit'), org('Edit Me')); // edited by tests, so no invite may depend on its name
 
   const member = (orgId, orgName, role, status = 'active') => ({
@@ -479,6 +480,54 @@ await deny('a stranger cannot read it', () => getDoc(doc(stranger, 'orgFocus/org
 await deny('a signed-out visitor cannot read it', () => getDoc(doc(anon, 'orgFocus/orgA')));
 await deny('nobody can list the copies', () => getDocs(collection(memberA, 'orgFocus')));
 await deny('a plain member still cannot read the company record itself (contacts, billing, notes stay private)', () => getDoc(doc(memberA, 'orgs/orgA')));
+
+console.log('\n--- activity log (orgs/{id}/audit) ---');
+const entry = (uid, email, over = {}) => Object.assign({
+  action: 'member.removed', actorUid: uid, actorEmail: email, targetEmail: 'x@x.com', detail: 'test', at: serverTimestamp()
+}, over);
+await allow('a company admin writes an entry about their own action', () => setDoc(doc(adminA, 'orgs/orgA/audit/e1'), entry('adminA', 'admin@a.com')));
+await allow('the owner writes an entry too', () => setDoc(doc(owner, 'orgs/orgA/audit/e2'), entry('owner1', 'owner@x.com', { action: 'company.edited' })));
+await allow('an entry may leave out the target and detail', () => setDoc(doc(adminA, 'orgs/orgA/audit/e3'), { action: 'focus.changed', actorUid: 'adminA', actorEmail: 'admin@a.com', at: serverTimestamp() }));
+await deny('an admin cannot sign an entry as somebody else', () => setDoc(doc(adminA, 'orgs/orgA/audit/e4'), entry('owner1', 'admin@a.com')));
+await deny('nor use somebody else\'s email', () => setDoc(doc(adminA, 'orgs/orgA/audit/e5'), entry('adminA', 'someone@else.com')));
+await deny('an entry must carry the server\'s time', () => setDoc(doc(adminA, 'orgs/orgA/audit/e6'), entry('adminA', 'admin@a.com', { at: Timestamp.fromDate(new Date(2020, 1, 1)) })));
+await deny('an unknown kind of action is refused', () => setDoc(doc(adminA, 'orgs/orgA/audit/e7'), entry('adminA', 'admin@a.com', { action: 'something.else' })));
+await deny('extra fields are refused', () => setDoc(doc(adminA, 'orgs/orgA/audit/e8'), entry('adminA', 'admin@a.com', { secret: 'x' })));
+await deny('an over-long detail is refused', () => setDoc(doc(adminA, 'orgs/orgA/audit/e9'), entry('adminA', 'admin@a.com', { detail: 'x'.repeat(301) })));
+await deny('an admin cannot write to another company\'s log', () => setDoc(doc(adminA, 'orgs/orgB/audit/e10'), entry('adminA', 'admin@a.com')));
+await deny('a plain member cannot write to the log', () => setDoc(doc(memberA, 'orgs/orgA/audit/e11'), entry('memberA', 'member@a.com')));
+await deny('a removed admin cannot write to the log', () => setDoc(doc(exAdminA, 'orgs/orgA/audit/e12'), entry('exAdminA', 'ex@a.com')));
+await deny('a stranger cannot write to the log', () => setDoc(doc(stranger, 'orgs/orgA/audit/e13'), entry('stranger', 'stranger@x.com')));
+await deny('an entry can never be changed', () => updateDoc(doc(adminA, 'orgs/orgA/audit/e1'), { detail: 'edited' }));
+await deny('an entry can never be deleted', () => deleteDoc(doc(adminA, 'orgs/orgA/audit/e1')));
+await deny('not even by the owner', () => deleteDoc(doc(owner, 'orgs/orgA/audit/e1')));
+await allow('a company admin reads their log', () => getDocs(collection(adminA, 'orgs/orgA/audit')));
+await allow('the owner reads any log', () => getDocs(collection(owner, 'orgs/orgA/audit')));
+await deny('an admin of another company cannot read it', () => getDocs(collection(adminB, 'orgs/orgA/audit')));
+await deny('a plain member cannot read it', () => getDocs(collection(memberA, 'orgs/orgA/audit')));
+await deny('a stranger cannot read it', () => getDocs(collection(stranger, 'orgs/orgA/audit')));
+await deny('a signed-out visitor cannot read it', () => getDocs(collection(anon, 'orgs/orgA/audit')));
+
+console.log('\n--- private owner notes (orgPrivate) ---');
+await allow('the owner writes private notes', () => setDoc(doc(owner, 'orgPrivate/orgA'), { notes: 'Pilot customer, pays on net 30', updatedAt: serverTimestamp() }));
+await allow('the owner reads them', () => getDoc(doc(owner, 'orgPrivate/orgA')));
+await allow('and lists them', () => getDocs(collection(owner, 'orgPrivate')));
+await deny('a company admin cannot read their own company\'s private notes', () => getDoc(doc(adminA, 'orgPrivate/orgA')));
+await deny('a company admin cannot write them', () => setDoc(doc(adminA, 'orgPrivate/orgA'), { notes: 'x', updatedAt: serverTimestamp() }));
+await deny('a plain member cannot read them', () => getDoc(doc(memberA, 'orgPrivate/orgA')));
+await deny('a stranger cannot read them', () => getDoc(doc(stranger, 'orgPrivate/orgA')));
+await deny('nobody can list them but the owner', () => getDocs(collection(adminA, 'orgPrivate')));
+await deny('notes over 2,000 characters are refused', () => setDoc(doc(owner, 'orgPrivate/orgB'), { notes: 'x'.repeat(2001), updatedAt: serverTimestamp() }));
+await deny('extra fields are refused', () => setDoc(doc(owner, 'orgPrivate/orgB'), { notes: 'x', extra: 1, updatedAt: serverTimestamp() }));
+await deny('the notes cannot be deleted', () => deleteDoc(doc(owner, 'orgPrivate/orgA')));
+
+console.log('\n--- an archived company receives nothing new ---');
+await deny('a member of an archived company cannot add to its copy of their results', () => setDoc(doc(asUser('oldMember', 'old@x.com'), 'orgs/orgOld/members/oldMember'), goodShare('old@x.com')));
+await allow('but they can still blank their own name on it (account deletion)', async () => {
+  await env.withSecurityRulesDisabled(async (ctx) => { await setDoc(doc(ctx.firestore(), 'orgs/orgOld/members/oldMember'), { identity: { name: 'Old', email: 'old@x.com' }, assessment: null, courses: {}, lastActiveAt: null, updatedAt: now() }); });
+  return updateDoc(doc(asUser('oldMember', 'old@x.com'), 'orgs/orgOld/members/oldMember'), { identity: null, updatedAt: serverTimestamp() });
+});
+await allow('while an active company still receives updates as before', () => setDoc(doc(memberA, 'orgs/orgA/members/memberA'), goodShare('member@a.com')));
 
 console.log('\n==============================');
 console.log(passes + ' passed, ' + failures + ' failed');

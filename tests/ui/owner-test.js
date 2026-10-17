@@ -91,10 +91,14 @@ function finish(){
     const org = window.__store[orgPath];
     t('company saved with contact, billing, notes, seats and default focus order',
       org && org.name === 'Acme Health' && org.plan === 'seat' && org.seatLimit === 3 && org.contactName === 'Pat Jones' &&
-      org.contactEmail === 'pat@acme.com' && org.billingAddress.indexOf('Springfield') > -1 && org.notes.indexOf('Pilot') === 0 &&
+      org.contactEmail === 'pat@acme.com' && org.billingAddress.indexOf('Springfield') > -1 && org.notes === '' &&
       org.focusAreas.length === 7 && org.status === 'active' && org.createdBy === 'owner1');
     const focusCopy = window.__store['orgFocus/' + orgPath.split('/')[1]];
     t('creating a company also saves the member-readable copy of its focus list, identical to the company\'s', !!focusCopy && focusCopy.focusAreas.join() === org.focusAreas.join() && focusCopy.updatedAt && typeof focusCopy.updatedAt.toMillis === 'function', JSON.stringify(focusCopy));
+    const privNotes = window.__store['orgPrivate/' + orgPath.split('/')[1]];
+    t('the private notes are saved in the owner-only place, not on the company record that its admins can read', !!privNotes && privNotes.notes.indexOf('Pilot customer') === 0 && org.notes === '', JSON.stringify(privNotes));
+    const created = Object.keys(window.__store).filter(k => k.indexOf(orgPath + '/audit/') === 0).map(k => window.__store[k]);
+    t('creating the company is recorded in its activity log by the owner', created.some(e => e.action === 'company.created' && e.actorUid === 'owner1' && e.actorEmail === 'owner@x.com' && e.at && e.at.toMillis), JSON.stringify(created));
     const summaryText = textOf($('detailSummary'));
     t('company page shows point of contact and billing address', /Pat Jones/.test(summaryText) && /pat@acme\.com/.test(summaryText) && /Springfield/.test(summaryText));
     t('company page shows seats, notes and created / last modified', /of 3 seats in use/.test(summaryText) && /Pilot customer/.test(summaryText) && /Created/.test(summaryText) && /Last modified/.test(summaryText));
@@ -308,6 +312,10 @@ function finish(){
     t('cannot invite people to an archived company', /archived/i.test($('usersError').textContent) && !window.__store['invites/late']);
     click('archiveBtn'); await sleep(250);
     t('restore brings it back', window.__store[orgPath].status === 'active' && $('archiveBtn').textContent === 'Archive');
+    await sleep(100);
+    const actions = Object.keys(window.__store).filter(k => k.indexOf(orgPath + '/audit/') === 0).map(k => window.__store[k].action);
+    t('editing, archiving and restoring were each recorded in the activity log', ['company.created', 'company.edited', 'company.archived', 'company.restored'].every(a => actions.indexOf(a) > -1), actions.join());
+    t('the company record still keeps no notes after the edit, and the private copy has the latest', window.__store[orgPath].notes === '' && /Pilot customer/.test(window.__store['orgPrivate/' + orgPath.split('/')[1]].notes));
     if (stopAt === 5) return finish();
 
     /* ---- add a second admin ---- */
@@ -416,6 +424,15 @@ function finish(){
     const janeAfterRemove = rowsIn('userTableWrap').find(r => /Jane Smith/.test(textOf(r)) && /Left/.test(textOf(r)));
     t('the list shows them as Left, with no Remove button, and their shared data still there', !!janeAfterRemove && /Left/.test(textOf(janeAfterRemove)) && !Array.prototype.some.call(janeAfterRemove.querySelectorAll('button'), b => b.textContent.trim() === 'Remove') && !!window.__store['orgs/' + orgIdForShares + '/members/uJane'], janeAfterRemove && textOf(janeAfterRemove));
     t('and the page confirms', /was removed/.test($('detailNotice').textContent), $('detailNotice').textContent);
+    await sleep(100);
+    const auditAll = Object.keys(window.__store).filter(k => k.indexOf(orgPath + '/audit/') === 0).map(k => window.__store[k]);
+    t('the removal and the invitations made along the way are in the activity log', auditAll.some(e => e.action === 'member.removed' && e.targetEmail === 'jane@acme.com') && auditAll.filter(e => e.action === 'invite.created').length >= 4 && auditAll.some(e => e.action === 'invite.revoked'), auditAll.map(e => e.action).join());
+
+    /* ---- a company saved before private notes existed ---- */
+    window.__store['orgs/legacy1'] = { name: 'Legacy Co', plan: 'flat', seatLimit: null, focusAreas: [], notes: 'old private note about pricing', status: 'active', createdAt: Timestamp.now(), createdBy: 'owner1', updatedAt: Timestamp.now() };
+    location.hash = ''; await sleep(80); location.hash = '#company=' + orgPath.split('/')[1]; await sleep(80); location.hash = ''; await sleep(500);
+    t('notes found on a company record are moved to the owner-only place and cleared from the record', window.__store['orgs/legacy1'].notes === '' && window.__store['orgPrivate/legacy1'] && window.__store['orgPrivate/legacy1'].notes === 'old private note about pricing', JSON.stringify(window.__store['orgs/legacy1']));
+    t('and the owner still sees that note in the list', /old private note/.test($('orgTableWrap').textContent));
 
   } catch (e) {
     out.push('FAIL test script crashed: ' + (e && e.stack ? e.stack.split('\n').slice(0, 3).join(' / ') : e));

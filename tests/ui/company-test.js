@@ -93,6 +93,7 @@ async function readBlob(d){ return await d.blob.text(); }
       t('with nobody assessed, the focus card shows no percentage yet and says why', /Progress on our focus: —/.test(txt('focusSummary')) && /once people have taken the assessment/.test(txt('focusSummary')), txt('focusSummary'));
       t('both download buttons: team report enabled, answers disabled (no answers)', $('csvTeamBtn').disabled === false && $('csvAnswersBtn').disabled === true);
       t('invitations list is empty with a friendly message', /No invitations waiting/.test($('inviteWrap').textContent));
+      t('a company with no history says so in Recent activity', /Nothing yet/.test($('activityWrap').textContent), $('activityWrap').textContent);
     } else if (scn === 'archived'){
       t('the page opens, read-only, with a banner', shown() === 'page' && vis('archivedBanner'));
       t('adding people is switched off', $('addUsersBtn').disabled && $('addAdminBtn').disabled);
@@ -124,6 +125,8 @@ async function readBlob(d){ return await d.blob.text(); }
       t('the focus ranking is shown in order, read-only', /1\. AI Fluency — Organizational/.test(txt('orgSummary')) && /2\. Customer & Market Discovery/.test(txt('orgSummary')));
       t('internal owner notes and billing address are NOT shown to company admins', !/secret owner notes/.test(document.body.textContent) && !/1 Main St/.test(document.body.textContent));
 
+      const hist = rowsIn('activityWrap');
+      t('Recent activity starts with the saved history, newest first, in plain sentences', hist.length === 3 && /focus priorities: 1\. AI Fluency — Organizational/.test(textOf(hist[0])) && /ann@acme\.com/.test(textOf(hist[0])) && /invited ben@acme\.com \(member\)/.test(textOf(hist[1])) && /owner@x\.com.*created the company/.test(textOf(hist[2])), hist.map(textOf).join(' | '));
       t('roll-up: 6 people', tileNum('People') === '6', tileNum('People'));
       t('roll-up: 5 took the assessment, 1 has not', tileNum('Took the assessment') === '5' && /1 have not/.test($('tiles').textContent));
       t('roll-up: 2 learning, 1 finished', tileNum('Learning now') === '2' && tileNum('Finished their plan') === '1');
@@ -284,7 +287,13 @@ async function readBlob(d){ return await d.blob.text(); }
 
       /* admins can only touch invitations */
       const paths = window.__writeLog.map(w => w.path);
-      t('the admin wrote only invitation documents (never the company, memberships or anyone\'s results)', paths.length > 0 && paths.every(p => /^invites\//.test(p)), paths.filter(p => !/^invites\//.test(p)).join());
+      t('the admin wrote only invitation documents and activity-log entries (never the company, memberships or anyone\'s results)', paths.length > 0 && paths.every(p => /^invites\//.test(p) || /^orgs\/orgA\/audit\//.test(p)), paths.filter(p => !/^invites\//.test(p) && !/^orgs\/orgA\/audit\//.test(p)).join());
+      const auditNow = () => Object.keys(window.__store).filter(k => k.indexOf('orgs/orgA/audit/') === 0).map(k => window.__store[k]);
+      t('creating, renewing and revoking invitations were each recorded in the activity log, by the admin, with their email',
+        auditNow().filter(e => e.action === 'invite.created' && e.actorUid === 'uAdmin' && e.actorEmail === 'ann@acme.com').length >= 3 && auditNow().some(e => e.action === 'invite.renewed') && auditNow().some(e => e.action === 'invite.revoked' && e.targetEmail === 'fresh2@acme.com'),
+        JSON.stringify(auditNow().map(e => e.action + ':' + e.targetEmail)));
+      t('every entry carries the server\'s time', auditNow().every(e => e.at && typeof e.at.toMillis === 'function'));
+      t('the Recent activity card lists the newest first, in plain sentences', /ann@acme\.com\s*(invited|sent|withdrew)/.test(textOf($('activityWrap').querySelector('tbody tr'))) || /(invited|sent a new invitation|withdrew)/.test(textOf($('activityWrap').querySelector('tbody tr'))), textOf($('activityWrap').querySelector('tbody tr')));
       t('the company record itself is unchanged', window.__store['orgs/orgA'].notes === 'secret owner notes' && window.__store['orgs/orgA'].seatLimit === 10);
 
       /* refresh picks up changes made elsewhere */
@@ -323,7 +332,8 @@ async function readBlob(d){ return await d.blob.text(); }
       const savedOrg = window.__store['orgs/orgA'], savedCopy = window.__store['orgFocus/orgA'];
       t('saving updates the company record and the member-readable copy to the new order', savedOrg.focusAreas.join() === 'discovery,aiOrg,strategy,prioritization,execution,stakeholder' && savedCopy.focusAreas.join() === savedOrg.focusAreas.join(), savedOrg.focusAreas.join());
       t('nothing else on the company record changed (name, plan, seats, notes, contacts, billing)', ['name', 'plan', 'seatLimit', 'notes', 'contactName', 'contactEmail', 'contactPhone', 'billingAddress', 'status'].every(k => savedOrg[k] === orgBefore[k]));
-      t('only those two documents were written', window.__writeLog.map(w => w.op + ':' + w.path).sort().join() === 'set:orgFocus/orgA,update:orgs/orgA', window.__writeLog.map(w => w.op + ':' + w.path).join());
+      t('only those two documents were changed (plus one activity-log entry)', window.__writeLog.filter(w => w.path.indexOf('/audit/') === -1).map(w => w.op + ':' + w.path).sort().join() === 'set:orgFocus/orgA,update:orgs/orgA' && window.__writeLog.filter(w => w.path.indexOf('/audit/') > -1).length === 1, window.__writeLog.map(w => w.op + ':' + w.path).join());
+      t('the change is recorded: "changed the focus priorities", with the new order', /changed the focus priorities: 1\. Customer & Market Discovery, 2\. AI Fluency — Organizational/.test(textOf($('activityWrap').querySelector('tbody tr'))), textOf($('activityWrap').querySelector('tbody tr')));
       t('the page confirms, and the header and progress rows follow the new order', /Priorities saved/.test(txt('notice')) && /1\. Customer & Market Discovery/.test(txt('orgSummary')) && /1\. Customer & Market Discovery/.test(textOf($('focusSummary').querySelector('.barrow'))) && $('focusSummary').querySelectorAll('.barrow').length === 6, txt('notice'));
 
       $('focusEditBtn').click(); await sleep(60);
@@ -360,7 +370,8 @@ async function readBlob(d){ return await d.blob.text(); }
       const fayDoc = window.__store['memberships/uFay'];
       t('removing ends the membership with a server-set end date', fayDoc.status === 'removed' && fayDoc.endedAt && typeof fayDoc.endedAt.toMillis === 'function', JSON.stringify(fayDoc));
       t('and changes nothing else on it (company, role, invite, join date)', fayDoc.orgId === 'orgA' && fayDoc.role === 'member' && fayDoc.inviteToken === fayBefore.inviteToken && fayDoc.joinedAt.toMillis() === fayBefore.joinedAt);
-      t('exactly one document was written', window.__writeLog.length === 1 && window.__writeLog[0].path === 'memberships/uFay', JSON.stringify(window.__writeLog));
+      t('exactly one membership was changed (plus one activity-log entry)', window.__writeLog.filter(w => w.path.indexOf('/audit/') === -1).length === 1 && window.__writeLog[0].path === 'memberships/uFay' && window.__writeLog.filter(w => w.path.indexOf('/audit/') > -1).length === 1, JSON.stringify(window.__writeLog));
+      t('the removal is recorded in the activity log', Object.keys(window.__store).map(k => window.__store[k]).some(e => e && e.action === 'member.removed' && e.actorUid === 'uAdmin') && /removed .* from the company/.test(textOf($('activityWrap').querySelector('tbody tr'))), textOf($('activityWrap').querySelector('tbody tr')));
       t('their shared record is left exactly as it was (the company keeps it)', window.__store['orgs/orgA/members/uFay'].identity === null && window.__store['orgs/orgA/members/uFay'].assessment.overallPct === 20);
       t('they leave the team table and appear under Former members', !rowFor('teamWrap', 'Name and email removed') && /Name and email removed/.test($('formerWrap').textContent) && /Left/.test($('formerWrap').textContent));
       t('the seat is freed and the roll-up shrinks: 4 of 10 seats, 4 people', /4 of 10 seats in use/.test(txt('orgSummary')) && tileNum('People') === '4', txt('orgSummary'));
@@ -371,6 +382,14 @@ async function readBlob(d){ return await d.blob.text(); }
       t('a refusal by the security rules is explained and the person stays', /security rules refused/.test(txt('errorLine')) && window.__store['memberships/uEli'].status === 'active' && !!rowFor('teamWrap', 'Eli E'), txt('errorLine'));
       t('the Remove button works again after a refusal', removeBtn(rowFor('teamWrap', 'Eli E')) && !removeBtn(rowFor('teamWrap', 'Eli E')).disabled);
       window.__failWrite = null;
+
+      /* the activity log can never stop an admin doing their job */
+      window.__failWrite = /\/audit\//;
+      removeBtn(rowFor('teamWrap', 'Eli E')).click(); await sleep(200);
+      t('if the activity log cannot be written, the removal still goes ahead and no error is shown', window.__store['memberships/uEli'].status === 'removed' && !rowFor('teamWrap', 'Eli E') && txt('errorLine') === '', txt('errorLine'));
+      window.__failWrite = null;
+    } else if (scn === 'auditdenied'){
+      t('if the activity log cannot be read, the rest of the page still works and says so', shown() === 'page' && rowsIn('teamWrap').length === 6 && /couldn't read the activity log/.test($('activityWrap').textContent), $('activityWrap').textContent);
     } else if (scn === 'nocopy'){
       t('the page opens', shown() === 'page');
       await sleep(150);
