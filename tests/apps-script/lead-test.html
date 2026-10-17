@@ -1,0 +1,163 @@
+<!doctype html><html><head><title>PENDING</title>
+<script>
+window.__err = null;
+window.addEventListener('error', function(e){ window.__err = (e.message || 'error') + ' @line ' + e.lineno; });
+
+/* ---- stand-ins for Google's services ---- */
+var props = {};
+var PropertiesService = { getScriptProperties: function(){ return {
+  getProperty: function(k){ return k in props ? props[k] : null; },
+  setProperty: function(k, v){ props[k] = String(v); },
+  deleteProperty: function(k){ delete props[k]; },
+  getKeys: function(){ return Object.keys(props); } }; } };
+var cacheStore = {};
+var CacheService = { getScriptCache: function(){ return { get: function(k){ return k in cacheStore ? cacheStore[k] : null; }, put: function(k, v){ cacheStore[k] = String(v); } }; } };
+var LockService = { getScriptLock: function(){ return { tryLock: function(){ return true; }, releaseLock: function(){} }; } };
+var Session = { getScriptTimeZone: function(){ return 'America/Los_Angeles'; } };
+var Utilities = { formatDate: function(d, tz, f){ return d.toLocaleDateString('sv-SE', { timeZone: tz }); } };
+var sent = []; var quota = 100; var mailThrows = false;
+var MailApp = { getRemainingDailyQuota: function(){ return quota; },
+  sendEmail: function(m){ if (mailThrows) throw new Error('mail down'); sent.push(m); } };
+var ContentService = { MimeType: { JSON: 'json', JAVASCRIPT: 'js' }, createTextOutput: function(t){ return { text: t, setMimeType: function(){ return this; } }; } };
+var sheets = {};
+function makeSheet(){ return { rows: [], frozen: 0, appendRow: function(r){ this.rows.push(r); }, setFrozenRows: function(n){ this.frozen = n; } }; }
+var SpreadsheetApp = { getActiveSpreadsheet: function(){ return {
+  getSheetByName: function(n){ return sheets[n] || null; },
+  insertSheet: function(n){ sheets[n] = makeSheet(); return sheets[n]; },
+  getUrl: function(){ return 'https://docs.google.com/spreadsheets/d/FAKE/edit'; } }; } };
+</script>
+<script src="../../apps-script/Code.gs"></script>
+<script src="../../lead-core.js"></script>
+<script>
+var out = [];
+function t(label, ok, extra){ out.push((ok ? 'PASS ' : 'FAIL ') + label + (ok || !extra ? '' : '   [' + extra + ']')); }
+function reset(){ props = {}; cacheStore = {}; sheets = {}; sent = []; quota = 100; mailThrows = false; }
+var n = 0;
+function newId(){ n++; var s = ('000000000000000000000000' + n.toString(16)).slice(-24); return s; }
+function good(over){
+  return Object.assign({ action: 'requestInfo', id: newId(), elapsedMs: 40000, website: '', source: 'toolkits',
+    who: 'org', interests: ['aiOrg', 'team_assessment'], size: 's51_200', timeline: 'this_month', role: 'decide',
+    message: 'We want to assess all 60 of our product managers before our planning cycle.', contactPref: 'call',
+    name: 'Jane Smith', email: 'jane@acme-health.com', company: 'Acme Health', phone: '555-0100', consent: true }, over || {});
+}
+function submit(d){ var r = handleLeadRequest_(d); return { reply: r.text, status: leadStatus_(d.id) }; }
+var leads = function(){ return sheets['Leads'] ? sheets['Leads'].rows.slice(1) : []; };
+var COL = {}; LEAD_HEADERS_.forEach(function(h, i){ COL[h] = i; });
+try {
+  /* ---- the lists match the page ---- */
+  Object.keys(LeadCore.OPTIONS).forEach(function(k){
+    var page = {}; LeadCore.OPTIONS[k].forEach(function(o){ page[o.code] = o.label; });
+    t('the answers the server accepts for "' + k + '" are exactly the ones the form offers, with the same words', JSON.stringify(page) === JSON.stringify(LEAD_OPTIONS_[k]), JSON.stringify(Object.keys(page)) + ' vs ' + JSON.stringify(Object.keys(LEAD_OPTIONS_[k])));
+  });
+  t('the notice goes to Rob, on both the page and the server', LEAD_NOTIFY_EMAIL_ === 'rob@productadvisory.co' && LeadCore.NOTIFY_EMAIL === LEAD_NOTIFY_EMAIL_);
+
+  /* ---- a good request ---- */
+  reset();
+  var r = submit(good());
+  t('the form is told it worked', r.reply === 'OK' && r.status.ok === true && r.status.found === true, JSON.stringify(r.status));
+  t('a Leads tab is created with a header row, frozen', !!sheets['Leads'] && sheets['Leads'].rows[0].join() === LEAD_HEADERS_.join() && sheets['Leads'].frozen === 1);
+  var row = leads()[0];
+  t('the lead is saved as one row, with the real words (not codes)', leads().length === 1 && row[COL['Name']] === 'Jane Smith' && row[COL['Email']] === 'jane@acme-health.com' && row[COL['I am']] === "I'm looking for my organization" && row[COL['Team size']] === '51 to 200 people' && row[COL['Timeline']] === 'This month' && row[COL['Who decides']] === 'I make the decision' && row[COL['Interested in']] === 'AI fluency for my organization, Assessing my whole team', JSON.stringify(row));
+  t('the row starts as "New" with room for Rob\'s notes, and records where it came from', row[COL['Status']] === 'New' && row[COL['Notes']] === '' && row[COL['Source']] === 'toolkits');
+  t('exactly one email goes out, to Rob', sent.length === 1 && sent[0].to === 'rob@productadvisory.co');
+  t('replying to it answers the lead', sent[0].replyTo === 'jane@acme-health.com');
+  t('the subject says how hot it is and who it is from', /^\[Hot\] Info request: Jane Smith, Acme Health \(org, this month\)$/.test(sent[0].subject), sent[0].subject);
+  t('the email carries every answer and the reasons for the score', /Why: Organization|Why: I'm looking for my organization/.test(sent[0].body) && /Team size: 51 to 200 people/.test(sent[0].body) && /Message: We want to assess all 60/.test(sent[0].body) && /docs\.google\.com\/spreadsheets\/d\/FAKE/.test(sent[0].body));
+  t('the person\'s own screen never learns the score', JSON.stringify(r.status).indexOf('Hot') === -1 && JSON.stringify(r.status).indexOf('score') === -1);
+
+  /* ---- scoring ---- */
+  function fitOf(d){ reset(); submit(good(d)); return { fit: leads()[0][COL['Fit']], score: leads()[0][COL['Score']] }; }
+  var hot = fitOf({});
+  t('an organization of 51-200 deciding this month is Hot, and the score never passes 100', hot.fit === 'Hot' && hot.score === 100, JSON.stringify(hot));
+  var warm = fitOf({ who: 'leader', size: 's11_50', timeline: 'this_quarter', role: 'influence', contactPref: 'email', interests: ['execution'], message: '' });
+  t('a team leader of 11-50, in 3 months, influencing the decision is Warm', warm.fit === 'Warm', JSON.stringify(warm));
+  var cold = fitOf({ who: 'individual', size: '', role: '', timeline: 'exploring', contactPref: 'email', email: 'pat@gmail.com', company: '', message: '', interests: ['notsure'] });
+  t('an individual just exploring from a free email address is Nurture', cold.fit === 'Nurture' && cold.score === 5, JSON.stringify(cold));
+  var free = fitOf({ email: 'someone@gmail.com' }), work = fitOf({ email: 'someone@bigco.com' });
+  t('a work email adds 10 points over a free one', work.score >= free.score && (work.fit !== 'Hot' || free.fit !== 'Hot' || true));
+  reset(); submit(good({ email: 'x@gmail.com', who: 'other', size: 's2_10', timeline: 'later', role: '', contactPref: 'email', message: 'short', company: '' }));
+  var low = leads()[0][COL['Score']];
+  reset(); submit(good({ email: 'x@bigco.com', who: 'other', size: 's2_10', timeline: 'later', role: '', contactPref: 'email', message: 'short', company: '' }));
+  t('exactly 10 points for the work email', leads()[0][COL['Score']] - low === 10);
+
+  /* ---- what is refused ---- */
+  function refused(label, over){
+    reset(); var res = submit(good(over));
+    t(label, res.status.ok === false && leads().length === 0 && sent.length === 0, JSON.stringify(res.status));
+  }
+  refused('no consent: nothing is saved or sent', { consent: false });
+  refused('consent must be a real true, not the word "true"', { consent: 'true' });
+  refused('a bad email address', { email: 'not-an-email' });
+  refused('no name', { name: '   ' });
+  refused('an unknown "who"', { who: 'robot' });
+  refused('an unknown timeline', { timeline: 'yesterday' });
+  refused('an unknown team size', { size: 'huge' });
+  refused('an unknown decision role', { role: 'boss' });
+  refused('no interests at all', { interests: [] });
+  refused('only unknown interests', { interests: ['hack', 'steal'] });
+  reset(); t('a malformed id is refused', leadStatus_('zzz').ok === false && handleLeadRequest_(good({ id: 'zzz' })).text === 'OK' && leads().length === 0);
+
+  /* ---- robots ---- */
+  reset(); var bot = submit(good({ website: 'http://spam.example' }));
+  t('a filled-in hidden field is quietly dropped: it looks like success, but nothing is saved or sent', bot.status.ok === true && leads().length === 0 && sent.length === 0);
+  reset(); var fast = submit(good({ elapsedMs: 900 }));
+  t('finishing in under 2.5 seconds is quietly dropped', fast.status.ok === true && leads().length === 0 && sent.length === 0);
+  reset(); var noTime = good(); delete noTime.elapsedMs; var nt = submit(noTime);
+  t('leaving out the time taken is treated as too fast', nt.status.ok === true && leads().length === 0);
+
+  /* ---- repeats and limits ---- */
+  reset(); var d1 = good(); submit(d1); submit(d1); submit(d1);
+  t('the same request sent three times is saved and emailed once', leads().length === 1 && sent.length === 1);
+  reset();
+  var okCount = 0, last;
+  for (var i = 0; i < 5; i++){ last = submit(good()); if (last.status.ok) okCount++; }
+  t('one email address can send 3 requests a day, then is told to wait', okCount === 3 && last.status.error === 'rate_limited' && leads().length === 3 && sent.length === 3, okCount + ' ' + JSON.stringify(last.status));
+  reset(); LEAD_DAILY_CAP_ = 4; var oks = 0, cap;
+  for (var j = 0; j < 6; j++){ cap = submit(good({ email: 'p' + j + '@x.com' })); if (cap.status.ok) oks++; }
+  t('there is also a cap on the whole day', oks === 4 && cap.status.error === 'rate_limited' && leads().length === 4);
+  LEAD_DAILY_CAP_ = 60;
+  reset(); props['leadday_2020-01-01'] = '9'; props['leademail_2020-01-01_a@b.com'] = '2'; props['GROQ_API_KEY'] = 'keep';
+  submit(good());
+  t('yesterday\'s counters are cleaned up and other settings survive', !('leadday_2020-01-01' in props) && !('leademail_2020-01-01_a@b.com' in props) && props.GROQ_API_KEY === 'keep');
+
+  /* ---- hostile input ---- */
+  reset(); submit(good({ name: '=HYPERLINK("http://evil","x")', company: '@evil', message: '+cmd|x', email: 'a@b.com' }));
+  var hr = leads()[0];
+  t('text that would run as a formula in the sheet is neutralised', hr[COL['Name']].indexOf("'=") === 0 && hr[COL['Company']].indexOf("'@") === 0 && hr[COL['Message']].indexOf("'+") === 0, JSON.stringify([hr[COL['Name']], hr[COL['Company']], hr[COL['Message']]]));
+  reset(); submit(good({ name: '<img src=x onerror=alert(1)>', message: '<scr' + 'ipt>alert(1)</scr' + 'ipt>' }));
+  t('markup in the email is escaped, never executed', sent[0].htmlBody.indexOf('<scr' + 'ipt>') === -1 && sent[0].htmlBody.indexOf('<img') === -1 && sent[0].htmlBody.indexOf('&lt;scr' + 'ipt&gt;') > -1);
+  reset(); submit(good({ name: 'N'.repeat(500), message: 'M'.repeat(2000), company: 'C'.repeat(500), phone: '9'.repeat(500) }));
+  var long = leads()[0];
+  t('over-long text is cut to the limits', long[COL['Name']].length === 80 && long[COL['Message']].length === 400 && long[COL['Company']].length === 80 && long[COL['Phone']].length === 40);
+  reset(); submit(good({ interests: ['aiOrg', 'aiOrg', 'hack', 'strategy', 'execution', 'toolkits'] }));
+  t('interests: duplicates and unknowns are dropped, and no more than three kept', leads()[0][COL['Interested in']] === 'AI fluency for my organization, Product strategy & roadmapping, Execution & delivery', leads()[0][COL['Interested in']]);
+  reset(); submit(good({ source: '<b>x</b>' }));
+  t('a strange source label is ignored', leads()[0][COL['Source']] === '');
+
+  /* ---- shared assessment ---- */
+  reset(); submit(good({ assessment: { tier: 'Moderate Experience', overallPct: 141, categoryPct: { discovery: 80.4, strategy: -5, aiOrg: 'x', evil: 9 } } }));
+  var as = leads()[0];
+  t('a shared assessment is saved as level and scores, cleaned and kept in range, and appears in the email', as[COL['Assessment level']] === 'Moderate Experience (100% overall)' && as[COL['Assessment scores']] === 'Discovery 80%, Strategy 0%' && /Assessment level: Moderate Experience/.test(sent[0].body), JSON.stringify([as[COL['Assessment level']], as[COL['Assessment scores']]]));
+  reset(); submit(good());
+  t('without one, those columns stay empty and the email does not mention it', leads()[0][COL['Assessment level']] === '' && sent[0].body.indexOf('Assessment level') === -1);
+
+  /* ---- when email fails, the lead is not lost ---- */
+  reset(); mailThrows = true; var mf = submit(good());
+  t('if Gmail fails the lead is still saved and the person is still told it worked', leads().length === 1 && mf.status.ok === true);
+  reset(); quota = 0; var mq = submit(good());
+  t('if the Gmail quota is used up the lead is still saved', leads().length === 1 && sent.length === 0 && mq.status.ok === true);
+
+  /* ---- the routes ---- */
+  reset();
+  var d = JSON.stringify(good());
+  var post = doPost({ postData: { contents: d } });
+  t('doPost routes requestInfo', post.text === 'OK' && leads().length === 1 && sent.length === 1);
+  var chk = doGet({ parameter: { action: 'leadsCheck', callback: 'cb' } });
+  t('doGet answers leadsCheck so the page can tell this version is deployed', /^cb\(\{"ok":true,"leads":true\}\);$/.test(chk.text), chk.text);
+  var st = doGet({ parameter: { action: 'leadStatus', callback: 'cb', id: JSON.parse(d).id } });
+  t('doGet answers leadStatus', /"found":true/.test(st.text) && /"ok":true/.test(st.text), st.text);
+  var nf = leadStatus_('0'.repeat(24));
+  t('an id that was never sent is "not found yet"', nf.ok === true && nf.found === false);
+} catch (e) { out.push('FAIL crashed: ' + e.message + ' ' + (e.stack || '').split('\n')[1]); }
+document.title = window.__err ? 'LOAD ERROR: ' + window.__err : out.join(' || ');
+</script></head><body></body></html>

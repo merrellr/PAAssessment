@@ -1,0 +1,49 @@
+<!--
+  PRODUCT ADVISORY WEBSITE BUTTONS: "Request Information" and "Schedule a Call"
+
+  HOW TO USE (on productadvisory.co):
+  1. In your website editor, add a "Code", "Embed" or "HTML" block where the buttons should go.
+  2. Select everything between the START and END lines below, copy it, and paste it into that block.
+  3. Save and publish. Both buttons open in a NEW TAB.
+
+  WHAT TO CHANGE:
+  - src=toolkits   Change the word after src= to say which page the buttons are on
+                   (for example src=home, src=teams, src=pricing). It appears on every
+                   request so you can see which page works best. Letters, numbers, - and _ only.
+  - &who=org       Optional. Add it to the Request Information link on pages aimed at companies:
+                   the form then skips its first question.
+  - SCHEDULE A CALL: this goes straight to your Calendly 30-minute page. If you would rather have
+                   people answer the short form first (so you know who is booking), replace its
+                   address with the one marked "alternative" on that button.
+-->
+
+<!-- START: copy from here -->
+<style>
+  .pa-btn-row{ display:flex; gap:14px; flex-wrap:wrap; align-items:center; margin:18px 0; }
+  .pa-btn{
+    display:inline-block; box-sizing:border-box; text-align:center; cursor:pointer; text-decoration:none;
+    font-family:'Space Grotesk','Helvetica Neue',Arial,sans-serif; font-weight:600; font-size:16px; line-height:1.2;
+    padding:15px 28px; border-radius:10px; border:2px solid #1A4584;
+    transition:opacity .15s ease, border-color .15s ease, background .15s ease;
+  }
+  .pa-btn--primary{ background:linear-gradient(90deg,#1A4584 0%,#12305e 100%); color:#ffffff !important; }
+  .pa-btn--primary:hover{ opacity:.9; }
+  .pa-btn--outline{ background:#ffffff; color:#12305e !important; }
+  .pa-btn--outline:hover{ border-color:#35C2E8; background:#F2FAFD; }
+  .pa-btn:focus-visible{ outline:3px solid #35C2E8; outline-offset:3px; }
+  @media (max-width:520px){ .pa-btn{ width:100%; } }
+</style>
+
+<div class="pa-btn-row">
+  <a class="pa-btn pa-btn--primary"
+     href="https://assessment.productadvisory.co/request-info.html?src=toolkits"
+     target="_blank" rel="noopener">Request Information</a>
+
+  <!-- Goes straight to your booking page.
+       Alternative (form first, then the booking page is offered on the thank-you screen):
+       https://assessment.productadvisory.co/request-info.html?src=toolkits&call=1 -->
+  <a class="pa-btn pa-btn--outline"
+     href="https://calendly.com/productadvisory/30min"
+     target="_blank" rel="noopener">Schedule a Call</a>
+</div>
+<!-- END: copy to here -->

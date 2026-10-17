@@ -25,6 +25,7 @@ Copy-Item "$repo\company-core.js" $site
 Copy-Item "$repo\focus-board.js" $site
 Copy-Item "$repo\focus-board.css" $site
 Copy-Item "$repo\tool-core.js" $site
+Copy-Item "$repo\lead-core.js" $site
 Copy-Item "$repo\vendor" "$site\vendor" -Recurse
 Copy-Item "$repo\content" "$site\content" -Recurse
 
@@ -51,6 +52,7 @@ Build-Page 'lesson.html' 'les-test.html' 'les-seed.js' 'les-test.js'
 Build-Page 'company.html' 'company-test.html' 'company-seed.js' 'company-test.js'
 Build-Page 'tool-requests.html' 'tool-requests-test.html' 'tool-seed.js' 'tool-test.js'
 Build-Page 'owner-tools.html' 'owner-tools-test.html' 'owner-tools-seed.js' 'owner-tools-test.js'
+Build-Page 'request-info.html' 'request-info-test.html' 'lead-seed.js' 'lead-test.js'
 [System.IO.File]::WriteAllText("$site\share-test.html", "<!doctype html><html><head>$errHook</head><body><script type=`"module`" src=`"share-test.js`"></script></body></html>")
 
 # a tiny web server, because browsers will not load ES modules from files
@@ -114,6 +116,11 @@ try {
   foreach ($s in 'main', 'empty', 'notowner', 'signedout') {
     $results += Run-Page "tool roadmap admin: $s" "$base/owner-tools-test.html?scn=$s" 40000
   }
+  foreach ($s in 'org', 'individual', 'back', 'signedin', 'nobackend', 'fail', 'unconfirmed', 'ratelimit', 'rejected') {
+    $results += Run-Page "request info form: $s" "$base/request-info-test.html?scn=$s" 90000
+  }
+  $results += Run-Page 'request info form: call' "$base/request-info-test.html?scn=call&call=1" 90000
+  $results += Run-Page 'request info form: preset' "$base/request-info-test.html?scn=preset&who=org&src=toolkits" 90000
   $results += Run-Page 'shared-record sync' "$base/share-test.html" 40000
 } finally {
   Stop-Job $server -ErrorAction SilentlyContinue

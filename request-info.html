@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>Request More Information — Product Advisory Learning</title>
+<meta name="description" content="Tell us a little about what you need and we'll point you to the right place.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy: #1A4584; --navy-deep: #12305e; --gray: #9AA3AD; --cyan: #35C2E8;
+    --bg: #F5F8FB; --surface: #FFFFFF; --ink: #16213E; --ink-soft: #4B5768; --line: #E3E9F0;
+    --warn: #C0622A; --ok: #2E8B57;
+  }
+  *{ box-sizing: border-box; }
+  body{ margin:0; background: var(--bg); font-family:'IBM Plex Sans', system-ui, sans-serif; color: var(--ink); }
+  .wrap{ max-width: 640px; margin: 0 auto; padding: 24px 16px 56px; }
+  .brand-header{ display:flex; align-items:center; gap:9px; padding: 0 0 14px; text-decoration:none; }
+  .brand-word{ font-family:'Space Grotesk', sans-serif; font-weight:700; font-size: 19px; line-height:1.3; color: var(--navy-deep); }
+  .brand-accent-bar{ height: 3px; background: linear-gradient(90deg, var(--navy) 0%, var(--cyan) 100%); border-radius: 2px; margin-bottom: 24px; }
+  .card{ background: var(--surface); border-radius: 18px; border: 1px solid var(--line); padding: 28px; box-shadow: 0 1px 2px rgba(22,33,62,0.04), 0 12px 32px rgba(22,33,62,0.06); margin-bottom: 20px; }
+  h1{ font-family:'Space Grotesk', sans-serif; font-size: 25px; margin: 0 0 6px; color: var(--navy-deep); line-height: 1.2; outline: none; }
+  p{ line-height:1.55; color: var(--ink-soft); font-size: 14.5px; margin: 0 0 12px; }
+  a{ color: var(--navy); }
+  .hint{ font-size: 13.5px; color: var(--gray); margin: 0 0 18px; }
+
+  .progress{ height: 6px; border-radius: 3px; background:#EEF2F7; overflow:hidden; margin-bottom: 14px; }
+  .progress span{ display:block; height:100%; background: linear-gradient(90deg, var(--navy), var(--cyan)); border-radius: 3px; transition: width .25s ease; }
+  .step-meta{ display:flex; justify-content:space-between; align-items:center; font-size: 12.5px; color: var(--gray); margin-bottom: 18px; min-height: 20px; }
+  .linklike{ background:none; border:none; padding:0; font:inherit; color: var(--navy); cursor:pointer; text-decoration: underline; }
+  .linklike[hidden]{ display:none; }
+
+  .options{ display:grid; gap: 10px; }
+  .options.two{ grid-template-columns: 1fr 1fr; }
+  .options.chips{ grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); }
+  @media (max-width: 520px){ .options.two{ grid-template-columns: 1fr; } }
+  .opt{ text-align:left; background:#fff; border: 1.5px solid var(--line); border-radius: 13px; padding: 14px 16px; cursor:pointer; font-family:'IBM Plex Sans', sans-serif; color: var(--ink); transition: border-color .12s, background .12s, transform .06s; }
+  .opt:hover{ border-color: var(--cyan); }
+  .opt:active{ transform: scale(0.99); }
+  .opt[aria-pressed="true"]{ border-color: var(--navy); background:#EEF3FA; box-shadow: 0 0 0 1px var(--navy) inset; }
+  .opt-title{ display:block; font-family:'Space Grotesk', sans-serif; font-weight:600; font-size: 15px; }
+  .opt-desc{ display:block; font-size: 12.5px; color: var(--gray); margin-top: 2px; }
+  .opt.chip{ padding: 11px 14px; }
+  .opt.chip .opt-title{ font-size: 14px; }
+
+  .field-label{ display:block; font-size:12.5px; font-weight:600; color: var(--ink-soft); margin: 0 0 5px 2px; }
+  .text-input{ width:100%; padding: 12px 14px; margin-bottom: 14px; border: 1.5px solid var(--line); border-radius: 10px; font-family:'IBM Plex Sans', sans-serif; font-size: 15px; background:#fff; color: var(--ink); }
+  textarea.text-input{ resize: vertical; min-height: 96px; line-height: 1.5; }
+  .text-input:focus{ outline:none; border-color: var(--cyan); }
+  .grid-2{ display:grid; grid-template-columns: 1fr 1fr; gap: 0 14px; }
+  @media (max-width: 520px){ .grid-2{ grid-template-columns: 1fr; } }
+  .count{ font-size: 12px; color: var(--gray); text-align:right; margin: -10px 2px 12px; }
+  .check-row{ display:flex; align-items:flex-start; gap:9px; font-size:13.5px; color: var(--ink-soft); margin: 4px 0 14px; cursor:pointer; line-height: 1.5; }
+  .check-row input{ margin-top: 3px; }
+  .callout{ background:#F2FAFD; border:1px solid #BFE6F2; border-radius: 12px; padding: 12px 14px; margin: 0 0 14px; }
+  .callout .check-row{ margin: 0; }
+  .field-error{ font-size: 13px; color: var(--warn); margin: 10px 0 0; min-height: 1px; }
+  .trap{ position:absolute; left:-9999px; width:1px; height:1px; overflow:hidden; }
+
+  .actions{ display:flex; gap:10px; margin-top: 18px; flex-wrap:wrap; }
+  button.btn, a.btn{ font-family:'Space Grotesk', sans-serif; font-weight:600; font-size:15px; border-radius: 10px; padding: 13px 22px; border: none; cursor:pointer; text-decoration:none; display:inline-block; text-align:center; }
+  .btn-primary{ background: linear-gradient(90deg, var(--navy) 0%, var(--navy-deep) 100%); color:#fff; }
+  .btn-primary:hover{ opacity:0.92; }
+  .btn-ghost{ background:#fff; color: var(--ink); border: 1.5px solid var(--line) !important; }
+  .btn-ghost:hover{ border-color: var(--cyan) !important; }
+  button.btn:disabled{ opacity:0.55; cursor: default; }
+  button:focus-visible, .text-input:focus-visible, a:focus-visible, input:focus-visible{ outline: 2px solid var(--cyan); outline-offset: 2px; }
+
+  .banner{ border:1px solid #E8D9A6; background:#FFF9E6; color:#6E5410; border-radius: 12px; padding: 12px 16px; font-size: 13px; line-height: 1.5; margin-bottom: 18px; }
+  .banner a{ color: inherit; }
+  .done-mark{ width:48px; height:48px; border-radius:50%; background:#E4F3EA; color: var(--ok); display:flex; align-items:center; justify-content:center; font-size: 24px; margin-bottom: 14px; }
+  .ref{ font-size: 12px; color: var(--gray); margin-top: 16px; }
+  .spinner{ width: 28px; height: 28px; border-radius: 50%; border: 3px solid #EEF2F7; border-top-color: var(--navy); animation: spin .8s linear infinite; margin-bottom: 14px; }
+  @keyframes spin{ to{ transform: rotate(360deg); } }
+  @media (prefers-reduced-motion: reduce){ .spinner{ animation: none; } .progress span{ transition: none; } }
+  .foot{ font-size: 12.5px; color: var(--gray); text-align:center; line-height: 1.6; }
+  [hidden]{ display:none !important; }
+</style>
+<script src="lead-core.js"></script>
+</head>
+<body>
+<div class="wrap">
+  <a href="https://www.productadvisory.co/" class="brand-header">
+    <svg width="28" height="28" viewBox="0 0 40 40" aria-hidden="true">
+      <polygon points="20,3 35,11.5 35,28.5 20,37 5,28.5 5,11.5" fill="#1A4584"/>
+      <polygon points="20,10 29,15 29,25 20,30 11,25 11,15" fill="none" stroke="#35C2E8" stroke-width="1.5"/>
+    </svg>
+    <div>
+      <div style="font-family:'IBM Plex Sans', sans-serif; font-weight:600; font-size:10.5px; letter-spacing:0.06em; color:var(--gray); line-height:1;">PRODUCT ADVISORY</div>
+      <div class="brand-word">Request more information</div>
+    </div>
+  </a>
+  <div class="brand-accent-bar"></div>
+
+  <div class="banner" id="backendNote" hidden>Our request form is being set up, so it can't send your answers just yet. Fill it in anyway: at the end you'll get a ready-to-send email to <strong>rob@productadvisory.co</strong> with everything filled in.</div>
+
+  <div class="card" id="formCard">
+    <div class="progress" id="progress" role="progressbar" aria-label="Progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><span id="progressFill" style="width:0%"></span></div>
+    <div class="step-meta"><button class="linklike" id="backBtn" type="button" hidden>← Back</button><span id="stepCount"></span></div>
+    <div id="stage"></div>
+    <div class="field-error" id="stepError" role="alert"></div>
+    <div class="actions" id="actions"></div>
+  </div>
+
+  <div class="card" id="sendingCard" hidden>
+    <div class="spinner" aria-hidden="true"></div>
+    <h1>Sending your request…</h1>
+    <p id="sendingText">This takes a few seconds.</p>
+  </div>
+
+  <div class="card" id="doneCard" hidden>
+    <div class="done-mark" aria-hidden="true">✓</div>
+    <h1 id="doneTitle" tabindex="-1"></h1>
+    <p id="doneText"></p>
+    <div class="actions">
+      <a class="btn btn-primary" id="doneBook" href="#" target="_blank" rel="noopener" hidden></a>
+      <a class="btn btn-primary" id="doneCta" href="index.html"></a>
+      <a class="btn btn-ghost" id="doneSecond" href="tool-requests.html"></a>
+    </div>
+    <div class="ref" id="doneRef"></div>
+  </div>
+
+  <div class="card" id="fallbackCard" hidden>
+    <h1 id="fallbackTitle" tabindex="-1">Let's send this by email instead</h1>
+    <p id="fallbackText"></p>
+    <div class="actions">
+      <a class="btn btn-primary" id="fallbackMail" href="#">Open the email, ready to send</a>
+      <button class="btn btn-ghost" id="fallbackRetry" type="button">Try again</button>
+    </div>
+    <p class="hint" style="margin-top:16px;">The email is addressed to rob@productadvisory.co with your answers already filled in. Nothing is lost.</p>
+  </div>
+
+  <p class="foot">We only use what you share here to reply to you. <a href="https://www.productadvisory.co/privacy-policy" target="_blank" rel="noopener">Privacy Policy</a> · <a href="https://www.productadvisory.co/terms-of-use" target="_blank" rel="noopener">Terms of Use</a></p>
+</div>
+
+<script type="module">
+const firebaseConfig = {
+  apiKey: "AIzaSyAcECtS5c6WeOhKlwRK-LYFE47npbuq_eU",
+  authDomain: "product-advisory-lms.firebaseapp.com",
+  projectId: "product-advisory-lms",
+  storageBucket: "product-advisory-lms.firebasestorage.app",
+  messagingSenderId: "1081134406437",
+  appId: "1:1081134406437:web:72e28604d093219e7698cc"
+};
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
+import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+const $ = (id) => document.getElementById(id);
+const LC = LeadCore;
+
+// The same Apps Script web app the assessment uses. It saves the request on the
+// "Leads" tab of the results sheet and emails rob@productadvisory.co (see apps-script/Code.gs).
+const RESULTS_LOG_URL = "https://script.google.com/macros/s/AKfycbynJQYF9rv5maL_CGniS9UGhTDfBVeW3gVhEWUsFdGOqquv4osGx4nQvc8jNkaaY6wrrg/exec";
+
+function el(tag, attrs, ...kids){
+  const node = document.createElement(tag);
+  Object.keys(attrs || {}).forEach(k => {
+    const v = attrs[k];
+    if (v === null || v === undefined || v === false) return;
+    if (k === 'class') node.className = v;
+    else if (k === 'text') node.textContent = v;
+    else if (k.slice(0, 2) === 'on') node.addEventListener(k.slice(2), v);
+    else node.setAttribute(k, v === true ? '' : v);
+  });
+  kids.forEach(c => { if (c === null || c === undefined) return; node.append(c.nodeType ? c : document.createTextNode(String(c))); });
+  return node;
+}
+
+/* ------------------------------------------------------------------ state */
+const startedAt = Date.now();
+const source = LC.readSource(location.search);
+let state = LC.emptyState();
+let current = 'who';
+let sending = false;
+let backendReady = null;      // true / false once the page has checked this version of the script is live
+let signedInUser = null;
+let assessment = null;        // { tier, overallPct, categoryPct } from the signed-in person's own record
+const STORE_KEY = 'pa_lead_form';
+
+try {
+  const saved = JSON.parse(sessionStorage.getItem(STORE_KEY) || 'null');
+  if (saved && saved.state){
+    state = Object.assign(LC.emptyState(), saved.state, { consent: false, shareAssessment: false });
+    if (LC.stepsFor(state).indexOf(saved.current) > -1) current = saved.current;
+  }
+} catch (e){ /* storage unavailable: start fresh */ }
+
+const preset = LC.readWho(location.search);
+if (preset && !state.who){ state.who = preset; current = 'interests'; }
+if (LC.readCall(location.search)) state.contactPref = 'call';
+
+function persist(){
+  try { sessionStorage.setItem(STORE_KEY, JSON.stringify({ state: Object.assign({}, state, { consent: false, shareAssessment: false }), current: current })); } catch (e){ /* ignore */ }
+}
+
+/* ------------------------------------------------------------ the screens */
+const TEXT = {
+  who: ['Who is this for?', 'Pick the closest one. It helps us point you to the right place.'],
+  interests: ['What would you like help with?', 'Choose up to 3.'],
+  size: ['How big is the team?', 'A rough number is fine.'],
+  timeline: ['When would you like to get started?', ''],
+  role: ['Who decides on something like this?', ''],
+  message: ['Anything else we should know?', 'Optional. A sentence or two is plenty.'],
+  contact: ['Where should we send the answer?', 'Last step.']
+};
+
+function render(){
+  const steps = LC.stepsFor(state);
+  if (steps.indexOf(current) === -1) current = steps[0];
+  const idx = steps.indexOf(current);
+  const pct = Math.round((idx / steps.length) * 100);
+  $('progressFill').style.width = pct + '%';
+  $('progress').setAttribute('aria-valuenow', String(pct));
+  // Until the first answer is chosen the length of the form is not known (a person exploring for themselves
+  // gets a shorter one), so no total is shown yet.
+  $('stepCount').textContent = state.who ? 'Step ' + (idx + 1) + ' of ' + steps.length : 'Step 1';
+  $('backBtn').hidden = idx === 0;
+  $('stepError').textContent = '';
+
+  const stage = $('stage');
+  stage.innerHTML = '';
+  const actions = $('actions');
+  actions.innerHTML = '';
+  const [title, hint] = TEXT[current];
+  stage.appendChild(el('h1', { text: title, tabindex: '-1', id: 'stepTitle' }));
+  stage.appendChild(el('p', { class: 'hint', text: hint }));
+
+  if (current === 'who') stage.appendChild(optionGrid('who', 'two', false));
+  if (current === 'interests'){ stage.appendChild(optionGrid('interests', 'chips', true)); addContinue(actions); }
+  if (current === 'size') stage.appendChild(optionGrid('size', 'two', false));
+  if (current === 'timeline') stage.appendChild(optionGrid('timeline', 'two', false));
+  if (current === 'role') stage.appendChild(optionGrid('role', 'two', false));
+  if (current === 'message'){ renderMessage(stage); addContinue(actions); }
+  if (current === 'contact'){ renderContact(stage); actions.appendChild(el('button', { class: 'btn btn-primary', type: 'button', id: 'sendBtn', text: 'Send request', onclick: next })); }
+  const h = $('stepTitle'); if (h && document.activeElement !== document.body) h.focus({ preventScroll: true });
+  persist();
+}
+
+function addContinue(actions){
+  actions.appendChild(el('button', { class: 'btn btn-primary', type: 'button', id: 'continueBtn', text: 'Continue', onclick: next }));
+}
+
+function optionGrid(key, layout, multi){
+  const grid = el('div', { class: 'options ' + layout, role: 'group', 'aria-label': TEXT[current][0] });
+  LC.OPTIONS[key].forEach(o => {
+    const selected = multi ? state.interests.indexOf(o.code) > -1 : state[key] === o.code;
+    const b = el('button', { type: 'button', class: 'opt' + (layout === 'chips' ? ' chip' : ''), 'aria-pressed': selected ? 'true' : 'false', 'data-code': o.code,
+      onclick: () => choose(key, o.code, multi) },
+      el('span', { class: 'opt-title', text: o.label }), o.desc ? el('span', { class: 'opt-desc', text: o.desc }) : null);
+    grid.appendChild(b);
+  });
+  return grid;
+}
+
+function choose(key, code, multi){
+  $('stepError').textContent = '';
+  if (multi){
+    const before = state.interests.slice();
+    state = LC.toggleInterest(state, code);
+    if (state.interests.join() === before.join() && before.indexOf(code) === -1){
+      $('stepError').textContent = 'You can pick up to ' + LC.MAX_INTERESTS + '. Tap one to remove it first.';
+    }
+    Array.prototype.forEach.call(document.querySelectorAll('.opt'), b => b.setAttribute('aria-pressed', state.interests.indexOf(b.getAttribute('data-code')) > -1 ? 'true' : 'false'));
+    persist();
+    return;
+  }
+  state[key] = code;
+  Array.prototype.forEach.call(document.querySelectorAll('.opt'), b => b.setAttribute('aria-pressed', b.getAttribute('data-code') === code ? 'true' : 'false'));
+  persist();
+  setTimeout(next, 220);       // one tap moves on
+}
+
+function renderMessage(stage){
+  const ta = el('textarea', { class: 'text-input', id: 'message', maxlength: String(LC.LIMITS.message), placeholder: 'e.g. We want to see where our 20 product managers are strongest, before our planning cycle.', 'aria-label': 'Anything else' });
+  ta.value = state.message;
+  const count = el('div', { class: 'count', id: 'messageCount', text: state.message.length + ' / ' + LC.LIMITS.message });
+  ta.addEventListener('input', () => { state.message = ta.value; count.textContent = ta.value.length + ' / ' + LC.LIMITS.message; persist(); });
+  stage.appendChild(ta);
+  stage.appendChild(count);
+  stage.appendChild(el('label', { class: 'field-label', text: 'How would you like us to reach you?' }));
+  const grid = el('div', { class: 'options two', role: 'group', 'aria-label': 'How would you like us to reach you?' });
+  LC.OPTIONS.contact.forEach(o => grid.appendChild(el('button', { type: 'button', class: 'opt', 'aria-pressed': state.contactPref === o.code ? 'true' : 'false', 'data-code': o.code,
+    onclick: () => { state.contactPref = o.code; Array.prototype.forEach.call(grid.querySelectorAll('.opt'), b => b.setAttribute('aria-pressed', b.getAttribute('data-code') === o.code ? 'true' : 'false')); persist(); } },
+    el('span', { class: 'opt-title', text: o.label }))));
+  stage.appendChild(grid);
+}
+
+function renderContact(stage){
+  const bind = (id, key) => { const e = $(id); e.value = state[key]; e.addEventListener('input', () => { state[key] = e.value; persist(); }); };
+  const needsCompany = state.who === 'leader' || state.who === 'org';
+  stage.appendChild(el('div', { class: 'grid-2' },
+    el('div', null, el('label', { class: 'field-label', for: 'f-name', text: 'Your name' }), el('input', { class: 'text-input', id: 'f-name', type: 'text', autocomplete: 'name', maxlength: String(LC.LIMITS.name) })),
+    el('div', null, el('label', { class: 'field-label', for: 'f-email', text: needsCompany ? 'Work email' : 'Email' }), el('input', { class: 'text-input', id: 'f-email', type: 'email', autocomplete: 'email', maxlength: String(LC.LIMITS.email) }))));
+  stage.appendChild(el('div', { class: 'grid-2' },
+    el('div', null, el('label', { class: 'field-label', for: 'f-company', text: needsCompany ? 'Company or organization' : 'Company or organization (optional)' }), el('input', { class: 'text-input', id: 'f-company', type: 'text', autocomplete: 'organization', maxlength: String(LC.LIMITS.company) })),
+    el('div', null, el('label', { class: 'field-label', for: 'f-phone', text: 'Phone (optional)' }), el('input', { class: 'text-input', id: 'f-phone', type: 'tel', autocomplete: 'tel', maxlength: String(LC.LIMITS.phone) }))));
+  bind('f-name', 'name'); bind('f-email', 'email'); bind('f-company', 'company'); bind('f-phone', 'phone');
+
+  // Signed-in people with a result can choose to share it, so the reply can be specific.
+  if (assessment){
+    const box = el('input', { type: 'checkbox', id: 'f-share' });
+    box.checked = state.shareAssessment;
+    box.addEventListener('change', () => { state.shareAssessment = box.checked; });
+    stage.appendChild(el('div', { class: 'callout' }, el('label', { class: 'check-row' }, box,
+      el('span', { text: 'Include my assessment level and scores (' + assessment.tier + ', ' + Math.round(assessment.overallPct) + '% overall) so the reply can be specific to me.' }))));
+  }
+
+  // A box real people never see or fill in; robots fill in everything.
+  stage.appendChild(el('div', { class: 'trap', 'aria-hidden': 'true' },
+    el('label', { for: 'f-website', text: 'Website' }), el('input', { id: 'f-website', name: 'website', type: 'text', tabindex: '-1', autocomplete: 'off' })));
+
+  const consent = el('input', { type: 'checkbox', id: 'f-consent' });
+  consent.checked = state.consent;
+  consent.addEventListener('change', () => { state.consent = consent.checked; });
+  stage.appendChild(el('label', { class: 'check-row' }, consent,
+    el('span', null, 'OK to contact me about this request. I have read the ',
+      el('a', { href: 'https://www.productadvisory.co/privacy-policy', target: '_blank', rel: 'noopener', text: 'Privacy Policy' }), '.')));
+}
+
+/* -------------------------------------------------------------- moving on */
+function stepOrder(){ return LC.stepsFor(state); }
+
+function next(){
+  if (sending) return;
+  const problem = LC.validateStep(current, state);
+  if (problem){ $('stepError').textContent = problem; return; }
+  const steps = stepOrder();
+  const i = steps.indexOf(current);
+  if (i === steps.length - 1){ submit(); return; }
+  current = steps[i + 1];
+  render();
+}
+
+$('backBtn').addEventListener('click', () => {
+  const steps = stepOrder();
+  const i = steps.indexOf(current);
+  if (i > 0){ current = steps[i - 1]; render(); }
+});
+
+/* ---------------------------------------------------------------- sending */
+function callBackend(params){
+  return new Promise((resolve) => {
+    const cb = 'leadCb_' + Date.now() + '_' + Math.floor(Math.random() * 1e6);
+    const script = document.createElement('script');
+    let settled = false;
+    const finish = (value) => { if (settled) return; settled = true; clearTimeout(timer); delete window[cb]; script.remove(); resolve(value); };
+    const timer = setTimeout(() => finish(null), 15000);
+    window[cb] = (result) => finish(result || null);
+    script.onerror = () => finish(null);
+    script.src = RESULTS_LOG_URL + '?' + new URLSearchParams(Object.assign({}, params, { callback: cb })).toString();
+    document.body.appendChild(script);
+  });
+}
+
+const sleep = (ms) => new Promise(r => setTimeout(r, ms));
+function show(id){ ['formCard', 'sendingCard', 'doneCard', 'fallbackCard'].forEach(c => { $(c).hidden = (c !== id); }); window.scrollTo(0, 0); }
+
+function showFallback(message){
+  $('fallbackText').textContent = message;
+  $('fallbackMail').setAttribute('href', LC.mailtoFallback(state));
+  show('fallbackCard');
+  $('fallbackTitle').focus({ preventScroll: true });
+}
+
+async function submit(){
+  if (sending) return;
+  // The page checked at the start whether the server can take requests. If it can't, don't make
+  // anyone wait: go straight to an email with their answers filled in.
+  if (backendReady === false){
+    showFallback("Our request form isn't switched on just yet, so we couldn't send this for you. Please send it by email instead.");
+    return;
+  }
+  sending = true;
+  const trap = $('f-website');
+  const payload = LC.buildPayload(state, { id: LC.newLeadId(), elapsedMs: Date.now() - startedAt, source: source, assessment: state.shareAssessment ? assessment : null });
+  if (trap && trap.value) payload.website = trap.value;
+  show('sendingCard');
+  try {
+    // "no-cors": the reply to a POST cannot be read from here, so success is confirmed separately below.
+    await fetch(RESULTS_LOG_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(payload) });
+  } catch (err){
+    sending = false;
+    showFallback("We couldn't reach our server, so your request hasn't been sent. Please send it by email instead.");
+    return;
+  }
+
+  // Ask the server whether it recorded this exact request, for up to ~15 seconds.
+  let result = null;
+  for (let attempt = 0; attempt < 10 && !(result && result.found); attempt++){
+    await sleep(attempt === 0 ? 800 : 1500);
+    result = await callBackend({ action: 'leadStatus', id: payload.id });
+  }
+  sending = false;
+
+  if (result && result.found && result.ok){
+    try { sessionStorage.removeItem(STORE_KEY); } catch (e){ /* ignore */ }
+    const ty = LC.thankYou(state);
+    $('doneTitle').textContent = ty.title;
+    $('doneText').textContent = ty.text;
+    $('doneBook').hidden = !ty.book;
+    if (ty.book){ $('doneBook').textContent = ty.book.label; $('doneBook').setAttribute('href', ty.book.href); $('doneCta').className = 'btn btn-ghost'; }
+    $('doneCta').textContent = ty.cta.label; $('doneCta').setAttribute('href', ty.cta.href);
+    $('doneSecond').textContent = ty.second.label; $('doneSecond').setAttribute('href', ty.second.href);
+    $('doneRef').textContent = 'Reference: ' + payload.id.slice(0, 8).toUpperCase();
+    show('doneCard');
+    $('doneTitle').focus({ preventScroll: true });
+    return;
+  }
+  if (result && result.found && result.error === 'rate_limited'){
+    showFallback("You've already sent a few requests today, so we've paused this one. If it's urgent, please email us instead.");
+    return;
+  }
+  showFallback(result && result.found
+    ? "We couldn't accept that request. Please send it by email instead."
+    : "We couldn't confirm that your request arrived. To be safe, please send it by email instead.");
+}
+
+$('fallbackRetry').addEventListener('click', () => { show('formCard'); render(); });
+
+/* ----------------------------------------------- is the server ready, who is here */
+callBackend({ action: 'leadsCheck' }).then(res => {
+  backendReady = !!(res && res.leads === true);
+  $('backendNote').hidden = backendReady;
+});
+
+onAuthStateChanged(auth, async (user) => {
+  signedInUser = user;
+  if (!user) return;
+  // Save typing: fill in the name and email we already know (never overwriting anything typed).
+  if (!state.name && user.displayName) state.name = user.displayName;
+  if (!state.email && user.email) state.email = user.email;
+  try {
+    const snap = await getDoc(doc(db, 'progress', user.uid));
+    const r = snap.exists() ? snap.data().assessmentResult : null;
+    if (r && r.tier && typeof r.overallPct === 'number') assessment = { tier: r.tier, overallPct: r.overallPct, categoryPct: r.categoryPct || {} };
+  } catch (err){ /* optional extra: carry on without it */ }
+  if (current === 'contact') render();
+});
+
+render();
+</script>
+</body>
+</html>

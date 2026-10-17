@@ -12,8 +12,9 @@ const SHEET_NAME = "Responses";
 const PROGRESS_SHEET_NAME = "Progress";
 const PROGRESS_HEADER = ["Last Updated", "Email", "Domain", "Tier", "Course ID", "Assignment Status", "Lessons Completed", "Total Lessons", "Percent Complete", "Course Status"];
 
-// Runs when the assessment page submits a completed result, OR when
-// the LMS dashboard syncs someone's course progress (data.action === "syncProgress").
+// Runs when the assessment page submits a completed result, when the LMS
+// dashboard syncs someone's course progress (data.action === "syncProgress"),
+// or when someone sends the "Request more information" form (data.action === "requestInfo").
 function doPost(e) {
   const data = JSON.parse(e.postData.contents);
 
@@ -25,6 +26,11 @@ function doPost(e) {
 
   if (data.action === "syncProgress") {
     return handleProgressSync(data);
+  }
+
+  // A "Request more information" form (request-info.html).
+  if (data.action === "requestInfo") {
+    return handleLeadRequest_(data);
   }
 
   const sheet = getOrCreateSheet();
@@ -103,6 +109,14 @@ function getOrCreateProgressSheet() {
 function doGet(e) {
   if (e.parameter.action === "mailCheck") {
     return jsonpOut_(e.parameter.callback, mailCheck_());
+  }
+
+  if (e.parameter.action === "leadsCheck") {
+    return jsonpOut_(e.parameter.callback, leadsCheck_());
+  }
+
+  if (e.parameter.action === "leadStatus") {
+    return jsonpOut_(e.parameter.callback, leadStatus_(e.parameter.id || ""));
   }
 
   if (e.parameter.action === "sendInvite") {
@@ -898,3 +912,251 @@ function authorizeInviteEmails() {
 }
 
 
+/* ==================================================================
+   7. REQUEST MORE INFORMATION (request-info.html)
+   ------------------------------------------------------------------
+   Each completed form is checked, scored, saved as a row on the "Leads"
+   tab, and announced to LEAD_NOTIFY_EMAIL_ with the lead's own email as
+   the Reply-To, so replying to the notice answers them directly.
+
+   Spam protection (a public form always attracts some): a hidden field
+   real people never fill in, a minimum fill time, one request id is only
+   ever saved once, at most LEAD_PER_EMAIL_DAILY_ requests per email
+   address and LEAD_DAILY_CAP_ in total per day, strict length limits and
+   a fixed list of allowed answers. The fit score is worked out HERE, so
+   it cannot be changed from the browser, and the person never sees it.
+   ================================================================== */
+
+var LEAD_NOTIFY_EMAIL_ = 'rob@productadvisory.co';
+var LEAD_SHEET_NAME_ = 'Leads';
+var LEAD_DAILY_CAP_ = 60;
+var LEAD_PER_EMAIL_DAILY_ = 3;
+var LEAD_MIN_FILL_MS_ = 2500;
+var LEAD_HEADERS_ = ['Received', 'Lead ID', 'Name', 'Email', 'Company', 'Phone', 'I am', 'Interested in', 'Team size', 'Timeline',
+  'Who decides', 'Contact preference', 'Message', 'Fit', 'Score', 'Why', 'Source', 'Assessment level', 'Assessment scores', 'Status', 'Notes'];
+
+// The only answers the form may send. Keep in step with lead-core.js (a test checks).
+var LEAD_OPTIONS_ = {
+  who: { individual: "I'm exploring this for myself", leader: 'I lead a product team', org: "I'm looking for my organization", other: 'Something else' },
+  interests: { discovery: 'Customer & market discovery', strategy: 'Product strategy & roadmapping', prioritization: 'Prioritization & trade-offs',
+    execution: 'Execution & delivery', stakeholder: 'Stakeholder communication', aiIndividual: 'AI fluency for me', aiOrg: 'AI fluency for my organization',
+    toolkits: 'Toolkits & templates', team_assessment: 'Assessing my whole team', notsure: 'Not sure yet' },
+  size: { just_me: 'Just me', s2_10: '2 to 10 people', s11_50: '11 to 50 people', s51_200: '51 to 200 people', s200_plus: 'More than 200' },
+  timeline: { this_month: 'This month', this_quarter: 'In the next 3 months', later: 'Later this year', exploring: 'Just exploring' },
+  role: { decide: 'I make the decision', influence: 'I influence the decision', approval: 'I need approval from someone else', unsure: 'Not sure yet' },
+  contact: { email: 'Email me', call: 'A short call is fine' }
+};
+var LEAD_FREE_EMAIL_DOMAINS_ = ['gmail.com', 'googlemail.com', 'yahoo.com', 'outlook.com', 'hotmail.com', 'live.com', 'msn.com', 'icloud.com', 'me.com',
+  'aol.com', 'proton.me', 'protonmail.com', 'gmx.com', 'mail.com'];
+
+// Lets the page check, before showing the form, that this version of the script is deployed.
+function leadsCheck_() {
+  return { ok: true, leads: true };
+}
+
+// The page asks, after sending, whether its request was recorded. The answer is
+// kept for ten minutes under the request's random id.
+function leadStatus_(id) {
+  if (!/^[0-9a-f]{24}$/.test(String(id || ''))) return { ok: false, error: 'bad_id' };
+  var raw = CacheService.getScriptCache().get('leadres_' + id);
+  if (!raw) return { ok: true, found: false };
+  var res = JSON.parse(raw);
+  return { ok: res.ok === true, found: true, error: res.error || '' };
+}
+
+function leadClean_(v, max) {
+  return String(v == null ? '' : v).replace(/[\u0000-\u001F\u007F]+/g, ' ').replace(/\s+/g, ' ').trim().slice(0, max);
+}
+
+// A spreadsheet cell that starts with = + - @ can run as a formula when the
+// sheet is opened, and every value here comes from a stranger.
+function leadSafeCell_(v) {
+  if (typeof v !== 'string') return v;               // numbers and dates are safe, and stay numbers and dates
+  return /^[=+\-@\t\r]/.test(v) && !/^[+-]?[\d\s().-]+$/.test(v) ? "'" + v : v;
+}
+
+// Returns { ok: true, lead } with every field checked and trimmed, or { ok: false, error }.
+function leadValidate_(data) {
+  var id = String(data.id || '');
+  if (!/^[0-9a-f]{24}$/.test(id)) return { ok: false, error: 'bad_id' };
+
+  var lead = {
+    id: id,
+    name: leadClean_(data.name, 80),
+    email: leadClean_(data.email, 120).toLowerCase(),
+    company: leadClean_(data.company, 80),
+    phone: leadClean_(data.phone, 40),
+    message: leadClean_(data.message, 400),
+    source: /^[a-z0-9_-]{1,30}$/i.test(String(data.source || '')) ? String(data.source).toLowerCase() : '',
+    who: String(data.who || ''),
+    size: String(data.size || ''),
+    timeline: String(data.timeline || ''),
+    role: String(data.role || ''),
+    contactPref: data.contactPref === 'call' ? 'call' : 'email',
+    interests: []
+  };
+  if (!lead.name) return { ok: false, error: 'invalid' };
+  if (!/^[^\s@,;]+@[^\s@,;]+\.[^\s@,;]+$/.test(lead.email)) return { ok: false, error: 'invalid' };
+  if (data.consent !== true) return { ok: false, error: 'no_consent' };
+  if (!LEAD_OPTIONS_.who[lead.who]) return { ok: false, error: 'invalid' };
+  if (!LEAD_OPTIONS_.timeline[lead.timeline]) return { ok: false, error: 'invalid' };
+  if (lead.size && !LEAD_OPTIONS_.size[lead.size]) return { ok: false, error: 'invalid' };
+  if (lead.role && !LEAD_OPTIONS_.role[lead.role]) return { ok: false, error: 'invalid' };
+
+  var seen = {};
+  (Array.isArray(data.interests) ? data.interests : []).forEach(function (c) {
+    c = String(c);
+    if (LEAD_OPTIONS_.interests[c] && !seen[c] && lead.interests.length < 3) { seen[c] = true; lead.interests.push(c); }
+  });
+  if (!lead.interests.length) return { ok: false, error: 'invalid' };
+
+  // The assessment is only present when the person ticked the box to share it.
+  lead.assessment = null;
+  var a = data.assessment;
+  if (a && typeof a === 'object') {
+    var scores = {};
+    ['discovery', 'strategy', 'prioritization', 'execution', 'stakeholder', 'aiIndividual', 'aiOrg'].forEach(function (k) {
+      var n = Number(a.categoryPct && a.categoryPct[k]);
+      if (isFinite(n)) scores[k] = Math.max(0, Math.min(100, Math.round(n)));
+    });
+    lead.assessment = { tier: leadClean_(a.tier, 40), overallPct: Math.max(0, Math.min(100, Math.round(Number(a.overallPct) || 0))), scores: scores };
+  }
+  return { ok: true, lead: lead };
+}
+
+// How good a fit this request looks for Rob. Only Rob sees it.
+function leadScore_(lead) {
+  var pts = 0, why = [];
+  function add(n, text) { if (n > 0) { pts += n; why.push(text + ' (+' + n + ')'); } }
+
+  add({ org: 30, leader: 20, individual: 5, other: 5 }[lead.who] || 0, LEAD_OPTIONS_.who[lead.who]);
+  add({ s200_plus: 25, s51_200: 22, s11_50: 15, s2_10: 8, just_me: 0 }[lead.size] || 0, lead.size ? LEAD_OPTIONS_.size[lead.size] : '');
+  add({ this_month: 25, this_quarter: 15, later: 5, exploring: 0 }[lead.timeline] || 0, 'Timeline: ' + LEAD_OPTIONS_.timeline[lead.timeline]);
+  add({ decide: 20, influence: 12, approval: 6, unsure: 0 }[lead.role] || 0, lead.role ? LEAD_OPTIONS_.role[lead.role] : '');
+  var domain = lead.email.split('@')[1] || '';
+  if (LEAD_FREE_EMAIL_DOMAINS_.indexOf(domain) === -1) add(10, 'Work email address');
+  if (lead.company) add(5, 'Gave a company');
+  if (lead.message.length >= 30) add(5, 'Wrote a message');
+  if (lead.contactPref === 'call') add(5, 'Open to a call');
+  if (lead.interests.indexOf('team_assessment') > -1) add(5, 'Wants to assess a team');
+
+  pts = Math.min(100, pts);
+  return { score: pts, fit: pts >= 80 ? 'Hot' : pts >= 50 ? 'Warm' : 'Nurture', why: why };
+}
+
+function leadAssessmentText_(a) {
+  if (!a) return { level: '', scores: '' };
+  var names = { discovery: 'Discovery', strategy: 'Strategy', prioritization: 'Prioritization', execution: 'Execution', stakeholder: 'Stakeholder', aiIndividual: 'AI (individual)', aiOrg: 'AI (organization)' };
+  var parts = Object.keys(a.scores).map(function (k) { return names[k] + ' ' + a.scores[k] + '%'; });
+  return { level: a.tier + ' (' + a.overallPct + '% overall)', scores: parts.join(', ') };
+}
+
+// Counts requests per day and per email address, and refuses past the caps.
+// Old counters are cleaned up on the first request of each day.
+function leadRateOk_(email) {
+  var props = PropertiesService.getScriptProperties();
+  var today = Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'yyyy-MM-dd');
+  var dayKey = 'leadday_' + today;
+  var emailKey = 'leademail_' + today + '_' + email;
+
+  if (!props.getProperty(dayKey)) {
+    props.getKeys().forEach(function (k) {
+      if ((k.indexOf('leadday_') === 0 && k !== dayKey) || (k.indexOf('leademail_') === 0 && k.indexOf('leademail_' + today + '_') !== 0)) props.deleteProperty(k);
+    });
+  }
+  var total = Number(props.getProperty(dayKey) || 0);
+  var mine = Number(props.getProperty(emailKey) || 0);
+  if (total >= LEAD_DAILY_CAP_ || mine >= LEAD_PER_EMAIL_DAILY_) return false;
+  props.setProperty(dayKey, String(total + 1));
+  props.setProperty(emailKey, String(mine + 1));
+  return true;
+}
+
+function leadBuildEmail_(lead, scored, assess, sheetUrl) {
+  var labelList = lead.interests.map(function (c) { return LEAD_OPTIONS_.interests[c]; }).join(', ');
+  var rows = [
+    ['Name', lead.name], ['Email', lead.email], ['Company', lead.company || '—'], ['Phone', lead.phone || '—'],
+    ['I am', LEAD_OPTIONS_.who[lead.who]], ['Interested in', labelList],
+    ['Team size', lead.size ? LEAD_OPTIONS_.size[lead.size] : '—'], ['Timeline', LEAD_OPTIONS_.timeline[lead.timeline]],
+    ['Who decides', lead.role ? LEAD_OPTIONS_.role[lead.role] : '—'], ['Contact preference', LEAD_OPTIONS_.contact[lead.contactPref]],
+    ['Message', lead.message || '—'], ['Came from', lead.source || '—']
+  ];
+  if (lead.assessment) { rows.push(['Assessment level', assess.level]); rows.push(['Assessment scores', assess.scores || '—']); }
+
+  var subject = '[' + scored.fit + '] Info request: ' + lead.name + (lead.company ? ', ' + lead.company : '') + ' (' + lead.who + ', ' + LEAD_OPTIONS_.timeline[lead.timeline].toLowerCase() + ')';
+  var text = 'New request for more information\n\nFit: ' + scored.fit + ' (score ' + scored.score + ' of 100)\nWhy: ' + (scored.why.join('; ') || 'nothing notable') + '\n\n' +
+    rows.map(function (r) { return r[0] + ': ' + r[1]; }).join('\n') +
+    '\n\nJust reply to this email to answer ' + lead.name + ' directly.' + (sheetUrl ? '\nAll leads: ' + sheetUrl : '') + '\n';
+  var color = scored.fit === 'Hot' ? '#C0622A' : scored.fit === 'Warm' ? '#8A6410' : '#4B5768';
+  var html = '<div style="font-family:Arial,Helvetica,sans-serif;font-size:14px;line-height:1.5;color:#16213E;max-width:600px;">' +
+    '<p style="margin:0 0 6px;"><strong style="color:' + color + ';font-size:16px;">' + escapeHtml_(scored.fit) + '</strong> &nbsp;score ' + scored.score + ' of 100</p>' +
+    '<p style="margin:0 0 14px;color:#4B5768;font-size:13px;">' + escapeHtml_(scored.why.join('; ') || 'nothing notable') + '</p>' +
+    '<table style="border-collapse:collapse;width:100%;">' +
+    rows.map(function (r) {
+      return '<tr><td style="padding:6px 10px;border-bottom:1px solid #E3E9F0;color:#6B7686;white-space:nowrap;vertical-align:top;">' + escapeHtml_(r[0]) +
+        '</td><td style="padding:6px 10px;border-bottom:1px solid #E3E9F0;">' + escapeHtml_(r[1]) + '</td></tr>';
+    }).join('') + '</table>' +
+    '<p style="margin:14px 0 0;color:#6B7686;font-size:13px;">Reply to this email to answer ' + escapeHtml_(lead.name) + ' directly.' +
+    (sheetUrl ? ' <a href="' + escapeHtml_(sheetUrl) + '">All leads</a>' : '') + '</p></div>';
+  return { subject: subject, text: text, html: html };
+}
+
+// Called by doPost. The browser cannot read a reply to a POST, so the answer is
+// left in the cache for leadStatus_ to hand back.
+function handleLeadRequest_(data) {
+  var cache = CacheService.getScriptCache();
+  var id = String(data && data.id || '');
+  function remember(res) { if (/^[0-9a-f]{24}$/.test(id)) cache.put('leadres_' + id, JSON.stringify(res), 600); }
+  var reply = ContentService.createTextOutput('OK');
+
+  if (!/^[0-9a-f]{24}$/.test(id)) return reply;
+  if (cache.get('leadres_' + id)) return reply;                       // the same request sent twice is saved once
+
+  // Robots fill in every box and finish in a blink. Say "ok" so they move on, and save nothing.
+  if (leadClean_(data.website, 100) !== '' || !(Number(data.elapsedMs) >= LEAD_MIN_FILL_MS_)) {
+    remember({ ok: true, dropped: true });
+    return reply;
+  }
+
+  var checked = leadValidate_(data);
+  if (!checked.ok) { remember({ ok: false, error: checked.error }); return reply; }
+  var lead = checked.lead;
+
+  var lock = null, locked = false;
+  try { lock = LockService.getScriptLock(); locked = lock.tryLock(10000); } catch (err) { /* carry on without it */ }
+  try {
+    if (!leadRateOk_(lead.email)) { remember({ ok: false, error: 'rate_limited' }); return reply; }
+
+    var scored = leadScore_(lead);
+    var assess = leadAssessmentText_(lead.assessment);
+    var ss = SpreadsheetApp.getActiveSpreadsheet();
+    var sheet = ss.getSheetByName(LEAD_SHEET_NAME_);
+    if (!sheet) {
+      sheet = ss.insertSheet(LEAD_SHEET_NAME_);
+      sheet.appendRow(LEAD_HEADERS_);
+      sheet.setFrozenRows(1);
+    }
+    var row = [new Date(), lead.id, lead.name, lead.email, lead.company, lead.phone, LEAD_OPTIONS_.who[lead.who],
+      lead.interests.map(function (c) { return LEAD_OPTIONS_.interests[c]; }).join(', '),
+      lead.size ? LEAD_OPTIONS_.size[lead.size] : '', LEAD_OPTIONS_.timeline[lead.timeline], lead.role ? LEAD_OPTIONS_.role[lead.role] : '',
+      LEAD_OPTIONS_.contact[lead.contactPref], lead.message, scored.fit, scored.score, scored.why.join('; '), lead.source,
+      assess.level, assess.scores, 'New', ''];
+    sheet.appendRow(row.map(leadSafeCell_));
+
+    // Tell Rob. If Gmail refuses, the row above is still safe, so the lead is not lost.
+    var emailed = false;
+    try {
+      if (MailApp.getRemainingDailyQuota() >= 1) {
+        var mail = leadBuildEmail_(lead, scored, assess, ss.getUrl ? ss.getUrl() : '');
+        MailApp.sendEmail({ to: LEAD_NOTIFY_EMAIL_, replyTo: lead.email, subject: mail.subject, body: mail.text, htmlBody: mail.html, name: 'Product Advisory Learning' });
+        emailed = true;
+      }
+    } catch (mailErr) { emailed = false; }
+    remember({ ok: true, emailed: emailed });
+  } catch (err) {
+    remember({ ok: false, error: 'server_error' });
+  } finally {
+    if (locked) lock.releaseLock();
+  }
+  return reply;
+}

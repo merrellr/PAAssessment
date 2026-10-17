@@ -197,3 +197,12 @@ manual review — it holds no uid and isn't read by the app.
 - Deleting an account (Profile > Delete account) withdraws the person's votes
   (taking each off the public total) and deletes their suggestion, before anything
   else is deleted.
+
+## Request more information (lead form)
+
+- `request-info.html` is a short, one-question-at-a-time form (about 60 seconds) for people who want to talk to Product Advisory. Link to it from productadvisory.co as `https://assessment.productadvisory.co/request-info.html?src=toolkits` (change `src=` to say which page the link is on, and add `&who=org` to skip the first question for pages aimed at teams). Open it in a new tab.
+- It asks who the request is for, what they want help with (up to 3), team size, timing, who decides, and an optional message, then contact details with a consent tick. Someone exploring for themselves gets a shorter form. Signed-in people have their name and email filled in and can choose to include their assessment level and scores (never their individual answers).
+- When it is sent, `apps-script/Code.gs` (section 7) validates it, scores it, adds a row to the **Leads** tab of the results sheet, and emails **rob@productadvisory.co** with the lead's own address as the Reply-To (so replying answers them). The fit score (Hot / Warm / Nurture) is worked out on the server and is never shown to the person. See `docs/OWNER-RUNBOOK.md` for how to use it.
+- Spam protection: a hidden field robots fill in, a minimum fill time, one request id is only saved once, 3 requests per email address and 60 in total per day, strict length limits and a fixed list of allowed answers.
+- If the server isn't switched on or can't be reached, the person gets an email to Rob with their answers already filled in, so nothing is lost.
+- `lead-core.js` holds the form's logic (tested in `tests/lead-core.test.mjs`); `tests/apps-script/lead-test.html` tests the server side and checks the page and the script accept exactly the same answers. The recipient address lives in two places, `LEAD_NOTIFY_EMAIL_` in `Code.gs` and `NOTIFY_EMAIL` in `lead-core.js`, and a test fails if they differ.

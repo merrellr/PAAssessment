@@ -164,7 +164,33 @@ The Google Sheet: delete test rows from the **Responses** and **Progress** tabs.
 
 ---
 
-## 12. Costs and limits (free plan)
+## 12. Requests for more information (the lead form)
+
+**The link** (put it on the "Request more information" button and set it to open in a new tab): `https://assessment.productadvisory.co/request-info.html?src=toolkits`
+
+Change the word after `src=` to match the page the button is on (for example `src=teams`, `src=home`). It shows up in every lead so you can see which page works. For a page aimed at companies add `&who=org` and the form skips its first question.
+
+**What happens when someone sends it**
+1. You get an email at rob@productadvisory.co. The subject starts with **[Hot]**, **[Warm]** or **[Nurture]**, then their name and company. Press **Reply** to answer them directly.
+2. The same request is added as a row on the **Leads** tab of your results Google Sheet (open the sheet and click the Leads tab at the bottom). Use the **Status** and **Notes** columns to keep track: change `New` to `Contacted`, `Call booked`, `Won`, `Not a fit`, and so on.
+
+**What Hot, Warm and Nurture mean** (only you see this; the person never does)
+- **Hot** (80+ out of 100): an organization or team leader, a real team size, wants to start soon, and makes or shapes the decision. Reply today.
+- **Warm** (50 to 79): a good fit with a longer timeline or less certainty. Reply within two business days, as the thank-you page promises.
+- **Nurture** (under 50): usually an individual exploring. The thank-you page already points them at the free assessment, so no reply is required unless you want to send one.
+- The email lists exactly why it scored that way. If someone shared their assessment, you also see their level and skill-area scores, which makes your reply much more specific.
+
+**Limits and safety**
+- One email address can send 3 requests a day, and the whole form takes 60 a day. Past that, the person is shown an email link instead.
+- Robots are quietly ignored. You will not see them.
+- If an email fails to send, the row is still saved on the Leads tab. Check it now and then.
+- To delete someone's request (they ask you to), delete their row on the Leads tab.
+
+**If it stops working** the page falls back by itself: people get an email to you with their answers filled in. To fix the form itself, check that the latest `Code.gs` is deployed (section 7), then open the page in a private window and send a test.
+
+---
+
+## 13. Costs and limits (free plan)
 
 You are on the Firebase free plan (Spark). It is enough for a pilot. You will
 want the paid plan (Blaze) when you have paying customers: it removes the daily
@@ -173,7 +199,7 @@ grace period). Ask Claude to plan that move when you are ready.
 
 ---
 
-## 13. Checking the system still works (for whoever maintains it)
+## 14. Checking the system still works (for whoever maintains it)
 
 Claude keeps automated tests in `tests/`. `tests/README.md` says how to run
 them: the security-rule tests, the report-logic tests, and the page tests.
