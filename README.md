@@ -92,7 +92,18 @@ when volume outgrows the free tier) and writes `blocked:` rows to the
   chosen something other than the standard order; the lowest score still decides
   last, and nobody's other gaps are hidden. Companies made before the copy existed
   get it the first time their admin or the owner opens them.
-- Not built yet: removing members.
+- Leaving a company: only the company's admins or the platform owner can end a
+  membership (a **Remove** button beside each person on `company.html` and in the
+  owner console; nobody can remove themselves, and admins cannot remove their own
+  membership). It only sets the membership's status to `removed` with an end date.
+  The person keeps their account, results and course access; from then on they
+  cannot add to the company's copy (`orgs/{id}/members/{uid}`), so the company
+  keeps exactly what it had and gets nothing new; their seat is freed; they appear
+  under **Former members**; and their own dashboard tells them once that they are no
+  longer a member. They can join a company again only with a new invite. Someone who
+  deletes their account while still a member leaves an active row with their name
+  and email removed; the admin removes that row to free the seat.
+- Not built yet: audit log, final privacy wording and the owner runbook (checkpoint 7).
 - Tests: see `tests/README.md`.
 
 ## Closing an account

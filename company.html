@@ -725,7 +725,7 @@ function statusPills(r){
 
 function nameCell(r){
   const label = r.name || r.email || '—';
-  const sub = r.name && r.email ? r.email : (r.removedIdentity ? 'Name and email removed (account deleted)' : '');
+  const sub = r.name && r.email ? r.email : (r.removedIdentity ? (r.status === 'active' ? 'Name and email removed (account deleted). Remove them to free the seat.' : 'Name and email removed (account deleted)') : '');
   return el('td', null,
     el('div', { class: 'cell-name' }, label, r.role === 'admin' ? el('span', { class: 'role-tag', text: 'Admin' }) : null),
     sub ? el('div', { class: 'cell-sub', text: sub }) : null);
@@ -751,8 +751,45 @@ function teamRow(r){
   return el('tr', { 'data-uid': r.id },
     nameCell(r), levelCell(r.progress), progressCell(r.progress),
     el('td', null, ...statusPills(r)), lastActiveCell(r.progress),
-    el('td', null, el('button', { class: 'btn btn-ghost btn-small', type: 'button', text: expanded[r.id] ? 'Hide details' : 'Details',
-      onclick: () => { expanded[r.id] = !expanded[r.id]; renderTeam(); renderFormer(); } })));
+    el('td', null, el('div', { class: 'btn-row' },
+      el('button', { class: 'btn btn-ghost btn-small', type: 'button', text: expanded[r.id] ? 'Hide details' : 'Details',
+        onclick: () => { expanded[r.id] = !expanded[r.id]; renderTeam(); renderFormer(); } }),
+      // Anyone can be removed except yourself (so a company is never left without the person managing it by accident).
+      r.id === currentUser.uid ? null : el('button', { class: 'btn btn-danger btn-small', type: 'button', text: 'Remove',
+        onclick: (e) => removeMember(r, e.currentTarget) }))));
+}
+
+/* Ends someone's membership. They keep their own account, results and course
+   access; the company keeps what was shared up to today and gets nothing new. */
+async function removeMember(r, button){
+  const who = r.name || r.email || 'this person';
+  const lines = [
+    'Remove ' + who + ' from ' + org.name + '?',
+    '',
+    '• They keep their own account, results and course access.',
+    '• ' + org.name + ' keeps what they shared up to today and gets nothing new.',
+    '• Their seat is freed.',
+    '• They can only come back if you invite them again.'
+  ];
+  const ok = window.confirm(lines.join('\n'));
+  if (!ok) return;
+  $('notice').textContent = '';
+  $('errorLine').textContent = '';
+  button.disabled = true;
+  try {
+    await updateDoc(doc(db, 'memberships', r.id), { status: 'removed', endedAt: serverTimestamp() });
+    const m = data.memberships.find(x => x.id === r.id);
+    if (m){ m.status = 'removed'; m.endedAtMs = Date.now(); }
+    delete expanded[r.id];
+    renderAll();
+    $('notice').textContent = who + ' was removed. They are listed under Former members, and their seat is free.';
+  } catch (err){
+    console.error('Could not remove the member:', err);
+    button.disabled = false;
+    $('errorLine').textContent = err && err.code === 'permission-denied'
+      ? 'The security rules refused this. Ask the platform owner to check that the latest rules are published.'
+      : 'Something went wrong removing ' + who + ', please try again.';
+  }
 }
 
 /* The full shared record for one person, as the company sees it. */

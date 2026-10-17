@@ -406,6 +406,17 @@ function finish(){
     t('it emails every pending user (and only them)', backendCalls.length === pendingUsers && pendingUsers > 5, backendCalls.length + ' vs ' + pendingUsers);
     t('and reports the result under the company name even though the new-links box is closed', new RegExp(pendingUsers + ' emails sent').test($('detailNotice').textContent), $('detailNotice').textContent);
 
+    /* ---- removing a member ---- */
+    const janeBeforeRemove = rowsIn('userTableWrap').find(r => /Jane Smith/.test(textOf(r)));
+    const removeJane = janeBeforeRemove && Array.prototype.find.call(janeBeforeRemove.querySelectorAll('button'), b => b.textContent.trim() === 'Remove');
+    t('an active person has a Remove button; invited people do not', !!removeJane && !rowsIn('userTableWrap').filter(r => /Invited/.test(textOf(r))).some(r => Array.prototype.some.call(r.querySelectorAll('button'), b => b.textContent.trim() === 'Remove')));
+    removeJane.click(); await sleep(300);
+    const janeDoc = window.__store['memberships/uJane'];
+    t('removing ends the membership (status removed, server end date), changing nothing else', janeDoc.status === 'removed' && janeDoc.endedAt && typeof janeDoc.endedAt.toMillis === 'function' && janeDoc.role === 'member' && janeDoc.email === 'jane@acme.com', JSON.stringify(janeDoc));
+    const janeAfterRemove = rowsIn('userTableWrap').find(r => /Jane Smith/.test(textOf(r)) && /Left/.test(textOf(r)));
+    t('the list shows them as Left, with no Remove button, and their shared data still there', !!janeAfterRemove && /Left/.test(textOf(janeAfterRemove)) && !Array.prototype.some.call(janeAfterRemove.querySelectorAll('button'), b => b.textContent.trim() === 'Remove') && !!window.__store['orgs/' + orgIdForShares + '/members/uJane'], janeAfterRemove && textOf(janeAfterRemove));
+    t('and the page confirms', /was removed/.test($('detailNotice').textContent), $('detailNotice').textContent);
+
   } catch (e) {
     out.push('FAIL test script crashed: ' + (e && e.stack ? e.stack.split('\n').slice(0, 3).join(' / ') : e));
   }

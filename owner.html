@@ -937,11 +937,46 @@ function personRow(p){
   if (p.kind === 'member'){
     actions.appendChild(el('button', { class: 'btn btn-ghost btn-small', type: 'button', text: expandedShares[p.id] ? 'Hide details' : 'Details',
       onclick: () => { expandedShares[p.id] = !expandedShares[p.id]; renderPeople(); } }));
+    if (p.status === 'active' && p.id !== currentUser.uid){
+      actions.appendChild(el('button', { class: 'btn btn-danger btn-small', type: 'button', text: 'Remove',
+        onclick: (e) => removeMember(p, e.currentTarget) }));
+    }
   }
   return el('tr', null,
     el('td', null, el('div', { class: 'cell-name', text: p.name || '—' })),
     el('td', { text: p.email || '—' }), el('td', { class: 'nowrap', text: p.phone || '—' }),
     el('td', null, status, el('div', { class: 'cell-sub', text: when }), emailLine, shareSummaryLine(p)), el('td', null, actions));
+}
+
+/* Ends someone's membership. They keep their own account, results and course
+   access; the company keeps what was shared up to today and gets nothing new. */
+async function removeMember(p, button){
+  const org = currentOrg();
+  const who = p.name || p.email || 'this person';
+  const lines = [
+    'Remove ' + who + ' from ' + org.name + '?',
+    '',
+    '• They keep their own account, results and course access.',
+    '• ' + org.name + ' keeps what they shared up to today and gets nothing new.',
+    '• Their seat is freed.',
+    '• They can only come back if they are invited again.'
+  ];
+  if (!window.confirm(lines.join('\n'))) return;
+  $('detailNotice').textContent = '';
+  $('detailError').textContent = '';
+  button.disabled = true;
+  try {
+    await updateDoc(doc(db, 'memberships', p.id), { status: 'removed', endedAt: serverTimestamp() });
+    await loadDetail();
+    renderDetail();
+    $('detailNotice').textContent = who + ' was removed.';
+  } catch (err){
+    console.error('Could not remove the member:', err);
+    button.disabled = false;
+    $('detailError').textContent = err && err.code === 'permission-denied'
+      ? 'The security rules refused this. Check that the latest rules are published.'
+      : 'Something went wrong removing ' + who + ', please try again.';
+  }
 }
 
 function peopleTable(rows, emptyText){

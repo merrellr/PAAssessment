@@ -22,6 +22,7 @@
     if (scn === 'focusdefault') store['orgFocus/orgA'] = { focusAreas: ['discovery', 'strategy', 'prioritization', 'execution', 'stakeholder', 'aiIndividual', 'aiOrg'], updatedAt: Timestamp.now() };
     if (scn === 'admin') store['memberships/uDash'] = { orgId: 'orgA', orgName: 'Acme Health', role: 'admin', status: 'active', inviteToken: 't', joinedAt: Timestamp.now(), endedAt: null, email: 'dash@acme.com', displayName: 'Dash User' };
     if (scn === 'removed') store['memberships/uDash'] = { orgId: 'orgA', orgName: 'Acme Health', role: 'member', status: 'removed', inviteToken: 't', joinedAt: Timestamp.now(), endedAt: Timestamp.now(), email: 'dash@acme.com', displayName: 'Dash User' };
+    if (scn === 'removedold') store['memberships/uDash'] = { orgId: 'orgA', orgName: 'Acme Health', role: 'member', status: 'removed', inviteToken: 't', joinedAt: Timestamp.fromMillis(Date.now() - 400 * 864e5), endedAt: Timestamp.fromMillis(Date.now() - 90 * 864e5), email: 'dash@acme.com', displayName: 'Dash User' };
     if (scn === 'owner') store['platformAdmins/uDash'] = { note: 'owner' };
   };
 })();

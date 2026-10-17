@@ -70,6 +70,10 @@ await env.withSecurityRulesDisabled(async (ctx) => {
   await setDoc(doc(db, 'invites/tokRevokeMe2'), invite('orgA', 'Acme', 'member', 'open', inDays(10)));
   await setDoc(doc(db, 'progress/memberA'), { courses: {}, profile: { phone: '555' } });
   await setDoc(doc(db, 'memberships/scrubMe'), member('orgA', 'Acme', 'member'));
+  for (const id of ['rm1', 'rm2', 'rm3', 'rm4', 'rm5', 'rm6', 'rm7']) await setDoc(doc(db, 'memberships/' + id), member('orgA', 'Acme', 'member'));
+  await setDoc(doc(db, 'memberships/rmAdmin'), member('orgA', 'Acme', 'admin'));
+  await setDoc(doc(db, 'memberships/rmOtherCo'), member('orgB', 'Beta', 'member'));
+  await setDoc(doc(db, 'orgs/orgA/members/rm1'), { identity: { name: 'Seed', email: 'rm1@a.com' }, assessment: null, courses: {}, lastActiveAt: null, updatedAt: now() });
   await setDoc(doc(db, 'memberships/scrubMe2'), member('orgA', 'Acme', 'member'));
   const share = (email) => ({ identity: { name: 'Seed', email }, assessment: { tier: 'Moderate Experience', overallPct: 50 },
     courses: {}, lastActiveAt: '2026-10-01T00:00:00.000Z', updatedAt: now() });
@@ -406,8 +410,36 @@ await deny('an active member cannot leave on their own (admin controls membershi
   () => updateDoc(doc(memberA, 'memberships/memberA'), { status: 'removed', endedAt: serverTimestamp() }));
 await deny('a member cannot delete their membership',
   () => deleteDoc(doc(memberA, 'memberships/memberA')));
-await deny('a company admin cannot remove a member yet (planned for a later step)',
-  () => updateDoc(doc(adminA, 'memberships/memberA'), { status: 'removed', endedAt: serverTimestamp() }));
+console.log('\n--- ending a membership (only the company or the owner can) ---');
+const endIt = (db, uid, over = {}) => updateDoc(doc(db, 'memberships/' + uid), Object.assign({ status: 'removed', endedAt: serverTimestamp() }, over));
+await allow('a company admin ends a member\'s membership', () => endIt(adminA, 'rm1'));
+await allow('a company admin can end another admin\'s membership', () => endIt(adminA, 'rmAdmin'));
+await allow('the platform owner can end a membership', () => endIt(owner, 'rm2'));
+await deny('an admin cannot end their own membership', () => endIt(adminA, 'adminA'));
+await deny('a member cannot end their own membership (only the company can)', () => endIt(memberA, 'memberA'));
+await deny('a member cannot end a colleague\'s', () => endIt(memberA, 'rm3'));
+await deny('an admin of another company cannot end it', () => endIt(adminB, 'rm3'));
+await deny('an admin cannot end a membership in another company', () => endIt(adminA, 'rmOtherCo'));
+await deny('a removed admin cannot end one', () => endIt(exAdminA, 'rm3'));
+await deny('a stranger cannot end one', () => endIt(stranger, 'rm3'));
+await deny('a signed-out visitor cannot end one', () => endIt(anon, 'rm3'));
+await deny('an already-ended membership cannot be ended again', () => endIt(adminA, 'rm1'));
+await deny('ending cannot also change the role', () => endIt(adminA, 'rm4', { role: 'admin' }));
+await deny('ending cannot also change the email', () => endIt(adminA, 'rm4', { email: 'z@z.com' }));
+await deny('ending cannot also change the company', () => endIt(adminA, 'rm4', { orgId: 'orgB', orgName: 'Beta' }));
+await deny('the end date must be the server\'s time, not one the client picks', () => endIt(adminA, 'rm4', { endedAt: Timestamp.fromDate(new Date(2020, 1, 1)) }));
+await deny('the new status must be exactly "removed"', () => endIt(adminA, 'rm4', { status: 'banned' }));
+await deny('an ended membership cannot be switched back on by the company', () => updateDoc(doc(adminA, 'memberships/rm1'), { status: 'active', endedAt: null }));
+await deny('an ended membership cannot be switched back on by the person', () => updateDoc(doc(asUser('rm1', 'rm1@a.com'), 'memberships/rm1'), { status: 'active', endedAt: null }));
+await deny('a membership cannot be deleted, even by the company', () => deleteDoc(doc(adminA, 'memberships/rm5')));
+await allow('a company admin still reads the person after they leave', () => getDoc(doc(adminA, 'memberships/rm1')));
+await allow('the person still reads their own membership after leaving', () => getDoc(doc(asUser('rm1', 'rm1@a.com'), 'memberships/rm1')));
+await deny('after leaving, the person can no longer add to the company\'s copy of their results', () => setDoc(doc(asUser('rm1', 'rm1@a.com'), 'orgs/orgA/members/rm1'), goodShare('rm1@a.com')));
+await allow('but can still read that copy', () => getDoc(doc(asUser('rm1', 'rm1@a.com'), 'orgs/orgA/members/rm1')));
+await allow('and can still blank their own name on it when they delete their account', () => updateDoc(doc(asUser('rm1', 'rm1@a.com'), 'orgs/orgA/members/rm1'), { identity: null, updatedAt: serverTimestamp() }));
+await allow('and blank their name, email and phone on the membership', () => updateDoc(doc(asUser('rm1', 'rm1@a.com'), 'memberships/rm1'), { email: '', displayName: '', phone: '' }));
+await deny('after leaving, they can no longer read the company\'s focus list', () => getDoc(doc(asUser('rm1', 'rm1@a.com'), 'orgFocus/orgA')));
+await allow('after leaving, they still use their own progress as always', () => getDoc(doc(asUser('rm1', 'rm1@a.com'), 'progress/rm1')));
 await allow('a removed member can join a NEW company with a new invite',
   () => join(asUser('removedR', 'r@a.com'), 'removedR', 'r@a.com', 'tokB', { orgId: 'orgB', orgName: 'Beta' }, {}, true));
 

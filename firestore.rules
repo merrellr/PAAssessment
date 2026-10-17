@@ -16,10 +16,12 @@
 //   Platform owner:     (an account with a platformAdmins/{uid} document,
 //                       created by hand in the console) creates and edits
 //                       companies, creates and revokes invites, reads every
-//                       membership. Nobody can delete a company.
+//                       membership, and can end any membership. Nobody can
+//                       delete a company.
 //   Company admin:      (an ACTIVE membership with role "admin") reads their
 //                       own company, creates and revokes its invites, reads
-//                       its memberships, and may change ONLY its focusAreas.
+//                       its memberships, may change ONLY its focusAreas, and
+//                       can end anyone's membership but its own (see memberships).
 //   Invited person:     reads an invite if they know its secret link, then
 //                       accepts it, which creates their own membership.
 //   Active member:      writes their own shared record (orgs/{orgId}/members/
@@ -192,6 +194,18 @@ service cloud.firestore {
         && request.resource.data.email == ''
         && request.resource.data.displayName == ''
         && request.resource.data.get('phone', '') == '';
+      // A membership is ended by the company, never by the member: the platform
+      // owner or one of the company's admins can end anyone's membership but their
+      // own. Only the status and end date change, so the person's record of who they
+      // were and when they joined stays exactly as it was. From then on they can no
+      // longer add to the company's copy of their results (see the shared-record
+      // rules below), and they keep their own account, results and course access.
+      allow update: if isSignedIn() && request.auth.uid != uid
+        && (isPlatformOwner() || isActiveAdminOf(resource.data.orgId))
+        && resource.data.status == 'active'
+        && request.resource.data.status == 'removed'
+        && request.resource.data.endedAt == request.time
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'endedAt']);
       allow delete: if false;
     }
 

@@ -48,9 +48,20 @@ const sleep = (ms) => new Promise(r => setTimeout(r, ms));
       t('a person with no company: no shared record is made anywhere', Object.keys(store).filter(p => p.indexOf('orgs/') === 0).length === 0);
       t('and no company notice is shown', banner.style.display !== 'block');
     }
+    if (window.__scn === 'removedold'){
+      t('someone who left more than 60 days ago is not shown the notice', banner.style.display !== 'block');
+    }
+    if (window.__scn === 'member' || window.__scn === 'admin'){
+      t('an active member\'s notice has no Dismiss link', document.getElementById('orgBannerDismiss').style.display === 'none');
+    }
     if (window.__scn === 'removed'){
       t('a former member: nothing is written for their old company any more', !share);
-      t('and no company notice is shown', banner.style.display !== 'block');
+      t('they are told plainly that they are no longer a member, and that the account and results stay theirs',
+        banner.style.display === 'block' && /no longer a member of Acme Health/.test(banner.textContent) && /still yours/.test(banner.textContent) && /receives nothing new/.test(banner.textContent), banner.textContent);
+      const dismiss = document.getElementById('orgBannerDismiss');
+      t('the notice can be dismissed', dismiss.style.display !== 'none');
+      dismiss.click(); await sleep(50);
+      t('dismissing hides it and remembers that', banner.style.display === 'none' && Object.keys(localStorage).some(k => k.indexOf('pa_left_notice_uDash_') === 0));
     }
     if (window.__scn === 'owner'){
       t('the platform owner sees the Owner Console link under Profile', ownerLink.style.display === 'block');

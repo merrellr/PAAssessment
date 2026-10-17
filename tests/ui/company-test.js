@@ -110,6 +110,11 @@ async function readBlob(d){ return await d.blob.text(); }
       await until(() => !!find());
       const mine = find();
       t('invites made by the owner here are made as the owner, for this company', !!mine && mine.createdBy === 'owner1' && mine.orgId === 'orgA' && mine.status === 'open', JSON.stringify(mine));
+      const annRow = rowFor('teamWrap', 'Ann Admin');
+      const annRemove = Array.prototype.find.call(annRow.querySelectorAll('button'), b => b.textContent.trim() === 'Remove');
+      t('the owner is offered Remove on every person, including a company admin', !!annRemove && rowsIn('teamWrap').every(r => Array.prototype.some.call(r.querySelectorAll('button'), b => b.textContent.trim() === 'Remove')));
+      annRemove.click(); await sleep(150);
+      t('the owner can end a company admin\'s membership', window.__store['memberships/uAdmin'].status === 'removed' && !rowFor('teamWrap', 'Ann Admin') && /Ann Admin/.test($('formerWrap').textContent), window.__store['memberships/uAdmin'].status);
     } else if (scn === 'admin') {
       /* ---------------- a normal company admin ---------------- */
       t('the page opens for the admin', shown() === 'page', shown());
@@ -335,6 +340,37 @@ async function readBlob(d){ return await d.blob.text(); }
       t('and nothing was saved', window.__store['orgFocus/orgA'].focusAreas[0] === 'discovery' && window.__store['orgs/orgA'].focusAreas[0] === 'discovery');
       window.__failCommit = null;
       $('focusCancelBtn').click();
+
+      /* ---------------- removing people ---------------- */
+      const removeBtn = (row) => Array.prototype.find.call(row.querySelectorAll('button'), b => b.textContent.trim() === 'Remove');
+      const activeNow = rowsIn('teamWrap');
+      t('every active person except the admin looking at the page has a Remove button', activeNow.length === 5 && activeNow.filter(r => removeBtn(r)).length === 4 && !removeBtn(rowFor('teamWrap', 'Ann Admin')), String(activeNow.length));
+      t('someone who deleted their account is told removing them frees the seat', /Remove them to free the seat/.test(textOf(rowFor('teamWrap', 'Name and email removed'))));
+      t('seats in use before: 5 of 10', /5 of 10 seats in use/.test(txt('orgSummary')), txt('orgSummary'));
+
+      confirmAnswer = false; confirmMessages.length = 0;
+      removeBtn(rowFor('teamWrap', 'Name and email removed')).click(); await sleep(80);
+      t('the confirmation says what they keep, what the company keeps, and that the seat is freed', confirmMessages.length === 1 && /keep their own account, results and course access/.test(confirmMessages[0]) && /keeps what they shared up to today and gets nothing new/.test(confirmMessages[0]) && /seat is freed/.test(confirmMessages[0]) && /invite them again/.test(confirmMessages[0]), confirmMessages[0]);
+      t('saying no changes nothing', window.__store['memberships/uFay'].status === 'active' && rowsIn('teamWrap').length === 5);
+
+      confirmAnswer = true;
+      const fayBefore = JSON.parse(JSON.stringify(window.__store['memberships/uFay'], (k, v) => (v && v.ms !== undefined ? v.ms : v)));
+      window.__writeLog.length = 0;
+      removeBtn(rowFor('teamWrap', 'Name and email removed')).click(); await sleep(150);
+      const fayDoc = window.__store['memberships/uFay'];
+      t('removing ends the membership with a server-set end date', fayDoc.status === 'removed' && fayDoc.endedAt && typeof fayDoc.endedAt.toMillis === 'function', JSON.stringify(fayDoc));
+      t('and changes nothing else on it (company, role, invite, join date)', fayDoc.orgId === 'orgA' && fayDoc.role === 'member' && fayDoc.inviteToken === fayBefore.inviteToken && fayDoc.joinedAt.toMillis() === fayBefore.joinedAt);
+      t('exactly one document was written', window.__writeLog.length === 1 && window.__writeLog[0].path === 'memberships/uFay', JSON.stringify(window.__writeLog));
+      t('their shared record is left exactly as it was (the company keeps it)', window.__store['orgs/orgA/members/uFay'].identity === null && window.__store['orgs/orgA/members/uFay'].assessment.overallPct === 20);
+      t('they leave the team table and appear under Former members', !rowFor('teamWrap', 'Name and email removed') && /Name and email removed/.test($('formerWrap').textContent) && /Left/.test($('formerWrap').textContent));
+      t('the seat is freed and the roll-up shrinks: 4 of 10 seats, 4 people', /4 of 10 seats in use/.test(txt('orgSummary')) && tileNum('People') === '4', txt('orgSummary'));
+      t('the page confirms what happened', /was removed/.test(txt('notice')) && /Former members/.test(txt('notice')), txt('notice'));
+
+      window.__failWrite = /^memberships\/uEli$/;
+      removeBtn(rowFor('teamWrap', 'Eli E')).click(); await sleep(150);
+      t('a refusal by the security rules is explained and the person stays', /security rules refused/.test(txt('errorLine')) && window.__store['memberships/uEli'].status === 'active' && !!rowFor('teamWrap', 'Eli E'), txt('errorLine'));
+      t('the Remove button works again after a refusal', removeBtn(rowFor('teamWrap', 'Eli E')) && !removeBtn(rowFor('teamWrap', 'Eli E')).disabled);
+      window.__failWrite = null;
     } else if (scn === 'nocopy'){
       t('the page opens', shown() === 'page');
       await sleep(150);

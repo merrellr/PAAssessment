@@ -348,6 +348,7 @@
 
     <div class="rec-banner" id="orgBanner" style="display:none; background:#EEF6FD; border-color:#C9E0F2;">
       <span style="font-size:13px; color:var(--ink-soft);" id="orgBannerText"></span>
+      <a href="#" id="orgBannerDismiss" style="display:none; margin-left:10px; font-size:13px; color:var(--navy);">Dismiss</a>
     </div>
 
     <div class="rec-banner" id="verifyBanner" style="display:none; background:#FFF8E8; border-color:#F0DDA8;">
@@ -903,6 +904,29 @@ function showCompanyNoticeIfMember(user){
       const banner = document.getElementById('orgBanner');
       // Company admins get a link to their team dashboard.
       document.getElementById('companyDashMenuItem').style.display = (m && m.status === 'active' && m.role === 'admin') ? 'block' : 'none';
+      document.getElementById('orgBannerDismiss').style.display = 'none';
+      // Someone whose company has ended their membership is told once, plainly,
+      // for 60 days or until they dismiss it. Nothing about their account changes.
+      if (m && m.status === 'removed' && m.orgName){
+        const endedMs = m.endedAt && m.endedAt.toMillis ? m.endedAt.toMillis() : 0;
+        const key = 'pa_left_notice_' + user.uid + '_' + endedMs;
+        let seen = false;
+        try { seen = localStorage.getItem(key) === '1'; } catch (e){ /* storage unavailable: show it */ }
+        if (endedMs && !seen && Date.now() - endedMs < 60 * 86400000){
+          document.getElementById('orgBannerText').textContent =
+            "You're no longer a member of " + m.orgName + ". Your account, results and course access are still yours. " +
+            m.orgName + " keeps what you had shared up to the day you left and receives nothing new.";
+          const dismiss = document.getElementById('orgBannerDismiss');
+          dismiss.style.display = 'inline';
+          dismiss.onclick = (ev) => {
+            ev.preventDefault();
+            try { localStorage.setItem(key, '1'); } catch (e){ /* ignore */ }
+            banner.style.display = 'none';
+          };
+          banner.style.display = 'block';
+          return;
+        }
+      }
       if (!m || m.status !== 'active'){ banner.style.display = 'none'; return; }
       document.getElementById('orgBannerText').textContent =
         "You're a member of " + m.orgName + ". Your assessment results, answers and course progress are shared with " +
