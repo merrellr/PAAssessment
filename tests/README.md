@@ -11,6 +11,7 @@ None of these touch the live site, your Firebase project, or send real email.
 | The "Request more information" form's logic (screens, answers, what is sent) | `lead-core.test.mjs` | `node --experimental-default-type=module tests/lead-core.test.mjs` |
 | The Tool Roadmap's logic | `tool-core.test.mjs` | `node --experimental-default-type=module tests/tool-core.test.mjs` |
 | Saving and emailing "Request more information" leads (validation, scoring, spam rules) | `apps-script/lead-test.html` | same as the line below, with `lead-test.html` |
+| The Reports numbers, insight sentences, AI privacy guard and weekly email (the server side) | `reports-logic.test.mjs` | `node tests/reports-logic.test.mjs` |
 | Invite emails and the Gmail self-check | `apps-script/mail-test.html` | `msedge --headless --allow-file-access-from-files --virtual-time-budget=5000 --dump-dom file:///<path>/tests/apps-script/mail-test.html` and read the page title (PASS / FAIL lines) |
 
 ## How the page tests work

@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>Reports — Product Advisory Learning</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy: #1A4584; --navy-deep: #12305e; --gray: #9AA3AD; --cyan: #35C2E8; --orange: #E08A3C;
+    --bg: #F5F8FB; --surface: #FFFFFF; --ink: #16213E; --ink-soft: #4B5768; --line: #E3E9F0;
+    --warn: #C0622A; --ok: #2E8B57;
+  }
+  *{ box-sizing: border-box; }
+  body{ margin:0; background: var(--bg); font-family:'IBM Plex Sans', system-ui, sans-serif; color: var(--ink); }
+  .wrap{ max-width: 1040px; margin: 0 auto; padding: 24px 16px 64px; }
+  .brand-header{ display:flex; align-items:center; gap:9px; padding: 0 0 14px; text-decoration:none; }
+  .brand-word{ font-family:'Space Grotesk', sans-serif; font-weight:700; font-size: 19px; line-height:1.3; color: var(--navy-deep); }
+  .brand-accent-bar{ height: 3px; background: linear-gradient(90deg, var(--navy) 0%, var(--cyan) 100%); border-radius: 2px; margin-bottom: 20px; }
+  .back-link{ font-size: 13px; color: var(--gray); text-decoration:none; display:inline-block; margin-bottom: 14px; }
+  .back-link:hover{ color: var(--navy); }
+  .card{ background: var(--surface); border-radius: 16px; border: 1px solid var(--line); padding: 22px; box-shadow: 0 1px 2px rgba(22,33,62,0.04), 0 12px 32px rgba(22,33,62,0.06); margin-bottom: 20px; }
+  h1{ font-family:'Space Grotesk', sans-serif; font-size: 22px; margin: 0 0 4px; color: var(--navy-deep); }
+  h2{ font-family:'Space Grotesk', sans-serif; font-size: 16px; margin: 0 0 4px; color: var(--navy-deep); }
+  p{ line-height:1.55; color: var(--ink-soft); font-size: 13.5px; margin: 0 0 10px; }
+  .hint{ font-size: 12.5px; color: var(--gray); }
+  .row{ display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap; }
+
+  .segmented{ display:inline-flex; border:1.5px solid var(--line); border-radius: 10px; overflow:hidden; background:#fff; }
+  .segmented button{ font-family:'Space Grotesk', sans-serif; font-weight:600; font-size:13px; padding: 8px 14px; border:none; background:#fff; color: var(--ink-soft); cursor:pointer; border-right:1px solid var(--line); }
+  .segmented button:last-child{ border-right:none; }
+  .segmented button[aria-pressed="true"]{ background: var(--navy); color:#fff; }
+  .tabs{ display:flex; gap:4px; border-bottom: 1.5px solid var(--line); margin: 6px 0 18px; overflow-x:auto; }
+  .tab{ font-family:'Space Grotesk', sans-serif; font-weight:600; font-size:14px; color: var(--gray); background:none; border:none; padding: 10px 16px; cursor:pointer; border-bottom: 2.5px solid transparent; white-space:nowrap; }
+  .tab[aria-selected="true"]{ color: var(--navy); border-bottom-color: var(--navy); }
+  button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible{ outline: 2px solid var(--cyan); outline-offset: 2px; }
+
+  button.btn{ font-family:'Space Grotesk', sans-serif; font-weight:600; font-size:13px; border-radius: 8px; padding: 8px 14px; border: 1px solid var(--line); cursor:pointer; background:#fff; color: var(--ink-soft); }
+  button.btn:hover{ border-color: var(--cyan); }
+  button.btn.primary{ background: linear-gradient(90deg, var(--navy) 0%, var(--navy-deep) 100%); color:#fff; border-color: transparent; }
+  button.btn:disabled{ opacity:.55; cursor:default; }
+  .error-line{ font-size: 13px; color: var(--warn); margin: 0 0 12px; min-height: 1px; }
+
+  .tiles{ display:grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; }
+  .tile{ border:1px solid var(--line); border-radius: 12px; padding: 14px 16px; background:#FBFCFE; }
+  .tile .num{ font-family:'Space Grotesk', sans-serif; font-weight:700; font-size: 28px; color: var(--navy-deep); line-height:1.1; font-variant-numeric: tabular-nums; }
+  .tile .lbl{ font-size: 12px; color: var(--ink-soft); margin-top: 4px; line-height:1.35; }
+  .delta{ display:inline-block; font-size: 12px; font-weight:600; margin-top: 6px; padding: 1px 8px; border-radius: 20px; background:#EEF2F7; color: var(--ink-soft); }
+  .delta.up{ background:#E4F3EA; color: var(--ok); }
+  .delta.down{ background:#F6E9E1; color: var(--warn); }
+
+  .insights{ margin-top: 14px; display:flex; flex-direction:column; gap: 8px; }
+  .insight{ display:flex; gap:10px; align-items:flex-start; background:#F7FAFD; border:1px solid var(--line); border-radius: 10px; padding: 10px 12px; font-size: 13.5px; line-height:1.5; color: var(--ink); }
+  .insight .chip{ flex:none; font-size: 11px; font-weight:700; text-transform:uppercase; letter-spacing:.04em; padding: 2px 8px; border-radius: 20px; background:#EEF2F7; color: var(--ink-soft); margin-top: 1px; }
+  .insight.sev-good .chip{ background:#E4F3EA; color: var(--ok); }
+  .insight.sev-watch .chip{ background:#F6E9E1; color: var(--warn); }
+  .insight-title{ font-size: 11.5px; font-weight:700; text-transform:uppercase; letter-spacing:.05em; color: var(--gray); margin: 16px 0 0; }
+  .ai-box{ margin-top: 12px; border:1px solid #BFE6F2; background:#F2FAFD; border-radius: 10px; padding: 12px 14px; font-size: 13.5px; line-height:1.55; white-space: pre-wrap; color: var(--ink); }
+  .ai-box small{ display:block; margin-top: 8px; color: var(--gray); white-space: normal; }
+
+  .grid-2{ display:grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  @media (max-width: 760px){ .grid-2{ grid-template-columns: 1fr; } }
+
+  .chart-svg{ width:100%; height:auto; display:block; }
+  .chart-grid{ stroke:#E3E9F0; stroke-width:1; }
+  .chart-axis{ font-size: 11px; fill:#9AA3AD; font-family:'IBM Plex Sans', sans-serif; }
+  .chart-legend{ display:flex; gap:16px; flex-wrap:wrap; font-size:12.5px; color: var(--ink-soft); margin-top: 6px; }
+  .legend-item i{ display:inline-block; width:10px; height:10px; border-radius:3px; margin-right:6px; vertical-align:-1px; }
+  .chart-empty{ font-size: 13px; color: var(--gray); margin: 8px 0; }
+  .bar-row{ display:grid; grid-template-columns: minmax(110px, 1.2fr) 2fr 46px; gap: 10px; align-items:center; margin-bottom: 9px; font-size: 13px; }
+  .bar-track{ height: 10px; border-radius: 5px; background:#EEF2F7; overflow:hidden; }
+  .bar-fill{ display:block; height:100%; background: var(--navy); border-radius: 5px; }
+  .bar-val{ text-align:right; font-variant-numeric: tabular-nums; color: var(--ink-soft); }
+  .bar-note{ display:block; font-size: 11px; color: var(--gray); }
+  .funnel-row{ display:grid; grid-template-columns: minmax(130px, 1.3fr) 3fr 44px 110px; gap: 10px; align-items:center; margin-bottom: 10px; font-size: 13.5px; }
+  .funnel-track{ height: 22px; border-radius: 6px; background:#EEF2F7; overflow:hidden; }
+  .funnel-fill{ display:block; height:100%; background: linear-gradient(90deg, var(--navy), var(--cyan)); border-radius: 6px; }
+  .funnel-row.worst .funnel-fill{ background: var(--warn); }
+  .funnel-count{ text-align:right; font-family:'Space Grotesk', sans-serif; font-weight:700; color: var(--navy-deep); font-variant-numeric: tabular-nums; }
+  .funnel-conv{ font-size: 12px; color: var(--gray); }
+  .funnel-conv.bad{ color: var(--warn); font-weight:600; }
+  @media (max-width: 640px){ .funnel-row{ grid-template-columns: 1fr 44px; } .funnel-track{ grid-column: 1 / -1; order: 3; } .funnel-conv{ grid-column: 1 / -1; order: 4; } }
+
+  .toolbar{ display:flex; gap:10px; flex-wrap:wrap; margin: 12px 0; }
+  .toolbar input, .toolbar select{ padding: 9px 12px; border: 1.5px solid var(--line); border-radius: 9px; font: inherit; font-size: 13.5px; background:#fff; color: var(--ink); }
+  .toolbar input{ flex: 1 1 220px; }
+  .table-wrap{ overflow-x:auto; }
+  table.data{ width:100%; border-collapse: collapse; font-size: 13px; }
+  table.data th{ text-align:left; font-family:'Space Grotesk', sans-serif; font-size: 11.5px; letter-spacing: .04em; text-transform: uppercase; color: var(--gray); padding: 8px 10px; border-bottom: 1.5px solid var(--line); white-space:nowrap; }
+  table.data td{ padding: 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  tr.expand td{ background:#F7FAFD; font-size: 12.5px; line-height:1.6; }
+  .pill{ display:inline-block; font-size: 11.5px; font-weight:600; padding: 2px 9px; border-radius: 20px; background:#EEF3FA; color: var(--navy); white-space:nowrap; }
+  .pill.Hot{ background:#F6E9E1; color: var(--warn); } .pill.Warm{ background:#FFF4D6; color:#8A6410; } .pill.Nurture{ background:#F0F2F5; color: var(--ink-soft); }
+  .linklike{ background:none; border:none; padding:0; font:inherit; color: var(--navy); text-decoration: underline; cursor:pointer; }
+  .foot-note{ font-size: 12px; color: var(--gray); line-height:1.6; }
+  [hidden]{ display:none !important; }
+</style>
+<script src="company-core.js"></script>
+<script src="charts.js"></script>
+</head>
+<body>
+<div class="wrap">
+  <a href="lms-dashboard.html" class="brand-header">
+    <svg width="28" height="28" viewBox="0 0 40 40" aria-hidden="true">
+      <polygon points="20,3 35,11.5 35,28.5 20,37 5,28.5 5,11.5" fill="#1A4584"/>
+      <polygon points="20,10 29,15 29,25 20,30 11,25 11,15" fill="none" stroke="#35C2E8" stroke-width="1.5"/>
+    </svg>
+    <div>
+      <div style="font-family:'IBM Plex Sans', sans-serif; font-weight:600; font-size:10.5px; letter-spacing:0.06em; color:var(--gray); line-height:1;">PRODUCT ADVISORY</div>
+      <div class="brand-word">Reports</div>
+    </div>
+  </a>
+  <div class="brand-accent-bar"></div>
+
+  <div class="card" id="stateLoading"><p style="margin:0;">Checking your account…</p></div>
+  <div class="card" id="stateSignedOut" hidden>
+    <h1>Please sign in first</h1>
+    <p>Sign in with your usual account on the dashboard, then come back to this page.</p>
+    <p style="margin-bottom:0;"><a href="lms-dashboard.html" style="color:var(--navy);">Go to the dashboard →</a></p>
+  </div>
+  <div class="card" id="stateNotOwner" hidden>
+    <h1>This page is for the platform owner</h1>
+    <p id="notOwnerMessage" style="margin-bottom:0;">Your account isn't set up as the platform owner.</p>
+  </div>
+
+  <div id="page" hidden>
+    <a href="owner.html" class="back-link">← Owner console</a>
+    <div class="card">
+      <div class="row">
+        <div>
+          <h1>Reports</h1>
+          <div class="hint" id="generated">Loading…</div>
+        </div>
+        <div class="row" style="gap:10px;">
+          <div class="segmented" role="group" aria-label="Period">
+            <button type="button" class="period-btn" data-days="7" aria-pressed="false">7 days</button>
+            <button type="button" class="period-btn" data-days="30" aria-pressed="true">30 days</button>
+            <button type="button" class="period-btn" data-days="90" aria-pressed="false">90 days</button>
+            <button type="button" class="period-btn" data-days="365" aria-pressed="false">1 year</button>
+          </div>
+          <button class="btn" id="refreshBtn" type="button">Refresh</button>
+        </div>
+      </div>
+      <div class="error-line" id="errorLine" role="alert" style="margin-top:10px;"></div>
+      <div class="tabs" role="tablist" aria-label="Reports">
+        <button class="tab" role="tab" id="tab-overview" data-tab="overview" aria-selected="true" aria-controls="panel-overview">Overview</button>
+        <button class="tab" role="tab" id="tab-funnel" data-tab="funnel" aria-selected="false" aria-controls="panel-funnel">Funnel</button>
+        <button class="tab" role="tab" id="tab-leads" data-tab="leads" aria-selected="false" aria-controls="panel-leads">Leads</button>
+      </div>
+
+      <!-- ============ OVERVIEW ============ -->
+      <section id="panel-overview" role="tabpanel" aria-labelledby="tab-overview">
+        <h2>What stands out</h2>
+        <div class="insights" id="summaryList"></div>
+        <div class="row" style="margin-top:12px;"><span></span><button class="btn primary" id="aiBtnOverview" type="button" data-section="overview">Explain with AI</button></div>
+        <div id="aiOutOverview"></div>
+
+        <h2 style="margin-top:22px;">Headline numbers</h2>
+        <p class="hint">Each number is the last period compared with the same length of time just before it.</p>
+        <div class="tiles" id="kpiTiles"></div>
+
+        <div class="grid-2" style="margin-top:22px;">
+          <div><h2>Activity per day</h2><div id="chartActivity"></div></div>
+          <div><h2>Where people land</h2><p class="hint">Level of everyone who finished the assessment in this period.</p><div id="chartTiers"></div></div>
+        </div>
+        <h2 style="margin-top:22px;">Average score by skill area</h2>
+        <div id="chartSkills"></div>
+        <p class="insight-title">Insights</p>
+        <div class="insights" id="insightsOverview"></div>
+        <div class="insights" id="insightsSkills" style="margin-top:8px;"></div>
+      </section>
+
+      <!-- ============ FUNNEL ============ -->
+      <section id="panel-funnel" role="tabpanel" aria-labelledby="tab-funnel" hidden>
+        <h2>From first click to finished course</h2>
+        <p class="hint">How many people reached each step in this period. The red row is the biggest drop.</p>
+        <div id="funnelChart"></div>
+        <p class="insight-title">Insights</p>
+        <div class="insights" id="insightsFunnel"></div>
+        <div class="row" style="margin-top:12px;"><span></span><button class="btn primary" id="aiBtnFunnel" type="button" data-section="funnel">Explain with AI</button></div>
+        <div id="aiOutFunnel"></div>
+        <p class="foot-note" id="funnelNotes" style="margin-top:14px;"></p>
+      </section>
+
+      <!-- ============ LEADS ============ -->
+      <section id="panel-leads" role="tabpanel" aria-labelledby="tab-leads" hidden>
+        <div class="tiles" id="leadKpis"></div>
+        <div class="grid-2" style="margin-top:22px;">
+          <div><h2>Requests per day</h2><div id="chartLeads"></div></div>
+          <div><h2>Fit</h2><p class="hint">Hot is the strongest.</p><div id="barsFit"></div></div>
+        </div>
+        <div class="grid-2" style="margin-top:22px;">
+          <div><h2>Where they came from</h2><div id="barsSource"></div></div>
+          <div><h2>Who they are</h2><div id="barsWho"></div></div>
+        </div>
+        <div class="grid-2" style="margin-top:22px;">
+          <div><h2>When they want to start</h2><div id="barsTimeline"></div></div>
+          <div><h2>Team size</h2><div id="barsSize"></div></div>
+        </div>
+        <h2 style="margin-top:22px;">Pipeline</h2>
+        <p class="hint">Every request by the Status you set in the sheet, all time.</p>
+        <div id="barsPipeline"></div>
+        <p class="insight-title">Insights</p>
+        <div class="insights" id="insightsLeads"></div>
+        <div class="row" style="margin-top:12px;"><span></span><button class="btn primary" id="aiBtnLeads" type="button" data-section="leads">Explain with AI</button></div>
+        <div id="aiOutLeads"></div>
+
+        <h2 style="margin-top:26px;">All requests</h2>
+        <p class="hint">The newest 300, with personal details. Only you can see this.</p>
+        <div class="toolbar">
+          <input type="search" id="leadSearch" placeholder="Search name, company or email…" aria-label="Search requests">
+          <select id="leadFit" aria-label="Filter by fit"><option value="">All fits</option><option>Hot</option><option>Warm</option><option>Nurture</option></select>
+          <button class="btn" id="leadCsvBtn" type="button">Download (CSV)</button>
+        </div>
+        <div class="table-wrap" id="leadsTableWrap"><p class="chart-empty">Open this tab to load the list.</p></div>
+      </section>
+    </div>
+    <p class="foot-note">Numbers come from your results sheet and are worked out on Google's servers. Insights are written from the numbers, so they are accurate but plain; they say so when there is too little data to read. "Explain with AI" sends only anonymous totals.</p>
+  </div>
+</div>
+
+<script type="module">
+const firebaseConfig = {
+  apiKey: "AIzaSyAcECtS5c6WeOhKlwRK-LYFE47npbuq_eU",
+  authDomain: "product-advisory-lms.firebaseapp.com",
+  projectId: "product-advisory-lms",
+  storageBucket: "product-advisory-lms.firebasestorage.app",
+  messagingSenderId: "1081134406437",
+  appId: "1:1081134406437:web:72e28604d093219e7698cc"
+};
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
+import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+const $ = (id) => document.getElementById(id);
+
+// The same Apps Script web app the rest of the site uses (apps-script/Code.gs, section 8).
+const RESULTS_LOG_URL = "https://script.google.com/macros/s/AKfycbynJQYF9rv5maL_CGniS9UGhTDfBVeW3gVhEWUsFdGOqquv4osGx4nQvc8jNkaaY6wrrg/exec";
+
+function h(tag, attrs, ...kids){
+  const n = document.createElement(tag);
+  Object.keys(attrs || {}).forEach(k => {
+    const v = attrs[k];
+    if (v === null || v === undefined || v === false) return;
+    if (k === 'class') n.className = v; else if (k === 'text') n.textContent = v;
+    else if (k.slice(0, 2) === 'on') n.addEventListener(k.slice(2), v); else n.setAttribute(k, v === true ? '' : v);
+  });
+  kids.forEach(c => { if (c !== null && c !== undefined) n.append(c.nodeType ? c : document.createTextNode(String(c))); });
+  return n;
+}
+function show(id){ ['stateLoading', 'stateSignedOut', 'stateNotOwner', 'page'].forEach(s => { $(s).hidden = (s !== id); }); }
+
+let currentUser = null;
+let period = 30;
+let tab = 'overview';
+let report = null;
+let leadRows = null;
+const SAVED = 'pa_reports_view';
+try {
+  const v = JSON.parse(localStorage.getItem(SAVED) || 'null');
+  if (v && [7, 30, 90, 365].indexOf(v.period) > -1) period = v.period;
+  if (v && ['overview', 'funnel', 'leads'].indexOf(v.tab) > -1) tab = v.tab;
+} catch (e){ /* start with the defaults */ }
+function remember(){ try { localStorage.setItem(SAVED, JSON.stringify({ period: period, tab: tab })); } catch (e){ /* ignore */ } }
+
+/* ---------------------------------------------------------------- sign-in */
+onAuthStateChanged(auth, async (user) => {
+  if (!user){ show('stateSignedOut'); return; }
+  currentUser = user;
+  try {
+    const snap = await getDoc(doc(db, 'platformAdmins', user.uid));
+    if (!snap.exists()){ show('stateNotOwner'); return; }
+  } catch (err){
+    $('notOwnerMessage').textContent = "We couldn't check your account. The latest security rules may not be published yet.";
+    show('stateNotOwner');
+    return;
+  }
+  show('page');
+  applyControls();
+  await load();
+});
+
+/* ---------------------------------------------------------------- talking to the server */
+function callBackend(params){
+  return new Promise((resolve) => {
+    const cb = 'repCb_' + Date.now() + '_' + Math.floor(Math.random() * 1e6);
+    const script = document.createElement('script');
+    let settled = false;
+    const finish = (v) => { if (settled) return; settled = true; clearTimeout(timer); delete window[cb]; script.remove(); resolve(v); };
+    const timer = setTimeout(() => finish(null), 60000);
+    window[cb] = (r) => finish(r || null);
+    script.onerror = () => finish(null);
+    script.src = RESULTS_LOG_URL + '?' + new URLSearchParams(Object.assign({}, params, { callback: cb })).toString();
+    document.body.appendChild(script);
+  });
+}
+
+const ERRORS = {
+  not_verified: 'Your sign-in could not be confirmed. Reload the page and try again.',
+  not_owner: "Your account isn't the platform owner, so the server refused.",
+  server_error: 'The report could not be built just now. Please try again.',
+  no_key: 'AI explanations are not switched on yet (no Groq key is set in the script).',
+  daily_limit: "Today's AI explanations have been used up. Try again tomorrow.",
+  privacy_guard: 'The AI request was stopped because it looked like it contained personal details. Nothing was sent.',
+  ai_error: 'The AI service could not answer just now. The insights above are still correct.',
+  bad_section: 'That section cannot be explained.'
+};
+function errorText(res){
+  if (!res) return "We couldn't reach the reports service. Check your connection and try again.";
+  if (res.ok === undefined) return "The reports service isn't switched on yet. Paste the latest Apps Script (v6) and deploy a new version.";
+  return (ERRORS[res.error] || 'Something went wrong.') + (res.detail ? ' (' + res.detail + ')' : '');
+}
+
+async function load(){
+  $('errorLine').textContent = '';
+  $('generated').textContent = 'Loading…';
+  const res = await callBackend({ action: 'reports', idToken: await currentUser.getIdToken(), days: period });
+  if (!res || res.ok !== true){ $('errorLine').textContent = errorText(res); $('generated').textContent = 'Could not load.'; return; }
+  report = res.report;
+  render();
+}
+
+/* ---------------------------------------------------------------- drawing */
+const SEV = { good: ['Good news', 'sev-good'], watch: ['Watch', 'sev-watch'], info: ['Note', 'sev-info'] };
+function insightList(id, items){
+  const box = $(id);
+  box.innerHTML = '';
+  (items || []).forEach(i => {
+    const s = SEV[i.severity] || SEV.info;
+    box.appendChild(h('div', { class: 'insight ' + s[1] }, h('span', { class: 'chip', text: s[0] }), h('span', { text: i.text })));
+  });
+}
+
+function deltaChip(k){
+  if (k.pct === null) return h('span', { class: 'delta', text: k.cur > 0 ? 'new this period' : 'no change' });
+  const arrow = k.dir === 'up' ? '▲ +' : k.dir === 'down' ? '▼ −' : '= ';
+  return h('span', { class: 'delta ' + (k.dir === 'flat' ? '' : k.dir), text: arrow + Math.abs(k.pct) + '%' });
+}
+function tiles(id, list){
+  const box = $(id);
+  box.innerHTML = '';
+  list.forEach(k => box.appendChild(h('div', { class: 'tile', title: k.note || '' },
+    h('div', { class: 'num', text: String(k.cur) }), h('div', { class: 'lbl', text: k.label }),
+    k.snapshot ? null : deltaChip(k),
+    h('div', { class: 'hint', text: k.snapshot ? 'right now, not compared' : 'vs ' + k.prev + ' before', style: 'margin-top:4px;' }))));
+}
+
+function render(){
+  const r = report;
+  $('generated').textContent = 'Updated ' + new Date(r.generatedAt).toLocaleString() + '. Showing the last ' + r.days + ' days compared with the ' + r.days + ' before.';
+  const kp = {}; r.kpis.forEach(k => { kp[k.key] = k; });
+
+  insightList('summaryList', r.summary);
+  tiles('kpiTiles', r.kpis);
+  Charts.line($('chartActivity'), { title: 'Activity per day', labels: r.series.labels, series: [
+    { name: 'Assessments completed', color: '#1A4584', values: r.series.assessments },
+    { name: 'Requests', color: '#35C2E8', values: r.series.requests },
+    { name: 'Accounts created', color: '#E08A3C', values: r.series.accounts }] });
+  Charts.bars($('chartTiers'), r.skills.tiers.map(t => ({ label: t.label, value: t.count })));
+  Charts.bars($('chartSkills'), r.skills.areas.map(a => ({ label: a.label, value: a.avg, note: a.n ? 'n=' + a.n : '' })), { max: 100, suffix: '%' });
+  insightList('insightsOverview', r.insights.overview);
+  insightList('insightsSkills', r.insights.skills);
+
+  Charts.funnel($('funnelChart'), r.funnel.steps, r.funnel.worst);
+  insightList('insightsFunnel', r.insights.funnel);
+  $('funnelNotes').textContent = r.notes.join(' ');
+
+  tiles('leadKpis', [kp.requests, kp.hotwarm, { key: 'waiting', label: 'Hot requests waiting 2+ days', cur: r.leads.hotWaiting, prev: 0, pct: null, dir: 'flat', snapshot: true, note: 'Hot requests still marked New' }]);
+  Charts.line($('chartLeads'), { title: 'Requests per day', labels: r.series.labels, series: [{ name: 'Requests', color: '#35C2E8', values: r.series.requests }] });
+  const bars = (id, list) => Charts.bars($(id), list.map(x => ({ label: x.label, value: x.count })));
+  bars('barsFit', r.leads.byFit); bars('barsSource', r.leads.bySource); bars('barsWho', r.leads.byWho);
+  bars('barsTimeline', r.leads.byTimeline); bars('barsSize', r.leads.bySize); bars('barsPipeline', r.leads.pipeline);
+  insightList('insightsLeads', r.insights.leads);
+  ['Overview', 'Funnel', 'Leads'].forEach(n => { $('aiOut' + n).innerHTML = ''; });
+}
+
+/* ---------------------------------------------------------------- controls */
+function applyControls(){
+  Array.prototype.forEach.call(document.querySelectorAll('.period-btn'), b => b.setAttribute('aria-pressed', Number(b.dataset.days) === period ? 'true' : 'false'));
+  Array.prototype.forEach.call(document.querySelectorAll('.tab'), b => {
+    const on = b.dataset.tab === tab;
+    b.setAttribute('aria-selected', on ? 'true' : 'false');
+    $('panel-' + b.dataset.tab).hidden = !on;
+  });
+}
+
+Array.prototype.forEach.call(document.querySelectorAll('.period-btn'), b => b.addEventListener('click', async () => {
+  period = Number(b.dataset.days); remember(); applyControls(); await load();
+}));
+Array.prototype.forEach.call(document.querySelectorAll('.tab'), b => b.addEventListener('click', () => {
+  tab = b.dataset.tab; remember(); applyControls(); if (tab === 'leads') loadLeads();
+}));
+$('refreshBtn').addEventListener('click', async () => { leadRows = null; await load(); if (tab === 'leads') loadLeads(); });
+
+/* ---------------------------------------------------------------- Explain with AI */
+Array.prototype.forEach.call(document.querySelectorAll('[data-section]'), btn => btn.addEventListener('click', async () => {
+  const section = btn.dataset.section;
+  const out = $('aiOut' + section.charAt(0).toUpperCase() + section.slice(1));
+  btn.disabled = true; btn.textContent = 'Thinking…';
+  out.innerHTML = '';
+  const res = await callBackend({ action: 'reportsAi', idToken: await currentUser.getIdToken(), section: section, days: period });
+  btn.disabled = false; btn.textContent = 'Explain with AI';
+  if (res && res.ok === true){
+    out.appendChild(h('div', { class: 'ai-box' }, res.text, h('small', { text: 'Written by an AI model from anonymous totals only. Check it against the numbers above.' })));
+  } else {
+    out.appendChild(h('div', { class: 'ai-box', style: 'background:#FFF9E6; border-color:#E8D9A6;' }, errorText(res)));
+  }
+}));
+
+/* ---------------------------------------------------------------- the list of requests */
+async function loadLeads(){
+  if (leadRows) { drawLeads(); return; }
+  $('leadsTableWrap').innerHTML = '';
+  $('leadsTableWrap').appendChild(h('p', { class: 'chart-empty', text: 'Loading…' }));
+  const res = await callBackend({ action: 'reportsLeads', idToken: await currentUser.getIdToken() });
+  if (!res || res.ok !== true){
+    $('leadsTableWrap').innerHTML = '';
+    $('leadsTableWrap').appendChild(h('p', { class: 'chart-empty', text: errorText(res) }));
+    return;
+  }
+  leadRows = res.leads;
+  drawLeads();
+}
+
+function filteredLeads(){
+  const term = $('leadSearch').value.trim().toLowerCase();
+  const fit = $('leadFit').value;
+  return (leadRows || []).filter(l => (!fit || l.fit === fit) && (!term || (l.name + ' ' + l.company + ' ' + l.email).toLowerCase().indexOf(term) > -1));
+}
+
+function drawLeads(){
+  const wrap = $('leadsTableWrap');
+  wrap.innerHTML = '';
+  const rows = filteredLeads();
+  if (!rows.length){ wrap.appendChild(h('p', { class: 'chart-empty', text: leadRows && leadRows.length ? 'No requests match.' : 'No requests yet.' })); return; }
+  const body = [];
+  rows.forEach(l => {
+    const tr = h('tr', { 'data-lead': l.id },
+      h('td', { text: new Date(l.ms).toLocaleDateString() }),
+      h('td', null, h('div', { text: l.name, style: 'font-weight:600;' }), h('div', { class: 'hint', text: l.company })),
+      h('td', { text: l.who }), h('td', null, h('span', { class: 'pill ' + l.fit, text: l.fit || '—' }), ' ', String(l.score || '')),
+      h('td', { text: l.source || '—' }), h('td', { text: l.timeline }), h('td', { text: l.status }),
+      h('td', null, h('button', { class: 'linklike', type: 'button', text: 'Details', onclick: () => { const x = tr.nextSibling; x.hidden = !x.hidden; } })));
+    const detail = h('tr', { class: 'expand', hidden: true }, h('td', { colspan: '8' },
+      h('div', null, h('strong', { text: 'Email: ' }), l.email), h('div', null, h('strong', { text: 'Interested in: ' }), l.interests),
+      h('div', null, h('strong', { text: 'Team size: ' }), l.size || '—', '  ', h('strong', { text: 'Who decides: ' }), l.role || '—'),
+      h('div', null, h('strong', { text: 'Why this fit: ' }), l.why || '—'), h('div', null, h('strong', { text: 'Message: ' }), l.message || '—')));
+    body.push(tr, detail);
+  });
+  wrap.appendChild(h('table', { class: 'data' },
+    h('thead', null, h('tr', null, ...['Received', 'Who', 'I am', 'Fit', 'Source', 'Timeline', 'Status', ''].map(t => h('th', { text: t })))),
+    h('tbody', null, ...body)));
+}
+$('leadSearch').addEventListener('input', drawLeads);
+$('leadFit').addEventListener('change', drawLeads);
+
+$('leadCsvBtn').addEventListener('click', () => {
+  const c = CompanyCore.csvCell;
+  const lines = [['Received', 'Name', 'Email', 'Company', 'I am', 'Interested in', 'Team size', 'Timeline', 'Who decides', 'Fit', 'Score', 'Source', 'Status', 'Message'].map(c).join(',')];
+  filteredLeads().forEach(l => lines.push([new Date(l.ms).toISOString().slice(0, 10), l.name, l.email, l.company, l.who, l.interests, l.size, l.timeline, l.role, l.fit, l.score, l.source, l.status, l.message].map(c).join(',')));
+  const blob = new Blob(['﻿' + lines.join('\r\n')], { type: 'text/csv;charset=utf-8' });
+  const a = h('a', { href: URL.createObjectURL(blob), download: 'requests-' + new Date().toISOString().slice(0, 10) + '.csv' });
+  document.body.appendChild(a); a.click(); a.remove();
+});
+</script>
+</body>
+</html>

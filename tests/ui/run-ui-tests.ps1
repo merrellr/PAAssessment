@@ -9,7 +9,8 @@
 # test scripts; the real pages are never modified.
 param(
   [string]$Edge = 'C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe',
-  [int]$Port = 8777
+  [int]$Port = 8777,
+  [string]$Only = ''   # optional: run only pages whose label matches this text, e.g. -Only reports
 )
 
 $ErrorActionPreference = 'Stop'
@@ -26,6 +27,7 @@ Copy-Item "$repo\focus-board.js" $site
 Copy-Item "$repo\focus-board.css" $site
 Copy-Item "$repo\tool-core.js" $site
 Copy-Item "$repo\lead-core.js" $site
+Copy-Item "$repo\charts.js" $site
 Copy-Item "$repo\vendor" "$site\vendor" -Recurse
 Copy-Item "$repo\content" "$site\content" -Recurse
 
@@ -53,6 +55,7 @@ Build-Page 'company.html' 'company-test.html' 'company-seed.js' 'company-test.js
 Build-Page 'tool-requests.html' 'tool-requests-test.html' 'tool-seed.js' 'tool-test.js'
 Build-Page 'owner-tools.html' 'owner-tools-test.html' 'owner-tools-seed.js' 'owner-tools-test.js'
 Build-Page 'request-info.html' 'request-info-test.html' 'lead-seed.js' 'lead-test.js'
+Build-Page 'reports.html' 'reports-test.html' 'reports-seed.js' 'reports-test.js'
 [System.IO.File]::WriteAllText("$site\share-test.html", "<!doctype html><html><head>$errHook</head><body><script type=`"module`" src=`"share-test.js`"></script></body></html>")
 
 # a tiny web server, because browsers will not load ES modules from files
@@ -81,6 +84,7 @@ $server = Start-Job -ArgumentList $site, $Port -ScriptBlock {
 Start-Sleep -Seconds 2
 
 function Run-Page($label, $url, $budget) {
+  if ($Only -and ($label -notlike "*$Only*")) { return }
   # Edge prints harmless warnings on stderr; do not let them stop the run.
   $ErrorActionPreference = 'Continue'
   $dom = & $Edge --headless --disable-gpu --virtual-time-budget=$budget --dump-dom $url 2>$null | Out-String
@@ -121,6 +125,9 @@ try {
   }
   $results += Run-Page 'request info form: call' "$base/request-info-test.html?scn=call&call=1" 90000
   $results += Run-Page 'request info form: preset' "$base/request-info-test.html?scn=preset&who=org&src=toolkits" 90000
+  foreach ($s in 'main', 'notowner', 'signedout', 'oldscript', 'unreachable', 'serverrefuses') {
+    $results += Run-Page "reports: $s" "$base/reports-test.html?scn=$s" 60000
+  }
   $results += Run-Page 'shared-record sync' "$base/share-test.html" 40000
 } finally {
   Stop-Job $server -ErrorAction SilentlyContinue

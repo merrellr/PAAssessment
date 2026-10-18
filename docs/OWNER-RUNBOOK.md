@@ -191,6 +191,22 @@ Change the word after `src=` to match the page the button is on (for example `sr
 
 ---
 
+## 12b. Reports (numbers, charts and plain-English insights)
+
+Owner Console → **Reports**. Pick **7 days / 30 days / 90 days / 1 year** at the top. Every number is compared with the same length of time just before it.
+
+- **Overview**: "What stands out" lists the most important sentences first (problems before good news). Under it: six headline numbers, an activity chart, how many people landed at each level, and the average score per skill area.
+- **Funnel**: where people drop off between taking the assessment and finishing a course. The red row is the biggest drop. Each step counts anonymous events, so read it as a guide, not an exact count of people.
+- **Leads**: how many requests came in, how many are Hot or Warm, which page they came from, who they are, their timeline and team size, and your own **Status** column as a pipeline. The table can be searched and downloaded as a CSV file.
+- **"Too few to read a trend yet"** means exactly that: with fewer than 5 in a period the page will not call it up or down. This is on purpose while the numbers are small.
+- **Explain with AI** (blue button under each tab) asks for a short explanation and suggested next steps. It only ever sees anonymous totals, never a person's name, email or message. Up to 30 a day. If it says AI is "not switched on", the Groq key is missing from the script.
+
+**Monday summary email.** Every Monday around 8am the same top points arrive at rob@productadvisory.co. To switch it on (once, after pasting the latest Code.gs): in the Apps Script editor choose `installWeeklyReport` in the function menu at the top, click **Run**, and approve the permission Google asks for. To see what it looks like right away, run `sendWeeklyReport` the same way. To stop it, run `removeWeeklyReport`.
+
+**If the page says "The reports service isn't switched on yet"** the script on Google is older than the page: paste the latest Code.gs and make a new version (section 7).
+
+---
+
 ## 13. Costs and limits (free plan)
 
 You are on the Firebase free plan (Spark). It is enough for a pilot. You will

@@ -111,6 +111,19 @@ function doGet(e) {
     return jsonpOut_(e.parameter.callback, mailCheck_());
   }
 
+  // Owner-only reports (reports.html). Each one re-checks the caller's sign-in token.
+  if (e.parameter.action === "reports") {
+    return jsonpOut_(e.parameter.callback, reportsEndpoint_(e.parameter.idToken || "", e.parameter.days));
+  }
+
+  if (e.parameter.action === "reportsLeads") {
+    return jsonpOut_(e.parameter.callback, reportsLeadsEndpoint_(e.parameter.idToken || ""));
+  }
+
+  if (e.parameter.action === "reportsAi") {
+    return jsonpOut_(e.parameter.callback, reportsAiEndpoint_(e.parameter.idToken || "", e.parameter.section || "", e.parameter.days));
+  }
+
   if (e.parameter.action === "leadsCheck") {
     return jsonpOut_(e.parameter.callback, leadsCheck_());
   }
@@ -1218,4 +1231,388 @@ function handleLeadRequest_(data) {
     if (locked) lock.releaseLock();
   }
   return reply;
+}
+
+
+/* ==================================================================
+   8. REPORTS (reports.html and the Monday email)
+   ------------------------------------------------------------------
+   Everything the Reports page shows is worked out HERE, from the sheet's
+   tabs, so there is one copy of the logic: the page only draws it. Only the
+   platform owner can ask for it (the caller's sign-in token is checked
+   against the platformAdmins record in Firestore).
+
+   The "insights" are ordinary sentences built from the numbers, so they are
+   always accurate and free. Where there is too little data to say anything
+   fair, they say so instead of guessing. The optional "Explain with AI"
+   button sends a model ONLY these anonymous totals and sentences (never a
+   name, an email or an answer) and is limited per day.
+   ================================================================== */
+
+var RP_DAY_ = 86400000;
+var RP_MIN_SAMPLE_ = 5;                       // fewer events than this and a trend is "too early to read"
+var RP_AI_DAILY_LIMIT_ = 30;
+var RP_PERIODS_ = [7, 30, 90, 365];
+var RP_SKILL_NAMES_ = {
+  discovery: 'Customer & Market Discovery', strategy: 'Product Strategy & Roadmapping', prioritization: 'Prioritization & Trade-offs',
+  execution: 'Execution & Delivery', stakeholder: 'Stakeholder Communication & Influence', aiIndividual: 'AI Fluency (Individual)', aiOrg: 'AI Fluency (Organizational)'
+};
+
+function rpNum_(v) { var n = Number(v); return isFinite(n) ? n : 0; }
+function rpMs_(v) { var t = (v instanceof Date) ? v.getTime() : new Date(v).getTime(); return isFinite(t) ? t : 0; }
+function rpCap_(s) { s = String(s || ''); return s.charAt(0).toUpperCase() + s.slice(1); }
+function rpPlural_(n, one, many) { return n + ' ' + (n === 1 ? one : (many || one + 's')); }
+
+function rpCount_(times, from, to) {
+  var n = 0;
+  for (var i = 0; i < times.length; i++) if (times[i] >= from && times[i] < to) n++;
+  return n;
+}
+
+// One count per day across the window, oldest first.
+function rpDaily_(times, from, days) {
+  var out = [];
+  for (var i = 0; i < days; i++) out.push(0);
+  times.forEach(function (t) {
+    var i = Math.floor((t - from) / RP_DAY_);
+    if (i >= 0 && i < days) out[i]++;
+  });
+  return out;
+}
+
+function rpCompare_(cur, prev) {
+  var delta = cur - prev;
+  return { cur: cur, prev: prev, delta: delta, pct: prev > 0 ? Math.round(delta / prev * 100) : null, dir: delta > 0 ? 'up' : delta < 0 ? 'down' : 'flat' };
+}
+
+function rpCounts_(values) {
+  var m = {};
+  values.forEach(function (v) { v = String(v == null ? '' : v).trim(); if (v) m[v] = (m[v] || 0) + 1; });
+  return Object.keys(m).map(function (k) { return { label: k, count: m[k] }; }).sort(function (a, b) { return (b.count - a.count) || a.label.localeCompare(b.label); });
+}
+
+function rpShare_(n, total) { return total > 0 ? Math.round(n / total * 100) : 0; }
+
+// "Assessments completed are up 40% vs the previous 30 days (14 vs 10)." Held back when there is too little to read.
+function rpTrendInsight_(noun, cmp, days) {
+  if (cmp.cur + cmp.prev < RP_MIN_SAMPLE_) {
+    return { severity: 'info', thin: true, text: 'Too few ' + noun + ' to read a trend yet (' + cmp.cur + ' in the last ' + days + ' days).' };
+  }
+  var vs = 'vs the previous ' + days + ' days (' + cmp.cur + ' vs ' + cmp.prev + ')';
+  if (cmp.prev === 0) return { severity: 'good', text: rpCap_(noun) + ': ' + cmp.cur + ' in the last ' + days + ' days, and none in the days before.' };
+  if (cmp.pct >= 20) return { severity: 'good', text: rpCap_(noun) + ' are up ' + cmp.pct + '% ' + vs + '.' };
+  if (cmp.pct <= -20) return { severity: 'watch', text: rpCap_(noun) + ' are down ' + Math.abs(cmp.pct) + '% ' + vs + '.' };
+  return { severity: 'info', text: rpCap_(noun) + ' are steady ' + vs + '.' };
+}
+
+// Turns step counts into steps with "% who carried on", and finds the biggest drop.
+function rpFunnel_(counts) {
+  var steps = counts.map(function (c, i) {
+    var prev = i > 0 ? counts[i - 1].count : null;
+    return { key: c.key, label: c.label, count: c.count, conv: (prev !== null && prev > 0) ? Math.min(100, Math.round(c.count / prev * 100)) : null };
+  });
+  var worst = -1;
+  for (var i = 1; i < steps.length; i++) {
+    if (steps[i].conv !== null && steps[i - 1].count >= RP_MIN_SAMPLE_ && (worst === -1 || steps[i].conv < steps[worst].conv)) worst = i;
+  }
+  return { steps: steps, worst: worst };
+}
+
+function rpFunnelInsights_(f) {
+  var out = [], s = f.steps;
+  if (!s.length || s[0].count === 0) return [{ severity: 'info', thin: true, text: 'Nobody started the assessment in this period, so there is no funnel to read yet.' }];
+  if (f.worst === -1) return [{ severity: 'info', thin: true, text: 'Too few people at each step to say where they drop off (' + s[0].count + ' started).' }];
+  var w = s[f.worst], p = s[f.worst - 1];
+  out.push({ severity: w.conv < 50 ? 'watch' : 'info', text: 'The biggest drop is from "' + p.label + '" to "' + w.label + '": ' + w.conv + '% carry on (' + w.count + ' of ' + p.count + ').' });
+  var last = s[s.length - 1];
+  if (s[0].count >= RP_MIN_SAMPLE_) out.push({ severity: 'info', text: 'Of ' + s[0].count + ' who started the assessment, ' + s[2].count + ' created an account (' + Math.min(100, rpShare_(s[2].count, s[0].count)) + '%) and ' + last.count + ' finished a course.' });
+  return out;
+}
+
+function rpSkills_(responses) {
+  var areas = Object.keys(RP_SKILL_NAMES_).map(function (k) {
+    var vals = responses.map(function (r) { return r.cats[k]; }).filter(function (v) { return typeof v === 'number'; });
+    var sum = vals.reduce(function (a, b) { return a + b; }, 0);
+    return { key: k, label: RP_SKILL_NAMES_[k], n: vals.length, avg: vals.length ? Math.round(sum / vals.length) : null };
+  });
+  return { n: responses.length, tiers: rpCounts_(responses.map(function (r) { return r.tier; })), areas: areas };
+}
+
+function rpSkillInsights_(sk) {
+  if (sk.n < RP_MIN_SAMPLE_) return [{ severity: 'info', thin: true, text: 'Only ' + rpPlural_(sk.n, 'assessment') + ' in this period, so skill averages would be misleading.' }];
+  var scored = sk.areas.filter(function (a) { return a.avg !== null; });
+  var lo = scored.reduce(function (m, a) { return a.avg < m.avg ? a : m; }, scored[0]);
+  var hi = scored.reduce(function (m, a) { return a.avg > m.avg ? a : m; }, scored[0]);
+  var out = [{ severity: 'info', text: 'Across ' + sk.n + ' assessments, the strongest area is ' + hi.label + ' (average ' + hi.avg + '%) and the weakest is ' + lo.label + ' (' + lo.avg + '%).' }];
+  if (hi.avg - lo.avg >= 25) out.push({ severity: 'watch', text: 'There is a ' + (hi.avg - lo.avg) + '-point gap between the strongest and weakest areas, so content and messaging about ' + lo.label + ' could meet a real need.' });
+  var top = sk.tiers[0];
+  if (top) out.push({ severity: 'info', text: 'Most people land at "' + top.label + '" (' + rpShare_(top.count, sk.n) + '%).' });
+  return out;
+}
+
+function rpLeadStats_(leads, from, to, nowMs) {
+  var inWin = leads.filter(function (l) { return l.ms >= from && l.ms < to; });
+  var hotWarm = inWin.filter(function (l) { return l.fit === 'Hot' || l.fit === 'Warm'; });
+  var waiting = leads.filter(function (l) { return l.fit === 'Hot' && String(l.status || 'New').toLowerCase() === 'new' && (nowMs - l.ms) > 2 * RP_DAY_; });
+  return {
+    total: inWin.length, hotWarm: hotWarm.length, hot: inWin.filter(function (l) { return l.fit === 'Hot'; }).length,
+    byFit: rpCounts_(inWin.map(function (l) { return l.fit; })), bySource: rpCounts_(inWin.map(function (l) { return l.source || '(not tagged)'; })),
+    byWho: rpCounts_(inWin.map(function (l) { return l.who; })), byTimeline: rpCounts_(inWin.map(function (l) { return l.timeline; })),
+    bySize: rpCounts_(inWin.map(function (l) { return l.size || 'Not asked'; })),
+    pipeline: rpCounts_(leads.map(function (l) { return l.status || 'New'; })), hotWaiting: waiting.length
+  };
+}
+
+function rpLeadInsights_(st, cmp, days) {
+  var out = [rpTrendInsight_('requests', cmp, days)];
+  if (st.total >= RP_MIN_SAMPLE_) {
+    out.push({ severity: 'info', text: st.hotWarm + ' of ' + st.total + ' requests are Hot or Warm (' + rpShare_(st.hotWarm, st.total) + '%).' });
+    var src = st.bySource[0];
+    if (src && src.count >= 3) out.push({ severity: 'info', text: 'Most requests come from "' + src.label + '" (' + src.count + ', ' + rpShare_(src.count, st.total) + '%).' });
+    var soon = st.byTimeline.filter(function (t) { return t.label === 'This month'; })[0];
+    if (soon) out.push({ severity: 'good', text: soon.count + ' of ' + st.total + ' want to start this month.' });
+  } else if (st.total > 0) {
+    out.push({ severity: 'info', thin: true, text: 'Only ' + rpPlural_(st.total, 'request') + ' in this period, so breakdowns would be misleading.' });
+  }
+  if (st.hotWaiting > 0) out.push({ severity: 'watch', text: rpPlural_(st.hotWaiting, 'Hot request') + ' ' + (st.hotWaiting === 1 ? 'has' : 'have') + ' been waiting more than 2 days with Status "New". Reply to ' + (st.hotWaiting === 1 ? 'it' : 'them') + ' first.' });
+  return out;
+}
+
+// What changed and what needs attention, most important first, never from thin data.
+function rpSummary_(sections) {
+  var all = [];
+  Object.keys(sections).forEach(function (k) { sections[k].forEach(function (i) { if (!i.thin) all.push(i); }); });
+  var rank = { watch: 0, good: 1, info: 2 };
+  all.sort(function (a, b) { return rank[a.severity] - rank[b.severity]; });
+  if (!all.length) return [{ severity: 'info', text: "There isn't enough activity in this period for reliable conclusions yet. Try a longer period." }];
+  return all.slice(0, 5);
+}
+
+/* data = { responses, funnel, progress, leads } already tidied by rpLoad_.
+   labelFn turns a time into the text shown under a chart. */
+function rpBuild_(data, nowMs, days, labelFn) {
+  labelFn = labelFn || function (ms) { return new Date(ms).toISOString().slice(0, 10); };
+  var cur0 = nowMs - days * RP_DAY_, prev0 = cur0 - days * RP_DAY_;
+  var rT = data.responses.map(function (r) { return r.ms; });
+  var started = data.funnel.filter(function (f) { return f.event === 'assessmentStarted'; }).map(function (f) { return f.ms; });
+  var viewed = data.funnel.filter(function (f) { return f.event === 'resultsViewed'; }).map(function (f) { return f.ms; });
+  var accounts = data.funnel.filter(function (f) { return f.event === 'accountCreated'; }).map(function (f) { return f.ms; });
+  var leadT = data.leads.map(function (l) { return l.ms; });
+  var hotWarmT = data.leads.filter(function (l) { return l.fit === 'Hot' || l.fit === 'Warm'; }).map(function (l) { return l.ms; });
+
+  // Progress rows are a snapshot refreshed whenever someone opens their dashboard, so "active" means "opened it this period".
+  function learners(from, to) {
+    var seen = {};
+    data.progress.forEach(function (p) { if (p.ms >= from && p.ms < to && p.lessons > 0) seen[p.who] = true; });
+    return Object.keys(seen).length;
+  }
+  function completers(from, to) {
+    var seen = {};
+    data.progress.forEach(function (p) { if (p.ms >= from && p.ms < to && p.completed) seen[p.who] = true; });
+    return Object.keys(seen).length;
+  }
+
+  function kpi(key, label, curVal, prevVal, note) { var c = rpCompare_(curVal, prevVal); c.key = key; c.label = label; if (note) c.note = note; return c; }
+  var kpis = [
+    kpi('assessments', 'Assessments completed', rpCount_(rT, cur0, nowMs), rpCount_(rT, prev0, cur0)),
+    kpi('started', 'Assessments started', rpCount_(started, cur0, nowMs), rpCount_(started, prev0, cur0)),
+    kpi('accounts', 'Accounts created', rpCount_(accounts, cur0, nowMs), rpCount_(accounts, prev0, cur0)),
+    kpi('requests', 'Requests for information', rpCount_(leadT, cur0, nowMs), rpCount_(leadT, prev0, cur0)),
+    kpi('hotwarm', 'Hot or Warm requests', rpCount_(hotWarmT, cur0, nowMs), rpCount_(hotWarmT, prev0, cur0)),
+    kpi('learners', 'Active learners', learners(cur0, nowMs), learners(prev0, cur0), 'People who started a lesson and opened their dashboard in the period.')
+  ];
+  var byKey = {}; kpis.forEach(function (k) { byKey[k.key] = k; });
+
+  var series = { labels: [], assessments: rpDaily_(rT, cur0, days), requests: rpDaily_(leadT, cur0, days), accounts: rpDaily_(accounts, cur0, days), started: rpDaily_(started, cur0, days) };
+  for (var i = 0; i < days; i++) series.labels.push(labelFn(cur0 + i * RP_DAY_));
+
+  var funnel = rpFunnel_([
+    { key: 'started', label: 'Started the assessment', count: byKey.started.cur },
+    { key: 'viewed', label: 'Saw their results', count: rpCount_(viewed, cur0, nowMs) },
+    { key: 'account', label: 'Created an account', count: byKey.accounts.cur },
+    { key: 'learning', label: 'Started learning', count: byKey.learners.cur },
+    { key: 'course', label: 'Finished a course', count: completers(cur0, nowMs) }
+  ]);
+
+  var winResponses = data.responses.filter(function (r) { return r.ms >= cur0 && r.ms < nowMs; });
+  var skills = rpSkills_(winResponses);
+  var leads = rpLeadStats_(data.leads, cur0, nowMs, nowMs);
+
+  var insights = {
+    overview: [
+      rpTrendInsight_('assessments completed', byKey.assessments, days),
+      rpTrendInsight_('accounts created', byKey.accounts, days),
+      rpTrendInsight_('requests for information', byKey.requests, days)
+    ],
+    funnel: rpFunnelInsights_(funnel),
+    leads: rpLeadInsights_(leads, byKey.requests, days),
+    skills: rpSkillInsights_(skills)
+  };
+  if (leads.hotWaiting > 0) insights.overview.push(insights.leads[insights.leads.length - 1]);
+  return { generatedAt: nowMs, days: days, kpis: kpis, series: series, funnel: funnel, skills: skills, leads: leads, insights: insights, summary: rpSummary_(insights),
+    notes: ['Funnel steps count anonymous events, so each step is a volume, not the same people followed through.', 'Active learners are people who opened their dashboard in the period; completions are not time-stamped.'] };
+}
+
+/* ---------- the Google-dependent parts ---------- */
+
+function rpHash_(email) {
+  var bytes = Utilities.computeDigest(Utilities.DigestAlgorithm.SHA_256, String(email || '').toLowerCase().trim());
+  return bytes.slice(0, 5).map(function (b) { return ('0' + (b & 255).toString(16)).slice(-2); }).join('');
+}
+
+function rpRows_(name) {
+  var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(name);
+  if (!sheet) return [];
+  var v = sheet.getDataRange().getValues();
+  return v.slice(1);
+}
+
+function rpLoad_() {
+  var responses = rpRows_(SHEET_NAME).map(function (r) {
+    var cats = {};
+    CATEGORY_KEYS.forEach(function (k, i) { var n = Number(r[9 + i]); cats[k] = isFinite(n) && r[9 + i] !== '' ? n : null; });
+    return { ms: rpMs_(r[0]), tier: String(r[8] || ''), overall: rpNum_(r[7]), cats: cats, size: String(r[5] || ''), industry: String(r[6] || ''), job: String(r[4] || '') };
+  }).filter(function (r) { return r.ms > 0; });
+  var funnel = rpRows_(FUNNEL_SHEET_NAME).map(function (r) { return { ms: rpMs_(r[0]), event: String(r[2] || ''), tier: String(r[3] || '') }; }).filter(function (f) { return f.ms > 0; });
+  var progress = rpRows_(PROGRESS_SHEET_NAME).map(function (r) {
+    return { ms: rpMs_(r[0]), who: rpHash_(r[1]), lessons: rpNum_(r[6]), completed: String(r[9] || '') === 'Completed' };
+  }).filter(function (p) { return p.ms > 0; });
+  var H = LEAD_HEADERS_;
+  var col = function (name) { return H.indexOf(name); };
+  var leads = rpRows_(LEAD_SHEET_NAME_).map(function (r) {
+    return { ms: rpMs_(r[col('Received')]), id: String(r[col('Lead ID')] || ''), name: String(r[col('Name')] || ''), email: String(r[col('Email')] || ''), company: String(r[col('Company')] || ''),
+      who: String(r[col('I am')] || ''), interests: String(r[col('Interested in')] || ''), size: String(r[col('Team size')] || ''), timeline: String(r[col('Timeline')] || ''),
+      role: String(r[col('Who decides')] || ''), fit: String(r[col('Fit')] || ''), score: rpNum_(r[col('Score')]), source: String(r[col('Source')] || ''),
+      status: String(r[col('Status')] || 'New'), message: String(r[col('Message')] || ''), why: String(r[col('Why')] || '') };
+  }).filter(function (l) { return l.ms > 0; });
+  return { responses: responses, funnel: funnel, progress: progress, leads: leads };
+}
+
+// Only the platform owner may read reports: the caller's own token is used to read
+// their platformAdmins record, which the security rules only let the owner's account have.
+function rpAuthorize_(idToken) {
+  var who = verifyFirebaseIdToken_(idToken);
+  if (!who) return { ok: false, error: 'not_verified' };
+  var res = UrlFetchApp.fetch('https://firestore.googleapis.com/v1/projects/' + FIRESTORE_PROJECT_ID_ + '/databases/(default)/documents/platformAdmins/' + encodeURIComponent(who.uid),
+    { method: 'get', headers: { Authorization: 'Bearer ' + idToken }, muteHttpExceptions: true });
+  if (res.getResponseCode() !== 200) return { ok: false, error: 'not_owner' };
+  return { ok: true, user: who };
+}
+
+function rpDays_(v) { var n = Number(v); return RP_PERIODS_.indexOf(n) > -1 ? n : 30; }
+
+function rpLabel_(ms) { return Utilities.formatDate(new Date(ms), Session.getScriptTimeZone(), 'MMM d'); }
+
+function reportsEndpoint_(idToken, days) {
+  var auth = rpAuthorize_(idToken);
+  if (!auth.ok) return { ok: false, error: auth.error };
+  try {
+    return { ok: true, report: rpBuild_(rpLoad_(), Date.now(), rpDays_(days), rpLabel_) };
+  } catch (err) {
+    return { ok: false, error: 'server_error', detail: String(err && err.message || err).slice(0, 200) };
+  }
+}
+
+// The detailed list of requests (personal details, owner only), newest first.
+function reportsLeadsEndpoint_(idToken) {
+  var auth = rpAuthorize_(idToken);
+  if (!auth.ok) return { ok: false, error: auth.error };
+  try {
+    var rows = rpLoad_().leads.sort(function (a, b) { return b.ms - a.ms; }).slice(0, 300);
+    return { ok: true, leads: rows };
+  } catch (err) {
+    return { ok: false, error: 'server_error', detail: String(err && err.message || err).slice(0, 200) };
+  }
+}
+
+/* ---------- "Explain with AI" ---------- */
+
+// What the model is given: anonymous totals and the sentences above. Nothing else.
+function rpAiPrompt_(section, report) {
+  var facts = { section: section, periodDays: report.days, kpis: report.kpis.map(function (k) { return { name: k.label, now: k.cur, before: k.prev, changePct: k.pct }; }) };
+  if (section === 'funnel') facts.funnel = report.funnel.steps.map(function (s) { return { step: s.label, count: s.count, carriedOnPct: s.conv }; });
+  if (section === 'leads') facts.leads = { total: report.leads.total, hotOrWarm: report.leads.hotWarm, byFit: report.leads.byFit, bySource: report.leads.bySource, byTimeline: report.leads.byTimeline, bySize: report.leads.bySize, pipeline: report.leads.pipeline, hotWaiting: report.leads.hotWaiting };
+  if (section === 'overview') facts.skills = report.skills.areas.map(function (a) { return { area: a.label, averagePct: a.avg }; });
+  facts.automaticInsights = (report.insights[section] || []).map(function (i) { return i.text; });
+  var system = "You are a careful business analyst for Product Advisory, a small company that sells product-management assessments, courses and toolkits. " +
+    "You are given anonymous totals for one section of the owner's reports. Use ONLY the numbers given; never invent a figure, name or cause. " +
+    "If counts are small (under about 10), say plainly that the data is too thin to be sure. Write in plain English for a busy founder, no jargon, no markdown headings. " +
+    "Format exactly as: a line 'What it shows:' with 2 or 3 sentences; a line 'What to watch:' with up to 2 short bullets starting with '- '; a line 'Next steps:' with up to 3 short bullets starting with '- '. Keep the whole answer under 900 characters.";
+  return { system: system, user: 'Here are the numbers:\n' + JSON.stringify(facts) };
+}
+
+function rpAiQuota_() {
+  var props = PropertiesService.getScriptProperties();
+  var key = 'rpai_' + Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'yyyy-MM-dd');
+  var n = Number(props.getProperty(key) || 0);
+  if (n >= RP_AI_DAILY_LIMIT_) return false;
+  props.getKeys().forEach(function (k) { if (k.indexOf('rpai_') === 0 && k !== key) props.deleteProperty(k); });
+  props.setProperty(key, String(n + 1));
+  return true;
+}
+
+function reportsAiEndpoint_(idToken, section, days) {
+  var auth = rpAuthorize_(idToken);
+  if (!auth.ok) return { ok: false, error: auth.error };
+  if (['overview', 'funnel', 'leads'].indexOf(section) === -1) return { ok: false, error: 'bad_section' };
+  var apiKey = PropertiesService.getScriptProperties().getProperty('GROQ_API_KEY');
+  if (!apiKey) return { ok: false, error: 'no_key' };
+  try {
+    var prompt = rpAiPrompt_(section, rpBuild_(rpLoad_(), Date.now(), rpDays_(days), rpLabel_));
+    // Belt and braces: nothing that looks like an email address is ever sent out.
+    if (/[^\s@]+@[^\s@]+\.[^\s@]+/.test(prompt.user)) return { ok: false, error: 'privacy_guard' };
+    if (!rpAiQuota_()) return { ok: false, error: 'daily_limit' };
+    var response = UrlFetchApp.fetch('https://api.groq.com/openai/v1/chat/completions', {
+      method: 'post', contentType: 'application/json', headers: { Authorization: 'Bearer ' + apiKey },
+      payload: JSON.stringify({ model: GROQ_MODEL_, temperature: 0.3, max_tokens: 700, messages: [{ role: 'system', content: prompt.system }, { role: 'user', content: prompt.user }] }),
+      muteHttpExceptions: true
+    });
+    if (response.getResponseCode() < 200 || response.getResponseCode() >= 300) return { ok: false, error: 'ai_error', detail: 'Groq answered ' + response.getResponseCode() };
+    var text = String(JSON.parse(response.getContentText()).choices[0].message.content || '').replace(/```/g, '').trim().slice(0, 1500);
+    return text ? { ok: true, text: text } : { ok: false, error: 'ai_error', detail: 'empty answer' };
+  } catch (err) {
+    return { ok: false, error: 'ai_error', detail: String(err && err.message || err).slice(0, 200) };
+  }
+}
+
+/* ---------- the Monday email ---------- */
+
+function rpWeeklyEmail_(r, reportsUrl) {
+  var k = {}; r.kpis.forEach(function (x) { k[x.key] = x; });
+  function change(x) { return x.pct === null ? (x.cur > 0 ? 'new' : 'no change') : (x.pct > 0 ? '+' : '') + x.pct + '%'; }
+  var subject = 'Weekly report: ' + rpPlural_(k.assessments.cur, 'assessment') + ' (' + change(k.assessments) + '), ' + rpPlural_(k.requests.cur, 'request') + ' (' + k.hotwarm.cur + ' Hot/Warm)';
+  var lines = r.kpis.map(function (x) { return x.label + ': ' + x.cur + ' (' + change(x) + ' vs the week before)'; });
+  var text = 'Your week at a glance (last 7 days)\n\n' + lines.join('\n') + '\n\nWhat stands out\n' + r.summary.map(function (s) { return '- ' + s.text; }).join('\n') + '\n\nOpen the full reports: ' + reportsUrl + '\n';
+  var html = '<div style="font-family:Arial,Helvetica,sans-serif;font-size:14px;line-height:1.55;color:#16213E;max-width:560px;">' +
+    '<h2 style="margin:0 0 4px;font-size:18px;color:#12305e;">Your week at a glance</h2><p style="margin:0 0 14px;color:#6B7686;font-size:13px;">The last 7 days compared with the 7 days before</p>' +
+    '<table style="border-collapse:collapse;width:100%;">' + r.kpis.map(function (x) {
+      var color = x.pct === null ? '#6B7686' : x.pct > 0 ? '#2E8B57' : x.pct < 0 ? '#C0622A' : '#6B7686';
+      return '<tr><td style="padding:7px 10px;border-bottom:1px solid #E3E9F0;">' + escapeHtml_(x.label) + '</td><td style="padding:7px 10px;border-bottom:1px solid #E3E9F0;text-align:right;font-weight:bold;">' + x.cur +
+        '</td><td style="padding:7px 10px;border-bottom:1px solid #E3E9F0;text-align:right;color:' + color + ';">' + escapeHtml_(change(x)) + '</td></tr>';
+    }).join('') + '</table>' +
+    '<h3 style="margin:20px 0 6px;font-size:14px;color:#12305e;">What stands out</h3><ul style="margin:0;padding-left:20px;">' +
+    r.summary.map(function (s) { return '<li style="margin-bottom:5px;">' + escapeHtml_(s.text) + '</li>'; }).join('') + '</ul>' +
+    '<p style="margin:20px 0 0;"><a href="' + escapeHtml_(reportsUrl) + '" style="display:inline-block;padding:11px 20px;border-radius:8px;background:#1A4584;color:#ffffff;text-decoration:none;font-weight:bold;">Open the full reports</a></p></div>';
+  return { subject: subject, text: text, html: html };
+}
+
+// Run by the Monday trigger (and handy to run by hand to see one now).
+function sendWeeklyReport() {
+  var r = rpBuild_(rpLoad_(), Date.now(), 7, rpLabel_);
+  var mail = rpWeeklyEmail_(r, SITE_BASE_URL_ + 'reports.html');
+  if (MailApp.getRemainingDailyQuota() < 1) return;
+  MailApp.sendEmail({ to: LEAD_NOTIFY_EMAIL_, subject: mail.subject, body: mail.text, htmlBody: mail.html, name: 'Product Advisory Learning' });
+}
+
+// Run these once from the editor's function menu. The first run asks you to approve the
+// "run on a schedule" permission.
+function installWeeklyReport() {
+  removeWeeklyReport();
+  ScriptApp.newTrigger('sendWeeklyReport').timeBased().onWeekDay(ScriptApp.WeekDay.MONDAY).atHour(8).create();
+  Logger.log('The weekly report will be emailed to ' + LEAD_NOTIFY_EMAIL_ + ' every Monday around 8am (' + Session.getScriptTimeZone() + ').');
+}
+
+function removeWeeklyReport() {
+  ScriptApp.getProjectTriggers().forEach(function (t) { if (t.getHandlerFunction() === 'sendWeeklyReport') ScriptApp.deleteTrigger(t); });
+  Logger.log('The weekly report schedule is switched off.');
 }
