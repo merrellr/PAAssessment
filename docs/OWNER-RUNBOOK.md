@@ -249,6 +249,21 @@ Open any company from the Owner Console and press **Team dashboard** (or sign in
 
 ---
 
+## 12e. The pilot and customer tracker
+
+Open a company in the Owner Console and press **Pilot tracker**. The full playbook, with the week-by-week plan and emails to copy, is in `docs/PILOT-PLAYBOOK.md`. In the tool:
+
+1. **Stage** at the top shows where the company is (Prospect, Pilot planned, Pilot running, Pilot review, Customer onboarding, Customer active, Paused or lost). Change it with the drop-down; each change is added to the timeline. Moving to "Pilot running" fills in the start date as today if it is blank; moving to "Pilot review" or "Customer: onboarding" fills in the end date as today if it is blank.
+2. **Where things stand** lists up to three next steps from the numbers (invitations waiting, people not yet assessed, people quiet) and, for customers, a health label with the reasons.
+3. **Run book**: tick items as you do them. Items marked *automatic* tick themselves (company created, admin joined, people invited, baseline saved, 80% joined, 90% assessed, 60% started).
+4. **Details and goals**: sponsor, group size, dates, renewal date, baseline and the goals. Press **Save details and goals**. Pick the baseline with **Save a baseline today** once most people have taken the assessment (it saves today's snapshot and uses it).
+5. **Before and after** compares today with the baseline. **Print the pilot summary** prints a one-page summary you can hand to the sponsor (it never includes your timeline or the health check).
+6. **Timeline** is for your own notes: calls, emails, meetings, decisions. Company admins never see it.
+
+**Before you use it the first time:** publish the latest `firestore.rules` (section 6) or it will say it could not save. The company list shows each company's stage and flags "Check-in overdue" when the next check-in date has passed.
+
+---
+
 ## 13. Costs and limits (free plan)
 
 You are on the Firebase free plan (Spark). It is enough for a pilot. You will

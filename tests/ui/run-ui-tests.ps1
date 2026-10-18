@@ -30,6 +30,7 @@ Copy-Item "$repo\lead-core.js" $site
 Copy-Item "$repo\charts.js" $site
 Copy-Item "$repo\charts.css" $site
 Copy-Item "$repo\company-report.js" $site
+Copy-Item "$repo\pilot-core.js" $site
 Copy-Item "$repo\vendor" "$site\vendor" -Recurse
 Copy-Item "$repo\content" "$site\content" -Recurse
 
@@ -60,6 +61,8 @@ Build-Page 'tool-requests.html' 'tool-requests-test.html' 'tool-seed.js' 'tool-t
 Build-Page 'owner-tools.html' 'owner-tools-test.html' 'owner-tools-seed.js' 'owner-tools-test.js'
 Build-Page 'request-info.html' 'request-info-test.html' 'lead-seed.js' 'lead-test.js'
 Build-Page 'reports.html' 'reports-test.html' 'reports-seed.js' 'reports-test.js'
+Build-Page 'owner-pilot.html' 'pilot-test.html' 'pilot-seed.js' 'pilot-test.js'
+Build-Page 'index.html' 'index-test.html' 'index-seed.js' 'index-test.js'
 $menuPage = "<!doctype html><html><head><script src=`"menu-seed.js`"></script></head><body><div class=`"wrap`"><p>A page</p></div><script type=`"module`" src=`"account-menu.js`"></script><script type=`"module`" src=`"menu-test.js`"></script></body></html>"
 [System.IO.File]::WriteAllText("$site\menu-test.html", $menuPage)
 [System.IO.File]::WriteAllText("$site\menu-off-test.html", $menuPage.Replace('src="account-menu.js"', 'src="account-menu.js?menu=off"'))
@@ -136,6 +139,14 @@ try {
   foreach ($s in 'main', 'notowner', 'signedout', 'oldscript', 'unreachable', 'serverrefuses') {
     $results += Run-Page "reports: $s" "$base/reports-test.html?scn=$s" 60000
   }
+  foreach ($s in 'high', 'low') {
+    $results += Run-Page "assessment: $s" "$base/index-test.html?scn=$s" 60000
+  }
+  foreach ($s in 'main', 'fresh', 'customer', 'saverefused', 'snapfail', 'deniedpilot', 'notowner', 'signedout') {
+    $results += Run-Page "pilot tracker: $s" "$base/pilot-test.html?scn=$s&org=orgA" 60000
+  }
+  $results += Run-Page 'pilot tracker: noorg' "$base/pilot-test.html?scn=noorg" 40000
+  $results += Run-Page 'pilot tracker: notfound' "$base/pilot-test.html?scn=notfound&org=zzz" 40000
   foreach ($s in 'plain', 'noname', 'owner', 'admin', 'removedadmin', 'memberrole', 'signedout') {
     $results += Run-Page "profile menu: $s" "$base/menu-test.html?scn=$s" 30000
   }

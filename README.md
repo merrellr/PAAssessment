@@ -26,9 +26,16 @@ notes at the top of that file (a Script Property for `GROQ_API_KEY`,
 then redeploy the web app). `index.html`'s `gradeScenario()` calls it via
 the same JSONP pattern already used for `action=lookup`.
 
-**Currently switched off.** The question is hidden from everyone by
-`SCENARIO_ENABLED = false` in `index.html`. Set it to `true` and push to bring
-it back; no other code needs to change.
+**Currently locked.** Two switches near the top of the scenario code in `index.html`:
+`SCENARIO_ENABLED = false` (the question is not answerable) and `SCENARIO_LOCKED = true`.
+While locked, people who scored above 25% on the AI Fluency (Organizational) questions see the
+question on a locked screen (an Enterprise badge, the answer box greyed out, a note that the step is
+part of the Enterprise assessment and that their result is complete without it, and a "Contact us about
+Enterprise" link to `request-info.html?src=assessment-enterprise&who=org`) with one button to carry on to
+their results. Two anonymous events are recorded on the Funnel tab: `scenarioLockedShown` and
+`enterpriseInterest` (the link was clicked); leads who came through the link show `assessment-enterprise` as
+their Source. To switch the real question on, set `SCENARIO_ENABLED = true` (the locked screen then never
+shows). To hide it altogether, set both to false. Tested in `tests/ui/index-test.js`.
 
 **Daily limits and usage report.** `gradeScenarioWithQuota_` in the same
 file allows 2 scored responses per respondent per day (keyed to the
@@ -233,3 +240,9 @@ manual review — it holds no uid and isn't read by the app.
 - `apps-script/Code.gs` section 9 holds the list of addresses (`MAIL_ADDR_`). `sendMail_` sends from the chosen address when Gmail lists it as one this account may send as, and otherwise sends from the account that owns the script, so adding an address later needs no code change.
 - noreply@: the welcome email and the notices to Rob. assessment@: replies to welcome and invitation emails. sales@: the "Request more information" thank-you and its replies. info@: the public contact shown on the site. toolkit@: the Tool Roadmap contact. feedback@: the "Send feedback" item in the Profile menus. legal@: privacy and legal questions in the welcome email. marketing@: reserved for newsletters.
 - **Welcome email** (section 10): `account-menu.js` (on every page, including the dashboard and invitation page with `?menu=off`) asks for it when it sees a signed-in account made in the last two days. The script checks the sign-in token, sends only to that account's own address, records the account on the **Welcomes** tab so it is sent once, and stops at 40 a day. Deleting an account removes its row. Tests: `tests/mail-and-org-ai.test.mjs` and the "profile menu" pages in the UI runner.
+
+## Pilot and customer tracker (owner only)
+
+- `owner-pilot.html?org=<id>` (button **Pilot tracker** on each company in the Owner Console, and a **Stage** column in the company list) tracks a company from prospect to customer: seven stages, a run book of things to do at each stage (some tick themselves from the data), goals with targets judged against live numbers, a before-and-after table against a saved baseline, a progress chart from the weekly snapshots, a health check once someone is a customer, and a private timeline of notes. **Print the pilot summary** gives a one-page summary that leaves out the private notes and the health check.
+- Data: `orgPilot/{orgId}` (stage, dates, goals, ticked run-book items, a summary note) and `orgPilot/{orgId}/log/{id}` (the timeline). Both are readable and writable by the platform owner only; company admins can never see them (see `firestore.rules`, tested in `tests/firestore-rules.test.mjs`).
+- The logic is `pilot-core.js` (pure, tested in `tests/pilot-core.test.mjs`); the page uses `company-core.js` and `company-report.js` for the live numbers and snapshots. The wording of the run book, goals and health thresholds is in `pilot-core.js`. `docs/PILOT-PLAYBOOK.md` is the human version, with email wording to copy.

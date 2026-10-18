@@ -85,6 +85,7 @@
 
 <script src="vendor/Sortable.min.js"></script>
 <script src="company-core.js"></script>
+<script src="pilot-core.js"></script>
 <script src="focus-board.js"></script>
 <script>
 /* Pure logic for the owner console, kept free of Firebase so it can be tested
@@ -347,6 +348,7 @@ const OwnerLogic = (function(){
             <div id="detailPills" style="margin-top:6px;"></div>
           </div>
           <div class="btn-row">
+            <a class="btn btn-ghost" id="pilotLink" href="#" style="text-decoration:none; display:inline-block; font-family:'Space Grotesk', sans-serif; font-weight:600; font-size:14px; border-radius:8px; padding:10px 18px; border:1px solid var(--line); color:var(--ink-soft);">Pilot tracker</a>
             <a class="btn btn-ghost" id="teamDashLink" href="#" style="text-decoration:none; display:inline-block; font-family:'Space Grotesk', sans-serif; font-weight:600; font-size:14px; border-radius:8px; padding:10px 18px; border:1px solid var(--line); color:var(--ink-soft);">Team dashboard</a>
             <button class="btn btn-ghost" id="editBtn" type="button">Edit details</button>
             <button class="btn btn-ghost" id="archiveBtn" type="button">Archive</button>
@@ -618,6 +620,12 @@ async function loadOrgs(){
       const ps = await getDocs(collection(db, 'orgPrivate'));
       ps.docs.forEach(d => { priv[d.id] = d.data().notes || ''; });
     } catch (e){ console.error('Could not read the private notes:', e); }
+    // Each company's stage in the sale (see owner-pilot.html). Also owner-only.
+    const pilots = {};
+    try {
+      const pl = await getDocs(collection(db, 'orgPilot'));
+      pl.docs.forEach(d => { pilots[d.id] = { stage: d.data().stage || '', nextCheckin: d.data().nextCheckin || '' }; });
+    } catch (e){ console.error('Could not read the pilot records:', e); }
     const previous = {};
     orgs.forEach(o => { previous[o.id] = o.activeCount; });
     orgs = snap.docs.map(d => {
@@ -626,6 +634,7 @@ async function loadOrgs(){
       return Object.assign({ id: d.id }, o, {
         notes: priv[d.id] ? priv[d.id] : legacy,
         legacyNotes: legacy,
+        pilot: pilots[d.id] || null,
         createdAtMs: msOf(o.createdAt), updatedAtMs: msOf(o.updatedAt),
         activeCount: previous[d.id] === undefined ? null : previous[d.id]
       });
@@ -662,6 +671,15 @@ async function moveNotesToPrivate(o){
   }
 }
 
+// The company's stage in the sale, and a flag when its next check-in has passed.
+function stageCell(o){
+  if (!o.pilot || !o.pilot.stage) return el('td', { class: 'nowrap', 'data-stage': '', text: '—' });
+  const s = PilotCore.stageOf(o.pilot.stage);
+  const late = o.pilot.nextCheckin && /^[0-9]{4}-[0-9]{2}-[0-9]{2}$/.test(o.pilot.nextCheckin) && o.pilot.nextCheckin < new Date().toISOString().slice(0, 10) && s.phase !== 'closed';
+  return el('td', { class: 'nowrap', 'data-stage': s.key }, el('span', { class: 'pill', text: s.label }),
+    late ? el('div', { class: 'cell-sub', style: 'color:var(--warn);', text: 'Check-in overdue' }) : null);
+}
+
 function renderOrgList(){
   const wrap = $('orgTableWrap');
   wrap.innerHTML = '';
@@ -677,7 +695,7 @@ function renderOrgList(){
 
   const head = el('tr', null,
     el('th', { text: 'Company' }), el('th', { class: 'num', text: 'Seats' }), el('th', { class: 'num', text: 'Active users' }),
-    el('th', { text: 'Created' }), el('th', { text: 'Last modified' }), el('th', { text: 'Notes' }), el('th', { text: 'Status' }), el('th', { text: '' }));
+    el('th', { text: 'Stage' }), el('th', { text: 'Created' }), el('th', { text: 'Last modified' }), el('th', { text: 'Notes' }), el('th', { text: 'Status' }), el('th', { text: '' }));
   const body = rows.map(o => {
     const archived = o.status === 'archived';
     const seats = o.plan === 'seat' ? String(o.seatLimit) : 'Flat';
@@ -687,6 +705,7 @@ function renderOrgList(){
       el('td', null, el('div', { class: 'cell-name', text: o.name }), o.contactName ? el('div', { class: 'cell-sub', text: o.contactName }) : null),
       el('td', { class: 'num', text: seats }),
       el('td', { class: 'num', text: active }),
+      stageCell(o),
       el('td', { class: 'nowrap', text: fmtDate(o.createdAtMs) }),
       el('td', { class: 'nowrap', text: fmtDate(o.updatedAtMs), title: fmtDateTime(o.updatedAtMs) }),
       el('td', { title: notes, text: notes.length > 60 ? notes.slice(0, 60) + '…' : notes }),
@@ -921,6 +940,7 @@ function renderDetail(){
   if (!org){ return; }
   $('detailName').textContent = org.name;
   $('teamDashLink').setAttribute('href', 'company.html?org=' + encodeURIComponent(org.id));
+  $('pilotLink').setAttribute('href', 'owner-pilot.html?org=' + encodeURIComponent(org.id));
   $('archiveBtn').textContent = org.status === 'archived' ? 'Restore' : 'Archive';
 
   const pills = $('detailPills');

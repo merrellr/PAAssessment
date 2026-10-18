@@ -159,10 +159,12 @@ async function readBlob(d){ return await d.blob.text(); }
       t('it notes the one person who finished', allObs.some(x => /1 person has finished their whole learning plan/.test(x)));
       t('the funnel shows five steps with the real counts', Array.prototype.slice.call($('reportFunnel').querySelectorAll('.funnel-count')).map(textOf).join() === '8,6,5,3,1', Array.prototype.slice.call($('reportFunnel').querySelectorAll('.funnel-count')).map(textOf).join());
       t('and marks the biggest drop', $('reportFunnel').querySelectorAll('.funnel-row.worst').length === 1 && /Finished their plan/.test(textOf($('reportFunnel').querySelector('.funnel-row.worst'))));
+      await until(() => !/Loading the comparison/.test(txt('reportCompareSub')), 5000);   // the totals come from the (fake) script a moment after the page opens
+      const allObs2 = Array.prototype.slice.call($('reportAll').querySelectorAll('.insight')).map(textOf);
       const cmpBars = Array.prototype.slice.call($('reportCompare').querySelectorAll('.bar-row'));
       t('the comparison shows seven areas with the team average and everyone\'s average', cmpBars.length === 7 && /Customer & Market Discovery/.test(textOf(cmpBars[0])) && /Everyone: 70% · −20/.test(textOf(cmpBars[0])) && /Everyone: 25% · \+15/.test(textOf(cmpBars[4])), cmpBars.map(textOf).join(' | '));
       t('it says how many people the comparison covers', /40 people/.test(txt('reportCompareSub')), txt('reportCompareSub'));
-      t('a big gap is turned into a sentence, below as a watch item and above as good news', allObs.some(x => /Your team averages 50% in Customer & Market Discovery, 20 points below the average of everyone/.test(x)) && allObs.some(x => /Your team averages 40% in Stakeholder Communication & Influence, 15 points above/.test(x)));
+      t('a big gap is turned into a sentence, below as a watch item and above as good news', allObs2.some(x => /Your team averages 50% in Customer & Market Discovery, 20 points below the average of everyone/.test(x)) && allObs2.some(x => /Your team averages 40% in Stakeholder Communication & Influence, 15 points above/.test(x)));
       t('the company\'s chosen focus is reported with real lesson counts', allObs.some(x => /Progress on your focus areas \(AI Fluency — Organizational, Customer & Market Discovery, Product Strategy & Roadmapping\): \d+% of the assigned lessons are done \(\d+ of \d+\)/.test(x)), allObs.join(' | '));
       t('the "All observations" list has a count', /^All observations \(\d+\)$/.test(txt('reportAllSummary')));
       t('with one snapshot the trend chart says it starts after the next one', /appears after the second weekly snapshot/.test(txt('reportTrend')) && !$('reportTrend').querySelector('svg'), txt('reportTrend'));

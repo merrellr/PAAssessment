@@ -221,16 +221,18 @@ function finish(){
     const cellsOf = () => { const r = $('orgTableWrap').querySelector('tbody tr'); return r ? Array.prototype.map.call(r.querySelectorAll('td'), textOf) : []; };
     await until(() => cellsOf()[2] === '3');
     const headers = Array.prototype.map.call($('orgTableWrap').querySelectorAll('th'), th => th.textContent.trim());
-    t('list columns: company, seats, active users, created, last modified, notes, status',
-      ['Company', 'Seats', 'Active users', 'Created', 'Last modified', 'Notes', 'Status'].every(h => headers.indexOf(h) > -1), headers.join('|'));
+    t('list columns: company, seats, active users, stage, created, last modified, notes, status',
+      ['Company', 'Seats', 'Active users', 'Stage', 'Created', 'Last modified', 'Notes', 'Status'].every(h => headers.indexOf(h) > -1), headers.join('|'));
     const listText = textOf($('orgTableWrap'));
     const c = cellsOf();
     t('list row shows company, seats, active user count, created, last modified, notes and a View button',
-      /Acme Health/.test(c[0]) && c[1] === '3' && c[2] === '3' && /2026/.test(c[3]) && /2026/.test(c[4]) && /Pilot customer/.test(c[5]) && /Active/.test(c[6]) && /View/.test(c[7]), c.join(' | '));
+      /Acme Health/.test(c[0]) && c[1] === '3' && c[2] === '3' && c[3] === '—' && /2026/.test(c[4]) && /2026/.test(c[5]) && /Pilot customer/.test(c[6]) && /Active/.test(c[7]) && /View/.test(c[8]), c.join(' | '));
     t('the list no longer shows the priority areas', !/Customer & Market|Priority|Discovery/.test(listText));
     if (stopAt === 4) return finish();
 
     /* ---- second company, search, sort ---- */
+    // a pilot record for the first company, so the list can show its stage (see owner-pilot.html)
+    window.__store['orgPilot/' + orgPath.split('/')[1]] = { stage: 'pilot_running', nextCheckin: '2020-01-01', pilotStart: '', pilotEnd: '', renewalDate: '', baselineDay: '', sponsor: '', pilotSize: 0, goals: [], done: [], summaryNote: '', updatedAt: Timestamp.now() };
     click('newCompanyBtn'); await sleep(80);
     t('create form opens BELOW the list when companies exist', vis('formCard') && $('formCard').style.order === '1' && $('listCard').style.order === '0');
     setVal('orgName', 'Zenith Clinics'); setVal('orgPlan', 'flat'); setVal('contactName', 'Zed');
@@ -241,6 +243,10 @@ function finish(){
     location.hash = ''; await sleep(120);
     await until(() => !/…/.test(textOf($('orgTableWrap'))));
     t('both companies listed', $('orgTableWrap').querySelectorAll('tbody tr').length === 2);
+    const acmeRow = Array.prototype.find.call($('orgTableWrap').querySelectorAll('tbody tr'), r => /Acme/.test(r.textContent));
+    const zenRow = Array.prototype.find.call($('orgTableWrap').querySelectorAll('tbody tr'), r => /Zenith/.test(r.textContent));
+    t('a company with a pilot record shows its stage, and flags an overdue check-in', /Pilot running/.test(textOf(acmeRow)) && /Check-in overdue/.test(textOf(acmeRow)), textOf(acmeRow));
+    t('a company with none shows a dash', zenRow.querySelector('td[data-stage]').textContent.trim() === '—');
     setVal('orgSearch', 'zen'); await sleep(50);
     t('search narrows the list by company name', $('orgTableWrap').querySelectorAll('tbody tr').length === 1 && /Zenith/.test($('orgTableWrap').textContent));
     setVal('orgSearch', 'qqq'); await sleep(50);
@@ -254,6 +260,7 @@ function finish(){
     const view = Array.prototype.slice.call($('orgTableWrap').querySelectorAll('button')).find(b => b.textContent === 'View');
     view.click(); await until(() => vis('viewDetail')); await sleep(200);
     t('View opens that company', /Acme Health/.test($('detailName').textContent));
+    t('the company page links to its pilot tracker and its team dashboard', /^owner-pilot\.html\?org=[^&]+$/.test($('pilotLink').getAttribute('href')) && /^company\.html\?org=[^&]+$/.test($('teamDashLink').getAttribute('href')) && $('pilotLink').getAttribute('href').split('=')[1] === $('teamDashLink').getAttribute('href').split('=')[1]);
     t('the company page links to that company\'s team dashboard', /^company\.html\?org=/.test($('teamDashLink').getAttribute('href')), $('teamDashLink').getAttribute('href'));
     t('people counts appear on the page: 1 admin and 1 user active',
       rowsIn('adminTableWrap').some(r => /Active/.test(textOf(r)) && /Sam Admin/.test(textOf(r))) && rowsIn('userTableWrap').some(r => /Active/.test(textOf(r)) && /Jane Smith/.test(textOf(r))));

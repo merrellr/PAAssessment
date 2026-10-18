@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>Pilot Tracker — Product Advisory Learning</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy: #1A4584; --navy-deep: #12305e; --gray: #9AA3AD; --cyan: #35C2E8; --orange: #E08A3C;
+    --bg: #F5F8FB; --surface: #FFFFFF; --ink: #16213E; --ink-soft: #4B5768; --line: #E3E9F0;
+    --warn: #C0622A; --ok: #2E8B57; --amber: #B98A12;
+  }
+  *{ box-sizing: border-box; }
+  body{ margin:0; background: var(--bg); font-family:'IBM Plex Sans', system-ui, sans-serif; color: var(--ink); }
+  .wrap{ max-width: 1000px; margin: 0 auto; padding: 24px 16px 64px; }
+  .brand-header{ display:flex; align-items:center; gap:9px; padding: 0 0 14px; text-decoration:none; }
+  .brand-word{ font-family:'Space Grotesk', sans-serif; font-weight:700; font-size: 19px; line-height:1.3; color: var(--navy-deep); }
+  .brand-accent-bar{ height: 3px; background: linear-gradient(90deg, var(--navy) 0%, var(--cyan) 100%); border-radius: 2px; margin-bottom: 22px; }
+  .back-link{ font-size: 13px; color: var(--gray); text-decoration:none; display:inline-block; }
+  .back-link:hover{ color: var(--navy); }
+  .card{ background: var(--surface); border-radius: 16px; border: 1px solid var(--line); padding: 24px; box-shadow: 0 1px 2px rgba(22,33,62,0.04), 0 12px 32px rgba(22,33,62,0.06); margin-bottom: 20px; }
+  h1{ font-family:'Space Grotesk', sans-serif; font-size: 22px; margin: 0 0 4px; color: var(--navy-deep); }
+  h2{ font-family:'Space Grotesk', sans-serif; font-size: 16px; margin: 0; color: var(--navy-deep); }
+  h3{ font-family:'Space Grotesk', sans-serif; font-size: 13px; margin: 18px 0 8px; color: var(--navy-deep); text-transform: uppercase; letter-spacing: 0.04em; }
+  p{ line-height:1.55; color: var(--ink-soft); font-size: 13.5px; margin: 0 0 10px; }
+  .hint{ font-size: 12.5px; color: var(--gray); line-height: 1.5; }
+  .section-head{ display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap; margin-bottom: 12px; }
+  .btn-row{ display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
+  button.btn, a.btn{ font-family:'Space Grotesk', sans-serif; font-weight:600; font-size: 13px; border-radius: 8px; padding: 8px 14px; border: 1px solid var(--line); cursor:pointer; background:#fff; color: var(--ink-soft); text-decoration:none; display:inline-block; }
+  button.btn:hover, a.btn:hover{ border-color: var(--cyan); }
+  button.btn.primary{ background: linear-gradient(90deg, var(--navy) 0%, var(--navy-deep) 100%); color:#fff; border-color: transparent; }
+  button.btn.small{ padding: 5px 10px; font-size: 12px; }
+  button.btn:disabled{ opacity:.55; cursor:default; }
+  button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible{ outline: 2px solid var(--cyan); outline-offset: 2px; }
+  .field-label{ display:block; font-size:12px; font-weight:600; color: var(--ink-soft); margin: 0 0 5px 2px; }
+  .text-input{ width:100%; padding: 10px 12px; margin-bottom: 12px; border: 1.5px solid var(--line); border-radius: 9px; font-family:'IBM Plex Sans', sans-serif; font-size: 14px; background:#fff; color: var(--ink); }
+  textarea.text-input{ resize: vertical; min-height: 70px; line-height: 1.5; }
+  .grid{ display:grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 0 16px; }
+  .notice{ font-size: 13px; color: var(--ok); min-height: 18px; }
+  .error-line{ font-size: 13px; color: var(--warn); min-height: 18px; }
+  .pill{ display:inline-block; font-size: 11.5px; font-weight:600; padding: 2px 9px; border-radius: 20px; background:#EEF3FA; color: var(--navy); white-space:nowrap; }
+  .pill.green{ background:#E4F3EA; color: var(--ok); } .pill.amber{ background:#FFF4D6; color:#8A6410; } .pill.red{ background:#F6E9E1; color: var(--warn); }
+  [hidden]{ display:none !important; }
+
+  .stepper{ display:flex; gap:6px; flex-wrap:wrap; margin: 4px 0 10px; }
+  .step{ font-size: 12.5px; font-weight:600; padding: 6px 12px; border-radius: 20px; background:#EEF2F7; color: var(--gray); font-family:'Space Grotesk', sans-serif; }
+  .step.done{ background:#E4F3EA; color: var(--ok); }
+  .step.current{ background: var(--navy); color:#fff; }
+  .step.closed.current{ background: var(--ink-soft); }
+
+  .nextlist{ margin: 6px 0 0; padding-left: 20px; font-size: 14px; line-height: 1.6; }
+  .reasons{ margin: 8px 0 0; padding-left: 20px; font-size: 13.5px; line-height: 1.6; color: var(--ink-soft); }
+
+  details.phase{ border:1px solid var(--line); border-radius: 12px; padding: 4px 14px; margin-bottom: 10px; background:#FBFCFE; }
+  details.phase > summary{ cursor:pointer; padding: 10px 0; font-family:'Space Grotesk', sans-serif; font-weight:600; font-size: 14px; color: var(--navy-deep); display:flex; justify-content:space-between; gap:10px; }
+  details.phase .count{ font-weight:500; color: var(--gray); font-size: 12.5px; }
+  .check{ display:flex; gap:10px; align-items:flex-start; padding: 7px 0; border-top: 1px solid var(--line); font-size: 14px; line-height: 1.45; }
+  .check input{ margin-top: 3px; width: 17px; height: 17px; flex:none; }
+  .check .tag{ font-size: 11px; color: var(--gray); margin-left: 6px; }
+  .check .sub{ display:block; font-size: 12.5px; color: var(--gray); }
+  .check.done .label{ color: var(--ink-soft); }
+
+  .goal{ display:grid; grid-template-columns: minmax(180px, 2fr) 96px 1.4fr auto; gap: 10px; align-items:center; padding: 8px 0; border-top: 1px solid var(--line); }
+  .goal .text-input{ margin: 0; }
+  .goal .state{ font-size: 13px; }
+  .goal .state.met{ color: var(--ok); font-weight:600; } .goal .state.not_yet{ color: var(--warn); font-weight:600; } .goal .state.unknown{ color: var(--gray); }
+  @media (max-width: 700px){ .goal{ grid-template-columns: 1fr 90px; } .goal .state{ grid-column: 1 / -1; } }
+
+  .table-wrap{ overflow-x:auto; }
+  table.data{ width:100%; border-collapse: collapse; font-size: 13.5px; }
+  table.data th{ text-align:left; font-family:'Space Grotesk', sans-serif; font-size: 11.5px; letter-spacing: .04em; text-transform: uppercase; color: var(--gray); padding: 8px 10px; border-bottom: 1.5px solid var(--line); white-space:nowrap; }
+  table.data td{ padding: 9px 10px; border-bottom: 1px solid var(--line); }
+  td.num, th.num{ text-align:right; font-variant-numeric: tabular-nums; white-space:nowrap; }
+  .up{ color: var(--ok); font-weight:600; } .down{ color: var(--warn); font-weight:600; }
+
+  .log-entry{ display:grid; grid-template-columns: 110px 1fr auto; gap: 10px; padding: 9px 0; border-top: 1px solid var(--line); font-size: 13.5px; line-height: 1.5; }
+  .log-entry .when{ color: var(--gray); font-size: 12.5px; }
+  .log-entry .kind{ font-size: 11px; font-weight:700; text-transform: uppercase; letter-spacing:.04em; color: var(--navy); display:block; }
+  .linklike{ background:none; border:none; padding:0; font:inherit; font-size:12.5px; color: var(--gray); text-decoration: underline; cursor:pointer; }
+
+  #printArea{ display:none; }
+  #printArea h1{ font-size: 24px; } #printArea h2{ font-size: 15px; margin: 18px 0 6px; }
+  #printArea table.data th, #printArea table.data td{ padding: 6px 8px; }
+  @media print{
+    body{ background:#fff; }
+    body.printing-summary .wrap > *:not(#printArea){ display:none !important; }
+    body.printing-summary #printArea{ display:block; }
+    .pa-acct{ display:none; }
+  }
+</style>
+<link rel="stylesheet" href="charts.css">
+<script src="company-core.js"></script>
+<script src="company-report.js"></script>
+<script src="pilot-core.js"></script>
+<script src="charts.js"></script>
+</head>
+<body>
+<div class="wrap">
+  <a href="lms-dashboard.html" class="brand-header">
+    <svg width="28" height="28" viewBox="0 0 40 40" aria-hidden="true">
+      <polygon points="20,3 35,11.5 35,28.5 20,37 5,28.5 5,11.5" fill="#1A4584"/>
+      <polygon points="20,10 29,15 29,25 20,30 11,25 11,15" fill="none" stroke="#35C2E8" stroke-width="1.5"/>
+    </svg>
+    <div>
+      <div style="font-family:'IBM Plex Sans', sans-serif; font-weight:600; font-size:10.5px; letter-spacing:0.06em; color:var(--gray); line-height:1;">PRODUCT ADVISORY</div>
+      <div class="brand-word">Pilot Tracker</div>
+    </div>
+  </a>
+  <div class="brand-accent-bar"></div>
+
+  <div class="card" id="stateLoading"><p style="margin:0;">Checking your account…</p></div>
+  <div class="card" id="stateSignedOut" hidden>
+    <h1>Please sign in first</h1>
+    <p>Sign in with your usual account on the dashboard, then come back to this page.</p>
+    <p style="margin-bottom:0;"><a href="lms-dashboard.html" style="color:var(--navy);">Go to the dashboard →</a></p>
+  </div>
+  <div class="card" id="stateNotOwner" hidden>
+    <h1>This page is for the platform owner</h1>
+    <p id="notOwnerMessage" style="margin-bottom:0;">Your account isn't set up as the platform owner.</p>
+  </div>
+  <div class="card" id="stateNoOrg" hidden>
+    <h1 id="noOrgTitle">Choose a company</h1>
+    <p id="noOrgMessage">Open a company from the owner console, then use its "Pilot tracker" button.</p>
+    <p style="margin-bottom:0;"><a href="owner.html" style="color:var(--navy);">Go to the owner console →</a></p>
+  </div>
+
+  <div id="page" hidden>
+
+    <div class="card">
+      <div class="section-head" style="margin-bottom:6px;">
+        <div>
+          <h1 id="orgName"></h1>
+          <div class="hint" id="orgSub"></div>
+        </div>
+        <div class="btn-row">
+          <a class="btn small" href="owner.html" id="ownerBackLink">← Owner console</a>
+          <a class="btn small" href="#" id="teamLink">Team dashboard</a>
+          <button class="btn small" id="refreshBtn" type="button">Refresh</button>
+        </div>
+      </div>
+      <div class="notice" id="saveNotice" role="status"></div>
+      <div class="error-line" id="errorLine" role="alert"></div>
+
+      <h3 style="margin-top:6px;">Stage</h3>
+      <div class="stepper" id="stageStrip" aria-label="Stages"></div>
+      <div class="grid">
+        <div>
+          <label class="field-label" for="stageSelect">Change stage</label>
+          <select class="text-input" id="stageSelect"></select>
+        </div>
+        <div>
+          <label class="field-label" for="checkinInput">Next check-in</label>
+          <input class="text-input" type="date" id="checkinInput">
+        </div>
+      </div>
+      <div class="hint" id="stageHint"></div>
+    </div>
+
+    <div class="card" id="nowCard">
+      <div class="section-head"><h2>Where things stand</h2><span id="healthPill"></span></div>
+      <div id="healthReasons"></div>
+      <h3>Next steps</h3>
+      <ol class="nextlist" id="nextList"></ol>
+    </div>
+
+    <div class="card">
+      <div class="section-head"><div><h2>Run book</h2><div class="hint">Tick items off as you go. Items marked "automatic" tick themselves when the numbers show they are done.</div></div></div>
+      <div id="runbook"></div>
+    </div>
+
+    <div class="card">
+      <div class="section-head"><h2>Details and goals</h2></div>
+      <div class="grid">
+        <div><label class="field-label" for="sponsorInput">Sponsor (who signs off)</label><input class="text-input" type="text" id="sponsorInput" maxlength="100" autocomplete="off"></div>
+        <div><label class="field-label" for="sizeInput">People in the pilot group</label><input class="text-input" type="number" id="sizeInput" min="0" step="1"></div>
+        <div><label class="field-label" for="startInput">Pilot start</label><input class="text-input" type="date" id="startInput"></div>
+        <div><label class="field-label" for="endInput">Pilot end</label><input class="text-input" type="date" id="endInput"></div>
+        <div><label class="field-label" for="renewalInput">Renewal date</label><input class="text-input" type="date" id="renewalInput"></div>
+        <div>
+          <label class="field-label" for="baselineSelect">Baseline (where they started)</label>
+          <select class="text-input" id="baselineSelect"></select>
+        </div>
+      </div>
+      <div class="btn-row" style="margin:-4px 0 12px;"><button class="btn small" id="baselineBtn" type="button">Save a baseline today</button><span class="hint" id="baselineHint"></span></div>
+
+      <h3>Goals</h3>
+      <div class="hint" style="margin-bottom:6px;">What the sponsor wants to see. The page checks each one against the live numbers.</div>
+      <div id="goalsList"></div>
+      <div class="btn-row" style="margin-top:10px;">
+        <button class="btn small" id="addGoalBtn" type="button">+ Add a goal</button>
+        <button class="btn small" id="defaultGoalsBtn" type="button">Use the standard three</button>
+      </div>
+
+      <h3>Note for the summary</h3>
+      <textarea class="text-input" id="summaryNote" maxlength="1000" placeholder="Optional. One or two sentences you want on the printed pilot summary."></textarea>
+      <div class="btn-row"><button class="btn primary" id="saveDetailsBtn" type="button">Save details and goals</button></div>
+    </div>
+
+    <div class="card" id="beforeAfterCard">
+      <div class="section-head">
+        <div><h2>Before and after</h2><div class="hint" id="baSub"></div></div>
+        <button class="btn" id="printBtn" type="button">Print the pilot summary</button>
+      </div>
+      <div class="table-wrap" id="beforeAfter"></div>
+      <h3>Progress over time</h3>
+      <div id="trendChart"></div>
+    </div>
+
+    <div class="card">
+      <div class="section-head"><div><h2>Timeline</h2><div class="hint">Your private notes about this company. Company admins never see this page.</div></div></div>
+      <div class="grid" style="grid-template-columns: 160px 1fr;">
+        <div><label class="field-label" for="logKind">Kind</label>
+          <select class="text-input" id="logKind"><option value="note">Note</option><option value="call">Call</option><option value="email">Email</option><option value="meeting">Meeting</option><option value="decision">Decision</option></select></div>
+        <div><label class="field-label" for="logText">What happened</label><input class="text-input" type="text" id="logText" maxlength="1000" placeholder="e.g. Kickoff call: sponsor wants a mid-point update on week 3" autocomplete="off"></div>
+      </div>
+      <div class="btn-row" style="margin-bottom:8px;"><button class="btn small primary" id="logAddBtn" type="button">Add to timeline</button><span class="error-line" id="logError"></span></div>
+      <div id="logList"></div>
+    </div>
+
+  </div>
+
+  <div id="printArea" aria-hidden="true"></div>
+</div>
+
+<script type="module">
+const firebaseConfig = {
+  apiKey: "AIzaSyAcECtS5c6WeOhKlwRK-LYFE47npbuq_eU",
+  authDomain: "product-advisory-lms.firebaseapp.com",
+  projectId: "product-advisory-lms",
+  storageBucket: "product-advisory-lms.firebasestorage.app",
+  messagingSenderId: "1081134406437",
+  appId: "1:1081134406437:web:72e28604d093219e7698cc"
+};
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
+import {
+  getFirestore, doc, getDoc, getDocs, setDoc, addDoc, deleteDoc, collection, query, where, orderBy, limit, serverTimestamp
+} from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+const $ = (id) => document.getElementById(id);
+const C = CompanyCore, R = CompanyReport, P = PilotCore;
+
+function el(tag, attrs, ...kids){
+  const n = document.createElement(tag);
+  Object.keys(attrs || {}).forEach(k => {
+    const v = attrs[k];
+    if (v === null || v === undefined || v === false) return;
+    if (k === 'class') n.className = v; else if (k === 'text') n.textContent = v;
+    else if (k.slice(0, 2) === 'on') n.addEventListener(k.slice(2), v); else n.setAttribute(k, v === true ? '' : v);
+  });
+  kids.forEach(c => { if (c !== null && c !== undefined) n.append(c.nodeType ? c : document.createTextNode(String(c))); });
+  return n;
+}
+const msOf = (ts) => (ts && ts.toMillis) ? ts.toMillis() : 0;
+const plural = (n, one, many) => n + ' ' + (n === 1 ? one : (many || one + 's'));
+function show(id){ ['stateLoading', 'stateSignedOut', 'stateNotOwner', 'stateNoOrg', 'page'].forEach(s => { $(s).hidden = (s !== id); }); }
+const todayStr = () => new Date().toISOString().slice(0, 10);
+function fmtDateTime(ms){ return ms ? new Date(ms).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' }) : 'just now'; }
+
+let orgId = null, org = null, pilot = null, hasRecord = false;
+let data = { memberships: [], invites: [], shares: {}, snapshots: [], log: [] };
+let view = null;
+let rows = [];
+
+/* ---------------------------------------------------------------- sign-in */
+onAuthStateChanged(auth, async (user) => {
+  if (!user){ show('stateSignedOut'); return; }
+  try {
+    const snap = await getDoc(doc(db, 'platformAdmins', user.uid));
+    if (!snap.exists()){ show('stateNotOwner'); return; }
+  } catch (err){
+    $('notOwnerMessage').textContent = "We couldn't check your account. The latest security rules may not be published yet.";
+    show('stateNotOwner');
+    return;
+  }
+  orgId = new URLSearchParams(location.search).get('org');
+  if (!orgId){ show('stateNoOrg'); return; }
+  const ok = await loadAll();
+  if (!ok) return;
+  show('page');
+  renderAll();
+  maybeSnapshot();
+});
+
+/* ---------------------------------------------------------------- loading */
+async function loadAll(){
+  try {
+    const [orgSnap, mSnap, iSnap, pSnap] = await Promise.all([
+      getDoc(doc(db, 'orgs', orgId)),
+      getDocs(query(collection(db, 'memberships'), where('orgId', '==', orgId))),
+      getDocs(query(collection(db, 'invites'), where('orgId', '==', orgId))),
+      getDoc(doc(db, 'orgPilot', orgId))
+    ]);
+    if (!orgSnap.exists()){
+      $('noOrgTitle').textContent = 'Company not found';
+      $('noOrgMessage').textContent = 'That company could not be found.';
+      show('stateNoOrg');
+      return false;
+    }
+    org = Object.assign({ id: orgId }, orgSnap.data());
+    data.memberships = mSnap.docs.map(d => Object.assign({ id: d.id }, d.data(), { joinedAtMs: msOf(d.data().joinedAt), endedAtMs: msOf(d.data().endedAt) }));
+    data.invites = iSnap.docs.map(d => Object.assign({ id: d.id }, d.data(), { createdAtMs: msOf(d.data().createdAt), expiresAtMs: msOf(d.data().expiresAt) }));
+    hasRecord = pSnap.exists();
+    const p = hasRecord ? pSnap.data() : {};
+    pilot = { stage: 'prospect', pilotStart: '', pilotEnd: '', nextCheckin: '', renewalDate: '', baselineDay: '', sponsor: '', pilotSize: 0, goals: [], done: [], summaryNote: '' };
+    Object.keys(pilot).forEach(k => { if (p[k] !== undefined) pilot[k] = p[k]; });
+  } catch (err){
+    console.error('Could not load the company:', err);
+    $('noOrgTitle').textContent = "We couldn't load this company";
+    $('noOrgMessage').textContent = 'The latest security rules may not be published yet.';
+    show('stateNoOrg');
+    return false;
+  }
+  data.shares = {};
+  try {
+    const s = await getDocs(collection(db, 'orgs', orgId, 'members'));
+    s.docs.forEach(d => { data.shares[d.id] = d.data(); });
+  } catch (err){ console.error('Could not read shared records:', err); }
+  data.snapshots = [];
+  try {
+    const s = await getDocs(query(collection(db, 'orgs', orgId, 'snapshots'), orderBy('at', 'asc')));
+    data.snapshots = s.docs.map(d => Object.assign({}, d.data(), { day: d.id, atMs: msOf(d.data().at) }));
+  } catch (err){ console.error('Could not read the snapshots:', err); }
+  data.log = [];
+  try {
+    const s = await getDocs(query(collection(db, 'orgPilot', orgId, 'log'), orderBy('at', 'desc'), limit(100)));
+    data.log = s.docs.map(d => Object.assign({ id: d.id }, d.data(), { atMs: msOf(d.data().at) }));
+  } catch (err){ console.error('Could not read the timeline:', err); }
+  return true;
+}
+
+$('refreshBtn').addEventListener('click', async () => {
+  $('refreshBtn').disabled = true;
+  const ok = await loadAll();
+  $('refreshBtn').disabled = false;
+  if (ok){ renderAll(); flash('Updated.'); }
+});
+
+function flash(text){ $('saveNotice').textContent = text; $('errorLine').textContent = ''; }
+function fail(text){ $('errorLine').textContent = text; $('saveNotice').textContent = ''; }
+
+/* ---------------------------------------------------------------- drawing */
+function activeRows(){ return rows.filter(r => r.status === 'active'); }
+
+// True while the details form has changes that are not saved yet, so ticking a box or moving the stage
+// never wipes out what was being typed.
+let detailsDirty = false;
+function markDirty(){ detailsDirty = true; }
+['sponsorInput', 'sizeInput', 'startInput', 'endInput', 'renewalInput', 'baselineSelect', 'summaryNote'].forEach(id => {
+  $(id).addEventListener('input', markDirty);
+  $(id).addEventListener('change', markDirty);
+});
+
+function renderAll(){
+  rows = C.buildTeamRows(data.memberships, data.shares, Date.now());
+  view = P.build({ pilot: pilot, org: org, rows: activeRows(), invites: data.invites, snapshots: data.snapshots, nowMs: Date.now() });
+  $('orgName').textContent = org.name;
+  document.title = org.name + ' — Pilot Tracker';
+  $('orgSub').textContent = (org.plan === 'seat' ? plural(org.seatLimit || 0, 'seat') : 'Flat enterprise price') + (pilot.sponsor ? ' · Sponsor: ' + pilot.sponsor : '');
+  $('teamLink').setAttribute('href', 'company.html?org=' + encodeURIComponent(orgId));
+  renderStage();
+  renderNow();
+  renderRunbook();
+  if (!detailsDirty) renderDetails(); else renderBaselineSelect($('baselineSelect').value);
+  renderBeforeAfter();
+  renderLog();
+}
+
+function renderStage(){
+  const strip = $('stageStrip');
+  strip.innerHTML = '';
+  const curIdx = P.STAGE_KEYS.indexOf(pilot.stage);
+  P.STAGES.forEach((s, i) => {
+    const isCur = s.key === pilot.stage;
+    strip.appendChild(el('span', { class: 'step' + (isCur ? ' current' : (curIdx < 6 && i < curIdx && s.key !== 'closed' ? ' done' : '')) + (s.key === 'closed' ? ' closed' : ''), text: s.label, 'aria-current': isCur ? 'step' : false }));
+  });
+  const sel = $('stageSelect');
+  sel.innerHTML = '';
+  P.STAGES.forEach(s => sel.appendChild(el('option', { value: s.key, text: s.label })));
+  sel.value = pilot.stage;
+  $('stageHint').textContent = view.stage.hint;
+  $('checkinInput').value = pilot.nextCheckin || '';
+}
+
+function renderNow(){
+  const h = view.health;
+  $('healthPill').innerHTML = '';
+  $('healthReasons').innerHTML = '';
+  if (h){
+    $('healthPill').appendChild(el('span', { class: 'pill ' + h.level, text: h.level === 'green' ? 'Healthy' : h.level === 'amber' ? 'Needs attention' : 'At risk' }));
+    $('healthReasons').appendChild(el('ul', { class: 'reasons' }, ...h.reasons.map(r => el('li', { text: r }))));
+  } else {
+    $('healthReasons').appendChild(el('p', { class: 'hint', text: 'A health check appears here once the company becomes a customer.' }));
+  }
+  const list = $('nextList');
+  list.innerHTML = '';
+  if (!view.next.length) list.appendChild(el('li', { text: 'Nothing urgent. Keep to the run book below.' }));
+  view.next.forEach(t => list.appendChild(el('li', { text: t })));
+}
+
+function renderRunbook(){
+  const wrap = $('runbook');
+  wrap.innerHTML = '';
+  const phases = ['plan', 'run', 'review', 'onboard', 'grow', 'closed'];
+  phases.forEach(ph => {
+    const cl = P.checklist(ph, pilot.done, view.auto);
+    const d = el('details', { class: 'phase', 'data-phase': ph }, el('summary', null, el('span', { text: cl.title }), el('span', { class: 'count', text: cl.done + ' of ' + cl.total })));
+    if (ph === view.stage.phase) d.setAttribute('open', '');
+    cl.items.forEach(i => {
+      const box = el('input', { type: 'checkbox', id: 'chk_' + i.id, 'data-item': i.id });
+      box.checked = i.done;
+      if (i.auto) box.disabled = true;
+      else box.addEventListener('change', () => toggleItem(i.id, box.checked));
+      d.appendChild(el('label', { class: 'check' + (i.done ? ' done' : ''), for: 'chk_' + i.id }, box,
+        el('span', null, el('span', { class: 'label', text: i.text }), i.auto ? el('span', { class: 'tag', text: 'automatic' }) : null, i.hint ? el('span', { class: 'sub', text: i.hint }) : null)));
+    });
+    wrap.appendChild(d);
+  });
+}
+
+function renderDetails(){
+  $('sponsorInput').value = pilot.sponsor || '';
+  $('sizeInput').value = pilot.pilotSize || '';
+  $('startInput').value = pilot.pilotStart || '';
+  $('endInput').value = pilot.pilotEnd || '';
+  $('renewalInput').value = pilot.renewalDate || '';
+  $('summaryNote').value = pilot.summaryNote || '';
+  renderBaselineSelect(pilot.baselineDay || '');
+  renderGoals(pilot.goals.map(g => Object.assign({}, g)));
+}
+
+function renderBaselineSelect(chosen){
+  const sel = $('baselineSelect');
+  sel.innerHTML = '';
+  sel.appendChild(el('option', { value: '', text: view.baseline && !pilot.baselineDay ? 'Automatic (' + view.baseline.day + ')' : 'Automatic: first snapshot after the pilot starts' }));
+  data.snapshots.forEach(s => sel.appendChild(el('option', { value: s.day, text: s.day + ' — ' + plural(s.people, 'person', 'people') + ', ' + s.assessed + ' assessed' })));
+  sel.value = data.snapshots.some(s => s.day === chosen) ? chosen : '';
+  $('baselineHint').textContent = view.baseline ? 'Using ' + view.baseline.day + '.' : 'No baseline yet.';
+}
+
+let goalDraft = [];
+function renderGoals(list, edited){   // edited: the owner changed something (drawing the saved goals is not an edit)
+  goalDraft = list;
+  if (edited) markDirty();
+  const wrap = $('goalsList');
+  wrap.innerHTML = '';
+  if (!goalDraft.length) wrap.appendChild(el('p', { class: 'hint', text: 'No goals yet.' }));
+  const judged = goalDraft.map(g => P.judgeGoal(g, view.now));
+  goalDraft.forEach((g, i) => {
+    const sel = el('select', { class: 'text-input', 'aria-label': 'What to measure' }, ...P.METRICS.map(m => el('option', { value: m.key, text: m.label })));
+    sel.value = g.metric;
+    sel.addEventListener('change', () => { g.metric = sel.value; renderGoals(goalDraft, true); });
+    const num = el('input', { class: 'text-input', type: 'number', min: '0', max: '100', step: '1', value: String(g.target), 'aria-label': 'Target' });
+    num.addEventListener('input', () => { g.target = Number(num.value); markDirty(); });
+    const j = judged[i];
+    wrap.appendChild(el('div', { class: 'goal', 'data-goal': g.metric }, sel, num,
+      el('div', { class: 'state ' + j.status }, (j.status === 'met' ? '✔ Met · ' : j.status === 'not_yet' ? 'Not yet · ' : '') + j.text),
+      el('button', { class: 'linklike', type: 'button', text: 'Remove', onclick: () => { goalDraft.splice(i, 1); renderGoals(goalDraft, true); } })));
+  });
+  $('addGoalBtn').disabled = goalDraft.length >= P.MAX_GOALS;
+}
+
+function renderBeforeAfter(){
+  const wrap = $('beforeAfter');
+  wrap.innerHTML = '';
+  if (!view.baseline){
+    $('baSub').textContent = '';
+    wrap.appendChild(el('p', { class: 'hint', text: 'No baseline yet. Once most people have taken the assessment, use "Save a baseline today" above. After that this table shows how far they have come.' }));
+  } else {
+    $('baSub').textContent = 'Compared with the baseline saved on ' + view.baseline.day + '.';
+    const fmt = (v, u) => v === null || v === undefined ? '—' : v + u;
+    wrap.appendChild(el('table', { class: 'data' },
+      el('thead', null, el('tr', null, el('th', { text: 'Measure' }), el('th', { class: 'num', text: 'Baseline' }), el('th', { class: 'num', text: 'Now' }), el('th', { class: 'num', text: 'Change' }))),
+      el('tbody', null, ...view.beforeAfter.map(r => el('tr', null,
+        el('td', { text: r.label }), el('td', { class: 'num', text: fmt(r.before, r.unit) }), el('td', { class: 'num', text: fmt(r.after, r.unit) }),
+        el('td', { class: 'num ' + (r.good === true ? 'up' : r.good === false ? 'down' : ''), text: r.delta === null ? '—' : (r.delta > 0 ? '▲ +' : r.delta < 0 ? '▼ −' : '= ') + Math.abs(r.delta) + (r.unit === '%' ? ' pts' : '') }))))));
+  }
+  const tr = $('trendChart');
+  tr.innerHTML = '';
+  const from = view.baseline ? data.snapshots.filter(s => s.day >= view.baseline.day) : data.snapshots;
+  if (from.length >= 2){
+    const ser = R.trendSeries(from);
+    Charts.line(tr, { title: 'People over time', integer: true, labels: ser.labels, series: ser.series.map((s, i) => ({ name: s.name, color: ['#1A4584', '#35C2E8', '#E08A3C'][i], values: s.values })) });
+  } else {
+    tr.appendChild(el('p', { class: 'hint', text: 'The chart appears once there are two weekly snapshots to compare.' }));
+  }
+}
+
+function renderLog(){
+  const wrap = $('logList');
+  wrap.innerHTML = '';
+  if (!data.log.length){ wrap.appendChild(el('p', { class: 'hint', text: 'Nothing yet.' })); return; }
+  data.log.forEach(e => wrap.appendChild(el('div', { class: 'log-entry', 'data-log': e.id },
+    el('div', { class: 'when', text: fmtDateTime(e.atMs) }),
+    el('div', null, el('span', { class: 'kind', text: e.kind }), e.text),
+    el('button', { class: 'linklike', type: 'button', text: 'Delete', onclick: () => removeLog(e) }))));
+}
+
+/* ----------------------------------------------------------------- saving */
+async function savePilot(){
+  const payload = {
+    stage: pilot.stage, pilotStart: pilot.pilotStart || '', pilotEnd: pilot.pilotEnd || '', nextCheckin: pilot.nextCheckin || '', renewalDate: pilot.renewalDate || '',
+    baselineDay: pilot.baselineDay || '', sponsor: pilot.sponsor || '', pilotSize: pilot.pilotSize || 0, goals: pilot.goals.map(g => ({ metric: g.metric, target: g.target })),
+    done: pilot.done.slice(), summaryNote: pilot.summaryNote || '', updatedAt: serverTimestamp()
+  };
+  await setDoc(doc(db, 'orgPilot', orgId), payload);
+  hasRecord = true;
+}
+
+async function addLog(kind, text){
+  const ref = await addDoc(collection(db, 'orgPilot', orgId, 'log'), { at: serverTimestamp(), kind: kind, text: text });
+  data.log.unshift({ id: ref.id, kind: kind, text: text, atMs: Date.now() });
+}
+
+async function toggleItem(id, on){
+  const before = pilot.done.slice();
+  const set = new Set(pilot.done);
+  if (on) set.add(id); else set.delete(id);
+  pilot.done = Array.from(set);
+  try { await savePilot(); renderAll(); flash('Saved.'); }
+  catch (err){ pilot.done = before; renderAll(); fail('That could not be saved. The latest security rules may not be published yet.'); }
+}
+
+$('stageSelect').addEventListener('change', async () => {
+  const to = $('stageSelect').value;
+  const was = pilot.stage;
+  if (to === was) return;
+  const saved = { stage: pilot.stage, pilotStart: pilot.pilotStart, pilotEnd: pilot.pilotEnd };
+  pilot.stage = to;
+  const filled = [];
+  if (to === 'pilot_running' && !pilot.pilotStart){ pilot.pilotStart = todayStr(); filled.push('the pilot start date'); }
+  if ((to === 'onboarding' || to === 'pilot_review') && !pilot.pilotEnd){ pilot.pilotEnd = todayStr(); filled.push('the pilot end date'); }
+  try {
+    await savePilot();
+    await addLog('stage', 'Moved to ' + P.stageOf(to).label + '.');
+    renderAll();
+    flash('Moved to ' + P.stageOf(to).label + '.' + (filled.length ? ' Filled in ' + filled.join(' and ') + ' as today.' : ''));
+  } catch (err){
+    Object.assign(pilot, saved);
+    renderAll();
+    fail('That could not be saved. The latest security rules may not be published yet.');
+  }
+});
+
+$('checkinInput').addEventListener('change', async () => {
+  const v = $('checkinInput').value;
+  if (v && !P.DAY_RE.test(v)) return;
+  const prev = pilot.nextCheckin;
+  pilot.nextCheckin = v;
+  try { await savePilot(); renderAll(); flash('Next check-in saved.'); }
+  catch (err){ pilot.nextCheckin = prev; renderAll(); fail('That could not be saved.'); }
+});
+
+$('addGoalBtn').addEventListener('click', () => {
+  const used = goalDraft.map(g => g.metric);
+  const m = P.METRICS.filter(x => used.indexOf(x.key) === -1)[0];
+  if (!m) return;
+  goalDraft.push({ metric: m.key, target: m.def });
+  renderGoals(goalDraft, true);
+});
+$('defaultGoalsBtn').addEventListener('click', () => renderGoals(P.DEFAULT_GOALS.map(g => Object.assign({}, g)), true));
+
+$('saveDetailsBtn').addEventListener('click', async () => {
+  const sponsor = $('sponsorInput').value.trim();
+  const sizeRaw = $('sizeInput').value.trim();
+  const size = sizeRaw === '' ? 0 : Number(sizeRaw);
+  const start = $('startInput').value, end = $('endInput').value, renewal = $('renewalInput').value;
+  const goals = goalDraft.map(g => ({ metric: g.metric, target: Number(g.target) }));
+  if (sponsor.length > 100) return fail('The sponsor name is too long (100 characters at most).');
+  if (!Number.isInteger(size) || size < 0 || size > 100000) return fail('The group size must be a whole number.');
+  if ([start, end, renewal].some(d => d && !P.DAY_RE.test(d))) return fail('Dates need to be real dates.');
+  if (start && end && end < start) return fail('The pilot cannot end before it starts.');
+  if (!P.validGoals(goals)) return fail('Each goal needs a different measure and a target between 0 and 100.');
+  const prev = Object.assign({}, pilot);
+  Object.assign(pilot, { sponsor: sponsor, pilotSize: size, pilotStart: start, pilotEnd: end, renewalDate: renewal, goals: goals, baselineDay: $('baselineSelect').value, summaryNote: $('summaryNote').value.slice(0, 1000) });
+  $('saveDetailsBtn').disabled = true;
+  try { await savePilot(); detailsDirty = false; renderAll(); flash('Saved.'); }
+  catch (err){ Object.assign(pilot, prev); renderAll(); fail('That could not be saved. The latest security rules may not be published yet.'); }
+  $('saveDetailsBtn').disabled = false;
+});
+
+// A snapshot of today's numbers, used as "where they started".
+$('baselineBtn').addEventListener('click', async () => {
+  $('baselineBtn').disabled = true;
+  const day = todayStr();
+  try {
+    if (!data.snapshots.some(s => s.day === day)){
+      const snap = R.snapshotOf(activeRows(), Date.now());
+      await setDoc(doc(db, 'orgs', orgId, 'snapshots', snap.day), Object.assign({}, snap, { at: serverTimestamp() }));
+      data.snapshots.push(Object.assign({}, snap, { atMs: Date.now() }));
+    }
+    const prev = pilot.baselineDay;
+    pilot.baselineDay = day;
+    try { await savePilot(); await addLog('note', 'Saved a baseline (' + day + ').'); }
+    catch (err){ pilot.baselineDay = prev; throw err; }
+    renderAll();
+    $('baselineSelect').value = day;
+    flash('Baseline saved for ' + day + '.');
+  } catch (err){
+    console.error(err);
+    fail('The baseline could not be saved. The latest security rules may not be published yet.');
+  }
+  $('baselineBtn').disabled = false;
+});
+
+$('logAddBtn').addEventListener('click', async () => {
+  const text = $('logText').value.trim();
+  $('logError').textContent = '';
+  if (!text){ $('logError').textContent = 'Write what happened first.'; return; }
+  $('logAddBtn').disabled = true;
+  try { await addLog($('logKind').value, text.slice(0, 1000)); $('logText').value = ''; renderLog(); }
+  catch (err){ $('logError').textContent = 'That could not be saved.'; }
+  $('logAddBtn').disabled = false;
+});
+
+async function removeLog(e){
+  if (!window.confirm('Delete this timeline entry?')) return;
+  try { await deleteDoc(doc(db, 'orgPilot', orgId, 'log', e.id)); data.log = data.log.filter(x => x.id !== e.id); renderLog(); }
+  catch (err){ fail('That could not be deleted.'); }
+}
+
+// The same weekly snapshot the company dashboard saves, so the history carries on while only the owner is looking.
+async function maybeSnapshot(){
+  if (org.status === 'archived') return;
+  const act = activeRows();
+  if (!R.snapshotDue(data.snapshots, act.length, Date.now())) return;
+  const snap = R.snapshotOf(act, Date.now());
+  try {
+    await setDoc(doc(db, 'orgs', orgId, 'snapshots', snap.day), Object.assign({}, snap, { at: serverTimestamp() }));
+    data.snapshots.push(Object.assign({}, snap, { atMs: Date.now() }));
+    renderAll();
+  } catch (err){ console.error('Could not save the weekly snapshot:', err); }
+}
+
+/* ------------------------------------------------------------- the summary */
+// A one-page summary to show the company: no private notes, no health check.
+$('printBtn').addEventListener('click', () => {
+  const area = $('printArea');
+  area.innerHTML = '';
+  const v = view, now = v.now;
+  area.appendChild(el('h1', { text: 'Pilot summary: ' + org.name }));
+  area.appendChild(el('p', { text: 'Prepared ' + new Date().toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' }) + ' by Product Advisory' + (pilot.sponsor ? ' for ' + pilot.sponsor : '') + '.' }));
+  v.summary.forEach(l => area.appendChild(el('p', { text: l })));
+  if (pilot.summaryNote) area.appendChild(el('p', { text: pilot.summaryNote, style: 'font-style:italic;' }));
+  if (v.goals.length){
+    area.appendChild(el('h2', { text: 'Goals' }));
+    area.appendChild(el('table', { class: 'data' }, el('tbody', null, ...v.goals.map(g => el('tr', null, el('td', { text: g.label }), el('td', { text: g.text }),
+      el('td', { text: g.status === 'met' ? 'Met' : g.status === 'not_yet' ? 'Not yet' : 'No data yet' }))))));
+  }
+  if (v.beforeAfter.length){
+    area.appendChild(el('h2', { text: 'Before and after' }));
+    area.appendChild(el('table', { class: 'data' }, el('thead', null, el('tr', null, el('th', { text: 'Measure' }), el('th', { class: 'num', text: 'Baseline' }), el('th', { class: 'num', text: 'Now' }), el('th', { class: 'num', text: 'Change' }))),
+      el('tbody', null, ...v.beforeAfter.map(r => el('tr', null, el('td', { text: r.label }), el('td', { class: 'num', text: r.before === null ? '—' : r.before + r.unit }), el('td', { class: 'num', text: r.after === null ? '—' : r.after + r.unit }),
+        el('td', { class: 'num', text: r.delta === null ? '—' : (r.delta > 0 ? '+' : r.delta < 0 ? '−' : '') + Math.abs(r.delta) }))))));
+  }
+  document.body.classList.add('printing-summary');
+  area.setAttribute('aria-hidden', 'false');
+  window.print();
+});
+window.addEventListener('afterprint', () => { document.body.classList.remove('printing-summary'); $('printArea').setAttribute('aria-hidden', 'true'); });
+</script>
+<script type="module" src="account-menu.js"></script>
+</body>
+</html>
