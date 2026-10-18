@@ -124,6 +124,15 @@ function doGet(e) {
     return jsonpOut_(e.parameter.callback, reportsAiEndpoint_(e.parameter.idToken || "", e.parameter.section || "", e.parameter.days));
   }
 
+  // The welcome email for a brand-new account (once per account), and the company admin's "Explain with AI".
+  if (e.parameter.action === "welcome") {
+    return jsonpOut_(e.parameter.callback, welcomeEndpoint_(e.parameter.idToken || ""));
+  }
+
+  if (e.parameter.action === "orgReportAi") {
+    return jsonpOut_(e.parameter.callback, orgReportAiEndpoint_(e.parameter.idToken || "", e.parameter.org || "", e.parameter.facts || ""));
+  }
+
   if (e.parameter.action === "leadsCheck") {
     return jsonpOut_(e.parameter.callback, leadsCheck_());
   }
@@ -652,7 +661,12 @@ function verifyFirebaseIdToken_(idToken) {
   if (response.getResponseCode() !== 200) return null;
   var users = JSON.parse(response.getContentText()).users;
   if (!users || !users.length || !users[0].email) return null;
-  return { uid: users[0].localId, email: String(users[0].email).toLowerCase().trim() };
+  return {
+    uid: users[0].localId,
+    email: String(users[0].email).toLowerCase().trim(),
+    name: String(users[0].displayName || '').slice(0, 80),
+    createdAtMs: Number(users[0].createdAt) || 0
+  };
 }
 
 // Deletes every row whose email column matches, bottom-up so row numbers
@@ -687,7 +701,8 @@ function deleteAccountData_(idToken) {
       ok: true,
       removed: {
         responses: deleteRowsByEmail_(ss.getSheetByName(SHEET_NAME), 2, who.email),
-        progress: deleteRowsByEmail_(ss.getSheetByName(PROGRESS_SHEET_NAME), 1, who.email)
+        progress: deleteRowsByEmail_(ss.getSheetByName(PROGRESS_SHEET_NAME), 1, who.email),
+        welcomes: deleteRowsByEmail_(ss.getSheetByName(WELCOME_SHEET_NAME_), 2, who.email)
       }
     };
   } catch (err) {
@@ -872,14 +887,14 @@ function sendInviteEmail_(token, idToken) {
 
     var mail = buildInviteEmail_(inv, who.email, SITE_BASE_URL_ + 'join.html?token=' + token);
     try {
-      MailApp.sendEmail({
+      sendMail_({
         to: inv.email,
         subject: mail.subject,
         body: mail.text,
         htmlBody: mail.html,
         name: 'Product Advisory Learning',
         replyTo: who.email
-      });
+      }, 'assessment');
     } catch (err) {
       return { ok: false, error: 'mail_error', detail: String(err && err.message || err).slice(0, 200) };
     }
@@ -945,7 +960,7 @@ var LEAD_SHEET_NAME_ = 'Leads';
 // Each saved request sends two emails (one to Rob, one thank-you to the person) and Gmail allows about 100 a
 // day for the whole script, so this stays well under half of that.
 var LEAD_DAILY_CAP_ = 40;
-var LEAD_REPLY_TO_ = 'info@productadvisory.co';             // where a reply to the thank-you email goes
+var LEAD_REPLY_TO_ = 'sales@productadvisory.co';            // where a reply to the thank-you email goes
 var LEAD_REPLY_WINDOW_ = 'within two business days';        // keep the same as REPLY_WINDOW in lead-core.js (a test checks)
 var LEAD_BOOKING_URL_ = 'https://calendly.com/productadvisory/30min';
 var LEAD_PER_EMAIL_DAILY_ = 3;
@@ -1210,7 +1225,7 @@ function handleLeadRequest_(data) {
     try {
       if (MailApp.getRemainingDailyQuota() >= 1) {
         var mail = leadBuildEmail_(lead, scored, assess, ss.getUrl ? ss.getUrl() : '');
-        MailApp.sendEmail({ to: LEAD_NOTIFY_EMAIL_, replyTo: lead.email, subject: mail.subject, body: mail.text, htmlBody: mail.html, name: 'Product Advisory Learning' });
+        sendMail_({ to: LEAD_NOTIFY_EMAIL_, replyTo: lead.email, subject: mail.subject, body: mail.text, htmlBody: mail.html, name: 'Product Advisory Learning' }, 'noreply');
         emailed = true;
       }
     } catch (mailErr) { emailed = false; }
@@ -1220,7 +1235,7 @@ function handleLeadRequest_(data) {
     try {
       if (MailApp.getRemainingDailyQuota() >= 5) {
         var ack = leadBuildAck_(lead);
-        MailApp.sendEmail({ to: lead.email, replyTo: LEAD_REPLY_TO_, subject: ack.subject, body: ack.text, htmlBody: ack.html, name: 'Product Advisory' });
+        sendMail_({ to: lead.email, replyTo: LEAD_REPLY_TO_, subject: ack.subject, body: ack.text, htmlBody: ack.html, name: 'Product Advisory' }, 'sales');
         acked = true;
       }
     } catch (ackErr) { acked = false; }
@@ -1601,7 +1616,7 @@ function sendWeeklyReport() {
   var r = rpBuild_(rpLoad_(), Date.now(), 7, rpLabel_);
   var mail = rpWeeklyEmail_(r, SITE_BASE_URL_ + 'reports.html');
   if (MailApp.getRemainingDailyQuota() < 1) return;
-  MailApp.sendEmail({ to: LEAD_NOTIFY_EMAIL_, subject: mail.subject, body: mail.text, htmlBody: mail.html, name: 'Product Advisory Learning' });
+  sendMail_({ to: LEAD_NOTIFY_EMAIL_, subject: mail.subject, body: mail.text, htmlBody: mail.html, name: 'Product Advisory Learning' }, 'noreply');
 }
 
 // Run these once from the editor's function menu. The first run asks you to approve the
@@ -1615,4 +1630,288 @@ function installWeeklyReport() {
 function removeWeeklyReport() {
   ScriptApp.getProjectTriggers().forEach(function (t) { if (t.getHandlerFunction() === 'sendWeeklyReport') ScriptApp.deleteTrigger(t); });
   Logger.log('The weekly report schedule is switched off.');
+}
+
+
+/* ==================================================================
+   9. SENDER ADDRESSES (who each kind of email comes from)
+   ------------------------------------------------------------------
+   Apps Script normally sends every email from the Google account that
+   owns this script. To make a message come from one of your other
+   addresses (noreply@, sales@ ...), that address has to be added to the
+   Gmail account as a "Send mail as" alias (Gmail > Settings > Accounts
+   and Import > Send mail as). When it is, sendMail_ uses it. When it is
+   not, the email is sent exactly as before and nothing breaks, so this is
+   safe to leave switched on either way. The Reply-To of each message is
+   set separately and works with or without an alias.
+   ================================================================== */
+
+var MAIL_ADDR_ = {
+  noreply: 'noreply@productadvisory.co',        // automatic messages nobody needs to answer: welcome, notices to Rob
+  assessment: 'assessment@productadvisory.co',  // the assessment, accounts and company invitations
+  sales: 'sales@productadvisory.co',            // "Request more information" thank-yous and anything about buying
+  info: 'info@productadvisory.co',              // general contact (shown on the site)
+  toolkit: 'toolkit@productadvisory.co',        // the Tool Roadmap and toolkit launches
+  feedback: 'feedback@productadvisory.co',      // ideas and problems from learners
+  legal: 'legal@productadvisory.co',            // privacy and legal questions
+  marketing: 'marketing@productadvisory.co'     // newsletters and announcements (not used yet)
+};
+
+// True when Gmail says this account may send as the address. Never throws.
+function mailAlias_(address) {
+  try {
+    var list = GmailApp.getAliases() || [];
+    for (var i = 0; i < list.length; i++) if (String(list[i]).toLowerCase() === String(address).toLowerCase()) return true;
+  } catch (err) { /* no permission yet, or no Gmail: use the normal way */ }
+  return false;
+}
+
+// Sends one email. msg: { to, subject, body, htmlBody, name, replyTo }. fromKey: a key of MAIL_ADDR_.
+// Returns 'alias' when it went out as that address and 'default' when it went out from the script owner's account.
+function sendMail_(msg, fromKey) {
+  var from = MAIL_ADDR_[fromKey];
+  if (from && mailAlias_(from)) {
+    try {
+      GmailApp.sendEmail(msg.to, msg.subject, msg.body, { htmlBody: msg.htmlBody, name: msg.name, replyTo: msg.replyTo, from: from });
+      return 'alias';
+    } catch (err) { /* fall through to the normal way */ }
+  }
+  MailApp.sendEmail(msg);
+  return 'default';
+}
+
+// Run this ONCE from the editor after adding the addresses in Gmail. It asks for Gmail permission (needed
+// to send as an alias), then tells you which of your addresses it can send as.
+function authorizeMailAliases() {
+  var list = [];
+  try { list = GmailApp.getAliases() || []; } catch (err) { Logger.log('Gmail permission was not granted: ' + err); return; }
+  var usable = [], missing = [];
+  Object.keys(MAIL_ADDR_).forEach(function (k) {
+    (list.map(function (a) { return String(a).toLowerCase(); }).indexOf(MAIL_ADDR_[k]) > -1 ? usable : missing).push(MAIL_ADDR_[k]);
+  });
+  Logger.log('Can send as: ' + (usable.join(', ') || '(none yet)'));
+  Logger.log('Not set up in Gmail yet (these still work, they just come from your main address): ' + (missing.join(', ') || '(none)'));
+}
+
+
+/* ==================================================================
+   10. WELCOME EMAIL (once, to each new account)
+   ------------------------------------------------------------------
+   Every page that has the account menu (and the dashboard and invitation
+   pages) asks for this when it sees a signed-in account that is only a
+   few days old. The sign-in token proves who is asking, the email goes
+   ONLY to that token's own address, and the "Welcomes" tab remembers who
+   has had one, so it is sent once however many times the page asks.
+   ================================================================== */
+
+var WELCOME_SHEET_NAME_ = 'Welcomes';
+var WELCOME_HEADERS_ = ['Sent', 'User ID', 'Email'];
+var WELCOME_DAILY_CAP_ = 40;                 // each uses one of Gmail's ~100 daily emails
+var WELCOME_MAX_AGE_MS_ = 3 * 86400000;      // only accounts created in the last 3 days
+
+function welcomeBuild_(who) {
+  var first = String(who.name || '').trim().split(/\s+/)[0] || '';
+  var greeting = first ? 'Hi ' + first + ',' : 'Hi there,';
+  var dash = SITE_BASE_URL_ + 'lms-dashboard.html', assess = SITE_BASE_URL_ + 'index.html';
+  var text = greeting + '\n\n' +
+    'Welcome to Product Advisory Learning. Your account is ready.\n\n' +
+    'The quickest way to get started:\n' +
+    '1. Take the free assessment (about 10 minutes) if you have not already. It shows where you are strongest and where to focus: ' + assess + '\n' +
+    '2. Open your dashboard to see the courses chosen for you: ' + dash + '\n' +
+    '3. If your company invited you, your dashboard shows exactly what your company can see, and nothing is shared until you agree.\n\n' +
+    'Good to know:\n' +
+    '- Forgot your password? Use "Forgot password" on the sign-in screen and we will email you a reset link.\n' +
+    '- Questions about your assessment or account: reply to this email, or write to ' + MAIL_ADDR_.assessment + '.\n' +
+    '- Something not working, or an idea? ' + MAIL_ADDR_.feedback + '.\n' +
+    '- Privacy or legal questions: ' + MAIL_ADDR_.legal + '.\n\n' +
+    'Product Advisory\n';
+  var button = function (href, label, solid) {
+    return '<a href="' + escapeHtml_(href) + '" style="display:inline-block;margin:0 10px 10px 0;padding:12px 20px;border-radius:8px;font-weight:bold;text-decoration:none;' +
+      (solid ? 'background:#1A4584;color:#ffffff;' : 'background:#ffffff;color:#12305e;border:2px solid #1A4584;') + '">' + escapeHtml_(label) + '</a>';
+  };
+  var html = '<div style="font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:1.55;color:#16213E;max-width:540px;">' +
+    '<p>' + escapeHtml_(greeting) + '</p>' +
+    '<p>Welcome to <strong>Product Advisory Learning</strong>. Your account is ready.</p>' +
+    '<p style="margin:0 0 12px;">The quickest way to get started:</p>' +
+    '<ol style="margin:0 0 16px;padding-left:20px;">' +
+    '<li style="margin-bottom:6px;">Take the free assessment (about 10 minutes) if you have not already. It shows where you are strongest and where to focus.</li>' +
+    '<li style="margin-bottom:6px;">Open your dashboard to see the courses chosen for you.</li>' +
+    '<li>If your company invited you, your dashboard shows exactly what your company can see, and nothing is shared until you agree.</li></ol>' +
+    '<p style="margin:0;">' + button(dash, 'Open your dashboard', true) + button(assess, 'Take the free assessment', false) + '</p>' +
+    '<p style="margin:18px 0 6px;color:#6B7686;font-size:13px;text-transform:uppercase;letter-spacing:.04em;">Good to know</p>' +
+    '<ul style="margin:0;padding-left:20px;font-size:14px;">' +
+    '<li style="margin-bottom:4px;">Forgot your password? Use &ldquo;Forgot password&rdquo; on the sign-in screen and we will email you a reset link.</li>' +
+    '<li style="margin-bottom:4px;">Questions about your assessment or account: reply to this email, or write to <a href="mailto:' + MAIL_ADDR_.assessment + '">' + MAIL_ADDR_.assessment + '</a>.</li>' +
+    '<li style="margin-bottom:4px;">Something not working, or an idea? <a href="mailto:' + MAIL_ADDR_.feedback + '">' + MAIL_ADDR_.feedback + '</a>.</li>' +
+    '<li>Privacy or legal questions: <a href="mailto:' + MAIL_ADDR_.legal + '">' + MAIL_ADDR_.legal + '</a>.</li></ul>' +
+    '<p style="margin-top:20px;">Product Advisory</p></div>';
+  return { subject: 'Welcome to Product Advisory Learning', text: text, html: html };
+}
+
+function welcomeEndpoint_(idToken) {
+  var who = null;
+  try { who = verifyFirebaseIdToken_(idToken); } catch (err) { who = null; }
+  if (!who) return { ok: false, error: 'not_verified' };
+  if (!who.createdAtMs || Date.now() - who.createdAtMs > WELCOME_MAX_AGE_MS_) return { ok: true, skipped: 'not_new' };
+  if (!/^[^\s@,;]+@[^\s@,;]+\.[^\s@,;]+$/.test(who.email)) return { ok: false, error: 'bad_recipient' };
+
+  var lock = null, locked = false;
+  try { lock = LockService.getScriptLock(); locked = lock.tryLock(10000); } catch (err) { /* carry on without it */ }
+  try {
+    var ss = SpreadsheetApp.getActiveSpreadsheet();
+    var sheet = ss.getSheetByName(WELCOME_SHEET_NAME_);
+    if (!sheet) {
+      sheet = ss.insertSheet(WELCOME_SHEET_NAME_);
+      sheet.appendRow(WELCOME_HEADERS_);
+      sheet.setFrozenRows(1);
+    }
+    var last = sheet.getLastRow();
+    if (last >= 2) {
+      var ids = sheet.getRange(2, 2, last - 1, 1).getValues();
+      for (var i = 0; i < ids.length; i++) if (String(ids[i][0]) === who.uid) return { ok: true, skipped: 'already' };
+    }
+
+    var props = PropertiesService.getScriptProperties();
+    var dayKey = 'welcomeday_' + Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'yyyy-MM-dd');
+    var sentToday = Number(props.getProperty(dayKey) || 0);
+    if (sentToday >= WELCOME_DAILY_CAP_) return { ok: false, error: 'daily_limit' };
+    if (MailApp.getRemainingDailyQuota() < 10) return { ok: false, error: 'quota' };   // keep the last few for invitations and leads
+
+    var mail = welcomeBuild_(who);
+    try {
+      sendMail_({ to: who.email, subject: mail.subject, body: mail.text, htmlBody: mail.html, name: 'Product Advisory Learning', replyTo: MAIL_ADDR_.assessment }, 'noreply');
+    } catch (err) {
+      return { ok: false, error: 'mail_error', detail: String(err && err.message || err).slice(0, 200) };
+    }
+    sheet.appendRow([new Date(), who.uid, who.email]);
+    props.getKeys().forEach(function (k) { if (k.indexOf('welcomeday_') === 0 && k !== dayKey) props.deleteProperty(k); });
+    props.setProperty(dayKey, String(sentToday + 1));
+    return { ok: true, sent: true };
+  } catch (err) {
+    return { ok: false, error: 'server_error' };
+  } finally {
+    if (locked) lock.releaseLock();
+  }
+}
+
+
+/* ==================================================================
+   11. COMPANY REPORT: "Explain with AI" for a company's admins
+   ------------------------------------------------------------------
+   The company dashboard works out its own numbers in the browser. For the
+   optional AI explanation it sends them here. Three safeguards:
+   1. Only an active admin of THAT company (or the owner) may ask: the
+      caller's own token is used to read their membership from Firestore.
+   2. The numbers are rebuilt field by field from a fixed list: whole
+      numbers, and the fixed names of the skill areas and funnel steps.
+      Any other text is dropped, so a name, an email or a company name
+      cannot be passed through to the AI.
+   3. A small daily limit per company and in total.
+   ================================================================== */
+
+var ORG_AREA_LABELS_ = ['Customer & Market Discovery', 'Product Strategy & Roadmapping', 'Prioritization & Trade-offs', 'Execution & Delivery',
+  'Stakeholder Communication & Influence', 'AI Fluency — Individual', 'AI Fluency — Organizational'];
+var ORG_FUNNEL_STEPS_ = ['Invited or joined', 'Joined', 'Took the assessment', 'Started learning', 'Finished their plan'];
+var ORG_AI_PER_ORG_DAILY_ = 5;
+var ORG_AI_DAILY_ = 40;
+
+// 'owner', 'admin' or '' for someone who may not ask.
+function orgRole_(who, idToken, orgId) {
+  var base = 'https://firestore.googleapis.com/v1/projects/' + FIRESTORE_PROJECT_ID_ + '/databases/(default)/documents/';
+  var headers = { Authorization: 'Bearer ' + idToken };
+  var o = UrlFetchApp.fetch(base + 'platformAdmins/' + encodeURIComponent(who.uid), { method: 'get', headers: headers, muteHttpExceptions: true });
+  if (o.getResponseCode() === 200) return 'owner';
+  var m = UrlFetchApp.fetch(base + 'memberships/' + encodeURIComponent(who.uid), { method: 'get', headers: headers, muteHttpExceptions: true });
+  if (m.getResponseCode() !== 200) return '';
+  var f = JSON.parse(m.getContentText()).fields || {};
+  var s = function (k) { return f[k] && f[k].stringValue !== undefined ? f[k].stringValue : ''; };
+  return s('orgId') === orgId && s('role') === 'admin' && s('status') === 'active' ? 'admin' : '';
+}
+
+function orgInt_(v, lo, hi, nullOk) {
+  if (v === null && nullOk) return null;
+  if (typeof v !== 'number' || !isFinite(v) || Math.floor(v) !== v || v < lo || v > hi) throw new Error('bad number');
+  return v;
+}
+
+// Rebuilds the facts from the allowed pieces only. Throws if anything is off.
+function orgFactsClean_(raw) {
+  var f = JSON.parse(raw);
+  var out = {
+    people: orgInt_(f.people, 0, 100000), assessed: orgInt_(f.assessed, 0, 100000), learning: orgInt_(f.learning, 0, 100000),
+    finished: orgInt_(f.finished, 0, 100000), quiet: orgInt_(f.quiet, 0, 100000), pendingInvites: orgInt_(f.pendingInvites, 0, 100000),
+    avgOverallPct: orgInt_(f.avgOverallPct, 0, 100, true), avgPlanPct: orgInt_(f.avgPlanPct, 0, 100, true),
+    funnel: [], areas: [], focusAreas: [], trend: null
+  };
+  if (!Array.isArray(f.funnel) || f.funnel.length > 5) throw new Error('bad funnel');
+  f.funnel.forEach(function (s) {
+    if (ORG_FUNNEL_STEPS_.indexOf(s.step) === -1) throw new Error('bad step');
+    out.funnel.push({ step: s.step, count: orgInt_(s.count, 0, 100000) });
+  });
+  if (!Array.isArray(f.areas) || f.areas.length > 7) throw new Error('bad areas');
+  f.areas.forEach(function (a) {
+    if (ORG_AREA_LABELS_.indexOf(a.area) === -1) throw new Error('bad area');
+    out.areas.push({ area: a.area, teamAvgPct: orgInt_(a.teamAvgPct, 0, 100), allAvgPct: orgInt_(a.allAvgPct, 0, 100, true) });
+  });
+  if (!Array.isArray(f.focusAreas) || f.focusAreas.length > 3) throw new Error('bad focus');
+  f.focusAreas.forEach(function (a) {
+    if (ORG_AREA_LABELS_.indexOf(a) === -1) throw new Error('bad focus area');
+    out.focusAreas.push(a);
+  });
+  if (f.trend !== null && f.trend !== undefined) {
+    out.trend = { weeks: orgInt_(f.trend.weeks, 1, 200), avgPlanFromPct: orgInt_(f.trend.avgPlanFromPct, 0, 100, true), avgPlanToPct: orgInt_(f.trend.avgPlanToPct, 0, 100, true),
+      startedFrom: orgInt_(f.trend.startedFrom, 0, 100000), startedTo: orgInt_(f.trend.startedTo, 0, 100000) };
+  }
+  return out;
+}
+
+function orgAiPrompt_(facts) {
+  var system = 'You are a careful analyst helping the administrator of a company that uses Product Advisory\'s product-management and AI skills program for its team. ' +
+    'You are given anonymous numbers about that team: how many people joined, took the assessment, started learning and finished; their average scores in seven skill areas ' +
+    '(and the average of everyone who has taken the assessment, when known); and a trend over weeks when there is one. Use ONLY the numbers given; never invent a figure, a name or a cause. ' +
+    'If the team is small (under about 10 people) say plainly that the numbers are a first look. Write in plain English for a busy manager, no jargon, no markdown headings. ' +
+    'Format exactly as: a line \'What it shows:\' with 2 or 3 sentences; a line \'What to watch:\' with up to 2 short bullets starting with \'- \'; ' +
+    'a line \'Next steps:\' with up to 3 short bullets starting with \'- \' that are concrete things an administrator can do (remind people, set focus areas, schedule time to learn). Keep the whole answer under 900 characters.';
+  return { system: system, user: 'Here are the numbers:\n' + JSON.stringify(facts) };
+}
+
+function orgAiQuota_(orgId) {
+  var props = PropertiesService.getScriptProperties();
+  var day = Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'yyyy-MM-dd');
+  var totalKey = 'orgai_' + day, orgKey = 'orgai_' + day + '_' + orgId;
+  var total = Number(props.getProperty(totalKey) || 0), mine = Number(props.getProperty(orgKey) || 0);
+  if (total >= ORG_AI_DAILY_ || mine >= ORG_AI_PER_ORG_DAILY_) return false;
+  props.getKeys().forEach(function (k) { if (k.indexOf('orgai_') === 0 && k.indexOf('orgai_' + day) !== 0) props.deleteProperty(k); });
+  props.setProperty(totalKey, String(total + 1));
+  props.setProperty(orgKey, String(mine + 1));
+  return true;
+}
+
+function orgReportAiEndpoint_(idToken, orgId, factsJson) {
+  var who = null;
+  try { who = verifyFirebaseIdToken_(idToken); } catch (err) { who = null; }
+  if (!who) return { ok: false, error: 'not_verified' };
+  if (!/^[A-Za-z0-9_-]{4,64}$/.test(String(orgId || ''))) return { ok: false, error: 'not_admin' };
+  var role = '';
+  try { role = orgRole_(who, idToken, orgId); } catch (err) { role = ''; }
+  if (!role) return { ok: false, error: 'not_admin' };
+
+  var facts;
+  try { facts = orgFactsClean_(String(factsJson || '')); } catch (err) { return { ok: false, error: 'bad_facts' }; }
+  var apiKey = PropertiesService.getScriptProperties().getProperty('GROQ_API_KEY');
+  if (!apiKey) return { ok: false, error: 'no_key' };
+  if (!orgAiQuota_(orgId)) return { ok: false, error: 'daily_limit' };
+  try {
+    var prompt = orgAiPrompt_(facts);
+    var response = UrlFetchApp.fetch('https://api.groq.com/openai/v1/chat/completions', {
+      method: 'post', contentType: 'application/json', headers: { Authorization: 'Bearer ' + apiKey },
+      payload: JSON.stringify({ model: GROQ_MODEL_, temperature: 0.3, max_tokens: 700, messages: [{ role: 'system', content: prompt.system }, { role: 'user', content: prompt.user }] }),
+      muteHttpExceptions: true
+    });
+    if (response.getResponseCode() < 200 || response.getResponseCode() >= 300) return { ok: false, error: 'ai_error', detail: 'Groq answered ' + response.getResponseCode() };
+    var text = String(JSON.parse(response.getContentText()).choices[0].message.content || '').replace(/```/g, '').trim().slice(0, 1500);
+    return text ? { ok: true, text: text } : { ok: false, error: 'ai_error', detail: 'empty answer' };
+  } catch (err) {
+    return { ok: false, error: 'ai_error', detail: String(err && err.message || err).slice(0, 200) };
+  }
 }

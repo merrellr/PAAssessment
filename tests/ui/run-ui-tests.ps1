@@ -28,6 +28,8 @@ Copy-Item "$repo\focus-board.css" $site
 Copy-Item "$repo\tool-core.js" $site
 Copy-Item "$repo\lead-core.js" $site
 Copy-Item "$repo\charts.js" $site
+Copy-Item "$repo\charts.css" $site
+Copy-Item "$repo\company-report.js" $site
 Copy-Item "$repo\vendor" "$site\vendor" -Recurse
 Copy-Item "$repo\content" "$site\content" -Recurse
 
@@ -60,6 +62,7 @@ Build-Page 'request-info.html' 'request-info-test.html' 'lead-seed.js' 'lead-tes
 Build-Page 'reports.html' 'reports-test.html' 'reports-seed.js' 'reports-test.js'
 $menuPage = "<!doctype html><html><head><script src=`"menu-seed.js`"></script></head><body><div class=`"wrap`"><p>A page</p></div><script type=`"module`" src=`"account-menu.js`"></script><script type=`"module`" src=`"menu-test.js`"></script></body></html>"
 [System.IO.File]::WriteAllText("$site\menu-test.html", $menuPage)
+[System.IO.File]::WriteAllText("$site\menu-off-test.html", $menuPage.Replace('src="account-menu.js"', 'src="account-menu.js?menu=off"'))
 [System.IO.File]::WriteAllText("$site\profile.html", $menuPage)   # same page under the name profile.html, to check the "you are here" marking
 [System.IO.File]::WriteAllText("$site\share-test.html", "<!doctype html><html><head>$errHook</head><body><script type=`"module`" src=`"share-test.js`"></script></body></html>")
 
@@ -115,7 +118,7 @@ try {
   foreach ($s in 'member', 'focus', 'focusdefault', 'admin', 'plain', 'removed', 'owner', 'threelessons', 'allfive', 'recentdone', 'removedold') { $results += Run-Page "dashboard: $s" "$base/dash-test.html?scn=$s" 25000 }
   foreach ($s in 'member', 'nonmember', 'blocked', 'votefail') { $results += Run-Page "delete account: $s" "$base/del-test.html?scn=$s" 25000 }
   foreach ($s in 'member', 'plain') { $results += Run-Page "last lesson: $s" "$base/les-test.html?scn=$s&course=discovery-novice&lesson=5" 30000 }
-  foreach ($s in 'admin', 'empty', 'archived', 'nocopy', 'auditdenied', 'owner', 'ownernoorg', 'plain', 'member', 'removedadmin', 'denied', 'sharesdenied', 'signedout') {
+  foreach ($s in 'admin', 'empty', 'archived', 'nocopy', 'auditdenied', 'owner', 'ownernoorg', 'plain', 'member', 'removedadmin', 'denied', 'sharesdenied', 'signedout', 'history', 'snapshotsdenied', 'snapfail', 'noplatform', 'smallplatform') {
     $org = if ($s -eq 'owner') { '&org=orgA' } else { '' }
     $results += Run-Page "company dashboard: $s" "$base/company-test.html?scn=$s$org" 40000
   }
@@ -136,6 +139,10 @@ try {
   foreach ($s in 'plain', 'noname', 'owner', 'admin', 'removedadmin', 'memberrole', 'signedout') {
     $results += Run-Page "profile menu: $s" "$base/menu-test.html?scn=$s" 30000
   }
+  foreach ($s in 'newaccount', 'oldaccount', 'welcomedone', 'welcomefail', 'welcomedown') {
+    $results += Run-Page "profile menu: $s" "$base/menu-test.html?scn=$s" 30000
+  }
+  $results += Run-Page 'profile menu: menu off, new account' "$base/menu-off-test.html?scn=newaccount" 30000
   $results += Run-Page 'profile menu: current page' "$base/profile.html?scn=plain" 30000
   $results += Run-Page 'shared-record sync' "$base/share-test.html" 40000
 } finally {

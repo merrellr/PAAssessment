@@ -148,7 +148,7 @@ try {
   /* ---- the thank-you email ---- */
   reset(); submit(good({ name: 'Jane Smith' }));
   var ack = sent[1];
-  t('the thank-you comes from Product Advisory, and a reply goes to info@', ack.name === 'Product Advisory' && ack.replyTo === 'info@productadvisory.co');
+  t('the thank-you comes from Product Advisory, and a reply goes to sales@', ack.name === 'Product Advisory' && ack.replyTo === 'sales@productadvisory.co');
   t('it welcomes them by first name and promises a reply within two business days', /^Thanks, Jane - we have your request$/.test(ack.subject) && /Hi Jane,/.test(ack.body) && /Welcome, and thanks for sharing/.test(ack.body) && /within two business days/.test(ack.body) && /within two business days/.test(ack.htmlBody), ack.subject);
   t('the promise is worded the same on the page and in the email', LEAD_REPLY_WINDOW_ === LeadCore.REPLY_WINDOW);
   t('it recaps what they said, including their note', /You are interested in: AI fluency for my organization/.test(ack.body) && /Your note: We want to assess all 60/.test(ack.body));

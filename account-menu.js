@@ -16,6 +16,10 @@ const firebaseConfig = {
   appId: "1:1081134406437:web:72e28604d093219e7698cc"
 };
 
+// "account-menu.js?menu=off" does everything except draw the button (for the dashboard, which has its own menu,
+// and the invitation page).
+const MENU = new URL(import.meta.url).searchParams.get('menu') !== 'off';
+
 // Not inside a frame (for example a page embedded in another site).
 if (window.self === window.top) {
   const app = initializeApp(firebaseConfig);
@@ -105,6 +109,7 @@ if (window.self === window.top) {
       menu.appendChild(link('Reports', 'reports.html', page === 'reports.html'));
     }
     menu.appendChild(link('Vote on the next tool', 'tool-requests.html', page === 'tool-requests.html'));
+    menu.appendChild(link('Send feedback', 'mailto:feedback@productadvisory.co?subject=' + encodeURIComponent('Feedback on Product Advisory Learning'), false));
     menu.appendChild(link('Visit Product Advisory ↗', 'https://www.productadvisory.co/', false, true));
     menu.appendChild(el('div', 'pa-acct-rule'));
     const out = el('button', 'pa-acct-item', 'Log out');
@@ -159,7 +164,41 @@ if (window.self === window.top) {
     return flags;
   }
 
+  /* The welcome email. A brand-new account (made in the last two days) asks the email script, once, to send it.
+     The script checks the sign-in token, sends only to that account's own address, and remembers who has had one,
+     so asking again is harmless. If it fails (script busy, Gmail limit) the page simply asks again next time. */
+  const BACKEND = "https://script.google.com/macros/s/AKfycbynJQYF9rv5maL_CGniS9UGhTDfBVeW3gVhEWUsFdGOqquv4osGx4nQvc8jNkaaY6wrrg/exec";
+  const WELCOME_WITHIN_MS = 2 * 86400000;
+  const askedThisPage = {};
+  function backend(params){
+    return new Promise((resolve) => {
+      const cb = 'paWelcomeCb_' + Date.now() + '_' + Math.floor(Math.random() * 1e6);
+      const script = document.createElement('script');
+      let settled = false;
+      const finish = (v) => { if (settled) return; settled = true; clearTimeout(timer); delete window[cb]; script.remove(); resolve(v); };
+      const timer = setTimeout(() => finish(null), 20000);
+      window[cb] = (r) => finish(r || null);
+      script.onerror = () => finish(null);
+      script.src = BACKEND + '?' + new URLSearchParams(Object.assign({}, params, { callback: cb })).toString();
+      document.body.appendChild(script);
+    });
+  }
+  async function welcomeIfNew(user){
+    try {
+      const made = user.metadata && user.metadata.creationTime ? Date.parse(user.metadata.creationTime) : 0;
+      if (!made || Date.now() - made > WELCOME_WITHIN_MS || askedThisPage[user.uid]) return;
+      const key = 'pa_welcomed_' + user.uid;
+      try { if (localStorage.getItem(key) === '1') return; } catch (e) { /* storage blocked: the script still sends only once */ }
+      askedThisPage[user.uid] = true;
+      const res = await backend({ action: 'welcome', idToken: await user.getIdToken() });
+      if (res && res.ok === true){ try { localStorage.setItem(key, '1'); } catch (e) { /* ignore */ } }
+      else delete askedThisPage[user.uid];
+    } catch (e) { /* never get in the way of the page */ }
+  }
+
   onAuthStateChanged(auth, async (user) => {
+    if (user) welcomeIfNew(user);
+    if (!MENU) return;
     const mine = ++token;
     if (!user){ remove(); return; }
     mount(user, { owner: false, companyAdmin: false });   // show it straight away, add the extra links when known

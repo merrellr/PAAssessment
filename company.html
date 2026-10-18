@@ -119,11 +119,27 @@
   .links-box code{ display:block; font-size: 12px; word-break: break-all; color: var(--ink-soft); }
   .result-line{ font-size: 13px; line-height: 1.6; color: var(--ink-soft); }
   .foot-note{ font-size: 12.5px; color: var(--gray); line-height: 1.55; }
+
+  /* report */
+  .report-headline{ font-size: 15px; font-weight: 500; color: var(--ink); line-height: 1.5; margin: 0 0 4px; }
+  .report-sub{ font-size: 12.5px; color: var(--gray); margin: 0 0 8px; line-height: 1.5; }
+  details.more{ margin-top: 18px; }
+  details.more summary{ cursor:pointer; font-family:'Space Grotesk', sans-serif; font-weight:600; font-size: 13px; color: var(--navy); }
+  .insights{ margin-top: 8px; }
+  @media print{
+    body{ background:#fff; }
+    body.printing-report #page > .card:not(:first-child):not(#reportCard):not(#rollupCard){ display:none; }
+    body.printing-report .btn-row, body.printing-report #refreshBtn, body.printing-report #ownerBackLink, body.printing-report .no-print{ display:none; }
+    body.printing-report .card{ box-shadow:none; break-inside: avoid; }
+  }
 </style>
 
 <link rel="stylesheet" href="focus-board.css">
+<link rel="stylesheet" href="charts.css">
 <script src="vendor/Sortable.min.js"></script>
 <script src="company-core.js"></script>
+<script src="company-report.js"></script>
+<script src="charts.js"></script>
 <script src="focus-board.js"></script>
 </head>
 <body>
@@ -172,6 +188,45 @@
       <div class="banner" id="archivedBanner" style="display:none;">This company is archived, so the dashboard is read-only. You can still see everything it holds. New invitations are switched off.</div>
       <div class="banner info" id="ownerBanner" style="display:none;">You are looking at this company as the platform owner.</div>
       <dl class="summary" id="orgSummary"></dl>
+    </div>
+
+    <div class="card" id="reportCard">
+      <div class="section-head">
+        <div>
+          <h2>Report</h2>
+          <div class="hint" style="margin:4px 0 0;" id="reportHint"></div>
+        </div>
+        <div class="btn-row no-print">
+          <button class="btn btn-ghost btn-small" id="reportPrintBtn" type="button">Print or save as PDF</button>
+        </div>
+      </div>
+      <p class="report-headline" id="reportHeadline"></p>
+
+      <h3>What stands out</h3>
+      <div class="insights" id="reportSummary"></div>
+      <div class="btn-row no-print" style="margin-top:12px;">
+        <button class="btn btn-primary btn-small" id="reportAiBtn" type="button">Explain with AI</button>
+      </div>
+      <div id="reportAiOut"></div>
+
+      <div id="reportFunnelSection">
+        <h3>Getting people started</h3>
+        <p class="report-sub">Each step shows how many people got that far, and what share of the step before carried on.</p>
+        <div id="reportFunnel"></div>
+      </div>
+
+      <h3>Compared with everyone who has taken the assessment</h3>
+      <p class="report-sub" id="reportCompareSub"></p>
+      <div id="reportCompare"></div>
+
+      <h3>Progress over time</h3>
+      <div id="reportTrend"></div>
+
+      <details class="more no-print" id="reportAllWrap">
+        <summary id="reportAllSummary">All observations</summary>
+        <div class="insights" id="reportAll"></div>
+      </details>
+      <p class="foot-note" id="reportNotes" style="margin-top:14px;"></p>
     </div>
 
     <div class="card" id="rollupCard">
@@ -421,7 +476,12 @@ let currentUser = null;
 let viewerIsOwner = false;
 let orgId = null;
 let org = null;
-let data = { memberships: [], invites: [], shares: {}, sharesError: false, audit: [], auditError: false };
+let data = { memberships: [], invites: [], shares: {}, sharesError: false, audit: [], auditError: false, snapshots: [], snapshotsError: false };
+const R = CompanyReport;
+let platform = null;          // the public totals (everyone who has taken the assessment), once loaded
+let platformState = 'loading';   // loading | ok | none
+let report = null;
+let aiBusy = false;
 let teamRows = [];          // everyone, active and former, with progress worked out
 let expanded = {};          // uid -> true while the "Details" panel is open
 let newLinks = [];
@@ -475,6 +535,8 @@ onAuthStateChanged(auth, async (user) => {
   showOnly('page');
   renderAll();
   syncFocusCopy();
+  loadPlatform();
+  maybeSnapshot();
 });
 
 /* ------------------------------------------------------------------ loading */
@@ -520,6 +582,16 @@ async function loadAll(){
     console.error('Could not read the activity log:', err);
     data.auditError = true;
   }
+  // So is the weekly history behind the trend chart.
+  data.snapshots = [];
+  data.snapshotsError = false;
+  try {
+    const nSnap = await getDocs(query(collection(db, 'orgs', id, 'snapshots'), orderBy('at', 'asc')));
+    data.snapshots = nSnap.docs.map(d => Object.assign({}, d.data(), { day: d.id, atMs: msOf(d.data().at) }));
+  } catch (err){
+    console.error('Could not read the weekly snapshots:', err);
+    data.snapshotsError = true;
+  }
   return true;
 }
 
@@ -528,7 +600,7 @@ $('refreshBtn').addEventListener('click', async () => {
   $('errorLine').textContent = '';
   const ok = await loadAll();
   $('refreshBtn').disabled = false;
-  if (ok){ renderAll(); $('notice').textContent = 'Updated.'; }
+  if (ok){ renderAll(); $('notice').textContent = 'Updated.'; maybeSnapshot(); }
 });
 
 /* ------------------------------------------------------------------ drawing */
@@ -540,6 +612,7 @@ const isArchived = () => org && org.status === 'archived';
 function renderAll(){
   teamRows = C.buildTeamRows(data.memberships, data.shares, Date.now());
   renderHeader();
+  renderReport();
   renderRollup();
   renderFocus();
   renderTeam();
@@ -639,6 +712,120 @@ function renderRollup(){
   }
   charts.appendChild(areas);
 }
+
+/* ------------------------------------------------------------------ report */
+const SEV = { good: ['Good news', 'sev-good'], watch: ['Watch', 'sev-watch'], info: ['Note', 'sev-info'] };
+function insightList(id, items){
+  const box = $(id);
+  box.innerHTML = '';
+  items.forEach(i => {
+    const s = SEV[i.severity] || SEV.info;
+    box.appendChild(el('div', { class: 'insight ' + s[1] }, el('span', { class: 'chip', text: s[0] }), el('span', { text: i.text })));
+  });
+}
+
+function renderReport(){
+  const rows = activeRows();
+  report = R.build({ rows: rows, invites: data.invites, snapshots: data.snapshots, platform: platform, focusAreas: org.focusAreas || [], nowMs: Date.now() });
+  const r = report.rollup;
+
+  $('reportHint').textContent = r.people ? 'Based on the ' + plural(r.people, 'active person', 'active people') + ' in this company, as of today.' : '';
+  $('reportHeadline').textContent = report.headline;
+  insightList('reportSummary', report.summary.length ? report.summary : report.insights.slice(0, 1));
+
+  const showFunnel = r.people > 0 || report.funnel.pending > 0;
+  $('reportFunnelSection').style.display = showFunnel ? 'block' : 'none';
+  Charts.funnel($('reportFunnel'), report.funnel.steps, report.funnel.worst);
+
+  // Compared with everyone: only when there is enough to compare.
+  const cmp = report.compare, box = $('reportCompare');
+  box.innerHTML = '';
+  if (platformState === 'loading'){
+    $('reportCompareSub').textContent = 'Loading the comparison…';
+  } else if (!cmp.ok || !cmp.areas.length){
+    $('reportCompareSub').textContent = !cmp.ok
+      ? (platformState === 'none' ? "The comparison isn't available right now." : 'Not enough people have taken the assessment yet for a fair comparison.')
+      : 'Once at least ' + R.MIN_COMPARE_PEOPLE + ' of your people have taken the assessment, each skill area is compared here.';
+  } else {
+    $('reportCompareSub').textContent = "Your team's average score in each skill area. Under each name: the average of everyone who has taken the assessment (" + plural(cmp.all, 'person', 'people') + ').';
+    Charts.bars(box, cmp.areas.map(a => ({ label: a.label, value: a.team, note: 'Everyone: ' + a.all + '% · ' + (a.gap > 0 ? '+' : a.gap < 0 ? '−' : '') + Math.abs(a.gap) + (a.gap === 0 ? ' (same)' : '') })), { max: 100, suffix: '%' });
+  }
+
+  // Trend, from the weekly snapshots.
+  const tr = $('reportTrend');
+  tr.innerHTML = '';
+  if (report.series){
+    Charts.line(tr, { title: 'People over time', integer: true, labels: report.series.labels, series: report.series.series.map((s, i) => ({ name: s.name, color: ['#1A4584', '#35C2E8', '#E08A3C'][i], values: s.values })) });
+  } else {
+    tr.appendChild(el('p', { class: 'report-sub', text: data.snapshotsError
+      ? "We couldn't read the weekly history. The latest security rules may not be published yet."
+      : r.people ? 'This chart appears after the second weekly snapshot, about a week after the first. A snapshot is saved automatically, at most once a week, when someone opens this page.'
+        : 'It starts once people have joined.' }));
+  }
+
+  insightList('reportAll', report.insights);
+  $('reportAllSummary').textContent = 'All observations (' + report.insights.length + ')';
+  $('reportNotes').textContent = report.notes.join(' ');
+}
+
+// The public totals for everyone who has taken the assessment. Anonymous numbers only.
+async function loadPlatform(){
+  const res = await callBackend({});
+  if (res && typeof res.totalCompletions === 'number' && res.categoryAverages){ platform = res; platformState = 'ok'; }
+  else { platform = null; platformState = 'none'; }
+  renderReport();
+}
+
+// Saves this week's numbers when the last one is a week old. Best effort: if it
+// cannot be saved, nothing else on the page is affected.
+async function maybeSnapshot(){
+  if (isArchived() || data.sharesError || data.snapshotsError) return;
+  const rows = activeRows();
+  const nowMs = Date.now();
+  if (!R.snapshotDue(data.snapshots, rows.length, nowMs)) return;
+  const snap = R.snapshotOf(rows, nowMs);
+  try {
+    await setDoc(doc(db, 'orgs', orgId, 'snapshots', snap.day), Object.assign({}, snap, { at: serverTimestamp() }));
+    data.snapshots.push(Object.assign({}, snap, { atMs: nowMs }));
+    renderReport();
+  } catch (err){
+    console.error('Could not save the weekly snapshot:', err);
+  }
+}
+
+const AI_ERRORS = {
+  not_verified: 'Your sign-in could not be confirmed. Reload the page and try again.',
+  not_admin: "Only this company's admins can ask for an explanation.",
+  no_key: 'AI explanations are not switched on yet.',
+  daily_limit: "Today's AI explanations have been used up. Try again tomorrow.",
+  bad_facts: 'The numbers could not be read, so nothing was sent. Reload the page and try again.',
+  ai_error: 'The AI service could not answer just now. The observations above are still correct.'
+};
+
+$('reportAiBtn').addEventListener('click', async () => {
+  if (aiBusy || !report) return;
+  aiBusy = true;
+  const b = $('reportAiBtn'), out = $('reportAiOut');
+  b.disabled = true; b.textContent = 'Thinking…'; out.innerHTML = '';
+  let res = null;
+  try { res = await callBackend({ action: 'orgReportAi', idToken: await currentUser.getIdToken(), org: orgId, facts: JSON.stringify(report.aiFacts) }); } catch (err){ res = null; }
+  aiBusy = false; b.disabled = false; b.textContent = 'Explain with AI';
+  if (res && res.ok === true && res.text){
+    out.appendChild(el('div', { class: 'ai-box' }, res.text,
+      el('small', { text: 'Written by AI from the anonymous numbers in this report. No names, emails or company name were sent. Check it against what you know.' })));
+  } else {
+    const msg = !res ? "We couldn't reach the explanation service. Try again in a moment."
+      : res.ok === undefined ? 'AI explanations are not switched on yet (the email script needs its latest version).'
+      : (AI_ERRORS[res.error] || 'Something went wrong.');
+    out.appendChild(el('p', { class: 'error-line', text: msg }));
+  }
+});
+
+$('reportPrintBtn').addEventListener('click', () => {
+  document.body.classList.add('printing-report');
+  window.print();
+});
+window.addEventListener('afterprint', () => document.body.classList.remove('printing-report'));
 
 /* ----------------------------------------------------------- activity log */
 function renderActivity(){

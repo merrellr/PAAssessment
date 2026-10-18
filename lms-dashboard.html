@@ -236,6 +236,7 @@
         <a class="profile-dropdown-item" id="companyDashMenuItem" href="company.html" style="display:none;">Company dashboard</a>
         <a class="profile-dropdown-item" id="changePasswordMenuItem" onclick="openChangePassword()">Change password</a>
         <a class="profile-dropdown-item" onclick="replayDashboardTour()">Replay the tour</a>
+        <a class="profile-dropdown-item" href="mailto:feedback@productadvisory.co?subject=Feedback%20on%20Product%20Advisory%20Learning">Send feedback</a>
         <a class="profile-dropdown-item" href="https://www.productadvisory.co/" target="_blank" rel="noopener">Visit Product Advisory ↗</a>
         <a class="profile-dropdown-item" onclick="handleSignOut()">Log out</a>
       </div>
@@ -2182,5 +2183,6 @@ function renderRecommendations(result, progress, companyFocus){
 }
 </script>
 <script>document.getElementById("footerYear").textContent = new Date().getFullYear();</script>
+<script type="module" src="account-menu.js?menu=off"></script>
 </body>
 </html>

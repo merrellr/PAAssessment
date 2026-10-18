@@ -26,6 +26,7 @@ const tileNum = (label) => {
 /* The email service is an Apps Script web app reached by a <script> tag. Here
    the tag is intercepted and answered by a fake. */
 let backendMode = 'ok';
+let aiMode = 'ok';
 const backendCalls = [];
 const srcDesc = Object.getOwnPropertyDescriptor(HTMLScriptElement.prototype, 'src');
 Object.defineProperty(HTMLScriptElement.prototype, 'src', {
@@ -38,7 +39,14 @@ Object.defineProperty(HTMLScriptElement.prototype, 'src', {
     setTimeout(() => {
       const cb = window[p.callback];
       if (!cb) return;
-      if (backendMode === 'ok') cb({ ok: true, to: 'x', remainingToday: 70 });
+      if (!p.action) cb(window.__platform === undefined ? { totalCompletions: 40, tierCounts: {}, categoryAverages: { discovery: 70, strategy: 46, prioritization: 44, execution: 43, stakeholder: 25, aiIndividual: 38, aiOrg: 36 } } : window.__platform);
+      else if (p.action === 'orgReportAi') {
+        if (aiMode === 'ok') cb({ ok: true, text: 'What it shows: your team is partly started.\nWhat to watch:\n- Quiet people\nNext steps:\n- Ask them to open their dashboard' });
+        else if (aiMode === 'old') cb({ totalCompletions: 1 });
+        else if (aiMode === 'down') cb(null);
+        else cb({ ok: false, error: aiMode });
+      }
+      else if (backendMode === 'ok') cb({ ok: true, to: 'x', remainingToday: 70 });
       else if (backendMode === 'notyours') cb({ ok: false, error: 'not_your_invite' });
       else cb(null);
     }, 15);
@@ -91,6 +99,8 @@ async function readBlob(d){ return await d.blob.text(); }
       t('charts say there are no assessments yet instead of drawing empty bars', /No assessments yet/.test($('rollupCharts').textContent) && !$('rollupCharts').querySelector('.stackbar'));
       t('no former members card', !vis('formerCard'));
       t('with nobody assessed, the focus card shows no percentage yet and says why', /Progress on our focus: —/.test(txt('focusSummary')) && /once people have taken the assessment/.test(txt('focusSummary')), txt('focusSummary'));
+      t('the report speaks plainly about a company where no one has taken the assessment', /^1 person has joined and no one has taken the assessment yet\.$/.test(txt('reportHeadline')) && /haven't taken the assessment yet|hasn't taken the assessment yet/.test($('reportAll').textContent), txt('reportHeadline'));
+      t('and the first snapshot records one person', (() => { const k = Object.keys(window.__store).filter(x => /^orgs\/orgA\/snapshots\//.test(x)); return k.length === 1 && window.__store[k[0]].people === 1 && window.__store[k[0]].avgOverall === null; })());
       t('both download buttons: team report enabled, answers disabled (no answers)', $('csvTeamBtn').disabled === false && $('csvAnswersBtn').disabled === true);
       t('invitations list is empty with a friendly message', /No invitations waiting/.test($('inviteWrap').textContent));
       t('a company with no history says so in Recent activity', /Nothing yet/.test($('activityWrap').textContent), $('activityWrap').textContent);
@@ -101,8 +111,10 @@ async function readBlob(d){ return await d.blob.text(); }
       t('pending invitations can be seen but not acted on', !!r && r.querySelectorAll('button').length === 0, r && textOf(r));
       t('people and results are still readable', rowsIn('teamWrap').length === 6);
       t('priorities can be seen but not edited', $('focusEditBtn').style.display === 'none' && /Progress on our focus/.test(txt('focusSummary')));
+      t('the report is readable, but no snapshot is saved for a read-only company', /5 of 6 people/.test(txt('reportHeadline')) && Object.keys(window.__store).filter(k => /snapshots\//.test(k)).length === 0);
     } else if (scn === 'owner'){
       t('the owner can open a company by its id', shown() === 'page' && txt('orgName') === 'Acme Health', shown());
+      t('the owner sees the report and this week\'s snapshot is saved on the company\'s behalf', /5 of 6 people/.test(txt('reportHeadline')) && Object.keys(window.__store).filter(k => /^orgs\/orgA\/snapshots\//.test(k)).length === 1);
       t('with a banner saying they are viewing as the owner and a way back', vis('ownerBanner') && $('ownerBackLink').style.display !== 'none');
       $('addUsersBtn').click();
       setVal('usersText', 'owneradded@x.com');
@@ -137,6 +149,52 @@ async function readBlob(d){ return await d.blob.text(); }
       const bars = Array.prototype.slice.call($('rollupCharts').querySelectorAll('.barrow'));
       t('seven skill-area bars', bars.length === 7);
       t('highest and lowest areas are labelled', /Customer & Market Discovery.*Highest on average/.test(textOf(bars[0])) && /AI Fluency — Organizational.*Lowest on average/.test(textOf(bars[6])), textOf(bars[0]) + ' | ' + textOf(bars[6]));
+
+      /* ---------------- the report at the top ---------------- */
+      const summ = Array.prototype.slice.call($('reportSummary').querySelectorAll('.insight'));
+      t('the report headline says how many took the assessment and how many are learning', /^5 of 6 people have taken the assessment and 3 are learning or finished\.$/.test(txt('reportHeadline')), txt('reportHeadline'));
+      t('"What stands out" lists at most four items, problems first, each labelled', summ.length > 0 && summ.length <= 4 && summ[0].classList.contains('sev-watch') && /Watch/.test(textOf(summ[0])), summ.map(textOf).join(' | '));
+      const allObs = Array.prototype.slice.call($('reportAll').querySelectorAll('.insight')).map(textOf);
+      t('the full list says 2 invitations are waiting, with counts for people not assessed, not started and quiet', allObs.some(x => /2 invitations are still waiting/.test(x)) && allObs.some(x => /1 of 6 people hasn't taken the assessment yet/.test(x)) && allObs.some(x => /2 people have taken the assessment but not started a lesson/.test(x)) && allObs.some(x => /1 person has been quiet for 30\+ days/.test(x)), allObs.join(' | '));
+      t('it notes the one person who finished', allObs.some(x => /1 person has finished their whole learning plan/.test(x)));
+      t('the funnel shows five steps with the real counts', Array.prototype.slice.call($('reportFunnel').querySelectorAll('.funnel-count')).map(textOf).join() === '8,6,5,3,1', Array.prototype.slice.call($('reportFunnel').querySelectorAll('.funnel-count')).map(textOf).join());
+      t('and marks the biggest drop', $('reportFunnel').querySelectorAll('.funnel-row.worst').length === 1 && /Finished their plan/.test(textOf($('reportFunnel').querySelector('.funnel-row.worst'))));
+      const cmpBars = Array.prototype.slice.call($('reportCompare').querySelectorAll('.bar-row'));
+      t('the comparison shows seven areas with the team average and everyone\'s average', cmpBars.length === 7 && /Customer & Market Discovery/.test(textOf(cmpBars[0])) && /Everyone: 70% · −20/.test(textOf(cmpBars[0])) && /Everyone: 25% · \+15/.test(textOf(cmpBars[4])), cmpBars.map(textOf).join(' | '));
+      t('it says how many people the comparison covers', /40 people/.test(txt('reportCompareSub')), txt('reportCompareSub'));
+      t('a big gap is turned into a sentence, below as a watch item and above as good news', allObs.some(x => /Your team averages 50% in Customer & Market Discovery, 20 points below the average of everyone/.test(x)) && allObs.some(x => /Your team averages 40% in Stakeholder Communication & Influence, 15 points above/.test(x)));
+      t('the company\'s chosen focus is reported with real lesson counts', allObs.some(x => /Progress on your focus areas \(AI Fluency — Organizational, Customer & Market Discovery, Product Strategy & Roadmapping\): \d+% of the assigned lessons are done \(\d+ of \d+\)/.test(x)), allObs.join(' | '));
+      t('the "All observations" list has a count', /^All observations \(\d+\)$/.test(txt('reportAllSummary')));
+      t('with one snapshot the trend chart says it starts after the next one', /appears after the second weekly snapshot/.test(txt('reportTrend')) && !$('reportTrend').querySelector('svg'), txt('reportTrend'));
+      t('the honest notes are shown', /active in this company today/.test(txt('reportNotes')) && /at most once a week/.test(txt('reportNotes')));
+      const snapKeys = Object.keys(window.__store).filter(k => /^orgs\/orgA\/snapshots\//.test(k));
+      const snap = window.__store[snapKeys[0]];
+      t('opening the page saved this week\'s snapshot, once, with numbers only', snapKeys.length === 1 && snap.people === 6 && snap.assessed === 5 && snap.learning === 2 && snap.finished === 1 && snap.inactive === 1 && snapKeys[0] === 'orgs/orgA/snapshots/' + snap.day && !!snap.at && !/@|Ann|Ben/.test(JSON.stringify(snap)), JSON.stringify(snap));
+      const writesBefore = window.__writeLog.filter(w => /snapshots/.test(w.path)).length;
+      $('refreshBtn').click(); await sleep(250);
+      t('refreshing the page does not save another one the same week', window.__writeLog.filter(w => /snapshots/.test(w.path)).length === writesBefore && writesBefore === 1);
+
+      /* Explain with AI */
+      $('reportAiBtn').click(); await sleep(5);
+      t('while the AI works, the button says so and cannot be pressed twice', $('reportAiBtn').disabled && /Thinking/.test($('reportAiBtn').textContent));
+      await until(() => !$('reportAiBtn').disabled);
+      t('the explanation appears with a note about what was sent', /What it shows: your team is partly started/.test(txt('reportAiOut')) && /No names, emails or company name were sent/.test(txt('reportAiOut')), txt('reportAiOut'));
+      const aiCall = backendCalls.filter(c => c.action === 'orgReportAi').pop();
+      const sent = JSON.parse(aiCall.facts);
+      t('it asked for this company, signed in as the admin', aiCall.org === 'orgA' && aiCall.idToken === 'tok');
+      t('only numbers and skill-area names were sent: no names, emails or company name', sent.people === 6 && sent.funnel.length === 5 && !/@|Acme|Ann|Ben|Cy |Dee|Eli|Fay/.test(CompanyCore.DOMAINS.reduce((s, d) => s.split(d[1]).join(''), aiCall.facts)), aiCall.facts.slice(0, 160));
+      for (const [mode, re] of [['no_key', /not switched on yet/], ['daily_limit', /Try again tomorrow/], ['not_admin', /Only this company's admins/], ['bad_facts', /nothing was sent/], ['ai_error', /could not answer/], ['down', /couldn't reach the explanation service/], ['old', /needs its latest version/]]) {
+        aiMode = mode; $('reportAiBtn').click(); await sleep(5); await until(() => !$('reportAiBtn').disabled); await sleep(20);
+        t('AI "' + mode + '" is explained plainly, and the observations stay', re.test(txt('reportAiOut')) && $('reportSummary').querySelectorAll('.insight').length > 0, txt('reportAiOut'));
+      }
+      aiMode = 'ok';
+
+      /* print */
+      let printed = 0; window.print = () => { printed++; };
+      $('reportPrintBtn').click();
+      t('Print puts the page in report-only mode', printed === 1 && document.body.classList.contains('printing-report'));
+      window.dispatchEvent(new Event('afterprint'));
+      t('and returns to normal afterwards', !document.body.classList.contains('printing-report'));
 
       let rows = rowsIn('teamWrap');
       t('six active people in the table (the former member is not in it)', rows.length === 6 && !/Old Timer/.test($('teamWrap').textContent), String(rows.length));
@@ -287,7 +345,7 @@ async function readBlob(d){ return await d.blob.text(); }
 
       /* admins can only touch invitations */
       const paths = window.__writeLog.map(w => w.path);
-      t('the admin wrote only invitation documents and activity-log entries (never the company, memberships or anyone\'s results)', paths.length > 0 && paths.every(p => /^invites\//.test(p) || /^orgs\/orgA\/audit\//.test(p)), paths.filter(p => !/^invites\//.test(p) && !/^orgs\/orgA\/audit\//.test(p)).join());
+      t('the admin wrote only invitation documents, activity-log entries and weekly snapshots (never the company, memberships or anyone\'s results)', paths.length > 0 && paths.every(p => /^invites\//.test(p) || /^orgs\/orgA\/audit\//.test(p) || /^orgs\/orgA\/snapshots\//.test(p)), paths.filter(p => !/^invites\//.test(p) && !/^orgs\/orgA\/audit\//.test(p) && !/^orgs\/orgA\/snapshots\//.test(p)).join());
       const auditNow = () => Object.keys(window.__store).filter(k => k.indexOf('orgs/orgA/audit/') === 0).map(k => window.__store[k]);
       t('creating, renewing and revoking invitations were each recorded in the activity log, by the admin, with their email',
         auditNow().filter(e => e.action === 'invite.created' && e.actorUid === 'uAdmin' && e.actorEmail === 'ann@acme.com').length >= 3 && auditNow().some(e => e.action === 'invite.renewed') && auditNow().some(e => e.action === 'invite.revoked' && e.targetEmail === 'fresh2@acme.com'),
@@ -388,6 +446,22 @@ async function readBlob(d){ return await d.blob.text(); }
       removeBtn(rowFor('teamWrap', 'Eli E')).click(); await sleep(200);
       t('if the activity log cannot be written, the removal still goes ahead and no error is shown', window.__store['memberships/uEli'].status === 'removed' && !rowFor('teamWrap', 'Eli E') && txt('errorLine') === '', txt('errorLine'));
       window.__failWrite = null;
+    } else if (scn === 'history'){
+      t('the page opens', shown() === 'page');
+      const trendSvg = $('reportTrend').querySelector('svg');
+      t('with earlier snapshots the trend chart is drawn: three lines, three points each (28 days ago, 10 days ago, today)', !!trendSvg && trendSvg.querySelectorAll('polyline').length === 3 && /Took the assessment/.test(txt('reportTrend')) && /Started learning/.test(txt('reportTrend')), txt('reportTrend'));
+      const obs = Array.prototype.slice.call($('reportAll').querySelectorAll('.insight')).map(textOf);
+      t('trend sentences use the real numbers over four weeks', obs.some(x => /Average plan complete moved from 2% to \d+% over 4 weeks/.test(x)) && obs.some(x => /People who have started learning: 0 then, 3 now/.test(x)), obs.join(' | '));
+      t('this week\'s snapshot was added to the two that were there', Object.keys(window.__store).filter(k => /^orgs\/orgA\/snapshots\//.test(k)).length === 3);
+    } else if (scn === 'snapshotsdenied'){
+      t('if the weekly history cannot be read, the rest of the report still works and says so', shown() === 'page' && /couldn't read the weekly history/.test(txt('reportTrend')) && /5 of 6 people/.test(txt('reportHeadline')), txt('reportTrend'));
+      t('and nothing is written (so the history is not overwritten blindly)', Object.keys(window.__store).filter(k => /snapshots\//.test(k)).length === 0);
+    } else if (scn === 'snapfail'){
+      t('if this week\'s snapshot cannot be saved, the page works as normal and shows no error', shown() === 'page' && txt('errorLine') === '' && /5 of 6 people/.test(txt('reportHeadline')));
+    } else if (scn === 'noplatform'){
+      t('if the totals for everyone cannot be loaded, the comparison says so and the rest remains', /isn't available right now/.test(txt('reportCompareSub')) && /5 of 6 people/.test(txt('reportHeadline')) && $('reportCompare').children.length === 0, txt('reportCompareSub'));
+    } else if (scn === 'smallplatform'){
+      t('when too few people have taken the assessment overall, no comparison is drawn', /Not enough people have taken the assessment yet/.test(txt('reportCompareSub')) && $('reportCompare').children.length === 0, txt('reportCompareSub'));
     } else if (scn === 'auditdenied'){
       t('if the activity log cannot be read, the rest of the page still works and says so', shown() === 'page' && rowsIn('teamWrap').length === 6 && /couldn't read the activity log/.test($('activityWrap').textContent), $('activityWrap').textContent);
     } else if (scn === 'nocopy'){

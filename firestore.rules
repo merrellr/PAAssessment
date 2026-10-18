@@ -26,6 +26,13 @@
 //   Active member:      writes their own shared record (orgs/{orgId}/members/
 //                       {uid}) for their current company; company admins and
 //                       the platform owner can read it, nobody else can.
+//   Weekly snapshots:   (orgs/{orgId}/snapshots) numbers-only records of a
+//                       company's progress for the trend in its report. Company
+//                       admins and the owner read and add them; one per day,
+//                       never changed or deleted.
+//   Pilot tracker:      (orgPilot/{orgId} and its log) stage, dates, goals, run-book
+//                       ticks and private notes for each company. Platform owner
+//                       only; company admins can never read it.
 //   Company focus list: a copy of the company's ranked focus areas that its
 //                       active members can read (see orgFocus below).
 //   Tool roadmap:       anyone can read the list of tools and their vote counts.
@@ -309,6 +316,45 @@ service cloud.firestore {
       allow update, delete: if false;
     }
 
+    // ---------------------------------------------------------- weekly snapshots
+    // A small record of a company's numbers (how many people, how many took the
+    // assessment, average scores) saved by the company dashboard at most once a
+    // week, so the report can show a trend. Numbers only: no names or emails.
+    // The id is the day (2026-10-13), so a day can only be written once, and a
+    // snapshot can never be changed or deleted afterwards. The company's admins
+    // and the owner read and add them; members cannot.
+    function validSnapshot(d, day) {
+      return d.keys().hasOnly(['day', 'at', 'people', 'assessed', 'learning', 'finished', 'inactive',
+          'avgOverall', 'avgPlan', 'lessons', 'areas'])
+        && day.matches('^[0-9]{4}-[0-9]{2}-[0-9]{2}$')
+        && d.day == day
+        && d.at == request.time
+        && d.people is int && d.people >= 0 && d.people <= 100000
+        && d.assessed is int && d.assessed >= 0 && d.assessed <= d.people
+        && d.learning is int && d.learning >= 0 && d.learning <= d.people
+        && d.finished is int && d.finished >= 0 && d.finished <= d.people
+        && d.inactive is int && d.inactive >= 0 && d.inactive <= d.people
+        && (d.avgOverall == null || (d.avgOverall is int && d.avgOverall >= 0 && d.avgOverall <= 100))
+        && (d.avgPlan == null || (d.avgPlan is int && d.avgPlan >= 0 && d.avgPlan <= 100))
+        && d.lessons is int && d.lessons >= 0 && d.lessons <= 10000000
+        && d.areas is map
+        && d.areas.keys().hasOnly(['discovery', 'strategy', 'prioritization', 'execution', 'stakeholder', 'aiIndividual', 'aiOrg'])
+        && areaOk(d.areas, 'discovery') && areaOk(d.areas, 'strategy') && areaOk(d.areas, 'prioritization')
+        && areaOk(d.areas, 'execution') && areaOk(d.areas, 'stakeholder') && areaOk(d.areas, 'aiIndividual')
+        && areaOk(d.areas, 'aiOrg');
+    }
+
+    function areaOk(areas, k) {
+      return !(k in areas) || (areas[k] is int && areas[k] >= 0 && areas[k] <= 100);
+    }
+
+    match /orgs/{orgId}/snapshots/{day} {
+      allow read: if isPlatformOwner() || isActiveAdminOf(orgId);
+      allow create: if (isPlatformOwner() || isActiveAdminOf(orgId))
+        && validSnapshot(request.resource.data, day);
+      allow update, delete: if false;
+    }
+
     // --------------------------------------------------- owner-only company notes
     // The platform owner's private notes about a company. They used to live on the
     // company record itself, which that company's admins can read, so they are
@@ -320,6 +366,54 @@ service cloud.firestore {
         && request.resource.data.notes is string && request.resource.data.notes.size() <= 2000
         && request.resource.data.updatedAt == request.time;
       allow delete: if false;
+    }
+
+    // ------------------------------------------------ owner-only pilot tracker
+    // Where each company is on the way from prospect to customer: its stage, the
+    // pilot dates and goals, the run-book items ticked off, and a private timeline
+    // of notes. Only the platform owner can see or change any of it; company admins
+    // never can.
+    function dayOk(s) {
+      return s is string && (s == '' || s.matches('^[0-9]{4}-[0-9]{2}-[0-9]{2}$'));
+    }
+    function goalOk(goals, i) {
+      return goals.size() <= i
+        || (goals[i] is map
+          && goals[i].keys().hasOnly(['metric', 'target'])
+          && goals[i].metric in ['joined_pct', 'assessed_pct', 'started_pct', 'finished_pct', 'plan_pct', 'quiet_pct', 'overall_gain']
+          && goals[i].target is int && goals[i].target >= 0 && goals[i].target <= 100);
+    }
+    function validPilot(d) {
+      return d.keys().hasOnly(['stage', 'pilotStart', 'pilotEnd', 'nextCheckin', 'renewalDate', 'baselineDay',
+          'sponsor', 'pilotSize', 'goals', 'done', 'summaryNote', 'updatedAt'])
+        && d.stage in ['prospect', 'pilot_planned', 'pilot_running', 'pilot_review', 'onboarding', 'active', 'closed']
+        && dayOk(d.pilotStart) && dayOk(d.pilotEnd) && dayOk(d.nextCheckin) && dayOk(d.renewalDate) && dayOk(d.baselineDay)
+        && d.sponsor is string && d.sponsor.size() <= 100
+        && d.pilotSize is int && d.pilotSize >= 0 && d.pilotSize <= 100000
+        && d.goals is list && d.goals.size() <= 8
+        && goalOk(d.goals, 0) && goalOk(d.goals, 1) && goalOk(d.goals, 2) && goalOk(d.goals, 3)
+        && goalOk(d.goals, 4) && goalOk(d.goals, 5) && goalOk(d.goals, 6) && goalOk(d.goals, 7)
+        && d.done is list && d.done.size() <= 100
+        && d.summaryNote is string && d.summaryNote.size() <= 1000
+        && d.updatedAt == request.time;
+    }
+
+    match /orgPilot/{orgId} {
+      allow get, list: if isPlatformOwner();
+      allow create, update: if isPlatformOwner() && validPilot(request.resource.data);
+      allow delete: if false;
+    }
+
+    match /orgPilot/{orgId}/log/{entryId} {
+      allow get, list: if isPlatformOwner();
+      allow create: if isPlatformOwner()
+        && request.resource.data.keys().hasOnly(['at', 'kind', 'text'])
+        && request.resource.data.kind in ['note', 'call', 'email', 'meeting', 'decision', 'stage']
+        && request.resource.data.text is string
+        && request.resource.data.text.size() >= 1 && request.resource.data.text.size() <= 1000
+        && request.resource.data.at == request.time;
+      allow update: if false;
+      allow delete: if isPlatformOwner();
     }
 
     // ------------------------------------------------------------ tool roadmap

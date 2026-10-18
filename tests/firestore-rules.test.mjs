@@ -518,6 +518,83 @@ await deny('a plain member cannot read it', () => getDocs(collection(memberA, 'o
 await deny('a stranger cannot read it', () => getDocs(collection(stranger, 'orgs/orgA/audit')));
 await deny('a signed-out visitor cannot read it', () => getDocs(collection(anon, 'orgs/orgA/audit')));
 
+console.log('\n--- weekly snapshots (orgs/{id}/snapshots) ---');
+const snapshot = (day, over = {}) => Object.assign({
+  day: day, at: serverTimestamp(), people: 6, assessed: 5, learning: 2, finished: 1, inactive: 1,
+  avgOverall: 42, avgPlan: 12, lessons: 30, areas: { discovery: 50, aiOrg: 20 }
+}, over);
+await allow('a company admin saves a snapshot', () => setDoc(doc(adminA, 'orgs/orgA/snapshots/2026-10-13'), snapshot('2026-10-13')));
+await allow('the owner saves one too', () => setDoc(doc(owner, 'orgs/orgA/snapshots/2026-10-06'), snapshot('2026-10-06')));
+await allow('an empty company can have a snapshot with no scores', () => setDoc(doc(owner, 'orgs/orgB/snapshots/2026-10-13'), snapshot('2026-10-13', { people: 0, assessed: 0, learning: 0, finished: 0, inactive: 0, avgOverall: null, avgPlan: null, lessons: 0, areas: {} })));
+await deny('the id must be the day it records', () => setDoc(doc(adminA, 'orgs/orgA/snapshots/2026-10-14'), snapshot('2026-10-13')));
+await deny('the id must look like a day', () => setDoc(doc(adminA, 'orgs/orgA/snapshots/today'), snapshot('today')));
+await deny('a snapshot must carry the server\'s time', () => setDoc(doc(adminA, 'orgs/orgA/snapshots/2026-10-15'), snapshot('2026-10-15', { at: Timestamp.fromDate(new Date(2020, 1, 1)) })));
+await deny('extra fields (such as a name) are refused', () => setDoc(doc(adminA, 'orgs/orgA/snapshots/2026-10-16'), snapshot('2026-10-16', { names: 'Ann' })));
+await deny('more people assessed than there are people is refused', () => setDoc(doc(adminA, 'orgs/orgA/snapshots/2026-10-17'), snapshot('2026-10-17', { assessed: 7 })));
+await deny('a score above 100 is refused', () => setDoc(doc(adminA, 'orgs/orgA/snapshots/2026-10-18'), snapshot('2026-10-18', { avgPlan: 120 })));
+await deny('a skill score above 100 is refused', () => setDoc(doc(adminA, 'orgs/orgA/snapshots/2026-10-19'), snapshot('2026-10-19', { areas: { discovery: 150 } })));
+await deny('an unknown skill area is refused', () => setDoc(doc(adminA, 'orgs/orgA/snapshots/2026-10-20'), snapshot('2026-10-20', { areas: { secret: 5 } })));
+await deny('text where a number belongs is refused', () => setDoc(doc(adminA, 'orgs/orgA/snapshots/2026-10-21'), snapshot('2026-10-21', { people: 'six' })));
+await deny('an admin cannot save one for another company', () => setDoc(doc(adminA, 'orgs/orgB/snapshots/2026-10-22'), snapshot('2026-10-22')));
+await deny('a plain member cannot save one', () => setDoc(doc(memberA, 'orgs/orgA/snapshots/2026-10-23'), snapshot('2026-10-23')));
+await deny('a removed admin cannot save one', () => setDoc(doc(exAdminA, 'orgs/orgA/snapshots/2026-10-24'), snapshot('2026-10-24')));
+await deny('a stranger cannot save one', () => setDoc(doc(stranger, 'orgs/orgA/snapshots/2026-10-25'), snapshot('2026-10-25')));
+await deny('a signed-out visitor cannot save one', () => setDoc(doc(anon, 'orgs/orgA/snapshots/2026-10-26'), snapshot('2026-10-26')));
+await deny('a day can only be written once (no overwrite)', () => setDoc(doc(adminA, 'orgs/orgA/snapshots/2026-10-13'), snapshot('2026-10-13', { people: 7 })));
+await deny('a snapshot can never be changed', () => updateDoc(doc(adminA, 'orgs/orgA/snapshots/2026-10-13'), { people: 9 }));
+await deny('a snapshot can never be deleted', () => deleteDoc(doc(adminA, 'orgs/orgA/snapshots/2026-10-13')));
+await deny('not even by the owner', () => deleteDoc(doc(owner, 'orgs/orgA/snapshots/2026-10-13')));
+await allow('a company admin reads their snapshots', () => getDocs(collection(adminA, 'orgs/orgA/snapshots')));
+await allow('the owner reads any company\'s snapshots', () => getDocs(collection(owner, 'orgs/orgA/snapshots')));
+await deny('an admin of another company cannot read them', () => getDocs(collection(adminB, 'orgs/orgA/snapshots')));
+await deny('a plain member cannot read them', () => getDocs(collection(memberA, 'orgs/orgA/snapshots')));
+await deny('a stranger cannot read them', () => getDocs(collection(stranger, 'orgs/orgA/snapshots')));
+await deny('a signed-out visitor cannot read them', () => getDocs(collection(anon, 'orgs/orgA/snapshots')));
+
+console.log('\n--- owner-only pilot tracker (orgPilot) ---');
+const pilot = (over = {}) => Object.assign({
+  stage: 'pilot_running', pilotStart: '2026-10-01', pilotEnd: '2026-11-12', nextCheckin: '2026-10-20', renewalDate: '', baselineDay: '2026-10-06',
+  sponsor: 'Pat Sponsor', pilotSize: 25, goals: [{ metric: 'assessed_pct', target: 90 }, { metric: 'plan_pct', target: 25 }], done: ['goals', 'dates'],
+  summaryNote: 'Going well', updatedAt: serverTimestamp()
+}, over);
+await allow('the owner creates a pilot record', () => setDoc(doc(owner, 'orgPilot/orgA'), pilot()));
+await allow('and changes it', () => setDoc(doc(owner, 'orgPilot/orgA'), pilot({ stage: 'pilot_review', done: ['goals', 'dates', 'summary'] })));
+await allow('a record with no goals and no dates is fine', () => setDoc(doc(owner, 'orgPilot/orgB'), pilot({ stage: 'prospect', pilotStart: '', pilotEnd: '', nextCheckin: '', baselineDay: '', goals: [], done: [], summaryNote: '', sponsor: '', pilotSize: 0 })));
+await deny('an unknown stage is refused', () => setDoc(doc(owner, 'orgPilot/orgA'), pilot({ stage: 'won' })));
+await deny('a date that is not a date is refused', () => setDoc(doc(owner, 'orgPilot/orgA'), pilot({ pilotStart: 'next week' })));
+await deny('a goal measuring something unknown is refused', () => setDoc(doc(owner, 'orgPilot/orgA'), pilot({ goals: [{ metric: 'revenue', target: 10 }] })));
+await deny('a goal target above 100 is refused', () => setDoc(doc(owner, 'orgPilot/orgA'), pilot({ goals: [{ metric: 'assessed_pct', target: 150 }] })));
+await deny('a goal with a name in it is refused', () => setDoc(doc(owner, 'orgPilot/orgA'), pilot({ goals: [{ metric: 'assessed_pct', target: 50, owner: 'Ann' }] })));
+await deny('the eighth goal is checked too', () => setDoc(doc(owner, 'orgPilot/orgA'), pilot({ goals: [1, 2, 3, 4, 5, 6, 7].map(() => ({ metric: 'assessed_pct', target: 1 })).concat([{ metric: 'bogus', target: 1 }]) })));
+await deny('more than eight goals is refused', () => setDoc(doc(owner, 'orgPilot/orgA'), pilot({ goals: Array(9).fill({ metric: 'assessed_pct', target: 1 }) })));
+await deny('an over-long summary note is refused', () => setDoc(doc(owner, 'orgPilot/orgA'), pilot({ summaryNote: 'x'.repeat(1001) })));
+await deny('extra fields are refused', () => setDoc(doc(owner, 'orgPilot/orgA'), pilot({ price: 5 })));
+await deny('a pilot size that is not a whole number is refused', () => setDoc(doc(owner, 'orgPilot/orgA'), pilot({ pilotSize: 2.5 })));
+await deny('it must carry the server\'s time', () => setDoc(doc(owner, 'orgPilot/orgA'), pilot({ updatedAt: Timestamp.fromDate(new Date(2020, 1, 1)) })));
+await deny('nobody can delete one, not even the owner', () => deleteDoc(doc(owner, 'orgPilot/orgA')));
+await deny('a company admin cannot read their own company\'s pilot record', () => getDoc(doc(adminA, 'orgPilot/orgA')));
+await deny('a company admin cannot write one', () => setDoc(doc(adminA, 'orgPilot/orgA'), pilot()));
+await deny('a plain member cannot read one', () => getDoc(doc(memberA, 'orgPilot/orgA')));
+await deny('a stranger cannot read one', () => getDoc(doc(stranger, 'orgPilot/orgA')));
+await deny('a signed-out visitor cannot read one', () => getDoc(doc(anon, 'orgPilot/orgA')));
+await allow('the owner reads one', () => getDoc(doc(owner, 'orgPilot/orgA')));
+await allow('and lists them all', () => getDocs(collection(owner, 'orgPilot')));
+await deny('an admin cannot list them', () => getDocs(collection(adminA, 'orgPilot')));
+const logEntry = (over = {}) => Object.assign({ at: serverTimestamp(), kind: 'note', text: 'Kickoff call went well. Sponsor wants a mid-point update.' }, over);
+await allow('the owner adds a timeline entry', () => setDoc(doc(owner, 'orgPilot/orgA/log/n1'), logEntry()));
+await allow('of any of the six kinds', () => setDoc(doc(owner, 'orgPilot/orgA/log/n2'), logEntry({ kind: 'decision' })));
+await deny('an unknown kind is refused', () => setDoc(doc(owner, 'orgPilot/orgA/log/n3'), logEntry({ kind: 'gossip' })));
+await deny('an empty entry is refused', () => setDoc(doc(owner, 'orgPilot/orgA/log/n4'), logEntry({ text: '' })));
+await deny('an over-long entry is refused', () => setDoc(doc(owner, 'orgPilot/orgA/log/n5'), logEntry({ text: 'x'.repeat(1001) })));
+await deny('an entry must carry the server\'s time', () => setDoc(doc(owner, 'orgPilot/orgA/log/n6'), logEntry({ at: Timestamp.fromDate(new Date(2020, 1, 1)) })));
+await deny('extra fields are refused', () => setDoc(doc(owner, 'orgPilot/orgA/log/n7'), logEntry({ by: 'rob' })));
+await deny('an entry can never be edited', () => updateDoc(doc(owner, 'orgPilot/orgA/log/n1'), { text: 'changed' }));
+await allow('but the owner can delete one added by mistake', () => deleteDoc(doc(owner, 'orgPilot/orgA/log/n2')));
+await deny('a company admin cannot add an entry', () => setDoc(doc(adminA, 'orgPilot/orgA/log/n8'), logEntry()));
+await deny('a company admin cannot read the timeline', () => getDocs(collection(adminA, 'orgPilot/orgA/log')));
+await deny('a stranger cannot read the timeline', () => getDocs(collection(stranger, 'orgPilot/orgA/log')));
+await allow('the owner reads the timeline', () => getDocs(collection(owner, 'orgPilot/orgA/log')));
+
 console.log('\n--- private owner notes (orgPrivate) ---');
 await allow('the owner writes private notes', () => setDoc(doc(owner, 'orgPrivate/orgA'), { notes: 'Pilot customer, pays on net 30', updatedAt: serverTimestamp() }));
 await allow('the owner reads them', () => getDoc(doc(owner, 'orgPrivate/orgA')));

@@ -90,6 +90,16 @@
     store['orgs/orgA/audit/a2'] = { action: 'invite.created', actorUid: 'uAdmin', actorEmail: 'ann@acme.com', targetEmail: 'ben@acme.com', detail: 'member', at: T(60) };
     store['orgs/orgA/audit/a3'] = { action: 'focus.changed', actorUid: 'uAdmin', actorEmail: 'ann@acme.com', targetEmail: '', detail: '1. AI Fluency — Organizational', at: T(10) };
 
+    // two earlier weekly snapshots, so the trend chart and trend sentences have something to show
+    if (scn === 'history') {
+      const day10 = new Date(Date.now() - 10 * day).toISOString().slice(0, 10), day28 = new Date(Date.now() - 28 * day).toISOString().slice(0, 10);
+      store['orgs/orgA/snapshots/' + day28] = { day: day28, at: T(28), people: 4, assessed: 3, learning: 0, finished: 0, inactive: 0, avgOverall: 40, avgPlan: 2, lessons: 4, areas: { discovery: 40 } };
+      store['orgs/orgA/snapshots/' + day10] = { day: day10, at: T(10), people: 5, assessed: 4, learning: 1, finished: 0, inactive: 0, avgOverall: 44, avgPlan: 6, lessons: 12, areas: { discovery: 45 } };
+    }
+    if (scn === 'snapshotsdenied') window.__failList = /^orgs\/orgA\/snapshots$/;
+    if (scn === 'snapfail') window.__failWrite = /\/snapshots\//;
+    if (scn === 'noplatform') window.__platform = null;
+    if (scn === 'smallplatform') window.__platform = { totalCompletions: 9, tierCounts: {}, categoryAverages: { discovery: 70 } };
     if (scn === 'auditdenied') window.__failList = /^orgs\/orgA\/audit$/;
     if (scn === 'denied') window.__failList = /^memberships$/;
     if (scn === 'sharesdenied') window.__failList = /^orgs\/orgA\/members$/;

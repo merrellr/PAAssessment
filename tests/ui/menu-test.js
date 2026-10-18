@@ -10,7 +10,28 @@ const key = (k) => document.dispatchEvent(new KeyboardEvent('keydown', { key: k,
 (async function run(){
   try {
     await sleep(400);
-    if (scn === 'signedout'){
+    const welcomeCalls = () => window.__calls.filter(c => c.action === 'welcome');
+    const stored = () => { try { return localStorage.getItem('pa_welcomed_uNew'); } catch (e) { return null; } };
+    const menuOff = /menu-off/.test(location.pathname);
+    if (menuOff){
+      t('with the menu switched off, no Profile button is drawn', !$('paAccount') && !document.querySelector('.pa-acct-btn'));
+      t('but a brand-new account still asks for its welcome email, once', welcomeCalls().length === 1 && welcomeCalls()[0].idToken === 'tok', JSON.stringify(window.__calls));
+    } else if (scn === 'newaccount'){
+      t('a brand-new account asks for the welcome email, once, with its sign-in token', welcomeCalls().length === 1 && welcomeCalls()[0].idToken === 'tok' && Object.keys(welcomeCalls()[0]).sort().join() === 'action,callback,idToken', JSON.stringify(window.__calls));
+      t('and remembers it was done', stored() === '1');
+      t('the Profile menu still appears as normal', !!$('paAccountBtn'));
+    } else if (scn === 'oldaccount'){
+      t('an account made ten days ago does not ask', window.__calls.length === 0);
+      t('the menu is unaffected', !!$('paAccountBtn'));
+    } else if (scn === 'welcomedone'){
+      t('an account already welcomed on this browser does not ask again', window.__calls.length === 0);
+    } else if (scn === 'welcomefail'){
+      t('if the script reports a problem it is not marked done, so a later page load tries again', welcomeCalls().length === 1 && stored() === null);
+      t('and the page is unaffected', !!$('paAccountBtn'));
+    } else if (scn === 'welcomedown'){
+      t('if the script cannot be reached it is not marked done either', welcomeCalls().length === 1 && stored() === null);
+      t('and the page is unaffected', !!$('paAccountBtn'));
+    } else if (scn === 'signedout'){
       t('nobody signed in: no Profile button at all', !$('paAccount') && !document.querySelector('.pa-acct-btn'));
     } else {
       const btn = $('paAccountBtn');
@@ -25,7 +46,8 @@ const key = (k) => document.dispatchEvent(new KeyboardEvent('keydown', { key: k,
       else t('it shows who is signed in', name.length > 0 && /@x\.com$/.test(email), name + ' / ' + email);
       t('everyone gets the dashboard, profile, vote and website links, then Log out last', L[0] === 'My learning dashboard' && L[1] === 'My profile' && L.indexOf('Vote on the next tool') > -1 && L.some(x => /Visit Product Advisory/.test(x)) && L[L.length - 1] === 'Log out', L.join(' | '));
       t('the links go to the right pages', document.querySelector('#paAccountMenu a[href="lms-dashboard.html"]') && document.querySelector('#paAccountMenu a[href="profile.html"]') && document.querySelector('#paAccountMenu a[href="tool-requests.html"]'));
-      const site = Array.prototype.slice.call(document.querySelectorAll('#paAccountMenu a')).filter(a => /productadvisory\.co/.test(a.href))[0];
+      t('"Send feedback" opens an email to feedback@ with a subject already filled in', (() => { const a = document.querySelector('#paAccountMenu a[href^="mailto:"]'); return !!a && /^mailto:feedback@productadvisory\.co\?subject=Feedback%20on%20Product%20Advisory%20Learning$/.test(a.getAttribute('href')) && a.textContent.trim() === 'Send feedback'; })());
+      const site = Array.prototype.slice.call(document.querySelectorAll('#paAccountMenu a')).filter(a => /^https:\/\/www\.productadvisory\.co/.test(a.href))[0];
       t('the website link opens in a new tab safely', site.target === '_blank' && /noopener/.test(site.rel));
       const owner = L.indexOf('Owner console') > -1, reports = L.indexOf('Reports') > -1, company = L.indexOf('Company dashboard') > -1;
       if (scn === 'owner') t('the owner also gets Owner console and Reports', owner && reports && document.querySelector('#paAccountMenu a[href="owner.html"]') && document.querySelector('#paAccountMenu a[href="reports.html"]'), L.join(' | '));

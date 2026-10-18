@@ -1,0 +1,30 @@
+/* Shared by the Reports page (reports.html) and the company dashboard (company.html): the insight
+   list, the "Explain with AI" box, and the line, bar and funnel charts drawn by charts.js.
+   The pages define the colour variables (--navy, --cyan, --warn, --ok, --ink, --gray, --line). */
+.insights{ margin-top: 14px; display:flex; flex-direction:column; gap: 8px; }
+.insight{ display:flex; gap:10px; align-items:flex-start; background:#F7FAFD; border:1px solid var(--line); border-radius: 10px; padding: 10px 12px; font-size: 13.5px; line-height:1.5; color: var(--ink); }
+.insight .chip{ flex:none; font-size: 11px; font-weight:700; text-transform:uppercase; letter-spacing:.04em; padding: 2px 8px; border-radius: 20px; background:#EEF2F7; color: var(--ink-soft); margin-top: 1px; }
+.insight.sev-good .chip{ background:#E4F3EA; color: var(--ok); }
+.insight.sev-watch .chip{ background:#F6E9E1; color: var(--warn); }
+.insight-title{ font-size: 11.5px; font-weight:700; text-transform:uppercase; letter-spacing:.05em; color: var(--gray); margin: 16px 0 0; }
+.ai-box{ margin-top: 12px; border:1px solid #BFE6F2; background:#F2FAFD; border-radius: 10px; padding: 12px 14px; font-size: 13.5px; line-height:1.55; white-space: pre-wrap; color: var(--ink); }
+.ai-box small{ display:block; margin-top: 8px; color: var(--gray); white-space: normal; }
+.chart-svg{ width:100%; height:auto; display:block; }
+.chart-grid{ stroke:#E3E9F0; stroke-width:1; }
+.chart-axis{ font-size: 11px; fill:#9AA3AD; font-family:'IBM Plex Sans', sans-serif; }
+.chart-legend{ display:flex; gap:16px; flex-wrap:wrap; font-size:12.5px; color: var(--ink-soft); margin-top: 6px; }
+.legend-item i{ display:inline-block; width:10px; height:10px; border-radius:3px; margin-right:6px; vertical-align:-1px; }
+.chart-empty{ font-size: 13px; color: var(--gray); margin: 8px 0; }
+.bar-row{ display:grid; grid-template-columns: minmax(110px, 1.2fr) 2fr 46px; gap: 10px; align-items:center; margin-bottom: 9px; font-size: 13px; }
+.bar-track{ height: 10px; border-radius: 5px; background:#EEF2F7; overflow:hidden; }
+.bar-fill{ display:block; height:100%; background: var(--navy); border-radius: 5px; }
+.bar-val{ text-align:right; font-variant-numeric: tabular-nums; color: var(--ink-soft); }
+.bar-note{ display:block; font-size: 11px; color: var(--gray); }
+.funnel-row{ display:grid; grid-template-columns: minmax(130px, 1.3fr) 3fr 44px 110px; gap: 10px; align-items:center; margin-bottom: 10px; font-size: 13.5px; }
+.funnel-track{ height: 22px; border-radius: 6px; background:#EEF2F7; overflow:hidden; }
+.funnel-fill{ display:block; height:100%; background: linear-gradient(90deg, var(--navy), var(--cyan)); border-radius: 6px; }
+.funnel-row.worst .funnel-fill{ background: var(--warn); }
+.funnel-count{ text-align:right; font-family:'Space Grotesk', sans-serif; font-weight:700; color: var(--navy-deep); font-variant-numeric: tabular-nums; }
+.funnel-conv{ font-size: 12px; color: var(--gray); }
+.funnel-conv.bad{ color: var(--warn); font-weight:600; }
+@media (max-width: 640px){ .funnel-row{ grid-template-columns: 1fr 44px; } .funnel-track{ grid-column: 1 / -1; order: 3; } .funnel-conv{ grid-column: 1 / -1; order: 4; } }

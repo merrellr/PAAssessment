@@ -172,7 +172,7 @@ Change the word after `src=` to match the page the button is on (for example `sr
 
 **What happens when someone sends it**
 1. You get an email at rob@productadvisory.co. The subject starts with **[Hot]**, **[Warm]** or **[Nurture]**, then their name and company. Press **Reply** to answer them directly.
-2. The person also gets a short thank-you email straight away: "Welcome, and thanks for sharing a little about what you need. We have your request and we will get back to you within two business days." It recaps what they told you, offers your Calendly page to team leaders, organizations and anyone who asked for a call, and offers the free assessment to everyone. If they reply to it, the reply goes to info@productadvisory.co. It is only sent for real requests that were saved, never for spam.
+2. The person also gets a short thank-you email straight away: "Welcome, and thanks for sharing a little about what you need. We have your request and we will get back to you within two business days." It recaps what they told you, offers your Calendly page to team leaders, organizations and anyone who asked for a call, and offers the free assessment to everyone. It comes from sales@productadvisory.co when that address is set up in Gmail (section 12d), and if they reply, the reply goes to sales@productadvisory.co. It is only sent for real requests that were saved, never for spam.
 3. The same request is added as a row on the **Leads** tab of your results Google Sheet (open the sheet and click the Leads tab at the bottom). Use the **Status** and **Notes** columns to keep track: change `New` to `Contacted`, `Call booked`, `Won`, `Not a fit`, and so on.
 
 **What Hot, Warm and Nurture mean** (only you see this; the person never does)
@@ -204,6 +204,48 @@ Owner Console → **Reports**. Pick **7 days / 30 days / 90 days / 1 year** at t
 **Monday summary email.** Every Monday around 8am the same top points arrive at rob@productadvisory.co. To switch it on (once, after pasting the latest Code.gs): in the Apps Script editor choose `installWeeklyReport` in the function menu at the top, click **Run**, and approve the permission Google asks for. To see what it looks like right away, run `sendWeeklyReport` the same way. To stop it, run `removeWeeklyReport`.
 
 **If the page says "The reports service isn't switched on yet"** the script on Google is older than the page: paste the latest Code.gs and make a new version (section 7).
+
+---
+
+## 12c. The company report (what a company's admins see)
+
+Open any company from the Owner Console and press **Team dashboard** (or sign in as one of its admins). The **Report** card at the top is the executive view; "Team at a glance" and the people table below it are the detail.
+
+- **What stands out** lists up to four sentences, problems first: invitations still waiting, people who have not taken the assessment, people assessed but not started, people quiet for 30+ days, and good news such as people who finished their plan. **All observations** lists everything.
+- **Getting people started** is the funnel from invited to finished. The red step is the biggest drop.
+- **Compared with everyone who has taken the assessment** shows the team's average in each skill area next to the average of all assessments. It only appears when the team has at least 3 assessed people and at least 10 assessments exist.
+- **Progress over time** builds up from weekly snapshots. A snapshot is saved automatically, at most once a week, when anyone opens the dashboard. The chart appears after the second one, so a new company shows "this chart appears after the second weekly snapshot" for about a week. Snapshots hold numbers only. **Publish the latest `firestore.rules` first** (section 6) or the trend will say it could not read the history.
+- **Print or save as PDF** prints just the Report and "Team at a glance", good for a customer meeting. **Explain with AI** gives a short plain-English reading and next steps from the anonymous numbers; each company gets 5 a day.
+- Small teams: with fewer than 5 assessed people the page says the numbers are a first look. It never calls a handful of people a trend.
+
+---
+
+## 12d. Your email addresses (who sends what)
+
+| Address | Used for |
+|---|---|
+| noreply@productadvisory.co | The welcome email, and the automatic notices to you (new requests, the Monday report). Password-reset and verification emails come from Firebase (see below). |
+| assessment@productadvisory.co | Replies to the welcome email and to company invitation emails (questions about an assessment or an account). |
+| sales@productadvisory.co | The "Request more information" thank-you. People who reply reach sales. |
+| info@productadvisory.co | The public contact address shown on the site and the fallback when the request form cannot send. |
+| toolkit@productadvisory.co | Shown on the Tool Roadmap page for toolkit questions; use it later for "your tool has launched" emails. |
+| feedback@productadvisory.co | The **Send feedback** item in every Profile menu. |
+| legal@productadvisory.co | Privacy and legal questions (named in the welcome email). |
+| marketing@productadvisory.co | Not used yet. Keep it for a newsletter, which needs an unsubscribe link. |
+
+**It already works without any setup.** Every email is sent from the Gmail account that owns the Apps Script, with the right address in **Reply-To**, so replies reach the right mailbox. The steps below only make the emails *appear* to come from the address.
+
+**To send as an address (optional):**
+1. In Gmail (the account that owns the Apps Script), click the gear, **See all settings**, **Accounts and Import**, then **Send mail as**, **Add another email address**.
+2. Type the name "Product Advisory" and the address (for example noreply@productadvisory.co). Keep "Treat as an alias" ticked. Click **Next Step**.
+3. Gmail asks for your email host's sending (SMTP) details, or offers to send through Gmail if the address is part of your Google Workspace. Follow what it shows. Your web host or email provider can give you the SMTP details. Gmail then emails a confirmation code to that address; enter it.
+4. Repeat for assessment@ and sales@ (at least these three are used for sending). The rest are only used as Reply-To or as links.
+5. Paste the latest Code.gs, save, then in the Apps Script editor choose `authorizeMailAliases` in the function menu and click **Run**. Approve the Gmail permission. The log at the bottom lists which addresses it can now send as and which it cannot (those still work, they just come from your main address).
+6. Click **Deploy**, **Manage deployments**, the pencil, **New version**, **Deploy**.
+
+**Password-reset and sign-in verification emails** are sent by Firebase, not by the script. In the Firebase console go to **Authentication**, **Templates**, pick **Password reset**, click the pencil, set **Sender name** to Product Advisory Learning and **Reply to** to assessment@productadvisory.co, and save. Do the same for **Email address verification**. The console also offers **Customize domain** on that page, which lets the sender become noreply@productadvisory.co once you add two DNS records at your domain host. That is optional.
+
+**The welcome email.** Every new account gets one short welcome email the first time they open any page of the site after signing up (it is sent once, and the **Welcomes** tab of your results sheet records who has had one). To see it, create a test account with an address you can read (for example yourname+test1@gmail.com goes to your own inbox). If it does not arrive within a minute, check the spam folder, then check that the latest Code.gs is deployed (section 7). Deleting an account also removes its row from the Welcomes tab.
 
 ---
 

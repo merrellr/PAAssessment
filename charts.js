@@ -31,13 +31,15 @@
     return (f <= 1 ? 1 : f <= 2 ? 2 : f <= 5 ? 5 : 10) * p;
   }
 
-  /* opts: { labels: [text per point], series: [{ name, color, values: [number] }], title, height } */
+  /* opts: { labels: [text per point], series: [{ name, color, values: [number] }], title, height, integer }
+     integer: true keeps the axis to whole numbers (for counts of people or requests). */
   function line(container, opts) {
     container.innerHTML = '';
     const W = 640, H = opts.height || 220, L = 38, R = 12, T = 12, B = 30;
     const n = opts.labels.length;
     const all = [].concat.apply([], opts.series.map(x => x.values));
-    const max = niceMax(Math.max.apply(null, all.concat([0])));
+    let max = niceMax(Math.max.apply(null, all.concat([0])));
+    if (opts.integer) max = Math.max(4, Math.ceil(max / 4) * 4);   // counts of people: four gridlines, whole numbers only
     const total = opts.series.map(x => x.name + ': ' + x.values.reduce((a, b) => a + b, 0));
     const svg = s('svg', { viewBox: '0 0 ' + W + ' ' + H, role: 'img', 'aria-label': (opts.title || 'Line chart') + '. Totals - ' + total.join(', ') + '.', class: 'chart-svg', preserveAspectRatio: 'xMidYMid meet' });
     svg.appendChild(s('title', {}, opts.title || 'Line chart'));
