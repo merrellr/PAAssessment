@@ -31,6 +31,7 @@ Copy-Item "$repo\charts.js" $site
 Copy-Item "$repo\charts.css" $site
 Copy-Item "$repo\company-report.js" $site
 Copy-Item "$repo\pilot-core.js" $site
+Copy-Item "$repo\analytics.js" $site
 Copy-Item "$repo\vendor" "$site\vendor" -Recurse
 Copy-Item "$repo\content" "$site\content" -Recurse
 

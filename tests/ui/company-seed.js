@@ -9,6 +9,15 @@
   addEventListener('unhandledrejection', e => window.__errs.push('rejection: ' + (e.reason && e.reason.message || e.reason)));
   window.__scn = scn;
 
+  // The page may ask the email script for something before the test script has loaded, so the interception is
+  // installed here, first of all. Calls made too early wait in __pendingScripts until the test script is ready.
+  window.__pendingScripts = [];
+  const srcDesc = Object.getOwnPropertyDescriptor(HTMLScriptElement.prototype, 'src');
+  Object.defineProperty(HTMLScriptElement.prototype, 'src', { configurable: true, get(){ return srcDesc.get.call(this); }, set(v){
+    if (String(v).indexOf('script.google.com') === -1) { srcDesc.set.call(this, v); return; }
+    if (window.__scriptHook) window.__scriptHook(v); else window.__pendingScripts.push(v);
+  } });
+
   const me = { uid: 'uAdmin', email: 'Ann@Acme.com', displayName: 'Ann Admin', getIdToken: async function(){ return 'tok'; } };
   window.__fakeUser = scn === 'signedout' ? null
     : (scn === 'owner' || scn === 'ownernoorg') ? { uid: 'owner1', email: 'owner@x.com', displayName: 'Owner', getIdToken: async function(){ return 'tok'; } }

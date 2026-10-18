@@ -13,6 +13,8 @@ None of these touch the live site, your Firebase project, or send real email.
 | Saving and emailing "Request more information" leads (validation, scoring, spam rules) | `apps-script/lead-test.html` | same as the line below, with `lead-test.html` |
 | The Reports numbers, insight sentences, AI privacy guard and weekly email (the server side) | `reports-logic.test.mjs` | `node tests/reports-logic.test.mjs` |
 | The company admin's report (sentences, funnel, comparison, trend, what "Explain with AI" may send) | `company-report.test.mjs` | `node --experimental-default-type=module tests/company-report.test.mjs` |
+| The sitemap and robots.txt (the sitemap lists exactly the pages that may be indexed) | `sitemap.test.mjs` | `node --experimental-default-type=module tests/sitemap.test.mjs` |
+| Google Analytics: where it runs, what it sends, and which pages carry it | `analytics.test.mjs` | `node --experimental-default-type=module tests/analytics.test.mjs` |
 | The pilot tracker's logic (stages, run book, goals, baseline, health) | `pilot-core.test.mjs` | `node --experimental-default-type=module tests/pilot-core.test.mjs` |
 | Which address each email comes from, the welcome email, and the company "Explain with AI" (the server side) | `mail-and-org-ai.test.mjs` | `node --experimental-default-type=module tests/mail-and-org-ai.test.mjs` |
 | The admin welcome and the tool launch emails (who may send, limits, wording, no double sends) | `admin-welcome-and-launch.test.mjs` | `node --experimental-default-type=module tests/admin-welcome-and-launch.test.mjs` |

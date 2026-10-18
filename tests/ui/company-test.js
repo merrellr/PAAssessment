@@ -28,12 +28,8 @@ const tileNum = (label) => {
 let backendMode = 'ok';
 let aiMode = 'ok';
 const backendCalls = [];
-const srcDesc = Object.getOwnPropertyDescriptor(HTMLScriptElement.prototype, 'src');
-Object.defineProperty(HTMLScriptElement.prototype, 'src', {
-  configurable: true,
-  get(){ return srcDesc.get.call(this); },
-  set(v){
-    if (String(v).indexOf('script.google.com') === -1) { srcDesc.set.call(this, v); return; }
+window.__scriptHook = (v) => {
+  {
     const p = Object.fromEntries(new URL(v).searchParams);
     backendCalls.push(p);
     setTimeout(() => {
@@ -51,7 +47,8 @@ Object.defineProperty(HTMLScriptElement.prototype, 'src', {
       else cb(null);
     }, 15);
   }
-});
+};
+(window.__pendingScripts || []).splice(0).forEach(v => window.__scriptHook(v));
 
 /* Downloads: capture the file instead of saving it. */
 const downloads = [];

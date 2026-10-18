@@ -18,6 +18,7 @@ function done(){
 (async function run(){
   try {
     await sleep(400);
+    t('the analytics script is on the page but does nothing on a local test server', !!document.querySelector('script[src="analytics.js"]') && window.dataLayer === undefined && !document.querySelector('script[src*="googletagmanager"]'));
     t('the intro screen is showing', active() === 'intro' || /intro|start/.test(active()), active());
     document.querySelector('button[onclick="startQuiz()"]').click();
     await sleep(60);
