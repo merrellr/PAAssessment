@@ -39,6 +39,65 @@ function done(){
       t('anyone but the owner is turned away and sees nothing', vis('stateNotOwner') && !vis('page'));
     } else if (scn === 'empty'){
       t('with no tools yet, the page offers the ten starting tools', vis('page') && /Add the 10 starting tools/.test($('starterBtn').textContent) && /No tools yet/.test(txt('toolsWrap')));
+    } else if (scn === 'launch'){
+      const row = (id) => $('notifyWrap').querySelector('tr[data-notify="' + id + '"]');
+      const sendBtn = (id) => $('notifyWrap').querySelector('button[data-send="' + id + '"]');
+      const prevBtn = (id) => $('notifyWrap').querySelector('button[data-preview="' + id + '"]');
+      const calls = [];
+      let mode = 'ok';
+      const srcDesc = Object.getOwnPropertyDescriptor(HTMLScriptElement.prototype, 'src');
+      Object.defineProperty(HTMLScriptElement.prototype, 'src', { configurable: true, get(){ return srcDesc.get.call(this); }, set(v){
+        if (String(v).indexOf('script.google.com') === -1) { srcDesc.set.call(this, v); return; }
+        const p = Object.fromEntries(new URL(v).searchParams);
+        calls.push(p);
+        setTimeout(() => {
+          const cb = window[p.callback]; if (!cb) return;
+          if (mode === 'down') return cb(null);
+          if (mode === 'old') return cb({ totalCompletions: 3 });
+          if (p.preview === '1') return cb({ ok: true, preview: true, to: 'rob@owner.com', people: 2 });
+          if (mode === 'ok') return cb({ ok: true, sent: 2, alreadySent: 0, remaining: 0, people: 2 });
+          if (mode === 'rest') return cb({ ok: true, sent: 1, alreadySent: 2, remaining: 4, people: 7 });
+          if (mode === 'none') return cb({ ok: true, sent: 0, alreadySent: 2, remaining: 0, people: 2 });
+          if (mode === 'partial') return cb({ ok: true, error: 'partial', sent: 1, remaining: 1, people: 2, detail: 'mail down' });
+          cb({ ok: false, error: mode });
+        }, 15);
+      } });
+      const messages = [];
+      window.confirm = (m) => { messages.push(m); return confirmAnswer; };
+
+      t('the launch list shows the tools that have people waiting', !!row('tC') && !!row('tD') && !!row('tA'));
+      t('a released tool with its launch link can be sent, and a preview sent to the owner', !!sendBtn('tC') && !sendBtn('tC').disabled && !prevBtn('tC').disabled);
+      t('a released tool with no launch link yet cannot, and says why', sendBtn('tD').disabled && /Add the launch link first/.test(sendBtn('tD').title) && prevBtn('tD').disabled);
+      t('a tool that is not released cannot, and says why', sendBtn('tA').disabled && /Released first/.test(sendBtn('tA').title));
+      t('the hint explains the emails, the preview and the daily limit', /Send launch emails/.test(document.body.textContent) && /Toolkit Notification/.test(document.body.textContent) && /about 100 emails a day/.test(document.body.textContent));
+
+      prevBtn('tC').click(); await until(() => /preview of/.test(txt('notice')), 2500);
+      t('"Send me a preview" asks the server for a preview of that tool, as the owner, and reports where it went', calls.length === 1 && calls[0].action === 'toolLaunch' && calls[0].tool === 'tC' && calls[0].preview === '1' && calls[0].idToken === 'tok' && /A preview of "Gamma Released" was sent to rob@owner\.com/.test(txt('notice')), txt('notice') + ' ' + JSON.stringify(calls[0]));
+      t('a preview does not ask for confirmation', messages.length === 0);
+
+      confirmAnswer = false;
+      sendBtn('tC').click(); await sleep(60);
+      t('"Send launch emails" asks first, naming the tool and how many people; "Cancel" sends nothing', messages.length === 1 && /Gamma Released/.test(messages[0]) && /2 people/.test(messages[0]) && /already emailed.*skipped/.test(messages[0]) && calls.length === 1);
+      confirmAnswer = true;
+      sendBtn('tC').click(); await sleep(5);
+      t('while sending, every send button is switched off, so it cannot be pressed twice', Array.prototype.every.call($('notifyWrap').querySelectorAll('button[data-send], button[data-preview]'), b => b.disabled) && /Sending/.test(txt('notice')));
+      await until(() => /Sent to/.test(txt('notice')), 2500);
+      const send = calls[calls.length - 1];
+      t('confirming sends it, with no preview flag', send.action === 'toolLaunch' && send.tool === 'tC' && (send.preview === '' || send.preview === undefined) && send.idToken === 'tok');
+      t('the result is reported in plain words', /^Sent to 2 people\.$/.test(txt('notice')), txt('notice'));
+      t('and the buttons come back', !sendBtn('tC').disabled);
+
+      mode = 'rest'; sendBtn('tC').click(); await until(() => /still to send/.test(txt('notice')), 2500);
+      t('a long list says how many were already emailed and how many are left for tomorrow', /Sent to 1 person\. 2 people were already emailed before\. 4 still to send: press the button again tomorrow\./.test(txt('notice')), txt('notice'));
+      mode = 'none'; sendBtn('tC').click(); await until(() => /Nobody new/.test(txt('notice')), 2500);
+      t('pressing it again when everyone has had it says nobody new', /Nobody new to email\. 2 people were already emailed before\./.test(txt('notice')), txt('notice'));
+      mode = 'partial'; sendBtn('tC').click(); await until(() => /Sent to 1 person/.test(txt('notice')), 2500);
+      t('if Gmail stops part-way, it says what was sent and to press again later', /Sent to 1 person/.test(txt('notice')) && /press the button again later/.test(txt('errorLine')), txt('notice') + ' / ' + txt('errorLine'));
+      for (const [m, re] of [['quota', /daily limit has been reached/], ['not_released', /Mark the tool as Released first/], ['no_link', /launch link/], ['not_owner', /isn't the platform owner/], ['votes_unreadable', /security rules/], ['mail_error', /Nothing was recorded/], ['old', /Paste the latest Apps Script/], ['down', /couldn't reach the email service/]]) {
+        mode = m; sendBtn('tC').click(); await sleep(5); await until(() => !sendBtn('tC').disabled, 2500); await sleep(30);
+        t('error "' + m + '" is explained plainly', re.test(txt('errorLine')), txt('errorLine'));
+      }
+      t('the copy-emails fallback is still there', !!btn(row('tC'), 'Copy emails'));
     } else {
       t('the owner sees the page', vis('page'));
       const tiles = Array.prototype.map.call($('tiles').querySelectorAll('.tile'), x => textOf(x));

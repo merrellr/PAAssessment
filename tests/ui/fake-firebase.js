@@ -57,7 +57,7 @@ if (window.__seed) window.__seed(store, Timestamp);
 const authCbs = [];   // like the real SDK, every listener hears about every sign-in and sign-out
 function fireAuth(u){ authCbs.slice().forEach(cb => cb(u)); }
 export function initializeApp(){ return {}; }
-export function getAuth(){ return {}; }
+export function getAuth(){ return { get currentUser(){ return window.__fakeUser || null; } }; }   // like the real thing, the signed-in person
 export function onAuthStateChanged(auth, cb){
   authCbs.push(cb);
   setTimeout(() => cb(window.__fakeUser === undefined ? { uid: 'owner1', email: 'owner@x.com', getIdToken: async () => 'fake-id-token' } : window.__fakeUser), 0);

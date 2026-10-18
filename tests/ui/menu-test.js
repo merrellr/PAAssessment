@@ -20,6 +20,26 @@ const key = (k) => document.dispatchEvent(new KeyboardEvent('keydown', { key: k,
       t('a brand-new account asks for the welcome email, once, with its sign-in token', welcomeCalls().length === 1 && welcomeCalls()[0].idToken === 'tok' && Object.keys(welcomeCalls()[0]).sort().join() === 'action,callback,idToken', JSON.stringify(window.__calls));
       t('and remembers it was done', stored() === '1');
       t('the Profile menu still appears as normal', !!$('paAccountBtn'));
+    } else if (/^adminjoin/.test(scn) || scn === 'membernew'){
+      const adminCalls = () => window.__calls.filter(c => c.action === 'adminWelcome');
+      const key = () => { try { return localStorage.getItem('pa_adminwelcomed_uJoin_orgA'); } catch (e) { return null; } };
+      if (scn === 'adminjoinnew'){
+        t('a person who has just joined a company as its admin asks for the admin welcome, once, naming the company', adminCalls().length === 1 && adminCalls()[0].org === 'orgA' && adminCalls()[0].idToken === 'tok' && Object.keys(adminCalls()[0]).sort().join() === 'action,callback,idToken,org', JSON.stringify(window.__calls));
+        t('and remembers it was done', key() === '1');
+        t('it does not also treat them as a brand-new account (they signed up 40 days ago)', window.__calls.filter(c => c.action === 'welcome').length === 0);
+      } else if (scn === 'adminjoinold'){ t('an admin who joined ten days ago does not ask', adminCalls().length === 0);
+      } else if (scn === 'adminjoinremoved'){ t('an admin whose membership has ended does not ask', adminCalls().length === 0);
+      } else if (scn === 'membernew'){ t('a plain member does not ask for the admin welcome', adminCalls().length === 0);
+      } else if (scn === 'adminjoindone'){ t('an admin already welcomed on this browser does not ask again', adminCalls().length === 0);
+      } else if (scn === 'adminjoinfail' || scn === 'adminjoindown'){ t('if the script reports a problem or cannot be reached it is not marked done, so a later page load tries again', adminCalls().length === 1 && key() === null);
+      } else if (scn === 'adminjoinlate'){
+        t('nothing is asked until the membership exists', adminCalls().length === 0);
+        window.__store['memberships/uJoin'] = window.__lateMembership;
+        window.dispatchEvent(new Event('pa-membership-changed')); await sleep(150);
+        t('when the invitation page announces the new membership, the welcome is requested straight away', adminCalls().length === 1 && adminCalls()[0].org === 'orgA', JSON.stringify(window.__calls));
+        window.dispatchEvent(new Event('pa-membership-changed')); await sleep(100);
+        t('announcing it again asks nothing more', adminCalls().length === 1);
+      }
     } else if (scn === 'oldaccount'){
       t('an account made ten days ago does not ask', window.__calls.length === 0);
       t('the menu is unaffected', !!$('paAccountBtn'));

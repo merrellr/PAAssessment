@@ -176,7 +176,7 @@
       <div class="section-head">
         <div>
           <h2>Launch emails</h2>
-          <div class="hint">People who ticked "Email me when this launches". When a tool is released, copy its list into the BCC line of one email (Gmail allows about 100 recipients a day). Only use these addresses for that launch notice.</div>
+          <div class="hint">People who ticked "Email me when this launches". When a tool is released (with its launch link filled in), press <strong>Send launch emails</strong>: each person gets one email from "Toolkit Notification" and nobody is emailed twice for the same tool. <strong>Send me a preview</strong> sends one copy to you first. Gmail allows about 100 emails a day, so a long list goes out in batches: press the button again the next day for the rest. Only use these addresses for that launch notice.</div>
         </div>
         <button class="btn btn-ghost btn-small" id="csvBtn" type="button">Download all (CSV)</button>
       </div>
@@ -238,6 +238,7 @@ let fromSuggestion = null;  // the suggestion being approved, while its form is 
 
 onAuthStateChanged(auth, async (user) => {
   if (!user){ showOnly('stateSignedOut'); return; }
+  currentUser = user;
   try {
     const snap = await getDoc(doc(db, 'platformAdmins', user.uid));
     if (!snap.exists()){ showOnly('stateNotOwner'); return; }
@@ -486,7 +487,78 @@ function renderNotify(){
     el('tbody', null, ...rows.map(r => el('tr', { 'data-notify': r.tool.id },
       el('td', null, el('div', { class: 'cell-name', text: r.tool.title }), el('span', { class: 'pill s-' + r.tool.status, text: TC.STATUS_LABELS[r.tool.status] })),
       el('td', { class: 'num', text: String(r.emails.length) }),
-      el('td', null, el('button', { class: 'btn btn-ghost btn-small', type: 'button', text: 'Copy emails', onclick: () => copyEmails(r) })))))));
+      el('td', null, el('div', { class: 'btn-row' },
+        launchButtons(r),
+        el('button', { class: 'btn btn-ghost btn-small', type: 'button', text: 'Copy emails', onclick: () => copyEmails(r) }))))))));
+}
+
+/* The launch emails are sent by the Apps Script (see Code.gs section 13), which re-checks that this is the platform
+   owner and reads the addresses itself. The page only says which tool. */
+const RESULTS_LOG_URL = "https://script.google.com/macros/s/AKfycbynJQYF9rv5maL_CGniS9UGhTDfBVeW3gVhEWUsFdGOqquv4osGx4nQvc8jNkaaY6wrrg/exec";
+let currentUser = null;
+let sendingFor = null;
+
+function callBackend(params){
+  return new Promise((resolve) => {
+    const cb = 'toolCb_' + Date.now() + '_' + Math.floor(Math.random() * 1e6);
+    const script = document.createElement('script');
+    let settled = false;
+    const finish = (v) => { if (settled) return; settled = true; clearTimeout(timer); delete window[cb]; script.remove(); resolve(v); };
+    const timer = setTimeout(() => finish(null), 120000);   // a long list takes a while
+    window[cb] = (r) => finish(r || null);
+    script.onerror = () => finish(null);
+    script.src = RESULTS_LOG_URL + '?' + new URLSearchParams(Object.assign({}, params, { callback: cb })).toString();
+    document.body.appendChild(script);
+  });
+}
+
+const LAUNCH_ERRORS = {
+  not_verified: 'Your sign-in could not be confirmed. Reload the page and try again.',
+  not_owner: "Your account isn't the platform owner, so the server refused.",
+  tool_not_found: 'That tool could not be found.',
+  not_released: 'Mark the tool as Released first.',
+  no_link: 'Add the tool\'s launch link (starting with https://) first.',
+  votes_unreadable: "The list of people couldn't be read. The latest security rules may not be published yet.",
+  quota: "Gmail's daily limit has been reached. Try again tomorrow.",
+  mail_error: 'Gmail could not send the emails. Nothing was recorded, so you can try again.',
+  partial: 'Gmail stopped part-way. Those already sent are recorded, so press the button again later for the rest.',
+  server_error: 'Something went wrong on the server. Please try again.'
+};
+
+function launchButtons(r){
+  const ready = r.tool.status === 'released' && /^https:\/\//.test(r.tool.launchUrl || '');
+  const why = ready ? '' : (r.tool.status !== 'released' ? 'Mark the tool as Released first' : 'Add the launch link first');
+  const send = el('button', { class: 'btn btn-primary btn-small', type: 'button', text: 'Send launch emails', 'data-send': r.tool.id, title: why, onclick: () => sendLaunch(r, false) });
+  const prev = el('button', { class: 'btn btn-ghost btn-small', type: 'button', text: 'Send me a preview', 'data-preview': r.tool.id, title: why, onclick: () => sendLaunch(r, true) });
+  if (!ready || sendingFor){ send.disabled = true; prev.disabled = true; }
+  return el('span', { style: 'display:contents;' }, send, prev);
+}
+
+async function sendLaunch(r, preview){
+  if (sendingFor) return;
+  if (!preview && !window.confirm('Send the launch email for "' + r.tool.title + '" to the ' + plural(r.emails.length, 'person', 'people') + ' who asked? People already emailed for this tool are skipped.')) return;
+  sendingFor = r.tool.id;
+  renderNotify();
+  $('errorLine').textContent = '';
+  $('notice').textContent = preview ? 'Sending you a preview…' : 'Sending…';
+  let res = null;
+  try { res = await callBackend({ action: 'toolLaunch', idToken: await currentUser.getIdToken(), tool: r.tool.id, preview: preview ? '1' : '' }); } catch (err){ res = null; }
+  sendingFor = null;
+  renderNotify();
+  if (!res){ $('notice').textContent = ''; $('errorLine').textContent = "We couldn't reach the email service. Check your connection and try again. If you pressed Send, check the ToolLaunchSent tab before sending again."; return; }
+  if (res.ok === undefined){ $('notice').textContent = ''; $('errorLine').textContent = "The email service isn't switched on yet. Paste the latest Apps Script (v8) and deploy a new version."; return; }
+  if (res.ok !== true){
+    $('notice').textContent = '';
+    $('errorLine').textContent = (LAUNCH_ERRORS[res.error] || 'Something went wrong.') + (res.detail ? ' (' + res.detail + ')' : '');
+    return;
+  }
+  if (res.preview){ $('notice').textContent = 'A preview of "' + r.tool.title + '" was sent to ' + res.to + '.'; return; }
+  if (res.error === 'partial'){ $('errorLine').textContent = LAUNCH_ERRORS.partial; }
+  const parts = [];
+  parts.push(res.sent ? 'Sent to ' + plural(res.sent, 'person', 'people') + '.' : 'Nobody new to email.');
+  if (res.alreadySent) parts.push(plural(res.alreadySent, 'person was', 'people were') + ' already emailed before.');
+  if (res.remaining) parts.push(res.remaining + ' still to send: press the button again tomorrow.');
+  $('notice').textContent = parts.join(' ');
 }
 
 async function copyEmails(r){

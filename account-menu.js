@@ -196,8 +196,30 @@ if (window.self === window.top) {
     } catch (e) { /* never get in the way of the page */ }
   }
 
+  /* The welcome for a company's admin: once they are an active admin who joined in the last two days, ask the script
+     (once per company) to send it. The script re-reads their membership with their own token, so it cannot be used
+     to send anything else. The invitation page announces a new membership with the "pa-membership-changed" event. */
+  const askedAdmin = {};
+  async function adminWelcomeIfDue(user){
+    try {
+      const m = await getDoc(doc(db, 'memberships', user.uid));
+      if (!m.exists()) return;
+      const d = m.data();
+      const joined = d.joinedAt && d.joinedAt.toMillis ? d.joinedAt.toMillis() : 0;
+      if (d.status !== 'active' || d.role !== 'admin' || !d.orgId || !joined || Date.now() - joined > WELCOME_WITHIN_MS) return;
+      const key = 'pa_adminwelcomed_' + user.uid + '_' + d.orgId;
+      try { if (localStorage.getItem(key) === '1') return; } catch (e) { /* storage blocked: the script still sends only once */ }
+      if (askedAdmin[key]) return;
+      askedAdmin[key] = true;
+      const res = await backend({ action: 'adminWelcome', idToken: await user.getIdToken(), org: d.orgId });
+      if (res && res.ok === true){ try { localStorage.setItem(key, '1'); } catch (e) { /* ignore */ } }
+      else delete askedAdmin[key];
+    } catch (e) { /* never get in the way of the page */ }
+  }
+  window.addEventListener('pa-membership-changed', () => { if (auth.currentUser) adminWelcomeIfDue(auth.currentUser); });
+
   onAuthStateChanged(auth, async (user) => {
-    if (user) welcomeIfNew(user);
+    if (user){ welcomeIfNew(user); adminWelcomeIfDue(user); }
     if (!MENU) return;
     const mine = ++token;
     if (!user){ remove(); return; }

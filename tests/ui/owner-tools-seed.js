@@ -25,6 +25,12 @@
     store['toolSuggestions/s1'] = { uid: 's1', email: 's1@x.com', text: 'Pricing worksheet for B2B products', status: 'pending', createdAt: now };
     store['toolSuggestions/s2'] = { uid: 's2', email: 's2@x.com', text: 'Something off topic', status: 'pending', createdAt: now };
     store['toolSuggestions/s3'] = { uid: 's3', email: 's3@x.com', text: 'Already handled', status: 'approved', createdAt: now };
+    if (scn === 'launch') {
+      // a released tool with people waiting, a released tool with no launch link yet, and the planned ones from above
+      vote('uE', 'tC', 'e@x.com', true); vote('uF', 'tC', 'f@x.com', false); vote('uG', 'tC', 'g@x.com', true);
+      store['tools/tD'] = tool('Delta Released No Link', 'released', 1, 4);
+      vote('uH', 'tD', 'h@x.com', true);
+    }
     if (scn === 'empty') { delete store['tools/tA']; delete store['tools/tB']; delete store['tools/tC']; }
   };
 })();

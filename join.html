@@ -342,6 +342,8 @@ $('acceptBtn').addEventListener('click', async () => {
     $('doneText').textContent = 'You\'ve joined as ' + JoinLogic.ROLE_LABEL[loaded.inv.role] + '. Your dashboard is ready whenever you are.';
     $('doneAdminLink').style.display = loaded.inv.role === 'admin' ? 'inline' : 'none';
     show('stateDone');
+    // Tells account-menu.js a membership now exists, so a new admin's welcome email goes out straight away.
+    window.dispatchEvent(new Event('pa-membership-changed'));
   } catch (err){
     console.error('Could not join:', err);
     if (err && err.code === 'permission-denied'){

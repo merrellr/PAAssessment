@@ -152,9 +152,11 @@ The Google Sheet: delete test rows from the **Responses** and **Progress** tabs.
 
 **When you release a tool**
 1. Edit the tool: set it to **Released** and paste the link. Click **Save tool**.
-2. In **Launch emails**, click **Copy emails** beside that tool.
-3. Open a new email in Gmail. Put yourself in **To** and paste the addresses into **BCC** (never in To or Cc). Gmail allows about 100 recipients a day, so send in batches if the list is long.
-4. Keep the message short: say you are writing because they asked to hear when it launched, link the tool, and thank them. Do not use the addresses for anything else.
+2. In **Launch emails**, click **Send me a preview** beside that tool. A copy arrives in your own inbox, marked [Preview], so you can see exactly what people will get.
+3. Click **Send launch emails**. The page asks you to confirm, then each person who ticked "Email me when this launches" gets one email from **Toolkit Notification** (toolkit@productadvisory.co): it says they asked to hear when it launched, links the tool, and links the Tool Roadmap. Replies go to toolkit@.
+4. Nobody is ever emailed twice for the same tool (the **ToolLaunchSent** tab of your results sheet remembers). Gmail allows about 100 emails a day, and the page always leaves 15 spare for invitations and requests, so a long list goes out in batches of up to 80. The page tells you how many are left: press the button again tomorrow. Someone who ticks the box after you sent is simply emailed next time you press it.
+5. If it says the email service isn't switched on, paste the latest Code.gs and make a new version (section 7). **Copy emails** and the CSV are still there if you ever want to write to people yourself.
+6. Deleting an account also removes that person from the ToolLaunchSent tab.
 
 **Rules of thumb**
 - Start with about 10 tools. Add the best suggestions over time.
@@ -225,10 +227,10 @@ Open any company from the Owner Console and press **Team dashboard** (or sign in
 | Address | Used for |
 |---|---|
 | noreply@productadvisory.co | The welcome email, and the automatic notices to you (new requests, the Monday report). Password-reset and verification emails come from Firebase (see below). |
-| assessment@productadvisory.co | Replies to the welcome email and to company invitation emails (questions about an assessment or an account). |
+| assessment@productadvisory.co | The sender of company invitation emails and of the **admin welcome**, and where replies to the welcome emails go (questions about an assessment, an account or the dashboard). |
 | sales@productadvisory.co | The "Request more information" thank-you. People who reply reach sales. |
 | info@productadvisory.co | The public contact address shown on the site and the fallback when the request form cannot send. |
-| toolkit@productadvisory.co | Shown on the Tool Roadmap page for toolkit questions; use it later for "your tool has launched" emails. |
+| toolkit@productadvisory.co | Shown on the Tool Roadmap page for toolkit questions, and the sender of the launch emails ("Toolkit Notification"). |
 | feedback@productadvisory.co | The **Send feedback** item in every Profile menu. |
 | legal@productadvisory.co | Privacy and legal questions (named in the welcome email). |
 | marketing@productadvisory.co | Not used yet. Keep it for a newsletter, which needs an unsubscribe link. |
@@ -244,6 +246,8 @@ Open any company from the Owner Console and press **Team dashboard** (or sign in
 6. Click **Deploy**, **Manage deployments**, the pencil, **New version**, **Deploy**.
 
 **Password-reset and sign-in verification emails** are sent by Firebase, not by the script. In the Firebase console go to **Authentication**, **Templates**, pick **Password reset**, click the pencil, set **Sender name** to Product Advisory Learning and **Reply to** to assessment@productadvisory.co, and save. Do the same for **Email address verification**. The console also offers **Customize domain** on that page, which lets the sender become noreply@productadvisory.co once you add two DNS records at your domain host. That is optional.
+
+**The admin welcome.** When someone accepts an invitation to join a company as its **admin**, they get one extra email, "Your [company] dashboard is ready", from assessment@ (if you set the alias up; otherwise from your main address with replies to assessment@). It explains in five steps how to open the dashboard, invite people, choose a focus, ask everyone to take the free assessment and read the Report, and names sales@ for seats and pricing, legal@ for privacy questions and feedback@. You also get a short email, "Admin joined: [company]", with a link to that company's pilot tracker, so you know the pilot has started. It is sent once per admin per company (the **AdminWelcomes** tab remembers) and a new admin also receives the ordinary welcome email a moment before it.
 
 **The welcome email.** Every new account gets one short welcome email the first time they open any page of the site after signing up (it is sent once, and the **Welcomes** tab of your results sheet records who has had one). To see it, create a test account with an address you can read (for example yourname+test1@gmail.com goes to your own inbox). If it does not arrive within a minute, check the spam folder, then check that the latest Code.gs is deployed (section 7). Deleting an account also removes its row from the Welcomes tab.
 

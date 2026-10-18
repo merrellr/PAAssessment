@@ -15,6 +15,7 @@ None of these touch the live site, your Firebase project, or send real email.
 | The company admin's report (sentences, funnel, comparison, trend, what "Explain with AI" may send) | `company-report.test.mjs` | `node --experimental-default-type=module tests/company-report.test.mjs` |
 | The pilot tracker's logic (stages, run book, goals, baseline, health) | `pilot-core.test.mjs` | `node --experimental-default-type=module tests/pilot-core.test.mjs` |
 | Which address each email comes from, the welcome email, and the company "Explain with AI" (the server side) | `mail-and-org-ai.test.mjs` | `node --experimental-default-type=module tests/mail-and-org-ai.test.mjs` |
+| The admin welcome and the tool launch emails (who may send, limits, wording, no double sends) | `admin-welcome-and-launch.test.mjs` | `node --experimental-default-type=module tests/admin-welcome-and-launch.test.mjs` |
 | Invite emails and the Gmail self-check | `apps-script/mail-test.html` | `msedge --headless --allow-file-access-from-files --virtual-time-budget=5000 --dump-dom file:///<path>/tests/apps-script/mail-test.html` and read the page title (PASS / FAIL lines) |
 
 ## How the page tests work

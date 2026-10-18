@@ -129,6 +129,14 @@ function doGet(e) {
     return jsonpOut_(e.parameter.callback, welcomeEndpoint_(e.parameter.idToken || ""));
   }
 
+  if (e.parameter.action === "adminWelcome") {
+    return jsonpOut_(e.parameter.callback, adminWelcomeEndpoint_(e.parameter.idToken || "", e.parameter.org || ""));
+  }
+
+  if (e.parameter.action === "toolLaunch") {
+    return jsonpOut_(e.parameter.callback, toolLaunchEndpoint_(e.parameter.idToken || "", e.parameter.tool || "", e.parameter.preview === "1"));
+  }
+
   if (e.parameter.action === "orgReportAi") {
     return jsonpOut_(e.parameter.callback, orgReportAiEndpoint_(e.parameter.idToken || "", e.parameter.org || "", e.parameter.facts || ""));
   }
@@ -702,7 +710,9 @@ function deleteAccountData_(idToken) {
       removed: {
         responses: deleteRowsByEmail_(ss.getSheetByName(SHEET_NAME), 2, who.email),
         progress: deleteRowsByEmail_(ss.getSheetByName(PROGRESS_SHEET_NAME), 1, who.email),
-        welcomes: deleteRowsByEmail_(ss.getSheetByName(WELCOME_SHEET_NAME_), 2, who.email)
+        welcomes: deleteRowsByEmail_(ss.getSheetByName(WELCOME_SHEET_NAME_), 2, who.email) +
+          deleteRowsByEmail_(ss.getSheetByName(ADMIN_WELCOME_SHEET_NAME_), 3, who.email) +
+          deleteRowsByEmail_(ss.getSheetByName(TOOL_LAUNCH_SHEET_NAME_), 2, who.email)
       }
     };
   } catch (err) {
@@ -1913,5 +1923,258 @@ function orgReportAiEndpoint_(idToken, orgId, factsJson) {
     return text ? { ok: true, text: text } : { ok: false, error: 'ai_error', detail: 'empty answer' };
   } catch (err) {
     return { ok: false, error: 'ai_error', detail: String(err && err.message || err).slice(0, 200) };
+  }
+}
+
+
+/* ==================================================================
+   12. WELCOME FOR A COMPANY'S ADMIN (once per admin per company)
+   ------------------------------------------------------------------
+   Sent when someone has just joined a company as an admin. The caller's
+   own token is used to read their own membership from Firestore, so it
+   only goes out for a real, active, recent admin membership, and only to
+   that person's own address. It comes from assessment@ (when Gmail has
+   that address set up) and replies go there. Rob is told, too, so a
+   pilot's admin joining shows up in the inbox. The "AdminWelcomes" tab
+   remembers who has had one.
+   ================================================================== */
+
+var ADMIN_WELCOME_SHEET_NAME_ = 'AdminWelcomes';
+var ADMIN_WELCOME_HEADERS_ = ['Sent', 'User ID', 'Company ID', 'Email'];
+var ADMIN_WELCOME_DAILY_CAP_ = 20;
+var ADMIN_WELCOME_MAX_AGE_MS_ = 3 * 86400000;
+
+function adminWelcomeBuild_(who, orgName) {
+  var first = String(who.name || '').trim().split(/\s+/)[0] || '';
+  var greeting = first ? 'Hi ' + first + ',' : 'Hi there,';
+  var org = String(orgName || 'your company');
+  var dash = SITE_BASE_URL_ + 'company.html';
+  var text = greeting + '\n\n' +
+    'You are now an admin of ' + org + ' on Product Advisory Learning. Here is how to get your team going.\n\n' +
+    '1. Open your company dashboard: ' + dash + '\n' +
+    '2. Invite your people. Press "Add users", paste their email addresses (one per line, with a name if you like) and tick "Send the emails". Each person gets a personal link that works once, and sees exactly what you can see before they agree to join.\n' +
+    '3. Choose your focus. Under "Our focus", drag the skills that matter most to the top. When two skills are equally good next steps for someone, yours comes first.\n' +
+    '4. Ask everyone to take the free assessment first. It shapes the courses they are given.\n' +
+    '5. Read your Report at the top of the dashboard: what stands out, how many people have started, how your team compares with everyone who has taken the assessment, and a weekly trend. "Print or save as PDF" gives you a page to share.\n\n' +
+    'Good to know:\n' +
+    '- Help with the dashboard or an invitation: reply to this email, or write to ' + MAIL_ADDR_.assessment + '.\n' +
+    '- Seats, plans and pricing: ' + MAIL_ADDR_.sales + '.\n' +
+    '- Privacy or data questions: ' + MAIL_ADDR_.legal + '.\n' +
+    '- Something that did not work, or an idea: ' + MAIL_ADDR_.feedback + '.\n\n' +
+    'Product Advisory\n';
+  var steps = [
+    ['Open your company dashboard', 'It is the one place for your people, your Report and your invitations.'],
+    ['Invite your people', 'Press <strong>Add users</strong>, paste their email addresses (one per line, with a name if you like) and tick <strong>Send the emails</strong>. Each person gets a personal link that works once, and sees exactly what you can see before they agree to join.'],
+    ['Choose your focus', 'Under <strong>Our focus</strong>, drag the skills that matter most to the top. When two skills are equally good next steps for someone, yours comes first.'],
+    ['Ask everyone to take the free assessment first', 'It shapes the courses they are given.'],
+    ['Read your Report', 'At the top of the dashboard: what stands out, how many people have started, how your team compares with everyone who has taken the assessment, and a weekly trend. <strong>Print or save as PDF</strong> gives you a page to share.']
+  ];
+  var html = '<div style="font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:1.55;color:#16213E;max-width:560px;">' +
+    '<p>' + escapeHtml_(greeting) + '</p>' +
+    '<p>You are now an admin of <strong>' + escapeHtml_(org) + '</strong> on Product Advisory Learning. Here is how to get your team going.</p>' +
+    '<ol style="margin:0 0 16px;padding-left:20px;">' + steps.map(function (s) {
+      return '<li style="margin-bottom:9px;"><strong>' + escapeHtml_(s[0]) + '.</strong> ' + s[1] + '</li>';
+    }).join('') + '</ol>' +
+    '<p style="margin:0 0 6px;"><a href="' + escapeHtml_(dash) + '" style="display:inline-block;padding:12px 20px;border-radius:8px;background:#1A4584;color:#ffffff;text-decoration:none;font-weight:bold;">Open your company dashboard</a></p>' +
+    '<p style="margin:18px 0 6px;color:#6B7686;font-size:13px;text-transform:uppercase;letter-spacing:.04em;">Good to know</p>' +
+    '<ul style="margin:0;padding-left:20px;font-size:14px;">' +
+    '<li style="margin-bottom:4px;">Help with the dashboard or an invitation: reply to this email, or write to <a href="mailto:' + MAIL_ADDR_.assessment + '">' + MAIL_ADDR_.assessment + '</a>.</li>' +
+    '<li style="margin-bottom:4px;">Seats, plans and pricing: <a href="mailto:' + MAIL_ADDR_.sales + '">' + MAIL_ADDR_.sales + '</a>.</li>' +
+    '<li style="margin-bottom:4px;">Privacy or data questions: <a href="mailto:' + MAIL_ADDR_.legal + '">' + MAIL_ADDR_.legal + '</a>.</li>' +
+    '<li>Something that did not work, or an idea: <a href="mailto:' + MAIL_ADDR_.feedback + '">' + MAIL_ADDR_.feedback + '</a>.</li></ul>' +
+    '<p style="margin-top:20px;">Product Advisory</p></div>';
+  return { subject: 'Your ' + org + ' dashboard is ready', text: text, html: html };
+}
+
+// Reads the caller's own membership. Returns null unless it is readable.
+function adminMembership_(who, idToken) {
+  var res = UrlFetchApp.fetch('https://firestore.googleapis.com/v1/projects/' + FIRESTORE_PROJECT_ID_ + '/databases/(default)/documents/memberships/' + encodeURIComponent(who.uid),
+    { method: 'get', headers: { Authorization: 'Bearer ' + idToken }, muteHttpExceptions: true });
+  if (res.getResponseCode() !== 200) return null;
+  var f = JSON.parse(res.getContentText()).fields || {};
+  var s = function (k) { return f[k] && f[k].stringValue !== undefined ? f[k].stringValue : ''; };
+  return { orgId: s('orgId'), orgName: s('orgName'), role: s('role'), status: s('status'),
+    joinedAtMs: f.joinedAt && f.joinedAt.timestampValue ? Date.parse(f.joinedAt.timestampValue) : 0 };
+}
+
+function adminWelcomeEndpoint_(idToken, orgId) {
+  var who = null;
+  try { who = verifyFirebaseIdToken_(idToken); } catch (err) { who = null; }
+  if (!who) return { ok: false, error: 'not_verified' };
+  if (!/^[A-Za-z0-9_-]{4,64}$/.test(String(orgId || ''))) return { ok: false, error: 'not_admin' };
+  var m = null;
+  try { m = adminMembership_(who, idToken); } catch (err) { m = null; }
+  if (!m || m.orgId !== orgId || m.role !== 'admin' || m.status !== 'active') return { ok: false, error: 'not_admin' };
+  if (!m.joinedAtMs || Date.now() - m.joinedAtMs > ADMIN_WELCOME_MAX_AGE_MS_) return { ok: true, skipped: 'not_new' };
+
+  var lock = null, locked = false;
+  try { lock = LockService.getScriptLock(); locked = lock.tryLock(10000); } catch (err) { /* carry on without it */ }
+  try {
+    var ss = SpreadsheetApp.getActiveSpreadsheet();
+    var sheet = ss.getSheetByName(ADMIN_WELCOME_SHEET_NAME_);
+    if (!sheet) {
+      sheet = ss.insertSheet(ADMIN_WELCOME_SHEET_NAME_);
+      sheet.appendRow(ADMIN_WELCOME_HEADERS_);
+      sheet.setFrozenRows(1);
+    }
+    var last = sheet.getLastRow();
+    if (last >= 2) {
+      var ids = sheet.getRange(2, 2, last - 1, 2).getValues();
+      for (var i = 0; i < ids.length; i++) if (String(ids[i][0]) === who.uid && String(ids[i][1]) === orgId) return { ok: true, skipped: 'already' };
+    }
+    var props = PropertiesService.getScriptProperties();
+    var dayKey = 'adminwelcomeday_' + Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'yyyy-MM-dd');
+    var sentToday = Number(props.getProperty(dayKey) || 0);
+    if (sentToday >= ADMIN_WELCOME_DAILY_CAP_) return { ok: false, error: 'daily_limit' };
+    if (MailApp.getRemainingDailyQuota() < 10) return { ok: false, error: 'quota' };
+
+    var mail = adminWelcomeBuild_(who, m.orgName);
+    try {
+      sendMail_({ to: who.email, subject: mail.subject, body: mail.text, htmlBody: mail.html, name: 'Product Advisory Learning', replyTo: MAIL_ADDR_.assessment }, 'assessment');
+    } catch (err) {
+      return { ok: false, error: 'mail_error', detail: String(err && err.message || err).slice(0, 200) };
+    }
+    sheet.appendRow([new Date(), who.uid, orgId, who.email]);
+    props.getKeys().forEach(function (k) { if (k.indexOf('adminwelcomeday_') === 0 && k !== dayKey) props.deleteProperty(k); });
+    props.setProperty(dayKey, String(sentToday + 1));
+
+    // A short notice for Rob: a pilot's admin has arrived. Best effort.
+    try {
+      if (MailApp.getRemainingDailyQuota() >= 5) {
+        var note = who.email + ' has joined ' + m.orgName + ' as an admin and has been sent the admin welcome.\nOpen the pilot tracker: ' + SITE_BASE_URL_ + 'owner-pilot.html?org=' + orgId + '\n';
+        sendMail_({ to: LEAD_NOTIFY_EMAIL_, subject: 'Admin joined: ' + m.orgName, body: note, name: 'Product Advisory Learning' }, 'noreply');
+      }
+    } catch (noteErr) { /* the welcome itself already went out */ }
+    return { ok: true, sent: true };
+  } catch (err) {
+    return { ok: false, error: 'server_error' };
+  } finally {
+    if (locked) lock.releaseLock();
+  }
+}
+
+
+/* ==================================================================
+   13. TOOL LAUNCH EMAILS (from "Toolkit Notification")
+   ------------------------------------------------------------------
+   People who ticked "Email me when this launches" on the Tool Roadmap get
+   one email when the owner marks that tool Released and presses "Send
+   launch emails" on the tool roadmap admin page. Only the platform owner
+   can send. The addresses come from the people's own vote records (read
+   with the owner's token), never from the request. A person is emailed at
+   most once per tool: the "ToolLaunchSent" tab remembers. Gmail allows
+   about 100 emails a day, so each press sends at most TOOL_LAUNCH_RUN_MAX_
+   and always leaves a reserve for invitations and requests; press again
+   tomorrow to send the rest. "Send me a preview" sends one copy to the
+   owner only and records nothing.
+   ================================================================== */
+
+var TOOL_LAUNCH_SHEET_NAME_ = 'ToolLaunchSent';
+var TOOL_LAUNCH_HEADERS_ = ['Sent', 'Tool ID', 'Email'];
+var TOOL_LAUNCH_RUN_MAX_ = 80;
+var TOOL_LAUNCH_RESERVE_ = 15;      // emails left over for invitations and requests
+var TOOL_LAUNCH_FROM_NAME_ = 'Toolkit Notification';
+
+function toolLaunchBuild_(tool) {
+  var title = String(tool.title || 'Your toolkit');
+  var link = String(tool.launchUrl);
+  var desc = String(tool.description || '').trim();
+  var vote = SITE_BASE_URL_ + 'tool-requests.html';
+  var text = 'Hi,\n\n' +
+    'You asked us to tell you when ' + title + ' launched. It is ready.\n\n' +
+    (desc ? desc + '\n\n' : '') +
+    'Open it here: ' + link + '\n\n' +
+    'Want a say in what we build next? Vote on the Tool Roadmap: ' + vote + '\n\n' +
+    'You are getting this one email because you ticked "Email me when this launches" for this tool. We will not email you about it again. Questions or ideas: ' + MAIL_ADDR_.toolkit + '.\n\n' +
+    'Product Advisory\n';
+  var html = '<div style="font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:1.55;color:#16213E;max-width:540px;">' +
+    '<p>Hi,</p>' +
+    '<p>You asked us to tell you when <strong>' + escapeHtml_(title) + '</strong> launched. It is ready.</p>' +
+    (desc ? '<p style="color:#4B5768;">' + escapeHtml_(desc) + '</p>' : '') +
+    '<p style="margin:20px 0;"><a href="' + escapeHtml_(link) + '" style="display:inline-block;padding:12px 22px;border-radius:8px;background:#1A4584;color:#ffffff;text-decoration:none;font-weight:bold;">Open ' + escapeHtml_(title) + '</a></p>' +
+    '<p>Want a say in what we build next? <a href="' + escapeHtml_(vote) + '">Vote on the Tool Roadmap</a>.</p>' +
+    '<p style="color:#6B7686;font-size:13px;margin-top:22px;">You are getting this one email because you ticked &ldquo;Email me when this launches&rdquo; for this tool. We will not email you about it again. Questions or ideas: <a href="mailto:' + MAIL_ADDR_.toolkit + '">' + MAIL_ADDR_.toolkit + '</a>.</p>' +
+    '<p style="margin-top:18px;">Product Advisory</p></div>';
+  return { subject: title + ' is here', text: text, html: html };
+}
+
+function toolLaunchRead_(toolId, idToken) {
+  var base = 'https://firestore.googleapis.com/v1/projects/' + FIRESTORE_PROJECT_ID_ + '/databases/(default)/documents';
+  var headers = { Authorization: 'Bearer ' + idToken };
+  var tr = UrlFetchApp.fetch(base + '/tools/' + encodeURIComponent(toolId), { method: 'get', headers: headers, muteHttpExceptions: true });
+  if (tr.getResponseCode() !== 200) return { error: 'tool_not_found' };
+  var f = JSON.parse(tr.getContentText()).fields || {};
+  var s = function (k) { return f[k] && f[k].stringValue !== undefined ? f[k].stringValue : ''; };
+  var tool = { title: s('title'), description: s('description'), status: s('status'), launchUrl: s('launchUrl') };
+  var qr = UrlFetchApp.fetch(base + ':runQuery', { method: 'post', contentType: 'application/json', headers: headers, muteHttpExceptions: true,
+    payload: JSON.stringify({ structuredQuery: { from: [{ collectionId: 'toolVotes' }], limit: 5000,
+      where: { fieldFilter: { field: { fieldPath: 'toolId' }, op: 'EQUAL', value: { stringValue: toolId } } } } }) });
+  if (qr.getResponseCode() !== 200) return { error: 'votes_unreadable' };
+  var emails = [], seen = {};
+  JSON.parse(qr.getContentText()).forEach(function (row) {
+    var d = row.document && row.document.fields;
+    if (!d || !d.notify || d.notify.booleanValue !== true) return;
+    var e = d.email && d.email.stringValue ? String(d.email.stringValue).toLowerCase().trim() : '';
+    if (/^[^\s@,;]+@[^\s@,;]+\.[^\s@,;]+$/.test(e) && !seen[e]) { seen[e] = true; emails.push(e); }
+  });
+  return { tool: tool, emails: emails };
+}
+
+// preview: true sends one copy to the owner only and records nothing.
+function toolLaunchEndpoint_(idToken, toolId, preview) {
+  var auth = rpAuthorize_(idToken);
+  if (!auth.ok) return { ok: false, error: auth.error };
+  if (!/^[A-Za-z0-9_-]{4,64}$/.test(String(toolId || ''))) return { ok: false, error: 'tool_not_found' };
+  var read;
+  try { read = toolLaunchRead_(toolId, idToken); } catch (err) { return { ok: false, error: 'server_error' }; }
+  if (read.error) return { ok: false, error: read.error };
+  var tool = read.tool;
+  if (tool.status !== 'released') return { ok: false, error: 'not_released' };
+  if (!/^https:\/\/[^\s]+$/.test(tool.launchUrl)) return { ok: false, error: 'no_link' };
+  var mail = toolLaunchBuild_(tool);
+
+  if (preview) {
+    if (MailApp.getRemainingDailyQuota() < 1) return { ok: false, error: 'quota' };
+    try {
+      sendMail_({ to: auth.user.email, subject: '[Preview] ' + mail.subject, body: mail.text, htmlBody: mail.html, name: TOOL_LAUNCH_FROM_NAME_, replyTo: MAIL_ADDR_.toolkit }, 'toolkit');
+    } catch (err) { return { ok: false, error: 'mail_error', detail: String(err && err.message || err).slice(0, 200) }; }
+    return { ok: true, preview: true, to: auth.user.email, people: read.emails.length };
+  }
+
+  var lock = null, locked = false;
+  try { lock = LockService.getScriptLock(); locked = lock.tryLock(15000); } catch (err) { /* carry on without it */ }
+  try {
+    var ss = SpreadsheetApp.getActiveSpreadsheet();
+    var sheet = ss.getSheetByName(TOOL_LAUNCH_SHEET_NAME_);
+    if (!sheet) {
+      sheet = ss.insertSheet(TOOL_LAUNCH_SHEET_NAME_);
+      sheet.appendRow(TOOL_LAUNCH_HEADERS_);
+      sheet.setFrozenRows(1);
+    }
+    var done = {};
+    var last = sheet.getLastRow();
+    if (last >= 2) sheet.getRange(2, 2, last - 1, 2).getValues().forEach(function (r) { if (String(r[0]) === toolId) done[String(r[1]).toLowerCase()] = true; });
+    var todo = read.emails.filter(function (e) { return !done[e]; });
+    var already = read.emails.length - todo.length;
+    if (!todo.length) return { ok: true, sent: 0, alreadySent: already, remaining: 0, people: read.emails.length };
+
+    var room = MailApp.getRemainingDailyQuota() - TOOL_LAUNCH_RESERVE_;
+    if (room < 1) return { ok: false, error: 'quota', remaining: todo.length };
+    var batch = todo.slice(0, Math.min(room, TOOL_LAUNCH_RUN_MAX_));
+    var sent = 0, failure = '';
+    for (var i = 0; i < batch.length; i++) {
+      try {
+        sendMail_({ to: batch[i], subject: mail.subject, body: mail.text, htmlBody: mail.html, name: TOOL_LAUNCH_FROM_NAME_, replyTo: MAIL_ADDR_.toolkit }, 'toolkit');
+      } catch (err) { failure = String(err && err.message || err).slice(0, 200); break; }
+      sheet.appendRow([new Date(), toolId, batch[i]]);
+      sent++;
+    }
+    var res = { ok: !failure || sent > 0, sent: sent, alreadySent: already, remaining: todo.length - sent, people: read.emails.length };
+    if (failure) { res.error = sent ? 'partial' : 'mail_error'; res.detail = failure; res.ok = sent > 0; }
+    return res;
+  } catch (err) {
+    return { ok: false, error: 'server_error' };
+  } finally {
+    if (locked) lock.releaseLock();
   }
 }

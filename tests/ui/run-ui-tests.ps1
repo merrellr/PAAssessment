@@ -128,7 +128,7 @@ try {
   foreach ($s in 'anon', 'fresh', 'unverified', 'voter', 'suggested', 'approved', 'empty', 'loaderror') {
     $results += Run-Page "tool roadmap: $s" "$base/tool-requests-test.html?scn=$s" 40000
   }
-  foreach ($s in 'main', 'empty', 'notowner', 'signedout') {
+  foreach ($s in 'main', 'empty', 'notowner', 'signedout', 'launch') {
     $results += Run-Page "tool roadmap admin: $s" "$base/owner-tools-test.html?scn=$s" 40000
   }
   foreach ($s in 'org', 'individual', 'back', 'signedin', 'nobackend', 'fail', 'unconfirmed', 'ratelimit', 'rejected') {
@@ -151,6 +151,9 @@ try {
     $results += Run-Page "profile menu: $s" "$base/menu-test.html?scn=$s" 30000
   }
   foreach ($s in 'newaccount', 'oldaccount', 'welcomedone', 'welcomefail', 'welcomedown') {
+    $results += Run-Page "profile menu: $s" "$base/menu-test.html?scn=$s" 30000
+  }
+  foreach ($s in 'adminjoinnew', 'adminjoinold', 'adminjoinremoved', 'membernew', 'adminjoindone', 'adminjoinfail', 'adminjoindown', 'adminjoinlate') {
     $results += Run-Page "profile menu: $s" "$base/menu-test.html?scn=$s" 30000
   }
   $results += Run-Page 'profile menu: menu off, new account' "$base/menu-off-test.html?scn=newaccount" 30000
