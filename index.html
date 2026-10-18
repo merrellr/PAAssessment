@@ -105,6 +105,11 @@
 
   .q-count{ font-size:13px; color: var(--gray); margin-bottom: 4px; font-weight:500; }
   .q-category{ font-size:12px; color: var(--navy); font-weight:600; text-transform:uppercase; letter-spacing:0.04em; margin-bottom: 10px; }
+  .lock-badge{ display:inline-flex; align-items:center; gap:5px; font-size:11.5px; font-weight:700; text-transform:uppercase; letter-spacing:0.04em; padding:3px 10px; border-radius:20px; background:#EEF3FA; color: var(--navy); }
+  .locked-box{ border:1.5px dashed var(--line); border-radius:12px; padding:16px 18px; background:#FAFBFD; margin-bottom:16px; }
+  .locked-box p{ color: var(--ink-soft); }
+  .locked-note{ background:#F2FAFD; border:1px solid #BFE6F2; border-radius:10px; padding:12px 14px; font-size:13.5px; line-height:1.55; color: var(--ink); margin:0 0 16px; }
+  .locked-note a{ color: var(--navy); font-weight:600; }
 
   .q-text{
     font-size: 18px;
@@ -315,6 +320,28 @@
       <div class="field-error" id="scenarioError"></div>
       <div class="nav-row" style="justify-content:flex-end;">
         <button class="btn btn-primary" id="scenarioSubmitBtn" onclick="submitScenario()" disabled>See my results →</button>
+      </div>
+    </div>
+
+    <!-- SCREEN: THE SAME SCENARIO, LOCKED. Shown in place of the one above while
+         SCENARIO_ENABLED is false and SCENARIO_LOCKED is true: the question is
+         visible but cannot be answered, it says why, and one click carries on to
+         the results. Pointing at the Enterprise assessment is the whole idea. -->
+    <div data-screen="scenarioLocked">
+      <span class="q-category">AI Fluency — Organizational</span>
+      <div style="display:flex; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:16px;">
+        <div class="q-text" style="margin:0;">One more thing: a real scenario</div>
+        <span class="lock-badge"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>Enterprise</span>
+      </div>
+      <div class="locked-box">
+        <p style="margin-bottom:14px;">You're a product manager at a mid-size company. Leadership has asked teams to bring forward AI opportunities, but six months ago a different team's AI pilot (an automated customer-support triage tool) was quietly shut down after costing more than expected and never showing clear results. Your VP of Engineering, who has to allocate a team to build anything you propose, was burned by that project and is now wary of "AI" pitches in general.</p>
+        <p style="margin-bottom:14px;">You believe there's a real opportunity to use AI to reduce manual work in customer onboarding, and you have two engineers' worth of time available for one quarter, no more.</p>
+        <p style="margin-bottom:12px;"><strong>In a few sentences, write what you'd actually say to this VP to get a pilot approved.</strong></p>
+        <textarea rows="3" disabled aria-label="Locked: written answers are part of the Enterprise assessment" placeholder="Written answers are part of the Enterprise assessment" style="width:100%; padding:12px 14px; border:1.5px solid var(--line); border-radius:9px; font-family:'IBM Plex Sans', sans-serif; font-size:14.5px; background:#F3F5F8; color:var(--gray); resize:none;"></textarea>
+      </div>
+      <p class="locked-note" id="lockedScenarioNote"><strong>This step is part of our Enterprise assessment.</strong> There, an AI reads a written answer like this one, scores how well it handles the skeptical VP, and folds the result into the AI Fluency — Organizational score, with feedback on how it landed. It is switched off in the free assessment, and your result is complete without it. Want it for your team? <a id="enterpriseContactLink" href="request-info.html?src=assessment-enterprise&who=org" target="_blank" rel="noopener" onclick="funnelEvent('enterpriseInterest')">Contact us about Enterprise</a>.</p>
+      <div class="nav-row" style="justify-content:flex-end;">
+        <button class="btn btn-primary" id="lockedScenarioContinueBtn" onclick="continueFromLockedScenario()">See my results →</button>
       </div>
     </div>
 
@@ -983,6 +1010,15 @@ async function goNext(){
       return;
     }
 
+    // Switched off for the free assessment, but shown locked to the same
+    // people, as a pointer to the Enterprise assessment.
+    if (!SCENARIO_ENABLED && SCENARIO_LOCKED && mcScores.catPct.aiOrg > 25){
+      lastScores = mcScores;
+      showScreen('scenarioLocked');
+      funnelEvent('scenarioLockedShown');
+      return;
+    }
+
     clearQuizProgress(); // assessment finished — nothing left to resume
     await finishAssessment(mcScores);
   } else {
@@ -996,6 +1032,18 @@ async function goNext(){
 // is shown it and the assessment ends after the multiple-choice questions.
 // Flip to true to bring it back; the grading code below is untouched.
 const SCENARIO_ENABLED = false;
+
+// While SCENARIO_ENABLED is false: true shows the question locked, with a note
+// that it is part of the Enterprise assessment and a "Contact us" link; false
+// hides it completely. Ignored once SCENARIO_ENABLED is true.
+const SCENARIO_LOCKED = true;
+
+// "See my results" on the locked question: carry on exactly as if it had not been shown.
+async function continueFromLockedScenario(){
+  clearQuizProgress();
+  await finishAssessment(lastScores);
+}
+window.continueFromLockedScenario = continueFromLockedScenario;
 
 const SCENARIO_MIN_WORDS = 12;
 const SCENARIO_MAX_CHARS = 800; // matches the textarea's maxlength and the Apps Script handler
