@@ -54,23 +54,24 @@ window.__store = store;
 window.__writeLog = [];
 if (window.__seed) window.__seed(store, Timestamp);
 
-let authCb = null;
+const authCbs = [];   // like the real SDK, every listener hears about every sign-in and sign-out
+function fireAuth(u){ authCbs.slice().forEach(cb => cb(u)); }
 export function initializeApp(){ return {}; }
 export function getAuth(){ return {}; }
 export function onAuthStateChanged(auth, cb){
-  authCb = cb;
+  authCbs.push(cb);
   setTimeout(() => cb(window.__fakeUser === undefined ? { uid: 'owner1', email: 'owner@x.com', getIdToken: async () => 'fake-id-token' } : window.__fakeUser), 0);
 }
-export async function signOut(){ window.__fakeUser = null; if (authCb) authCb(null); }
-export async function createUserWithEmailAndPassword(auth, email){ window.__fakeUser = { uid: 'uCreated', email, displayName: null }; if (authCb) authCb(window.__fakeUser); return { user: window.__fakeUser }; }
+export async function signOut(){ window.__fakeUser = null; fireAuth(null); }
+export async function createUserWithEmailAndPassword(auth, email){ window.__fakeUser = { uid: 'uCreated', email, displayName: null }; fireAuth(window.__fakeUser); return { user: window.__fakeUser }; }
 export async function signInWithEmailAndPassword(auth, email, pw){
   if (pw === 'wrong') throw Object.assign(new Error('bad'), { code: 'auth/invalid-credential' });
-  window.__fakeUser = { uid: 'uSignedIn', email, displayName: 'Signed In' }; if (authCb) authCb(window.__fakeUser);
+  window.__fakeUser = { uid: 'uSignedIn', email, displayName: 'Signed In' }; fireAuth(window.__fakeUser);
 }
 export async function updateProfile(user, p){ Object.assign(user, p); }
 export async function sendEmailVerification(){}
 export class GoogleAuthProvider {}
-export async function signInWithPopup(){ window.__fakeUser = { uid: 'uGoogle', email: 'g@x.com', displayName: 'G User' }; if (authCb) authCb(window.__fakeUser); return { user: window.__fakeUser }; }
+export async function signInWithPopup(){ window.__fakeUser = { uid: 'uGoogle', email: 'g@x.com', displayName: 'G User' }; fireAuth(window.__fakeUser); return { user: window.__fakeUser }; }
 export function getAdditionalUserInfo(){ return { isNewUser: false }; }
 export function getFirestore(){ return {}; }
 export function doc(db, ...segs){
@@ -151,5 +152,5 @@ export async function deleteUser(user){
   window.__deleted = true;
   window.__fakeUser = null;
   window.__writeLog.push({ op: 'deleteUser', path: user.uid });
-  if (authCb) authCb(null);
+  fireAuth(null);
 }

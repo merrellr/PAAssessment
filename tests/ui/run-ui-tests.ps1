@@ -36,6 +36,8 @@ $errHook = '<script>window.__errs=[];addEventListener("error",function(e){__errs
 
 $share = [System.IO.File]::ReadAllText("$repo\org-share.js") -replace $fb, './fake-firebase.js'
 [System.IO.File]::WriteAllText("$site\org-share.js", $share)
+$menu = [System.IO.File]::ReadAllText("$repo\account-menu.js") -replace $fb, './fake-firebase.js'
+[System.IO.File]::WriteAllText("$site\account-menu.js", $menu)
 
 function Build-Page($page, $out, $seedScript, $testScript) {
   $html = [System.IO.File]::ReadAllText("$repo\$page") -replace $fb, './fake-firebase.js'
@@ -56,6 +58,9 @@ Build-Page 'tool-requests.html' 'tool-requests-test.html' 'tool-seed.js' 'tool-t
 Build-Page 'owner-tools.html' 'owner-tools-test.html' 'owner-tools-seed.js' 'owner-tools-test.js'
 Build-Page 'request-info.html' 'request-info-test.html' 'lead-seed.js' 'lead-test.js'
 Build-Page 'reports.html' 'reports-test.html' 'reports-seed.js' 'reports-test.js'
+$menuPage = "<!doctype html><html><head><script src=`"menu-seed.js`"></script></head><body><div class=`"wrap`"><p>A page</p></div><script type=`"module`" src=`"account-menu.js`"></script><script type=`"module`" src=`"menu-test.js`"></script></body></html>"
+[System.IO.File]::WriteAllText("$site\menu-test.html", $menuPage)
+[System.IO.File]::WriteAllText("$site\profile.html", $menuPage)   # same page under the name profile.html, to check the "you are here" marking
 [System.IO.File]::WriteAllText("$site\share-test.html", "<!doctype html><html><head>$errHook</head><body><script type=`"module`" src=`"share-test.js`"></script></body></html>")
 
 # a tiny web server, because browsers will not load ES modules from files
@@ -128,6 +133,10 @@ try {
   foreach ($s in 'main', 'notowner', 'signedout', 'oldscript', 'unreachable', 'serverrefuses') {
     $results += Run-Page "reports: $s" "$base/reports-test.html?scn=$s" 60000
   }
+  foreach ($s in 'plain', 'noname', 'owner', 'admin', 'removedadmin', 'memberrole', 'signedout') {
+    $results += Run-Page "profile menu: $s" "$base/menu-test.html?scn=$s" 30000
+  }
+  $results += Run-Page 'profile menu: current page' "$base/profile.html?scn=plain" 30000
   $results += Run-Page 'shared-record sync' "$base/share-test.html" 40000
 } finally {
   Stop-Job $server -ErrorAction SilentlyContinue

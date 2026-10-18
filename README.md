@@ -214,3 +214,9 @@ manual review — it holds no uid and isn't read by the app.
 - Each insight is a plain sentence written by fixed rules with a minimum sample (`RP_MIN_SAMPLE_`, 5): below that it says "too few to read a trend". **Explain with AI** (optional, per tab) sends only anonymous totals to Groq (never names, emails, companies or message text; a guard refuses anything that looks like an email address) and is limited to 30 a day. It needs the `GROQ_API_KEY` script property, the same one scenario grading uses.
 - Honest limits: the funnel counts anonymous events, so each step is a volume and not the same people followed through. "Active learners" are people who opened their dashboard in the period, because lesson completions are not time-stamped.
 - Tests: `tests/reports-logic.test.mjs` (the server's numbers and sentences, the privacy guard, the weekly email) and the `reports:` pages in `tests/ui/run-ui-tests.ps1`.
+
+## The Profile menu on every page
+
+- `account-menu.js` puts the same **Profile** button in the top right corner of every page except the learning dashboard (which has its own) and the invitation page (`join.html`). It appears only while someone is signed in. Add it to a new page with one line before `</body>`: `<script type="module" src="account-menu.js"></script>`.
+- It lists My learning dashboard, My profile, Vote on the next tool, Visit Product Advisory and Log out for everyone; Company dashboard only for an active company admin; Owner console and Reports only for the platform owner. The page you are on is shown in bold.
+- It finds the owner and the admin by reading `platformAdmins/{uid}` and `memberships/{uid}`, the same two records the dashboard menu uses, so no new security rules are needed. It is tested in `tests/ui/menu-test.js` ("profile menu" pages in the runner).
