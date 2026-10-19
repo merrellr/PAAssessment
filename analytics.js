@@ -21,13 +21,13 @@
      testing the site never shows up in the numbers.
    - Visitors who send "Do Not Track" or "Global Privacy Control" are never tracked, and are not shown the notice.
    - Advertising features are off (no ad personalization, no Google signals).
-   - Only a short list of harmless address parameters is sent with a page view (which course or lesson, which button
-     on the website the visitor came from). The rest of the address (an invitation token, a company id, the #part)
+   - Only a short list of harmless address parameters is sent with a page view (which course or lesson, which tool,
+     which button on the website the visitor came from). The rest of the address (an invitation token, a company id, the #part)
      is dropped before it leaves the browser. */
 (function (root) {
   'use strict';
   var MEASUREMENT_ID = 'G-4XFS1QWS9H';
-  var KEEP = ['course', 'lesson', 'src', 'who', 'call'];
+  var KEEP = ['course', 'lesson', 'src', 'who', 'call', 'tool'];
   var KEY = 'pa_cookie_consent';
   var PRIVACY_URL = 'https://www.productadvisory.co/privacy-policy';
   // EEA (EU + Iceland, Liechtenstein, Norway), UK and Switzerland, for Google's own IP-based check.

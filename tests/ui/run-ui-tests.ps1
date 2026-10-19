@@ -130,6 +130,7 @@ try {
   foreach ($s in 'anon', 'fresh', 'unverified', 'voter', 'suggested', 'approved', 'empty', 'loaderror') {
     $results += Run-Page "tool roadmap: $s" "$base/tool-requests-test.html?scn=$s" 40000
   }
+  $results += Run-Page 'tool roadmap: deeplink' "$base/tool-requests-test.html?scn=deeplink&tool=t4" 40000
   foreach ($s in 'main', 'empty', 'notowner', 'signedout', 'launch') {
     $results += Run-Page "tool roadmap admin: $s" "$base/owner-tools-test.html?scn=$s" 40000
   }

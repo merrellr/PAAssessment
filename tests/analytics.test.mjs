@@ -52,6 +52,7 @@ console.log('--- what is sent about the address ---');
   t('a plain page is sent as it is, without the #part', clean('https://assessment.productadvisory.co/index.html#results') === 'https://assessment.productadvisory.co/index.html');
   t('which course and lesson are kept', clean('https://assessment.productadvisory.co/lesson.html?course=discovery-novice&lesson=5') === 'https://assessment.productadvisory.co/lesson.html?course=discovery-novice&lesson=5');
   t('the button on the website that sent them is kept', clean('https://assessment.productadvisory.co/request-info.html?src=toolkits&who=org&call=1') === 'https://assessment.productadvisory.co/request-info.html?src=toolkits&who=org&call=1');
+  t('which tool a roadmap link pointed at is kept', clean('https://assessment.productadvisory.co/tool-requests.html?tool=ai-use-case-prioritization&src=site') === 'https://assessment.productadvisory.co/tool-requests.html?src=site&tool=ai-use-case-prioritization');
   t('an invitation token never leaves the browser', !/token|abc123/.test(clean('https://assessment.productadvisory.co/join.html?token=abc123abc123abc123')));
   t('a company id never leaves the browser', !/orgA|org=/.test(clean('https://assessment.productadvisory.co/company.html?org=orgA')));
   t('anything else is dropped, even next to allowed parameters', clean('https://assessment.productadvisory.co/lesson.html?email=a%40b.com&course=aiOrg-novice&x=1') === 'https://assessment.productadvisory.co/lesson.html?course=aiOrg-novice');

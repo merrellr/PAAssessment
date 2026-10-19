@@ -64,6 +64,7 @@
   .tool{ background: var(--surface); border:1px solid var(--line); border-radius: 14px; padding: 18px 20px; margin-bottom: 12px; }
   .tool.voted{ border-color: var(--cyan); box-shadow: 0 0 0 1px var(--cyan) inset; }
   .tool.released{ background:#F8FBF9; }
+  .tool.requested{ border-color: var(--navy); box-shadow: 0 0 0 3px rgba(53,194,232,0.35); }
   .tool-top{ display:flex; justify-content:space-between; gap:14px; align-items:flex-start; }
   .tool-title{ font-family:'Space Grotesk', sans-serif; font-weight:600; font-size: 16px; color: var(--navy-deep); margin: 0 0 4px; }
   .tool-meta{ display:flex; gap:6px; flex-wrap:wrap; margin-bottom: 8px; }
@@ -272,6 +273,11 @@ function render(){
   renderTools();
 }
 
+// tool-requests.html?tool=<id> (from "Vote for this" links on www.productadvisory.co) highlights that tool and
+// scrolls to it once the list has loaded.
+const REQUESTED = (() => { const v = new URLSearchParams(location.search).get('tool'); return v && /^[a-z0-9-]{1,60}$/.test(v) ? v : ''; })();
+let requestedShown = false;
+
 function renderTools(){
   const wrap = $('toolList');
   wrap.innerHTML = '';
@@ -286,6 +292,10 @@ function renderTools(){
   const sorted = TC.sortTools(tools);
   const max = Math.max.apply(null, sorted.map(t => t.voteCount || 0).concat([1]));
   sorted.forEach(tool => wrap.appendChild(toolCard(tool, max)));
+  if (REQUESTED && !requestedShown){
+    const card = wrap.querySelector('[data-tool="' + REQUESTED + '"]');
+    if (card){ requestedShown = true; setTimeout(() => card.scrollIntoView({ behavior: 'smooth', block: 'center' }), 60); }
+  }
 }
 
 function toolCard(tool, max){
@@ -321,7 +331,7 @@ function toolCard(tool, max){
       onclick: () => vote(tool) }));
   }
 
-  return el('div', { class: 'tool' + (mine ? ' voted' : '') + (released ? ' released' : ''), 'data-tool': tool.id },
+  return el('div', { class: 'tool' + (mine ? ' voted' : '') + (released ? ' released' : '') + (tool.id === REQUESTED ? ' requested' : ''), 'data-tool': tool.id },
     el('div', { class: 'tool-top' },
       el('div', null,
         el('h2', { class: 'tool-title', text: tool.title }),
