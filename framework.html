@@ -5,26 +5,27 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>The Training Framework — Product Advisory Learning</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@600&family=Lato:ital,wght@0,300;0,400;0,700;0,900;1,400&display=swap" rel="stylesheet">
+<script src="pa-prefs.js"></script>
 <style>
   :root{
     --navy:#1A4584; --navy-deep:#12305e; --cyan:#35C2E8; --gray:#9AA3AD;
     --ink:#16213E; --ink-soft:#4B5768; --line:#E3E9F0; --bg:#F5F8FB;
   }
   *{ box-sizing:border-box; }
-  body{ margin:0; background:var(--bg); font-family:'IBM Plex Sans', sans-serif; color:var(--ink); }
+  body{ margin:0; background:var(--bg); font-family:var(--sans); color:var(--ink); }
   .wrap{ max-width:900px; margin:0 auto; padding:0 16px 48px; }
   .brand-header{ display:flex; align-items:center; justify-content:space-between; gap:9px; padding:24px 0 14px; }
   .brand-header-left{ display:flex; align-items:center; gap:9px; text-decoration:none; }
-  .brand-word{ font-family:'Space Grotesk', sans-serif; font-weight:700; font-size:15px; color:var(--navy-deep); }
+  .brand-word{ font-family:var(--display); font-weight:700; font-size:0.9375rem; color:var(--navy-deep); }
   .brand-accent-bar{ height:3px; background:linear-gradient(90deg, var(--navy) 0%, var(--cyan) 100%); border-radius:2px; margin-bottom:28px; }
-  .back-link{ font-size:13px; color:var(--gray); text-decoration:none; display:inline-block; margin-bottom:16px; }
+  .back-link{ font-size:0.8125rem; color:var(--gray); text-decoration:none; display:inline-block; margin-bottom:16px; }
   .back-link:hover{ color:var(--navy); }
-  .card{ background:#fff; border:1px solid var(--line); border-radius:14px; padding:24px 26px; margin-bottom:18px; }
-  h1{ font-family:'Space Grotesk', sans-serif; font-size:24px; color:var(--navy-deep); margin:0 0 10px; }
-  h2{ font-family:'Space Grotesk', sans-serif; font-size:17px; color:var(--navy-deep); margin:0; }
-  p{ line-height:1.6; color:var(--ink-soft); font-size:14.5px; }
-  .eyebrow{ font-family:'Space Grotesk', sans-serif; font-weight:600; font-size:12px; letter-spacing:0.06em; color:var(--cyan); text-transform:uppercase; }
+  .card{ background:var(--surface); border:1px solid var(--line); border-radius:14px; padding:24px 26px; margin-bottom:18px; }
+  h1{ font-family:var(--display); font-size:1.5rem; color:var(--navy-deep); margin:0 0 10px; }
+  h2{ font-family:var(--display); font-size:1.0625rem; color:var(--navy-deep); margin:0; }
+  p{ line-height:1.6; color:var(--ink-soft); font-size:0.9062rem; }
+  .eyebrow{ font-family:var(--display); font-weight:600; font-size:0.75rem; letter-spacing:0.06em; color:var(--cyan); text-transform:uppercase; }
   .domain-header{ display:flex; align-items:center; gap:12px; margin-bottom:10px; }
   .domain-badge{ width:40px; height:40px; border-radius:10px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
 
@@ -34,28 +35,30 @@
   .tier-dots{ display:flex; gap:4px; flex-shrink:0; }
   .tier-dot{ width:9px; height:9px; border-radius:50%; border:1.5px solid var(--line); box-sizing:border-box; }
 
-  .legend-intro{ font-size:13px; color:var(--ink-soft); margin:18px 0 0; }
+  .legend-intro{ font-size:0.8125rem; color:var(--ink-soft); margin:18px 0 0; }
   .legend-intro strong{ color:var(--ink); }
   .tier-legend{ display:flex; flex-wrap:wrap; gap:10px 20px; align-items:center; margin-top:12px; }
-  .tier-legend .leg-item{ display:flex; align-items:center; gap:7px; font-size:12.5px; color:var(--ink-soft); }
+  .tier-legend .leg-item{ display:flex; align-items:center; gap:7px; font-size:0.7812rem; color:var(--ink-soft); }
 
   /* All four levels shown at once, two-by-two (one column on narrow screens). */
   .tier-grid{ display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:16px; }
   @media (max-width:560px){ .tier-grid{ grid-template-columns:1fr; } }
   .tier-cell{ background:var(--bg); border-radius:10px; padding:14px 16px; border-top:3px solid var(--line); }
   .tier-cell-head{ display:flex; align-items:center; gap:8px; margin-bottom:8px; }
-  .tier-cell-label{ font-family:'Space Grotesk', sans-serif; font-weight:700; font-size:12.5px; }
-  .tier-cell p{ font-size:13px; margin:0; line-height:1.55; }
+  .tier-cell-label{ font-family:var(--display); font-weight:700; font-size:0.7812rem; }
+  .tier-cell p{ font-size:0.8125rem; margin:0; line-height:1.55; }
 
   .overview-scroll{ overflow-x:auto; }
   #frameworkOverviewSvg{ display:block; min-width:380px; width:100%; height:auto; }
 
   .cta-row{ text-align:center; margin-top:28px; }
-  .btn{ display:inline-block; background:linear-gradient(135deg, var(--navy) 0%, var(--navy-deep) 100%); color:#fff; padding:12px 26px; border-radius:24px; text-decoration:none; font-weight:600; font-size:14.5px; }
+  .btn{ display:inline-block; background:linear-gradient(135deg, var(--navy) 0%, var(--primary-strong) 100%); color:var(--btn-ink); padding:12px 26px; border-radius:24px; text-decoration:none; font-weight:600; font-size:0.9062rem; }
 </style>
+<link rel="stylesheet" href="pa-theme.css">
 <script src="analytics.js"></script>
 </head>
 <body>
+<script src="pa-shell.js"></script>
 <div class="wrap">
 
   <div class="brand-header">
@@ -65,8 +68,8 @@
         <polygon points="20,10 29,15 29,25 20,30 11,25 11,15" fill="none" stroke="#35C2E8" stroke-width="1.5"/>
       </svg>
       <div>
-        <div style="font-family:'IBM Plex Sans', sans-serif; font-weight:600; font-size:10.5px; letter-spacing:0.06em; color:var(--gray); line-height:1;">PRODUCT ADVISORY</div>
-        <div class="brand-word" style="font-size:19px; line-height:1.3;">Learning</div>
+        <div style="font-family:var(--sans); font-weight:600; font-size:0.6562rem; letter-spacing:0.06em; color:var(--gray); line-height:1;">PRODUCT ADVISORY</div>
+        <div class="brand-word" style="font-size:1.1875rem; line-height:1.3;">Learning</div>
       </div>
     </a>
   </div>
@@ -84,7 +87,7 @@
 
   <div class="card">
     <span class="eyebrow">At a glance</span>
-    <h2 style="font-size:19px; margin-bottom:6px;">The seven skill domains</h2>
+    <h2 style="font-size:1.1875rem; margin-bottom:6px;">The seven skill domains</h2>
     <p style="margin-bottom:16px;">Everything below is organized under these seven areas. Each one carries the four experience levels described above, in full detail in the cards below.</p>
     <div class="overview-scroll">
       <figure style="margin:0;">
@@ -99,7 +102,7 @@
     <a href="index.html" class="btn" id="assessmentCta">Take the Assessment →</a>
   </div>
 
-  <div style="margin-top:40px; padding:20px 0; border-top:1px solid var(--line); text-align:center; font-size:12px; color:var(--gray);">
+  <div style="margin-top:40px; padding:20px 0; border-top:1px solid var(--line); text-align:center; font-size:0.75rem; color:var(--gray);">
     © <span id="footerYear"></span> Product Advisory, LLC. All rights reserved. &nbsp;·&nbsp;
     <a href="https://www.productadvisory.co/privacy-policy" target="_blank" rel="noopener" style="color:var(--gray); text-decoration:underline;">Privacy Policy</a> &nbsp;·&nbsp;
     <a href="https://www.productadvisory.co/terms-of-use" target="_blank" rel="noopener" style="color:var(--gray); text-decoration:underline;">Terms of Use</a>
@@ -228,8 +231,8 @@ function renderFrameworkOverview(){
     s += `<circle cx="${cx}" cy="${iconCy}" r="25" fill="${color}"/>`;
     s += `<svg x="${cx - 14}" y="${iconCy - 14}" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" color="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${DOMAIN_ICON_PATHS[key]}</svg>`;
 
-    s += `<text x="${cx}" y="${iconCy + 41}" text-anchor="middle" font-family="'Space Grotesk', sans-serif" font-weight="700" font-size="13" fill="var(--ink)">${label[0]}</text>`;
-    s += `<text x="${cx}" y="${iconCy + 57}" text-anchor="middle" font-family="'Space Grotesk', sans-serif" font-weight="700" font-size="13" fill="var(--ink)">${label[1]}</text>`;
+    s += `<text x="${cx}" y="${iconCy + 41}" text-anchor="middle" font-family="var(--display)" font-weight="700" font-size="13" fill="var(--ink)">${label[0]}</text>`;
+    s += `<text x="${cx}" y="${iconCy + 57}" text-anchor="middle" font-family="var(--display)" font-weight="700" font-size="13" fill="var(--ink)">${label[1]}</text>`;
   });
 
   svg.innerHTML = s;

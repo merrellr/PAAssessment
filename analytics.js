@@ -115,13 +115,13 @@
 
   /* ---------------------------------------------------------------------- the notice */
   var STYLE = '.pa-cookie{position:fixed;left:0;right:0;bottom:0;z-index:1000;display:flex;justify-content:center;padding:12px;pointer-events:none;}' +
-    '.pa-cookie-box{pointer-events:auto;max-width:720px;width:100%;box-sizing:border-box;background:#fff;color:#16213E;border:1px solid #DCE3EE;border-radius:14px;box-shadow:0 8px 32px rgba(22,33,62,0.18);padding:16px 18px;font:14px/1.5 "IBM Plex Sans",system-ui,sans-serif;}' +
-    '.pa-cookie-box strong{font-family:"Space Grotesk","IBM Plex Sans",system-ui,sans-serif;font-size:15px;}' +
-    '.pa-cookie-box p{margin:4px 0 12px;color:#4B5768;}' +
-    '.pa-cookie-box a{color:#1A4584;}' +
+    '.pa-cookie-box{pointer-events:auto;max-width:720px;width:100%;box-sizing:border-box;background:var(--surface,#fff);color:var(--ink,#16213E);border:1px solid var(--line,#DCE3EE);border-radius:14px;box-shadow:0 8px 32px rgba(22,33,62,0.18);padding:16px 18px;font:14px/1.5 var(--sans,"IBM Plex Sans",system-ui,sans-serif);}' +
+    '.pa-cookie-box strong{font-family:var(--display,"Space Grotesk",system-ui,sans-serif);font-size:15px;color:var(--navy-deep,#12305e);}' +
+    '.pa-cookie-box p{margin:4px 0 12px;color:var(--ink-soft,#4B5768);}' +
+    '.pa-cookie-box a{color:var(--cyan-ink,#1A4584);}' +
     '.pa-cookie-row{display:flex;flex-wrap:wrap;gap:10px;align-items:center;}' +
-    '.pa-cookie-btn{font:600 14px "Space Grotesk","IBM Plex Sans",system-ui,sans-serif;padding:9px 20px;border-radius:8px;border:1.5px solid #1A4584;background:#fff;color:#1A4584;cursor:pointer;}' +
-    '.pa-cookie-btn:hover{background:#EEF3FA;}' +
+    '.pa-cookie-btn{font:600 14px var(--display,"Space Grotesk",system-ui,sans-serif);padding:9px 20px;border-radius:var(--pa-pill,8px);border:1.5px solid var(--navy,#1A4584);background:var(--surface,#fff);color:var(--navy-deep,#1A4584);cursor:pointer;}' +
+    '.pa-cookie-btn:hover{background:var(--tint,#EEF3FA);}' +
     '.pa-cookie-btn:focus-visible{outline:3px solid #35C2E8;outline-offset:2px;}' +
     '@media print{.pa-cookie{display:none;}}';
 
