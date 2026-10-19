@@ -175,7 +175,6 @@
 
   /* ---------------------------------------------------------------- search (⌘K) */
   var ACTIONS = [
-    { g: "Go to", t: "Take or retake the assessment", i: "✓", u: "index.html" },
     { g: "Go to", t: "My learning dashboard", i: "⌂", u: "lms-dashboard.html" },
     { g: "Go to", t: "The training framework", i: "◆", u: "framework.html" },
     { g: "Go to", t: "My profile", i: "☺", u: "profile.html" },
