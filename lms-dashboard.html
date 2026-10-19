@@ -7,7 +7,8 @@
 <title>Product Advisory Learning</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@600&family=Lato:ital,wght@0,300;0,400;0,700;0,900;1,400&display=swap" rel="stylesheet">
+<script src="pa-prefs.js"></script>
 <style>
   :root{
     --navy: #1A4584; --navy-deep: #12305e; --gray: #9AA3AD; --cyan: #35C2E8;
@@ -16,27 +17,27 @@
     --tier-1: #B9C6DA; --tier-2: #6FA3D6; --tier-3: #35C2E8; --tier-4: #1A4584;
   }
   *{ box-sizing: border-box; }
-  body{ margin:0; background: var(--bg); font-family:'IBM Plex Sans', system-ui, sans-serif; color: var(--ink); }
+  body{ margin:0; background: var(--bg); font-family:var(--sans); color: var(--ink); }
 
   .wrap{ max-width: 1100px; margin: 0 auto; padding: 0 16px 48px; }
 
   .brand-header{ display:flex; align-items:center; justify-content:space-between; gap:9px; padding: 24px 0 14px; }
   .brand-header-left{ display:flex; align-items:center; gap:9px; }
-  .brand-word{ font-family:'Space Grotesk', sans-serif; font-weight:700; font-size: 15px; color: var(--navy-deep); }
+  .brand-word{ font-family:var(--display); font-weight:700; font-size: 0.9375rem; color: var(--navy-deep); }
   .brand-accent-bar{ height: 3px; background: linear-gradient(90deg, var(--navy) 0%, var(--cyan) 100%); border-radius: 2px; margin-bottom: 24px; }
 
   .card{ background: var(--surface); border-radius: 16px; border: 1px solid var(--line); padding: 32px; box-shadow: 0 1px 2px rgba(22,33,62,0.04), 0 12px 32px rgba(22,33,62,0.06); }
 
-  h1{ font-family:'Space Grotesk', sans-serif; font-size: 22px; margin: 0 0 8px; color: var(--navy-deep); }
-  h2{ font-family:'Space Grotesk', sans-serif; font-size: 16px; margin: 0 0 4px; color: var(--navy-deep); }
+  h1{ font-family:var(--display); font-size: 1.375rem; margin: 0 0 8px; color: var(--navy-deep); }
+  h2{ font-family:var(--display); font-size: 1rem; margin: 0 0 4px; color: var(--navy-deep); }
   p{ line-height:1.55; color: var(--ink-soft); margin: 0 0 18px; }
 
-  .text-input{ width:100%; padding: 12px 14px; margin-bottom: 12px; border: 1.5px solid var(--line); border-radius: 9px; font-family:'IBM Plex Sans', sans-serif; font-size: 14.5px; }
+  .text-input{ width:100%; padding: 12px 14px; margin-bottom: 12px; border: 1.5px solid var(--line); border-radius: 9px; font-family:var(--sans); font-size: 0.9062rem; }
   .text-input:focus{ outline:none; border-color: var(--cyan); }
-  .field-error{ font-size: 12.5px; color: var(--warn); margin: -6px 0 12px 2px; min-height: 1px; }
+  .field-error{ font-size: 0.7812rem; color: var(--warn); margin: -6px 0 12px 2px; min-height: 1px; }
 
   .auth-tabs{ display:flex; gap:24px; border-bottom: 1.5px solid var(--line); margin-bottom: 18px; }
-  .auth-tab{ padding-bottom: 10px; font-family:'Space Grotesk', sans-serif; font-weight:600; font-size: 15px; color: var(--gray); cursor:pointer; border-bottom: 2px solid transparent; margin-bottom: -1.5px; }
+  .auth-tab{ padding-bottom: 10px; font-family:var(--display); font-weight:600; font-size: 0.9375rem; color: var(--gray); cursor:pointer; border-bottom: 2px solid transparent; margin-bottom: -1.5px; }
   .auth-tab.active{ color: var(--navy-deep); border-bottom-color: var(--cyan); }
 
   .input-icon-wrap{ position:relative; margin-bottom: 12px; }
@@ -45,44 +46,44 @@
   #authPassword, #authPasswordConfirm{ padding-right: 40px; }
   .password-toggle{ position:absolute; right:2px; top:0; bottom:0; width:36px; display:flex; align-items:center; justify-content:center; background:none; border:none; cursor:pointer; padding:0; }
 
-  .divider-row{ display:flex; align-items:center; text-align:center; color: var(--gray); font-size:12.5px; margin: 16px 0; }
+  .divider-row{ display:flex; align-items:center; text-align:center; color: var(--gray); font-size:0.7812rem; margin: 16px 0; }
   .divider-row::before, .divider-row::after{ content:''; flex:1; height:1px; background:var(--line); }
   .divider-row span{ padding: 0 12px; }
 
-  button.btn{ font-family:'Space Grotesk', sans-serif; font-weight:600; font-size: 14px; border-radius: 8px; padding: 11px 20px; border: none; cursor:pointer; }
-  .btn-primary{ background: var(--navy); color:#fff; width:100%; }
-  .btn-primary:hover{ background: var(--navy-deep); }
-  .btn-gradient{ background: linear-gradient(90deg, var(--navy) 0%, var(--navy-deep) 100%); border-radius: 24px; padding: 12px 20px; }
+  button.btn{ font-family:var(--display); font-weight:600; font-size: 0.875rem; border-radius: 8px; padding: 11px 20px; border: none; cursor:pointer; }
+  .btn-primary{ background: var(--navy); color:var(--btn-ink); width:100%; }
+  .btn-primary:hover{ background: var(--primary-strong); }
+  .btn-gradient{ background: linear-gradient(90deg, var(--navy) 0%, var(--primary-strong) 100%); border-radius: 24px; padding: 12px 20px; }
   .btn-gradient:hover{ opacity:0.92; }
-  .btn-google{ background:#fff; color: var(--ink); border: 1.5px solid var(--line); width:100%; margin-top: 4px; display:flex; align-items:center; justify-content:center; gap:9px; border-radius: 24px; }
+  .btn-google{ background:var(--surface); color: var(--ink); border: 1.5px solid var(--line); width:100%; margin-top: 4px; display:flex; align-items:center; justify-content:center; gap:9px; border-radius: 24px; }
   .btn-google:hover{ border-color: var(--cyan); }
-  .btn-ghost{ background:none; color: var(--gray); text-decoration:underline; font-size: 13px; padding: 6px; }
+  .btn-ghost{ background:none; color: var(--gray); text-decoration:underline; font-size: 0.8125rem; padding: 6px; }
 
-  .toggle-row{ text-align:center; margin-top: 14px; font-size: 13.5px; color: var(--ink-soft); }
+  .toggle-row{ text-align:center; margin-top: 14px; font-size: 0.8438rem; color: var(--ink-soft); }
   .toggle-row a{ color: var(--navy); cursor:pointer; text-decoration:underline; }
 
   .top-bar{ display:flex; justify-content:space-between; align-items:center; margin-bottom: 22px; }
-  .top-bar .who{ font-size: 13.5px; color: var(--ink-soft); }
+  .top-bar .who{ font-size: 0.8438rem; color: var(--ink-soft); }
 
   .profile-menu-wrap{ position:relative; }
-  .profile-avatar-btn{ display:flex; align-items:center; gap:7px; padding: 7px 14px 7px 10px; border-radius:20px; background: var(--navy); color:#fff; border:none; cursor:pointer; font-family:'Space Grotesk', sans-serif; font-weight:600; font-size:13px; }
-  .profile-avatar-btn:hover{ background: var(--navy-deep); }
-  .profile-avatar-btn:hover{ background: var(--navy-deep); }
-  .profile-dropdown{ position:absolute; right:0; top:44px; width:250px; background:#fff; border:1px solid var(--line); border-radius:12px; box-shadow: 0 8px 24px rgba(22,33,62,0.12); padding:14px; z-index:10; }
-  .profile-dropdown-name{ font-family:'Space Grotesk', sans-serif; font-weight:600; font-size: 14.5px; color: var(--ink); }
-  .profile-dropdown-email{ font-size:12.5px; color: var(--ink-soft); word-break:break-all; }
-  .profile-dropdown-verified{ font-size:11.5px; color: var(--gray); margin-top:2px; }
+  .profile-avatar-btn{ display:flex; align-items:center; gap:7px; padding: 7px 14px 7px 10px; border-radius:20px; background: var(--navy); color:var(--btn-ink); border:none; cursor:pointer; font-family:var(--display); font-weight:600; font-size:0.8125rem; }
+  .profile-avatar-btn:hover{ background: var(--primary-strong); }
+  .profile-avatar-btn:hover{ background: var(--primary-strong); }
+  .profile-dropdown{ position:absolute; right:0; top:44px; width:250px; background:var(--surface); border:1px solid var(--line); border-radius:12px; box-shadow: 0 8px 24px rgba(22,33,62,0.12); padding:14px; z-index:10; }
+  .profile-dropdown-name{ font-family:var(--display); font-weight:600; font-size: 0.9062rem; color: var(--ink); }
+  .profile-dropdown-email{ font-size:0.7812rem; color: var(--ink-soft); word-break:break-all; }
+  .profile-dropdown-verified{ font-size:0.7188rem; color: var(--gray); margin-top:2px; }
   .profile-dropdown-divider{ height:1px; background:var(--line); margin:10px 0; }
-  .profile-progress-summary{ font-size:12.5px; }
-  .profile-progress-label{ font-size:11px; font-weight:600; color: var(--cyan); text-transform:uppercase; letter-spacing:0.04em; margin-bottom: 6px; }
+  .profile-progress-summary{ font-size:0.7812rem; }
+  .profile-progress-label{ font-size:0.6875rem; font-weight:600; color: var(--cyan); text-transform:uppercase; letter-spacing:0.04em; margin-bottom: 6px; }
   .profile-progress-line{ color: var(--ink-soft); margin-bottom: 3px; }
-  .profile-dropdown-item{ display:block; padding:8px 4px; font-size:13.5px; color: var(--ink); text-decoration:none; cursor:pointer; border-radius:6px; }
-  .profile-dropdown-item:hover{ background:#F7F9FC; }
+  .profile-dropdown-item{ display:block; padding:8px 4px; font-size:0.8438rem; color: var(--ink); text-decoration:none; cursor:pointer; border-radius:6px; }
+  .profile-dropdown-item:hover{ background:var(--bg); }
 
-  .profile-field-label{ display:block; font-size:12px; font-weight:600; color: var(--ink-soft); margin: 0 0 5px 2px; }
+  .profile-field-label{ display:block; font-size:0.75rem; font-weight:600; color: var(--ink-soft); margin: 0 0 5px 2px; }
 
   .stat-strip{ display:flex; gap:14px; margin-bottom: 22px; }
-  .stat-box{ flex:1; background:#fff; border:1px solid var(--line); border-radius:12px; padding: 16px 18px; text-align:center; transition: background 0.4s ease; }
+  .stat-box{ flex:1; background:var(--surface); border:1px solid var(--line); border-radius:12px; padding: 16px 18px; text-align:center; transition: background 0.4s ease; }
 
   #detailsFlex{ flex-direction: row; align-items:flex-start; }
   #radarChartSvg{ width: 260px; height: 260px; }
@@ -90,75 +91,75 @@
 
   @keyframes skeletonPulse{ 0%, 100%{ opacity:1; } 50%{ opacity:0.5; } }
   .skeleton-block{ background: var(--line); border-radius:10px; animation: skeletonPulse 1.4s ease-in-out infinite; }
-  .stat-box.pulse-success{ background:#EEF9F1; border-color:#2E8B57; }
+  .stat-box.pulse-success{ background:var(--ok-bg); border-color:var(--ok); }
   #summaryTimeSince:not(:empty)::before{ content: " · "; }
   #summaryActiveTime:not(:empty)::before{ content: " · "; }
-  .stat-num{ font-family:'Space Grotesk', sans-serif; font-weight:700; font-size: 28px; color: var(--navy); }
-  .stat-label{ font-size: 12px; color: var(--gray); margin-top: 4px; }
+  .stat-num{ font-family:var(--display); font-weight:700; font-size: 1.75rem; color: var(--navy); }
+  .stat-label{ font-size: 0.75rem; color: var(--gray); margin-top: 4px; }
 
-  .rec-banner{ background:#EEF3FA; border:1px solid var(--line); border-radius: 12px; padding: 16px 18px; margin-bottom: 22px; }
-  .rec-banner .eyebrow{ font-size:11px; font-weight:600; letter-spacing:0.06em; text-transform:uppercase; color: var(--cyan); }
-  .rec-chip{ display:inline-block; background:#fff; border:1px solid var(--line); border-radius:7px; padding:6px 12px; margin: 8px 8px 0 0; font-size:13px; font-weight:500; color: var(--navy); text-decoration:none; }
+  .rec-banner{ background:var(--tint); border:1px solid var(--line); border-radius: 12px; padding: 16px 18px; margin-bottom: 22px; }
+  .rec-banner .eyebrow{ font-size:0.6875rem; font-weight:600; letter-spacing:0.06em; text-transform:uppercase; color: var(--cyan); }
+  .rec-chip{ display:inline-block; background:var(--surface); border:1px solid var(--line); border-radius:7px; padding:6px 12px; margin: 8px 8px 0 0; font-size:0.8125rem; font-weight:500; color: var(--navy); text-decoration:none; }
   .rec-chip:hover{ border-color: var(--cyan); }
 
   .domain-group{ margin-bottom: 22px; }
-  .domain-title{ font-family:'Space Grotesk', sans-serif; font-weight:600; font-size: 14px; color: var(--navy-deep); margin-bottom: 10px; }
+  .domain-title{ font-family:var(--display); font-weight:600; font-size: 0.875rem; color: var(--navy-deep); margin-bottom: 10px; }
   .tier-row{ display:grid; grid-template-columns: repeat(4, 1fr); gap:8px; }
-  .tier-card{ position:relative; border:1px solid var(--line); border-radius: 10px; padding: 10px; text-align:center; text-decoration:none; color: var(--ink); background:#fff; }
+  .tier-card{ position:relative; border:1px solid var(--line); border-radius: 10px; padding: 10px; text-align:center; text-decoration:none; color: var(--ink); background:var(--surface); }
   .tier-card:hover{ border-color: var(--cyan); }
-  .tier-card .tname{ font-size: 11.5px; font-weight:600; margin-bottom: 6px; }
+  .tier-card .tname{ font-size: 0.7188rem; font-weight:600; margin-bottom: 6px; }
   .tier-card .tbar{ height:5px; background: var(--line); border-radius:3px; overflow:hidden; margin-bottom: 6px; }
   .tier-card .tbar-fill{ height:100%; background: var(--cyan); }
-  .tier-card .tstatus{ font-size: 10.5px; color: var(--gray); }
+  .tier-card .tstatus{ font-size: 0.6562rem; color: var(--gray); }
 
-  .tier-card.is-complete{ border-color:#2E8B57; background:#EEF9F1; }
-  .tier-card.is-complete .tbar-fill{ background:#2E8B57; }
-  .tier-card.is-complete .tstatus{ color:#2E8B57; font-weight:600; }
-  .tier-card .tcheck{ position:absolute; top:6px; right:8px; width:16px; height:16px; border-radius:50%; background:#2E8B57; color:#fff; font-size:10px; line-height:16px; text-align:center; }
-  .tier-card .tnote{ position:absolute; top:6px; left:8px; font-size:11px; line-height:1; color: var(--cyan); }
+  .tier-card.is-complete{ border-color:var(--ok); background:var(--ok-bg); }
+  .tier-card.is-complete .tbar-fill{ background:var(--ok); }
+  .tier-card.is-complete .tstatus{ color:var(--ok); font-weight:600; }
+  .tier-card .tcheck{ position:absolute; top:6px; right:8px; width:16px; height:16px; border-radius:50%; background:var(--ok); color:var(--btn-ink); font-size:0.625rem; line-height:16px; text-align:center; }
+  .tier-card .tnote{ position:absolute; top:6px; left:8px; font-size:0.6875rem; line-height:1; color: var(--cyan); }
 
   .notes-item{ border-left:3px solid var(--cyan); padding:2px 0 2px 12px; margin-bottom:14px; }
-  .notes-item .notes-course{ font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:0.04em; color: var(--navy); margin-bottom:3px; }
-  .notes-item .notes-prompt{ font-size:12px; color: var(--gray); margin-bottom:4px; }
-  .notes-item .notes-text{ font-size:13.5px; color: var(--ink); white-space:pre-wrap; margin-bottom:5px; }
-  .notes-item a{ font-size:12px; color: var(--navy); text-decoration:underline; }
+  .notes-item .notes-course{ font-size:0.6875rem; font-weight:600; text-transform:uppercase; letter-spacing:0.04em; color: var(--navy); margin-bottom:3px; }
+  .notes-item .notes-prompt{ font-size:0.75rem; color: var(--gray); margin-bottom:4px; }
+  .notes-item .notes-text{ font-size:0.8438rem; color: var(--ink); white-space:pre-wrap; margin-bottom:5px; }
+  .notes-item a{ font-size:0.75rem; color: var(--navy); text-decoration:underline; }
 
   .article-item{ border-left:3px solid var(--cyan); padding:2px 0 2px 12px; margin-bottom:12px; }
-  .article-item .article-course{ font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:0.04em; color: var(--navy); margin-bottom:4px; }
-  .article-item a{ font-size:13.5px; color: var(--ink); text-decoration:none; }
+  .article-item .article-course{ font-size:0.6875rem; font-weight:600; text-transform:uppercase; letter-spacing:0.04em; color: var(--navy); margin-bottom:4px; }
+  .article-item a{ font-size:0.8438rem; color: var(--ink); text-decoration:none; }
   .article-item a:hover{ text-decoration:underline; color: var(--navy); }
 
   .tour-highlight{ position:fixed; border:3px solid var(--cyan); border-radius:11px; box-shadow:0 0 0 9999px rgba(18,33,62,0.45); z-index:9999; pointer-events:none; transition:top .2s ease, left .2s ease, width .2s ease, height .2s ease; }
-  .tour-pop{ position:fixed; z-index:10000; width:280px; max-width:calc(100vw - 24px); background:#fff; border-radius:12px; padding:16px 18px; box-shadow:0 14px 44px rgba(0,0,0,0.28); }
-  .tour-pop .tour-title{ font-family:'Space Grotesk', sans-serif; font-weight:700; font-size:14px; color:var(--navy-deep); margin-bottom:6px; }
-  .tour-pop .tour-body{ font-size:13px; color:var(--ink-soft); line-height:1.5; margin-bottom:14px; }
+  .tour-pop{ position:fixed; z-index:10000; width:280px; max-width:calc(100vw - 24px); background:var(--surface); border-radius:12px; padding:16px 18px; box-shadow:0 14px 44px rgba(0,0,0,0.28); }
+  .tour-pop .tour-title{ font-family:var(--display); font-weight:700; font-size:0.875rem; color:var(--navy-deep); margin-bottom:6px; }
+  .tour-pop .tour-body{ font-size:0.8125rem; color:var(--ink-soft); line-height:1.5; margin-bottom:14px; }
   .tour-pop .tour-actions{ display:flex; justify-content:space-between; align-items:center; gap:10px; }
-  .tour-pop .tour-skip{ font-size:12px; color:var(--gray); cursor:pointer; text-decoration:underline; background:none; border:none; padding:0; font-family:inherit; }
-  .tour-pop .tour-count{ font-size:11px; color:var(--gray); }
-  .tour-pop .tour-next{ font-family:'Space Grotesk', sans-serif; font-weight:600; font-size:12.5px; padding:7px 16px; border-radius:7px; border:none; background:var(--navy); color:#fff; cursor:pointer; }
-  .tour-pop .tour-next:hover{ background:var(--navy-deep); }
+  .tour-pop .tour-skip{ font-size:0.75rem; color:var(--gray); cursor:pointer; text-decoration:underline; background:none; border:none; padding:0; font-family:inherit; }
+  .tour-pop .tour-count{ font-size:0.6875rem; color:var(--gray); }
+  .tour-pop .tour-next{ font-family:var(--display); font-weight:600; font-size:0.7812rem; padding:7px 16px; border-radius:7px; border:none; background:var(--navy); color:var(--btn-ink); cursor:pointer; }
+  .tour-pop .tour-next:hover{ background:var(--primary-strong); }
 
-  .check-box{ background:#F7F9FC; border: 1.5px solid var(--line); border-radius: 12px; padding: 16px 18px; }
-  .check-box .check-eyebrow{ font-size: 11px; font-weight:600; letter-spacing:0.06em; text-transform:uppercase; color: var(--cyan); display:block; margin-bottom: 8px; }
-  .check-box .check-q{ font-family:'Space Grotesk', sans-serif; font-weight:600; font-size: 14.5px; color: var(--navy-deep); margin-bottom: 12px; }
-  .check-option{ display:block; width:100%; text-align:left; padding: 10px 13px; margin-bottom: 8px; border: 1.5px solid var(--line); border-radius: 8px; background:#fff; font-family:'IBM Plex Sans', sans-serif; font-size: 13.5px; color: var(--ink); cursor:pointer; }
+  .check-box{ background:var(--bg); border: 1.5px solid var(--line); border-radius: 12px; padding: 16px 18px; }
+  .check-box .check-eyebrow{ font-size: 0.6875rem; font-weight:600; letter-spacing:0.06em; text-transform:uppercase; color: var(--cyan); display:block; margin-bottom: 8px; }
+  .check-box .check-q{ font-family:var(--display); font-weight:600; font-size: 0.9062rem; color: var(--navy-deep); margin-bottom: 12px; }
+  .check-option{ display:block; width:100%; text-align:left; padding: 10px 13px; margin-bottom: 8px; border: 1.5px solid var(--line); border-radius: 8px; background:var(--surface); font-family:var(--sans); font-size: 0.8438rem; color: var(--ink); cursor:pointer; }
   .check-option:hover{ border-color: var(--cyan); }
-  .check-option.correct{ border-color: #2E8B57; background:#EEF9F1; }
-  .check-option.incorrect{ border-color: #C0622A; background:#FCEFE9; }
-  .check-feedback{ font-size: 13px; margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--line); color: var(--ink-soft); display:none; }
+  .check-option.correct{ border-color: var(--ok); background:var(--ok-bg); }
+  .check-option.incorrect{ border-color: var(--warn); background:var(--warn-bg); }
+  .check-feedback{ font-size: 0.8125rem; margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--line); color: var(--ink-soft); display:none; }
   .check-feedback.show{ display:block; }
   .check-feedback strong{ color: var(--ink); }
 
   .tier-card.is-inprogress{ border-color: var(--cyan); }
   .tier-card.is-inprogress .tstatus{ color: var(--navy); font-weight:600; }
 
-  .tier-card.is-belowlevel{ opacity:0.55; background:#FAFAFA; }
+  .tier-card.is-belowlevel{ opacity:0.55; background:var(--bg); }
   .tier-card.is-belowlevel:hover{ opacity:0.85; }
 
   .catalog-toggle{ display:inline-flex; border:1px solid var(--line); border-radius:20px; overflow:hidden; }
-  .catalog-toggle button{ font-family:'Space Grotesk', sans-serif; font-weight:600; font-size:11.5px; padding:5px 13px; border:none; background:#fff; color:var(--gray); cursor:pointer; }
+  .catalog-toggle button{ font-family:var(--display); font-weight:600; font-size:0.7188rem; padding:5px 13px; border:none; background:var(--surface); color:var(--gray); cursor:pointer; }
   .catalog-toggle button:not(.active):hover{ color:var(--navy); }
-  .catalog-toggle button.active{ background:var(--navy); color:#fff; }
+  .catalog-toggle button.active{ background:var(--navy); color:var(--btn-ink); }
 
   .tier-card.is-locked{ opacity:0.45; cursor:default; }
   .tier-card.is-locked:hover{ border-color: var(--line); opacity:0.45; }
@@ -188,9 +189,11 @@
     .tour-pop{ width: calc(100vw - 24px) !important; left: 12px !important; }
   }
 </style>
+<link rel="stylesheet" href="pa-theme.css">
 <script src="analytics.js"></script>
 </head>
 <body>
+<script src="pa-shell.js"></script>
 <div class="wrap">
 
   <div class="brand-header">
@@ -200,8 +203,8 @@
         <polygon points="20,10 29,15 29,25 20,30 11,25 11,15" fill="none" stroke="#35C2E8" stroke-width="1.5"/>
       </svg>
       <div>
-        <div style="font-family:'IBM Plex Sans', sans-serif; font-weight:600; font-size:10.5px; letter-spacing:0.06em; color:var(--gray); line-height:1;">PRODUCT ADVISORY</div>
-        <div class="brand-word" style="font-size:19px; line-height:1.3;">Learning</div>
+        <div style="font-family:var(--sans); font-weight:600; font-size:0.6562rem; letter-spacing:0.06em; color:var(--gray); line-height:1;">PRODUCT ADVISORY</div>
+        <div class="brand-word" style="font-size:1.1875rem; line-height:1.3;">Learning</div>
       </div>
     </a>
     <div class="profile-menu-wrap" id="profileMenuWrap" style="display:none;">
@@ -238,6 +241,7 @@
         <a class="profile-dropdown-item" id="companyDashMenuItem" href="company.html" style="display:none;">Company dashboard</a>
         <a class="profile-dropdown-item" id="changePasswordMenuItem" onclick="openChangePassword()">Change password</a>
         <a class="profile-dropdown-item" onclick="replayDashboardTour()">Replay the tour</a>
+        <a class="profile-dropdown-item" href="tool-requests.html">Toolkits Roadmap</a>
         <a class="profile-dropdown-item" href="mailto:feedback@productadvisory.co?subject=Feedback%20on%20Product%20Advisory%20Learning">Send feedback</a>
         <a class="profile-dropdown-item" href="https://www.productadvisory.co/" target="_blank" rel="noopener">Visit Product Advisory ↗</a>
         <a class="profile-dropdown-item" href="#" data-cookie-settings>Cookie settings</a>
@@ -245,15 +249,17 @@
       </div>
     </div>
   </div>
+  <script>/* the Profile menu lives in the site header */ (function(){ var slot = document.getElementById('paNavAccount'), w = document.getElementById('profileMenuWrap'); if (slot && w) slot.appendChild(w); })();</script>
+
   <div class="brand-accent-bar"></div>
 
   <!-- LOGIN / SIGN UP -->
   <div data-screen="auth" class="active">
     <div class="card" style="max-width:420px;margin:0 auto;">
 
-      <span style="display:block; font-size:11px; font-weight:600; letter-spacing:0.06em; text-transform:uppercase; color:var(--cyan); margin-bottom:6px;">Your learning dashboard</span>
-      <h1 style="font-size:19px; margin:0 0 6px;">See your personalized results and course plan</h1>
-      <p style="font-size:13.5px; color:var(--ink-soft); margin:0 0 16px; line-height:1.55;">Log in or create an account to view your assessment score across all seven skill areas and the courses matched to your level. Haven't taken the assessment yet? <a href="index.html" style="color:var(--navy);">Start here</a>.</p>
+      <span style="display:block; font-size:0.6875rem; font-weight:600; letter-spacing:0.06em; text-transform:uppercase; color:var(--cyan); margin-bottom:6px;">Your learning dashboard</span>
+      <h1 style="font-size:1.1875rem; margin:0 0 6px;">See your personalized results and course plan</h1>
+      <p style="font-size:0.8438rem; color:var(--ink-soft); margin:0 0 16px; line-height:1.55;">Log in or create an account to view your assessment score across all seven skill areas and the courses matched to your level. Haven't taken the assessment yet? <a href="index.html" style="color:var(--navy);">Start here</a>.</p>
 
       <div class="auth-tabs">
         <div class="auth-tab active" id="tabLogin" onclick="setAuthMode(false)">Log in</div>
@@ -263,38 +269,38 @@
       <p id="authSub">Log in to pick up your courses where you left off.</p>
 
       <div class="input-icon-wrap" id="nameWrap" style="display:none;">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9AA3AD" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--gray)" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>
         <input class="text-input" type="text" id="authName" placeholder="Full name">
       </div>
 
       <div class="input-icon-wrap">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9AA3AD" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--gray)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg>
         <input class="text-input" type="email" id="authEmail" placeholder="Email address">
       </div>
 
       <div class="input-icon-wrap">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9AA3AD" stroke-width="2"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--gray)" stroke-width="2"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
         <input class="text-input" type="password" id="authPassword" placeholder="Password" oninput="updateAuthStrength()">
         <button type="button" class="password-toggle" id="passwordToggleBtn" onclick="togglePasswordVisibility()" aria-label="Show password">
-          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#9AA3AD" stroke-width="2"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/></svg>
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="var(--gray)" stroke-width="2"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/></svg>
         </button>
       </div>
 
-      <div id="authPasswordStrength" style="display:none; font-size:12px; color:var(--gray); margin:-4px 0 10px 2px;"></div>
+      <div id="authPasswordStrength" style="display:none; font-size:0.75rem; color:var(--gray); margin:-4px 0 10px 2px;"></div>
 
       <div class="input-icon-wrap" id="confirmPasswordWrap" style="display:none;">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9AA3AD" stroke-width="2"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--gray)" stroke-width="2"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
         <input class="text-input" type="password" id="authPasswordConfirm" placeholder="Confirm password">
       </div>
 
       <div class="field-error" id="authError"></div>
-      <div class="field-error" id="authSuccess" style="color:#2E8B57;"></div>
+      <div class="field-error" id="authSuccess" style="color:var(--ok);"></div>
 
       <div class="toggle-row" id="forgotRow" style="text-align:right; margin-top:-4px;">
         <a onclick="handleForgotPassword()">Forgot password?</a>
       </div>
 
-      <label id="termsCheckRow" style="display:none; align-items:flex-start; gap:8px; font-size:12.5px; color:var(--ink-soft); margin:8px 0 14px; cursor:pointer;">
+      <label id="termsCheckRow" style="display:none; align-items:flex-start; gap:8px; font-size:0.7812rem; color:var(--ink-soft); margin:8px 0 14px; cursor:pointer;">
         <input type="checkbox" id="agreeTermsCheckbox" style="margin-top:2px;">
         <span>By creating an account you agree to the <a href="https://www.productadvisory.co/terms-of-use" target="_blank" rel="noopener" style="color:var(--navy);">Terms of Use</a> and <a href="https://www.productadvisory.co/privacy-policy" target="_blank" rel="noopener" style="color:var(--navy);">Privacy Policy</a>.</span>
       </label>
@@ -307,7 +313,7 @@
         <svg width="17" height="17" viewBox="0 0 24 24"><path fill="#4285F4" d="M23.52 12.27c0-.85-.08-1.67-.22-2.45H12v4.64h6.47a5.53 5.53 0 0 1-2.4 3.63v3h3.88c2.27-2.09 3.57-5.17 3.57-8.82z"/><path fill="#34A853" d="M12 24c3.24 0 5.95-1.07 7.94-2.91l-3.88-3c-1.08.72-2.45 1.15-4.06 1.15-3.13 0-5.78-2.11-6.73-4.96H1.27v3.11A12 12 0 0 0 12 24z"/><path fill="#FBBC05" d="M5.27 14.28A7.2 7.2 0 0 1 4.89 12c0-.79.14-1.56.38-2.28V6.61H1.27A12 12 0 0 0 0 12c0 1.94.46 3.77 1.27 5.39l4-3.11z"/><path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.44-3.44C17.94 1.19 15.24 0 12 0 7.31 0 3.26 2.69 1.27 6.61l4 3.11C6.22 6.86 8.87 4.75 12 4.75z"/></svg>
         Continue with Google
       </button>
-      <div id="googleTermsNote" style="display:none; font-size:11px; color:var(--gray); text-align:center; margin-top:8px;">By continuing with Google, you agree to the <a href="https://www.productadvisory.co/terms-of-use" target="_blank" rel="noopener" style="color:var(--gray);">Terms of Use</a> and <a href="https://www.productadvisory.co/privacy-policy" target="_blank" rel="noopener" style="color:var(--gray);">Privacy Policy</a>.</div>
+      <div id="googleTermsNote" style="display:none; font-size:0.6875rem; color:var(--gray); text-align:center; margin-top:8px;">By continuing with Google, you agree to the <a href="https://www.productadvisory.co/terms-of-use" target="_blank" rel="noopener" style="color:var(--gray);">Terms of Use</a> and <a href="https://www.productadvisory.co/privacy-policy" target="_blank" rel="noopener" style="color:var(--gray);">Privacy Policy</a>.</div>
     </div>
   </div>
 
@@ -320,7 +326,7 @@
       <input class="text-input" type="password" id="newPasswordInput" placeholder="New password">
       <input class="text-input" type="password" id="newPasswordConfirmInput" placeholder="Confirm new password">
       <div class="field-error" id="changePasswordError"></div>
-      <div class="field-error" id="changePasswordSuccess" style="color:#2E8B57;"></div>
+      <div class="field-error" id="changePasswordSuccess" style="color:var(--ok);"></div>
       <div style="display:flex; gap:10px;">
         <button class="btn btn-primary btn-gradient" style="width:auto; padding:10px 20px;" onclick="handleChangePassword()">Save new password</button>
         <button class="btn btn-ghost" onclick="closeChangePassword()">Cancel</button>
@@ -350,21 +356,21 @@
 
     <div id="dashboardContent" style="display:none;">
 
-    <div class="rec-banner" id="orgBanner" style="display:none; background:#EEF6FD; border-color:#C9E0F2;">
-      <span style="font-size:13px; color:var(--ink-soft);" id="orgBannerText"></span>
-      <a href="#" id="orgBannerDismiss" style="display:none; margin-left:10px; font-size:13px; color:var(--navy);">Dismiss</a>
+    <div class="rec-banner" id="orgBanner" style="display:none; background:var(--tint); border-color:var(--tint-2);">
+      <span style="font-size:0.8125rem; color:var(--ink-soft);" id="orgBannerText"></span>
+      <a href="#" id="orgBannerDismiss" style="display:none; margin-left:10px; font-size:0.8125rem; color:var(--navy);">Dismiss</a>
     </div>
 
-    <div class="rec-banner" id="verifyBanner" style="display:none; background:#FFF8E8; border-color:#F0DDA8;">
-      <span style="font-size:13px; color:var(--ink-soft);">Please verify your email — check your inbox for a link.</span>
-      <a onclick="handleResendVerification()" style="margin-left:10px; font-size:13px; color:var(--navy); text-decoration:underline; cursor:pointer;">Resend email</a>
+    <div class="rec-banner" id="verifyBanner" style="display:none; background:var(--note-bg); border-color:var(--note-line);">
+      <span style="font-size:0.8125rem; color:var(--ink-soft);">Please verify your email — check your inbox for a link.</span>
+      <a onclick="handleResendVerification()" style="margin-left:10px; font-size:0.8125rem; color:var(--navy); text-decoration:underline; cursor:pointer;">Resend email</a>
     </div>
 
-    <div class="card" id="welcomeCard" style="display:none; margin-bottom:22px; background:linear-gradient(135deg, #EEF3FA 0%, #EAF7FB 100%); border-color: var(--line);">
+    <div class="card" id="welcomeCard" style="display:none; margin-bottom:22px; background:linear-gradient(135deg, var(--tint) 0%, var(--surface) 100%); border-color: var(--line);">
       <span class="eyebrow">Welcome</span>
-      <h1 style="font-size:19px;">You're in! Here's how to get the most out of this</h1>
+      <h1 style="font-size:1.1875rem;">You're in! Here's how to get the most out of this</h1>
       <p style="margin-bottom:14px;">Your courses are organized into seven skill areas, each with four experience levels. If you've taken the assessment, we've already highlighted where to start below. From here:</p>
-      <ul style="font-size:13.5px; color:var(--ink-soft); margin:0 0 18px; padding-left:20px; line-height:1.7;">
+      <ul style="font-size:0.8438rem; color:var(--ink-soft); margin:0 0 18px; padding-left:20px; line-height:1.7;">
         <li>Check <strong>Recommended for you</strong> for your best starting point</li>
         <li>Click into any course tile to begin, your progress saves automatically</li>
         <li>Come back anytime, you'll always resume right where you left off</li>
@@ -381,62 +387,62 @@
             <circle id="summaryRingFill" cx="18" cy="18" r="15" fill="none" stroke-width="4" stroke-linecap="round" transform="rotate(-90 18 18)"/>
           </svg>
           <div style="flex:1; min-width:200px;">
-            <div style="font-family:'Space Grotesk', sans-serif; font-weight:600; font-size:16px; color:var(--navy-deep);"><span id="summaryTierLabel"></span> <span style="font-weight:400; color:var(--gray); font-size:13px;" id="summaryOverallPct"></span></div>
-            <div style="font-size:11.5px; color:var(--gray); margin-top:3px; line-height:1.5;">
+            <div style="font-family:var(--display); font-weight:600; font-size:1rem; color:var(--navy-deep);"><span id="summaryTierLabel"></span> <span style="font-weight:400; color:var(--gray); font-size:0.8125rem;" id="summaryOverallPct"></span></div>
+            <div style="font-size:0.7188rem; color:var(--gray); margin-top:3px; line-height:1.5;">
               <span id="summaryTimeSinceFirst"></span><span id="summaryTimeSince"></span><span id="summaryActiveTime"></span>
             </div>
           </div>
           <div class="hero-stat" style="text-align:center; padding:0 16px; border-left:1px solid var(--line);">
-            <div><span style="font-family:'Space Grotesk', sans-serif; font-weight:700; font-size:20px; color:var(--navy);" id="statAssignedCompleted">0</span><span style="font-size:13px; color:var(--gray);"> of </span><span style="font-family:'Space Grotesk', sans-serif; font-weight:700; font-size:20px; color:var(--navy);" id="statAssignedTotal">0</span></div>
-            <div style="font-size:10.5px; color:var(--gray);">completed in plan</div>
-            <div style="font-size:10px; color:var(--gray); margin-top:2px;"><span id="statTotalCompletedAllTime">0</span> all-time</div>
+            <div><span style="font-family:var(--display); font-weight:700; font-size:1.25rem; color:var(--navy);" id="statAssignedCompleted">0</span><span style="font-size:0.8125rem; color:var(--gray);"> of </span><span style="font-family:var(--display); font-weight:700; font-size:1.25rem; color:var(--navy);" id="statAssignedTotal">0</span></div>
+            <div style="font-size:0.6562rem; color:var(--gray);">completed in plan</div>
+            <div style="font-size:0.625rem; color:var(--gray); margin-top:2px;"><span id="statTotalCompletedAllTime">0</span> all-time</div>
           </div>
           <div id="growthCard" class="hero-stat" style="display:none; text-align:center; padding:0 16px; border-left:1px solid var(--line);">
-            <div id="growthDelta" style="font-family:'Space Grotesk', sans-serif; font-weight:700; font-size:20px;"></div>
-            <div style="font-size:10.5px; color:var(--gray);">growth since <span id="growthFirstTier"></span></div>
+            <div id="growthDelta" style="font-family:var(--display); font-weight:700; font-size:1.25rem;"></div>
+            <div style="font-size:0.6562rem; color:var(--gray);">growth since <span id="growthFirstTier"></span></div>
           </div>
           <div class="hero-actions" style="display:flex; flex-direction:column; gap:6px; white-space:nowrap;">
-            <a onclick="toggleSummaryDetails()" style="font-size:12.5px; color:var(--navy); cursor:pointer; text-decoration:underline;" id="detailsToggleLink">Hide details</a>
-            <a onclick="handleRetakeAssessment()" style="font-size:12.5px; color:var(--ink-soft); cursor:pointer; text-decoration:underline;">Retake</a>
+            <a onclick="toggleSummaryDetails()" style="font-size:0.7812rem; color:var(--navy); cursor:pointer; text-decoration:underline;" id="detailsToggleLink">Hide details</a>
+            <a onclick="handleRetakeAssessment()" style="font-size:0.7812rem; color:var(--ink-soft); cursor:pointer; text-decoration:underline;">Retake</a>
           </div>
         </div>
-        <div id="staleAssessmentNudge" style="display:none; margin-top:12px; padding-top:12px; border-top:1px solid var(--line); font-size:12px; color:var(--ink-soft);">
+        <div id="staleAssessmentNudge" style="display:none; margin-top:12px; padding-top:12px; border-top:1px solid var(--line); font-size:0.75rem; color:var(--ink-soft);">
           <span id="staleAssessmentText"></span>
           <a onclick="handleRetakeAssessment()" style="color:var(--navy); cursor:pointer; text-decoration:underline; white-space:nowrap;">Retake it &rarr;</a>
         </div>
         <div id="summaryDetailsPanel" style="display:none; margin-top:16px; padding-top:16px; border-top:1px solid var(--line);">
           <div id="detailsFlex" style="display:flex; flex-direction:column; gap:16px; align-items:center;">
-            <svg id="radarChartSvg" width="240" height="240" viewBox="0 0 300 300" style="display:block; flex-shrink:0;"></svg>
+            <svg id="radarChartSvg" width="320" height="240" viewBox="-50 0 400 300" style="display:block; flex-shrink:0; max-width:100%; height:auto;"></svg>
             <div id="domainBarsContainer" style="width:100%; max-width:420px;"></div>
           </div>
         </div>
       </div>
 
       <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:18px;">
-        <div style="flex:1; min-width:220px; background:#EEF9F1; border-radius:10px; padding:12px 14px; display:flex; align-items:flex-start; gap:10px;">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#2E8B57" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0; margin-top:1px;"><path d="M12 2 L14.5 9 L22 9 L16 13.5 L18 21 L12 16.5 L6 21 L8 13.5 L2 9 L9.5 9 Z"/></svg>
+        <div style="flex:1; min-width:220px; background:var(--ok-bg); border-radius:10px; padding:12px 14px; display:flex; align-items:flex-start; gap:10px;">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--ok)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0; margin-top:1px;"><path d="M12 2 L14.5 9 L22 9 L16 13.5 L18 21 L12 16.5 L6 21 L8 13.5 L2 9 L9.5 9 Z"/></svg>
           <div>
-            <div style="font-size:10.5px; text-transform:uppercase; letter-spacing:0.04em; color:#2E8B57; font-weight:600;">Strength</div>
-            <div style="font-size:13px; color:var(--ink-soft); margin-top:2px;" id="insightStrengthText"></div>
+            <div style="font-size:0.6562rem; text-transform:uppercase; letter-spacing:0.04em; color:var(--ok); font-weight:600;">Strength</div>
+            <div style="font-size:0.8125rem; color:var(--ink-soft); margin-top:2px;" id="insightStrengthText"></div>
           </div>
         </div>
-        <div style="flex:1; min-width:220px; background:#EEF3FA; border-radius:10px; padding:12px 14px; display:flex; align-items:flex-start; gap:10px;">
+        <div style="flex:1; min-width:220px; background:var(--tint); border-radius:10px; padding:12px 14px; display:flex; align-items:flex-start; gap:10px;">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--navy)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0; margin-top:1px;"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r="0.8" fill="var(--navy)"/></svg>
           <div>
-            <div style="font-size:10.5px; text-transform:uppercase; letter-spacing:0.04em; color:var(--navy); font-weight:600;">Growth area</div>
-            <div style="font-size:13px; color:var(--ink-soft); margin-top:2px;" id="insightGrowthText"></div>
+            <div style="font-size:0.6562rem; text-transform:uppercase; letter-spacing:0.04em; color:var(--navy); font-weight:600;">Growth area</div>
+            <div style="font-size:0.8125rem; color:var(--ink-soft); margin-top:2px;" id="insightGrowthText"></div>
           </div>
         </div>
       </div>
 
     </div>
 
-    <div class="card" id="profilePromptCard" style="display:none; margin-bottom:22px; background:linear-gradient(135deg, #EEF3FA 0%, #EAF7FB 100%); border-color: var(--line);">
+    <div class="card" id="profilePromptCard" style="display:none; margin-bottom:22px; background:linear-gradient(135deg, var(--tint) 0%, var(--surface) 100%); border-color: var(--line);">
       <div style="display:flex; align-items:baseline; justify-content:space-between;">
-        <span class="eyebrow" style="font-size:11px; font-weight:600; letter-spacing:0.06em; text-transform:uppercase; color:var(--cyan);">One quick thing</span>
-        <a onclick="dismissProfilePrompt()" style="font-size:12.5px; color:var(--ink-soft); cursor:pointer; text-decoration:underline;">Not now</a>
+        <span class="eyebrow" style="font-size:0.6875rem; font-weight:600; letter-spacing:0.06em; text-transform:uppercase; color:var(--cyan);">One quick thing</span>
+        <a onclick="dismissProfilePrompt()" style="font-size:0.7812rem; color:var(--ink-soft); cursor:pointer; text-decoration:underline;">Not now</a>
       </div>
-      <h2 style="font-size:16px; margin:10px 0 4px;">Tell us a bit about your team</h2>
+      <h2 style="font-size:1rem; margin:10px 0 4px;">Tell us a bit about your team</h2>
       <p style="margin:0 0 16px;">This lets us shape the examples and course material around the kind of product work you actually do. About fifteen seconds, and you can change it any time from <a href="profile.html" style="color:var(--navy);">your profile</a>.</p>
       <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:0 16px;">
         <div>
@@ -468,63 +474,63 @@
       <div class="field-error" id="profilePromptError"></div>
       <div style="display:flex; align-items:center; gap:14px; margin-top:4px;">
         <button class="btn btn-primary btn-gradient" style="width:auto; padding:10px 22px;" onclick="saveProfilePrompt()">Save</button>
-        <span id="profilePromptSaved" style="display:none; font-size:12.5px; color:#2E8B57;">Saved, thanks.</span>
+        <span id="profilePromptSaved" style="display:none; font-size:0.7812rem; color:var(--ok);">Saved, thanks.</span>
       </div>
     </div>
 
-    <div id="progressToast" style="display:none; background:#EEF9F1; border:1px solid #2E8B57; border-radius:10px; padding:10px 14px; margin-bottom:14px; font-size:13.5px; color:#1f6b47; text-align:center;">Nice work! Updating your progress…</div>
+    <div id="progressToast" style="display:none; background:var(--ok-bg); border:1px solid var(--ok); border-radius:10px; padding:10px 14px; margin-bottom:14px; font-size:0.8438rem; color:var(--ok-ink); text-align:center;">Nice work! Updating your progress…</div>
 
     <div class="card" id="assessmentPromptCard" style="display:none; margin-bottom:22px;">
       <span class="eyebrow">Get started</span>
-      <h1 style="font-size:19px;">Find your starting point</h1>
+      <h1 style="font-size:1.1875rem;">Find your starting point</h1>
       <p>Answer a few questions about your product and AI skills to unlock courses matched to your level, across all seven skill areas below.</p>
       <a id="takeAssessmentLink" href="index.html" class="btn btn-primary btn-gradient" style="display:inline-block; width:auto; padding:11px 22px; text-decoration:none; margin-bottom:14px;">Take the assessment →</a>
 
       <div>
-        <a onclick="toggleExamplePreview()" id="examplePreviewToggle" style="font-size:13px; color:var(--navy); cursor:pointer; text-decoration:underline;">See an example of your results</a>
+        <a onclick="toggleExamplePreview()" id="examplePreviewToggle" style="font-size:0.8125rem; color:var(--navy); cursor:pointer; text-decoration:underline;">See an example of your results</a>
       </div>
       <div id="examplePreviewPanel" style="display:none; margin-top:16px; padding-top:16px; border-top:1px solid var(--line);">
-        <div style="font-size:11px; color:var(--gray); text-transform:uppercase; letter-spacing:0.04em; margin-bottom:10px;">Example only — yours will reflect your own answers</div>
+        <div style="font-size:0.6875rem; color:var(--gray); text-transform:uppercase; letter-spacing:0.04em; margin-bottom:10px;">Example only — yours will reflect your own answers</div>
         <div style="display:flex; align-items:center; gap:12px; margin-bottom:16px;">
           <div style="width:44px; height:44px; border-radius:50%; background:var(--cyan); display:flex; align-items:center; justify-content:center; flex-shrink:0;">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 13l4 4L19 7"/></svg>
           </div>
           <div>
-            <div style="font-size:11.5px; color:var(--gray);">Your assessed level</div>
-            <div style="font-family:'Space Grotesk', sans-serif; font-weight:600; font-size:15px; color:var(--navy-deep);">Lots of experience</div>
+            <div style="font-size:0.7188rem; color:var(--gray);">Your assessed level</div>
+            <div style="font-family:var(--display); font-weight:600; font-size:0.9375rem; color:var(--navy-deep);">Lots of experience</div>
           </div>
         </div>
         <div style="margin-bottom:8px;">
-          <div style="display:flex; justify-content:space-between; font-size:12.5px; margin-bottom:4px;"><span>Customer & market discovery</span><span style="color:var(--gray);">72%</span></div>
+          <div style="display:flex; justify-content:space-between; font-size:0.7812rem; margin-bottom:4px;"><span>Customer & market discovery</span><span style="color:var(--gray);">72%</span></div>
           <div style="height:6px; background:var(--line); border-radius:3px; overflow:hidden;"><div style="width:72%; height:100%; background:var(--cyan);"></div></div>
         </div>
         <div style="margin-bottom:8px;">
-          <div style="display:flex; justify-content:space-between; font-size:12.5px; margin-bottom:4px;"><span>AI fluency, organizational</span><span style="color:var(--gray);">38%</span></div>
+          <div style="display:flex; justify-content:space-between; font-size:0.7812rem; margin-bottom:4px;"><span>AI fluency, organizational</span><span style="color:var(--gray);">38%</span></div>
           <div style="height:6px; background:var(--line); border-radius:3px; overflow:hidden;"><div style="width:38%; height:100%; background:var(--cyan);"></div></div>
         </div>
         <div>
-          <div style="display:flex; justify-content:space-between; font-size:12.5px; margin-bottom:4px;"><span>Prioritization & trade-offs</span><span style="color:var(--gray);">55%</span></div>
+          <div style="display:flex; justify-content:space-between; font-size:0.7812rem; margin-bottom:4px;"><span>Prioritization & trade-offs</span><span style="color:var(--gray);">55%</span></div>
           <div style="height:6px; background:var(--line); border-radius:3px; overflow:hidden;"><div style="width:55%; height:100%; background:var(--cyan);"></div></div>
         </div>
-        <p style="font-size:12.5px; margin-top:14px; margin-bottom:0;">You'll also get a downloadable badge and reading recommendations targeted to your two weakest areas.</p>
+        <p style="font-size:0.7812rem; margin-top:14px; margin-bottom:0;">You'll also get a downloadable badge and reading recommendations targeted to your two weakest areas.</p>
       </div>
     </div>
 
     <div class="card" id="spacedReviewCard" style="display:none; margin-bottom:22px;">
       <span class="eyebrow">Spaced review</span>
-      <div id="spacedReviewMeta" style="font-size:12.5px; color:var(--gray); margin-bottom:12px;"></div>
+      <div id="spacedReviewMeta" style="font-size:0.7812rem; color:var(--gray); margin-bottom:12px;"></div>
       <div id="spacedReviewCheckContainer"></div>
-      <a id="spacedReviewLink" href="#" style="font-size:12.5px; color:var(--navy); text-decoration:underline; display:inline-block; margin-top:12px;">Revisit this course →</a>
+      <a id="spacedReviewLink" href="#" style="font-size:0.7812rem; color:var(--navy); text-decoration:underline; display:inline-block; margin-top:12px;">Revisit this course →</a>
     </div>
 
     <div style="display:flex; align-items:baseline; justify-content:space-between; gap:12px; flex-wrap:wrap; margin: 6px 0 14px;">
-      <h2 style="font-family:'Space Grotesk', sans-serif; font-size:16px; color:var(--navy-deep); margin:0;">Your Courses</h2>
+      <h2 style="font-family:var(--display); font-size:1rem; color:var(--navy-deep); margin:0;">Your Courses</h2>
       <div style="display:flex; align-items:center; gap:14px;">
         <div class="catalog-toggle" id="catalogToggle" style="display:none;">
           <button type="button" id="catViewPlan" onclick="setCatalogView('plan')">My plan</button>
           <button type="button" id="catViewAll" onclick="setCatalogView('all')">Browse all</button>
         </div>
-        <a href="framework.html" style="font-size:12.5px; color:var(--navy); text-decoration:underline;">About the framework →</a>
+        <a href="framework.html" style="font-size:0.7812rem; color:var(--navy); text-decoration:underline;">About the framework →</a>
       </div>
     </div>
 
@@ -538,7 +544,7 @@
     <div class="card" id="myNotesCard" style="display:none; margin-top:22px;">
       <div style="display:flex; align-items:baseline; justify-content:space-between;">
         <span class="eyebrow" style="margin-bottom:0;">Your notes</span>
-        <a id="notesToggleLink" onclick="toggleNotesPanel()" style="font-size:12.5px; color:var(--navy); cursor:pointer; text-decoration:underline;">Hide</a>
+        <a id="notesToggleLink" onclick="toggleNotesPanel()" style="font-size:0.7812rem; color:var(--navy); cursor:pointer; text-decoration:underline;">Hide</a>
       </div>
       <div id="notesList" style="margin-top:14px;"></div>
     </div>
@@ -551,7 +557,7 @@
     </div>
   </div>
 
-  <div style="margin-top:40px; padding:20px 0; border-top:1px solid var(--line); text-align:center; font-size:12px; color:var(--gray);">
+  <div style="margin-top:40px; padding:20px 0; border-top:1px solid var(--line); text-align:center; font-size:0.75rem; color:var(--gray);">
     © <span id="footerYear"></span> Product Advisory, LLC. All rights reserved. &nbsp;·&nbsp;
     <a href="https://www.productadvisory.co/privacy-policy" target="_blank" rel="noopener" style="color:var(--gray); text-decoration:underline;">Privacy Policy</a> &nbsp;·&nbsp;
     <a href="https://www.productadvisory.co/terms-of-use" target="_blank" rel="noopener" style="color:var(--gray); text-decoration:underline;">Terms of Use</a>
@@ -707,7 +713,7 @@ window.updateAuthStrength = function(){
   if (!pw){ hint.style.display = 'none'; return; }
   const s = passwordStrength(pw);
   hint.textContent = s.label;
-  hint.style.color = s.ok ? (s.label === 'Strong' ? '#2E8B57' : 'var(--gray)') : '#C0622A';
+  hint.style.color = s.ok ? (s.label === 'Strong' ? 'var(--ok)' : 'var(--gray)') : 'var(--warn)';
   hint.style.display = 'block';
 };
 
@@ -718,8 +724,8 @@ window.togglePasswordVisibility = function(){
   input.type = showing ? 'password' : 'text';
   btn.setAttribute('aria-label', showing ? 'Show password' : 'Hide password');
   btn.innerHTML = showing
-    ? '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#9AA3AD" stroke-width="2"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/></svg>'
-    : '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#9AA3AD" stroke-width="2"><path d="M17.94 17.94A10.94 10.94 0 0 1 12 19c-7 0-11-7-11-7a18.5 18.5 0 0 1 5.06-5.94M9.9 4.24A10.94 10.94 0 0 1 12 4c7 0 11 7 11 7a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>';
+    ? '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="var(--gray)" stroke-width="2"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/></svg>'
+    : '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="var(--gray)" stroke-width="2"><path d="M17.94 17.94A10.94 10.94 0 0 1 12 19c-7 0-11-7-11-7a18.5 18.5 0 0 1 5.06-5.94M9.9 4.24A10.94 10.94 0 0 1 12 4c7 0 11 7 11 7a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>';
 };
 
 window.handleForgotPassword = async function(){
@@ -1284,7 +1290,7 @@ function renderAssignedStat(progress, assessmentResult){
   }
 
   const tierColorFor = (tierName) => {
-    const map = { 'Limited Experience': '#B9C6DA', 'No Experience': '#B9C6DA', 'Moderate Experience': '#6FA3D6', 'Lots of Experience': '#35C2E8', 'Advanced Experience': '#1A4584' };
+    const map = { 'Limited Experience': 'var(--tier-1)', 'No Experience': 'var(--tier-1)', 'Moderate Experience': 'var(--tier-2)', 'Lots of Experience': 'var(--tier-3)', 'Advanced Experience': 'var(--tier-4)' };
     return map[tierName] || 'var(--navy)';
   };
 
@@ -1318,7 +1324,7 @@ function renderAssignedStat(progress, assessmentResult){
     const delta = Math.round(assessmentResult.overallPct - assessmentResult.firstOverallPct);
     const deltaEl = document.getElementById('growthDelta');
     deltaEl.textContent = (delta >= 0 ? '+' : '') + delta + '%';
-    deltaEl.style.color = delta >= 0 ? '#2E8B57' : '#C0622A';
+    deltaEl.style.color = delta >= 0 ? 'var(--ok)' : 'var(--warn)';
   } else {
     growthCard.style.display = 'none';
   }
@@ -1579,19 +1585,19 @@ function infoIconHtml(domainKey, currentTierSlug, meterInfo){
     const shownLabel = TIER_LABEL_BY_SLUG[meterInfo.displayedSlug];
     const moved = meterInfo.displayedSlug !== currentTierSlug || meterInfo.done > 0;
     const sub = moved
-      ? `<div style="font-size:11px; color:var(--gray); font-weight:400; margin-top:3px;">Started at ${TIER_LABEL_BY_SLUG[currentTierSlug]} &middot; ${meterInfo.done} of ${meterInfo.assigned} course${meterInfo.assigned === 1 ? '' : 's'} complete</div>`
+      ? `<div style="font-size:0.6875rem; color:var(--gray); font-weight:400; margin-top:3px;">Started at ${TIER_LABEL_BY_SLUG[currentTierSlug]} &middot; ${meterInfo.done} of ${meterInfo.assigned} course${meterInfo.assigned === 1 ? '' : 's'} complete</div>`
       : '';
-    tierLine = `<div style="font-size:12px; color:var(--navy); font-weight:600; margin-bottom:10px;"><div style="display:flex; align-items:center; gap:7px;">Your current level: ${shownLabel} ${tierMeterHtml(meterInfo.displayedSlug, DOMAIN_COLORS[domainKey], meterInfo.filled)}</div>${sub}</div>`;
+    tierLine = `<div style="font-size:0.75rem; color:var(--navy); font-weight:600; margin-bottom:10px;"><div style="display:flex; align-items:center; gap:7px;">Your current level: ${shownLabel} ${tierMeterHtml(meterInfo.displayedSlug, DOMAIN_COLORS[domainKey], meterInfo.filled)}</div>${sub}</div>`;
   } else if (currentTierSlug){
-    tierLine = `<div style="font-size:12px; color:var(--navy); font-weight:600; margin-bottom:10px; display:flex; align-items:center; gap:7px;">Your current level: ${TIER_LABEL_BY_SLUG[currentTierSlug]} ${tierMeterHtml(currentTierSlug, DOMAIN_COLORS[domainKey])}</div>`;
+    tierLine = `<div style="font-size:0.75rem; color:var(--navy); font-weight:600; margin-bottom:10px; display:flex; align-items:center; gap:7px;">Your current level: ${TIER_LABEL_BY_SLUG[currentTierSlug]} ${tierMeterHtml(currentTierSlug, DOMAIN_COLORS[domainKey])}</div>`;
   }
   return `
     <span style="position:relative; display:inline-flex;">
-      <button type="button" onclick="toggleInfoPopover('${uid}')" style="width:16px; height:16px; border-radius:50%; border:1.5px solid var(--gray); background:none; color:var(--gray); font-size:10px; font-weight:700; line-height:1; cursor:pointer; display:flex; align-items:center; justify-content:center; padding:0; font-family:'Space Grotesk', sans-serif;" aria-label="About this domain">i</button>
-      <div id="${uid}" class="info-popover" style="display:none; position:absolute; top:22px; left:0; z-index:20; width:270px; background:#fff; border:1px solid var(--line); border-radius:10px; padding:14px 16px; box-shadow:0 8px 24px rgba(0,0,0,0.14); font-weight:400;">
-        <div style="font-size:13px; color:var(--ink-soft); line-height:1.5; margin-bottom:10px;">${description}</div>
+      <button type="button" onclick="toggleInfoPopover('${uid}')" style="width:16px; height:16px; border-radius:50%; border:1.5px solid var(--gray); background:none; color:var(--gray); font-size:0.625rem; font-weight:700; line-height:1; cursor:pointer; display:flex; align-items:center; justify-content:center; padding:0; font-family:var(--display);" aria-label="About this domain">i</button>
+      <div id="${uid}" class="info-popover" style="display:none; position:absolute; top:22px; left:0; z-index:20; width:270px; background:var(--surface); border:1px solid var(--line); border-radius:10px; padding:14px 16px; box-shadow:0 8px 24px rgba(0,0,0,0.14); font-weight:400;">
+        <div style="font-size:0.8125rem; color:var(--ink-soft); line-height:1.5; margin-bottom:10px;">${description}</div>
         ${tierLine}
-        <a href="framework.html" style="font-size:12.5px; color:var(--navy); text-decoration:underline;">View full framework →</a>
+        <a href="framework.html" style="font-size:0.7812rem; color:var(--navy); text-decoration:underline;">View full framework →</a>
       </div>
     </span>
   `;
@@ -1618,7 +1624,7 @@ function buildDomainBarsHtml(assessmentResult){
       <div style="display:flex; align-items:center; gap:9px; margin-bottom:10px;">
         ${domainIconBadgeHtml(domainKey, 26)}
         <div style="flex:1;">
-          <div style="display:flex; justify-content:space-between; font-size:12.5px; margin-bottom:4px;"><span>${DOMAINS[domainKey].label}</span><span style="color:var(--gray);">${pct}%</span></div>
+          <div style="display:flex; justify-content:space-between; font-size:0.7812rem; margin-bottom:4px;"><span>${DOMAINS[domainKey].label}</span><span style="color:var(--gray);">${pct}%</span></div>
           <div style="height:6px; background:var(--line); border-radius:3px; overflow:hidden;"><div style="width:${pct}%; height:100%; background:${color};"></div></div>
         </div>
       </div>
@@ -1646,12 +1652,12 @@ function drawRadarChart(assessmentResult){
   [25, 50, 75, 100].forEach(gridPct => {
     const pts = domainKeys.map((_, i) => axisPoint(i, (gridPct / 100) * maxR));
     const d = pts.map((p, i) => (i === 0 ? 'M' : 'L') + p.x.toFixed(1) + ' ' + p.y.toFixed(1)).join(' ') + ' Z';
-    parts += `<path d="${d}" fill="none" stroke="#E3E9F0" stroke-width="1"/>`;
+    parts += `<path d="${d}" fill="none" stroke="var(--line)" stroke-width="1"/>`;
   });
 
   domainKeys.forEach((_, i) => {
     const p = axisPoint(i, maxR);
-    parts += `<line x1="${cx}" y1="${cy}" x2="${p.x.toFixed(1)}" y2="${p.y.toFixed(1)}" stroke="#E3E9F0" stroke-width="1"/>`;
+    parts += `<line x1="${cx}" y1="${cy}" x2="${p.x.toFixed(1)}" y2="${p.y.toFixed(1)}" stroke="var(--line)" stroke-width="1"/>`;
   });
 
   const dataPoints = domainKeys.map((domainKey, i) => {
@@ -1659,7 +1665,7 @@ function drawRadarChart(assessmentResult){
     return axisPoint(i, (Math.max(0, Math.min(100, pct)) / 100) * maxR);
   });
   const dataPath = dataPoints.map((p, i) => (i === 0 ? 'M' : 'L') + p.x.toFixed(1) + ' ' + p.y.toFixed(1)).join(' ') + ' Z';
-  parts += `<path d="${dataPath}" fill="#35C2E8" fill-opacity="0.22" stroke="#1A4584" stroke-width="2"/>`;
+  parts += `<path d="${dataPath}" fill="var(--cyan)" fill-opacity="0.22" stroke="var(--navy)" stroke-width="2"/>`;
 
   dataPoints.forEach((p, i) => {
     parts += `<circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="4" fill="${DOMAIN_COLORS[domainKeys[i]]}"/>`;
@@ -1668,7 +1674,7 @@ function drawRadarChart(assessmentResult){
   domainKeys.forEach((domainKey, i) => {
     const labelPoint = axisPoint(i, maxR + 22);
     const anchor = labelPoint.x < cx - 8 ? 'end' : (labelPoint.x > cx + 8 ? 'start' : 'middle');
-    parts += `<text x="${labelPoint.x.toFixed(1)}" y="${labelPoint.y.toFixed(1)}" text-anchor="${anchor}" font-family="IBM Plex Sans" font-size="10" fill="#4B5768">${DOMAIN_SHORT_LABELS[domainKey]}</text>`;
+    parts += `<text x="${labelPoint.x.toFixed(1)}" y="${labelPoint.y.toFixed(1)}" text-anchor="${anchor}" font-family="var(--sans)" font-size="13" fill="var(--ink-soft)">${DOMAIN_SHORT_LABELS[domainKey]}</text>`;
   });
 
   svg.innerHTML = parts;
@@ -1818,7 +1824,7 @@ function renderCatalog(progress, assessmentResult, view){
       + '<span>' + DOMAINS[domainKey].label + '</span>'
       + tierMeterHtml(meter.displayedSlug, DOMAIN_COLORS[domainKey], meter.filled)
       + infoIconHtml(domainKey, currentTierSlug, meterInfo)
-      + '<span style="font-size:12px; font-weight:500; color:var(--gray); margin-left:auto;">' + domainPct + '% complete</span>';
+      + '<span style="font-size:0.75rem; font-weight:500; color:var(--gray); margin-left:auto;">' + domainPct + '% complete</span>';
     group.appendChild(title);
 
     const row = document.createElement('div');
@@ -2097,7 +2103,7 @@ function renderLockedTeaser(wrap){
       const card = document.createElement('div');
       card.className = 'tier-card is-locked';
       card.innerHTML = `
-        <svg class="lock-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9AA3AD" stroke-width="2"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
+        <svg class="lock-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--gray)" stroke-width="2"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
         <div class="tname">${tier.label}</div>
         <div class="tbar"><div class="tbar-fill" style="width:0%;"></div></div>
         <div class="tstatus">Locked</div>

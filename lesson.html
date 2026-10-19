@@ -7,122 +7,125 @@
 <title>Lesson — Product Advisory Learning</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@600&family=Lato:ital,wght@0,300;0,400;0,700;0,900;1,400&display=swap" rel="stylesheet">
+<script src="pa-prefs.js"></script>
 <style>
   :root{
     --navy: #1A4584; --navy-deep: #12305e; --gray: #9AA3AD; --cyan: #35C2E8;
     --bg: #F5F8FB; --surface: #FFFFFF; --ink: #16213E; --ink-soft: #4B5768; --line: #E3E9F0;
   }
   *{ box-sizing: border-box; }
-  body{ margin:0; background: var(--bg); font-family:'IBM Plex Sans', system-ui, sans-serif; color: var(--ink); }
+  body{ margin:0; background: var(--bg); font-family:var(--sans); color: var(--ink); }
   .wrap{ max-width: 640px; margin: 0 auto; padding: 24px 16px 48px; }
   .brand-accent-bar{ height: 3px; background: linear-gradient(90deg, var(--navy) 0%, var(--cyan) 100%); border-radius: 2px; margin-bottom: 24px; }
-  .back-link{ font-size: 13px; color: var(--gray); text-decoration:none; display:inline-block; margin-bottom: 16px; }
+  .back-link{ font-size: 0.8125rem; color: var(--gray); text-decoration:none; display:inline-block; margin-bottom: 16px; }
   .back-link:hover{ color: var(--navy); }
   .card{ background: var(--surface); border-radius: 16px; border: 1px solid var(--line); padding: 32px; box-shadow: 0 1px 2px rgba(22,33,62,0.04), 0 12px 32px rgba(22,33,62,0.06); }
-  .eyebrow{ font-size: 12px; font-weight:600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--cyan); margin-bottom: 8px; display:block; }
-  h1{ font-family:'Space Grotesk', sans-serif; font-size: 20px; margin: 0 0 18px; color: var(--navy-deep); }
+  .eyebrow{ font-size: 0.75rem; font-weight:600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--cyan); margin-bottom: 8px; display:block; }
+  h1{ font-family:var(--display); font-size: 1.25rem; margin: 0 0 18px; color: var(--navy-deep); }
   p{ line-height:1.6; color: var(--ink-soft); }
   #lessonBody p{ margin: 0 0 14px; }
   #lessonBody ul{ margin: 0 0 14px; padding-left: 20px; }
   #lessonBody li{ line-height:1.6; color: var(--ink-soft); margin-bottom: 8px; }
   #lessonBody strong{ color: var(--ink); }
   .lesson-image{ width:100%; border-radius: 10px; border: 1px solid var(--line); margin-bottom: 16px; display:block; }
-  .lesson-image-caption{ font-size: 12.5px; color: var(--gray); text-align:center; margin: -8px 0 18px; }
+  .lesson-image-caption{ font-size: 0.7812rem; color: var(--gray); text-align:center; margin: -8px 0 18px; }
 
-  .check-box{ background:#F7F9FC; border: 1.5px solid var(--line); border-radius: 12px; padding: 18px 20px; margin-top: 24px; }
-  .check-box .check-eyebrow{ font-size: 11px; font-weight:600; letter-spacing:0.06em; text-transform:uppercase; color: var(--cyan); display:block; margin-bottom: 8px; }
-  .check-box .check-q{ font-family:'Space Grotesk', sans-serif; font-weight:600; font-size: 14.5px; color: var(--navy-deep); margin-bottom: 12px; }
-  .check-option{ display:block; width:100%; text-align:left; padding: 10px 13px; margin-bottom: 8px; border: 1.5px solid var(--line); border-radius: 8px; background:#fff; font-family:'IBM Plex Sans', sans-serif; font-size: 13.5px; color: var(--ink); cursor:pointer; }
+  .check-box{ background:var(--bg); border: 1.5px solid var(--line); border-radius: 12px; padding: 18px 20px; margin-top: 24px; }
+  .check-box .check-eyebrow{ font-size: 0.6875rem; font-weight:600; letter-spacing:0.06em; text-transform:uppercase; color: var(--cyan); display:block; margin-bottom: 8px; }
+  .check-box .check-q{ font-family:var(--display); font-weight:600; font-size: 0.9062rem; color: var(--navy-deep); margin-bottom: 12px; }
+  .check-option{ display:block; width:100%; text-align:left; padding: 10px 13px; margin-bottom: 8px; border: 1.5px solid var(--line); border-radius: 8px; background:var(--surface); font-family:var(--sans); font-size: 0.8438rem; color: var(--ink); cursor:pointer; }
   .check-option:hover{ border-color: var(--cyan); }
-  .check-option.correct{ border-color: #2E8B57; background:#EEF9F1; }
-  .check-option.incorrect{ border-color: #C0622A; background:#FCEFE9; }
-  .check-feedback{ font-size: 13px; margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--line); color: var(--ink-soft); display:none; }
+  .check-option.correct{ border-color: var(--ok); background:var(--ok-bg); }
+  .check-option.incorrect{ border-color: var(--warn); background:var(--warn-bg); }
+  .check-feedback{ font-size: 0.8125rem; margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--line); color: var(--ink-soft); display:none; }
   .check-feedback.show{ display:block; }
   .check-feedback strong{ color: var(--ink); }
 
   .chart-box{ margin-top: 20px; }
   .chart-slider-row{ display:flex; align-items:center; gap:12px; margin-bottom: 14px; }
   .chart-slider-row input[type=range]{ flex:1; accent-color: var(--cyan); }
-  .chart-slider-row .chart-x-label{ font-size: 13px; color: var(--ink-soft); min-width: 68px; text-align:right; }
+  .chart-slider-row .chart-x-label{ font-size: 0.8125rem; color: var(--ink-soft); min-width: 68px; text-align:right; }
   .chart-stats{ display:flex; gap:14px; margin-bottom: 14px; flex-wrap: wrap; }
-  .chart-stat{ flex:1; min-width: 120px; background:#F7F9FC; border-radius: 10px; padding: 10px 12px; }
-  .chart-stat .clabel{ font-size: 11.5px; color: var(--gray); margin-bottom: 2px; }
-  .chart-stat .cval{ font-family:'Space Grotesk', sans-serif; font-weight:700; font-size: 18px; }
-  .chart-caption{ font-size: 11.5px; color: var(--gray); text-align:center; margin-top: 6px; }
+  .chart-stat{ flex:1; min-width: 120px; background:var(--bg); border-radius: 10px; padding: 10px 12px; }
+  .chart-stat .clabel{ font-size: 0.7188rem; color: var(--gray); margin-bottom: 2px; }
+  .chart-stat .cval{ font-family:var(--display); font-weight:700; font-size: 1.125rem; }
+  .chart-caption{ font-size: 0.7188rem; color: var(--gray); text-align:center; margin-top: 6px; }
 
-  .calc-box{ margin-top: 20px; background:#F7F9FC; border:1.5px solid var(--line); border-radius: 12px; padding: 16px 18px; }
-  .calc-title{ font-family:'Space Grotesk', sans-serif; font-weight:700; font-size: 14px; color: var(--ink); margin-bottom: 12px; }
+  .calc-box{ margin-top: 20px; background:var(--bg); border:1.5px solid var(--line); border-radius: 12px; padding: 16px 18px; }
+  .calc-title{ font-family:var(--display); font-weight:700; font-size: 0.875rem; color: var(--ink); margin-bottom: 12px; }
   .calc-row{ display:flex; align-items:center; gap:12px; margin-bottom: 10px; }
-  .calc-row label{ flex: 0 0 auto; width: 42%; font-size: 12.5px; color: var(--ink-soft); }
+  .calc-row label{ flex: 0 0 auto; width: 42%; font-size: 0.7812rem; color: var(--ink-soft); }
   .calc-row input[type=range]{ flex:1; accent-color: var(--cyan); }
-  .calc-val{ flex: 0 0 30px; text-align:right; font-family:'Space Grotesk', sans-serif; font-weight:700; font-size: 13px; color: var(--navy); }
-  .calc-result{ display:flex; align-items:center; justify-content:space-between; background:#fff; border-radius: 10px; padding: 10px 14px; margin-top: 12px; border: 1.5px solid var(--cyan); }
-  .calc-result-label{ font-size: 12.5px; color: var(--ink-soft); }
-  .calc-result-val{ font-family:'Space Grotesk', sans-serif; font-weight:700; font-size: 20px; color: var(--navy-deep); }
-  .calc-note{ font-size: 11.5px; color: var(--gray); margin-top: 10px; }
+  .calc-val{ flex: 0 0 30px; text-align:right; font-family:var(--display); font-weight:700; font-size: 0.8125rem; color: var(--navy); }
+  .calc-result{ display:flex; align-items:center; justify-content:space-between; background:var(--surface); border-radius: 10px; padding: 10px 14px; margin-top: 12px; border: 1.5px solid var(--cyan); }
+  .calc-result-label{ font-size: 0.7812rem; color: var(--ink-soft); }
+  .calc-result-val{ font-family:var(--display); font-weight:700; font-size: 1.25rem; color: var(--navy-deep); }
+  .calc-note{ font-size: 0.7188rem; color: var(--gray); margin-top: 10px; }
 
   .stepper-box{ margin-top: 8px; }
   .stepper-dots{ display:flex; gap:6px; margin-bottom: 14px; }
   .stepper-dot{ flex:1; height:4px; border-radius:2px; background: var(--line); cursor:pointer; }
   .stepper-dot.active{ background: var(--navy); }
   .stepper-dot.seen{ background: var(--cyan); }
-  .stepper-card{ background:#F7F9FC; border-radius: 12px; padding: 16px 18px; margin-bottom: 12px; }
-  .stepper-card .snum{ font-size: 11px; font-weight:600; color: var(--cyan); text-transform:uppercase; letter-spacing:0.04em; margin-bottom: 6px; }
-  .stepper-card h4{ font-family:'Space Grotesk', sans-serif; font-size: 14.5px; margin: 0 0 8px; color: var(--navy-deep); }
-  .stepper-card p{ font-size: 13.5px; margin: 0; }
+  .stepper-card{ background:var(--bg); border-radius: 12px; padding: 16px 18px; margin-bottom: 12px; }
+  .stepper-card .snum{ font-size: 0.6875rem; font-weight:600; color: var(--cyan); text-transform:uppercase; letter-spacing:0.04em; margin-bottom: 6px; }
+  .stepper-card h4{ font-family:var(--display); font-size: 0.9062rem; margin: 0 0 8px; color: var(--navy-deep); }
+  .stepper-card p{ font-size: 0.8438rem; margin: 0; }
   .stepper-nav{ display:flex; justify-content:space-between; }
-  .stepper-nav button{ font-family:'IBM Plex Sans', sans-serif; font-size: 13px; padding: 7px 14px; border-radius: 7px; border: 1px solid var(--line); background:#fff; cursor:pointer; color: var(--ink); }
+  .stepper-nav button{ font-family:var(--sans); font-size: 0.8125rem; padding: 7px 14px; border-radius: 7px; border: 1px solid var(--line); background:var(--surface); cursor:pointer; color: var(--ink); }
   .stepper-nav button:disabled{ opacity:0.35; cursor:not-allowed; }
 
-  .reflection-box{ background:#F7F9FC; border-radius: 12px; padding: 16px 18px; margin-top: 20px; }
-  .reflection-box .rlabel{ font-size: 11px; font-weight:600; color: var(--cyan); text-transform:uppercase; letter-spacing:0.04em; margin-bottom: 8px; display:block; }
-  .reflection-box textarea{ width:100%; min-height: 80px; padding: 10px 12px; border: 1.5px solid var(--line); border-radius: 9px; font-family:'IBM Plex Sans', sans-serif; font-size: 13.5px; resize:vertical; }
+  .reflection-box{ background:var(--bg); border-radius: 12px; padding: 16px 18px; margin-top: 20px; }
+  .reflection-box .rlabel{ font-size: 0.6875rem; font-weight:600; color: var(--cyan); text-transform:uppercase; letter-spacing:0.04em; margin-bottom: 8px; display:block; }
+  .reflection-box textarea{ width:100%; min-height: 80px; padding: 10px 12px; border: 1.5px solid var(--line); border-radius: 9px; font-family:var(--sans); font-size: 0.8438rem; resize:vertical; }
   .reflection-box textarea:focus{ outline:none; border-color: var(--cyan); }
   .reflection-save-row{ display:flex; justify-content:space-between; align-items:center; margin-top: 10px; }
-  .reflection-save-row button{ font-family:'Space Grotesk', sans-serif; font-weight:600; font-size: 13px; padding: 8px 16px; border-radius: 7px; border:none; background: var(--navy); color:#fff; cursor:pointer; }
-  .linkedin-box{ background:#F7F9FC; border: 1.5px solid var(--line); border-radius: 12px; padding: 16px 18px; margin-top: 22px; }
-  .linkedin-box p{ font-size: 13.5px; margin: 0 0 12px; color: var(--ink-soft); }
-  .linkedin-btn{ display:inline-flex; align-items:center; gap:8px; background:var(--navy); color:#fff; font-family:'Space Grotesk', sans-serif; font-weight:600; font-size: 13.5px; padding: 9px 16px; border-radius: 8px; text-decoration:none; }
-  .linkedin-btn:hover{ background:var(--navy-deep); }
-  .reflection-saved-note{ font-size: 12px; color: var(--gray); }
+  .reflection-save-row button{ font-family:var(--display); font-weight:600; font-size: 0.8125rem; padding: 8px 16px; border-radius: 7px; border:none; background: var(--navy); color:var(--btn-ink); cursor:pointer; }
+  .linkedin-box{ background:var(--bg); border: 1.5px solid var(--line); border-radius: 12px; padding: 16px 18px; margin-top: 22px; }
+  .linkedin-box p{ font-size: 0.8438rem; margin: 0 0 12px; color: var(--ink-soft); }
+  .linkedin-btn{ display:inline-flex; align-items:center; gap:8px; background:var(--navy); color:var(--btn-ink); font-family:var(--display); font-weight:600; font-size: 0.8438rem; padding: 9px 16px; border-radius: 8px; text-decoration:none; }
+  .linkedin-btn:hover{ background:var(--primary-strong); }
+  .reflection-saved-note{ font-size: 0.75rem; color: var(--gray); }
 
-  .template-box{ background:#F7F9FC; border-radius: 12px; padding: 18px 20px; margin-top: 20px; }
+  .template-box{ background:var(--bg); border-radius: 12px; padding: 18px 20px; margin-top: 20px; }
   .template-field{ margin-bottom: 12px; }
-  .template-field label{ display:block; font-size: 12px; color: var(--ink-soft); margin-bottom: 4px; }
-  .template-field input[type=text], .template-field textarea{ width:100%; padding: 9px 11px; border: 1.5px solid var(--line); border-radius: 8px; font-family:'IBM Plex Sans', sans-serif; font-size: 13.5px; box-sizing:border-box; }
+  .template-field label{ display:block; font-size: 0.75rem; color: var(--ink-soft); margin-bottom: 4px; }
+  .template-field input[type=text], .template-field textarea{ width:100%; padding: 9px 11px; border: 1.5px solid var(--line); border-radius: 8px; font-family:var(--sans); font-size: 0.8438rem; box-sizing:border-box; }
   .template-field textarea{ min-height: 60px; resize: vertical; }
   .template-field input:focus, .template-field textarea:focus{ outline:none; border-color: var(--cyan); }
   .template-actions{ display:flex; justify-content:space-between; align-items:center; margin-top: 14px; flex-wrap: wrap; gap: 10px; }
   .template-actions .tbtns{ display:flex; gap:8px; flex-wrap: wrap; }
-  .template-actions button{ font-family:'Space Grotesk', sans-serif; font-weight:600; font-size: 12.5px; padding: 8px 14px; border-radius: 7px; cursor:pointer; }
-  .template-actions .tbtn-save{ border:none; background: var(--navy); color:#fff; }
-  .template-actions .tbtn-save:hover{ background: var(--navy-deep); }
-  .template-actions .tbtn-ghost{ border: 1px solid var(--line); background:#fff; color: var(--ink-soft); }
-  .template-saved-note{ font-size: 12px; color: var(--gray); }
+  .template-actions button{ font-family:var(--display); font-weight:600; font-size: 0.7812rem; padding: 8px 14px; border-radius: 7px; cursor:pointer; }
+  .template-actions .tbtn-save{ border:none; background: var(--navy); color:var(--btn-ink); }
+  .template-actions .tbtn-save:hover{ background: var(--primary-strong); }
+  .template-actions .tbtn-ghost{ border: 1px solid var(--line); background:var(--surface); color: var(--ink-soft); }
+  .template-saved-note{ font-size: 0.75rem; color: var(--gray); }
   .lesson-nav{ display:flex; gap:8px; margin: 24px 0; flex-wrap:wrap; }
-  .lesson-pill{ padding: 7px 12px; border-radius: 7px; font-size: 12.5px; font-weight:500; border: 1px solid var(--line); background:#fff; color: var(--ink-soft); text-decoration:none; }
-  .lesson-pill.done{ background:#EEF3FA; border-color: var(--cyan); color: var(--navy); }
+  .lesson-pill{ padding: 7px 12px; border-radius: 7px; font-size: 0.7812rem; font-weight:500; border: 1px solid var(--line); background:var(--surface); color: var(--ink-soft); text-decoration:none; }
+  .lesson-pill.done{ background:var(--tint); border-color: var(--cyan); color: var(--navy); }
   .lesson-pill.current{ border-color: var(--navy); color: var(--navy); font-weight:600; }
   .nav-row{ display:flex; justify-content:space-between; margin-top: 26px; }
-  button.btn{ font-family:'Space Grotesk', sans-serif; font-weight:600; font-size: 14px; border-radius: 8px; padding: 11px 20px; border: none; cursor:pointer; }
-  .btn-primary{ background: var(--navy); color:#fff; }
-  .btn-primary:hover{ background: var(--navy-deep); }
+  button.btn{ font-family:var(--display); font-weight:600; font-size: 0.875rem; border-radius: 8px; padding: 11px 20px; border: none; cursor:pointer; }
+  .btn-primary{ background: var(--navy); color:var(--btn-ink); }
+  .btn-primary:hover{ background: var(--primary-strong); }
   .btn-ghost{ background:none; color: var(--gray); border: 1px solid var(--line); }
-  .status-msg{ font-size: 13px; color: var(--gray); margin-top: 10px; }
+  .status-msg{ font-size: 0.8125rem; color: var(--gray); margin-top: 10px; }
 </style>
+<link rel="stylesheet" href="pa-theme.css">
 <script src="analytics.js"></script>
 </head>
 <body>
+<script src="pa-shell.js"></script>
 <div class="wrap">
-  <a href="lms-dashboard.html" style="display:flex; align-items:center; gap:9px; text-decoration:none; padding-top:24px; margin-bottom:14px;">
+  <a href="lms-dashboard.html" class="brand-header" style="display:flex; align-items:center; gap:9px; text-decoration:none; padding-top:24px; margin-bottom:14px;">
     <svg width="26" height="26" viewBox="0 0 40 40" aria-hidden="true">
       <polygon points="20,3 35,11.5 35,28.5 20,37 5,28.5 5,11.5" fill="#1A4584"/>
       <polygon points="20,10 29,15 29,25 20,30 11,25 11,15" fill="none" stroke="#35C2E8" stroke-width="1.5"/>
     </svg>
     <div>
-      <div style="font-family:'IBM Plex Sans', sans-serif; font-weight:600; font-size:10px; letter-spacing:0.06em; color:var(--gray); line-height:1;">PRODUCT ADVISORY</div>
-      <div style="font-family:'Space Grotesk', sans-serif; font-weight:700; font-size:17px; line-height:1.3; color:var(--navy-deep);">Learning</div>
+      <div style="font-family:var(--sans); font-weight:600; font-size:0.625rem; letter-spacing:0.06em; color:var(--gray); line-height:1;">PRODUCT ADVISORY</div>
+      <div style="font-family:var(--display); font-weight:700; font-size:1.0625rem; line-height:1.3; color:var(--navy-deep);">Learning</div>
     </div>
   </a>
   <div class="brand-accent-bar"></div>
@@ -158,7 +161,7 @@
     <div class="status-msg" id="statusMsg"></div>
   </div>
 
-  <div style="margin-top:40px; padding:20px 0; border-top:1px solid var(--line); text-align:center; font-size:12px; color:var(--gray);">
+  <div style="margin-top:40px; padding:20px 0; border-top:1px solid var(--line); text-align:center; font-size:0.75rem; color:var(--gray);">
     © <span id="footerYear"></span> Product Advisory, LLC. All rights reserved. &nbsp;·&nbsp;
     <a href="https://www.productadvisory.co/privacy-policy" target="_blank" rel="noopener" style="color:var(--gray); text-decoration:underline;">Privacy Policy</a> &nbsp;·&nbsp;
     <a href="https://www.productadvisory.co/terms-of-use" target="_blank" rel="noopener" style="color:var(--gray); text-decoration:underline;">Terms of Use</a> &nbsp;·&nbsp;
@@ -314,12 +317,12 @@ function showAssessmentLock(){
   ['preCheckContainer','chartContainer','calcContainer','stepperContainer','checkContainer','reflectionContainer','sourceLinkRow']
     .forEach(id => { const el = document.getElementById(id); if (el) el.style.display = 'none'; });
   document.getElementById('lessonBody').innerHTML = `
-    <div style="background:#F7F9FC; border:1.5px solid var(--line); border-radius:12px; padding:24px; text-align:center; margin-top:8px;">
+    <div style="background:var(--bg); border:1.5px solid var(--line); border-radius:12px; padding:24px; text-align:center; margin-top:8px;">
       <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="var(--gray)" stroke-width="2" style="margin-bottom:10px;">
         <rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/>
       </svg>
       <p style="margin:0 0 8px; color:var(--ink); font-weight:600;">This course is locked until you take the assessment.</p>
-      <p style="margin:0 0 16px; font-size:13.5px;">The assessment places you at the right level in each skill area, so every course starts where you are. It takes about five minutes.</p>
+      <p style="margin:0 0 16px; font-size:0.8438rem;">The assessment places you at the right level in each skill area, so every course starts where you are. It takes about five minutes.</p>
       <a href="index.html" class="btn btn-primary" style="text-decoration:none; display:inline-block;">Take the assessment →</a>
     </div>
   `;
@@ -728,7 +731,7 @@ function renderReflection(reflection, lessonId){
   box.className = 'reflection-box';
   box.innerHTML = `
     <span class="rlabel">Your reflection</span>
-    <p style="margin:0 0 10px; font-size:13.5px;">${reflection.prompt}</p>
+    <p style="margin:0 0 10px; font-size:0.8438rem;">${reflection.prompt}</p>
     <textarea id="reflectionInput" placeholder="Type your answer here">${existing}</textarea>
     <div class="reflection-save-row">
       <span class="reflection-saved-note" id="reflectionSavedNote">${existing ? 'Saved previously' : ''}</span>
@@ -851,7 +854,7 @@ function courseTemplateHtml(tmpl, existing){
   return `
     <div class="template-box" id="courseTemplateBox">
       <span class="eyebrow">${tmpl.title || 'Course template'}</span>
-      ${tmpl.intro ? `<p style="margin:8px 0 14px; font-size:13.5px; color:var(--ink-soft);">${tmpl.intro}</p>` : ''}
+      ${tmpl.intro ? `<p style="margin:8px 0 14px; font-size:0.8438rem; color:var(--ink-soft);">${tmpl.intro}</p>` : ''}
       ${fieldsHtml}
       <div class="template-actions">
         <span class="template-saved-note" id="tmplSavedNote">${existing && Object.keys(existing).length ? 'Saved previously' : ''}</span>
@@ -935,7 +938,7 @@ function showCourseComplete(coursesMap){
     ? course.recap
     : course.lessons.map(l => l.title.replace(/^Lesson\s*\d+:\s*/, ''));
   const recapHtml = `
-    <div style="background:#F7F9FC; border:1px solid var(--line); border-radius:12px; padding:18px 20px; margin-top:8px;">
+    <div style="background:var(--bg); border:1px solid var(--line); border-radius:12px; padding:18px 20px; margin-top:8px;">
       <span class="eyebrow">${course.recap ? 'The takeaways' : 'What this course covered'}</span>
       <ul style="margin:8px 0 0; padding-left:20px;">
         ${recapItems.map(t => `<li style="line-height:1.55; color:var(--ink-soft); margin-bottom:6px;">${t}</li>`).join('')}
@@ -952,8 +955,8 @@ function showCourseComplete(coursesMap){
       const prompt = lesson && lesson.reflection ? lesson.reflection.prompt : '';
       return `
         <div style="border-left:3px solid var(--cyan); padding:2px 0 2px 12px; margin-bottom:12px;">
-          ${prompt ? `<div style="font-size:12px; color:var(--gray); margin-bottom:4px;">${prompt}</div>` : ''}
-          <div style="font-size:13.5px; color:var(--ink); white-space:pre-wrap;">${n.text.replace(/</g, '&lt;')}</div>
+          ${prompt ? `<div style="font-size:0.75rem; color:var(--gray); margin-bottom:4px;">${prompt}</div>` : ''}
+          <div style="font-size:0.8438rem; color:var(--ink); white-space:pre-wrap;">${n.text.replace(/</g, '&lt;')}</div>
         </div>`;
     }).join('');
   const notesHtml = myNotes ? `
@@ -972,8 +975,8 @@ function showCourseComplete(coursesMap){
     </div>` : '';
 
   const retakeHtml = recs.length ? '' : `
-    <div style="margin-top:20px; background:#EEF3FA; border:1px solid var(--line); border-radius:12px; padding:16px 18px;">
-      <p style="margin:0 0 10px; font-size:13.5px;">You've cleared every course at your assessed level. Retake the assessment to see how far you've moved and unlock the next set.</p>
+    <div style="margin-top:20px; background:var(--tint); border:1px solid var(--line); border-radius:12px; padding:16px 18px;">
+      <p style="margin:0 0 10px; font-size:0.8438rem;">You've cleared every course at your assessed level. Retake the assessment to see how far you've moved and unlock the next set.</p>
       <a href="${buildAssessmentPrefillUrl(currentUser, userProfile)}" class="btn btn-primary" style="text-decoration:none; display:inline-block;">Retake the assessment →</a>
     </div>`;
 

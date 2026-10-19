@@ -108,7 +108,7 @@ if (window.self === window.top) {
       menu.appendChild(link('Owner console', 'owner.html', page === 'owner.html'));
       menu.appendChild(link('Reports', 'reports.html', page === 'reports.html'));
     }
-    menu.appendChild(link('Vote on the next tool', 'tool-requests.html', page === 'tool-requests.html'));
+    menu.appendChild(link('Toolkits Roadmap', 'tool-requests.html', page === 'tool-requests.html'));
     menu.appendChild(link('Send feedback', 'mailto:feedback@productadvisory.co?subject=' + encodeURIComponent('Feedback on Product Advisory Learning'), false));
     menu.appendChild(link('Visit Product Advisory ↗', 'https://www.productadvisory.co/', false, true));
     if (window.PAAnalytics && window.PAAnalytics.reopen){
