@@ -31,16 +31,16 @@ if (window.self === window.top) {
 
   const STYLE = [
     '.pa-acct{position:absolute;z-index:40;font-family:"Space Grotesk","IBM Plex Sans",system-ui,sans-serif;}',
-    '.pa-acct-btn{display:flex;align-items:center;gap:7px;padding:7px 14px 7px 10px;border-radius:20px;background:var(--navy,#1A4584);color:#fff;border:none;cursor:pointer;font:600 13px "Space Grotesk","IBM Plex Sans",system-ui,sans-serif;}',
-    '.pa-acct-btn:hover{background:var(--navy-deep,#12325F);}',
+    '.pa-acct-btn{display:flex;align-items:center;gap:7px;padding:7px 14px 7px 10px;border-radius:20px;background:var(--navy,#1A4584);color:var(--btn-ink,#fff);border:none;cursor:pointer;font:600 13px "Space Grotesk","IBM Plex Sans",system-ui,sans-serif;}',
+    '.pa-acct-btn:hover{background:var(--primary-strong,#12325F);}',
     '.pa-acct-btn:focus-visible,.pa-acct-item:focus-visible{outline:3px solid var(--cyan,#35C2E8);outline-offset:2px;}',
-    '.pa-acct-menu{position:absolute;right:0;top:42px;width:250px;max-width:calc(100vw - 32px);background:#fff;border:1px solid var(--line,#DCE3EE);border-radius:12px;box-shadow:0 8px 24px rgba(22,33,62,0.12);padding:14px;}',
+    '.pa-acct-menu{position:absolute;right:0;top:42px;width:250px;max-width:calc(100vw - 32px);background:var(--surface,#fff);border:1px solid var(--line,#DCE3EE);border-radius:12px;box-shadow:0 8px 24px rgba(22,33,62,0.12);padding:14px;}',
     '.pa-acct-menu[hidden]{display:none;}',
     '.pa-acct-name{font-weight:600;font-size:14.5px;color:var(--ink,#16213E);}',
     '.pa-acct-email{font:400 12.5px "IBM Plex Sans",system-ui,sans-serif;color:var(--ink-soft,#4A5568);word-break:break-all;}',
     '.pa-acct-rule{height:1px;background:var(--line,#DCE3EE);margin:10px 0;}',
     '.pa-acct-item{display:block;width:100%;box-sizing:border-box;text-align:left;padding:8px 4px;font:400 13.5px "IBM Plex Sans",system-ui,sans-serif;color:var(--ink,#16213E);text-decoration:none;cursor:pointer;border:none;background:none;border-radius:6px;}',
-    '.pa-acct-item:hover{background:#F7F9FC;}',
+    '.pa-acct-item:hover{background:var(--bg,#F7F9FC);}',
     '.pa-acct-item[aria-current="page"]{font-weight:600;color:var(--navy,#1A4584);}',
     '@media print{.pa-acct{display:none;}}'
   ].join('');
@@ -92,7 +92,7 @@ if (window.self === window.top) {
     btn.setAttribute('aria-haspopup', 'true');
     btn.setAttribute('aria-expanded', 'false');
     btn.setAttribute('aria-label', 'Account menu');
-    btn.innerHTML = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>';
+    btn.innerHTML = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>';
     btn.appendChild(document.createTextNode('Profile'));
 
     const menu = el('div', 'pa-acct-menu');
@@ -132,7 +132,10 @@ if (window.self === window.top) {
     });
     wrap.append(btn, menu);
 
-    // Sit in the corner of the page's own column, level with the logo, when it has one.
+    // On themed pages the site header has a slot for it (pa-shell.js).
+    const slot = document.getElementById('paNavAccount');
+    if (slot){ slot.appendChild(wrap); return; }
+    // Otherwise sit in the corner of the page's own column, level with the logo, when it has one.
     const col = document.querySelector('.wrap') || document.querySelector('.card') || document.body;
     if (getComputedStyle(col).position === 'static') col.style.position = 'relative';
     const isWrap = col.classList.contains('wrap');

@@ -250,6 +250,28 @@ manual review — it holds no uid and isn't read by the app.
 - **Admin welcome** (section 12): when someone joins a company as an admin (`join.html` announces the new membership with a `pa-membership-changed` event, and `account-menu.js` also checks on every page load for an admin who joined in the last two days), the script re-reads their own membership with their token and sends "Your [company] dashboard is ready" from assessment@, once per admin per company (the **AdminWelcomes** tab), plus a short notice to Rob linking the pilot tracker. Tests: `tests/admin-welcome-and-launch.test.mjs` and the "adminjoin" pages in the UI runner.
 - **Tool launch emails** (section 13): on `owner-tools.html`, **Send launch emails** (and **Send me a preview**) next to a Released tool with a launch link asks the script to email everyone who ticked "Email me when this launches" for that tool, from the name "Toolkit Notification" with replies to toolkit@. Only the owner can send; the addresses are read from the vote records with the owner's token; each person is emailed once per tool (the **ToolLaunchSent** tab); at most 80 a press, always leaving 15 of Gmail's ~100 daily emails in reserve. Tests: `tests/admin-welcome-and-launch.test.mjs` and the "tool roadmap admin: launch" page.
 
+## The Product Advisory look (header, search, "Make it yours", light and dark)
+
+The learner-facing pages share the look of www.productadvisory.co. Three files do it:
+
+- `pa-prefs.js` (in the `<head>`, before the page's `<style>`): applies the visitor's look before anything is drawn:
+  style (Classic, Editorial, Boardroom, Lab), accent, text size, density, motion and light/dark. The look is kept in a
+  preference cookie on `.productadvisory.co` (`pa_look`) shared with www.productadvisory.co and the portfolio, so a
+  choice made on one site opens the others the same way.
+- `pa-theme.css` (straight after the page's `</style>`): the brand tokens copied from the main site (with a `--pa-`
+  prefix), in light and dark, plus the four styles and the accents. It re-points the names every page already uses
+  (`--navy` fills buttons, `--navy-deep` is heading ink, `--surface`, `--bg`, `--ink`, `--ink-soft`, `--line`, `--gray`,
+  `--ok`, `--warn`, `--note-*`) so each page gets dark mode without being rewritten. Use those names, never a hex
+  colour, in new page styles.
+- `pa-shell.js` (straight after `<body>`): draws the site header (logo, Assessment, My learning, Framework, Tool
+  Roadmap, a link to productadvisory.co, search, Make it yours, light/dark, and the Profile button from
+  `account-menu.js`), the Make it yours panel and the search menu (⌘K / Ctrl+K or /). Search covers every course,
+  lesson and skill area from `search-index.js`, which is generated: **after adding or editing a course in `content/`,
+  run `node tools/build-search-index.mjs`** (the theme test fails until you do).
+
+Fonts are Lato for text and Comfortaa for the logo. Font sizes are in `rem`, so "Text size" scales the whole page.
+`tests/theme.test.mjs` lists which pages are converted (`THEMED`).
+
 ## Google Analytics and the cookie notice
 
 - `analytics.js` loads Google Analytics 4 (measurement id `G-4XFS1QWS9H`, set once at the top of that file) on the public and learner pages only: the assessment, framework, request form, Tool Roadmap, dashboard, lessons and profile. It is deliberately **not** on the owner and admin pages (owner, owner-tools, owner-pilot, reports, company), the invitation page (its address holds a secret link) or the aggregate results page. A new page must be added to one of the two lists in `tests/analytics.test.mjs`, which fails until it has been decided.

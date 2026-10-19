@@ -17,7 +17,8 @@
 <meta name="twitter:description" content="A 14-question skill check across product management and AI fluency, with courses matched to your level.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@600&family=Lato:ital,wght@0,300;0,400;0,700;0,900;1,400&display=swap" rel="stylesheet">
+<script src="pa-prefs.js"></script>
 <style>
 
   /* ============================================================
@@ -48,7 +49,7 @@
   body{
     margin:0;
     background: var(--bg);
-    font-family: 'IBM Plex Sans', system-ui, sans-serif;
+    font-family: var(--sans);
     color: var(--ink);
     display:flex;
     flex-direction:column;
@@ -71,7 +72,7 @@
     padding: 16px 32px 14px;
   }
   .brand-word{
-    font-family:'Space Grotesk', sans-serif; font-weight:700; font-size: 17px;
+    font-family:var(--display); font-weight:700; font-size: 1.0625rem;
     letter-spacing: 0.02em; color: var(--navy-deep);
   }
   .brand-accent-bar{
@@ -82,13 +83,13 @@
   .card-inner{ padding: 30px 32px 32px; }
 
   h1,h2,h3{
-    font-family:'Space Grotesk', sans-serif;
+    font-family:var(--display);
     margin: 0 0 8px;
     color: var(--navy-deep);
   }
 
   .eyebrow{
-    font-size: 12px;
+    font-size: 0.75rem;
     font-weight:600;
     letter-spacing: 0.08em;
     text-transform: uppercase;
@@ -103,19 +104,19 @@
   .progress-seg{ flex:1; height:4px; border-radius:2px; background: var(--line); transition: background .25s ease; }
   .progress-seg.done{ background: var(--cyan); }
 
-  .q-count{ font-size:13px; color: var(--gray); margin-bottom: 4px; font-weight:500; }
-  .q-category{ font-size:12px; color: var(--navy); font-weight:600; text-transform:uppercase; letter-spacing:0.04em; margin-bottom: 10px; }
-  .lock-badge{ display:inline-flex; align-items:center; gap:5px; font-size:11.5px; font-weight:700; text-transform:uppercase; letter-spacing:0.04em; padding:3px 10px; border-radius:20px; background:#EEF3FA; color: var(--navy); }
-  .locked-box{ border:1.5px dashed var(--line); border-radius:12px; padding:16px 18px; background:#FAFBFD; margin-bottom:16px; }
+  .q-count{ font-size:0.8125rem; color: var(--gray); margin-bottom: 4px; font-weight:500; }
+  .q-category{ font-size:0.75rem; color: var(--navy); font-weight:600; text-transform:uppercase; letter-spacing:0.04em; margin-bottom: 10px; }
+  .lock-badge{ display:inline-flex; align-items:center; gap:5px; font-size:0.7188rem; font-weight:700; text-transform:uppercase; letter-spacing:0.04em; padding:3px 10px; border-radius:20px; background:var(--tint); color: var(--navy); }
+  .locked-box{ border:1.5px dashed var(--line); border-radius:12px; padding:16px 18px; background:var(--bg); margin-bottom:16px; }
   .locked-box p{ color: var(--ink-soft); }
-  .locked-note{ background:#F2FAFD; border:1px solid #BFE6F2; border-radius:10px; padding:12px 14px; font-size:13.5px; line-height:1.55; color: var(--ink); margin:0 0 16px; }
+  .locked-note{ background:var(--tint); border:1px solid var(--tint-2); border-radius:10px; padding:12px 14px; font-size:0.8438rem; line-height:1.55; color: var(--ink); margin:0 0 16px; }
   .locked-note a{ color: var(--navy); font-weight:600; }
 
   .q-text{
-    font-size: 18px;
+    font-size: 1.125rem;
     font-weight:600;
     color: var(--navy-deep);
-    font-family:'Space Grotesk', sans-serif;
+    font-family:var(--display);
     margin-bottom: 18px;
     line-height:1.35;
   }
@@ -125,106 +126,106 @@
     padding: 13px 16px; margin-bottom: 9px;
     border: 1.5px solid var(--line); border-radius: 10px;
     background: var(--surface);
-    font-family:'IBM Plex Sans', sans-serif; font-size: 14.5px; color: var(--ink);
+    font-family:var(--sans); font-size: 0.9062rem; color: var(--ink);
     cursor:pointer; transition: border-color .15s ease, background .15s ease;
   }
-  .option:hover{ border-color: var(--cyan); background: #F0FAFD; }
-  .option.selected{ border-color: var(--navy); background: #EEF3FA; }
+  .option:hover{ border-color: var(--cyan); background: var(--tint); }
+  .option.selected{ border-color: var(--navy); background: var(--tint); }
 
   .nav-row{ display:flex; justify-content:space-between; align-items:center; margin-top: 22px; }
 
   button.btn{
-    font-family:'Space Grotesk', sans-serif; font-weight:600; font-size: 14px;
+    font-family:var(--display); font-weight:600; font-size: 0.875rem;
     border-radius: 8px; padding: 11px 20px; border: none; cursor:pointer;
     transition: opacity .15s ease, transform .1s ease;
   }
   button.btn:disabled{ opacity:0.35; cursor:not-allowed; }
   button.btn:active:not(:disabled){ transform: scale(0.98); }
-  .btn-primary{ background: var(--navy); color:#fff; }
-  .btn-primary:hover:not(:disabled){ background: var(--navy-deep); }
+  .btn-primary{ background: var(--navy); color:var(--btn-ink); }
+  .btn-primary:hover:not(:disabled){ background: var(--primary-strong); }
   .btn-ghost{ background:transparent; color: var(--ink-soft); }
   .btn-ghost:hover:not(:disabled){ color: var(--navy); }
 
   .gauge-wrap{ display:flex; flex-direction:column; align-items:center; margin: 4px 0 16px; }
-  .tier-label{ font-family:'Space Grotesk', sans-serif; font-weight:700; font-size: 22px; margin-top: 8px; color: var(--navy-deep); }
-  .score-sub{ font-size:14px; color:var(--gray); margin-top:2px; }
+  .tier-label{ font-family:var(--display); font-weight:700; font-size: 1.375rem; margin-top: 8px; color: var(--navy-deep); }
+  .score-sub{ font-size:0.875rem; color:var(--gray); margin-top:2px; }
   .tier-desc{ text-align:center; max-width: 460px; margin: 6px auto 22px; }
 
   .section-block{ border-top: 1px solid var(--line); padding-top: 22px; margin-top: 6px; }
-  .section-block h3{ font-size:16px; margin-bottom:4px; }
-  .section-sub{ font-size:13px; color:var(--gray); margin-bottom:16px; }
+  .section-block h3{ font-size:1rem; margin-bottom:4px; }
+  .section-sub{ font-size:0.8125rem; color:var(--gray); margin-bottom:16px; }
 
   .bar-row{ margin-bottom: 14px; }
-  .bar-row-top{ display:flex; justify-content:space-between; font-size:13.5px; font-weight:500; margin-bottom: 5px; }
+  .bar-row-top{ display:flex; justify-content:space-between; font-size:0.8438rem; font-weight:500; margin-bottom: 5px; }
   .bar-row-top .pct{ color: var(--gray); font-weight:600; }
   .bar-track{ height: 8px; background: var(--line); border-radius: 5px; overflow:hidden; }
   .bar-fill{ height:100%; border-radius:5px; }
 
   .growth-card{
     border: 1.5px solid var(--line); border-radius: 12px; padding: 16px;
-    margin-bottom: 12px; background: #FBFCFE;
+    margin-bottom: 12px; background: var(--bg);
   }
   .growth-card .growth-tag{
-    display:inline-block; font-size: 11px; font-weight:700; letter-spacing:0.04em;
+    display:inline-block; font-size: 0.6875rem; font-weight:700; letter-spacing:0.04em;
     text-transform:uppercase; color: var(--warn); margin-bottom: 8px;
   }
-  .growth-card h4{ font-family:'Space Grotesk', sans-serif; font-size:15px; margin:0 0 6px; color: var(--navy-deep); }
-  .growth-card p{ font-size: 13.5px; margin: 0 0 10px; }
+  .growth-card h4{ font-family:var(--display); font-size:0.9375rem; margin:0 0 6px; color: var(--navy-deep); }
+  .growth-card p{ font-size: 0.8438rem; margin: 0 0 10px; }
   .article-link{
     display:flex; align-items:center; gap:10px; padding: 11px 13px;
     border: 1px solid var(--line); border-radius: 9px; text-decoration:none;
-    color: var(--ink); font-size:13.5px; font-weight:500; background:#fff;
+    color: var(--ink); font-size:0.8438rem; font-weight:500; background:var(--surface);
     transition: border-color .15s ease, background .15s ease;
   }
-  .article-link:hover{ border-color: var(--cyan); background:#F7FDFF; }
+  .article-link:hover{ border-color: var(--cyan); background:var(--tint); }
   .article-link .arrow{ margin-left:auto; color: var(--cyan); font-weight:700; }
 
   .text-input{
     width:100%; padding: 12px 14px; margin-bottom: 12px;
     border: 1.5px solid var(--line); border-radius: 9px;
-    font-family:'IBM Plex Sans', sans-serif; font-size: 14.5px; color: var(--ink);
-    background: #fff;
+    font-family:var(--sans); font-size: 0.9062rem; color: var(--ink);
+    background: var(--surface);
   }
   .text-input.has-companion{ margin-bottom: 4px; }
   .text-input:focus{ outline:none; border-color: var(--cyan); }
-  .text-input.invalid{ border-color: #C0622A; }
+  .text-input.invalid{ border-color: var(--warn); }
   .text-input[readonly]{ background: var(--bg); color: var(--ink-soft); cursor: not-allowed; }
   select.text-input{ appearance:auto; }
 
   .field-error{
-    font-size: 12.5px; color: #C0622A; margin: 0 0 10px 2px; min-height: 1px;
+    font-size: 0.7812rem; color: var(--warn); margin: 0 0 10px 2px; min-height: 1px;
   }
   .field-hint{
-    font-size: 12px; color: var(--gray); margin: 0 0 10px 2px;
+    font-size: 0.75rem; color: var(--gray); margin: 0 0 10px 2px;
   }
 
   .suggest-chip{
     display:inline-flex; align-items:center; gap:6px;
-    font-size: 12.5px; color: var(--navy); background: #EEF3FA;
+    font-size: 0.7812rem; color: var(--navy); background: var(--tint);
     border: 1px solid var(--line); border-radius: 7px;
     padding: 6px 10px; margin: 0 0 10px; cursor:pointer;
   }
   .suggest-chip:hover{ border-color: var(--cyan); }
   .suggest-chip b{ font-weight:600; }
 
-  .preview-card{ border: 1.5px solid var(--line); border-radius: 14px; padding: 18px 20px; margin: 4px 0 22px; background: #FBFCFE; }
-  .preview-caption{ font-family:'Space Grotesk', sans-serif; font-weight:600; font-size:13px; color: var(--navy-deep); margin-bottom:14px; }
+  .preview-card{ border: 1.5px solid var(--line); border-radius: 14px; padding: 18px 20px; margin: 4px 0 22px; background: var(--bg); }
+  .preview-caption{ font-family:var(--display); font-weight:600; font-size:0.8125rem; color: var(--navy-deep); margin-bottom:14px; }
   .preview-grid{ display:flex; gap:20px; flex-wrap:wrap; }
   .preview-col{ flex:1; min-width:180px; }
-  .preview-col-label{ font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:0.04em; color: var(--gray); margin-bottom:10px; }
-  .mini-bar-row{ display:flex; justify-content:space-between; font-size:12px; margin-bottom:4px; }
+  .preview-col-label{ font-size:0.6875rem; font-weight:600; text-transform:uppercase; letter-spacing:0.04em; color: var(--gray); margin-bottom:10px; }
+  .mini-bar-row{ display:flex; justify-content:space-between; font-size:0.75rem; margin-bottom:4px; }
   .mini-bar-row b{ color: var(--gray); font-weight:600; }
   .mini-track{ height:6px; background: var(--line); border-radius:3px; overflow:hidden; margin-bottom:10px; }
   .mini-fill{ height:100%; border-radius:3px; background: var(--cyan); }
-  .mini-lesson{ border:1px solid var(--line); border-radius:10px; padding:12px 14px; background:#fff; }
-  .mini-lesson-q{ font-size:12.5px; font-weight:600; color: var(--navy-deep); margin-bottom:8px; line-height:1.4; }
-  .mini-opt{ font-size:12px; padding:7px 10px; border:1px solid var(--line); border-radius:6px; margin-bottom:6px; color: var(--ink-soft); }
-  .mini-opt-correct{ border-color:#2E8B57; background:#EEF9F1; color:#1f6b47; font-weight:500; }
-  .preview-note{ font-size:10.5px; color: var(--gray); margin-top:12px; text-align:right; }
+  .mini-lesson{ border:1px solid var(--line); border-radius:10px; padding:12px 14px; background:var(--surface); }
+  .mini-lesson-q{ font-size:0.7812rem; font-weight:600; color: var(--navy-deep); margin-bottom:8px; line-height:1.4; }
+  .mini-opt{ font-size:0.75rem; padding:7px 10px; border:1px solid var(--line); border-radius:6px; margin-bottom:6px; color: var(--ink-soft); }
+  .mini-opt-correct{ border-color:var(--ok); background:var(--ok-bg); color:var(--ok-ink); font-weight:500; }
+  .preview-note{ font-size:0.6562rem; color: var(--gray); margin-top:12px; text-align:right; }
 
   .badge-section{ text-align:center; border-top: 1px solid var(--line); margin-top: 24px; padding-top: 24px; }
   .retake-row{ text-align:center; margin-top: 20px; }
-  .retake-row button{ background:none; border:none; color:var(--gray); font-size:13px; text-decoration:underline; cursor:pointer; font-family:'IBM Plex Sans',sans-serif; }
+  .retake-row button{ background:none; border:none; color:var(--gray); font-size:0.8125rem; text-decoration:underline; cursor:pointer; font-family:var(--sans); }
   .retake-row button:hover{ color:var(--navy); }
 
   [data-screen]{ display:none; }
@@ -232,12 +233,14 @@
 
   @media (max-width: 480px){
     .card-inner{ padding: 26px 20px 24px; }
-    .q-text{ font-size:16.5px; }
+    .q-text{ font-size:1.0312rem; }
   }
 </style>
+<link rel="stylesheet" href="pa-theme.css">
 <script src="analytics.js"></script>
 </head>
 <body>
+<script src="pa-shell.js"></script>
 
 <div class="card">
   <a href="lms-dashboard.html" class="brand-header" style="text-decoration:none;">
@@ -246,7 +249,7 @@
       <polygon points="20,10 29,15 29,25 20,30 11,25 11,15" fill="none" stroke="var(--cyan)" stroke-width="1.5"/>
     </svg>
     <div>
-      <div style="font-family:'IBM Plex Sans', sans-serif; font-weight:600; font-size:10px; letter-spacing:0.06em; color:var(--gray); line-height:1;">PRODUCT ADVISORY</div>
+      <div style="font-family:var(--sans); font-weight:600; font-size:0.625rem; letter-spacing:0.06em; color:var(--gray); line-height:1;">PRODUCT ADVISORY</div>
       <div class="brand-word" style="line-height:1.3;">Learning</div>
     </div>
   </a>
@@ -255,11 +258,11 @@
 
     <!-- SCREEN 1: INTRO -->
     <div data-screen="intro" class="active">
-      <div id="resumeBar" style="display:none; background:#EEF3FA; border:1px solid var(--line); border-radius:10px; padding:12px 14px; margin-bottom:18px; font-size:13.5px; color:var(--ink);">
+      <div id="resumeBar" style="display:none; background:var(--tint); border:1px solid var(--line); border-radius:10px; padding:12px 14px; margin-bottom:18px; font-size:0.8438rem; color:var(--ink);">
         You have an assessment in progress.
-        <button type="button" onclick="resumeQuiz()" style="background:none; border:none; padding:0; margin-left:4px; color:var(--navy); font-weight:600; font-family:inherit; font-size:13.5px; cursor:pointer; text-decoration:underline;">Resume</button>
+        <button type="button" onclick="resumeQuiz()" style="background:none; border:none; padding:0; margin-left:4px; color:var(--navy); font-weight:600; font-family:inherit; font-size:0.8438rem; cursor:pointer; text-decoration:underline;">Resume</button>
         <span style="color:var(--gray);"> · </span>
-        <button type="button" onclick="discardSavedQuiz()" style="background:none; border:none; padding:0; color:var(--ink-soft); font-family:inherit; font-size:13.5px; cursor:pointer; text-decoration:underline;">Start over</button>
+        <button type="button" onclick="discardSavedQuiz()" style="background:none; border:none; padding:0; color:var(--ink-soft); font-family:inherit; font-size:0.8438rem; cursor:pointer; text-decoration:underline;">Start over</button>
       </div>
       <span class="eyebrow">Skill Check</span>
       <h1>How well-rounded is your product + AI practice?</h1>
@@ -316,7 +319,7 @@
       <p style="margin-bottom:14px;">You're a product manager at a mid-size company. Leadership has asked teams to bring forward AI opportunities, but six months ago a different team's AI pilot (an automated customer-support triage tool) was quietly shut down after costing more than expected and never showing clear results. Your VP of Engineering, who has to allocate a team to build anything you propose, was burned by that project and is now wary of "AI" pitches in general.</p>
       <p style="margin-bottom:14px;">You believe there's a real opportunity to use AI to reduce manual work in customer onboarding, and you have two engineers' worth of time available for one quarter, no more.</p>
       <p style="margin-bottom:16px;"><strong>In a few sentences, write what you'd actually say to this VP to get a pilot approved.</strong> Be specific about how you'd address their skepticism and what you'd propose doing with that limited time.</p>
-      <textarea id="scenarioTextarea" rows="6" maxlength="800" placeholder="What would you actually say to get this approved?" style="width:100%; padding:12px 14px; border:1.5px solid var(--line); border-radius:9px; font-family:'IBM Plex Sans', sans-serif; font-size:14.5px; color:var(--ink); resize:vertical;" oninput="updateScenarioButton()"></textarea>
+      <textarea id="scenarioTextarea" rows="6" maxlength="800" placeholder="What would you actually say to get this approved?" style="width:100%; padding:12px 14px; border:1.5px solid var(--line); border-radius:9px; font-family:var(--sans); font-size:0.9062rem; color:var(--ink); resize:vertical;" oninput="updateScenarioButton()"></textarea>
       <div class="field-hint" id="scenarioCharCount" style="text-align:right;"></div>
       <div class="field-error" id="scenarioError"></div>
       <div class="nav-row" style="justify-content:flex-end;">
@@ -338,7 +341,7 @@
         <p style="margin-bottom:14px;">You're a product manager at a mid-size company. Leadership has asked teams to bring forward AI opportunities, but six months ago a different team's AI pilot (an automated customer-support triage tool) was quietly shut down after costing more than expected and never showing clear results. Your VP of Engineering, who has to allocate a team to build anything you propose, was burned by that project and is now wary of "AI" pitches in general.</p>
         <p style="margin-bottom:14px;">You believe there's a real opportunity to use AI to reduce manual work in customer onboarding, and you have two engineers' worth of time available for one quarter, no more.</p>
         <p style="margin-bottom:12px;"><strong>In a few sentences, write what you'd actually say to this VP to get a pilot approved.</strong></p>
-        <textarea rows="3" disabled aria-label="Locked: written answers are part of the Enterprise assessment" placeholder="Written answers are part of the Enterprise assessment" style="width:100%; padding:12px 14px; border:1.5px solid var(--line); border-radius:9px; font-family:'IBM Plex Sans', sans-serif; font-size:14.5px; background:#F3F5F8; color:var(--gray); resize:none;"></textarea>
+        <textarea rows="3" disabled aria-label="Locked: written answers are part of the Enterprise assessment" placeholder="Written answers are part of the Enterprise assessment" style="width:100%; padding:12px 14px; border:1.5px solid var(--line); border-radius:9px; font-family:var(--sans); font-size:0.9062rem; background:var(--bg); color:var(--gray); resize:none;"></textarea>
       </div>
       <p class="locked-note" id="lockedScenarioNote"><strong>This step is part of our Enterprise assessment.</strong> There, an AI reads a written answer like this one, scores how well it handles the skeptical VP, and folds the result into the AI Fluency — Organizational score, with feedback on how it landed. It is switched off in the free assessment, and your result is complete without it. Want it for your team? <a id="enterpriseContactLink" href="request-info.html?src=assessment-enterprise&who=org" target="_blank" rel="noopener" onclick="funnelEvent('enterpriseInterest')">Contact us about Enterprise</a>.</p>
       <div class="nav-row" style="justify-content:flex-end;">
@@ -375,7 +378,7 @@
         <h3>Your growth areas</h3>
         <div class="section-sub">Your two lowest-scoring areas. Start here, at the level the assessment placed you</div>
         <div id="growthWrap"></div>
-        <div id="firstCourseCta" style="margin-top:14px; border:1.5px solid var(--navy); border-radius:12px; padding:16px; background:#EEF3FA;">
+        <div id="firstCourseCta" style="margin-top:14px; border:1.5px solid var(--navy); border-radius:12px; padding:16px; background:var(--tint);">
           <span class="growth-tag" style="color:var(--navy);">Start here</span>
           <p id="firstCourseCtaText" style="margin:6px 0 12px;"></p>
           <button class="btn btn-primary" id="firstCourseCtaBtn" onclick="firstCourseCtaAction()">Create your account to start →</button>
@@ -418,7 +421,7 @@
           <div class="field-error" id="signupPasswordError"></div>
           <input class="text-input has-companion" type="password" id="signupPasswordConfirm" placeholder="Confirm password">
           <div class="field-error" id="signupConfirmError"></div>
-          <label style="display:flex; align-items:flex-start; gap:8px; font-size:12.5px; color:var(--ink); margin:10px 0 14px; cursor:pointer;">
+          <label style="display:flex; align-items:flex-start; gap:8px; font-size:0.7812rem; color:var(--ink); margin:10px 0 14px; cursor:pointer;">
             <input type="checkbox" id="signupAgreeTerms" style="margin-top:2px;">
             <span>By creating an account you agree to the <a href="https://www.productadvisory.co/terms-of-use" target="_blank" rel="noopener">Terms of Use</a> and <a href="https://www.productadvisory.co/privacy-policy" target="_blank" rel="noopener">Privacy Policy</a>.</span>
           </label>
@@ -436,7 +439,7 @@
   </div>
 </div>
 
-<div style="max-width:640px; margin:20px auto 0; padding:20px 0; border-top:1px solid var(--line); text-align:center; font-size:12px; color:var(--gray);">
+<div style="max-width:640px; margin:20px auto 0; padding:20px 0; border-top:1px solid var(--line); text-align:center; font-size:0.75rem; color:var(--gray);">
   © <span id="footerYear"></span> Product Advisory, LLC. All rights reserved. &nbsp;·&nbsp;
   <a href="https://www.productadvisory.co/privacy-policy" target="_blank" rel="noopener" style="color:var(--gray); text-decoration:underline;">Privacy Policy</a> &nbsp;·&nbsp;
   <a href="https://www.productadvisory.co/terms-of-use" target="_blank" rel="noopener" style="color:var(--gray); text-decoration:underline;">Terms of Use</a> &nbsp;·&nbsp;
@@ -621,7 +624,7 @@ const CATEGORIES = {
   },
   stakeholder: {
     label: "Stakeholder Communication & Influence",
-    color: "#1A4584",
+    color: "var(--pa-deep-1)",
     // No standalone article for this domain yet — point at our own
     // framework section instead of a mismatched or dead external link.
     articles: [{ title: "See the Stakeholder Communication & Influence framework", url: "framework.html#stakeholder" }]
@@ -633,7 +636,7 @@ const CATEGORIES = {
   },
   aiOrg: {
     label: "AI Fluency — Organizational",
-    color: "#12305e",
+    color: "var(--pa-deep-2)",
     articles: [{ title: "Your First AI Product Team: Designing a Squad of Agents, Not Just One Chatbot", url: "https://www.linkedin.com/pulse/your-first-ai-product-team-designing-squad-agents-just-robert-merrell-vudmc" }]
   }
 };
@@ -1403,7 +1406,7 @@ window.updateSignupStrength = function(){
   if (!pw){ hint.style.display = 'none'; return; }
   const s = passwordStrength(pw);
   hint.textContent = s.label;
-  hint.style.color = s.ok ? (s.label === 'Strong' ? '#2E8B57' : 'var(--gray)') : '#C0622A';
+  hint.style.color = s.ok ? (s.label === 'Strong' ? 'var(--ok)' : 'var(--gray)') : 'var(--warn)';
   hint.style.display = 'block';
 };
 
@@ -1490,7 +1493,7 @@ function drawGauge(pct){
     return `M ${p1.x} ${p1.y} A ${radius} ${radius} 0 ${largeArc} 1 ${p2.x} ${p2.y}`;
   }
 
-  const zoneColors = ['#B9C6DA', '#6FA3D6', '#35C2E8', '#1A4584'];
+  const zoneColors = ['#B9C6DA', '#6FA3D6', '#35C2E8', 'var(--pa-deep-1)'];
   let svgParts = '';
   for (let i = 0; i < 4; i++){
     const a1 = 180 - i * 45;
@@ -1500,10 +1503,10 @@ function drawGauge(pct){
 
   const needleAngle = 180 - (pct / 100) * 180;
   const tip = polarToXY(needleAngle, r - 22);
-  svgParts += `<line x1="${cx}" y1="${cy}" x2="${tip.x}" y2="${tip.y}" stroke="#16213E" stroke-width="3" stroke-linecap="round"/>`;
-  svgParts += `<circle cx="${cx}" cy="${cy}" r="6" fill="#16213E"/>`;
-  svgParts += `<text x="12" y="148" font-family="IBM Plex Sans" font-size="11" fill="#9AA3AD">Novice</text>`;
-  svgParts += `<text x="205" y="148" font-family="IBM Plex Sans" font-size="11" fill="#9AA3AD">Advanced</text>`;
+  svgParts += `<line x1="${cx}" y1="${cy}" x2="${tip.x}" y2="${tip.y}" stroke="var(--ink)" stroke-width="3" stroke-linecap="round"/>`;
+  svgParts += `<circle cx="${cx}" cy="${cy}" r="6" fill="var(--ink)"/>`;
+  svgParts += `<text x="12" y="148" font-family="var(--sans)" font-size="11" fill="var(--gray)">Novice</text>`;
+  svgParts += `<text x="205" y="148" font-family="var(--sans)" font-size="11" fill="var(--gray)">Advanced</text>`;
 
   svg.innerHTML = svgParts;
 }
@@ -1512,17 +1515,17 @@ function drawGauge(pct){
    name / tier / date as clean type below it (LinkedIn-badge style) */
 function drawBadge(tier, name){
   const svg = document.getElementById('badgeSvg');
-  const colorMap = { 'Limited Experience': '#B9C6DA', 'No Experience': '#B9C6DA', 'Moderate Experience': '#6FA3D6', 'Lots of Experience': '#35C2E8', 'Advanced Experience': '#1A4584' };
-  const c = colorMap[tier.name] || '#1A4584';
+  const colorMap = { 'Limited Experience': '#B9C6DA', 'No Experience': '#B9C6DA', 'Moderate Experience': '#6FA3D6', 'Lots of Experience': '#35C2E8', 'Advanced Experience': 'var(--pa-deep-1)' };
+  const c = colorMap[tier.name] || 'var(--pa-deep-1)';
   const dateStr = new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
   const displayName = name && name.length > 24 ? name.slice(0, 22) + '…' : (name || '');
 
   svg.innerHTML = `
     <circle cx="90" cy="52" r="34" fill="${c}"/>
     <path d="M75 52 L86 63 L107 40" fill="none" stroke="#FFFFFF" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
-    <text x="90" y="108" text-anchor="middle" font-family="Space Grotesk" font-weight="600" font-size="14" fill="#16213E">${displayName}</text>
-    <text x="90" y="128" text-anchor="middle" font-family="Space Grotesk" font-weight="600" font-size="13" fill="#1A4584">${tier.name}</text>
-    <text x="90" y="148" text-anchor="middle" font-family="IBM Plex Sans" font-size="11" fill="#9AA3AD">Product Advisory · ${dateStr}</text>
+    <text x="90" y="108" text-anchor="middle" font-family="var(--display)" font-weight="600" font-size="14" fill="var(--ink)">${displayName}</text>
+    <text x="90" y="128" text-anchor="middle" font-family="var(--display)" font-weight="600" font-size="13" fill="var(--navy-deep)">${tier.name}</text>
+    <text x="90" y="148" text-anchor="middle" font-family="var(--sans)" font-size="11" fill="var(--gray)">Product Advisory · ${dateStr}</text>
   `;
 }
 
