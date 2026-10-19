@@ -182,6 +182,8 @@ manual review — it holds no uid and isn't read by the app.
 
 - `tool-requests.html` is the public page (link it from the toolkits page on
   productadvisory.co as `https://assessment.productadvisory.co/tool-requests.html`).
+  The top card has **Request a tool** (goes to the request form, or to sign-in first) and **See the live toolkits**
+  (the toolkits page on www.productadvisory.co). `tool-requests.html#suggest` opens straight on the request form.
   Anyone can see each tool and its vote total. To vote you sign in (email and
   password, or Google) with a **verified** email address. You can back up to three
   tools, one vote each, and change your mind. A box on each voted tool asks for a
@@ -225,8 +227,18 @@ manual review — it holds no uid and isn't read by the app.
 ## The Profile menu on every page
 
 - `account-menu.js` puts the same **Profile** button in the top right corner of every page except the learning dashboard (which has its own) and the invitation page (`join.html`). It appears only while someone is signed in. Add it to a new page with one line before `</body>`: `<script type="module" src="account-menu.js"></script>`.
-- It lists My learning dashboard, My profile, Toolkits Roadmap, Visit Product Advisory and Log out for everyone; Company dashboard only for an active company admin; Owner console and Reports only for the platform owner. The page you are on is shown in bold.
+- It lists My learning dashboard, My profile, Toolkits (the toolkits page on www.productadvisory.co, new tab), Request tools (`tool-requests.html#suggest`), Send feedback (`feedback.html`), Visit Product Advisory and Log out for everyone; the dashboard's own menu has the same links; Company dashboard only for an active company admin; Owner console and Reports only for the platform owner. The page you are on is shown in bold.
 - It finds the owner and the admin by reading `platformAdmins/{uid}` and `memberships/{uid}`, the same two records the dashboard menu uses, so no new security rules are needed. It is tested in `tests/ui/menu-test.js` ("profile menu" pages in the runner).
+
+## Send feedback (feedback.html)
+
+- The Profile menus' **Send feedback** opens `feedback.html` instead of an email. A signed-in person picks what it is
+  about (courses and lessons, the assessment, something not working, an idea or request, something else), optionally
+  how it's going, and writes up to 2000 characters. `feedback.html?about=idea` chooses the topic in advance.
+- It is sent to the Apps Script (`?action=feedback`, section 15 of `Code.gs`), which checks the sign-in, saves it on a
+  **Feedback** tab and emails it to feedback@ with a reply-to of the person, so replying is one click. Each person can
+  send 10 a day and everyone together 200. Redeploy the script after changing it.
+- Tests: `tests/mail-and-org-ai.test.mjs` (the script) and `tests/ui/feedback-test.js` ("feedback form" in the runner).
 
 ## Company reports (company admins)
 
@@ -252,7 +264,8 @@ manual review — it holds no uid and isn't read by the app.
 
 ## The Product Advisory look (header, search, "Make it yours", light and dark)
 
-The learner-facing pages share the look of www.productadvisory.co. Three files do it:
+Every page shares the look of www.productadvisory.co: the learner pages, the company dashboard, and the owner pages
+(owner console, reports, Toolkits Roadmap admin, pilot tracker, aggregate results). Three files do it:
 
 - `pa-prefs.js` (in the `<head>`, before the page's `<style>`): applies the visitor's look before anything is drawn:
   style (Classic, Editorial, Boardroom, Lab), accent, text size, density, motion and light/dark. The look is kept in a
@@ -269,8 +282,30 @@ The learner-facing pages share the look of www.productadvisory.co. Three files d
   lesson and skill area from `search-index.js`, which is generated: **after adding or editing a course in `content/`,
   run `node tools/build-search-index.mjs`** (the theme test fails until you do).
 
+Shared stylesheets that predate the look (`charts.css`, `focus-board.css`) keep their light colours; `pa-theme.css`
+re-points them on themed pages. The framework's seven skill-area icons are line icons in the main site's style
+(`DOMAIN_ICON_PATHS` in `framework.html`).
+
 Fonts are Lato for text and Comfortaa for the logo. Font sizes are in `rem`, so "Text size" scales the whole page.
 `tests/theme.test.mjs` lists which pages are converted (`THEMED`).
+
+## "Ask AI": answers from the lessons
+
+Typing a question in the search menu (three or more words, or ending in "?") adds an **Ask the lessons** row at the top.
+Choosing it:
+
+1. loads `ask-index.js` (every lesson's text in passages of up to 800 characters, generated with `search-index.js` by
+   `node tools/build-search-index.mjs`) and picks the four passages that best match the question, at most two per lesson;
+2. sends the question, those passages and the person's sign-in token to the Apps Script (`?action=askLessons`,
+   section 14 of `Code.gs`);
+3. shows the answer with numbered citations that link to the lessons, and the lessons it drew from.
+
+The script checks the sign-in, keeps only passages that link to a lesson or skill area on this site, tells the AI to
+answer only from them (and to ignore instructions inside them), and allows 20 answers per person and 400 in total a
+day. It uses the same `GROQ_API_KEY` script property and model as scenario grading. Signed-out visitors are asked to
+sign in; a question the lessons do not cover is pointed to the Ask on www.productadvisory.co. After changing
+`Code.gs`, redeploy it (Deploy → Manage deployments → pencil → New version) so the live address has the new action.
+Tests: `tests/mail-and-org-ai.test.mjs` (the script) and `tests/theme.test.mjs` (the passages).
 
 ## Google Analytics and the cookie notice
 

@@ -36,6 +36,7 @@ Copy-Item "$repo\pa-prefs.js" $site
 Copy-Item "$repo\pa-shell.js" $site
 Copy-Item "$repo\pa-theme.css" $site
 Copy-Item "$repo\search-index.js" $site
+Copy-Item "$repo\pa-icons.js" $site
 Copy-Item "$repo\vendor" "$site\vendor" -Recurse
 Copy-Item "$repo\content" "$site\content" -Recurse
 
@@ -68,6 +69,7 @@ Build-Page 'request-info.html' 'request-info-test.html' 'lead-seed.js' 'lead-tes
 Build-Page 'reports.html' 'reports-test.html' 'reports-seed.js' 'reports-test.js'
 Build-Page 'owner-pilot.html' 'pilot-test.html' 'pilot-seed.js' 'pilot-test.js'
 Build-Page 'index.html' 'index-test.html' 'index-seed.js' 'index-test.js'
+Build-Page 'feedback.html' 'feedback-test.html' 'feedback-seed.js' 'feedback-test.js'
 $menuPage = "<!doctype html><html><head><script src=`"menu-seed.js`"></script></head><body><div class=`"wrap`"><p>A page</p></div><script type=`"module`" src=`"account-menu.js`"></script><script type=`"module`" src=`"menu-test.js`"></script></body></html>"
 [System.IO.File]::WriteAllText("$site\menu-test.html", $menuPage)
 [System.IO.File]::WriteAllText("$site\consent-test.html", "<!doctype html><html><head><script src=`"consent-seed.js`"></script><script src=`"analytics.js`"></script></head><body><div class=`"wrap`"><p>A page</p></div><script type=`"module`" src=`"account-menu.js`"></script><script type=`"module`" src=`"consent-test.js`"></script></body></html>")
@@ -135,6 +137,8 @@ try {
     $results += Run-Page "tool roadmap: $s" "$base/tool-requests-test.html?scn=$s" 40000
   }
   $results += Run-Page 'tool roadmap: deeplink' "$base/tool-requests-test.html?scn=deeplink&tool=t4" 40000
+  foreach ($s in 'signedin', 'signedout', 'limit') { $results += Run-Page "feedback form: $s" "$base/feedback-test.html?scn=$s" 20000 }
+  $results += Run-Page 'feedback form: about' "$base/feedback-test.html?scn=about&about=idea" 20000
   foreach ($s in 'main', 'empty', 'notowner', 'signedout', 'launch') {
     $results += Run-Page "tool roadmap admin: $s" "$base/owner-tools-test.html?scn=$s" 40000
   }

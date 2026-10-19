@@ -600,6 +600,19 @@ html.pa-shell .chart-axis { fill: var(--pa-muted); font-family: var(--pa-sans); 
 html.pa-shell .bar-track, html.pa-shell .funnel-track { background: var(--pa-line); }
 html.pa-shell .funnel-count { font-family: var(--pa-display); }
 
+/* focus-board.css (the drag-to-rank board on the owner console and company dashboard) */
+html.pa-shell .focus-col { background: var(--pa-band); }
+html.pa-shell .focus-item { background: var(--pa-card); color: var(--pa-ink); }
+html.pa-shell .focus-ghost { background: var(--pa-tint); }
+html.pa-shell .focus-col-title, html.pa-shell .focus-rank { font-family: var(--pa-sans); }
+html.pa-shell .icon-btn { background: var(--pa-card); }
+
+/* the skill-area icons (pa-icons.js) */
+.pa-dom-ico { stroke: var(--pa-navy); flex: none; }
+.pa-dom-ico .dot { fill: var(--pa-cyan); stroke: none; }
+.pa-dom-ico .tick { stroke: var(--pa-cyan); }
+.pa-dom-badge { display: flex; align-items: center; justify-content: center; flex-shrink: 0; border-radius: 8px; background: var(--pa-tint); }
+
 /* ---------- site header ---------- */
 .pa-nav { position: sticky; top: 0; z-index: 60; background: color-mix(in srgb, var(--pa-bg) 90%, transparent); backdrop-filter: saturate(160%) blur(12px); -webkit-backdrop-filter: saturate(160%) blur(12px); border-bottom: 1px solid var(--pa-line); align-self: stretch; font-family: var(--pa-sans); }
 .pa-nav-in { max-width: 1120px; margin: 0 auto; padding: 0 clamp(16px, 4vw, 40px); height: 64px; display: flex; align-items: center; gap: 16px; }
@@ -662,5 +675,24 @@ html.pa-shell .funnel-count { font-family: var(--pa-display); }
 .palette button .pa-txt { min-width: 0; flex: 1; }
 .palette .pa-empty { padding: 14px 12px; color: var(--pa-muted); font-size: .92rem; }
 .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+
+/* ---------- "Ask AI" answer in the command menu ---------- */
+.palette .pa-answer { padding: 6px 12px 12px; list-style: none; color: var(--pa-ink); font-size: .95rem; line-height: 1.55; }
+.palette .pa-q { font-weight: 700; color: var(--pa-navy); margin: 4px 0 10px; }
+.palette .pa-q::before { content: "✦ "; color: var(--pa-cyan); }
+.palette .pa-wait { color: var(--pa-ink-2); margin: 0 0 10px; }
+.palette .pa-ans p { margin: 0 0 8px; }
+.palette .pa-ans ul { margin: 0 0 8px; padding: 0 0 0 20px; max-height: none; overflow: visible; list-style: disc; }
+.palette .pa-ans li { display: list-item; margin-bottom: 4px; }
+.palette .pa-cite { display: inline-flex; align-items: center; justify-content: center; min-width: 1.35em; height: 1.35em; margin: 0 1px; padding: 0 4px; border-radius: 999px; background: var(--pa-tint); color: var(--pa-cyan-ink); font-size: .72rem; font-weight: 700; text-decoration: none; vertical-align: .15em; }
+.palette .pa-cite:hover { background: var(--pa-cyan); color: #0a1526; }
+.palette .pa-src { border-top: 1px solid var(--pa-line); margin-top: 10px; padding-top: 10px; }
+.palette .pa-src h4 { margin: 0 0 6px; font-size: .72rem; letter-spacing: .08em; text-transform: uppercase; color: var(--pa-muted); }
+.palette .pa-src ol { list-style: none; margin: 0; padding: 0; }
+.palette .pa-src li a { display: block; padding: 6px 8px; border-radius: 8px; color: var(--pa-ink); text-decoration: none; font-size: .9rem; }
+.palette .pa-src li a:hover { background: var(--pa-tint); }
+.palette .pa-src li b { display: inline-block; min-width: 1.4em; color: var(--pa-cyan-ink); }
+.palette .pa-src li.pa-dim a { color: var(--pa-muted); }
+.palette .pa-note { margin: 10px 0 0; font-size: .8rem; color: var(--pa-muted); }
 
 @media print { .pa-nav, .pa-panel-back, .palette-backdrop { display: none !important; } }

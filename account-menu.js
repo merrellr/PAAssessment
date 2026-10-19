@@ -108,8 +108,9 @@ if (window.self === window.top) {
       menu.appendChild(link('Owner console', 'owner.html', page === 'owner.html'));
       menu.appendChild(link('Reports', 'reports.html', page === 'reports.html'));
     }
-    menu.appendChild(link('Toolkits Roadmap', 'tool-requests.html', page === 'tool-requests.html'));
-    menu.appendChild(link('Send feedback', 'mailto:feedback@productadvisory.co?subject=' + encodeURIComponent('Feedback on Product Advisory Learning'), false));
+    menu.appendChild(link('Toolkits ↗', 'https://www.productadvisory.co/toolkits.html', false, true));
+    menu.appendChild(link('Request tools', 'tool-requests.html#suggest', page === 'tool-requests.html'));
+    menu.appendChild(link('Send feedback', 'feedback.html', page === 'feedback.html'));
     menu.appendChild(link('Visit Product Advisory ↗', 'https://www.productadvisory.co/', false, true));
     if (window.PAAnalytics && window.PAAnalytics.reopen){
       const cookies = el('button', 'pa-acct-item', 'Cookie settings');
@@ -193,6 +194,14 @@ if (window.self === window.top) {
       document.body.appendChild(script);
     });
   }
+  // For the search menu's "Ask AI" (pa-shell.js) and the feedback form: the signed-in person's token, and the same
+  // JSONP call to the script.
+  window.PAAccount = {
+    user: null, ready: false,
+    idToken: () => (auth.currentUser ? auth.currentUser.getIdToken() : Promise.resolve(null)),
+    backend: backend
+  };
+
   async function welcomeIfNew(user){
     try {
       const made = user.metadata && user.metadata.creationTime ? Date.parse(user.metadata.creationTime) : 0;
@@ -229,6 +238,10 @@ if (window.self === window.top) {
   window.addEventListener('pa-membership-changed', () => { if (auth.currentUser) adminWelcomeIfDue(auth.currentUser); });
 
   onAuthStateChanged(auth, async (user) => {
+    // Pages that need to know (feedback.html) read PAAccount.user, or listen for 'pa-auth'.
+    window.PAAccount.user = user ? { name: user.displayName || '', email: user.email || '' } : null;
+    window.PAAccount.ready = true;
+    window.dispatchEvent(new CustomEvent('pa-auth', { detail: window.PAAccount.user }));
     if (user){
       welcomeIfNew(user); adminWelcomeIfDue(user);
       // Having an account means they agreed to the Privacy Policy, so the cookie notice is not shown again

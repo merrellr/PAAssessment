@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>Send Feedback — Product Advisory Learning</title>
+<meta name="description" content="Tell us what's working, what isn't, and what you'd like next.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@600&family=Lato:ital,wght@0,300;0,400;0,700;0,900;1,400&display=swap" rel="stylesheet">
+<script src="pa-prefs.js"></script>
+<style>
+  *{ box-sizing: border-box; }
+  body{ margin:0; background: var(--bg); font-family:var(--sans); color: var(--ink); }
+  .wrap{ max-width: 640px; margin: 0 auto; padding: 24px 16px 56px; }
+  .card{ background: var(--surface); border-radius: 18px; border: 1px solid var(--line); padding: 28px; margin-bottom: 20px; }
+  .eyebrow{ display:block; font-size: 0.75rem; font-weight:700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--cyan-ink); margin-bottom: 6px; }
+  h1{ font-family:var(--display); font-size: 1.5625rem; margin: 0 0 6px; color: var(--navy-deep); line-height: 1.2; outline: none; }
+  p{ line-height:1.55; color: var(--ink-soft); font-size: 0.9375rem; margin: 0 0 14px; }
+  a{ color: var(--navy); }
+  fieldset{ border: 0; padding: 0; margin: 0 0 18px; }
+  legend, .flabel{ display:block; font-weight:700; font-size: 0.875rem; color: var(--ink); margin: 0 0 8px; padding: 0; }
+  .opt{ font-weight:400; color: var(--gray); }
+  .seg{ display:flex; flex-wrap:wrap; gap: 8px; }
+  .seg button{ font: inherit; font-size: 0.875rem; padding: 8px 14px; border-radius: 999px; border: 1.5px solid var(--line); background: var(--surface); color: var(--ink-soft); cursor: pointer; }
+  .seg button:hover{ border-color: var(--cyan); }
+  .seg button[aria-checked="true"]{ border-color: var(--navy); background: var(--navy); color: var(--btn-ink); font-weight:700; }
+  textarea{ width:100%; min-height: 150px; resize: vertical; font: inherit; font-size: 0.9375rem; line-height: 1.5; padding: 12px 14px; border: 1.5px solid var(--line); border-radius: 12px; }
+  textarea:focus{ outline: none; border-color: var(--cyan); }
+  .count{ font-size: 0.75rem; color: var(--gray); text-align: right; margin-top: 4px; }
+  .error{ color: var(--warn); font-size: 0.875rem; min-height: 1.2em; margin: 6px 0 10px; }
+  .btn{ display:inline-flex; align-items:center; gap:6px; font: inherit; font-weight:700; font-size: 0.9375rem; padding: 11px 22px; border-radius: 999px; border: 2px solid var(--navy); background: var(--navy); color: var(--btn-ink); cursor:pointer; text-decoration:none; }
+  .btn:disabled{ opacity: .6; cursor: default; }
+  .btn.ghost{ background: transparent; color: var(--navy); }
+  .row{ display:flex; gap: 10px; flex-wrap: wrap; align-items:center; }
+  .small{ font-size: 0.8125rem; color: var(--gray); }
+  [hidden]{ display:none !important; }
+</style>
+<link rel="stylesheet" href="pa-theme.css">
+<script src="analytics.js"></script>
+</head>
+<body>
+<script src="pa-shell.js"></script>
+<div class="wrap">
+
+  <div class="card" id="stateLoading"><p style="margin:0;">Checking your account…</p></div>
+
+  <div class="card" id="stateSignedOut" hidden>
+    <span class="eyebrow">Send feedback</span>
+    <h1>Please sign in first</h1>
+    <p>Feedback comes from your account, so we can reply. Sign in on your dashboard, then come back to this page.</p>
+    <a class="btn" href="lms-dashboard.html">Go to the dashboard</a>
+  </div>
+
+  <form class="card" id="feedbackForm" novalidate hidden>
+    <span class="eyebrow">Send feedback</span>
+    <h1>Tell us what you think</h1>
+    <p>What's working, what isn't, and what you'd like next. It goes straight to our team, and we reply to <strong id="replyTo"></strong> when there's something to follow up.</p>
+
+    <fieldset>
+      <legend id="topicLabel">What's it about?</legend>
+      <div class="seg" role="radiogroup" aria-labelledby="topicLabel" data-group="topic">
+        <button type="button" role="radio" aria-checked="false" data-v="courses">The courses and lessons</button>
+        <button type="button" role="radio" aria-checked="false" data-v="assessment">The assessment</button>
+        <button type="button" role="radio" aria-checked="false" data-v="broken">Something isn't working</button>
+        <button type="button" role="radio" aria-checked="false" data-v="idea">An idea or a request</button>
+        <button type="button" role="radio" aria-checked="false" data-v="other">Something else</button>
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend id="ratingLabel">How's it going? <span class="opt">(optional)</span></legend>
+      <div class="seg" role="radiogroup" aria-labelledby="ratingLabel" data-group="rating">
+        <button type="button" role="radio" aria-checked="false" data-v="love">Love it</button>
+        <button type="button" role="radio" aria-checked="false" data-v="good">Good</button>
+        <button type="button" role="radio" aria-checked="false" data-v="okay">It's okay</button>
+        <button type="button" role="radio" aria-checked="false" data-v="needswork">Needs work</button>
+      </div>
+    </fieldset>
+
+    <label class="flabel" for="message">Your note</label>
+    <textarea id="message" maxlength="2000" placeholder="The more specific, the better: which course or page, and what happened."></textarea>
+    <div class="count" id="count">0 / 2000</div>
+    <div class="error" id="error" role="alert"></div>
+    <button class="btn" id="sendBtn" type="submit">Send feedback</button>
+  </form>
+
+  <div class="card" id="stateDone" hidden>
+    <span class="eyebrow">Thank you</span>
+    <h1 tabindex="-1" id="doneTitle">Got it, thanks</h1>
+    <p>Your note is with our team. We read every one, and we'll reply to <strong id="doneEmail"></strong> if there's something to follow up.</p>
+    <div class="row">
+      <a class="btn" href="lms-dashboard.html">Back to my learning</a>
+      <button class="btn ghost" id="againBtn" type="button">Send another</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+(function(){
+  const $ = (id) => document.getElementById(id);
+  const ERRORS = {
+    not_verified: 'Your sign-in could not be confirmed. Reload the page and try again.',
+    daily_limit: "You've sent a lot of notes today. Please try again tomorrow.",
+    too_short: 'Please write a little more.',
+    too_long: 'Please keep it under 2000 characters.'
+  };
+  // Where the person came from, so we know which page a note is about.
+  const from = (() => { try { const r = new URL(document.referrer); return r.origin === location.origin ? r.pathname.split('/').pop() : ''; } catch (e) { return ''; } })();
+  const choice = { topic: '', rating: '' };
+
+  function show(id){ ['stateLoading', 'stateSignedOut', 'feedbackForm', 'stateDone'].forEach(k => { $(k).hidden = k !== id; }); }
+  function onAuth(user){
+    if (!user){ show('stateSignedOut'); return; }
+    $('replyTo').textContent = user.email; $('doneEmail').textContent = user.email;
+    if ($('stateDone').hidden) show('feedbackForm');
+  }
+  if (window.PAAccount && window.PAAccount.ready) onAuth(window.PAAccount.user);
+  window.addEventListener('pa-auth', (e) => onAuth(e.detail));
+
+  // A topic can be chosen from the link: feedback.html?about=idea
+  const pre = new URLSearchParams(location.search).get('about');
+
+  Array.prototype.forEach.call(document.querySelectorAll('[data-group]'), (grp) => {
+    const key = grp.getAttribute('data-group');
+    const pick = (b) => {
+      const again = key === 'rating' && b.getAttribute('aria-checked') === 'true';   // the rating can be un-chosen
+      choice[key] = again ? '' : b.getAttribute('data-v');
+      Array.prototype.forEach.call(grp.querySelectorAll('button'), (x) => x.setAttribute('aria-checked', x === b && !again ? 'true' : 'false'));
+      if (key === 'topic') $('error').textContent = '';
+    };
+    grp.addEventListener('click', (e) => { const b = e.target.closest('button'); if (b) pick(b); });
+    if (key === 'topic' && pre){ const b = grp.querySelector('[data-v="' + pre.replace(/[^a-z]/g, '') + '"]'); if (b) pick(b); }
+  });
+
+  $('message').addEventListener('input', () => { $('count').textContent = $('message').value.length + ' / 2000'; $('error').textContent = ''; });
+
+  $('feedbackForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const text = $('message').value.trim();
+    if (!choice.topic){ $('error').textContent = "Please choose what it's about."; return; }
+    if (text.length < 3){ $('error').textContent = ERRORS.too_short; $('message').focus(); return; }
+    const acct = window.PAAccount;
+    const tok = acct ? await acct.idToken() : null;
+    if (!tok){ show('stateSignedOut'); return; }
+    $('sendBtn').disabled = true; $('sendBtn').textContent = 'Sending…'; $('error').textContent = '';
+    const res = await acct.backend({ action: 'feedback', idToken: tok, topic: choice.topic, rating: choice.rating, message: text, page: from });
+    $('sendBtn').disabled = false; $('sendBtn').textContent = 'Send feedback';
+    if (res && res.ok){
+      show('stateDone'); $('doneTitle').focus();
+    } else {
+      $('error').textContent = (res && ERRORS[res.error]) || "We couldn't send that just now. Please try again in a minute.";
+    }
+  });
+
+  $('againBtn').addEventListener('click', () => {
+    $('message').value = ''; $('count').textContent = '0 / 2000';
+    show('feedbackForm'); $('message').focus();
+  });
+})();
+</script>
+<script type="module" src="account-menu.js"></script>
+</body>
+</html>

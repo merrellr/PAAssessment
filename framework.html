@@ -27,7 +27,12 @@
   p{ line-height:1.6; color:var(--ink-soft); font-size:0.9062rem; }
   .eyebrow{ font-family:var(--display); font-weight:600; font-size:0.75rem; letter-spacing:0.06em; color:var(--cyan); text-transform:uppercase; }
   .domain-header{ display:flex; align-items:center; gap:12px; margin-bottom:10px; }
-  .domain-badge{ width:40px; height:40px; border-radius:10px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+  .domain-badge{ width:48px; height:48px; border-radius:14px; background:var(--tint); display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+  .fw-tile{ fill:var(--tint); }
+  .fw-hit{ fill:transparent; }
+  .fw-link:hover .fw-tile, .fw-link:focus-visible .fw-tile{ fill:var(--tint-2); }
+  .fw-link:focus-visible{ outline:none; }
+  .fw-link:focus-visible .fw-hit{ stroke:var(--cyan); stroke-width:2; }
 
   /* Shared "dot meter": four slots, filled left-to-right — Limited Experience 1,
      Moderate 2, Lots of Experience 3, Advanced 4. Same visual language is
@@ -91,7 +96,7 @@
     <p style="margin-bottom:16px;">Everything below is organized under these seven areas. Each one carries the four experience levels described above, in full detail in the cards below.</p>
     <div class="overview-scroll">
       <figure style="margin:0;">
-        <svg id="frameworkOverviewSvg" role="img" aria-label="The seven Product Advisory skill domains, each shown as a colored icon with its name."></svg>
+        <svg id="frameworkOverviewSvg" role="img" aria-label="The seven Product Advisory skill domains, each shown as an icon with its name."></svg>
       </figure>
     </div>
   </div>
@@ -110,20 +115,14 @@
 </div>
 
 <script src="content/framework-data.js"></script>
+<script src="pa-icons.js"></script>
 <script>
 const DOMAIN_COLORS = {
   discovery: "#3B82F6", strategy: "#8B5CF6", prioritization: "#EC4899",
   execution: "#F97316", stakeholder: "#10B981", aiIndividual: "#06B6D4", aiOrg: "#6366F1"
 };
-const DOMAIN_ICON_PATHS = {
-  discovery: '<circle cx="12" cy="12" r="9"/><path d="M14.5 9.5L13 13l-3.5 1.5L11 11z"/>',
-  strategy: '<circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r="0.8" fill="currentColor"/>',
-  prioritization: '<line x1="6" y1="5" x2="6" y2="19"/><circle cx="6" cy="10" r="2"/><line x1="12" y1="5" x2="12" y2="19"/><circle cx="12" cy="15" r="2"/><line x1="18" y1="5" x2="18" y2="19"/><circle cx="18" cy="8" r="2"/>',
-  execution: '<path d="M12 3c-1.2 3-3.8 4.2-3.8 7.8a3.8 3.8 0 0 0 7.6 0c0-1.6-.6-2.4-.6-2.4s.3 1.6-.8 2.4c0-2.6-1.6-3.6-2.4-7.8z"/>',
-  stakeholder: '<path d="M4 5h16v10H8l-4 4z"/>',
-  aiIndividual: '<rect x="6" y="6" width="12" height="12" rx="2"/><line x1="9" y1="3" x2="9" y2="6"/><line x1="15" y1="3" x2="15" y2="6"/><line x1="9" y1="18" x2="9" y2="21"/><line x1="15" y1="18" x2="15" y2="21"/><line x1="3" y1="9" x2="6" y2="9"/><line x1="18" y1="9" x2="21" y2="9"/>',
-  aiOrg: '<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1L7 17M17 7l2.1-2.1"/>'
-};
+// The skill-area icons come from pa-icons.js (shared with the dashboard).
+function domainIconSvg(key, size, x, y){ return window.paDomainIcon(key, size, x, y); }
 const TIER_LABELS = [
   ["novice", "Limited Experience"],
   ["moderate", "Moderate Experience"],
@@ -170,9 +169,7 @@ Object.keys(window.FRAMEWORK_DATA).forEach(domainKey => {
   card.style.scrollMarginTop = '20px';
   card.innerHTML = `
     <div class="domain-header">
-      <div class="domain-badge" style="background:${color}18;">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${DOMAIN_ICON_PATHS[domainKey]}</svg>
-      </div>
+      <div class="domain-badge">${domainIconSvg(domainKey, 28)}</div>
       <h2>${domain.label}</h2>
     </div>
     <p>${domain.description}</p>
@@ -192,7 +189,7 @@ function renderFrameworkOverview(){
   if (!svg) return;
 
   const domainKeys = Object.keys(window.FRAMEWORK_DATA);
-  const COLS = 3, TILE_W = 196, TILE_H = 116, COL_GAP = 18, ROW_GAP = 18, PAD = 16;
+  const COLS = 3, TILE_W = 196, TILE_H = 128, COL_GAP = 18, ROW_GAP = 18, PAD = 16;
   const rows = Math.ceil(domainKeys.length / COLS);
   const gridW = COLS * TILE_W + (COLS - 1) * COL_GAP;
   const svgW = gridW + PAD * 2;
@@ -213,7 +210,6 @@ function renderFrameworkOverview(){
 
   let s = '';
   domainKeys.forEach((key, i) => {
-    const color = DOMAIN_COLORS[key];
     const label = TILE_LABEL[key];
     const row = Math.floor(i / COLS);
     const itemsInRow = Math.min(COLS, domainKeys.length - row * COLS);
@@ -224,15 +220,15 @@ function renderFrameworkOverview(){
     const tileX = rowX0 + col * (TILE_W + COL_GAP);
     const tileY = PAD + row * (TILE_H + ROW_GAP);
     const cx = tileX + TILE_W / 2;
-    const iconCy = tileY + 36;
+    const iconCy = tileY + 34;
 
-    // Bold, solid icon badge — full color and a white glyph, since the
-    // domain is what's meant to read first here.
-    s += `<circle cx="${cx}" cy="${iconCy}" r="25" fill="${color}"/>`;
-    s += `<svg x="${cx - 14}" y="${iconCy - 14}" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" color="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${DOMAIN_ICON_PATHS[key]}</svg>`;
+    // A line icon on a soft tile, as on www.productadvisory.co's service cards.
+    s += `<a class="fw-link" href="#${key}"><rect class="fw-hit" x="${tileX}" y="${tileY}" width="${TILE_W}" height="${TILE_H}" rx="14"/>`;
+    s += `<rect class="fw-tile" x="${cx - 30}" y="${iconCy - 30}" width="60" height="60" rx="16"/>`;
+    s += domainIconSvg(key, 38, cx - 19, iconCy - 19);
 
-    s += `<text x="${cx}" y="${iconCy + 41}" text-anchor="middle" font-family="var(--display)" font-weight="700" font-size="13" fill="var(--ink)">${label[0]}</text>`;
-    s += `<text x="${cx}" y="${iconCy + 57}" text-anchor="middle" font-family="var(--display)" font-weight="700" font-size="13" fill="var(--ink)">${label[1]}</text>`;
+    s += `<text x="${cx}" y="${iconCy + 52}" text-anchor="middle" font-family="var(--display)" font-weight="700" font-size="13" fill="var(--ink)">${label[0]}</text>`;
+    s += `<text x="${cx}" y="${iconCy + 68}" text-anchor="middle" font-family="var(--display)" font-weight="700" font-size="13" fill="var(--ink)">${label[1]}</text>` + '</a>';
   });
 
   svg.innerHTML = s;
