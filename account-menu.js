@@ -111,6 +111,13 @@ if (window.self === window.top) {
     menu.appendChild(link('Vote on the next tool', 'tool-requests.html', page === 'tool-requests.html'));
     menu.appendChild(link('Send feedback', 'mailto:feedback@productadvisory.co?subject=' + encodeURIComponent('Feedback on Product Advisory Learning'), false));
     menu.appendChild(link('Visit Product Advisory ↗', 'https://www.productadvisory.co/', false, true));
+    if (window.PAAnalytics && window.PAAnalytics.reopen){
+      const cookies = el('button', 'pa-acct-item', 'Cookie settings');
+      cookies.type = 'button';
+      cookies.id = 'paAccountCookies';
+      cookies.addEventListener('click', () => { close(false); window.PAAnalytics.reopen(); });
+      menu.appendChild(cookies);
+    }
     menu.appendChild(el('div', 'pa-acct-rule'));
     const out = el('button', 'pa-acct-item', 'Log out');
     out.type = 'button';
@@ -219,7 +226,12 @@ if (window.self === window.top) {
   window.addEventListener('pa-membership-changed', () => { if (auth.currentUser) adminWelcomeIfDue(auth.currentUser); });
 
   onAuthStateChanged(auth, async (user) => {
-    if (user){ welcomeIfNew(user); adminWelcomeIfDue(user); }
+    if (user){
+      welcomeIfNew(user); adminWelcomeIfDue(user);
+      // Having an account means they agreed to the Privacy Policy, so the cookie notice is not shown again
+      // (unless they had clicked Decline on this device, which is respected).
+      if (window.PAAnalytics && window.PAAnalytics.acceptFromAccount) window.PAAnalytics.acceptFromAccount();
+    }
     if (!MENU) return;
     const mine = ++token;
     if (!user){ remove(); return; }

@@ -66,6 +66,7 @@ Build-Page 'owner-pilot.html' 'pilot-test.html' 'pilot-seed.js' 'pilot-test.js'
 Build-Page 'index.html' 'index-test.html' 'index-seed.js' 'index-test.js'
 $menuPage = "<!doctype html><html><head><script src=`"menu-seed.js`"></script></head><body><div class=`"wrap`"><p>A page</p></div><script type=`"module`" src=`"account-menu.js`"></script><script type=`"module`" src=`"menu-test.js`"></script></body></html>"
 [System.IO.File]::WriteAllText("$site\menu-test.html", $menuPage)
+[System.IO.File]::WriteAllText("$site\consent-test.html", "<!doctype html><html><head><script src=`"consent-seed.js`"></script><script src=`"analytics.js`"></script></head><body><div class=`"wrap`"><p>A page</p></div><script type=`"module`" src=`"account-menu.js`"></script><script type=`"module`" src=`"consent-test.js`"></script></body></html>")
 [System.IO.File]::WriteAllText("$site\menu-off-test.html", $menuPage.Replace('src="account-menu.js"', 'src="account-menu.js?menu=off"'))
 [System.IO.File]::WriteAllText("$site\profile.html", $menuPage)   # same page under the name profile.html, to check the "you are here" marking
 [System.IO.File]::WriteAllText("$site\share-test.html", "<!doctype html><html><head>$errHook</head><body><script type=`"module`" src=`"share-test.js`"></script></body></html>")
@@ -156,6 +157,9 @@ try {
   }
   foreach ($s in 'adminjoinnew', 'adminjoinold', 'adminjoinremoved', 'membernew', 'adminjoindone', 'adminjoinfail', 'adminjoindown', 'adminjoinlate') {
     $results += Run-Page "profile menu: $s" "$base/menu-test.html?scn=$s" 30000
+  }
+  foreach ($s in 'new', 'stored_accepted', 'stored_declined', 'signedin', 'signedin_declined', 'dnt', 'gpc') {
+    $results += Run-Page "cookie notice: $s" "$base/consent-test.html?scn=$s" 30000
   }
   $results += Run-Page 'profile menu: menu off, new account' "$base/menu-off-test.html?scn=newaccount" 30000
   $results += Run-Page 'profile menu: current page' "$base/profile.html?scn=plain" 30000

@@ -71,5 +71,42 @@ console.log('--- which pages have it ---');
   t('the id appears only in analytics.js, never pasted into a page', all.every(p => fs.readFileSync(path.join(root, p + '.html'), 'utf8').indexOf('G-4XFS1QWS9H') === -1));
 }
 
+console.log('--- the visitor\'s choice ---');
+{
+  const store = (init, throws) => { const d = Object.assign({}, init); return { d, getItem: (k) => { if (throws) throw new Error('blocked'); return k in d ? d[k] : null; }, setItem: (k, v) => { if (throws) throw new Error('blocked'); d[k] = String(v); } }; };
+  const e = (url, ls, nav) => Object.assign(env(url, nav), { localStorage: ls });
+  const site = 'https://assessment.productadvisory.co/';
+  t('nothing stored: nobody has been asked yet', A.readConsent(e(site, store({}))) === '');
+  t('"accepted" and "declined" are understood', A.readConsent(e(site, store({ pa_cookie_consent: 'accepted' }))) === 'accepted' && A.readConsent(e(site, store({ pa_cookie_consent: 'declined' }))) === 'declined');
+  t('anything else is treated as not asked, never as a yes', A.readConsent(e(site, store({ pa_cookie_consent: 'yes' }))) === '' && A.readConsent(e(site, store({ pa_cookie_consent: '1' }))) === '' && A.readConsent(e(site, store({ pa_cookie_consent: '' }))) === '');
+  const ls = store({}); const ev = e(site, ls);
+  A.writeConsent(ev, 'accepted');
+  t('a choice is written with the time it was made', ls.d.pa_cookie_consent === 'accepted' && /^\d{4}-\d{2}-\d{2}T/.test(ls.d.pa_cookie_consent_at));
+  t('blocked storage never breaks the page (the visitor is simply asked again next time)', A.readConsent(e(site, store({}, true))) === '' && (() => { try { A.writeConsent(e(site, store({}, true)), 'accepted'); return true; } catch (x) { return false; } })());
+  t('first visit: show the notice', A.decide(e(site, store({}))) === 'banner');
+  t('accepted before: start Google, no notice', A.decide(e(site, store({ pa_cookie_consent: 'accepted' }))) === 'start');
+  t('declined before: do nothing, no notice', A.decide(e(site, store({ pa_cookie_consent: 'declined' }))) === 'none');
+  t('Do Not Track: nothing, even if they had accepted', A.decide(e(site, store({ pa_cookie_consent: 'accepted' }), { doNotTrack: '1' })) === 'none' && A.decide(e(site, store({}), { doNotTrack: '1' })) === 'none');
+  t('Global Privacy Control: nothing, and no notice', A.decide(e(site, store({}), { globalPrivacyControl: true })) === 'none');
+  t('a local test server still shows the notice (so it can be tested) but never starts Google', A.decide(e('http://localhost:8000/', store({}))) === 'banner' && A.start(e('http://localhost:8000/', store({ pa_cookie_consent: 'accepted' }))) === false);
+  const e2 = e(site, store({ pa_cookie_consent: 'accepted' }));
+  t('Google is started once per page, however many times it is asked', A.start(e2) === true && A.start(e2) === false && e2.appended.length === 1);
+  t('Google is not started on the real site unless start is called (accepting is what calls it)', (() => { const x = e(site, store({})); return !x.dataLayer && x.appended.length === 0; })());
+  t('the choice key is the one the pages and tests use', A.KEY === 'pa_cookie_consent');
+}
+
+console.log('--- the notice is wired into the pages ---');
+{
+  const read = (f) => fs.readFileSync(path.join(root, f), 'utf8');
+  ['index', 'lesson', 'profile'].forEach(p => t(p + '.html has a "Cookie settings" link in its footer', /data-cookie-settings[^>]*>Cookie settings<\/a>/.test(read(p + '.html'))));
+  t('the dashboard\'s Profile menu has "Cookie settings"', /profile-dropdown-item" href="#" data-cookie-settings>Cookie settings<\/a>/.test(read('lms-dashboard.html')));
+  const menu = read('account-menu.js');
+  t('signing in counts as accepting (account-menu.js calls acceptFromAccount for every signed-in person, with or without the menu)', /PAAnalytics\.acceptFromAccount\(\)/.test(menu) && menu.indexOf('acceptFromAccount') < menu.indexOf('if (!MENU) return;'));
+  t('the Profile menu has a "Cookie settings" button that reopens the notice', /Cookie settings/.test(menu) && /PAAnalytics\.reopen\(\)/.test(menu));
+  const an = read('analytics.js');
+  t('no Google script is added except inside start()', (an.match(/googletagmanager/g) || []).length === 1 && /function start\(env\)[\s\S]*googletagmanager/.test(an));
+  t('the notice links to the Privacy Policy used elsewhere on the site', an.indexOf('https://www.productadvisory.co/privacy-policy') > -1);
+}
+
 console.log('\n' + pass + ' passed, ' + fail + ' failed');
 process.exit(fail ? 1 : 0);
