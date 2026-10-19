@@ -103,7 +103,7 @@
 <body>
 <script src="pa-shell.js"></script>
 <div class="wrap">
-  <a href="lms-dashboard.html" class="brand-header">
+  <a href="/lms-dashboard" class="brand-header">
     <svg width="28" height="28" viewBox="0 0 40 40" aria-hidden="true">
       <polygon points="20,3 35,11.5 35,28.5 20,37 5,28.5 5,11.5" fill="#1A4584"/>
       <polygon points="20,10 29,15 29,25 20,30 11,25 11,15" fill="none" stroke="#35C2E8" stroke-width="1.5"/>
@@ -119,7 +119,7 @@
   <div class="card" id="stateSignedOut" hidden>
     <h1>Please sign in first</h1>
     <p>Sign in with your usual account on the dashboard, then come back to this page.</p>
-    <p style="margin-bottom:0;"><a href="lms-dashboard.html" style="color:var(--navy);">Go to the dashboard →</a></p>
+    <p style="margin-bottom:0;"><a href="/lms-dashboard" style="color:var(--navy);">Go to the dashboard →</a></p>
   </div>
   <div class="card" id="stateNotOwner" hidden>
     <h1>This page is for the platform owner</h1>
@@ -128,7 +128,7 @@
   <div class="card" id="stateNoOrg" hidden>
     <h1 id="noOrgTitle">Choose a company</h1>
     <p id="noOrgMessage">Open a company from the owner console, then use its "Pilot tracker" button.</p>
-    <p style="margin-bottom:0;"><a href="owner.html" style="color:var(--navy);">Go to the owner console →</a></p>
+    <p style="margin-bottom:0;"><a href="/owner" style="color:var(--navy);">Go to the owner console →</a></p>
   </div>
 
   <div id="page" hidden>
@@ -140,7 +140,7 @@
           <div class="hint" id="orgSub"></div>
         </div>
         <div class="btn-row">
-          <a class="btn small" href="owner.html" id="ownerBackLink">← Owner console</a>
+          <a class="btn small" href="/owner" id="ownerBackLink">← Owner console</a>
           <a class="btn small" href="#" id="teamLink">Team dashboard</a>
           <button class="btn small" id="refreshBtn" type="button">Refresh</button>
         </div>
@@ -368,7 +368,7 @@ function renderAll(){
   $('orgName').textContent = org.name;
   document.title = org.name + ' — Pilot Tracker';
   $('orgSub').textContent = (org.plan === 'seat' ? plural(org.seatLimit || 0, 'seat') : 'Flat enterprise price') + (pilot.sponsor ? ' · Sponsor: ' + pilot.sponsor : '');
-  $('teamLink').setAttribute('href', 'company.html?org=' + encodeURIComponent(orgId));
+  $('teamLink').setAttribute('href', '/company?org=' + encodeURIComponent(orgId));
   renderStage();
   renderNow();
   renderRunbook();

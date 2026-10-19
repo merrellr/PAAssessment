@@ -70,7 +70,7 @@
 <body>
 <script src="pa-shell.js"></script>
 <div class="wrap">
-  <a href="lms-dashboard.html" class="brand-header">
+  <a href="/lms-dashboard" class="brand-header">
     <svg width="28" height="28" viewBox="0 0 40 40" aria-hidden="true">
       <polygon points="20,3 35,11.5 35,28.5 20,37 5,28.5 5,11.5" fill="#1A4584"/>
       <polygon points="20,10 29,15 29,25 20,30 11,25 11,15" fill="none" stroke="#35C2E8" stroke-width="1.5"/>
@@ -86,7 +86,7 @@
   <div class="card" id="stateSignedOut" style="display:none;">
     <h1>Please sign in first</h1>
     <p>Sign in with your usual account on the dashboard, then come back to this page.</p>
-    <p style="margin-bottom:0;"><a href="lms-dashboard.html" style="color:var(--navy);">Go to the dashboard →</a></p>
+    <p style="margin-bottom:0;"><a href="/lms-dashboard" style="color:var(--navy);">Go to the dashboard →</a></p>
   </div>
   <div class="card" id="stateNotOwner" style="display:none;">
     <h1>This page is for the platform owner</h1>
@@ -94,7 +94,7 @@
   </div>
 
   <div id="page" style="display:none;">
-    <a href="owner.html" class="back-link">← Owner console</a>
+    <a href="/owner" class="back-link">← Owner console</a>
     <div class="notice" id="notice" role="status"></div>
     <div class="error-line" id="errorLine" role="alert"></div>
 
@@ -102,7 +102,7 @@
       <div class="section-head">
         <div>
           <h1>Tool roadmap</h1>
-          <div class="hint">The public page is <a href="tool-requests.html" target="_blank" rel="noopener">tool-requests.html</a>. Anyone can see the tools and totals; people vote after signing in with a verified email.</div>
+          <div class="hint">The public page is <a href="/tool-requests" target="_blank" rel="noopener">assessment.productadvisory.co/tool-requests</a>. Anyone can see the tools and totals; people vote after signing in with a verified email.</div>
         </div>
       </div>
       <div class="tiles" id="tiles"></div>

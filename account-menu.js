@@ -59,8 +59,9 @@ if (window.self === window.top) {
     return a;
   }
   function currentPage(){
+    // The file name, whether the address is clean (/company) or not (/company.html).
     const seg = location.pathname.split('/').pop();
-    return seg || 'index.html';
+    return !seg ? 'index.html' : /\.html$/.test(seg) ? seg : seg + '.html';
   }
 
   function remove(){
@@ -101,16 +102,16 @@ if (window.self === window.top) {
     menu.appendChild(el('div', 'pa-acct-name', user.displayName || (user.email || '').split('@')[0] || 'Your account'));
     menu.appendChild(el('div', 'pa-acct-email', user.email || ''));
     menu.appendChild(el('div', 'pa-acct-rule'));
-    menu.appendChild(link('My learning dashboard', 'lms-dashboard.html', page === 'lms-dashboard.html'));
-    menu.appendChild(link('My profile', 'profile.html', page === 'profile.html'));
-    if (flags.companyAdmin) menu.appendChild(link('Company dashboard', 'company.html', page === 'company.html'));
+    menu.appendChild(link('My learning dashboard', '/lms-dashboard', page === 'lms-dashboard.html'));
+    menu.appendChild(link('My profile', '/profile', page === 'profile.html'));
+    if (flags.companyAdmin) menu.appendChild(link('Company dashboard', '/company', page === 'company.html'));
     if (flags.owner){
-      menu.appendChild(link('Owner console', 'owner.html', page === 'owner.html'));
-      menu.appendChild(link('Reports', 'reports.html', page === 'reports.html'));
+      menu.appendChild(link('Owner console', '/owner', page === 'owner.html'));
+      menu.appendChild(link('Reports', '/reports', page === 'reports.html'));
     }
-    menu.appendChild(link('Toolkits ↗', 'https://www.productadvisory.co/toolkits.html', false, true));
-    menu.appendChild(link('Request tools', 'tool-requests.html#suggest', page === 'tool-requests.html'));
-    menu.appendChild(link('Send feedback', 'feedback.html', page === 'feedback.html'));
+    menu.appendChild(link('Toolkits ↗', 'https://www.productadvisory.co/toolkits', false, true));
+    menu.appendChild(link('Request tools', '/tool-requests#suggest', page === 'tool-requests.html'));
+    menu.appendChild(link('Send feedback', '/feedback', page === 'feedback.html'));
     menu.appendChild(link('Visit Product Advisory ↗', 'https://www.productadvisory.co/', false, true));
     if (window.PAAnalytics && window.PAAnalytics.reopen){
       const cookies = el('button', 'pa-acct-item', 'Cookie settings');
@@ -145,7 +146,7 @@ if (window.self === window.top) {
     wrap.style.right = (isWrap ? 16 : 12) + 'px';
     col.appendChild(wrap);
     // Line the button up with the middle of the page's logo, when there is one.
-    const logo = col.querySelector('.brand-header svg, .brand-header-left svg, a[href="lms-dashboard.html"] > svg');
+    const logo = col.querySelector('.brand-header svg, .brand-header-left svg, a[href="/lms-dashboard"] > svg');
     if (logo){
       const place = () => {
         const l = logo.getBoundingClientRect(), c = col.getBoundingClientRect();

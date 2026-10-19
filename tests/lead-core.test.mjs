@@ -100,10 +100,10 @@ console.log('--- the fallback and the thank-you ---');
   t('the email-us link goes to info@ with the answers filled in', m.indexOf('mailto:info@productadvisory.co?subject=') === 0 && decodeURIComponent(m).indexOf('Acme') > -1 && decodeURIComponent(m).indexOf('AI fluency for my organization') > -1 && decodeURIComponent(m).indexOf('Need help') > -1);
   t('the text summary reads in plain words', /I am: I'm looking for my organization/.test(L.summaryText(s)) && /Team size: 11 to 50 people/.test(L.summaryText(s)));
   const ty = L.thankYou(s);
-  t('a company contact is told Rob will reply, and is offered the assessment', /Thanks, Jane/.test(ty.title) && /Rob will reply to jane@acme\.com within two business days/.test(ty.text) && ty.cta.href === 'index.html');
+  t('a company contact is told Rob will reply, and is offered the assessment', /Thanks, Jane/.test(ty.title) && /Rob will reply to jane@acme\.com within two business days/.test(ty.text) && ty.cta.href === '/');
   const ti = L.thankYou(withState({ who: 'individual', name: 'Pat', email: 'pat@x.com' }));
-  t('an individual is pointed to the free assessment', /Thanks, Pat/.test(ti.title) && /We will reply to pat@x\.com/.test(ti.text) && ti.cta.href === 'index.html');
-  t('both get a second link to the Tool Roadmap', ty.second.href === 'tool-requests.html' && ti.second.href === 'tool-requests.html');
+  t('an individual is pointed to the free assessment', /Thanks, Pat/.test(ti.title) && /We will reply to pat@x\.com/.test(ti.text) && ti.cta.href === '/');
+  t('both get a second link to the Tool Roadmap', ty.second.href === '/tool-requests' && ti.second.href === '/tool-requests');
 }
 
 console.log('--- the booking link and the call button ---');

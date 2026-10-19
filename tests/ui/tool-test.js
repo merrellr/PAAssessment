@@ -64,7 +64,7 @@ function done(){
       t('signed-in bar shows who they are and their votes', vis('statusBar') && /ufresh@Example\.com/i.test(txt('signedInAs')) && txt('votesLeft') === '3 votes left', txt('votesLeft'));
       t('the sign-in card is hidden and the suggestion box is shown', !vis('authCard') && vis('suggestCard'));
       t('no verify banner for a verified person', !vis('verifyBanner'));
-      t('they are pointed at the assessment, because they have not taken it', vis('nextCard') && /take the assessment/i.test(txt('nextTitle')) && $('nextLink').getAttribute('href') === 'index.html', txt('nextTitle'));
+      t('they are pointed at the assessment, because they have not taken it', vis('nextCard') && /take the assessment/i.test(txt('nextTitle')) && $('nextLink').getAttribute('href') === '/', txt('nextTitle'));
       t('open tools offer "Vote for this"', ['t1', 't2', 't3', 't4'].every(id => !!btn(card(id), 'Vote for this')));
 
       window.__writeLog.length = 0;
@@ -130,7 +130,7 @@ function done(){
       t('a returning voter sees their three votes', txt('votesLeft') === 'All 3 votes used' && ['t1', 't2', 't4'].every(id => card(id).classList.contains('voted')));
       t('their launch-email choice is remembered', card('t2').querySelector('input[type="checkbox"]').checked === true && card('t1').querySelector('input[type="checkbox"]').checked === false);
       t('they cannot vote for a fourth tool', !btn(card('t3'), 'Vote for this') && /used all 3 votes/.test(textOf(card('t3'))));
-      t('having taken the assessment, they are sent to their dashboard instead', vis('nextCard') && /Keep learning/.test(txt('nextTitle')) && $('nextLink').getAttribute('href') === 'lms-dashboard.html', txt('nextTitle'));
+      t('having taken the assessment, they are sent to their dashboard instead', vis('nextCard') && /Keep learning/.test(txt('nextTitle')) && $('nextLink').getAttribute('href') === '/lms-dashboard', txt('nextTitle'));
       btn(card('t1'), '✓ Voted').click(); await sleep(250);
       t('removing one vote lets them vote for another', !!btn(card('t3'), 'Vote for this') && txt('votesLeft') === '1 vote left');
     }

@@ -109,7 +109,7 @@ function finish(){
       inv.orgName === 'Acme Health' && inv.status === 'open' && inv.usedBy === null);
     t('invite expires in about 30 days', inv && Math.abs(inv.expiresAt.toMillis() - (Date.now() + 30 * 864e5)) < 60000);
     t('invite token is a long random string', invPath.split('/')[1].length === 32 && /^[0-9a-f]+$/.test(invPath.split('/')[1]));
-    t('new-links card shows the admin link', vis('linksCard') && /join\.html\?token=/.test($('linksTable').textContent));
+    t('new-links card shows the admin link', vis('linksCard') && /\/join\?token=/.test($('linksTable').textContent));
     const adminRows = rowsIn('adminTableWrap');
     t('admin table lists the invited admin with name, email, phone and Invited status',
       adminRows.length === 1 && /Sam Admin/.test(textOf(adminRows[0])) && /sam@acme\.com/.test(textOf(adminRows[0])) && /555-0101/.test(textOf(adminRows[0])) && /Invited/.test(textOf(adminRows[0])));
@@ -260,8 +260,8 @@ function finish(){
     const view = Array.prototype.slice.call($('orgTableWrap').querySelectorAll('button')).find(b => b.textContent === 'View');
     view.click(); await until(() => vis('viewDetail')); await sleep(200);
     t('View opens that company', /Acme Health/.test($('detailName').textContent));
-    t('the company page links to its pilot tracker and its team dashboard', /^owner-pilot\.html\?org=[^&]+$/.test($('pilotLink').getAttribute('href')) && /^company\.html\?org=[^&]+$/.test($('teamDashLink').getAttribute('href')) && $('pilotLink').getAttribute('href').split('=')[1] === $('teamDashLink').getAttribute('href').split('=')[1]);
-    t('the company page links to that company\'s team dashboard', /^company\.html\?org=/.test($('teamDashLink').getAttribute('href')), $('teamDashLink').getAttribute('href'));
+    t('the company page links to its pilot tracker and its team dashboard', /^\/owner-pilot\?org=[^&]+$/.test($('pilotLink').getAttribute('href')) && /^\/company\?org=[^&]+$/.test($('teamDashLink').getAttribute('href')) && $('pilotLink').getAttribute('href').split('=')[1] === $('teamDashLink').getAttribute('href').split('=')[1]);
+    t('the company page links to that company\'s team dashboard', /^\/company\?org=/.test($('teamDashLink').getAttribute('href')), $('teamDashLink').getAttribute('href'));
     t('people counts appear on the page: 1 admin and 1 user active',
       rowsIn('adminTableWrap').some(r => /Active/.test(textOf(r)) && /Sam Admin/.test(textOf(r))) && rowsIn('userTableWrap').some(r => /Active/.test(textOf(r)) && /Jane Smith/.test(textOf(r))));
     /* ---- what the company sees about each member (checkpoint 3) ---- */

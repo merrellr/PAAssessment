@@ -89,7 +89,7 @@ async function walkOrg(){
       t('the page asked the server to confirm it arrived, using the id (not the person\'s details)', window.__calls.filter(c => c === 'leadStatus').length >= 2 && !/jane/i.test(JSON.stringify(window.__calls)));
       t('it checked at the start that this version of the server is live', window.__calls[0] === 'leadsCheck' && $('backendNote').hidden);
       t('success replaces the form with a thank-you naming the person and the email', shown() === 'doneCard' && /Thanks, Jane/.test(txt('doneTitle')) && /Rob will reply to jane@acme-health\.com within two business days/.test(txt('doneText')), txt('doneText'));
-      t('it points on to the free assessment and the Tool Roadmap', $('doneCta').getAttribute('href') === 'index.html' && $('doneSecond').getAttribute('href') === 'tool-requests.html');
+      t('it points on to the free assessment and the Tool Roadmap', $('doneCta').getAttribute('href') === '/' && $('doneSecond').getAttribute('href') === '/tool-requests');
       t('an organization is offered the booking page as well', !$('doneBook').hidden && $('doneBook').getAttribute('href') === 'https://calendly.com/productadvisory/30min');
       t('it shows a short reference', /^Reference: [0-9A-F]{8}$/.test(txt('doneRef')), txt('doneRef'));
       t('the saved draft is cleared once it has been sent', sessionStorage.getItem('pa_lead_form') === null);
@@ -116,7 +116,7 @@ async function walkOrg(){
       const b = posted().body;
       t('no team size or decision role is sent for an individual', b.who === 'individual' && b.size === '' && b.role === '' && b.company === '');
       t('an individual who did not ask for a call is not shown the booking button', $('doneBook').hidden);
-      t('an individual is thanked and pointed to the free assessment', /Thanks, Pat/.test(txt('doneTitle')) && /We will reply to pat@gmail\.com/.test(txt('doneText')) && $('doneCta').getAttribute('href') === 'index.html', txt('doneText'));
+      t('an individual is thanked and pointed to the free assessment', /Thanks, Pat/.test(txt('doneTitle')) && /We will reply to pat@gmail\.com/.test(txt('doneText')) && $('doneCta').getAttribute('href') === '/', txt('doneText'));
     }
 
     if (scn === 'back'){

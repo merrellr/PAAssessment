@@ -112,7 +112,7 @@ const JoinLogic = (function(){
 <body>
 <script src="pa-shell.js"></script>
 <div class="wrap">
-  <a href="lms-dashboard.html" class="brand-header">
+  <a href="/lms-dashboard" class="brand-header">
     <svg width="28" height="28" viewBox="0 0 40 40" aria-hidden="true">
       <polygon points="20,3 35,11.5 35,28.5 20,37 5,28.5 5,11.5" fill="#1A4584"/>
       <polygon points="20,10 29,15 29,25 20,30 11,25 11,15" fill="none" stroke="#35C2E8" stroke-width="1.5"/>
@@ -158,7 +158,7 @@ const JoinLogic = (function(){
   <div class="card" id="stateProblem" style="display:none;">
     <h1 id="problemTitle"></h1>
     <p id="problemText"></p>
-    <a class="btn-link" href="lms-dashboard.html" id="problemLink">Go to your dashboard</a>
+    <a class="btn-link" href="/lms-dashboard" id="problemLink">Go to your dashboard</a>
     <p class="small" id="problemSwitch" style="display:none;">Signed in as <span id="problemEmail"></span>. <a href="#" id="problemSignOut">Use a different account</a></p>
   </div>
 
@@ -205,8 +205,8 @@ const JoinLogic = (function(){
     <div class="ok-mark">✓</div>
     <h1 id="doneTitle"></h1>
     <p id="doneText"></p>
-    <a class="btn-link" href="lms-dashboard.html">Go to your dashboard</a>
-    <p style="margin:14px 0 0;"><a id="doneAdminLink" href="company.html" style="display:none; color:var(--navy);">Open the company dashboard →</a></p>
+    <a class="btn-link" href="/lms-dashboard">Go to your dashboard</a>
+    <p style="margin:14px 0 0;"><a id="doneAdminLink" href="/company" style="display:none; color:var(--navy);">Open the company dashboard →</a></p>
   </div>
 </div>
 

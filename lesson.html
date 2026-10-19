@@ -118,7 +118,7 @@
 <body>
 <script src="pa-shell.js"></script>
 <div class="wrap">
-  <a href="lms-dashboard.html" class="brand-header" style="display:flex; align-items:center; gap:9px; text-decoration:none; padding-top:24px; margin-bottom:14px;">
+  <a href="/lms-dashboard" class="brand-header" style="display:flex; align-items:center; gap:9px; text-decoration:none; padding-top:24px; margin-bottom:14px;">
     <svg width="26" height="26" viewBox="0 0 40 40" aria-hidden="true">
       <polygon points="20,3 35,11.5 35,28.5 20,37 5,28.5 5,11.5" fill="#1A4584"/>
       <polygon points="20,10 29,15 29,25 20,30 11,25 11,15" fill="none" stroke="#35C2E8" stroke-width="1.5"/>
@@ -129,7 +129,7 @@
     </div>
   </a>
   <div class="brand-accent-bar"></div>
-  <a class="back-link" href="lms-dashboard.html">← Back to dashboard</a>
+  <a class="back-link" href="/lms-dashboard">← Back to dashboard</a>
 
   <div class="card">
     <span class="eyebrow" id="courseTitle">Loading…</span>
@@ -323,7 +323,7 @@ function showAssessmentLock(){
       </svg>
       <p style="margin:0 0 8px; color:var(--ink); font-weight:600;">This course is locked until you take the assessment.</p>
       <p style="margin:0 0 16px; font-size:0.8438rem;">The assessment places you at the right level in each skill area, so every course starts where you are. It takes about five minutes.</p>
-      <a href="index.html" class="btn btn-primary" style="text-decoration:none; display:inline-block;">Take the assessment →</a>
+      <a href="/" class="btn btn-primary" style="text-decoration:none; display:inline-block;">Take the assessment →</a>
     </div>
   `;
 }
@@ -350,7 +350,7 @@ if (!course){
 
 onAuthStateChanged(auth, async (user) => {
   if (!user){
-    window.location.href = 'lms-dashboard.html';
+    window.location.href = '/lms-dashboard';
     return;
   }
   currentUser = user;
@@ -463,7 +463,7 @@ function renderLesson(){
   nav.innerHTML = '';
   course.lessons.forEach(l => {
     const pill = document.createElement('a');
-    pill.href = 'lesson.html?course=' + courseId + '&lesson=' + l.id;
+    pill.href = '/lesson?course=' + courseId + '&lesson=' + l.id;
     pill.className = 'lesson-pill' + (completedLessons.includes(l.id) ? ' done' : '') + (l.id === lessonNum ? ' current' : '');
     pill.textContent = 'Lesson ' + l.id;
     nav.appendChild(pill);
@@ -716,7 +716,7 @@ function renderChecksInto(containerId, checks){
 }
 
 window.goToLesson = function(direction){
-  window.location.href = 'lesson.html?course=' + courseId + '&lesson=' + (lessonNum + direction);
+  window.location.href = '/lesson?course=' + courseId + '&lesson=' + (lessonNum + direction);
 };
 
 /* Renders a short reflection prompt. Saved answers persist to
@@ -791,7 +791,7 @@ function buildAssessmentPrefillUrl(user, profile){
   if (profile.companySize) params.set('companySize', profile.companySize);
   if (profile.industry) params.set('industry', profile.industry);
   const query = params.toString();
-  return 'index.html' + (query ? '?' + query : '');
+  return '/' + (query ? '?' + query : '');
 }
 
 function courseIsComplete(coursesMap, cid){
@@ -970,7 +970,7 @@ function showCourseComplete(coursesMap){
     <div style="margin-top:20px;">
       <span class="eyebrow">Recommended next</span>
       <div style="margin-top:10px; display:flex; flex-direction:column; gap:8px;">
-        ${recs.map(r => `<a href="lesson.html?course=${r.cid}" class="lesson-pill" style="text-align:left;">${r.title} →</a>`).join('')}
+        ${recs.map(r => `<a href="/lesson?course=${r.cid}" class="lesson-pill" style="text-align:left;">${r.title} →</a>`).join('')}
       </div>
     </div>` : '';
 
@@ -992,7 +992,7 @@ function showCourseComplete(coursesMap){
     ${recsHtml}
     ${retakeHtml}
     <div style="margin-top:22px;">
-      <a href="lms-dashboard.html?justCompleted=1" class="btn btn-ghost" style="text-decoration:none; display:inline-block;">Back to your dashboard</a>
+      <a href="/lms-dashboard?justCompleted=1" class="btn btn-ghost" style="text-decoration:none; display:inline-block;">Back to your dashboard</a>
     </div>
   `;
   document.getElementById('courseCompleteScreen').style.display = 'block';
@@ -1027,7 +1027,7 @@ window.markCompleteAndContinue = async function(){
     showCourseComplete(data.courses || {});
     window.scrollTo({ top: 0, behavior: 'smooth' });
   } else {
-    window.location.href = 'lesson.html?course=' + courseId + '&lesson=' + (lessonNum + 1);
+    window.location.href = '/lesson?course=' + courseId + '&lesson=' + (lessonNum + 1);
   }
 };
 </script>

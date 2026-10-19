@@ -37,7 +37,7 @@ function done(){
     else if (scn === 'serverrefuses'){ t('if the server refuses, the reason is shown', /isn't the platform owner/.test(txt('errorLine')), txt('errorLine')); }
     else {
       t('the owner sees the page', shown() === 'page');
-      t('the Profile menu is there, top right, with the owner links', !!$('paAccountBtn') && !!document.querySelector('#paAccountMenu a[href="reports.html"]') && !!document.querySelector('#paAccountMenu a[href="owner.html"]'));
+      t('the Profile menu is there, top right, with the owner links', !!$('paAccountBtn') && !!document.querySelector('#paAccountMenu a[href="/reports"]') && !!document.querySelector('#paAccountMenu a[href="/owner"]'));
       t('it asked the server for 30 days, with the owner\'s sign-in token', window.__calls[0].action === 'reports' && window.__calls[0].days === '30' && window.__calls[0].idToken === 'tok', JSON.stringify(window.__calls[0]));
       t('the 30-day button is pressed and the Overview tab is open', document.querySelector('.period-btn[data-days="30"]').getAttribute('aria-pressed') === 'true' && $('tab-overview').getAttribute('aria-selected') === 'true' && !$('panel-overview').hidden && $('panel-funnel').hidden && $('panel-leads').hidden);
       t('it says how the periods are compared', /last 30 days compared with the 30 before/.test(txt('generated')), txt('generated'));

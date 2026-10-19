@@ -89,6 +89,8 @@ $server = Start-Job -ArgumentList $site, $Port -ScriptBlock {
     try {
       $rel = [Uri]::UnescapeDataString($c.Request.Url.AbsolutePath.TrimStart('/'))
       $p = Join-Path $site ($rel -replace '/', '\')
+      # like GitHub Pages: /page serves page.html (the site links to clean addresses)
+      if (-not (Test-Path $p -PathType Leaf) -and (Test-Path "$p.html" -PathType Leaf)) { $p = "$p.html" }
       if ((Test-Path $p -PathType Leaf) -and $p.StartsWith($site)) {
         $b = [System.IO.File]::ReadAllBytes($p)
         $ext = [System.IO.Path]::GetExtension($p).ToLower()

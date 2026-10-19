@@ -115,7 +115,7 @@
     <p>Back the tools you would actually use. You can vote for up to <strong>3 tools</strong>, one vote each, and change your mind any time. The tool with the most votes gets built first. Everyone can see the totals.</p>
     <div class="hero-actions">
       <button class="btn btn-primary" id="requestBtn" type="button">Request a tool</button>
-      <a class="btn-out" href="https://www.productadvisory.co/toolkits.html" target="_blank" rel="noopener">See the live toolkits<span aria-hidden="true"> ↗</span><span class="sr-only"> (opens in a new tab)</span></a>
+      <a class="btn-out" href="https://www.productadvisory.co/toolkits" target="_blank" rel="noopener">See the live toolkits<span aria-hidden="true"> ↗</span><span class="sr-only"> (opens in a new tab)</span></a>
     </div>
     <div class="status-bar" id="statusBar" style="display:none;">
       <span id="signedInAs"></span>
@@ -175,7 +175,7 @@
   <div class="cta" id="nextCard" style="display:none;">
     <h2 id="nextTitle">Now that you have an account, take the assessment</h2>
     <p id="nextText">The Product Learning Assessment shows where you are strongest across seven product management skill areas, and gives you a course plan to match. It takes about 15 minutes.</p>
-    <a class="btn-link" id="nextLink" href="index.html">Take the assessment</a>
+    <a class="btn-link" id="nextLink" href="/">Take the assessment</a>
   </div>
 
   <p class="small" style="text-align:center;">Totals reflect the people who chose to vote, so treat them as a guide to what's wanted, not a poll.</p>
@@ -479,12 +479,12 @@ async function loadNextStep(){
       $('nextTitle').textContent = 'Keep learning';
       $('nextText').textContent = 'Your assessment results and course plan are waiting on your dashboard.';
       $('nextLink').textContent = 'Go to my dashboard';
-      $('nextLink').setAttribute('href', 'lms-dashboard.html');
+      $('nextLink').setAttribute('href', '/lms-dashboard');
     } else {
       $('nextTitle').textContent = 'Now that you have an account, take the assessment';
       $('nextText').textContent = 'The Product Learning Assessment shows where you are strongest across seven product management skill areas, and gives you a course plan to match. It takes about 15 minutes.';
       $('nextLink').textContent = 'Take the assessment';
-      $('nextLink').setAttribute('href', 'index.html');
+      $('nextLink').setAttribute('href', '/');
     }
     $('nextCard').style.display = 'block';
   } catch (err){ /* optional extra: show nothing */ }

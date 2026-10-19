@@ -42,7 +42,7 @@ const sleep = (ms) => new Promise(r => setTimeout(r, ms));
       t('a course finished over a week ago brings up the spaced-review card', reviewCard.style.display === 'block');
       t('it names the course and how long ago', /Customer & Market Discovery — Moderate Experience — completed \d+ days ago/.test(document.getElementById('spacedReviewMeta').textContent), document.getElementById('spacedReviewMeta').textContent);
       t('the question is a real one from that course\'s lessons', checks.length > 0 && checks.some(c => c.question === shownQ), String(shownQ));
-      t('and it links back to the course', /lesson\.html\?course=discovery-moderate/.test(document.getElementById('spacedReviewLink').getAttribute('href')));
+      t('and it links back to the course', /^\/lesson\?course=discovery-moderate/.test(document.getElementById('spacedReviewLink').getAttribute('href')));
       const q = checks.find(c => c.question === shownQ);
       const opts = Array.prototype.slice.call(document.querySelectorAll('#spacedReviewCheckContainer .check-option'));
       t('every answer option is shown', !!q && opts.length === q.options.length);
@@ -69,7 +69,7 @@ const sleep = (ms) => new Promise(r => setTimeout(r, ms));
     if (window.__scn === 'allfive') t('all 5 of its 5 lessons does', doneStat === '1', doneStat);
     const companyLink = document.getElementById('companyDashMenuItem');
     if (window.__scn === 'admin'){
-      t('a company admin sees "Company dashboard" under Profile, pointing at company.html', companyLink.style.display === 'block' && companyLink.getAttribute('href') === 'company.html');
+      t('a company admin sees "Company dashboard" under Profile, pointing at the company dashboard', companyLink.style.display === 'block' && companyLink.getAttribute('href') === '/company');
       t('and still gets their own shared record like any member', !!share);
       t('but not the Owner Console link', ownerLink.style.display === 'none');
     } else {
