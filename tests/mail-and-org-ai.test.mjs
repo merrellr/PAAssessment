@@ -1,5 +1,5 @@
 // Tests for sections 9-11 of apps-script/Code.gs: which address each email comes from, the welcome email,
-// the company admin's "Explain with AI", and section 14: "Ask AI" answers from the lessons.
+// the company admin's "Explain with AI", section 14: "Ask AI" answers from the lessons, and section 15: the feedback form.
 // Run:  node --experimental-default-type=module tests/mail-and-org-ai.test.mjs
 // The script is loaded into a sandbox with stand-ins for Google's services, so nothing real is touched.
 import fs from 'node:fs';
@@ -304,6 +304,37 @@ console.log('--- "Ask AI": answers from the lessons ---');
   reset(); props.GROQ_API_KEY = 'k';
   const routed = G('doGet')({ parameter: { action: 'askLessons', idToken: 'memberA-token', q: Q, ctx: JSON.stringify(P(2)), callback: 'cb' } });
   t('the web address "?action=askLessons" is wired up and answers in JSONP', /^cb\(\{"ok":true,"text":/.test(routed.text), routed.text.slice(0, 60));
+}
+
+console.log('--- the feedback form ---');
+{
+  const fb = G('feedbackEndpoint_');
+  const rows = () => (sheets.Feedback || []).slice(1);
+  reset();
+  t('a token Google does not accept is refused, and nothing is saved or sent', fb('nope', 'idea', '', 'Add dark mode', 'lms-dashboard.html').error === 'not_verified' && !sheets.Feedback && sentMail.length === 0);
+  t('a topic or rating that is not on the list is refused', fb('new-token', 'spam', '', 'Hello there', '').error === 'bad_topic' && fb('new-token', 'idea', 'great', 'Hello there', '').error === 'bad_rating');
+  t('an empty or very long note is refused', fb('new-token', 'idea', '', '  hi ', '').error === 'too_short' && fb('new-token', 'idea', '', 'x'.repeat(2001), '').error === 'too_long' && fb('new-token', 'idea', '', 'x'.repeat(2000), '').ok === true);
+  reset();
+  const ok = fb('new-token', 'broken', 'needswork', '=HYPERLINK("http://evil","x")\r\nThe lesson page is blank.', 'lesson.html');
+  const r = rows()[0] || [];
+  t('a good note is saved on the Feedback tab with headers, in plain words', ok.ok === true && sheets.Feedback[0].join() === 'Received,Name,Email,About,How it is going,Message,Page,User id' &&
+    r[1] === 'Nora Newcomer' && r[2] === 'new.person@example.com' && r[3] === "Something isn't working" && r[4] === 'Needs work' && r[6] === 'lesson.html' && r[7] === 'uNew', JSON.stringify(r));
+  t('a note that starts like a formula is stored as text, not run by the sheet', /^'=HYPERLINK/.test(r[5]) && /\nThe lesson page is blank\.$/.test(r[5]), r[5]);
+  t('it is emailed to feedback@ with a reply-to of the person', ok.emailed === true && sentMail.length === 1 && sentMail[0].to === 'feedback@productadvisory.co' && sentMail[0].replyTo === 'new.person@example.com' && /Something isn't working from Nora Newcomer/.test(sentMail[0].subject));
+  t('the email shows the note safely (no live HTML)', /&lt;|=HYPERLINK\(&quot;/.test(sentMail[0].htmlBody) && !/<script/i.test(sentMail[0].htmlBody));
+  reset();
+  t('a page name that is not a page name is dropped', fb('new-token', 'other', '', 'Note here', '../../evil').ok === true && rows()[0][6] === '');
+  reset(); mailThrows = true;
+  t('if Gmail fails, the note is still saved and the person is not told it failed', (() => { const x = fb('new-token', 'idea', '', 'Note here', ''); return x.ok === true && x.emailed === false && rows().length === 1; })());
+  reset();
+  let n = 0; for (let i = 0; i < 11; i++) if (fb('new-token', 'idea', '', 'Note ' + i, '').ok) n++;
+  t('one person can send 10 a day', n === 10 && fb('new-token', 'idea', '', 'one more', '').error === 'daily_limit');
+  t('another person is not affected', fb('old-token', 'idea', '', 'Note here', '').ok === true);
+  reset(); props['fb_' + new Date().toISOString().slice(0, 10)] = '200';
+  t('everyone together can send 200 a day', fb('new-token', 'idea', '', 'Note here', '').error === 'daily_limit');
+  reset();
+  const routed = G('doGet')({ parameter: { action: 'feedback', idToken: 'new-token', topic: 'idea', rating: 'love', message: 'Great course', page: 'profile.html', callback: 'cb' } });
+  t('the web address "?action=feedback" is wired up and answers in JSONP', /^cb\(\{"ok":true/.test(routed.text) && rows().length === 1, routed.text.slice(0, 60));
 }
 
 console.log('\n' + pass + ' passed, ' + fail + ' failed');

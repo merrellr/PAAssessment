@@ -137,6 +137,11 @@ function doGet(e) {
     return jsonpOut_(e.parameter.callback, toolLaunchEndpoint_(e.parameter.idToken || "", e.parameter.tool || "", e.parameter.preview === "1"));
   }
 
+  if (e.parameter.action === "feedback") {
+    const p = e.parameter;
+    return jsonpOut_(p.callback, feedbackEndpoint_(p.idToken || "", p.topic || "", p.rating || "", p.message || "", p.page || ""));
+  }
+
   if (e.parameter.action === "askLessons") {
     return jsonpOut_(e.parameter.callback, askLessonsEndpoint_(e.parameter.idToken || "", e.parameter.q || "", e.parameter.ctx || ""));
   }
@@ -2272,5 +2277,86 @@ function askLessonsEndpoint_(idToken, q, ctxJson) {
     return { ok: true, text: text, cited: cited };
   } catch (err) {
     return { ok: false, error: 'ai_error', detail: String(err && err.message || err).slice(0, 200) };
+  }
+}
+
+
+/* ==================================================================
+   15. FEEDBACK (the "Send feedback" form, feedback.html)
+   ------------------------------------------------------------------
+   Replaces the old feedback@ mailto link in the Profile menus. A
+   signed-in person picks what it is about, optionally how things are
+   going, and writes a note. It is kept on the "Feedback" tab and sent
+   to feedback@ with a reply-to of the person's own address, so
+   answering is one click. Topics and ratings come from fixed lists;
+   the note is capped; each person can send 10 a day and everyone
+   together 200, so the inbox cannot be flooded.
+   ================================================================== */
+var FEEDBACK_SHEET_NAME_ = 'Feedback';
+var FEEDBACK_HEADERS_ = ['Received', 'Name', 'Email', 'About', 'How it is going', 'Message', 'Page', 'User id'];
+var FEEDBACK_TOPICS_ = { courses: 'The courses and lessons', assessment: 'The assessment', broken: "Something isn't working", idea: 'An idea or a request', other: 'Something else' };
+var FEEDBACK_RATINGS_ = { love: 'Love it', good: 'Good', okay: "It's okay", needswork: 'Needs work' };
+var FEEDBACK_PER_USER_DAILY_ = 10;
+var FEEDBACK_DAILY_ = 200;
+
+function feedbackQuota_(uid) {
+  var props = PropertiesService.getScriptProperties();
+  var day = Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'yyyy-MM-dd');
+  var totalKey = 'fb_' + day, userKey = 'fb_' + day + '_' + uid;
+  var total = Number(props.getProperty(totalKey) || 0), mine = Number(props.getProperty(userKey) || 0);
+  if (total >= FEEDBACK_DAILY_ || mine >= FEEDBACK_PER_USER_DAILY_) return false;
+  props.getKeys().forEach(function (k) { if (k.indexOf('fb_') === 0 && k.indexOf('fb_' + day) !== 0) props.deleteProperty(k); });
+  props.setProperty(totalKey, String(total + 1));
+  props.setProperty(userKey, String(mine + 1));
+  return true;
+}
+
+function feedbackEndpoint_(idToken, topic, rating, message, page) {
+  var who = null;
+  try { who = verifyFirebaseIdToken_(idToken); } catch (err) { who = null; }
+  if (!who || !who.uid) return { ok: false, error: 'not_verified' };
+  topic = String(topic || '');
+  rating = String(rating || '');
+  if (!FEEDBACK_TOPICS_.hasOwnProperty(topic)) return { ok: false, error: 'bad_topic' };
+  if (rating && !FEEDBACK_RATINGS_.hasOwnProperty(rating)) return { ok: false, error: 'bad_rating' };
+  var text = String(message || '').replace(/\r\n?/g, '\n').trim();
+  if (text.length < 3) return { ok: false, error: 'too_short' };
+  if (text.length > 2000) return { ok: false, error: 'too_long' };   // it travels in the web address, so it stays short
+  var from = /^[a-z0-9-]+\.html$/.test(String(page || '')) ? String(page) : '';
+
+  var lock = null, locked = false;
+  try { lock = LockService.getScriptLock(); locked = lock.tryLock(10000); } catch (err) { /* carry on without it */ }
+  try {
+    if (!feedbackQuota_(who.uid)) return { ok: false, error: 'daily_limit' };
+    var ss = SpreadsheetApp.getActiveSpreadsheet();
+    var sheet = ss.getSheetByName(FEEDBACK_SHEET_NAME_);
+    if (!sheet) {
+      sheet = ss.insertSheet(FEEDBACK_SHEET_NAME_);
+      sheet.appendRow(FEEDBACK_HEADERS_);
+      sheet.setFrozenRows(1);
+    }
+    var about = FEEDBACK_TOPICS_[topic], how = rating ? FEEDBACK_RATINGS_[rating] : '';
+    sheet.appendRow([new Date(), who.name, who.email, about, how, text, from, who.uid].map(leadSafeCell_));
+
+    // The note is already saved, so a Gmail problem loses nothing.
+    var emailed = false;
+    try {
+      if (MailApp.getRemainingDailyQuota() >= 1) {
+        var lines = ['From: ' + (who.name ? who.name + ' <' + who.email + '>' : who.email), 'About: ' + about];
+        if (how) lines.push('How it is going: ' + how);
+        if (from) lines.push('Sent from: ' + from);
+        var body = lines.join('\n') + '\n\n' + text + '\n\nReply to this email to answer them.';
+        var html = '<p>' + lines.map(escapeHtml_).join('<br>') + '</p><p style="white-space:pre-wrap;">' + escapeHtml_(text) + '</p>' +
+          '<p style="color:#6b7686;">Reply to this email to answer them.</p>';
+        sendMail_({ to: MAIL_ADDR_.feedback, replyTo: who.email, subject: 'Feedback: ' + about + (who.name ? ' from ' + who.name : ''),
+          body: body, htmlBody: html, name: 'Product Advisory Learning' }, 'noreply');
+        emailed = true;
+      }
+    } catch (mailErr) { emailed = false; }
+    return { ok: true, emailed: emailed };
+  } catch (err) {
+    return { ok: false, error: 'server_error' };
+  } finally {
+    if (locked) lock.releaseLock();
   }
 }

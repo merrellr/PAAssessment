@@ -182,6 +182,8 @@ manual review — it holds no uid and isn't read by the app.
 
 - `tool-requests.html` is the public page (link it from the toolkits page on
   productadvisory.co as `https://assessment.productadvisory.co/tool-requests.html`).
+  The top card has **Request a tool** (goes to the request form, or to sign-in first) and **See the live toolkits**
+  (the toolkits page on www.productadvisory.co). `tool-requests.html#suggest` opens straight on the request form.
   Anyone can see each tool and its vote total. To vote you sign in (email and
   password, or Google) with a **verified** email address. You can back up to three
   tools, one vote each, and change your mind. A box on each voted tool asks for a
@@ -225,8 +227,18 @@ manual review — it holds no uid and isn't read by the app.
 ## The Profile menu on every page
 
 - `account-menu.js` puts the same **Profile** button in the top right corner of every page except the learning dashboard (which has its own) and the invitation page (`join.html`). It appears only while someone is signed in. Add it to a new page with one line before `</body>`: `<script type="module" src="account-menu.js"></script>`.
-- It lists My learning dashboard, My profile, Toolkits Roadmap, Visit Product Advisory and Log out for everyone; Company dashboard only for an active company admin; Owner console and Reports only for the platform owner. The page you are on is shown in bold.
+- It lists My learning dashboard, My profile, Toolkits (the toolkits page on www.productadvisory.co, new tab), Request tools (`tool-requests.html#suggest`), Send feedback (`feedback.html`), Visit Product Advisory and Log out for everyone; the dashboard's own menu has the same links; Company dashboard only for an active company admin; Owner console and Reports only for the platform owner. The page you are on is shown in bold.
 - It finds the owner and the admin by reading `platformAdmins/{uid}` and `memberships/{uid}`, the same two records the dashboard menu uses, so no new security rules are needed. It is tested in `tests/ui/menu-test.js` ("profile menu" pages in the runner).
+
+## Send feedback (feedback.html)
+
+- The Profile menus' **Send feedback** opens `feedback.html` instead of an email. A signed-in person picks what it is
+  about (courses and lessons, the assessment, something not working, an idea or request, something else), optionally
+  how it's going, and writes up to 2000 characters. `feedback.html?about=idea` chooses the topic in advance.
+- It is sent to the Apps Script (`?action=feedback`, section 15 of `Code.gs`), which checks the sign-in, saves it on a
+  **Feedback** tab and emails it to feedback@ with a reply-to of the person, so replying is one click. Each person can
+  send 10 a day and everyone together 200. Redeploy the script after changing it.
+- Tests: `tests/mail-and-org-ai.test.mjs` (the script) and `tests/ui/feedback-test.js` ("feedback form" in the runner).
 
 ## Company reports (company admins)
 

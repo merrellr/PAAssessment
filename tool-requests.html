@@ -22,6 +22,10 @@
   .brand-word{ font-family:var(--display); font-weight:700; font-size: 1.1875rem; line-height:1.3; color: var(--navy-deep); }
   .brand-accent-bar{ height: 3px; background: linear-gradient(90deg, var(--navy) 0%, var(--cyan) 100%); border-radius: 2px; margin-bottom: 24px; }
   .card{ background: var(--surface); border-radius: 16px; border: 1px solid var(--line); padding: 24px; box-shadow: 0 1px 2px rgba(22,33,62,0.04), 0 12px 32px rgba(22,33,62,0.06); margin-bottom: 20px; }
+  #authCard, #suggestCard, #verifyBanner{ scroll-margin-top: 84px; }
+  .hero-actions{ display:flex; flex-wrap:wrap; gap:10px; align-items:center; margin: 4px 0 14px; }
+  .btn-out{ display:inline-flex; align-items:center; font-family:var(--display); font-weight:600; font-size:0.875rem; border-radius: 8px; padding: 9.5px 16px; border: 1.5px solid var(--line); background:var(--surface); color: var(--navy); text-decoration:none; }
+  .btn-out:hover{ border-color: var(--cyan); }
   .eyebrow{ display:block; font-size:0.6875rem; font-weight:600; letter-spacing:0.06em; text-transform:uppercase; color: var(--cyan); margin-bottom: 6px; }
   h1{ font-family:var(--display); font-size: 1.5rem; margin: 0 0 8px; color: var(--navy-deep); line-height: 1.2; }
   h2{ font-family:var(--display); font-size: 1rem; margin: 0 0 6px; color: var(--navy-deep); }
@@ -109,6 +113,10 @@
     <span class="eyebrow">Help us choose</span>
     <h1>Which toolkit should we build next?</h1>
     <p>Back the tools you would actually use. You can vote for up to <strong>3 tools</strong>, one vote each, and change your mind any time. The tool with the most votes gets built first. Everyone can see the totals.</p>
+    <div class="hero-actions">
+      <button class="btn btn-primary" id="requestBtn" type="button">Request a tool</button>
+      <a class="btn-out" href="https://www.productadvisory.co/toolkits.html" target="_blank" rel="noopener">See the live toolkits<span aria-hidden="true"> ↗</span><span class="sr-only"> (opens in a new tab)</span></a>
+    </div>
     <div class="status-bar" id="statusBar" style="display:none;">
       <span id="signedInAs"></span>
       <span><span class="votes-left" id="votesLeft"></span> &nbsp;·&nbsp; <button class="linklike" id="signOutBtn" type="button">Sign out</button></span>
@@ -117,7 +125,7 @@
 
   <!-- Sign in or create an account (shown when signed out) -->
   <div class="card" id="authCard" style="display:none;">
-    <h2>Sign in to vote</h2>
+    <h2 id="authTitle" tabindex="-1">Sign in to vote or request a tool</h2>
     <p>One vote per person, so we ask you to sign in. You need an account anyway to take the Product Learning Assessment. It's free.</p>
     <div class="tabs">
       <button class="tab active" id="tabLogin" type="button">Log in</button>
@@ -155,12 +163,12 @@
 
   <!-- Suggest a tool -->
   <div class="card" id="suggestCard" style="display:none;">
-    <h2>Suggest a tool</h2>
+    <h2 id="suggestTitle" tabindex="-1">Request a tool</h2>
     <p>Not on the list? Tell us what you would use. We read every suggestion and add the good ones to the roadmap so others can vote on them.</p>
     <div id="suggestStatus" class="small" style="margin-bottom:8px;"></div>
     <textarea class="text-input" id="suggestText" maxlength="300" placeholder="e.g. A pricing and packaging worksheet for B2B products"></textarea>
     <div class="field-error" id="suggestError"></div>
-    <button class="btn btn-primary btn-small" id="suggestBtn" type="button">Send suggestion</button>
+    <button class="btn btn-primary btn-small" id="suggestBtn" type="button">Send request</button>
   </div>
 
   <!-- What next (shown when signed in) -->
@@ -259,6 +267,18 @@ onAuthStateChanged(auth, async (user) => {
   if (user) { loadSuggestion(); loadNextStep(); }
 });
 
+/* -------------------------------------------------------------- "Request a tool" */
+// The button at the top, and tool-requests.html#suggest (the Profile menu's "Request tools"), go to the request form,
+// or to the sign-in or verify step that comes before it.
+function goToRequest(){
+  const target = $('suggestCard').style.display === 'block' ? 'suggestCard' : $('verifyBanner').style.display === 'block' ? 'verifyBanner' : 'authCard';
+  $(target).scrollIntoView({ behavior: 'smooth', block: 'start' });
+  if (target === 'suggestCard') $('suggestText').focus({ preventScroll: true });
+  else if (target === 'authCard') $('authTitle').focus({ preventScroll: true });
+}
+$('requestBtn').addEventListener('click', goToRequest);
+let requestHashDone = false;
+
 /* -------------------------------------------------------------- the page */
 function render(){
   const signedIn = !!currentUser;
@@ -274,6 +294,7 @@ function render(){
     $('votesLeft').textContent = left === 0 ? 'All 3 votes used' : plural(left, 'vote') + ' left';
   }
   renderTools();
+  if (location.hash === '#suggest' && !requestHashDone){ requestHashDone = true; setTimeout(goToRequest, 50); }
 }
 
 // tool-requests.html?tool=<id> (from "Vote for this" links on www.productadvisory.co) highlights that tool and

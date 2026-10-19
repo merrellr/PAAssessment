@@ -16,7 +16,7 @@ function t(label, ok, extra){
 const read = (f) => fs.readFileSync(path.join(root, f), 'utf8');
 
 // Pages that have the new look. Add a page here when it is converted.
-const THEMED = ['index', 'framework', 'request-info', 'tool-requests', 'lms-dashboard', 'lesson', 'profile', 'join', 'company', 'owner', 'reports', 'owner-tools', 'owner-pilot', 'assessment-dashboard'];
+const THEMED = ['index', 'framework', 'request-info', 'tool-requests', 'lms-dashboard', 'lesson', 'profile', 'join', 'company', 'owner', 'reports', 'owner-tools', 'owner-pilot', 'assessment-dashboard', 'feedback'];
 
 console.log('--- the theme files are on each themed page, in the right order ---');
 for (const p of THEMED) {

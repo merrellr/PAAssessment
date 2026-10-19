@@ -607,6 +607,12 @@ html.pa-shell .focus-ghost { background: var(--pa-tint); }
 html.pa-shell .focus-col-title, html.pa-shell .focus-rank { font-family: var(--pa-sans); }
 html.pa-shell .icon-btn { background: var(--pa-card); }
 
+/* the skill-area icons (pa-icons.js) */
+.pa-dom-ico { stroke: var(--pa-navy); flex: none; }
+.pa-dom-ico .dot { fill: var(--pa-cyan); stroke: none; }
+.pa-dom-ico .tick { stroke: var(--pa-cyan); }
+.pa-dom-badge { display: flex; align-items: center; justify-content: center; flex-shrink: 0; border-radius: 8px; background: var(--pa-tint); }
+
 /* ---------- site header ---------- */
 .pa-nav { position: sticky; top: 0; z-index: 60; background: color-mix(in srgb, var(--pa-bg) 90%, transparent); backdrop-filter: saturate(160%) blur(12px); -webkit-backdrop-filter: saturate(160%) blur(12px); border-bottom: 1px solid var(--pa-line); align-self: stretch; font-family: var(--pa-sans); }
 .pa-nav-in { max-width: 1120px; margin: 0 auto; padding: 0 clamp(16px, 4vw, 40px); height: 64px; display: flex; align-items: center; gap: 16px; }
