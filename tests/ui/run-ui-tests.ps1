@@ -130,6 +130,7 @@ try {
   foreach ($s in 'anon', 'fresh', 'unverified', 'voter', 'suggested', 'approved', 'empty', 'loaderror') {
     $results += Run-Page "tool roadmap: $s" "$base/tool-requests-test.html?scn=$s" 40000
   }
+  $results += Run-Page 'tool roadmap: deeplink' "$base/tool-requests-test.html?scn=deeplink&tool=t4" 40000
   foreach ($s in 'main', 'empty', 'notowner', 'signedout', 'launch') {
     $results += Run-Page "tool roadmap admin: $s" "$base/owner-tools-test.html?scn=$s" 40000
   }
@@ -158,7 +159,7 @@ try {
   foreach ($s in 'adminjoinnew', 'adminjoinold', 'adminjoinremoved', 'membernew', 'adminjoindone', 'adminjoinfail', 'adminjoindown', 'adminjoinlate') {
     $results += Run-Page "profile menu: $s" "$base/menu-test.html?scn=$s" 30000
   }
-  foreach ($s in 'new', 'stored_accepted', 'stored_declined', 'signedin', 'signedin_declined', 'dnt', 'gpc') {
+  foreach ($s in 'new', 'us_new', 'stored_accepted', 'stored_declined', 'signedin', 'signedin_declined', 'dnt', 'gpc') {
     $results += Run-Page "cookie notice: $s" "$base/consent-test.html?scn=$s" 30000
   }
   $results += Run-Page 'profile menu: menu off, new account' "$base/menu-off-test.html?scn=newaccount" 30000

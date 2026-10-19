@@ -139,6 +139,11 @@ function done(){
       t('a returning suggester sees where their last idea stands', scn === 'suggested' ? /A pricing worksheet.*waiting for review/.test(txt('suggestStatus')) : /added to the roadmap/.test(txt('suggestStatus')), txt('suggestStatus'));
     }
 
+    if (scn === 'deeplink'){
+      t('a link with ?tool= highlights that tool (from "Vote for this" on www.productadvisory.co)', !!card('t4') && card('t4').classList.contains('requested'));
+      t('and only that one', cards().filter(c => c.classList.contains('requested')).length === 1);
+    }
+
     if (scn === 'empty'){
       t('with no tools yet, a friendly message is shown', /first tools are being added/.test(txt('toolList')), txt('toolList'));
     }

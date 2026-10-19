@@ -10,7 +10,7 @@ With your permission, we use Google Analytics, a web analytics service provided 
 
 **What it collects.** Google Analytics sets cookies in your browser and receives the pages you view, how you arrived at them, your approximate location (at city level), and your device, browser and operating system. We turn off Google's advertising features and do not use this information to show you ads. We do not send Google your name, your email address or your assessment answers.
 
-**When it is switched on.** Google Analytics only loads after you click "Accept" on our cookie notice, or after you create an account (creating an account means you agree to this Privacy Policy). If you click "Decline", it does not load. If your browser sends a "Do Not Track" or "Global Privacy Control" signal, we do not load it at all.
+**When it is switched on.** If you visit from the European Economic Area, the United Kingdom or Switzerland, Google Analytics does not set cookies unless you click "Accept" on our cookie notice or create an account (creating an account means you agree to this Privacy Policy). Elsewhere it is on by default. If you click "Decline", it does not load. If your browser sends a "Do Not Track" or "Global Privacy Control" signal, we do not load it at all.
 
 **Changing your mind.** You can change your choice at any time using "Cookie settings" at the bottom of our pages or in your Profile menu. You can also block or delete cookies in your browser settings.
 

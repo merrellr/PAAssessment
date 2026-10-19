@@ -3,10 +3,14 @@
    It is left OFF the owner and admin pages (owner, owner-tools, owner-pilot, reports, company), the invitation
    page (its address holds a secret link) and the aggregate results page.
 
-   Nothing from Google loads until the visitor has said yes:
-   - First visit: a notice at the bottom of the page with Accept and Decline (equal weight). The answer is kept in the
-     browser (localStorage "pa_cookie_consent"), so they are not asked again.
-   - Accepted: Google Analytics starts. Declined: it never loads.
+   By location (the same rules as www.productadvisory.co):
+   - Device time zone in Europe (the EEA, UK and Switzerland, and a little beyond): nothing from Google loads until
+     the visitor says yes. A notice at the bottom of the page offers Accept and Decline (equal weight).
+   - Elsewhere: Google Analytics starts with no notice. As a safety net, Google's Consent Mode keeps analytics
+     cookies off for anyone whose IP address is in the EEA, UK or Switzerland until they accept (the `region`
+     default in start()), so a traveller or VPN user is never given cookies without asking.
+   - The answer is kept in the browser (localStorage "pa_cookie_consent"), so nobody is asked again.
+     Accepted: Google Analytics runs with cookies. Declined: it never loads.
    - Signed in (account-menu.js calls acceptFromAccount): someone who has an account has already agreed to the Terms
      and Privacy Policy when creating it, so they are not asked again. A person who clicked Decline before signing in
      stays declined.
@@ -17,15 +21,18 @@
      testing the site never shows up in the numbers.
    - Visitors who send "Do Not Track" or "Global Privacy Control" are never tracked, and are not shown the notice.
    - Advertising features are off (no ad personalization, no Google signals).
-   - Only a short list of harmless address parameters is sent with a page view (which course or lesson, which button
-     on the website the visitor came from). The rest of the address (an invitation token, a company id, the #part)
+   - Only a short list of harmless address parameters is sent with a page view (which course or lesson, which tool,
+     which button on the website the visitor came from). The rest of the address (an invitation token, a company id, the #part)
      is dropped before it leaves the browser. */
 (function (root) {
   'use strict';
   var MEASUREMENT_ID = 'G-4XFS1QWS9H';
-  var KEEP = ['course', 'lesson', 'src', 'who', 'call'];
+  var KEEP = ['course', 'lesson', 'src', 'who', 'call', 'tool'];
   var KEY = 'pa_cookie_consent';
   var PRIVACY_URL = 'https://www.productadvisory.co/privacy-policy';
+  // EEA (EU + Iceland, Liechtenstein, Norway), UK and Switzerland, for Google's own IP-based check.
+  var STRICT = ['AT', 'BE', 'BG', 'HR', 'CY', 'CZ', 'DK', 'EE', 'FI', 'FR', 'DE', 'GR', 'HU', 'IE', 'IT', 'LV', 'LT', 'LU',
+    'MT', 'NL', 'PL', 'PT', 'RO', 'SK', 'SI', 'ES', 'SE', 'IS', 'LI', 'NO', 'GB', 'CH'];
 
   function isLocal(host) {
     return host === 'localhost' || host === '127.0.0.1' || host === '[::1]' || /\.localhost$/.test(host) || /\.test$/.test(host);
@@ -57,6 +64,19 @@
     return privacySignal(env);
   }
 
+  // The device's time zone, as a stand-in for location. env.__paTimeZone lets tests choose one.
+  function timeZone(env) {
+    if (env.__paTimeZone) return env.__paTimeZone;
+    try { return Intl.DateTimeFormat().resolvedOptions().timeZone || ''; } catch (e) { return ''; }
+  }
+  // Whether to ask before anything loads. Errs towards asking.
+  function inStrictZone(env) {
+    var tz = timeZone(env);
+    if (/^Europe\/(Moscow|Minsk|Kaliningrad|Samara|Ulyanovsk|Saratov|Volgograd|Kirov|Astrakhan|Istanbul)$/.test(tz)) return false;
+    return /^Europe\//.test(tz) ||
+      /^(Atlantic\/(Reykjavik|Canary|Madeira|Azores|Faroe)|Asia\/(Nicosia|Famagusta)|Arctic\/Longyearbyen)$/.test(tz);
+  }
+
   /* ---------------------------------------------------------------- the visitor's choice */
   function readConsent(env) {
     try { var v = env.localStorage.getItem(KEY); return v === 'accepted' || v === 'declined' ? v : ''; } catch (e) { return ''; }
@@ -65,13 +85,14 @@
     try { env.localStorage.setItem(KEY, v); env.localStorage.setItem(KEY + '_at', new Date().toISOString()); } catch (e) { /* storage blocked: asked again next time */ }
   }
 
-  // What to do when a page opens: 'start' (already accepted), 'banner' (never asked) or 'none'.
+  // What to do when a page opens: 'start' (accepted, or not asked and outside Europe), 'banner' (not asked, in
+  // Europe) or 'none' (declined, or a privacy signal).
   function decide(env) {
     if (privacySignal(env)) return 'none';
     var c = readConsent(env);
     if (c === 'accepted') return 'start';
     if (c === 'declined') return 'none';
-    return 'banner';
+    return inStrictZone(env) ? 'banner' : 'start';
   }
 
   function start(env) {
@@ -81,6 +102,8 @@
     var gtag = function () { env.dataLayer.push(arguments); };
     env.gtag = gtag;
     gtag('consent', 'default', { ad_storage: 'denied', ad_user_data: 'denied', ad_personalization: 'denied', analytics_storage: 'granted' });
+    // Until they accept, visitors Google locates in the EEA, UK or Switzerland get no analytics cookies.
+    if (readConsent(env) !== 'accepted') gtag('consent', 'default', { ad_storage: 'denied', ad_user_data: 'denied', ad_personalization: 'denied', analytics_storage: 'denied', region: STRICT });
     gtag('js', new Date());
     gtag('config', MEASUREMENT_ID, { allow_google_signals: false, allow_ad_personalization_signals: false, page_location: cleanUrl(env.location) });
     var s = env.document.createElement('script');
@@ -133,14 +156,21 @@
     doc.body.appendChild(wrap);
   }
 
+  // Start Google if it isn't running; if it is (started before a yes), turn analytics cookies on.
+  function grant(env) {
+    if (env.__paStarted) { if (env.gtag) env.gtag('consent', 'update', { analytics_storage: 'granted' }); return; }
+    start(env);
+  }
+
   /* ------------------------------------------------------------------------ public */
   var api = {
-    MEASUREMENT_ID: MEASUREMENT_ID, KEEP: KEEP, KEY: KEY,
-    isLocal: isLocal, cleanUrl: cleanUrl, skipReason: skipReason, privacySignal: privacySignal, decide: decide,
+    MEASUREMENT_ID: MEASUREMENT_ID, KEEP: KEEP, KEY: KEY, STRICT: STRICT,
+    isLocal: isLocal, cleanUrl: cleanUrl, skipReason: skipReason, privacySignal: privacySignal, decide: decide, inStrictZone: inStrictZone,
     start: start, readConsent: readConsent, writeConsent: writeConsent, showBanner: showBanner,
     consent: function () { return readConsent(root); },
-    accept: function () { writeConsent(root, 'accepted'); removeBanner(root.document); start(root); },
-    decline: function () { writeConsent(root, 'declined'); removeBanner(root.document); },
+    accept: function () { writeConsent(root, 'accepted'); removeBanner(root.document); grant(root); },
+    // Already running (outside Europe, not asked): switch cookies off for the rest of this page; it won't load next time.
+    decline: function () { writeConsent(root, 'declined'); removeBanner(root.document); if (root.__paStarted && root.gtag) root.gtag('consent', 'update', { analytics_storage: 'denied' }); },
     // Signed-in people have agreed to the Privacy Policy by creating an account, so no question is needed.
     // An earlier "Decline" on this device is respected.
     acceptFromAccount: function () {
@@ -148,7 +178,7 @@
       if (c === 'declined') return;
       if (c === '') writeConsent(root, 'accepted');
       removeBanner(root.document);
-      start(root);
+      grant(root);
     },
     // "Cookie settings": show the notice again so the choice can be changed.
     reopen: function () { if (privacySignal(root)) return; removeBanner(root.document); showBanner(root); },
