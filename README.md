@@ -225,7 +225,7 @@ manual review — it holds no uid and isn't read by the app.
 ## The Profile menu on every page
 
 - `account-menu.js` puts the same **Profile** button in the top right corner of every page except the learning dashboard (which has its own) and the invitation page (`join.html`). It appears only while someone is signed in. Add it to a new page with one line before `</body>`: `<script type="module" src="account-menu.js"></script>`.
-- It lists My learning dashboard, My profile, Vote on the next tool, Visit Product Advisory and Log out for everyone; Company dashboard only for an active company admin; Owner console and Reports only for the platform owner. The page you are on is shown in bold.
+- It lists My learning dashboard, My profile, Toolkits Roadmap, Visit Product Advisory and Log out for everyone; Company dashboard only for an active company admin; Owner console and Reports only for the platform owner. The page you are on is shown in bold.
 - It finds the owner and the admin by reading `platformAdmins/{uid}` and `memberships/{uid}`, the same two records the dashboard menu uses, so no new security rules are needed. It is tested in `tests/ui/menu-test.js` ("profile menu" pages in the runner).
 
 ## Company reports (company admins)
@@ -263,9 +263,9 @@ The learner-facing pages share the look of www.productadvisory.co. Three files d
   (`--navy` fills buttons, `--navy-deep` is heading ink, `--surface`, `--bg`, `--ink`, `--ink-soft`, `--line`, `--gray`,
   `--ok`, `--warn`, `--note-*`) so each page gets dark mode without being rewritten. Use those names, never a hex
   colour, in new page styles.
-- `pa-shell.js` (straight after `<body>`): draws the site header (logo, Assessment, My learning, Framework, Tool
-  Roadmap, a link to productadvisory.co, search, Make it yours, light/dark, and the Profile button from
-  `account-menu.js`), the Make it yours panel and the search menu (⌘K / Ctrl+K or /). Search covers every course,
+- `pa-shell.js` (straight after `<body>`): draws the site header (logo, My learning, search, Make it yours,
+  light/dark, and the Profile button from `account-menu.js`). It is kept short on purpose: the assessment is reached
+  from the dashboard (first launch or Retake), and the Toolkits Roadmap from www.productadvisory.co or the Profile menu, the Make it yours panel and the search menu (⌘K / Ctrl+K or /). Search covers every course,
   lesson and skill area from `search-index.js`, which is generated: **after adding or editing a course in `content/`,
   run `node tools/build-search-index.mjs`** (the theme test fails until you do).
 

@@ -15,12 +15,10 @@
   var CALENDLY = "https://calendly.com/productadvisory/30min";
   var NEW_TAB = '<span class="sr-only"> (opens in a new tab)</span>';
 
+  // The assessment is reached from the dashboard (first launch, or Retake) and the Toolkits Roadmap
+  // from www.productadvisory.co or the Profile menu, so the header stays this short.
   var LINKS = [
-    ["index.html", "Assessment"],
-    ["lms-dashboard.html", "My learning"],
-    ["framework.html", "Framework"],
-    ["tool-requests.html", "Tool Roadmap"],
-    [WWW, "Product Advisory"]
+    ["lms-dashboard.html", "My learning"]
   ];
 
   function page() { var p = location.pathname.split("/").pop(); return p || "index.html"; }
@@ -45,7 +43,7 @@
     }).join("");
     var mac = /Mac|iPhone|iPad/.test(navigator.platform || navigator.userAgent);
     return '<header class="pa-nav" id="paNav"><div class="pa-nav-in">' +
-      '<a class="pa-brand" href="index.html" aria-label="Product Advisory Learning, home">' + WORDMARK + '<span class="pa-app">Learning</span></a>' +
+      '<a class="pa-brand" href="lms-dashboard.html" aria-label="Product Advisory Learning, my dashboard">' + WORDMARK + '<span class="pa-app">Learning</span></a>' +
       '<nav class="pa-links" aria-label="Main">' + links + '<button type="button" class="pa-m-only" data-pa="prefs">Make it yours</button></nav>' +
       '<div class="pa-tools">' +
       '<button type="button" class="pa-icon" data-pa="search" aria-label="Search courses and lessons">' + ICON.search + "<kbd>" + (mac ? "⌘" : "Ctrl") + "</kbd><kbd>K</kbd></button>" +
@@ -177,10 +175,8 @@
 
   /* ---------------------------------------------------------------- search (⌘K) */
   var ACTIONS = [
-    { g: "Go to", t: "Take the assessment", i: "✓", u: "index.html" },
     { g: "Go to", t: "My learning dashboard", i: "⌂", u: "lms-dashboard.html" },
     { g: "Go to", t: "The training framework", i: "◆", u: "framework.html" },
-    { g: "Go to", t: "Tool Roadmap: vote for the next toolkit", i: "▣", u: "tool-requests.html" },
     { g: "Go to", t: "My profile", i: "☺", u: "profile.html" },
     { g: "Go to", t: "Team assessments for your company", i: "✉", u: "request-info.html?who=org" },
     { g: "Product Advisory", t: "Services", i: "↗", u: WWW + "services.html", ext: true },

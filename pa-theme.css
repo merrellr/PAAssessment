@@ -548,6 +548,58 @@ html.pa-shell ::selection { background: var(--pa-cyan); color: #0a1526; }
 html.pa-shell .brand-header, html.pa-shell .brand-accent-bar { display: none !important; }
 html.pa-shell .card { box-shadow: var(--pa-shadow); }
 
+/* Lesson diagrams and callouts are drawn in fixed light-page colours (content/*.js).
+   On a dark page, point those colours at the dark palette. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .card svg [fill="#12305e" i], :root:not([data-theme="light"]) .card svg [fill="#16213E" i] { fill: var(--pa-ink); }
+  :root:not([data-theme="light"]) .card svg [fill="#4B5768" i] { fill: var(--pa-ink-2); }
+  :root:not([data-theme="light"]) .card svg [fill="#9AA3AD" i], :root:not([data-theme="light"]) .card svg [fill="#6b7480" i] { fill: var(--pa-muted); }
+  :root:not([data-theme="light"]) .card svg [fill="#EEF3FA" i], :root:not([data-theme="light"]) .card svg [fill="#E7F7FC" i], :root:not([data-theme="light"]) .card svg [fill="#F7F9FC" i], :root:not([data-theme="light"]) .card svg [fill="#F2F4F7" i], :root:not([data-theme="light"]) .card svg [fill="#F7FAFD" i], :root:not([data-theme="light"]) .card svg [fill="#FFFFFF" i], :root:not([data-theme="light"]) .card svg [fill="#FFF" i] { fill: var(--pa-tint); }
+  :root:not([data-theme="light"]) .card svg [fill="#1A4584" i] { fill: var(--pa-primary); }
+  :root:not([data-theme="light"]) .card svg [fill="#EEF9F1" i] { fill: var(--pa-ok-bg); }
+  :root:not([data-theme="light"]) .card svg [fill="#256b45" i] { fill: var(--pa-ok-ink); }
+  :root:not([data-theme="light"]) .card svg [fill="#FBF0E9" i], :root:not([data-theme="light"]) .card svg [fill="#FCEFE9" i], :root:not([data-theme="light"]) .card svg [fill="#F7DCD0" i] { fill: var(--pa-warn-bg); }
+  :root:not([data-theme="light"]) .card svg [fill="#7a3d18" i] { fill: var(--pa-warn); }
+  :root:not([data-theme="light"]) .card svg [stroke="#1A4584" i] { stroke: var(--pa-primary); }
+  :root:not([data-theme="light"]) .card svg [stroke="#E3E9F0" i] { stroke: var(--pa-line); }
+  :root:not([data-theme="light"]) .card [style*="background:#FBF3EF" i] { background: var(--pa-warn-bg) !important; }
+  :root:not([data-theme="light"]) .card [style*="background:#FCEFE9" i] { background: var(--pa-warn-bg) !important; }
+  :root:not([data-theme="light"]) .card [style*="background:#EEF7F1" i] { background: var(--pa-ok-bg) !important; }
+  :root:not([data-theme="light"]) .card [style*="background:#EEF9F1" i] { background: var(--pa-ok-bg) !important; }
+  :root:not([data-theme="light"]) .card [style*="color:#7a3d18" i] { color: var(--pa-warn) !important; }
+  :root:not([data-theme="light"]) .card [style*="color:#256b45" i] { color: var(--pa-ok-ink) !important; }
+  :root:not([data-theme="light"]) .card [style*="color:#1A4584" i] { color: var(--pa-cyan-ink) !important; }
+}
+:root[data-theme="dark"] .card svg [fill="#12305e" i], :root[data-theme="dark"] .card svg [fill="#16213E" i] { fill: var(--pa-ink); }
+:root[data-theme="dark"] .card svg [fill="#4B5768" i] { fill: var(--pa-ink-2); }
+:root[data-theme="dark"] .card svg [fill="#9AA3AD" i], :root[data-theme="dark"] .card svg [fill="#6b7480" i] { fill: var(--pa-muted); }
+:root[data-theme="dark"] .card svg [fill="#EEF3FA" i], :root[data-theme="dark"] .card svg [fill="#E7F7FC" i], :root[data-theme="dark"] .card svg [fill="#F7F9FC" i], :root[data-theme="dark"] .card svg [fill="#F2F4F7" i], :root[data-theme="dark"] .card svg [fill="#F7FAFD" i], :root[data-theme="dark"] .card svg [fill="#FFFFFF" i], :root[data-theme="dark"] .card svg [fill="#FFF" i] { fill: var(--pa-tint); }
+:root[data-theme="dark"] .card svg [fill="#1A4584" i] { fill: var(--pa-primary); }
+:root[data-theme="dark"] .card svg [fill="#EEF9F1" i] { fill: var(--pa-ok-bg); }
+:root[data-theme="dark"] .card svg [fill="#256b45" i] { fill: var(--pa-ok-ink); }
+:root[data-theme="dark"] .card svg [fill="#FBF0E9" i], :root[data-theme="dark"] .card svg [fill="#FCEFE9" i], :root[data-theme="dark"] .card svg [fill="#F7DCD0" i] { fill: var(--pa-warn-bg); }
+:root[data-theme="dark"] .card svg [fill="#7a3d18" i] { fill: var(--pa-warn); }
+:root[data-theme="dark"] .card svg [stroke="#1A4584" i] { stroke: var(--pa-primary); }
+:root[data-theme="dark"] .card svg [stroke="#E3E9F0" i] { stroke: var(--pa-line); }
+:root[data-theme="dark"] .card [style*="background:#FBF3EF" i] { background: var(--pa-warn-bg) !important; }
+:root[data-theme="dark"] .card [style*="background:#FCEFE9" i] { background: var(--pa-warn-bg) !important; }
+:root[data-theme="dark"] .card [style*="background:#EEF7F1" i] { background: var(--pa-ok-bg) !important; }
+:root[data-theme="dark"] .card [style*="background:#EEF9F1" i] { background: var(--pa-ok-bg) !important; }
+:root[data-theme="dark"] .card [style*="color:#7a3d18" i] { color: var(--pa-warn) !important; }
+:root[data-theme="dark"] .card [style*="color:#256b45" i] { color: var(--pa-ok-ink) !important; }
+:root[data-theme="dark"] .card [style*="color:#1A4584" i] { color: var(--pa-cyan-ink) !important; }
+
+/* charts.css (company dashboard, reports) draws in fixed light colours; on themed pages use the theme */
+html.pa-shell .insight { background: var(--pa-band); }
+html.pa-shell .insight .chip { background: var(--pa-tint); }
+html.pa-shell .insight.sev-good .chip { background: var(--pa-ok-bg); }
+html.pa-shell .insight.sev-watch .chip { background: var(--pa-warn-bg); }
+html.pa-shell .ai-box { border-color: var(--pa-tint-2); background: var(--pa-tint); }
+html.pa-shell .chart-grid { stroke: var(--pa-line); }
+html.pa-shell .chart-axis { fill: var(--pa-muted); font-family: var(--pa-sans); }
+html.pa-shell .bar-track, html.pa-shell .funnel-track { background: var(--pa-line); }
+html.pa-shell .funnel-count { font-family: var(--pa-display); }
+
 /* ---------- site header ---------- */
 .pa-nav { position: sticky; top: 0; z-index: 60; background: color-mix(in srgb, var(--pa-bg) 90%, transparent); backdrop-filter: saturate(160%) blur(12px); -webkit-backdrop-filter: saturate(160%) blur(12px); border-bottom: 1px solid var(--pa-line); align-self: stretch; font-family: var(--pa-sans); }
 .pa-nav-in { max-width: 1120px; margin: 0 auto; padding: 0 clamp(16px, 4vw, 40px); height: 64px; display: flex; align-items: center; gap: 16px; }
@@ -583,6 +635,8 @@ html.pa-shell .card { box-shadow: var(--pa-shadow); }
   .pa-wm { font-size: 1rem; }
   .pa-app { display: none; }
   .pa-tools .pa-prefs-btn { display: none; }
+  /* light/dark is also in the menu's "Make it yours" */
+  .pa-nav:has(#paNavAccount:not(:empty)) .pa-tools [data-pa="theme"] { display: none; }
 }
 
 /* ---------- Make it yours panel ---------- */

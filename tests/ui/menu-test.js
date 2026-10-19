@@ -64,7 +64,7 @@ const key = (k) => document.dispatchEvent(new KeyboardEvent('keydown', { key: k,
       const L = labels();
       if (scn === 'noname') t('with no display name, the part of the email before the @ is used', name === 'pat.jones' && email === 'pat.jones@x.com', name + ' / ' + email);
       else t('it shows who is signed in', name.length > 0 && /@x\.com$/.test(email), name + ' / ' + email);
-      t('everyone gets the dashboard, profile, vote and website links, then Log out last', L[0] === 'My learning dashboard' && L[1] === 'My profile' && L.indexOf('Vote on the next tool') > -1 && L.some(x => /Visit Product Advisory/.test(x)) && L[L.length - 1] === 'Log out', L.join(' | '));
+      t('everyone gets the dashboard, profile, Toolkits Roadmap and website links, then Log out last', L[0] === 'My learning dashboard' && L[1] === 'My profile' && L.indexOf('Toolkits Roadmap') > -1 && L.some(x => /Visit Product Advisory/.test(x)) && L[L.length - 1] === 'Log out', L.join(' | '));
       t('the links go to the right pages', document.querySelector('#paAccountMenu a[href="lms-dashboard.html"]') && document.querySelector('#paAccountMenu a[href="profile.html"]') && document.querySelector('#paAccountMenu a[href="tool-requests.html"]'));
       t('"Send feedback" opens an email to feedback@ with a subject already filled in', (() => { const a = document.querySelector('#paAccountMenu a[href^="mailto:"]'); return !!a && /^mailto:feedback@productadvisory\.co\?subject=Feedback%20on%20Product%20Advisory%20Learning$/.test(a.getAttribute('href')) && a.textContent.trim() === 'Send feedback'; })());
       const site = Array.prototype.slice.call(document.querySelectorAll('#paAccountMenu a')).filter(a => /^https:\/\/www\.productadvisory\.co/.test(a.href))[0];
