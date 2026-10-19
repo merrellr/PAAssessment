@@ -307,6 +307,17 @@ sign in; a question the lessons do not cover is pointed to the Ask on www.produc
 `Code.gs`, redeploy it (Deploy → Manage deployments → pencil → New version) so the live address has the new action.
 Tests: `tests/mail-and-org-ai.test.mjs` (the script) and `tests/theme.test.mjs` (the passages).
 
+## Clean addresses
+
+Pages are files (`lms-dashboard.html`), but links use the clean address: `/lms-dashboard`, `/lesson?course=…`, and `/`
+for the assessment. GitHub Pages serves `lms-dashboard.html` for `/lms-dashboard`, so old links (in emails, bookmarks
+and Google) keep working, and `pa-prefs.js` shows them as the clean address in the address bar. Write new links the
+same way (`href="/feedback"`). Where code needs the page's file name it normalises it (`currentPage()` in
+`account-menu.js`, `page()` in `pa-shell.js`). The search and Ask indexes keep file names (`lesson.html?course=…`,
+which is what the Apps Script checks) and `clean()` in `pa-shell.js` turns them into links. The UI test servers
+serve `/page` from `page.html` too. The Apps Script's emails still link to `.html` addresses, which work and tidy
+themselves; they can be switched at the next redeploy.
+
 ## Google Analytics and the cookie notice
 
 - `analytics.js` loads Google Analytics 4 (measurement id `G-4XFS1QWS9H`, set once at the top of that file) on the public and learner pages only: the assessment, framework, request form, Tool Roadmap, dashboard, lessons and profile. It is deliberately **not** on the owner and admin pages (owner, owner-tools, owner-pilot, reports, company), the invitation page (its address holds a secret link) or the aggregate results page. A new page must be added to one of the two lists in `tests/analytics.test.mjs`, which fails until it has been decided.

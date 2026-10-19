@@ -69,7 +69,7 @@ function done(){
     }
     else if (scn === 'main'){
       t('the page opens for the owner', shown() === 'page' && txt('orgName') === 'Acme Health' && /20 seats/.test(txt('orgSub')) && /Pat Sponsor/.test(txt('orgSub')), txt('orgSub'));
-      t('there are links back to the console and across to the team dashboard', $('ownerBackLink').getAttribute('href') === 'owner.html' && $('teamLink').getAttribute('href') === 'company.html?org=orgA');
+      t('there are links back to the console and across to the team dashboard', $('ownerBackLink').getAttribute('href') === '/owner' && $('teamLink').getAttribute('href') === '/company?org=orgA');
       t('the Profile menu is there too', !!$('paAccountBtn'));
       const steps = q('#stageStrip .step');
       t('seven stages are shown, the current one marked, earlier ones ticked', steps.length === 7 && steps[2].classList.contains('current') && steps[2].getAttribute('aria-current') === 'step' && steps[0].classList.contains('done') && steps[1].classList.contains('done') && !steps[3].classList.contains('done'));

@@ -45,7 +45,7 @@ function done(){
       t('the answer box cannot be used', ta.disabled === true && ta.value === '');
       t('it says why, in plain words, and that the result is complete without it', /part of our Enterprise assessment/.test(textOf($('lockedScenarioNote'))) && /switched off in the free assessment/.test(textOf($('lockedScenarioNote'))) && /complete without it/.test(textOf($('lockedScenarioNote'))));
       const a = $('enterpriseContactLink');
-      t('"Contact us about Enterprise" opens the request form for organizations in a new tab', a.getAttribute('href') === 'request-info.html?src=assessment-enterprise&who=org' && a.target === '_blank' && /noopener/.test(a.rel));
+      t('"Contact us about Enterprise" opens the request form for organizations in a new tab', a.getAttribute('href') === '/request-info?src=assessment-enterprise&who=org' && a.target === '_blank' && /noopener/.test(a.rel));
       t('the lock was noted as a drop-off signal', events().indexOf('scenarioLockedShown') > -1, events().join());
       a.addEventListener('click', e => e.preventDefault());
       a.click();

@@ -85,7 +85,7 @@ async function readBlob(d){ return await d.blob.text(); }
     } else if (scn === 'removedadmin'){
       t('an admin whose membership ended gets no access', shown() === 'stateNoAccess' && !/member of Acme/.test(txt('noAccessMessage')), shown() + ' ' + txt('noAccessMessage'));
     } else if (scn === 'ownernoorg'){
-      t('the owner without a company chosen is sent to the owner console', shown() === 'stateNoAccess' && $('noAccessLink').getAttribute('href') === 'owner.html' && /Choose a company/.test(txt('noAccessTitle')), shown());
+      t('the owner without a company chosen is sent to the owner console', shown() === 'stateNoAccess' && $('noAccessLink').getAttribute('href') === '/owner' && /Choose a company/.test(txt('noAccessTitle')), shown());
     } else if (scn === 'denied'){
       t('if the company cannot be read, a plain explanation is shown instead of an empty page', shown() === 'stateNoAccess' && /couldn't load this company/.test(txt('noAccessTitle')), shown() + ' ' + txt('noAccessTitle'));
     } else if (scn === 'empty'){
@@ -287,7 +287,7 @@ async function readBlob(d){ return await d.blob.text(); }
       t('name and phone are kept', f1 && f1.name === 'Fresh One' && f1.phone === '555-1111');
       t('expiry is about 30 days out', f1 && Math.abs(f1.expiresAt.toMillis() - (Date.now() + 30 * 864e5)) < 60000);
       t('they were emailed straight away (box ticked by default)', backendCalls.length === 2 && backendCalls.every(c => c.action === 'sendInvite'), String(backendCalls.length));
-      t('the new-links box lists them with a copy of each link', vis('linksCard') && /fresh1@acme\.com/.test($('linksTable').textContent) && /join\.html\?token=[0-9a-f]{32}/.test($('linksTable').textContent));
+      t('the new-links box lists them with a copy of each link', vis('linksCard') && /fresh1@acme\.com/.test($('linksTable').textContent) && /\/join\?token=[0-9a-f]{32}/.test($('linksTable').textContent));
       t('invitations list now shows five', rowsIn('inviteWrap').length === 5, String(rowsIn('inviteWrap').length));
       t('6 in use + 2 waiting + 2 new is exactly 10 seats, so no over-the-limit warning', confirmMessages.length === 0, confirmMessages.join(' | '));
 

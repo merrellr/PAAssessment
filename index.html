@@ -243,7 +243,7 @@
 <script src="pa-shell.js"></script>
 
 <div class="card">
-  <a href="lms-dashboard.html" class="brand-header" style="text-decoration:none;">
+  <a href="/lms-dashboard" class="brand-header" style="text-decoration:none;">
     <svg width="26" height="26" viewBox="0 0 40 40" aria-hidden="true">
       <polygon points="20,3 35,11.5 35,28.5 20,37 5,28.5 5,11.5" fill="var(--navy)"/>
       <polygon points="20,10 29,15 29,25 20,30 11,25 11,15" fill="none" stroke="var(--cyan)" stroke-width="1.5"/>
@@ -343,7 +343,7 @@
         <p style="margin-bottom:12px;"><strong>In a few sentences, write what you'd actually say to this VP to get a pilot approved.</strong></p>
         <textarea rows="3" disabled aria-label="Locked: written answers are part of the Enterprise assessment" placeholder="Written answers are part of the Enterprise assessment" style="width:100%; padding:12px 14px; border:1.5px solid var(--line); border-radius:9px; font-family:var(--sans); font-size:0.9062rem; background:var(--bg); color:var(--gray); resize:none;"></textarea>
       </div>
-      <p class="locked-note" id="lockedScenarioNote"><strong>This step is part of our Enterprise assessment.</strong> There, an AI reads a written answer like this one, scores how well it handles the skeptical VP, and folds the result into the AI Fluency — Organizational score, with feedback on how it landed. It is switched off in the free assessment, and your result is complete without it. Want it for your team? <a id="enterpriseContactLink" href="request-info.html?src=assessment-enterprise&who=org" target="_blank" rel="noopener" onclick="funnelEvent('enterpriseInterest')">Contact us about Enterprise</a>.</p>
+      <p class="locked-note" id="lockedScenarioNote"><strong>This step is part of our Enterprise assessment.</strong> There, an AI reads a written answer like this one, scores how well it handles the skeptical VP, and folds the result into the AI Fluency — Organizational score, with feedback on how it landed. It is switched off in the free assessment, and your result is complete without it. Want it for your team? <a id="enterpriseContactLink" href="/request-info?src=assessment-enterprise&who=org" target="_blank" rel="noopener" onclick="funnelEvent('enterpriseInterest')">Contact us about Enterprise</a>.</p>
       <div class="nav-row" style="justify-content:flex-end;">
         <button class="btn btn-primary" id="lockedScenarioContinueBtn" onclick="continueFromLockedScenario()">See my results →</button>
       </div>
@@ -397,7 +397,7 @@
         <h3 id="dashboardAccessHeading">Access your dashboard</h3>
         <div id="dashboardAccessLoggedIn" style="display:none;">
           <p style="margin-bottom:14px;">You're logged in, so your results are already saved to your dashboard.</p>
-          <a href="lms-dashboard.html?justAssessed=1" class="btn btn-primary" style="text-decoration:none; display:inline-block;">Go to your dashboard →</a>
+          <a href="/lms-dashboard?justAssessed=1" class="btn btn-primary" style="text-decoration:none; display:inline-block;">Go to your dashboard →</a>
         </div>
         <div id="dashboardAccessSignup" style="display:none;">
           <p style="margin-bottom:14px;">Your results are ready above. Create an account to save them and open the courses matched to your level.</p>
@@ -561,10 +561,10 @@ window.handleCreateAccountFromResults = async function(){
     // Google Sheet too (kept for the sales report and per-question stats).
     if (window.logAssessmentRow) window.logAssessmentRow(name, email);
     if (window.funnelEvent) window.funnelEvent('accountCreated', { tier: (window.__assessmentResultObj || {}).tier });
-    window.location.href = 'lms-dashboard.html?justAssessed=1';
+    window.location.href = '/lms-dashboard?justAssessed=1';
   } catch (err){
     if (err.code === 'auth/email-already-in-use'){
-      generalError.innerHTML = 'An account already exists for this email. <a href="lms-dashboard.html">Log in instead →</a>';
+      generalError.innerHTML = 'An account already exists for this email. <a href="/lms-dashboard">Log in instead →</a>';
     } else {
       generalError.textContent = 'Something went wrong creating your account. Please try again.';
     }
@@ -608,7 +608,7 @@ const CATEGORIES = {
     color: "#4C8FCB",
     // No foundational roadmapping article yet — point at our own
     // framework section rather than a loosely related external link.
-    articles: [{ title: "See the Product Strategy & Roadmapping framework", url: "framework.html#strategy" }]
+    articles: [{ title: "See the Product Strategy & Roadmapping framework", url: "/framework#strategy" }]
   },
   prioritization: {
     label: "Prioritization & Trade-offs",
@@ -620,14 +620,14 @@ const CATEGORIES = {
     color: "#2AA0BF",
     // No foundational delivery article yet — point at our own framework
     // section rather than a loosely related external link.
-    articles: [{ title: "See the Execution & Delivery framework", url: "framework.html#execution" }]
+    articles: [{ title: "See the Execution & Delivery framework", url: "/framework#execution" }]
   },
   stakeholder: {
     label: "Stakeholder Communication & Influence",
     color: "var(--pa-deep-1)",
     // No standalone article for this domain yet — point at our own
     // framework section instead of a mismatched or dead external link.
-    articles: [{ title: "See the Stakeholder Communication & Influence framework", url: "framework.html#stakeholder" }]
+    articles: [{ title: "See the Stakeholder Communication & Influence framework", url: "/framework#stakeholder" }]
   },
   aiIndividual: {
     label: "AI Fluency — Individual",
@@ -1346,7 +1346,7 @@ function showResults(scores, lead){
       <p>Taking you to your dashboard, where your updated results and courses are waiting.</p>
     `;
     showScreen('results');
-    setTimeout(() => { window.location.href = 'lms-dashboard.html?justAssessed=1'; }, 900);
+    setTimeout(() => { window.location.href = '/lms-dashboard?justAssessed=1'; }, 900);
     return;
   }
 
@@ -1468,7 +1468,7 @@ function renderGrowthAreas(catPct){
    dashboard, where this course is already the top recommendation. */
 function firstCourseCtaAction(){
   if (window.isLoggedIn){
-    window.location.href = 'lms-dashboard.html?justAssessed=1';
+    window.location.href = '/lms-dashboard?justAssessed=1';
     return;
   }
   const box = document.getElementById('dashboardAccessSection');

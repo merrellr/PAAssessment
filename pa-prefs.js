@@ -15,6 +15,15 @@
    ================================================================ */
 (function () {
   "use strict";
+  // Clean addresses: an old link to /lms-dashboard.html (or /index.html) shows as /lms-dashboard (or /), same page, no
+  // reload. GitHub Pages serves lms-dashboard.html for /lms-dashboard.
+  try {
+    var path = window.location.pathname;
+    if (window.history && history.replaceState && /\.html$/.test(path) && !/\/404\.html$/.test(path)) {
+      history.replaceState(history.state, "", path.replace(/(^|\/)index\.html$/, "$1").replace(/\.html$/, "") + location.search + location.hash);
+    }
+  } catch (e) { /* the page works the same either way */ }
+
   var DEFAULTS = { style: "classic", accent: "", text: "m", density: "comfortable", motion: "full" };
   var CHOICES = {
     style: ["classic", "editorial", "boardroom", "lab"],

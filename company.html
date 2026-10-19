@@ -147,7 +147,7 @@
 <body>
 <script src="pa-shell.js"></script>
 <div class="wrap">
-  <a href="lms-dashboard.html" class="brand-header">
+  <a href="/lms-dashboard" class="brand-header">
     <svg width="28" height="28" viewBox="0 0 40 40" aria-hidden="true">
       <polygon points="20,3 35,11.5 35,28.5 20,37 5,28.5 5,11.5" fill="#1A4584"/>
       <polygon points="20,10 29,15 29,25 20,30 11,25 11,15" fill="none" stroke="#35C2E8" stroke-width="1.5"/>
@@ -164,13 +164,13 @@
   <div class="card" id="stateSignedOut" style="display:none;">
     <h1>Please sign in first</h1>
     <p>Sign in with your usual account on the dashboard, then come back to this page.</p>
-    <p style="margin-bottom:0;"><a href="lms-dashboard.html" style="color:var(--navy);">Go to the dashboard →</a></p>
+    <p style="margin-bottom:0;"><a href="/lms-dashboard" style="color:var(--navy);">Go to the dashboard →</a></p>
   </div>
 
   <div class="card" id="stateNoAccess" style="display:none;">
     <h1 id="noAccessTitle">This page is for company admins</h1>
     <p id="noAccessMessage" style="margin-bottom:0;">Your account isn't an admin of a company.</p>
-    <p style="margin:12px 0 0;"><a id="noAccessLink" href="lms-dashboard.html" style="color:var(--navy);">Go to your dashboard →</a></p>
+    <p style="margin:12px 0 0;"><a id="noAccessLink" href="/lms-dashboard" style="color:var(--navy);">Go to your dashboard →</a></p>
   </div>
 
   <div id="page" style="display:none;">
@@ -182,7 +182,7 @@
           <div id="orgPills" style="margin-top:6px;"></div>
         </div>
         <div class="btn-row">
-          <a id="ownerBackLink" href="owner.html" class="back-link" style="display:none; margin:0;">← Owner console</a>
+          <a id="ownerBackLink" href="/owner" class="back-link" style="display:none; margin:0;">← Owner console</a>
           <button class="btn btn-ghost btn-small" id="refreshBtn" type="button">Refresh</button>
         </div>
       </div>
@@ -495,7 +495,7 @@ function noAccess(title, message, linkText, linkHref){
   $('noAccessTitle').textContent = title;
   $('noAccessMessage').textContent = message;
   $('noAccessLink').textContent = linkText || 'Go to your dashboard →';
-  $('noAccessLink').setAttribute('href', linkHref || 'lms-dashboard.html');
+  $('noAccessLink').setAttribute('href', linkHref || '/lms-dashboard');
   showOnly('stateNoAccess');
 }
 
@@ -521,7 +521,7 @@ onAuthStateChanged(auth, async (user) => {
   } else if (isAdmin){
     orgId = membership.orgId;
   } else if (viewerIsOwner){
-    noAccess('Choose a company', 'Open a company from the owner console, then use its "Team dashboard" button.', 'Go to the owner console →', 'owner.html');
+    noAccess('Choose a company', 'Open a company from the owner console, then use its "Team dashboard" button.', 'Go to the owner console →', '/owner');
     return;
   } else {
     noAccess('This page is for company admins',
@@ -552,7 +552,7 @@ async function loadAll(){
       getDocs(query(collection(db, 'invites'), where('orgId', '==', id)))
     ]);
     if (!orgSnap.exists()){
-      noAccess('Company not found', 'That company could not be found.', viewerIsOwner ? 'Go to the owner console →' : undefined, viewerIsOwner ? 'owner.html' : undefined);
+      noAccess('Company not found', 'That company could not be found.', viewerIsOwner ? 'Go to the owner console →' : undefined, viewerIsOwner ? '/owner' : undefined);
       return false;
     }
     org = Object.assign({ id: id }, orgSnap.data(), { createdAtMs: msOf(orgSnap.data().createdAt), updatedAtMs: msOf(orgSnap.data().updatedAt) });
@@ -1177,7 +1177,7 @@ $('csvAnswersBtn').addEventListener('click', () => {
 
 /* ------------------------------------------------------------- invitations */
 function inviteLink(token){
-  return location.origin + location.pathname.replace(/[^/]*$/, '') + 'join.html?token=' + token;
+  return location.origin + '/join?token=' + token;
 }
 
 async function copyText(text, notice){

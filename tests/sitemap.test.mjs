@@ -18,7 +18,7 @@ const robots = fs.readFileSync(path.join(root, 'robots.txt'), 'utf8');
 const pages = fs.readdirSync(root).filter(f => f.endsWith('.html'));
 const noindex = (f) => /<meta name="robots" content="[^"]*noindex/.test(fs.readFileSync(path.join(root, f), 'utf8'));
 const locs = Array.from(xml.matchAll(/<loc>([^<]+)<\/loc>/g)).map(m => m[1]);
-const fileOf = (u) => { const p = new URL(u).pathname; return p === '/' ? 'index.html' : p.slice(1); };
+const fileOf = (u) => { const p = new URL(u).pathname; return p === '/' ? 'index.html' : p.slice(1).replace(/\.html$/, '') + '.html'; };   // clean addresses: /framework is framework.html
 
 console.log('--- the sitemap ---');
 t('it is a sitemap in the standard format', /^<\?xml version="1.0" encoding="UTF-8"\?>\s*<urlset xmlns="http:\/\/www\.sitemaps\.org\/schemas\/sitemap\/0\.9">/.test(xml) && /<\/urlset>\s*$/.test(xml));

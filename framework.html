@@ -67,7 +67,7 @@
 <div class="wrap">
 
   <div class="brand-header">
-    <a href="lms-dashboard.html" class="brand-header-left" style="text-decoration:none;">
+    <a href="/lms-dashboard" class="brand-header-left" style="text-decoration:none;">
       <svg width="28" height="28" viewBox="0 0 40 40" aria-hidden="true">
         <polygon points="20,3 35,11.5 35,28.5 20,37 5,28.5 5,11.5" fill="#1A4584"/>
         <polygon points="20,10 29,15 29,25 20,30 11,25 11,15" fill="none" stroke="#35C2E8" stroke-width="1.5"/>
@@ -79,7 +79,7 @@
     </a>
   </div>
   <div class="brand-accent-bar"></div>
-  <a class="back-link" id="backLink" href="lms-dashboard.html">← Back to dashboard</a>
+  <a class="back-link" id="backLink" href="/lms-dashboard">← Back to dashboard</a>
 
   <div class="card">
     <span class="eyebrow">The Training Framework</span>
@@ -104,7 +104,7 @@
   <div id="domainsContainer"></div>
 
   <div class="cta-row">
-    <a href="index.html" class="btn" id="assessmentCta">Take the Assessment →</a>
+    <a href="/" class="btn" id="assessmentCta">Take the Assessment →</a>
   </div>
 
   <div style="margin-top:40px; padding:20px 0; border-top:1px solid var(--line); text-align:center; font-size:0.75rem; color:var(--gray);">
@@ -282,10 +282,10 @@ onAuthStateChanged(auth, async (user) => {
   const backLink = document.getElementById('backLink');
   const cta = document.getElementById('assessmentCta');
   if (!user){
-    if (backLink){ backLink.textContent = '← Back to the assessment'; backLink.setAttribute('href', 'index.html'); }
+    if (backLink){ backLink.textContent = '← Back to the assessment'; backLink.setAttribute('href', '/'); }
     return;
   }
-  if (backLink){ backLink.textContent = '← Back to dashboard'; backLink.setAttribute('href', 'lms-dashboard.html'); }
+  if (backLink){ backLink.textContent = '← Back to dashboard'; backLink.setAttribute('href', '/lms-dashboard'); }
   const result = await fetchAssessmentResult(user.email);
   if (result && cta) cta.textContent = 'Retake the Assessment →';
 });

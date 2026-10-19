@@ -50,7 +50,7 @@
     <span class="eyebrow">Send feedback</span>
     <h1>Please sign in first</h1>
     <p>Feedback comes from your account, so we can reply. Sign in on your dashboard, then come back to this page.</p>
-    <a class="btn" href="lms-dashboard.html">Go to the dashboard</a>
+    <a class="btn" href="/lms-dashboard">Go to the dashboard</a>
   </div>
 
   <form class="card" id="feedbackForm" novalidate hidden>
@@ -91,7 +91,7 @@
     <h1 tabindex="-1" id="doneTitle">Got it, thanks</h1>
     <p>Your note is with our team. We read every one, and we'll reply to <strong id="doneEmail"></strong> if there's something to follow up.</p>
     <div class="row">
-      <a class="btn" href="lms-dashboard.html">Back to my learning</a>
+      <a class="btn" href="/lms-dashboard">Back to my learning</a>
       <button class="btn ghost" id="againBtn" type="button">Send another</button>
     </div>
   </div>
@@ -108,7 +108,7 @@
     too_long: 'Please keep it under 2000 characters.'
   };
   // Where the person came from, so we know which page a note is about.
-  const from = (() => { try { const r = new URL(document.referrer); return r.origin === location.origin ? r.pathname.split('/').pop() : ''; } catch (e) { return ''; } })();
+  const from = (() => { try { const r = new URL(document.referrer); if (r.origin !== location.origin) return ''; const p = r.pathname.split('/').pop(); return !p ? 'index.html' : /\.html$/.test(p) ? p : p + '.html'; } catch (e) { return ''; } })();
   const choice = { topic: '', rating: '' };
 
   function show(id){ ['stateLoading', 'stateSignedOut', 'feedbackForm', 'stateDone'].forEach(k => { $(k).hidden = k !== id; }); }

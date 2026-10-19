@@ -234,16 +234,16 @@
         book: book,
         title: 'Thanks, ' + first + '. We have your request.',
         text: 'Rob will reply to ' + email + ' ' + REPLY_WINDOW + '. While you wait, taking the free assessment yourself is the quickest way to see what your team would experience.',
-        cta: { label: 'Take the free assessment', href: 'index.html' },
-        second: { label: 'Vote on the next toolkit', href: 'tool-requests.html' }
+        cta: { label: 'Take the free assessment', href: '/' },
+        second: { label: 'Vote on the next toolkit', href: '/tool-requests' }
       };
     }
     return {
       book: book,
       title: 'Thanks, ' + first + '. We have your note.',
       text: 'We will reply to ' + email + ' ' + REPLY_WINDOW + '. In the meantime, the free assessment shows your level across seven product skill areas and gives you a course plan to match.',
-      cta: { label: 'Take the free assessment', href: 'index.html' },
-      second: { label: 'Vote on the next toolkit', href: 'tool-requests.html' }
+      cta: { label: 'Take the free assessment', href: '/' },
+      second: { label: 'Vote on the next toolkit', href: '/tool-requests' }
     };
   }
 

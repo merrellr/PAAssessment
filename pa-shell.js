@@ -18,10 +18,13 @@
   // The assessment is reached from the dashboard (first launch, or Retake) and the Toolkits Roadmap
   // from www.productadvisory.co or the Profile menu, so the header stays this short.
   var LINKS = [
-    ["lms-dashboard.html", "My learning"]
+    ["/lms-dashboard", "My learning"]
   ];
 
-  function page() { var p = location.pathname.split("/").pop(); return p || "index.html"; }
+  // This page's clean address (/lms-dashboard, / for the assessment), whether it was opened as /lms-dashboard or /lms-dashboard.html.
+  function page() { var p = location.pathname.split("/").pop().replace(/\.html$/, ""); return !p || p === "index" ? "/" : "/" + p; }
+  // The search and Ask indexes name pages by file ("lesson.html?course=..."); links use the clean address.
+  function clean(u) { return String(u).replace(/^index\.html/, "/").replace(/^([a-z-]+)\.html/, "/$1"); }
   function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
   function tiny(path) { return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + path + "</svg>"; }
   var ICON = {
@@ -43,7 +46,7 @@
     }).join("");
     var mac = /Mac|iPhone|iPad/.test(navigator.platform || navigator.userAgent);
     return '<header class="pa-nav" id="paNav"><div class="pa-nav-in">' +
-      '<a class="pa-brand" href="lms-dashboard.html" aria-label="Product Advisory Learning, my dashboard">' + WORDMARK + '<span class="pa-app">Learning</span></a>' +
+      '<a class="pa-brand" href="/lms-dashboard" aria-label="Product Advisory Learning, my dashboard">' + WORDMARK + '<span class="pa-app">Learning</span></a>' +
       '<nav class="pa-links" aria-label="Main">' + links + '<button type="button" class="pa-m-only" data-pa="prefs">Make it yours</button></nav>' +
       '<div class="pa-tools">' +
       '<button type="button" class="pa-icon" data-pa="search" aria-label="Search courses and lessons">' + ICON.search + "<kbd>" + (mac ? "⌘" : "Ctrl") + "</kbd><kbd>K</kbd></button>" +
@@ -120,7 +123,7 @@
       seg("text", "Text size", [["s", "Small"], ["m", "Default"], ["l", "Large"], ["xl", "Larger"]]) +
       seg("density", "Density", [["comfortable", "Comfortable"], ["compact", "Compact"]]) +
       seg("motion", "Motion", [["full", "On"], ["reduced", "Off"]]) +
-      '<div class="pa-panel-foot"><button type="button" class="pa-btn ghost" data-pa="reset">Reset everything</button><a class="pa-btn ghost" href="' + WWW + 'preferences.html" target="_blank" rel="noopener">More on productadvisory.co<span aria-hidden="true"> ↗</span>' + NEW_TAB + "</a></div>" +
+      '<div class="pa-panel-foot"><button type="button" class="pa-btn ghost" data-pa="reset">Reset everything</button><a class="pa-btn ghost" href="' + WWW + 'preferences" target="_blank" rel="noopener">More on productadvisory.co<span aria-hidden="true"> ↗</span>' + NEW_TAB + "</a></div>" +
       "</div>";
     document.body.appendChild(panel);
     panel.addEventListener("click", function (e) {
@@ -175,14 +178,14 @@
 
   /* ---------------------------------------------------------------- search (⌘K) */
   var ACTIONS = [
-    { g: "Go to", t: "My learning dashboard", i: "⌂", u: "lms-dashboard.html" },
-    { g: "Go to", t: "The training framework", i: "◆", u: "framework.html" },
-    { g: "Go to", t: "My profile", i: "☺", u: "profile.html" },
-    { g: "Go to", t: "Team assessments for your company", i: "✉", u: "request-info.html?who=org" },
-    { g: "Product Advisory", t: "Services", i: "↗", u: WWW + "services.html", ext: true },
-    { g: "Product Advisory", t: "Free toolkits", i: "↗", u: WWW + "toolkits.html", ext: true },
-    { g: "Product Advisory", t: "About", i: "↗", u: WWW + "about.html", ext: true },
-    { g: "Product Advisory", t: "Contact", i: "↗", u: WWW + "contact.html", ext: true },
+    { g: "Go to", t: "My learning dashboard", i: "⌂", u: "/lms-dashboard" },
+    { g: "Go to", t: "The training framework", i: "◆", u: "/framework" },
+    { g: "Go to", t: "My profile", i: "☺", u: "/profile" },
+    { g: "Go to", t: "Team assessments for your company", i: "✉", u: "/request-info?who=org" },
+    { g: "Product Advisory", t: "Services", i: "↗", u: WWW + "services", ext: true },
+    { g: "Product Advisory", t: "Free toolkits", i: "↗", u: WWW + "toolkits", ext: true },
+    { g: "Product Advisory", t: "About", i: "↗", u: WWW + "about", ext: true },
+    { g: "Product Advisory", t: "Contact", i: "↗", u: WWW + "contact", ext: true },
     { g: "Product Advisory", t: "Book a free 30-minute call", i: "☎", u: CALENDLY, ext: true },
     { g: "Make it yours", t: "Toggle light / dark", i: "◐", run: toggleTheme },
     { g: "Make it yours", t: "Open Make it yours", i: "⚙", run: openPanel }
@@ -283,7 +286,7 @@
       if (!ln) return;
       ln = ln.replace(/\[(\d)\]/g, function (m, d) {
         var p = used[+d - 1];
-        return p ? '<a class="pa-cite" href="' + esc(p.u) + '" title="' + esc(p.t) + '">' + d + "</a>" : "";
+        return p ? '<a class="pa-cite" href="' + esc(clean(p.u)) + '" title="' + esc(p.t) + '">' + d + "</a>" : "";
       });
       if (/^[-•]\s+/.test(ln)) { if (!list) { html += "<ul>"; list = true; } html += "<li>" + ln.replace(/^[-•]\s+/, "") + "</li>"; }
       else { if (list) { html += "</ul>"; list = false; } html += "<p>" + ln + "</p>"; }
@@ -296,7 +299,7 @@
     used.forEach(function (p, i) { if (!nums[p.u]) { nums[p.u] = []; order.push(p); } nums[p.u].push(i + 1); });
     order.forEach(function (p) {
       var on = !cited || nums[p.u].some(function (n) { return cited.indexOf(n) > -1; });
-      rows += '<li' + (on ? "" : ' class="pa-dim"') + '><a href="' + esc(p.u) + '"><b>' + nums[p.u].join(" ") + "</b> " + esc(p.t) + "</a></li>";
+      rows += '<li' + (on ? "" : ' class="pa-dim"') + '><a href="' + esc(clean(p.u)) + '"><b>' + nums[p.u].join(" ") + "</b> " + esc(p.t) + "</a></li>";
     });
     return '<div class="pa-src"><h4>From the lessons</h4><ol>' + rows + "</ol></div>";
   }
@@ -324,7 +327,7 @@
     }).catch(function (e) {
       var code = e && e.code, msg;
       if (code === "nothing") msg = "The lessons don't cover that yet. Try other words, or <a href=\"" + WWW + "?ask=" + encodeURIComponent(q) + "\" target=\"_blank\" rel=\"noopener\">ask on productadvisory.co<span aria-hidden=\"true\"> ↗</span>" + NEW_TAB + "</a>.";
-      else if (code === "signin" || code === "not_verified") msg = 'Answers from the lessons are for signed-in learners. <a href="lms-dashboard.html">Sign in on your dashboard</a>, then ask again.';
+      else if (code === "signin" || code === "not_verified") msg = 'Answers from the lessons are for signed-in learners. <a href="/lms-dashboard">Sign in on your dashboard</a>, then ask again.';
       else if (code === "daily_limit") msg = "You've asked a lot today. Ask again tomorrow; the lessons below are the closest matches.";
       else msg = "Couldn't get an answer just now. The lessons below are the closest matches.";
       box(head + '<p class="pa-wait">' + msg + "</p>" + (used.length && code !== "nothing" ? sourcesHtml(used, null) : ""));
@@ -361,7 +364,7 @@
     var q = palInput.value.trim();
     var ql = q.toLowerCase();
     var acts = ACTIONS.filter(function (a) { return !ql || (a.t + " " + a.g).toLowerCase().indexOf(ql) > -1; });
-    var hits = q ? searchIndex(q).map(function (it) { return { g: KIND[it.k], t: it.t, sub: it.s, i: it.k === "lesson" ? "›" : it.k === "course" ? "▤" : "◆", u: it.u }; }) : [];
+    var hits = q ? searchIndex(q).map(function (it) { return { g: KIND[it.k], t: it.t, sub: it.s, i: it.k === "lesson" ? "›" : it.k === "course" ? "▤" : "◆", u: clean(it.u) }; }) : [];
     palItems = (q && isQuestion(q) ? [{ g: "Ask AI", t: "Ask the lessons: “" + q + "”", i: "✦", ask: q }] : []).concat(hits, acts);
     if (q && !hits.length && window.PA_SEARCH && !isQuestion(q)) {
       palItems.push({ g: "Ask Product Advisory", t: "Ask on productadvisory.co: “" + q + "”", i: "?", u: WWW + "?ask=" + encodeURIComponent(q), ext: true });
