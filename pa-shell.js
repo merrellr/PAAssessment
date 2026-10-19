@@ -221,11 +221,121 @@
     out.sort(function (a, b) { return b.score - a.score; });
     return out.slice(0, 24).map(function (r) { return r.it; });
   }
+  /* ---------------------------------------------------------------- Ask AI (answers from the lessons) */
+  // ask-index.js holds every lesson's text in short passages; it is loaded only when someone asks.
+  var askLoading = null, askStats = null;
+  var STOP = ("a an and are as at be but by can do does for from get how i if in into is it its me my of on or our should so " +
+    "that the their them then there these they this to us was we what when where which who why will with you your about").split(" ");
+  function loadAsk() {
+    if (window.PA_ASK) return Promise.resolve();
+    if (askLoading) return askLoading;
+    askLoading = new Promise(function (resolve, reject) {
+      var s = document.createElement("script");
+      s.src = "ask-index.js";
+      s.onload = function () { resolve(); };
+      s.onerror = function () { askLoading = null; reject(new Error("index")); };
+      document.head.appendChild(s);
+    });
+    return askLoading;
+  }
+  // Rough word roots, so "feature", "features" and "prioritizing", "prioritize" match each other.
+  function stem(w) { for (var k = 0; k < 2 && w.length > 4; k++) w = w.replace(/(ings?|ed|es|e|s)$/, ""); return w; }
+  function terms(s) { return words(s).filter(function (w) { return STOP.indexOf(w) < 0 && (w.length > 2 || /\d/.test(w)); }).map(stem); }
+  // Best passages for a question: words weighted by how rare they are, a bonus for the lesson title, at most two per lesson.
+  function retrieve(q, max) {
+    var data = window.PA_ASK || [];
+    if (!askStats) {
+      var df = {};
+      askStats = { df: df, docs: data.map(function (p) {
+        var tf = {}, tt = {};
+        terms(p.x).forEach(function (w) { tf[w] = (tf[w] || 0) + 1; });
+        terms(p.t).forEach(function (w) { tt[w] = 1; });
+        Object.keys(tf).forEach(function (w) { df[w] = (df[w] || 0) + 1; });
+        return { tf: tf, tt: tt };
+      }) };
+    }
+    var qs = terms(q).filter(function (w, i, a) { return a.indexOf(w) === i; });
+    var n = data.length || 1, scored = [];
+    data.forEach(function (p, i) {
+      var d = askStats.docs[i], score = 0;
+      qs.forEach(function (w) {
+        var idf = Math.log(1 + n / (1 + (askStats.df[w] || 0)));
+        if (d.tf[w]) score += idf * (1 + Math.log(d.tf[w]));
+        if (d.tt[w]) score += idf * 1.5;
+      });
+      if (score > 0) scored.push({ p: p, score: score });
+    });
+    scored.sort(function (a, b) { return b.score - a.score; });
+    var out = [], per = {};
+    for (var k = 0; k < scored.length && out.length < max; k++) {
+      var u = scored[k].p.u;
+      if ((per[u] || 0) >= 2) continue;
+      per[u] = (per[u] || 0) + 1;
+      out.push(scored[k].p);
+    }
+    return out;
+  }
+  function isQuestion(q) { return /\?\s*$/.test(q) || words(q).length >= 3; }
+  function answerHtml(text, used) {
+    var lines = esc(text).split(/\n+/), html = "", list = false;
+    lines.forEach(function (ln) {
+      ln = ln.trim();
+      if (!ln) return;
+      ln = ln.replace(/\[(\d)\]/g, function (m, d) {
+        var p = used[+d - 1];
+        return p ? '<a class="pa-cite" href="' + esc(p.u) + '" title="' + esc(p.t) + '">' + d + "</a>" : "";
+      });
+      if (/^[-•]\s+/.test(ln)) { if (!list) { html += "<ul>"; list = true; } html += "<li>" + ln.replace(/^[-•]\s+/, "") + "</li>"; }
+      else { if (list) { html += "</ul>"; list = false; } html += "<p>" + ln + "</p>"; }
+    });
+    return html + (list ? "</ul>" : "");
+  }
+  // One row per lesson, with every passage number that came from it; lessons the answer did not cite are dimmed.
+  function sourcesHtml(used, cited) {
+    var order = [], nums = {}, rows = "";
+    used.forEach(function (p, i) { if (!nums[p.u]) { nums[p.u] = []; order.push(p); } nums[p.u].push(i + 1); });
+    order.forEach(function (p) {
+      var on = !cited || nums[p.u].some(function (n) { return cited.indexOf(n) > -1; });
+      rows += '<li' + (on ? "" : ' class="pa-dim"') + '><a href="' + esc(p.u) + '"><b>' + nums[p.u].join(" ") + "</b> " + esc(p.t) + "</a></li>";
+    });
+    return '<div class="pa-src"><h4>From the lessons</h4><ol>' + rows + "</ol></div>";
+  }
+  var askSeq = 0;
+  function showAnswer(q) {
+    var seq = ++askSeq;
+    palItems = [];
+    var box = function (html) { if (seq === askSeq) palList.innerHTML = '<li class="pa-answer" role="presentation"><div aria-live="polite">' + html + "</div></li>"; };
+    var head = '<p class="pa-q">' + esc(q) + "</p>";
+    box(head + '<p class="pa-wait">Reading the lessons…</p>');
+    var used = [];
+    loadAsk().then(function () {
+      used = retrieve(q, 4);
+      if (!used.length) throw { code: "nothing" };
+      var acct = window.PAAccount;
+      return acct ? acct.idToken() : null;
+    }).then(function (tok) {
+      if (!tok) throw { code: "signin" };
+      var ctx = used.map(function (p) { return { u: p.u, t: p.t, x: p.x.slice(0, 700) }; });
+      return window.PAAccount.backend({ action: "askLessons", idToken: tok, q: q, ctx: JSON.stringify(ctx) });
+    }).then(function (r) {
+      if (!r || !r.ok) throw { code: r && r.error || "down" };
+      box(head + '<div class="pa-ans">' + answerHtml(r.text, used) + "</div>" + sourcesHtml(used, r.cited && r.cited.length ? r.cited : null) +
+        '<p class="pa-note">An AI answer written only from your course lessons. Open a lesson for the full picture.</p>');
+    }).catch(function (e) {
+      var code = e && e.code, msg;
+      if (code === "nothing") msg = "The lessons don't cover that yet. Try other words, or <a href=\"" + WWW + "?ask=" + encodeURIComponent(q) + "\" target=\"_blank\" rel=\"noopener\">ask on productadvisory.co<span aria-hidden=\"true\"> ↗</span>" + NEW_TAB + "</a>.";
+      else if (code === "signin" || code === "not_verified") msg = 'Answers from the lessons are for signed-in learners. <a href="lms-dashboard.html">Sign in on your dashboard</a>, then ask again.';
+      else if (code === "daily_limit") msg = "You've asked a lot today. Ask again tomorrow; the lessons below are the closest matches.";
+      else msg = "Couldn't get an answer just now. The lessons below are the closest matches.";
+      box(head + '<p class="pa-wait">' + msg + "</p>" + (used.length && code !== "nothing" ? sourcesHtml(used, null) : ""));
+    });
+  }
+
   function buildPalette() {
     pal = document.createElement("div");
     pal.className = "palette-backdrop";
     pal.innerHTML = '<div class="palette" role="dialog" aria-modal="true" aria-label="Search">' +
-      '<input type="text" placeholder="Search courses, lessons and skill areas…" aria-label="Search" autocomplete="off">' +
+      '<input type="text" placeholder="Search the lessons, or ask a question…" aria-label="Search or ask" autocomplete="off">' +
       '<ul role="listbox"></ul>' +
       '<div class="foot"><span><kbd>↑</kbd> <kbd>↓</kbd> move</span><span><kbd>↵</kbd> open</span><span><kbd>esc</kbd> close</span></div></div>';
     document.body.appendChild(pal);
@@ -241,6 +351,7 @@
     });
   }
   function go(it) {
+    if (it.ask) return showAnswer(it.ask);
     closePalette();
     if (it.run) return it.run();
     if (it.ext) window.open(it.u, "_blank", "noopener");
@@ -251,8 +362,8 @@
     var ql = q.toLowerCase();
     var acts = ACTIONS.filter(function (a) { return !ql || (a.t + " " + a.g).toLowerCase().indexOf(ql) > -1; });
     var hits = q ? searchIndex(q).map(function (it) { return { g: KIND[it.k], t: it.t, sub: it.s, i: it.k === "lesson" ? "›" : it.k === "course" ? "▤" : "◆", u: it.u }; }) : [];
-    palItems = hits.concat(acts);
-    if (q && !hits.length && window.PA_SEARCH) {
+    palItems = (q && isQuestion(q) ? [{ g: "Ask AI", t: "Ask the lessons: “" + q + "”", i: "✦", ask: q }] : []).concat(hits, acts);
+    if (q && !hits.length && window.PA_SEARCH && !isQuestion(q)) {
       palItems.push({ g: "Ask Product Advisory", t: "Ask on productadvisory.co: “" + q + "”", i: "?", u: WWW + "?ask=" + encodeURIComponent(q), ext: true });
     }
     palSel = 0;
@@ -314,5 +425,5 @@
   }
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init); else init();
 
-  window.PAShell = { openSearch: openPalette, openPrefs: openPanel, toggleTheme: toggleTheme, search: searchIndex, loadIndex: loadIndex };
+  window.PAShell = { openSearch: openPalette, openPrefs: openPanel, toggleTheme: toggleTheme, search: searchIndex, loadIndex: loadIndex, retrieve: retrieve, loadAsk: loadAsk, ask: showAnswer };
 })();

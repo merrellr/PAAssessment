@@ -272,6 +272,24 @@ The learner-facing pages share the look of www.productadvisory.co. Three files d
 Fonts are Lato for text and Comfortaa for the logo. Font sizes are in `rem`, so "Text size" scales the whole page.
 `tests/theme.test.mjs` lists which pages are converted (`THEMED`).
 
+## "Ask AI": answers from the lessons
+
+Typing a question in the search menu (three or more words, or ending in "?") adds an **Ask the lessons** row at the top.
+Choosing it:
+
+1. loads `ask-index.js` (every lesson's text in passages of up to 800 characters, generated with `search-index.js` by
+   `node tools/build-search-index.mjs`) and picks the four passages that best match the question, at most two per lesson;
+2. sends the question, those passages and the person's sign-in token to the Apps Script (`?action=askLessons`,
+   section 14 of `Code.gs`);
+3. shows the answer with numbered citations that link to the lessons, and the lessons it drew from.
+
+The script checks the sign-in, keeps only passages that link to a lesson or skill area on this site, tells the AI to
+answer only from them (and to ignore instructions inside them), and allows 20 answers per person and 400 in total a
+day. It uses the same `GROQ_API_KEY` script property and model as scenario grading. Signed-out visitors are asked to
+sign in; a question the lessons do not cover is pointed to the Ask on www.productadvisory.co. After changing
+`Code.gs`, redeploy it (Deploy → Manage deployments → pencil → New version) so the live address has the new action.
+Tests: `tests/mail-and-org-ai.test.mjs` (the script) and `tests/theme.test.mjs` (the passages).
+
 ## Google Analytics and the cookie notice
 
 - `analytics.js` loads Google Analytics 4 (measurement id `G-4XFS1QWS9H`, set once at the top of that file) on the public and learner pages only: the assessment, framework, request form, Tool Roadmap, dashboard, lessons and profile. It is deliberately **not** on the owner and admin pages (owner, owner-tools, owner-pilot, reports, company), the invitation page (its address holds a secret link) or the aggregate results page. A new page must be added to one of the two lists in `tests/analytics.test.mjs`, which fails until it has been decided.

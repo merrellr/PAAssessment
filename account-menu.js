@@ -193,6 +193,12 @@ if (window.self === window.top) {
       document.body.appendChild(script);
     });
   }
+  // For the search menu's "Ask AI" (pa-shell.js): the signed-in person's token, and the same JSONP call to the script.
+  window.PAAccount = {
+    idToken: () => (auth.currentUser ? auth.currentUser.getIdToken() : Promise.resolve(null)),
+    backend: backend
+  };
+
   async function welcomeIfNew(user){
     try {
       const made = user.metadata && user.metadata.creationTime ? Date.parse(user.metadata.creationTime) : 0;
