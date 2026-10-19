@@ -29,6 +29,12 @@ const banner = () => $('paCookieBanner');
       t('the reopened notice does not stack up a second one', document.querySelectorAll('#paCookieBanner').length === 0);
       PAAnalytics.reopen(); PAAnalytics.reopen();
       t('opening it twice still shows only one', document.querySelectorAll('#paCookieBanner').length === 1);
+    } else if (scn === 'us_new'){
+      t('a first-time visitor outside Europe is not shown the notice', !banner() && stored() === '' && PAAnalytics.state().banner === false);
+      t('(on a local test server Google still never starts)', PAAnalytics.state().started === false);
+      t('they can still open "Cookie settings"', (() => { PAAnalytics.reopen(); return !!banner(); })());
+      $('paCookieDecline').click(); await sleep(30);
+      t('and a Decline from there is remembered', stored() === 'declined' && !banner());
     } else if (scn === 'stored_accepted'){
       t('someone who accepted before is not asked again', !banner() && PAAnalytics.state().consent === 'accepted');
     } else if (scn === 'stored_declined'){

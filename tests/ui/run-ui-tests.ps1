@@ -158,7 +158,7 @@ try {
   foreach ($s in 'adminjoinnew', 'adminjoinold', 'adminjoinremoved', 'membernew', 'adminjoindone', 'adminjoinfail', 'adminjoindown', 'adminjoinlate') {
     $results += Run-Page "profile menu: $s" "$base/menu-test.html?scn=$s" 30000
   }
-  foreach ($s in 'new', 'stored_accepted', 'stored_declined', 'signedin', 'signedin_declined', 'dnt', 'gpc') {
+  foreach ($s in 'new', 'us_new', 'stored_accepted', 'stored_declined', 'signedin', 'signedin_declined', 'dnt', 'gpc') {
     $results += Run-Page "cookie notice: $s" "$base/consent-test.html?scn=$s" 30000
   }
   $results += Run-Page 'profile menu: menu off, new account' "$base/menu-off-test.html?scn=newaccount" 30000

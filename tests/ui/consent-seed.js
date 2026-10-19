@@ -2,6 +2,8 @@
 (function(){
   const scn = new URLSearchParams(location.search).get('scn') || 'new';
   window.__scn = scn;
+  // Where the visitor appears to be: Europe asks first, elsewhere starts with no notice (analytics.js reads this).
+  window.__paTimeZone = scn === 'us_new' ? 'America/Chicago' : 'Europe/Berlin';
   window.__errs = [];
   addEventListener('error', e => window.__errs.push((e.message || 'error') + ' @' + (e.filename || '').split('/').pop() + ':' + e.lineno));
   addEventListener('unhandledrejection', e => window.__errs.push('rejection: ' + (e.reason && e.reason.message || e.reason)));
