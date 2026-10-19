@@ -589,6 +589,17 @@ html.pa-shell .card { box-shadow: var(--pa-shadow); }
 :root[data-theme="dark"] .card [style*="color:#256b45" i] { color: var(--pa-ok-ink) !important; }
 :root[data-theme="dark"] .card [style*="color:#1A4584" i] { color: var(--pa-cyan-ink) !important; }
 
+/* charts.css (company dashboard, reports) draws in fixed light colours; on themed pages use the theme */
+html.pa-shell .insight { background: var(--pa-band); }
+html.pa-shell .insight .chip { background: var(--pa-tint); }
+html.pa-shell .insight.sev-good .chip { background: var(--pa-ok-bg); }
+html.pa-shell .insight.sev-watch .chip { background: var(--pa-warn-bg); }
+html.pa-shell .ai-box { border-color: var(--pa-tint-2); background: var(--pa-tint); }
+html.pa-shell .chart-grid { stroke: var(--pa-line); }
+html.pa-shell .chart-axis { fill: var(--pa-muted); font-family: var(--pa-sans); }
+html.pa-shell .bar-track, html.pa-shell .funnel-track { background: var(--pa-line); }
+html.pa-shell .funnel-count { font-family: var(--pa-display); }
+
 /* ---------- site header ---------- */
 .pa-nav { position: sticky; top: 0; z-index: 60; background: color-mix(in srgb, var(--pa-bg) 90%, transparent); backdrop-filter: saturate(160%) blur(12px); -webkit-backdrop-filter: saturate(160%) blur(12px); border-bottom: 1px solid var(--pa-line); align-self: stretch; font-family: var(--pa-sans); }
 .pa-nav-in { max-width: 1120px; margin: 0 auto; padding: 0 clamp(16px, 4vw, 40px); height: 64px; display: flex; align-items: center; gap: 16px; }
