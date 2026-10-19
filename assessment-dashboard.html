@@ -7,7 +7,8 @@
 <title>Assessment Results — Aggregate Dashboard</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@600&family=Lato:ital,wght@0,300;0,400;0,700;0,900;1,400&display=swap" rel="stylesheet">
+<script src="pa-prefs.js"></script>
 <style>
   :root{
     --navy: #1A4584; --navy-deep: #12305e; --gray: #9AA3AD; --cyan: #35C2E8;
@@ -15,46 +16,48 @@
   }
   *{ box-sizing: border-box; }
   body{
-    margin:0; background: var(--bg); font-family:'IBM Plex Sans', system-ui, sans-serif;
-    color: var(--ink); display:flex; justify-content:center; padding: 32px 16px;
+    margin:0; background: var(--bg); font-family:var(--sans);
+    color: var(--ink); display:flex; flex-direction:column; align-items:center; padding: 32px 16px;
   }
   .card{
     width:100%; max-width: 720px; background: var(--surface); border-radius: 16px;
     border: 1px solid var(--line); box-shadow: 0 1px 2px rgba(22,33,62,0.04), 0 12px 32px rgba(22,33,62,0.06);
     padding: 36px 32px;
   }
-  .eyebrow{ font-size: 12px; font-weight:600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--cyan); margin-bottom: 10px; display:block; }
-  h1{ font-family:'Space Grotesk', sans-serif; margin: 0 0 6px; color: var(--navy-deep); font-size: 24px; }
-  p.sub{ color: var(--ink-soft); margin: 0 0 28px; font-size: 14px; }
+  .eyebrow{ font-size: 0.75rem; font-weight:600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--cyan); margin-bottom: 10px; display:block; }
+  h1{ font-family:var(--display); margin: 0 0 6px; color: var(--navy-deep); font-size: 1.5rem; }
+  p.sub{ color: var(--ink-soft); margin: 0 0 28px; font-size: 0.875rem; }
 
   .stat-row{ display:flex; gap:16px; margin-bottom: 30px; flex-wrap:wrap; }
   .stat-box{
-    flex:1; min-width: 140px; background: #F7F9FC; border: 1px solid var(--line);
+    flex:1; min-width: 140px; background: var(--bg); border: 1px solid var(--line);
     border-radius: 12px; padding: 18px; text-align:center;
   }
-  .stat-num{ font-family:'Space Grotesk', sans-serif; font-weight:700; font-size: 30px; color: var(--navy); }
-  .stat-label{ font-size: 12px; color: var(--gray); margin-top: 4px; }
+  .stat-num{ font-family:var(--display); font-weight:700; font-size: 1.875rem; color: var(--navy); }
+  .stat-label{ font-size: 0.75rem; color: var(--gray); margin-top: 4px; }
 
   .section{ margin-top: 8px; }
-  .section h2{ font-family:'Space Grotesk', sans-serif; font-size: 16px; margin: 0 0 16px; color: var(--navy-deep); }
+  .section h2{ font-family:var(--display); font-size: 1rem; margin: 0 0 16px; color: var(--navy-deep); }
 
   .bar-row{ margin-bottom: 14px; }
-  .bar-row-top{ display:flex; justify-content:space-between; font-size:13.5px; font-weight:500; margin-bottom: 5px; }
+  .bar-row-top{ display:flex; justify-content:space-between; font-size:0.8438rem; font-weight:500; margin-bottom: 5px; }
   .bar-row-top .pct{ color: var(--gray); font-weight:600; }
   .bar-track{ height: 9px; background: var(--line); border-radius: 5px; overflow:hidden; }
   .bar-fill{ height:100%; border-radius:5px; background: var(--navy); }
 
   .tier-dist{ display:flex; height: 28px; border-radius: 8px; overflow:hidden; margin-bottom: 12px; }
-  .tier-seg{ display:flex; align-items:center; justify-content:center; font-size:11px; color:#fff; font-weight:600; }
-  .tier-legend{ display:flex; flex-wrap:wrap; gap:14px; font-size:12.5px; color: var(--ink-soft); }
+  .tier-seg{ display:flex; align-items:center; justify-content:center; font-size:0.6875rem; color:var(--btn-ink); font-weight:600; }
+  .tier-legend{ display:flex; flex-wrap:wrap; gap:14px; font-size:0.7812rem; color: var(--ink-soft); }
   .tier-legend span{ display:inline-flex; align-items:center; gap:6px; }
   .swatch{ width:10px; height:10px; border-radius:3px; display:inline-block; }
 
-  .updated{ text-align:center; font-size: 11.5px; color: var(--gray); margin-top: 30px; }
-  .empty-state{ text-align:center; color: var(--ink-soft); font-size: 14px; padding: 30px 0; }
+  .updated{ text-align:center; font-size: 0.7188rem; color: var(--gray); margin-top: 30px; }
+  .empty-state{ text-align:center; color: var(--ink-soft); font-size: 0.875rem; padding: 30px 0; }
 </style>
+<link rel="stylesheet" href="pa-theme.css">
 </head>
 <body>
+<script src="pa-shell.js"></script>
 
 <div class="card">
   <span class="eyebrow">Product Advisory</span>
@@ -90,7 +93,7 @@ const TIER_COLORS = {
   "No Experience": "#B9C6DA",
   "Moderate Experience": "#6FA3D6",
   "Lots of Experience": "#35C2E8",
-  "Advanced Experience": "#1A4584"
+  "Advanced Experience": "var(--pa-deep-1, #1A4584)"
 };
 const TIER_ORDER = ["No Experience", "Moderate Experience", "Lots of Experience", "Advanced Experience"];
 

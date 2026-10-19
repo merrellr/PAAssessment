@@ -252,7 +252,8 @@ manual review — it holds no uid and isn't read by the app.
 
 ## The Product Advisory look (header, search, "Make it yours", light and dark)
 
-The learner-facing pages share the look of www.productadvisory.co. Three files do it:
+Every page shares the look of www.productadvisory.co: the learner pages, the company dashboard, and the owner pages
+(owner console, reports, Toolkits Roadmap admin, pilot tracker, aggregate results). Three files do it:
 
 - `pa-prefs.js` (in the `<head>`, before the page's `<style>`): applies the visitor's look before anything is drawn:
   style (Classic, Editorial, Boardroom, Lab), accent, text size, density, motion and light/dark. The look is kept in a
@@ -268,6 +269,10 @@ The learner-facing pages share the look of www.productadvisory.co. Three files d
   from the dashboard (first launch or Retake), and the Toolkits Roadmap from www.productadvisory.co or the Profile menu, the Make it yours panel and the search menu (⌘K / Ctrl+K or /). Search covers every course,
   lesson and skill area from `search-index.js`, which is generated: **after adding or editing a course in `content/`,
   run `node tools/build-search-index.mjs`** (the theme test fails until you do).
+
+Shared stylesheets that predate the look (`charts.css`, `focus-board.css`) keep their light colours; `pa-theme.css`
+re-points them on themed pages. The framework's seven skill-area icons are line icons in the main site's style
+(`DOMAIN_ICON_PATHS` in `framework.html`).
 
 Fonts are Lato for text and Comfortaa for the logo. Font sizes are in `rem`, so "Text size" scales the whole page.
 `tests/theme.test.mjs` lists which pages are converted (`THEMED`).

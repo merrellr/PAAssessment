@@ -7,7 +7,8 @@
 <title>Reports — Product Advisory Learning</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@600&family=Lato:ital,wght@0,300;0,400;0,700;0,900;1,400&display=swap" rel="stylesheet">
+<script src="pa-prefs.js"></script>
 <style>
   :root{
     --navy: #1A4584; --navy-deep: #12305e; --gray: #9AA3AD; --cyan: #35C2E8; --orange: #E08A3C;
@@ -15,42 +16,44 @@
     --warn: #C0622A; --ok: #2E8B57;
   }
   *{ box-sizing: border-box; }
-  body{ margin:0; background: var(--bg); font-family:'IBM Plex Sans', system-ui, sans-serif; color: var(--ink); }
+  body{ margin:0; background: var(--bg); font-family:var(--sans); color: var(--ink); }
   .wrap{ max-width: 1040px; margin: 0 auto; padding: 24px 16px 64px; }
   .brand-header{ display:flex; align-items:center; gap:9px; padding: 0 0 14px; text-decoration:none; }
-  .brand-word{ font-family:'Space Grotesk', sans-serif; font-weight:700; font-size: 19px; line-height:1.3; color: var(--navy-deep); }
+  .brand-word{ font-family:var(--display); font-weight:700; font-size: 1.1875rem; line-height:1.3; color: var(--navy-deep); }
   .brand-accent-bar{ height: 3px; background: linear-gradient(90deg, var(--navy) 0%, var(--cyan) 100%); border-radius: 2px; margin-bottom: 20px; }
-  .back-link{ font-size: 13px; color: var(--gray); text-decoration:none; display:inline-block; margin-bottom: 14px; }
+  .back-link{ font-size: 0.8125rem; color: var(--gray); text-decoration:none; display:inline-block; margin-bottom: 14px; }
   .back-link:hover{ color: var(--navy); }
   .card{ background: var(--surface); border-radius: 16px; border: 1px solid var(--line); padding: 22px; box-shadow: 0 1px 2px rgba(22,33,62,0.04), 0 12px 32px rgba(22,33,62,0.06); margin-bottom: 20px; }
-  h1{ font-family:'Space Grotesk', sans-serif; font-size: 22px; margin: 0 0 4px; color: var(--navy-deep); }
-  h2{ font-family:'Space Grotesk', sans-serif; font-size: 16px; margin: 0 0 4px; color: var(--navy-deep); }
-  p{ line-height:1.55; color: var(--ink-soft); font-size: 13.5px; margin: 0 0 10px; }
-  .hint{ font-size: 12.5px; color: var(--gray); }
+  h1{ font-family:var(--display); font-size: 1.375rem; margin: 0 0 4px; color: var(--navy-deep); }
+  h2{ font-family:var(--display); font-size: 1rem; margin: 0 0 4px; color: var(--navy-deep); }
+  p{ line-height:1.55; color: var(--ink-soft); font-size: 0.8438rem; margin: 0 0 10px; }
+  .hint{ font-size: 0.7812rem; color: var(--gray); }
+  details.more summary{ cursor:pointer; font-family:var(--display); font-weight:600; font-size: 0.875rem; color: var(--navy); }
   .row{ display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap; }
 
-  .segmented{ display:inline-flex; border:1.5px solid var(--line); border-radius: 10px; overflow:hidden; background:#fff; }
-  .segmented button{ font-family:'Space Grotesk', sans-serif; font-weight:600; font-size:13px; padding: 8px 14px; border:none; background:#fff; color: var(--ink-soft); cursor:pointer; border-right:1px solid var(--line); }
+  .segmented{ display:inline-flex; border:1.5px solid var(--line); border-radius: 10px; overflow:hidden; background:var(--surface); }
+  .segmented button{ font-family:var(--display); font-weight:600; font-size:0.8125rem; padding: 8px 14px; border:none; background:var(--surface); color: var(--ink-soft); cursor:pointer; border-right:1px solid var(--line); }
   .segmented button:last-child{ border-right:none; }
-  .segmented button[aria-pressed="true"]{ background: var(--navy); color:#fff; }
+  .segmented button[aria-pressed="true"]{ background: var(--navy); color:var(--btn-ink); }
   .tabs{ display:flex; gap:4px; border-bottom: 1.5px solid var(--line); margin: 6px 0 18px; overflow-x:auto; }
-  .tab{ font-family:'Space Grotesk', sans-serif; font-weight:600; font-size:14px; color: var(--gray); background:none; border:none; padding: 10px 16px; cursor:pointer; border-bottom: 2.5px solid transparent; white-space:nowrap; }
+  .tab{ font-family:var(--display); font-weight:600; font-size:0.875rem; color: var(--gray); background:none; border:none; padding: 10px 16px; cursor:pointer; border-bottom: 2.5px solid transparent; white-space:nowrap; }
   .tab[aria-selected="true"]{ color: var(--navy); border-bottom-color: var(--navy); }
   button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible{ outline: 2px solid var(--cyan); outline-offset: 2px; }
 
-  button.btn{ font-family:'Space Grotesk', sans-serif; font-weight:600; font-size:13px; border-radius: 8px; padding: 8px 14px; border: 1px solid var(--line); cursor:pointer; background:#fff; color: var(--ink-soft); }
+  button.btn{ font-family:var(--display); font-weight:600; font-size:0.8125rem; border-radius: 8px; padding: 8px 14px; border: 1px solid var(--line); cursor:pointer; background:var(--surface); color: var(--ink-soft); }
   button.btn:hover{ border-color: var(--cyan); }
-  button.btn.primary{ background: linear-gradient(90deg, var(--navy) 0%, var(--navy-deep) 100%); color:#fff; border-color: transparent; }
+  button.btn.primary{ background: linear-gradient(90deg, var(--navy) 0%, var(--primary-strong) 100%); color:var(--btn-ink); border-color: transparent; }
   button.btn:disabled{ opacity:.55; cursor:default; }
-  .error-line{ font-size: 13px; color: var(--warn); margin: 0 0 12px; min-height: 1px; }
+  .error-line{ font-size: 0.8125rem; color: var(--warn); margin: 0 0 12px; min-height: 1px; }
 
   .tiles{ display:grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; }
-  .tile{ border:1px solid var(--line); border-radius: 12px; padding: 14px 16px; background:#FBFCFE; }
-  .tile .num{ font-family:'Space Grotesk', sans-serif; font-weight:700; font-size: 28px; color: var(--navy-deep); line-height:1.1; font-variant-numeric: tabular-nums; }
-  .tile .lbl{ font-size: 12px; color: var(--ink-soft); margin-top: 4px; line-height:1.35; }
-  .delta{ display:inline-block; font-size: 12px; font-weight:600; margin-top: 6px; padding: 1px 8px; border-radius: 20px; background:#EEF2F7; color: var(--ink-soft); }
-  .delta.up{ background:#E4F3EA; color: var(--ok); }
-  .delta.down{ background:#F6E9E1; color: var(--warn); }
+  .tile{ border:1px solid var(--line); border-radius: 12px; padding: 14px 16px; background:var(--bg); }
+  .tile .num{ font-family:var(--display); font-weight:700; font-size: 1.75rem; color: var(--navy-deep); line-height:1.1; font-variant-numeric: tabular-nums; }
+  .tile{ display:flex; flex-direction:column; align-items:flex-start; }
+  .tile .lbl{ font-size: 0.75rem; color: var(--ink-soft); margin-top: 4px; line-height:1.35; min-height: 2.7em; }
+  .delta{ display:inline-block; font-size: 0.75rem; font-weight:600; margin-top: 6px; padding: 1px 8px; border-radius: 20px; background:var(--tint); color: var(--ink-soft); }
+  .delta.up{ background:var(--ok-bg); color: var(--ok); }
+  .delta.down{ background:var(--warn-bg); color: var(--warn); }
 
 
   .grid-2{ display:grid; grid-template-columns: 1fr 1fr; gap: 20px; }
@@ -58,24 +61,26 @@
 
 
   .toolbar{ display:flex; gap:10px; flex-wrap:wrap; margin: 12px 0; }
-  .toolbar input, .toolbar select{ padding: 9px 12px; border: 1.5px solid var(--line); border-radius: 9px; font: inherit; font-size: 13.5px; background:#fff; color: var(--ink); }
+  .toolbar input, .toolbar select{ padding: 9px 12px; border: 1.5px solid var(--line); border-radius: 9px; font: inherit; font-size: 0.8438rem; background:var(--surface); color: var(--ink); }
   .toolbar input{ flex: 1 1 220px; }
   .table-wrap{ overflow-x:auto; }
-  table.data{ width:100%; border-collapse: collapse; font-size: 13px; }
-  table.data th{ text-align:left; font-family:'Space Grotesk', sans-serif; font-size: 11.5px; letter-spacing: .04em; text-transform: uppercase; color: var(--gray); padding: 8px 10px; border-bottom: 1.5px solid var(--line); white-space:nowrap; }
+  table.data{ width:100%; border-collapse: collapse; font-size: 0.8125rem; }
+  table.data th{ text-align:left; font-family:var(--display); font-size: 0.7188rem; letter-spacing: .04em; text-transform: uppercase; color: var(--gray); padding: 8px 10px; border-bottom: 1.5px solid var(--line); white-space:nowrap; }
   table.data td{ padding: 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
-  tr.expand td{ background:#F7FAFD; font-size: 12.5px; line-height:1.6; }
-  .pill{ display:inline-block; font-size: 11.5px; font-weight:600; padding: 2px 9px; border-radius: 20px; background:#EEF3FA; color: var(--navy); white-space:nowrap; }
-  .pill.Hot{ background:#F6E9E1; color: var(--warn); } .pill.Warm{ background:#FFF4D6; color:#8A6410; } .pill.Nurture{ background:#F0F2F5; color: var(--ink-soft); }
+  tr.expand td{ background:var(--bg); font-size: 0.7812rem; line-height:1.6; }
+  .pill{ display:inline-block; font-size: 0.7188rem; font-weight:600; padding: 2px 9px; border-radius: 20px; background:var(--tint); color: var(--navy); white-space:nowrap; }
+  .pill.Hot{ background:var(--warn-bg); color: var(--warn); } .pill.Warm{ background:var(--note-bg); color:var(--note-ink); } .pill.Nurture{ background:var(--bg); color: var(--ink-soft); }
   .linklike{ background:none; border:none; padding:0; font:inherit; color: var(--navy); text-decoration: underline; cursor:pointer; }
-  .foot-note{ font-size: 12px; color: var(--gray); line-height:1.6; }
+  .foot-note{ font-size: 0.75rem; color: var(--gray); line-height:1.6; }
   [hidden]{ display:none !important; }
 </style>
+<link rel="stylesheet" href="pa-theme.css">
 <link rel="stylesheet" href="charts.css">
 <script src="company-core.js"></script>
 <script src="charts.js"></script>
 </head>
 <body>
+<script src="pa-shell.js"></script>
 <div class="wrap">
   <a href="lms-dashboard.html" class="brand-header">
     <svg width="28" height="28" viewBox="0 0 40 40" aria-hidden="true">
@@ -83,7 +88,7 @@
       <polygon points="20,10 29,15 29,25 20,30 11,25 11,15" fill="none" stroke="#35C2E8" stroke-width="1.5"/>
     </svg>
     <div>
-      <div style="font-family:'IBM Plex Sans', sans-serif; font-weight:600; font-size:10.5px; letter-spacing:0.06em; color:var(--gray); line-height:1;">PRODUCT ADVISORY</div>
+      <div style="font-family:var(--sans); font-weight:600; font-size:0.6562rem; letter-spacing:0.06em; color:var(--gray); line-height:1;">PRODUCT ADVISORY</div>
       <div class="brand-word">Reports</div>
     </div>
   </a>
@@ -137,14 +142,17 @@
         <div class="tiles" id="kpiTiles"></div>
 
         <div class="grid-2" style="margin-top:22px;">
-          <div><h2>Activity per day</h2><div id="chartActivity"></div></div>
+          <div><h2 id="activityTitle">Activity per day</h2><p class="hint" id="activityHint"></p><div id="chartActivity"></div></div>
           <div><h2>Where people land</h2><p class="hint">Level of everyone who finished the assessment in this period.</p><div id="chartTiers"></div></div>
         </div>
         <h2 style="margin-top:22px;">Average score by skill area</h2>
+        <p class="hint" id="skillsHint"></p>
         <div id="chartSkills"></div>
-        <p class="insight-title">Insights</p>
-        <div class="insights" id="insightsOverview"></div>
-        <div class="insights" id="insightsSkills" style="margin-top:8px;"></div>
+        <details class="more" style="margin-top:18px;">
+          <summary id="insightsSummary">All observations</summary>
+          <div class="insights" id="insightsOverview"></div>
+          <div class="insights" id="insightsSkills" style="margin-top:8px;"></div>
+        </details>
       </section>
 
       <!-- ============ FUNNEL ============ -->
@@ -163,7 +171,7 @@
       <section id="panel-leads" role="tabpanel" aria-labelledby="tab-leads" hidden>
         <div class="tiles" id="leadKpis"></div>
         <div class="grid-2" style="margin-top:22px;">
-          <div><h2>Requests per day</h2><div id="chartLeads"></div></div>
+          <div><h2 id="leadsTitle">Requests per day</h2><div id="chartLeads"></div></div>
           <div><h2>Fit</h2><p class="hint">Hot is the strongest.</p><div id="barsFit"></div></div>
         </div>
         <div class="grid-2" style="margin-top:22px;">
@@ -326,6 +334,20 @@ function tiles(id, list){
     h('div', { class: 'hint', text: k.snapshot ? 'right now, not compared' : 'vs ' + k.prev + ' before', style: 'margin-top:4px;' }))));
 }
 
+/* Daily counts are mostly zeros over a long period, which draws as a saw-tooth. Over 30 days and more they are
+   added up by week, and over a year by 30-day block. Blocks are counted back from today and the oldest days that
+   do not fill a whole block are left out, so the last point is never a part-week that looks like a drop. */
+function bucketed(series, days){
+  const size = days <= 14 ? 1 : days <= 90 ? 7 : 30;
+  const unit = size === 1 ? 'day' : size === 7 ? 'week' : '30 days';
+  const n = series.labels.length, skip = n % size, count = Math.floor(n / size);
+  if (size === 1) return { unit, size, skip: 0, labels: series.labels, sum: (v) => v };
+  const labels = [];
+  for (let k = 0; k < count; k++) labels.push(series.labels[skip + k * size]);
+  const sum = (v) => { const out = []; for (let k = 0; k < count; k++) out.push(v.slice(skip + k * size, skip + (k + 1) * size).reduce((a, b) => a + b, 0)); return out; };
+  return { unit, size, skip, labels, sum };
+}
+
 function render(){
   const r = report;
   $('generated').textContent = 'Updated ' + new Date(r.generatedAt).toLocaleString() + '. Showing the last ' + r.days + ' days compared with the ' + r.days + ' before.';
@@ -333,21 +355,29 @@ function render(){
 
   insightList('summaryList', r.summary);
   tiles('kpiTiles', r.kpis);
-  Charts.line($('chartActivity'), { title: 'Activity per day', integer: true, labels: r.series.labels, series: [
-    { name: 'Assessments completed', color: '#1A4584', values: r.series.assessments },
-    { name: 'Requests', color: '#35C2E8', values: r.series.requests },
-    { name: 'Accounts created', color: '#E08A3C', values: r.series.accounts }] });
+  const b = bucketed(r.series, r.days);
+  $('activityTitle').textContent = 'Activity per ' + b.unit;
+  $('activityHint').textContent = b.size === 1 ? '' : 'Each point adds up ' + b.size + ' days, counted back from today' + (b.skip ? ' (the oldest ' + b.skip + ' day' + (b.skip === 1 ? ' is' : 's are') + ' left out).' : '.');
+  $('leadsTitle').textContent = 'Requests per ' + b.unit;
+  Charts.line($('chartActivity'), { title: 'Activity per ' + b.unit, integer: true, labels: b.labels, series: [
+    { name: 'Assessments completed', color: 'var(--navy)', values: b.sum(r.series.assessments) },
+    { name: 'Requests', color: 'var(--cyan)', values: b.sum(r.series.requests) },
+    { name: 'Accounts created', color: '#E08A3C', values: b.sum(r.series.accounts) }] });
   Charts.bars($('chartTiers'), r.skills.tiers.map(t => ({ label: t.label, value: t.count })));
-  Charts.bars($('chartSkills'), r.skills.areas.map(a => ({ label: a.label, value: a.avg, note: a.n ? 'n=' + a.n : '' })), { max: 100, suffix: '%' });
+  // How many assessments each average is based on: said once, and only repeated on an area whose count differs.
+  const most = Math.max(0, ...r.skills.areas.map(a => a.n || 0));
+  $('skillsHint').textContent = most ? 'Average of ' + most + ' assessment' + (most === 1 ? '' : 's') + ' in this period.' : 'No assessments in this period yet.';
+  Charts.bars($('chartSkills'), r.skills.areas.map(a => ({ label: a.label, value: a.avg, note: a.n && a.n !== most ? 'based on ' + a.n : '' })), { max: 100, suffix: '%' });
   insightList('insightsOverview', r.insights.overview);
   insightList('insightsSkills', r.insights.skills);
+  $('insightsSummary').textContent = 'All observations (' + (r.insights.overview.length + r.insights.skills.length) + ')';
 
   Charts.funnel($('funnelChart'), r.funnel.steps, r.funnel.worst);
   insightList('insightsFunnel', r.insights.funnel);
   $('funnelNotes').textContent = r.notes.join(' ');
 
   tiles('leadKpis', [kp.requests, kp.hotwarm, { key: 'waiting', label: 'Hot requests waiting 2+ days', cur: r.leads.hotWaiting, prev: 0, pct: null, dir: 'flat', snapshot: true, note: 'Hot requests still marked New' }]);
-  Charts.line($('chartLeads'), { title: 'Requests per day', integer: true, labels: r.series.labels, series: [{ name: 'Requests', color: '#35C2E8', values: r.series.requests }] });
+  Charts.line($('chartLeads'), { title: 'Requests per ' + b.unit, integer: true, labels: b.labels, series: [{ name: 'Requests', color: 'var(--cyan)', values: b.sum(r.series.requests) }] });
   const bars = (id, list) => Charts.bars($(id), list.map(x => ({ label: x.label, value: x.count })));
   bars('barsFit', r.leads.byFit); bars('barsSource', r.leads.bySource); bars('barsWho', r.leads.byWho);
   bars('barsTimeline', r.leads.byTimeline); bars('barsSize', r.leads.bySize); bars('barsPipeline', r.leads.pipeline);
@@ -384,7 +414,7 @@ Array.prototype.forEach.call(document.querySelectorAll('[data-section]'), btn =>
   if (res && res.ok === true){
     out.appendChild(h('div', { class: 'ai-box' }, res.text, h('small', { text: 'Written by an AI model from anonymous totals only. Check it against the numbers above.' })));
   } else {
-    out.appendChild(h('div', { class: 'ai-box', style: 'background:#FFF9E6; border-color:#E8D9A6;' }, errorText(res)));
+    out.appendChild(h('div', { class: 'ai-box', style: 'background:var(--note-bg); border-color:var(--note-line);' }, errorText(res)));
   }
 }));
 
