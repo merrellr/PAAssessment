@@ -142,6 +142,11 @@ function doGet(e) {
     return jsonpOut_(p.callback, feedbackEndpoint_(p.idToken || "", p.topic || "", p.rating || "", p.message || "", p.page || ""));
   }
 
+  if (e.parameter.action === "emailPrefs") {
+    const p = e.parameter;
+    return jsonpOut_(p.callback, emailPrefsEndpoint_(p.u || "", p.k || "", p.kind || "", p.freq || ""));
+  }
+
   if (e.parameter.action === "askLessons") {
     return jsonpOut_(e.parameter.callback, askLessonsEndpoint_(e.parameter.idToken || "", e.parameter.q || "", e.parameter.ctx || ""));
   }
@@ -721,7 +726,8 @@ function deleteAccountData_(idToken) {
         progress: deleteRowsByEmail_(ss.getSheetByName(PROGRESS_SHEET_NAME), 1, who.email),
         welcomes: deleteRowsByEmail_(ss.getSheetByName(WELCOME_SHEET_NAME_), 2, who.email) +
           deleteRowsByEmail_(ss.getSheetByName(ADMIN_WELCOME_SHEET_NAME_), 3, who.email) +
-          deleteRowsByEmail_(ss.getSheetByName(TOOL_LAUNCH_SHEET_NAME_), 2, who.email)
+          deleteRowsByEmail_(ss.getSheetByName(TOOL_LAUNCH_SHEET_NAME_), 2, who.email),
+        notifications: deleteRowsByEmail_(ss.getSheetByName(NOTIFY_SHEET_NAME_), 2, who.email)
       }
     };
   } catch (err) {
@@ -2359,4 +2365,401 @@ function feedbackEndpoint_(idToken, topic, rating, message, page) {
   } finally {
     if (locked) lock.releaseLock();
   }
+}
+
+
+/* ==================================================================
+   16. CHECK-IN EMAILS (learners) AND COMPANY REPORTS (admins)
+   ------------------------------------------------------------------
+   Every learner gets a short check-in on their goal, their plan and
+   their next lesson, and every company admin a summary of their team
+   with a link to the full report. Weekly unless they choose daily,
+   monthly or off on My profile (or from the link in any of these
+   emails, which needs no sign-in). An hourly schedule sends whatever
+   is due from 8am (script time zone), and stops for the day well
+   before the daily email allowance runs out, so invites, welcomes and
+   feedback always get through; anything left goes out on the next run.
+
+   The pure logic (what is due, what the emails say) is in notify.gs,
+   which is built from the website's own files. This part reads the
+   data and sends.
+
+   ONE-TIME SETUP
+   1. Add notify.gs: in the editor, Files > + > Script, name it
+      "notify", paste apps-script/notify.gs.
+   2. A key so the schedule can read everyone's progress (a scheduled
+      run has no signed-in person, so the security rules would refuse
+      it): Firebase console > Project settings > Service accounts >
+      Generate new private key. Open the downloaded file, copy ALL of
+      it, and in Apps Script > Project Settings > Script properties add
+      FIREBASE_SERVICE_ACCOUNT with the whole file as the value. Delete
+      the downloaded file afterwards. Never paste it anywhere else.
+   3. Run checkNotificationsSetup once. It asks for permission, then
+      logs how many emails would go out now, without sending any.
+   4. Run sendMyCheckinPreview to get your own check-in by email.
+   5. Run installNotifications to switch the schedule on
+      (removeNotifications switches it off).
+   6. Deploy > Manage deployments > edit > New version, so the email
+      settings page (email-settings.html) can save choices.
+   The "Notifications" tab records what was sent to whom and when.
+   ================================================================== */
+var NOTIFY_SHEET_NAME_ = 'Notifications';
+var NOTIFY_HEADERS_ = ['Key', 'User id', 'Email', 'Kind', 'Company', 'Frequency', 'Last sent', 'Result'];
+var NOTIFY_MAIL_RESERVE_ = 60;          // left in the daily allowance for invites, welcomes and feedback
+var NOTIFY_TIME_BUDGET_MS_ = 270000;    // 4.5 minutes; Apps Script stops any run at 6
+var NOTIFY_SCOPE_ = 'https://www.googleapis.com/auth/cloud-platform';
+
+/* ---------- reading Firestore as the project (service account) ---------- */
+function b64url_(bytesOrString) { return Utilities.base64EncodeWebSafe(bytesOrString).replace(/=+$/, ''); }
+
+// A short-lived access token for the service account in FIREBASE_SERVICE_ACCOUNT.
+function fsServiceToken_() {
+  var props = PropertiesService.getScriptProperties();
+  var cached = props.getProperty('fs_sa_token');
+  if (cached) {
+    try { var c = JSON.parse(cached); if (c.exp > Date.now() + 60000) return c.token; } catch (err) { /* make a new one */ }
+  }
+  var raw = props.getProperty('FIREBASE_SERVICE_ACCOUNT');
+  if (!raw) throw new Error('no_service_account');
+  var sa = JSON.parse(raw);
+  var now = Math.floor(Date.now() / 1000);
+  var head = b64url_(JSON.stringify({ alg: 'RS256', typ: 'JWT' }));
+  var claim = b64url_(JSON.stringify({ iss: sa.client_email, scope: NOTIFY_SCOPE_, aud: 'https://oauth2.googleapis.com/token', iat: now, exp: now + 3600 }));
+  var sig = b64url_(Utilities.computeRsaSha256Signature(head + '.' + claim, sa.private_key));
+  var res = UrlFetchApp.fetch('https://oauth2.googleapis.com/token', {
+    method: 'post', payload: { grant_type: 'urn:ietf:params:oauth:grant-type:jwt-bearer', assertion: head + '.' + claim + '.' + sig }, muteHttpExceptions: true
+  });
+  if (res.getResponseCode() !== 200) throw new Error('token_' + res.getResponseCode());
+  var token = JSON.parse(res.getContentText()).access_token;
+  props.setProperty('fs_sa_token', JSON.stringify({ token: token, exp: Date.now() + 3300000 }));
+  return token;
+}
+
+function fsBase_() { return 'https://firestore.googleapis.com/v1/projects/' + FIRESTORE_PROJECT_ID_ + '/databases/(default)/documents'; }
+
+function fsCall_(method, url, body) {
+  var opts = { method: method, headers: { Authorization: 'Bearer ' + fsServiceToken_() }, muteHttpExceptions: true };
+  if (body) { opts.contentType = 'application/json'; opts.payload = JSON.stringify(body); }
+  var res = UrlFetchApp.fetch(url, opts);
+  var code = res.getResponseCode();
+  if (code === 404) return null;
+  if (code < 200 || code >= 300) throw new Error('firestore_' + code);
+  return JSON.parse(res.getContentText() || '{}');
+}
+
+// Firestore's typed values to plain ones (timestamps stay ISO strings).
+function fsVal_(v) {
+  if (!v) return null;
+  if ('stringValue' in v) return v.stringValue;
+  if ('integerValue' in v) return Number(v.integerValue);
+  if ('doubleValue' in v) return Number(v.doubleValue);
+  if ('booleanValue' in v) return !!v.booleanValue;
+  if ('timestampValue' in v) return v.timestampValue;
+  if ('mapValue' in v) return fsFields_(v.mapValue.fields);
+  if ('arrayValue' in v) return (v.arrayValue.values || []).map(fsVal_);
+  return null;
+}
+function fsFields_(f) { var o = {}; Object.keys(f || {}).forEach(function (k) { o[k] = fsVal_(f[k]); }); return o; }
+function fsId_(name) { return String(name).split('/').pop(); }
+function fsMask_(fields) { return (fields || []).map(function (f) { return 'mask.fieldPaths=' + encodeURIComponent(f); }).join('&'); }
+
+function fsGet_(path, fields) {
+  var d = fsCall_('get', fsBase_() + '/' + path + (fields ? '?' + fsMask_(fields) : ''));
+  return d ? fsFields_(d.fields) : null;
+}
+
+// Every document in a collection: [{ id, data }].
+function fsList_(path, fields) {
+  var out = [], page = '', guard = 0;
+  do {
+    var q = ['pageSize=300'];
+    if (fields) q.push(fsMask_(fields));
+    if (page) q.push('pageToken=' + encodeURIComponent(page));
+    var d = fsCall_('get', fsBase_() + '/' + path + '?' + q.join('&')) || {};
+    (d.documents || []).forEach(function (x) { out.push({ id: fsId_(x.name), data: fsFields_(x.fields) }); });
+    page = d.nextPageToken || '';
+  } while (page && ++guard < 200);
+  return out;
+}
+
+// Documents whose field equals a string: [{ id, data }].
+function fsWhere_(collection, field, value) {
+  var d = fsCall_('post', fsBase_() + ':runQuery', { structuredQuery: {
+    from: [{ collectionId: collection }],
+    where: { fieldFilter: { field: { fieldPath: field }, op: 'EQUAL', value: { stringValue: String(value) } } } } }) || [];
+  return d.filter(function (r) { return r.document; }).map(function (r) { return { id: fsId_(r.document.name), data: fsFields_(r.document.fields) }; });
+}
+
+// Several documents of one collection by id: { id: data }.
+function fsGetMany_(collection, ids, fields) {
+  var out = {};
+  for (var i = 0; i < ids.length; i += 100) {
+    var names = ids.slice(i, i + 100).map(function (id) { return 'projects/' + FIRESTORE_PROJECT_ID_ + '/databases/(default)/documents/' + collection + '/' + id; });
+    var body = { documents: names };
+    if (fields) body.mask = { fieldPaths: fields };
+    (fsCall_('post', fsBase_() + ':batchGet', body) || []).forEach(function (r) { if (r.found) out[fsId_(r.found.name)] = fsFields_(r.found.fields); });
+  }
+  return out;
+}
+
+// Sets notify.<kind> on an existing progress document (nothing else changes).
+function fsSetNotify_(uid, kind, freq) {
+  var body = { fields: { notify: { mapValue: { fields: {} } } } };
+  body.fields.notify.mapValue.fields[kind] = { stringValue: freq };
+  return fsCall_('patch', fsBase_() + '/progress/' + encodeURIComponent(uid) + '?updateMask.fieldPaths=' + encodeURIComponent('notify.' + kind) + '&currentDocument.exists=true', body);
+}
+
+// Every account: [{ uid, email, name, verified, disabled, createdAtMs }].
+function notifyUsers_() {
+  var out = [], page = '', guard = 0;
+  do {
+    var res = UrlFetchApp.fetch('https://identitytoolkit.googleapis.com/v1/projects/' + FIRESTORE_PROJECT_ID_ + '/accounts:batchGet?maxResults=1000' + (page ? '&nextPageToken=' + encodeURIComponent(page) : ''),
+      { headers: { Authorization: 'Bearer ' + fsServiceToken_() }, muteHttpExceptions: true });
+    if (res.getResponseCode() !== 200) throw new Error('users_' + res.getResponseCode());
+    var j = JSON.parse(res.getContentText());
+    (j.users || []).forEach(function (u) {
+      out.push({ uid: u.localId, email: String(u.email || '').toLowerCase().trim(), name: String(u.displayName || ''), verified: !!u.emailVerified, disabled: !!u.disabled, createdAtMs: Number(u.createdAt) || 0 });
+    });
+    page = j.nextPageToken || '';
+  } while (page && ++guard < 50);
+  return out;
+}
+
+/* ---------- links in the emails ---------- */
+function notifySecret_() {
+  var props = PropertiesService.getScriptProperties();
+  var s = props.getProperty('NOTIFY_SECRET');
+  if (!s) { s = Utilities.getUuid() + Utilities.getUuid(); props.setProperty('NOTIFY_SECRET', s); }
+  return s;
+}
+// A signature for one account's links, so the settings page needs no sign-in but cannot be used for anyone else.
+function notifySig_(uid) { return b64url_(Utilities.computeHmacSha256Signature('notify:' + uid, notifySecret_())).slice(0, 32); }
+function notifyLinks_(uid, kind) {
+  var q = 'u=' + encodeURIComponent(uid) + '&k=' + notifySig_(uid);
+  return { site: SITE_BASE_URL_, settings: SITE_BASE_URL_ + 'email-settings?' + q, unsubscribe: SITE_BASE_URL_ + 'email-settings?' + q + '&off=' + kind };
+}
+
+/* ---------- the email settings page (opened from a link in an email) ---------- */
+function emailPrefsEndpoint_(uid, sig, kind, freq) {
+  uid = String(uid || '');
+  if (!/^[A-Za-z0-9_-]{6,128}$/.test(uid) || !sig || String(sig) !== notifySig_(uid)) return { ok: false, error: 'bad_link' };
+  try {
+    if (kind) {
+      if (['checkin', 'orgReport'].indexOf(kind) === -1 || NotifyCore.FREQS.indexOf(freq) === -1) return { ok: false, error: 'bad_choice' };
+      if (fsSetNotify_(uid, kind, freq) === null) return { ok: false, error: 'no_account' };
+    }
+    var doc = fsGet_('progress/' + encodeURIComponent(uid), ['notify']);
+    if (!doc) return { ok: false, error: 'no_account' };
+    var prefs = NotifyCore.prefsOf(doc);
+    var m = fsGet_('memberships/' + encodeURIComponent(uid), ['role', 'status', 'orgId']);
+    var admin = !!(m && m.role === 'admin' && m.status === 'active');
+    var org = admin && m.orgId ? fsGet_('orgs/' + encodeURIComponent(m.orgId), ['name']) : null;
+    return { ok: true, checkin: prefs.checkin, orgReport: prefs.orgReport, admin: admin, orgName: org && org.name ? String(org.name) : '' };
+  } catch (err) {
+    return { ok: false, error: String(err && err.message) === 'no_service_account' ? 'not_set_up' : 'server_error' };
+  }
+}
+
+/* ---------- what was sent (the Notifications tab) ---------- */
+function notifySheet_() {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sheet = ss.getSheetByName(NOTIFY_SHEET_NAME_);
+  if (!sheet) { sheet = ss.insertSheet(NOTIFY_SHEET_NAME_); sheet.appendRow(NOTIFY_HEADERS_); sheet.setFrozenRows(1); }
+  return sheet;
+}
+// { key: { row, lastMs } }
+function notifyState_(sheet) {
+  var out = {};
+  var v = sheet.getDataRange().getValues();
+  for (var i = 1; i < v.length; i++) {
+    var t = v[i][6] instanceof Date ? v[i][6].getTime() : Date.parse(v[i][6]);
+    out[String(v[i][0])] = { row: i + 1, lastMs: isFinite(t) ? t : 0 };
+  }
+  return out;
+}
+function notifyRecord_(sheet, state, key, cells) {
+  var row = [key].concat(cells).map(leadSafeCell_);
+  if (state[key]) sheet.getRange(state[key].row, 1, 1, row.length).setValues([row]);
+  else { sheet.appendRow(row); state[key] = { row: sheet.getLastRow(), lastMs: 0 }; }
+}
+
+// The script time zone's offset from UTC, in minutes, at that moment.
+function notifyOffsetMin_(ms) {
+  var z = Utilities.formatDate(new Date(ms), Session.getScriptTimeZone(), 'Z');   // e.g. -0700
+  var m = /^([+-])(\d\d)(\d\d)$/.exec(z);
+  return m ? (m[1] === '-' ? -1 : 1) * (Number(m[2]) * 60 + Number(m[3])) : 0;
+}
+
+// The latest assessment per email, from the Responses tab (older accounts keep it only there).
+function notifyResultsByEmail_() {
+  var out = {};
+  var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(SHEET_NAME);
+  if (!sheet) return out;
+  var v = sheet.getDataRange().getValues();
+  for (var i = 1; i < v.length; i++) {
+    var email = String(v[i][2] || '').toLowerCase().trim();
+    if (!email) continue;
+    var cat = {};
+    CATEGORY_KEYS.forEach(function (k, j) { cat[k] = Number(v[i][9 + j]) || 0; });
+    out[email] = { overallPct: Number(v[i][7]) || 0, tier: String(v[i][8] || ''), categoryPct: cat };   // later rows win
+  }
+  return out;
+}
+
+// Everyone's average, for "how your team compares" in the admin report.
+function notifyPlatform_() {
+  var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(SHEET_NAME);
+  var rows = sheet ? sheet.getDataRange().getValues().slice(1) : [];
+  var avg = {};
+  CATEGORY_KEYS.forEach(function (k, j) {
+    var sum = rows.reduce(function (a, r) { return a + (Number(r[9 + j]) || 0); }, 0);
+    avg[k] = rows.length ? Math.round(sum / rows.length) : 0;
+  });
+  return { totalCompletions: rows.length, categoryAverages: avg };
+}
+
+// One company's people, invites and snapshots, shaped as company.html has them.
+function notifyOrgData_(orgId) {
+  var org = fsGet_('orgs/' + encodeURIComponent(orgId));
+  if (!org) return null;
+  org.id = orgId;
+  var ms = function (iso) { var t = Date.parse(iso || ''); return isFinite(t) ? t : 0; };
+  var memberships = fsWhere_('memberships', 'orgId', orgId).map(function (d) { return Object.assign({ id: d.id }, d.data, { joinedAtMs: ms(d.data.joinedAt) }); });
+  var invites = fsWhere_('invites', 'orgId', orgId).map(function (d) { return Object.assign({ id: d.id }, d.data, { createdAtMs: ms(d.data.createdAt), expiresAtMs: ms(d.data.expiresAt) }); });
+  var shares = {};
+  fsList_('orgs/' + encodeURIComponent(orgId) + '/members').forEach(function (d) { shares[d.id] = d.data; });
+  var snaps = fsList_('orgs/' + encodeURIComponent(orgId) + '/snapshots').map(function (d) { return Object.assign({}, d.data, { day: d.id, atMs: ms(d.data.at) }); })
+    .sort(function (a, b) { return a.atMs - b.atMs; });
+  var rows = CompanyCore.buildTeamRows(memberships, shares, Date.now()).filter(function (r) { return r.status === 'active'; });
+  return { org: org, rows: rows, invites: invites, snapshots: snaps };
+}
+
+/* ---------- the run ---------- */
+// opts: { dryRun: true } counts what is due without sending; { only: email } limits the run to one person.
+function notifyRun_(nowMs, opts) {
+  opts = opts || {};
+  var started = Date.now();
+  var offset = notifyOffsetMin_(nowMs);
+  var out = { checkinsDue: 0, reportsDue: 0, sent: 0, failed: 0, stopped: '' };
+  if (!opts.dryRun && NotifyCore.localParts(nowMs, offset).hour < NotifyCore.SEND_HOUR) { out.stopped = 'before_8am'; return out; }
+
+  var sheet = notifySheet_();
+  var state = notifyState_(sheet);
+  var users = notifyUsers_().filter(function (u) { return u.email && u.verified && !u.disabled && (!opts.only || u.email === opts.only); });
+  var byUid = {};
+  users.forEach(function (u) { byUid[u.uid] = u; });
+  var prefsDocs = {};
+  fsList_('progress', ['notify']).forEach(function (d) { prefsDocs[d.id] = d.data; });
+  var lastOf = function (key, floorMs) { return Math.max(state[key] ? state[key].lastMs : 0, floorMs || 0); };
+
+  var queue = [];
+  users.forEach(function (u) {
+    var p = NotifyCore.prefsOf(prefsDocs[u.uid] || {});
+    if (NotifyCore.isDue(p.checkin, lastOf('checkin:' + u.uid, u.createdAtMs), nowMs, offset)) queue.push({ kind: 'checkin', user: u, freq: p.checkin });
+  });
+  var archived = {};
+  fsList_('orgs', ['status']).forEach(function (d) { if (d.data.status === 'archived') archived[d.id] = true; });
+  fsList_('memberships', ['orgId', 'role', 'status', 'joinedAt']).forEach(function (d) {
+    var u = byUid[d.id];
+    if (!u || d.data.role !== 'admin' || d.data.status !== 'active' || !d.data.orgId || archived[d.data.orgId]) return;
+    var p = NotifyCore.prefsOf(prefsDocs[d.id] || {});
+    var joined = Date.parse(d.data.joinedAt || '') || 0;
+    if (NotifyCore.isDue(p.orgReport, lastOf('org:' + d.data.orgId + ':' + d.id, joined), nowMs, offset)) queue.push({ kind: 'org', user: u, freq: p.orgReport, orgId: d.data.orgId });
+  });
+  out.checkinsDue = queue.filter(function (q) { return q.kind === 'checkin'; }).length;
+  out.reportsDue = queue.length - out.checkinsDue;
+  if (opts.dryRun || !queue.length) return out;
+
+  var full = fsGetMany_('progress', queue.filter(function (q) { return q.kind === 'checkin'; }).map(function (q) { return q.user.uid; }),
+    ['notify', 'goals', 'lessonLog', 'courses', 'assessmentResult']);
+  var results = null, platform = null, orgs = {};
+  for (var i = 0; i < queue.length; i++) {
+    var q = queue[i], u = q.user;
+    if (Date.now() - started > NOTIFY_TIME_BUDGET_MS_) { out.stopped = 'time'; break; }
+    if (MailApp.getRemainingDailyQuota() <= NOTIFY_MAIL_RESERVE_) { out.stopped = 'daily_limit'; break; }
+    var key, mail, company = '';
+    try {
+      if (q.kind === 'checkin') {
+        key = 'checkin:' + u.uid;
+        var doc = full[u.uid] || {};
+        var assessment = doc.assessmentResult && doc.assessmentResult.categoryPct ? doc.assessmentResult : null;
+        if (!assessment) { results = results || notifyResultsByEmail_(); assessment = results[u.email] || null; }
+        mail = NotifyCore.checkinEmail(NotifyCore.checkin({ name: u.name, progress: doc, assessment: assessment, freq: q.freq, nowMs: nowMs, offsetMin: offset, links: notifyLinks_(u.uid, 'checkin') }));
+      } else {
+        key = 'org:' + q.orgId + ':' + u.uid;
+        if (!(q.orgId in orgs)) orgs[q.orgId] = notifyOrgData_(q.orgId);
+        var od = orgs[q.orgId];
+        if (!od) throw new Error('company not found');
+        company = od.org.name || q.orgId;
+        platform = platform || notifyPlatform_();
+        mail = NotifyCore.orgEmail(NotifyCore.orgReport({ org: od.org, rows: od.rows, invites: od.invites, snapshots: od.snapshots, platform: platform,
+          freq: q.freq, nowMs: nowMs, offsetMin: offset, adminName: u.name, links: notifyLinks_(u.uid, 'orgReport') }));
+      }
+      sendMail_({ to: u.email, subject: mail.subject, body: mail.text, htmlBody: mail.html, name: 'Product Advisory Learning' }, 'assessment');
+      notifyRecord_(sheet, state, key, [u.uid, u.email, q.kind === 'checkin' ? 'Check-in' : 'Company report', company, q.freq, new Date(nowMs), 'Sent']);
+      out.sent++;
+    } catch (err) {
+      out.failed++;
+      // Recorded as tried, so one broken account cannot block the queue every hour.
+      notifyRecord_(sheet, state, key || (q.kind + ':' + u.uid), [u.uid, u.email, q.kind === 'checkin' ? 'Check-in' : 'Company report', company, q.freq, new Date(nowMs), 'Failed: ' + String(err && err.message || err).slice(0, 120)]);
+    }
+  }
+  return out;
+}
+
+// Run by the hourly schedule.
+function runNotifications() {
+  var lock = LockService.getScriptLock();
+  if (!lock.tryLock(1000)) return;   // the last run is still going
+  try { Logger.log(JSON.stringify(notifyRun_(Date.now()))); } finally { lock.releaseLock(); }
+}
+
+// Run these from the editor's function menu.
+function checkNotificationsSetup() {
+  try {
+    var r = notifyRun_(Date.now(), { dryRun: true });
+    Logger.log('Set up correctly. Due now: ' + r.checkinsDue + ' check-ins and ' + r.reportsDue + ' company reports (nothing was sent). ' +
+      'Email allowance left today: ' + MailApp.getRemainingDailyQuota() + '.');
+  } catch (err) {
+    var m = String(err && err.message || err);
+    Logger.log(m === 'no_service_account' ? 'Add the FIREBASE_SERVICE_ACCOUNT script property first (see the setup steps at the top of section 16).'
+      : 'Not working yet: ' + m + '. Check that FIREBASE_SERVICE_ACCOUNT holds the whole key file from Firebase.');
+  }
+}
+
+// Sends you your own check-in now (to the account with your email), whether or not one is due.
+function sendMyCheckinPreview() {
+  var me = Session.getEffectiveUser().getEmail().toLowerCase();
+  var u = notifyUsers_().filter(function (x) { return x.email === me; })[0];
+  if (!u) { Logger.log('No learning account uses ' + me + '. Sign in to the dashboard with it once, then try again.'); return; }
+  var doc = fsGet_('progress/' + encodeURIComponent(u.uid)) || {};
+  var assessment = doc.assessmentResult && doc.assessmentResult.categoryPct ? doc.assessmentResult : (notifyResultsByEmail_()[u.email] || null);
+  var freq = NotifyCore.prefsOf(doc).checkin === 'off' ? 'weekly' : NotifyCore.prefsOf(doc).checkin;
+  var mail = NotifyCore.checkinEmail(NotifyCore.checkin({ name: u.name, progress: doc, assessment: assessment, freq: freq, nowMs: Date.now(), offsetMin: notifyOffsetMin_(Date.now()), links: notifyLinks_(u.uid, 'checkin') }));
+  sendMail_({ to: me, subject: '[Preview] ' + mail.subject, body: mail.text, htmlBody: mail.html, name: 'Product Advisory Learning' }, 'assessment');
+  Logger.log('Sent a preview to ' + me + '.');
+}
+
+// Sends you one company's report now. Put the company id (from the owner console address bar) in the quotes.
+function sendOrgReportPreview(orgId) {
+  orgId = orgId || '';
+  if (!orgId) { Logger.log('Edit this line: sendOrgReportPreview("the company id"), or call it from another function.'); return; }
+  var od = notifyOrgData_(orgId);
+  if (!od) { Logger.log('No company with id ' + orgId + '.'); return; }
+  var me = Session.getEffectiveUser().getEmail().toLowerCase();
+  var mail = NotifyCore.orgEmail(NotifyCore.orgReport({ org: od.org, rows: od.rows, invites: od.invites, snapshots: od.snapshots, platform: notifyPlatform_(),
+    freq: 'weekly', nowMs: Date.now(), offsetMin: notifyOffsetMin_(Date.now()), adminName: '', links: { site: SITE_BASE_URL_ } }));
+  sendMail_({ to: me, subject: '[Preview] ' + mail.subject, body: mail.text, htmlBody: mail.html, name: 'Product Advisory Learning' }, 'assessment');
+  Logger.log('Sent ' + od.org.name + "'s report to " + me + '.');
+}
+
+function installNotifications() {
+  removeNotifications();
+  ScriptApp.newTrigger('runNotifications').timeBased().everyHours(1).create();
+  Logger.log('Check-ins and company reports are on: every hour from 8am (' + Session.getScriptTimeZone() + '), whatever is due goes out.');
+}
+
+function removeNotifications() {
+  ScriptApp.getProjectTriggers().forEach(function (t) { if (t.getHandlerFunction() === 'runNotifications') ScriptApp.deleteTrigger(t); });
+  Logger.log('Check-ins and company reports are off.');
 }

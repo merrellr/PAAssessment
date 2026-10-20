@@ -11,6 +11,8 @@ const sleep = (ms) => new Promise(r => setTimeout(r, ms));
     if (window.__scn === 'member'){
       // Help (pa-shell.js): on every page; checked here on the dashboard
       const helpBtn = document.querySelector('.pa-tools [data-pa="help"]');
+      const wg = document.getElementById('weekGoal');
+      t('the weekly goal shows next to Your Courses, with a way to set it', !wg.hidden && /This week: 0 of 2 lessons/.test(wg.textContent) && /Set a goal/.test(wg.textContent) && wg.getAttribute('href') === '/profile#goals', wg.textContent);
       t('the header has a Help button', !!helpBtn);
       helpBtn.click(); await sleep(60);
       const panel = document.querySelector('.pa-help-back');
@@ -79,8 +81,12 @@ const sleep = (ms) => new Promise(r => setTimeout(r, ms));
     }
     const doneStat = document.getElementById('statAssignedCompleted').textContent.trim();
     if (window.__scn === 'threelessons') t('3 of a course\'s 5 lessons does NOT count as a finished course', doneStat === '0', doneStat);
+    if (window.__scn === 'threelessons') t('a lesson finished today counts toward this week, older ones do not', /This week: 1 of 2 lessons/.test(document.getElementById('weekGoal').textContent) && /Change goal/.test(document.getElementById('weekGoal').textContent) && !document.getElementById('weekGoal').classList.contains('met'), document.getElementById('weekGoal').textContent);
     if (window.__scn === 'allfive') t('all 5 of its 5 lessons does', doneStat === '1', doneStat);
     const companyLink = document.getElementById('companyDashMenuItem');
+    const roleBadge = document.getElementById('profileRoleBadge').textContent;
+    t('the Profile menu shows a role badge', window.__scn === 'owner' ? roleBadge === 'Super admin' : window.__scn === 'admin' ? /^Company admin/.test(roleBadge) : roleBadge === 'Learner', roleBadge);
+    t('"Your details" is gone from the menu; "Your progress" stays', !/Your details/.test(document.getElementById('profileDropdown').textContent) && /Your progress/.test(document.getElementById('profileDropdown').textContent));
     if (window.__scn === 'admin'){
       t('a company admin sees "Company dashboard" under Profile, pointing at the company dashboard', companyLink.style.display === 'block' && companyLink.getAttribute('href') === '/company');
       t('and still gets their own shared record like any member', !!share);

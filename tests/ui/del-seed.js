@@ -16,8 +16,9 @@
   window.__seed = function(store, Timestamp){
     var ts = Timestamp.now();
     store['progress/uDel'] = { courses: {}, profile: { phone: '555' }, orgIds: scn === 'nonmember' ? [] : ['orgOld', 'orgA'] };
+    if (scn === 'goals') { store['progress/uDel'].goals = { weeklyLessons: 3, focus: ['aiOrg'] }; store['progress/uDel'].notify = { checkin: 'monthly' }; store['progress/uDel'].lessonLog = { '2026-10-01': 2 }; }
     if (scn !== 'nonmember'){
-      store['memberships/uDel'] = { orgId: 'orgA', orgName: 'Acme', role: 'member', status: 'active', inviteToken: 't', joinedAt: ts, endedAt: null, email: 'del@acme.com', displayName: 'Del User', phone: '555-0100' };
+      store['memberships/uDel'] = { orgId: 'orgA', orgName: 'Acme', role: scn === 'goalsadmin' ? 'admin' : 'member', status: 'active', inviteToken: 't', joinedAt: ts, endedAt: null, email: 'del@acme.com', displayName: 'Del User', phone: '555-0100' };
       var sh = function(){ return { identity: { name: 'Del User', email: 'del@acme.com' }, assessment: { tier: 'Lots of Experience', overallPct: 80 }, courses: {}, lastActiveAt: null, updatedAt: ts }; };
       store['orgs/orgA/members/uDel'] = sh();
       store['orgs/orgOld/members/uDel'] = sh();

@@ -114,6 +114,8 @@
 </style>
 <link rel="stylesheet" href="pa-theme.css">
 <script src="analytics.js"></script>
+<script src="company-core.js"></script>
+<script src="notify-core.js"></script>
 </head>
 <body>
 <script src="pa-shell.js"></script>
@@ -1000,7 +1002,8 @@ function showCourseComplete(coursesMap){
 }
 
 window.markCompleteAndContinue = async function(){
-  if (!completedLessons.includes(lessonNum)) completedLessons.push(lessonNum);
+  const firstTime = !completedLessons.includes(lessonNum);
+  if (firstTime) completedLessons.push(lessonNum);
 
   const progressRef = doc(db, 'progress', currentUser.uid);
   const snap = await getDoc(progressRef);
@@ -1013,6 +1016,8 @@ window.markCompleteAndContinue = async function(){
     updatedAt: new Date().toISOString(),
     reflections: existingCourseData.reflections || reflections
   };
+  // Lessons finished per day (the learner's own calendar), for the weekly goal and the check-in emails.
+  if (firstTime && window.NotifyCore) data.lessonLog = NotifyCore.logLesson(data.lessonLog, Date.now(), -new Date().getTimezoneOffset());
   await setDoc(progressRef, data);
   // If this person belongs to a company, refresh the copy their company sees.
   // Wait for it (but never longer than a few seconds, and never fail the lesson)

@@ -32,11 +32,51 @@ async function photoTests(store){
   t('"Remove photo" clears it and brings back the initial, here and on the button', store['progress/uDel'].profile.photo === '' && $('avatarCircle').textContent === 'D' && !document.querySelector('.pa-acct-btn img.pa-avatar'));
 }
 
+// Goals and check-in emails: the saved choices show, the controls keep to their limits, and saving writes
+// only the goals and email settings, next to everything else on the person's record.
+async function goalsTests(store){
+  const pressed = () => Array.from($('focusChips').querySelectorAll('button[aria-pressed="true"]')).map(b => b.dataset.k).join();
+  const checked = (kind) => (document.querySelector('.seg[data-kind="' + kind + '"] [aria-checked="true"]') || {}).dataset;
+  if (window.__scn === 'goalsadmin'){
+    t('with nothing saved: a 2-lesson goal, no focus areas, weekly emails', $('goalValue').textContent === '2' && pressed() === '' && checked('checkin').v === 'weekly' && /Every Monday morning/.test($('checkinHint').textContent));
+    t('a company admin also chooses how often the company report comes (weekly by default)', !$('orgReportSetting').hidden && checked('orgReport').v === 'weekly');
+    document.querySelector('.seg[data-kind="orgReport"] [data-v="daily"]').click();
+    $('goalsSaveBtn').click(); await sleep(300);
+    t('the report choice is saved', store['progress/uDel'].notify.orgReport === 'daily' && store['progress/uDel'].notify.checkin === 'weekly');
+    return;
+  }
+  t('the saved goal, focus area and frequency show', $('goalValue').textContent === '3' && pressed() === 'aiOrg' && checked('checkin').v === 'monthly' && /On the 1st/.test($('checkinHint').textContent));
+  t('a member who is not an admin sees no company report setting', $('orgReportSetting').hidden);
+  t('the weekly default is labelled', /Weekly \(default\)/.test(document.querySelector('.seg[data-kind="checkin"] [data-v="weekly"]').textContent));
+  for (let i = 0; i < 12; i++) $('goalPlus').click();
+  t('the goal stops at 10 lessons a week', $('goalValue').textContent === '10' && $('goalPlus').disabled && /about 100 minutes/.test($('goalUnit').textContent));
+  for (let i = 0; i < 12; i++) $('goalMinus').click();
+  t('and at 1', $('goalValue').textContent === '1' && $('goalMinus').disabled && /^lesson a week/.test($('goalUnit').textContent));
+  $('goalPlus').click();
+  const chip = (k) => $('focusChips').querySelector('[data-k="' + k + '"]');
+  chip('discovery').click(); chip('strategy').click();
+  t('three focus areas can be chosen, then the rest are unavailable', pressed() === 'discovery,strategy,aiOrg' && chip('execution').disabled && /3 of 3 chosen/.test($('focusCount').textContent));
+  chip('aiOrg').click();
+  t('choosing one again takes it off', pressed() === 'discovery,strategy' && !chip('execution').disabled);
+  const seg = document.querySelector('.seg[data-kind="checkin"]');
+  seg.querySelector('[aria-checked="true"]').focus();
+  seg.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true }));
+  t('arrow keys move along the email choices', checked('checkin').v === 'off' && document.activeElement === seg.querySelector('[data-v="off"]') && /No check-in emails/.test($('checkinHint').textContent));
+  seg.querySelector('[data-v="daily"]').click();
+  $('goalsSaveBtn').click(); await sleep(300);
+  const d = store['progress/uDel'];
+  t('saving writes the goal, the focus areas and the choice', d.goals.weeklyLessons === 2 && d.goals.focus.join() === 'discovery,strategy' && d.notify.checkin === 'daily' && d.notify.orgReport === 'weekly' && /^Saved/.test($('goalsSuccess').textContent), JSON.stringify(d.goals) + JSON.stringify(d.notify));
+  t('and keeps everything else on the record', d.profile.phone === '555' && d.lessonLog['2026-10-01'] === 2 && Array.isArray(d.orgIds));
+  await window.handleSaveProfile(); await sleep(200);
+  t('saving the profile form afterwards keeps the goals', store['progress/uDel'].goals.weeklyLessons === 2 && store['progress/uDel'].notify.checkin === 'daily');
+}
+
 (async function(){
   try {
     await sleep(1500);
     const store = window.__store;
     if (window.__scn === 'photo') await photoTests(store);
+    else if (/^goals/.test(window.__scn)) await goalsTests(store);
     else {
       $('deleteConfirmText').value = 'DELETE';
       $('deletePassword').value = 'secret';

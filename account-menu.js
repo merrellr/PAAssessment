@@ -43,6 +43,11 @@ if (window.self === window.top) {
     '.pa-acct-item{display:block;width:100%;box-sizing:border-box;text-align:left;padding:8px 4px;font:400 13.5px "IBM Plex Sans",system-ui,sans-serif;color:var(--ink,#16213E);text-decoration:none;cursor:pointer;border:none;background:none;border-radius:6px;}',
     '.pa-acct-item:hover{background:var(--bg,#F7F9FC);}',
     '.pa-acct-item[aria-current="page"]{font-weight:600;color:var(--navy,#1A4584);}',
+    '.pa-acct-label{font:700 10.5px "IBM Plex Sans",system-ui,sans-serif;letter-spacing:.07em;text-transform:uppercase;color:var(--gray,#8A94A6);margin:2px 4px 2px;}',
+    '.pa-acct-badge{display:inline-block;margin-top:7px;padding:2px 9px;border-radius:999px;font:700 10.5px "IBM Plex Sans",system-ui,sans-serif;letter-spacing:.05em;text-transform:uppercase;background:var(--bg,#F1F4F9);color:var(--ink-soft,#4A5568);max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;box-sizing:border-box;}',
+    '.pa-acct-badge.is-super{background:var(--navy,#1A4584);color:var(--btn-ink,#fff);}',
+    '.pa-acct-badge.is-admin{background:var(--tint,#E8F6FC);color:var(--cyan-ink,#0B6E8C);}',
+    '.pa-acct-out{color:var(--warn,#C0622A);}',
     '@media print{.pa-acct{display:none;}}'
   ].join('');
 
@@ -63,6 +68,16 @@ if (window.self === window.top) {
     // The file name, whether the address is clean (/company) or not (/company.html).
     const seg = location.pathname.split('/').pop();
     return !seg ? 'index.html' : /\.html$/.test(seg) ? seg : seg + '.html';
+  }
+
+  // Who this account is here: Super admin (Product Advisory's own team), a company's admin, or a learner.
+  function roleBadge(flags){
+    const b = el('span', 'pa-acct-badge');
+    b.id = 'paAccountRole';
+    if (flags.owner){ b.classList.add('is-super'); b.textContent = 'Super admin'; }
+    else if (flags.companyAdmin){ b.classList.add('is-admin'); b.textContent = 'Company admin' + (flags.orgName ? ' · ' + flags.orgName : ''); b.title = b.textContent; }
+    else b.textContent = 'Learner';
+    return b;
   }
 
   function remove(){
@@ -102,18 +117,26 @@ if (window.self === window.top) {
     menu.hidden = true;
     menu.appendChild(el('div', 'pa-acct-name', user.displayName || (user.email || '').split('@')[0] || 'Your account'));
     menu.appendChild(el('div', 'pa-acct-email', user.email || ''));
-    menu.appendChild(el('div', 'pa-acct-rule'));
+    menu.appendChild(roleBadge(flags));
+    const section = (label) => { menu.appendChild(el('div', 'pa-acct-rule')); if (label) menu.appendChild(el('div', 'pa-acct-label', label)); };
+
+    section('My learning');
     menu.appendChild(link('My learning dashboard', '/lms-dashboard', page === 'lms-dashboard.html'));
     menu.appendChild(link('My profile', '/profile', page === 'profile.html'));
-    if (flags.companyAdmin) menu.appendChild(link('Company dashboard', '/company', page === 'company.html'));
-    if (flags.owner){
-      menu.appendChild(link('Owner console', '/owner', page === 'owner.html'));
-      menu.appendChild(link('Reports', '/reports', page === 'reports.html'));
+    if (flags.companyAdmin || flags.owner){
+      section(flags.owner ? 'Manage' : 'My company');
+      if (flags.companyAdmin) menu.appendChild(link('Company dashboard', '/company', page === 'company.html'));
+      if (flags.owner){
+        menu.appendChild(link('Owner console', '/owner', page === 'owner.html'));
+        menu.appendChild(link('Reports', '/reports', page === 'reports.html'));
+      }
     }
+    section('Product Advisory');
     menu.appendChild(link('Toolkits ↗', 'https://www.productadvisory.co/toolkits', false, true));
     menu.appendChild(link('Request tools', '/tool-requests#suggest', page === 'tool-requests.html'));
-    menu.appendChild(link('Send feedback', '/feedback', page === 'feedback.html'));
     menu.appendChild(link('Visit Product Advisory ↗', 'https://www.productadvisory.co/', false, true));
+    section('Help');
+    menu.appendChild(link('Send feedback', '/feedback', page === 'feedback.html'));
     if (window.PAAnalytics && window.PAAnalytics.reopen){
       const cookies = el('button', 'pa-acct-item', 'Cookie settings');
       cookies.type = 'button';
@@ -121,8 +144,8 @@ if (window.self === window.top) {
       cookies.addEventListener('click', () => { close(false); window.PAAnalytics.reopen(); });
       menu.appendChild(cookies);
     }
-    menu.appendChild(el('div', 'pa-acct-rule'));
-    const out = el('button', 'pa-acct-item', 'Log out');
+    section('');
+    const out = el('button', 'pa-acct-item pa-acct-out', 'Log out');
     out.type = 'button';
     out.id = 'paAccountLogout';
     out.addEventListener('click', () => { close(false); signOut(auth); });
@@ -172,6 +195,7 @@ if (window.self === window.top) {
       getDoc(doc(db, 'memberships', user.uid)).then(s => {
         const m = s.exists() ? s.data() : null;
         flags.companyAdmin = !!(m && m.status === 'active' && m.role === 'admin');
+        flags.orgName = flags.companyAdmin && m.orgName ? String(m.orgName) : '';
       }).catch(() => { /* no company */ })
     ]);
     return flags;

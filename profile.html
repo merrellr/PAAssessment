@@ -78,9 +78,34 @@
   button.btn:disabled{ opacity:0.6; cursor: default; }
 
   .divider{ height:1px; background:var(--line); margin: 20px 0; }
+
+  /* goals and check-in emails */
+  .goal-row{ display:flex; flex-wrap:wrap; align-items:center; gap: 12px 18px; margin: 4px 0 18px; }
+  .stepper{ display:inline-flex; align-items:center; border:1.5px solid var(--line); border-radius: 10px; overflow:hidden; }
+  .stepper button{ width: 40px; height: 40px; border:0; background: var(--surface); color: var(--navy); font-size: 1.25rem; font-weight:700; cursor:pointer; }
+  .stepper button:hover:not(:disabled){ background: var(--tint); }
+  .stepper button:disabled{ color: var(--gray); cursor: default; }
+  .stepper output{ min-width: 46px; text-align:center; font-family:var(--display); font-weight:700; font-size: 1.125rem; color: var(--navy-deep); }
+  .goal-unit{ font-size: 0.875rem; color: var(--ink-soft); }
+  .chipset{ display:flex; flex-wrap:wrap; gap: 8px; margin: 0 0 6px; }
+  .chipset button{ font: inherit; font-size: 0.8125rem; padding: 7px 12px; border-radius: 999px; border: 1.5px solid var(--line); background: var(--surface); color: var(--ink-soft); cursor: pointer; display:inline-flex; align-items:center; gap:6px; }
+  .chipset button:hover:not(:disabled){ border-color: var(--cyan); }
+  .chipset button[aria-pressed="true"]{ border-color: var(--navy); background: var(--navy); color: var(--btn-ink); font-weight:700; }
+  .chipset button[aria-pressed="true"]::before{ content:"✓"; }
+  .chipset button:disabled{ opacity: .45; cursor: default; }
+  .seg{ display:inline-flex; flex-wrap:wrap; border:1.5px solid var(--line); border-radius: 10px; overflow:hidden; }
+  .seg button{ font: inherit; font-size: 0.8438rem; padding: 8px 14px; border:0; border-right:1px solid var(--line); background: var(--surface); color: var(--ink-soft); cursor:pointer; }
+  .seg button:last-child{ border-right:0; }
+  @media (max-width: 520px){ .seg{ display:grid; grid-template-columns: 1fr 1fr; width:100%; } .seg button{ border-bottom:1px solid var(--line); } .seg button:nth-child(2n){ border-right:0; } .seg button:nth-last-child(-n+2){ border-bottom:0; } }
+  .seg button[aria-checked="true"]{ background: var(--navy); color: var(--btn-ink); font-weight:700; }
+  .seg button:focus-visible, .chipset button:focus-visible, .stepper button:focus-visible{ outline: 2px solid var(--cyan); outline-offset: 2px; }
+  .setting{ margin: 0 0 18px; }
+  .setting-hint{ font-size: 0.7812rem; color: var(--gray); margin: 6px 0 0; }
 </style>
 <link rel="stylesheet" href="pa-theme.css">
 <script src="analytics.js"></script>
+<script src="company-core.js"></script>
+<script src="notify-core.js"></script>
 </head>
 <body>
 <script src="pa-shell.js"></script>
@@ -182,6 +207,45 @@
     <div class="field-error" id="editProfileSuccess" style="color:var(--ok);"></div>
 
     <button class="btn btn-primary" onclick="handleSaveProfile()">Save profile</button>
+  </div>
+
+  <div class="card" id="goals" tabindex="-1">
+    <h2>Goals and check-in emails</h2>
+    <p style="margin-top:4px;">Set a weekly goal and up to three areas to focus on. Your check-in email shows how you did, where your plan stands and the next lesson to open.</p>
+
+    <div class="setting">
+      <span class="profile-field-label" id="goalLabel">Weekly goal</span>
+      <div class="goal-row">
+        <div class="stepper" role="group" aria-labelledby="goalLabel">
+          <button type="button" id="goalMinus" aria-label="One lesson fewer">−</button>
+          <output id="goalValue" aria-live="polite">2</output>
+          <button type="button" id="goalPlus" aria-label="One lesson more">+</button>
+        </div>
+        <span class="goal-unit" id="goalUnit">lessons a week, about 20 minutes</span>
+      </div>
+    </div>
+
+    <div class="setting">
+      <span class="profile-field-label" id="focusLabel">Focus areas <span style="font-weight:400; color:var(--gray);" id="focusCount">(choose up to 3)</span></span>
+      <div class="chipset" id="focusChips" role="group" aria-labelledby="focusLabel"></div>
+      <p class="setting-hint">Your next lesson comes from these first. With none chosen, your check-in suggests your two lowest-scoring areas.</p>
+    </div>
+
+    <div class="setting">
+      <span class="profile-field-label" id="checkinLabel">Check-in email</span>
+      <div class="seg" role="radiogroup" aria-labelledby="checkinLabel" data-kind="checkin"></div>
+      <p class="setting-hint" id="checkinHint"></p>
+    </div>
+
+    <div class="setting" id="orgReportSetting" hidden>
+      <span class="profile-field-label" id="orgReportLabel">Company report email</span>
+      <div class="seg" role="radiogroup" aria-labelledby="orgReportLabel" data-kind="orgReport"></div>
+      <p class="setting-hint" id="orgReportHint"></p>
+    </div>
+
+    <div class="field-error" id="goalsError"></div>
+    <div class="field-error" id="goalsSuccess" style="color:var(--ok);"></div>
+    <button class="btn btn-primary" id="goalsSaveBtn" type="button">Save goals and emails</button>
   </div>
 
   <div class="card">
@@ -426,6 +490,102 @@ onAuthStateChanged(auth, async (user) => {
   document.getElementById('editJobTitle').value = profile.jobTitle || '';
   document.getElementById('editCompanySize').value = profile.companySize || '';
   document.getElementById('editIndustry').value = profile.industry || '';
+  showGoals(data);
+  // Company admins also choose how often their company's report comes.
+  getDoc(doc(db, 'memberships', user.uid))
+    .then(m => { if (m.exists() && m.data().role === 'admin' && m.data().status === 'active') $id('orgReportSetting').hidden = false; })
+    .catch(() => { /* not in a company: keep it hidden */ });
+});
+
+/* ---------------------------------------------------------------- goals and check-in emails */
+const $id = (id) => document.getElementById(id);
+const N = window.NotifyCore;
+const goals = { weeklyLessons: N.DEFAULT_GOAL, focus: [], checkin: N.DEFAULT_FREQ, orgReport: N.DEFAULT_FREQ };
+const HINTS = {
+  checkin: { daily: 'Every morning: yesterday, your plan and your next lesson.', weekly: "Every Monday morning: last week's progress, your plan and your next lesson.",
+    monthly: 'On the 1st: last month, your plan and your next lesson.', off: "No check-in emails. You can switch them back on here any time." },
+  orgReport: { daily: "Every morning: your team's numbers, what stands out and a link to the full report.", weekly: "Every Monday morning: your team's week, what stands out and a link to the full report.",
+    monthly: "On the 1st: your team's month and a link to the full report.", off: 'No report emails. The full report is always on your company dashboard.' }
+};
+CompanyCore.DOMAINS.forEach(d => {
+  const b = document.createElement('button');
+  b.type = 'button'; b.dataset.k = d[0]; b.textContent = d[1]; b.setAttribute('aria-pressed', 'false');
+  b.addEventListener('click', () => {
+    const i = goals.focus.indexOf(d[0]);
+    if (i > -1) goals.focus.splice(i, 1); else if (goals.focus.length < N.MAX_FOCUS) goals.focus.push(d[0]);
+    paintGoals();
+  });
+  $id('focusChips').appendChild(b);
+});
+document.querySelectorAll('.seg[data-kind]').forEach(seg => {
+  const kind = seg.dataset.kind;
+  N.FREQS.forEach(f => {
+    const b = document.createElement('button');
+    b.type = 'button'; b.setAttribute('role', 'radio'); b.dataset.v = f;
+    b.textContent = N.FREQ_LABELS[f] + (f === N.DEFAULT_FREQ ? ' (default)' : '');
+    b.addEventListener('click', () => { goals[kind] = f; paintGoals(); });
+    seg.appendChild(b);
+  });
+  // Arrow keys move along the choices, as in any radio group.
+  seg.addEventListener('keydown', (e) => {
+    const i = N.FREQS.indexOf(goals[kind]), step = { ArrowRight: 1, ArrowDown: 1, ArrowLeft: -1, ArrowUp: -1 }[e.key];
+    if (!step) return;
+    e.preventDefault();
+    goals[kind] = N.FREQS[(i + step + N.FREQS.length) % N.FREQS.length];
+    paintGoals();
+    seg.querySelector('[data-v="' + goals[kind] + '"]').focus();
+  });
+});
+$id('goalMinus').addEventListener('click', () => { goals.weeklyLessons = Math.max(N.GOAL_MIN, goals.weeklyLessons - 1); paintGoals(); });
+$id('goalPlus').addEventListener('click', () => { goals.weeklyLessons = Math.min(N.GOAL_MAX, goals.weeklyLessons + 1); paintGoals(); });
+
+function paintGoals(){
+  $id('goalValue').textContent = String(goals.weeklyLessons);
+  $id('goalUnit').textContent = (goals.weeklyLessons === 1 ? 'lesson' : 'lessons') + ' a week, about ' + goals.weeklyLessons * 10 + ' minutes';
+  $id('goalMinus').disabled = goals.weeklyLessons <= N.GOAL_MIN;
+  $id('goalPlus').disabled = goals.weeklyLessons >= N.GOAL_MAX;
+  const full = goals.focus.length >= N.MAX_FOCUS;
+  $id('focusChips').querySelectorAll('button').forEach(b => {
+    const on = goals.focus.indexOf(b.dataset.k) > -1;
+    b.setAttribute('aria-pressed', on ? 'true' : 'false');
+    b.disabled = full && !on;
+  });
+  $id('focusCount').textContent = goals.focus.length ? '(' + goals.focus.length + ' of ' + N.MAX_FOCUS + ' chosen)' : '(choose up to ' + N.MAX_FOCUS + ')';
+  document.querySelectorAll('.seg[data-kind]').forEach(seg => {
+    const kind = seg.dataset.kind;
+    seg.querySelectorAll('button').forEach(b => {
+      const on = b.dataset.v === goals[kind];
+      b.setAttribute('aria-checked', on ? 'true' : 'false');
+      b.tabIndex = on ? 0 : -1;
+    });
+    $id(kind + 'Hint').textContent = HINTS[kind][goals[kind]];
+  });
+  $id('goalsSuccess').textContent = '';
+}
+
+function showGoals(data){
+  const p = N.prefsOf(data);
+  goals.weeklyLessons = p.goals.weeklyLessons; goals.focus = p.goals.focus.slice();
+  goals.checkin = p.checkin; goals.orgReport = p.orgReport;
+  paintGoals();
+  if (location.hash === '#goals') $id('goals').focus();
+}
+
+$id('goalsSaveBtn').addEventListener('click', async () => {
+  $id('goalsError').textContent = ''; $id('goalsSuccess').textContent = '';
+  $id('goalsSaveBtn').disabled = true;
+  try {
+    await setDoc(doc(db, 'progress', currentUser.uid), {
+      goals: { weeklyLessons: goals.weeklyLessons, focus: goals.focus.slice() },
+      notify: { checkin: goals.checkin, orgReport: goals.orgReport, updatedAt: new Date().toISOString() }
+    }, { merge: true });
+    $id('goalsSuccess').textContent = 'Saved. ' + (goals.checkin === 'off' ? 'Check-in emails are off.' : 'Your next check-in follows the new goal.');
+  } catch (err){
+    console.error('Could not save goals:', err);
+    $id('goalsError').textContent = "Your goals couldn't be saved just now. Please try again.";
+  } finally {
+    $id('goalsSaveBtn').disabled = false;
+  }
 });
 
 /* ------------------------------------------------------------ profile photo */
