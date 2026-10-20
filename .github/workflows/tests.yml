@@ -1,0 +1,62 @@
+# Runs every test on each pull request and on each push to main, so a change is checked before it goes live.
+name: Tests
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  unit:
+    name: Unit tests (logic, Apps Script, theme, search index)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Run tests/*.test.mjs
+        run: |
+          status=0
+          for f in tests/*.test.mjs; do
+            [ "$f" = "tests/firestore-rules.test.mjs" ] && continue   # needs the emulator: its own job below
+            echo "::group::$f"
+            node --experimental-default-type=module "$f" || status=1
+            echo "::endgroup::"
+          done
+          exit $status
+
+  rules:
+    name: Firestore security rules (emulator)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+      - name: Install the emulator and test library
+        run: npm install --no-save --no-audit --no-fund firebase-tools@13 @firebase/rules-unit-testing@3 firebase@10
+      - name: Run tests/firestore-rules.test.mjs
+        run: npx firebase emulators:exec --only firestore --project demo-pa "node tests/firestore-rules.test.mjs"
+
+  ui:
+    name: UI tests (every page, headless Chromium)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install Playwright and Chromium
+        run: |
+          npm install --no-save --no-audit --no-fund playwright@1
+          npx playwright install --with-deps chromium
+      - name: Run tests/ui/run-ui-tests.mjs
+        run: node tests/ui/run-ui-tests.mjs

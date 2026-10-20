@@ -2,12 +2,21 @@
 
 None of these touch the live site, your Firebase project, or send real email.
 
+**They run by themselves on GitHub.** `.github/workflows/tests.yml` runs all of them on every pull request and every
+push to main: the unit tests, the security rules against the Firestore emulator, and every page (plus the Apps Script
+checks) in headless Chromium. A pull request shows a green tick when everything passes, or a red cross with the failing
+check named; open **Details** to read it. To run the page tests yourself on any computer:
+
+    npm install --no-save playwright && npx playwright install chromium
+    node tests/ui/run-ui-tests.mjs              # or: node tests/ui/run-ui-tests.mjs "feedback"
+
+
 | What | Where | How to run |
 |---|---|---|
-| Security rules (who may read or write what) | `firestore-rules.test.mjs` | Needs Node 20 and Java 21. `npm install firebase-tools@13 @firebase/rules-unit-testing@3 firebase@10`, then `RULES_PATH=../firestore.rules npx firebase emulators:exec --only firestore --project demo-pa "node tests/firestore-rules.test.mjs"` |
+| Security rules (who may read or write what) | `firestore-rules.test.mjs` | Needs Node 20 and Java 21. `npm install firebase-tools@13 @firebase/rules-unit-testing@3 firebase@10`, then (from the repo root) `npx firebase emulators:exec --only firestore --project demo-pa "node tests/firestore-rules.test.mjs"` |
 | What the company sees about a member (and what it never sees) | `org-share-core.test.mjs` | `node --experimental-default-type=module tests/org-share-core.test.mjs` |
 | The team report (statuses, roll-up numbers, CSV exports) and that the lesson counts match `content/` | `company-core.test.mjs` | `node --experimental-default-type=module tests/company-core.test.mjs` |
-| Every page's real code: owner console, join page, dashboard, company dashboard, delete account, lessons, shared-record sync | `ui/` | `powershell -ExecutionPolicy Bypass -File tests\ui\run-ui-tests.ps1` (needs Microsoft Edge) |
+| Every page's real code: owner console, join page, dashboard, company dashboard, delete account, lessons, shared-record sync | `ui/` | `node tests/ui/run-ui-tests.mjs` (Chromium, any computer; it also runs the two `apps-script/` pages below), or `powershell -ExecutionPolicy Bypass -File tests\ui\run-ui-tests.ps1` (Edge on Windows) |
 | The "Request more information" form's logic (screens, answers, what is sent) | `lead-core.test.mjs` | `node --experimental-default-type=module tests/lead-core.test.mjs` |
 | The Tool Roadmap's logic | `tool-core.test.mjs` | `node --experimental-default-type=module tests/tool-core.test.mjs` |
 | Saving and emailing "Request more information" leads (validation, scoring, spam rules) | `apps-script/lead-test.html` | same as the line below, with `lead-test.html` |
