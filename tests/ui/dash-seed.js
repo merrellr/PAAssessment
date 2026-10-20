@@ -15,6 +15,9 @@
     };
     if (scn === 'member' || scn === 'focus' || scn === 'focusdefault') store['memberships/uDash'] = { orgId: 'orgA', orgName: 'Acme Health', role: 'member', status: 'active', inviteToken: 't', joinedAt: Timestamp.now(), endedAt: null, email: 'dash@acme.com', displayName: 'Dash User' };
     // a course counts as complete only when ALL its real lessons are done (discovery-moderate has 5)
+    // a weekly goal of 2, with one lesson finished today and two last month
+    if (scn === 'threelessons') { var d = new Date(), key = d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2);
+      store['progress/uDash'].goals = { weeklyLessons: 2, focus: [] }; store['progress/uDash'].lessonLog = { '2026-09-01': 2 }; store['progress/uDash'].lessonLog[key] = 1; }
     if (scn === 'threelessons') store['progress/uDash'].courses['discovery-moderate'] = { completed: [1, 2, 3], lastLesson: 3, updatedAt: '2026-10-08T09:00:00.000Z' };
     // finished long ago, with a saved reflection on its last lesson: eligible for spaced review
     if (scn === 'allfive') store['progress/uDash'].courses['discovery-moderate'] = { completed: [1, 2, 3, 4, 5], lastLesson: 5, updatedAt: '2026-10-08T09:00:00.000Z', reflections: { '5': 'My own answer to the final question' } };

@@ -225,7 +225,15 @@
 
   <p class="small" style="text-align:center;">Totals reflect the people who chose to vote, so treat them as a guide to what's wanted, not a poll.</p>
   <p class="small" style="text-align:center;" id="toolkitContact">Questions about the toolkits? <a href="mailto:toolkit@productadvisory.co">toolkit@productadvisory.co</a></p>
+
+  <div class="site-foot" id="siteFoot" style="margin-top:28px; padding:20px 0; border-top:1px solid var(--line); text-align:center; font-size:0.75rem; color:var(--gray);">
+    © <span id="footerYear"></span> Product Advisory, LLC. All rights reserved. &nbsp;·&nbsp;
+    <a href="https://www.productadvisory.co/privacy-policy" target="_blank" rel="noopener" style="color:var(--gray); text-decoration:underline;">Privacy Policy</a> &nbsp;·&nbsp;
+    <a href="https://www.productadvisory.co/terms-of-use" target="_blank" rel="noopener" style="color:var(--gray); text-decoration:underline;">Terms of Use</a> &nbsp;·&nbsp;
+    <a href="#" data-cookie-settings style="color:var(--gray); text-decoration:underline;">Cookie settings</a>
+  </div>
 </div>
+<script>document.getElementById("footerYear").textContent = new Date().getFullYear();</script>
 
 <script type="module">
 const firebaseConfig = {

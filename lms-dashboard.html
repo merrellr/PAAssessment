@@ -79,6 +79,12 @@
   .profile-progress-line{ color: var(--ink-soft); margin-bottom: 3px; }
   .profile-dropdown-item{ display:block; padding:8px 4px; font-size:0.8438rem; color: var(--ink); text-decoration:none; cursor:pointer; border-radius:6px; }
   .profile-dropdown-item:hover{ background:var(--bg); }
+  .profile-dropdown .profile-progress-label{ margin: 2px 4px 2px; }
+  .profile-dropdown{ max-height: calc(100vh - 80px); overflow-y: auto; }
+  .profile-role-badge{ display:inline-block; margin-top:7px; padding:2px 9px; border-radius:999px; font-size:0.6562rem; font-weight:700; letter-spacing:.05em; text-transform:uppercase; background:var(--bg); color:var(--ink-soft); max-width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .profile-role-badge.is-super{ background:var(--navy); color:var(--btn-ink); }
+  .profile-role-badge.is-admin{ background:var(--tint); color:var(--cyan-ink); }
+  .profile-logout{ color: var(--warn); }
 
   .profile-field-label{ display:block; font-size:0.75rem; font-weight:600; color: var(--ink-soft); margin: 0 0 5px 2px; }
 
@@ -164,6 +170,15 @@
   .tier-card.is-belowlevel{ opacity:0.55; background:var(--bg); }
   .tier-card.is-belowlevel:hover{ opacity:0.85; }
 
+  .week-goal{ display:inline-flex; align-items:center; gap:8px; padding: 4px 12px 4px 6px; border-radius: 999px; border: 1px solid var(--line); background: var(--surface); color: var(--ink-soft); font-size: 0.7812rem; text-decoration:none; }
+  .week-goal[hidden]{ display:none; }
+  .week-goal:hover{ border-color: var(--cyan); }
+  .week-goal b{ color: var(--navy-deep); }
+  .week-goal svg{ flex-shrink:0; }
+  .week-goal .wg-track{ stroke: var(--line); }
+  .week-goal .wg-fill{ stroke: var(--cyan); transition: stroke-dashoffset .4s; }
+  .week-goal.met .wg-fill{ stroke: var(--ok); }
+  .week-goal .wg-edit{ color: var(--navy); text-decoration: underline; }
   .catalog-toggle{ display:inline-flex; border:1px solid var(--line); border-radius:20px; overflow:hidden; }
   .catalog-toggle button{ font-family:var(--display); font-weight:600; font-size:0.7188rem; padding:5px 13px; border:none; background:var(--surface); color:var(--gray); cursor:pointer; }
   .catalog-toggle button:not(.active):hover{ color:var(--navy); }
@@ -225,14 +240,7 @@
         <div class="profile-dropdown-name" id="profileDropdownName"></div>
         <div class="profile-dropdown-email" id="profileDropdownEmail"></div>
         <div class="profile-dropdown-verified" id="profileDropdownVerified"></div>
-
-        <div class="profile-dropdown-divider"></div>
-
-        <div class="profile-progress-summary">
-          <div class="profile-progress-label">Your details</div>
-          <div id="profileDropdownIndustry" class="profile-progress-line"></div>
-          <div id="profileDropdownCompanySize" class="profile-progress-line"></div>
-        </div>
+        <span class="profile-role-badge" id="profileRoleBadge">Learner</span>
 
         <div class="profile-dropdown-divider"></div>
 
@@ -243,18 +251,32 @@
         </div>
 
         <div class="profile-dropdown-divider"></div>
-
-        <a class="profile-dropdown-item" href="/profile">My Profile</a>
-        <a class="profile-dropdown-item" id="ownerConsoleMenuItem" href="/owner" style="display:none;">Owner Console</a>
-        <a class="profile-dropdown-item" id="companyDashMenuItem" href="/company" style="display:none;">Company dashboard</a>
+        <div class="profile-progress-label">My learning</div>
+        <a class="profile-dropdown-item" href="/profile">My profile</a>
         <a class="profile-dropdown-item" id="changePasswordMenuItem" onclick="openChangePassword()">Change password</a>
         <a class="profile-dropdown-item" onclick="replayDashboardTour()">Replay the tour</a>
+
+        <div id="manageMenuGroup" style="display:none;">
+          <div class="profile-dropdown-divider"></div>
+          <div class="profile-progress-label" id="manageMenuLabel">My company</div>
+          <a class="profile-dropdown-item" id="companyDashMenuItem" href="/company" style="display:none;">Company dashboard</a>
+          <a class="profile-dropdown-item" id="ownerConsoleMenuItem" href="/owner" style="display:none;">Owner console</a>
+          <a class="profile-dropdown-item" id="reportsMenuItem" href="/reports" style="display:none;">Reports</a>
+        </div>
+
+        <div class="profile-dropdown-divider"></div>
+        <div class="profile-progress-label">Product Advisory</div>
         <a class="profile-dropdown-item" href="https://www.productadvisory.co/toolkits" target="_blank" rel="noopener">Toolkits ↗</a>
         <a class="profile-dropdown-item" href="/tool-requests#suggest">Request tools</a>
-        <a class="profile-dropdown-item" href="/feedback">Send feedback</a>
         <a class="profile-dropdown-item" href="https://www.productadvisory.co/" target="_blank" rel="noopener">Visit Product Advisory ↗</a>
+
+        <div class="profile-dropdown-divider"></div>
+        <div class="profile-progress-label">Help</div>
+        <a class="profile-dropdown-item" href="/feedback">Send feedback</a>
         <a class="profile-dropdown-item" href="#" data-cookie-settings>Cookie settings</a>
-        <a class="profile-dropdown-item" onclick="handleSignOut()">Log out</a>
+
+        <div class="profile-dropdown-divider"></div>
+        <a class="profile-dropdown-item profile-logout" onclick="handleSignOut()">Log out</a>
       </div>
     </div>
   </div>
@@ -533,7 +555,10 @@
     </div>
 
     <div style="display:flex; align-items:baseline; justify-content:space-between; gap:12px; flex-wrap:wrap; margin: 6px 0 14px;">
-      <h2 style="font-family:var(--display); font-size:1rem; color:var(--navy-deep); margin:0;">Your Courses</h2>
+      <div style="display:flex; align-items:center; gap:14px; flex-wrap:wrap;">
+        <h2 style="font-family:var(--display); font-size:1rem; color:var(--navy-deep); margin:0;">Your Courses</h2>
+        <a class="week-goal" id="weekGoal" href="/profile#goals" hidden title="Your weekly goal. Change it on My profile."></a>
+      </div>
       <div style="display:flex; align-items:center; gap:14px;">
         <div class="catalog-toggle" id="catalogToggle" style="display:none;">
           <button type="button" id="catViewPlan" onclick="setCatalogView('plan')">My plan</button>
@@ -576,6 +601,7 @@
 
 <script src="content/framework-data.js"></script>
 <script src="company-core.js"></script>
+<script src="notify-core.js"></script>
 <script src="pa-icons.js"></script>
 <script type="module">
 /* ================================================================
@@ -900,8 +926,27 @@ function startActiveTimeTracking(){
    else this finds nothing and the menu link stays hidden. */
 function showOwnerLinkIfOwner(user){
   getDoc(doc(db, 'platformAdmins', user.uid))
-    .then(snap => { if (snap.exists()) document.getElementById('ownerConsoleMenuItem').style.display = 'block'; })
+    .then(snap => {
+      if (!snap.exists()) return;
+      ['ownerConsoleMenuItem', 'reportsMenuItem'].forEach(id => { document.getElementById(id).style.display = 'block'; });
+      setMenuRole('super');
+    })
     .catch(() => { /* not the owner, or the rules are not published: keep it hidden */ });
+}
+
+/* The badge under the name in the Profile menu: Super admin (Product Advisory's own team) outranks
+   a company's admin, who outranks a learner. The two lookups finish in any order. */
+let menuRole = 'learner';
+function setMenuRole(role, orgName){
+  const rank = { learner: 0, admin: 1, super: 2 };
+  if (rank[role] < rank[menuRole]) return;
+  menuRole = role;
+  const b = document.getElementById('profileRoleBadge');
+  b.className = 'profile-role-badge' + (role === 'super' ? ' is-super' : role === 'admin' ? ' is-admin' : '');
+  b.textContent = role === 'super' ? 'Super admin' : role === 'admin' ? 'Company admin' + (orgName ? ' · ' + orgName : '') : 'Learner';
+  b.title = b.textContent;
+  document.getElementById('manageMenuGroup').style.display = role === 'learner' ? 'none' : 'block';
+  document.getElementById('manageMenuLabel').textContent = role === 'super' ? 'Manage' : 'My company';
 }
 
 /* People who joined a company see a plain notice saying so. */
@@ -925,7 +970,9 @@ function showCompanyNoticeIfMember(user){
       const m = snap.exists() ? snap.data() : null;
       const banner = document.getElementById('orgBanner');
       // Company admins get a link to their team dashboard.
-      document.getElementById('companyDashMenuItem').style.display = (m && m.status === 'active' && m.role === 'admin') ? 'block' : 'none';
+      const isAdmin = !!(m && m.status === 'active' && m.role === 'admin');
+      document.getElementById('companyDashMenuItem').style.display = isAdmin ? 'block' : 'none';
+      if (isAdmin) setMenuRole('admin', m.orgName);
       document.getElementById('orgBannerDismiss').style.display = 'none';
       // Someone whose company has ended their membership is told once, plainly,
       // for 60 days or until they dismiss it. Nothing about their account changes.
@@ -961,7 +1008,7 @@ function showCompanyNoticeIfMember(user){
 function populateProfileMenu(user){
   document.getElementById('profileDropdownName').textContent = user.displayName || 'Add your name';
   document.getElementById('profileDropdownEmail').textContent = user.email;
-  document.getElementById('profileDropdownVerified').textContent = user.emailVerified ? 'Email verified' : 'Email not verified';
+  document.getElementById('profileDropdownVerified').textContent = user.emailVerified ? '' : 'Email not verified';
 
   // Only show "Change password" for accounts that actually have a password —
   // Google-only accounts have nothing to change here.
@@ -1210,8 +1257,24 @@ async function loadDashboard(user){
   if (assessmentResult) renderRecommendations(assessmentResult, progress, await fetchCompanyFocus(user));
   populateProfileProgressSummary(progress, assessmentResult);
   renderAssignedStat(progress, assessmentResult);
+  renderWeekGoal(progress);
 
   syncProgressReport(user.email, progress, assessmentResult);
+}
+
+/* "This week: 1 of 2 lessons", a ring that fills as lessons are finished, next to
+   "Your Courses". The goal is set on My profile, and the check-in email reports on it. */
+function renderWeekGoal(progress){
+  const el = document.getElementById('weekGoal');
+  if (!window.NotifyCore) return;
+  const w = NotifyCore.weekSoFar(progress, Date.now(), -new Date().getTimezoneOffset());
+  const C = 2 * Math.PI * 9;
+  el.innerHTML = '<svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true"><circle class="wg-track" cx="12" cy="12" r="9" fill="none" stroke-width="3"/>' +
+    '<circle class="wg-fill" cx="12" cy="12" r="9" fill="none" stroke-width="3" stroke-linecap="round" transform="rotate(-90 12 12)" stroke-dasharray="' + C.toFixed(2) + '" stroke-dashoffset="' + (C * (1 - w.pct / 100)).toFixed(2) + '"/></svg>' +
+    '<span>This week: <b>' + w.done + ' of ' + w.target + '</b> ' + (w.target === 1 ? 'lesson' : 'lessons') + (w.done >= w.target ? ' · goal met' : '') + '</span><span class="wg-edit">' + (progress.goals ? 'Change goal' : 'Set a goal') + '</span>';
+  el.classList.toggle('met', w.done >= w.target);
+  el.setAttribute('aria-label', 'This week: ' + w.done + ' of ' + w.target + ' lessons' + (w.done >= w.target ? ', goal met' : '') + '. ' + (progress.goals ? 'Change your goal' : 'Set a goal') + ' on My profile.');
+  el.hidden = false;
 }
 
 /* Builds the assessment link with everything we already know about
@@ -1361,19 +1424,7 @@ function renderAssignedStat(progress, assessmentResult){
   drawRadarChart(assessmentResult);
   drawSummaryRing(assessmentResult.overallPct, tierColorFor(assessmentResult.tier));
 
-  populateProfileTile(progress, assessmentResult);
   populateInsightSummary(assessmentResult);
-}
-
-/* "Your profile" tile — surfaces info already collected via the
-   assessment and Edit Profile page, so it isn't just sitting unused. */
-/* Now writes into the profile dropdown menu rather than a dashboard
-   tile, tier level and assessed date already show elsewhere on the
-   page (hero band), so only industry and company size are needed here. */
-function populateProfileTile(progress, assessmentResult){
-  const profile = progress.profile || {};
-  document.getElementById('profileDropdownIndustry').textContent = 'Industry: ' + (profile.industry || 'Not set');
-  document.getElementById('profileDropdownCompanySize').textContent = 'Company size: ' + (profile.companySize || 'Not set');
 }
 
 /* ================================================================
@@ -1460,8 +1511,6 @@ window.saveProfilePrompt = async function(){
     await setDoc(progressRef, { profile: merged }, { merge: true });
     document.getElementById('profilePromptIndustry').blur();
     document.getElementById('profilePromptSaved').style.display = 'inline';
-    document.getElementById('profileDropdownIndustry').textContent = 'Industry: ' + (merged.industry || 'Not set');
-    document.getElementById('profileDropdownCompanySize').textContent = 'Company size: ' + (merged.companySize || 'Not set');
     setTimeout(() => {
       const card = document.getElementById('profilePromptCard');
       if (card) card.style.display = 'none';

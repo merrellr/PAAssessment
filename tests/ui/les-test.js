@@ -17,6 +17,11 @@ const sleep = (ms) => new Promise(r => setTimeout(r, ms));
     const share = store['orgs/orgA/members/uLes'];
     const prog = store['progress/uLes'];
     t('the lesson is saved on the person\'s own progress as before', prog.courses['discovery-novice'] && prog.courses['discovery-novice'].completed.indexOf(5) > -1);
+    const today = window.NotifyCore.dateKey(Date.now(), -new Date().getTimezoneOffset());
+    t('the finished lesson is counted for today, for the weekly goal', prog.lessonLog && prog.lessonLog[today] === 1, JSON.stringify(prog.lessonLog));
+    await window.markCompleteAndContinue();
+    await sleep(400);
+    t('finishing the same lesson again does not count twice', store['progress/uLes'].lessonLog[today] === 1, JSON.stringify(store['progress/uLes'].lessonLog));
     if (window.__scn === 'member'){
       t('finishing the last lesson refreshes the company copy with all five lessons', !!share && share.courses['discovery-novice'] && share.courses['discovery-novice'].completed.length === 5 && share.courses['discovery-novice'].lastLesson === 5, JSON.stringify(share));
       t('last active moved forward to the lesson time', !!share && typeof share.lastActiveAt === 'string' && Date.parse(share.lastActiveAt) > Date.parse('2026-10-06T10:00:00.000Z'));

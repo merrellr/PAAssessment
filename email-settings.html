@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<meta name="referrer" content="no-referrer">
+<title>Email Settings — Product Advisory Learning</title>
+<meta name="description" content="Choose how often Product Advisory Learning emails you, or unsubscribe.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@600&family=Lato:ital,wght@0,300;0,400;0,700;0,900;1,400&display=swap" rel="stylesheet">
+<script src="pa-prefs.js"></script>
+<style>
+  *{ box-sizing: border-box; }
+  body{ margin:0; background: var(--bg); font-family:var(--sans); color: var(--ink); }
+  .wrap{ max-width: 620px; margin: 0 auto; padding: 24px 16px 56px; }
+  .card{ background: var(--surface); border-radius: 18px; border: 1px solid var(--line); padding: 28px; margin-bottom: 20px; }
+  .eyebrow{ display:block; font-size: 0.75rem; font-weight:700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--cyan-ink); margin-bottom: 6px; }
+  h1{ font-family:var(--display); font-size: 1.5rem; margin: 0 0 6px; color: var(--navy-deep); line-height: 1.25; outline: none; }
+  p{ line-height:1.55; color: var(--ink-soft); font-size: 0.9375rem; margin: 0 0 14px; }
+  a{ color: var(--navy); }
+  .setting{ margin: 18px 0 0; }
+  .flabel{ display:block; font-weight:700; font-size: 0.875rem; color: var(--ink); margin: 0 0 8px; }
+  .seg{ display:inline-flex; flex-wrap:wrap; border:1.5px solid var(--line); border-radius: 10px; overflow:hidden; }
+  .seg button{ font: inherit; font-size: 0.875rem; padding: 9px 15px; border:0; border-right:1px solid var(--line); background: var(--surface); color: var(--ink-soft); cursor:pointer; }
+  .seg button:last-child{ border-right:0; }
+  @media (max-width: 520px){ .seg{ display:grid; grid-template-columns: 1fr 1fr; width:100%; } .seg button{ border-bottom:1px solid var(--line); } .seg button:nth-child(2n){ border-right:0; } .seg button:nth-last-child(-n+2){ border-bottom:0; } }
+  .seg button[aria-checked="true"]{ background: var(--navy); color: var(--btn-ink); font-weight:700; }
+  .seg button:disabled{ cursor: default; }
+  .seg button:focus-visible{ outline: 2px solid var(--cyan); outline-offset: 2px; }
+  .hint{ font-size: 0.8125rem; color: var(--gray); margin: 6px 0 0; }
+  .done{ display:flex; gap: 12px; align-items:flex-start; padding: 14px 16px; border-radius: 12px; background: var(--ok-bg); color: var(--ok); margin: 0 0 6px; }
+  .done b{ color: inherit; }
+  .done p{ margin: 0; color: var(--ink); }
+  .linkbtn{ background:none; border:0; padding:0; font: inherit; color: var(--navy); text-decoration: underline; cursor: pointer; }
+  .status{ font-size: 0.875rem; min-height: 1.3em; margin: 14px 0 0; color: var(--ink-soft); }
+  .status.err{ color: var(--warn); }
+  .small{ font-size: 0.8125rem; color: var(--gray); }
+  [hidden]{ display:none !important; }
+</style>
+<link rel="stylesheet" href="pa-theme.css">
+<script src="company-core.js"></script>
+<script src="notify-core.js"></script>
+</head>
+<body>
+<script src="pa-shell.js"></script>
+<div class="wrap">
+
+  <div class="card" id="stateLoading"><p style="margin:0;">Loading your email settings…</p></div>
+
+  <div class="card" id="stateError" hidden>
+    <span class="eyebrow">Email settings</span>
+    <h1 id="errorTitle" tabindex="-1">This link doesn't work</h1>
+    <p id="errorText">It may have been copied only in part. Open the link from the email again, or sign in and change your emails on My profile.</p>
+    <a href="/profile#goals">Go to My profile →</a>
+  </div>
+
+  <div class="card" id="stateReady" hidden>
+    <span class="eyebrow">Email settings</span>
+    <div class="done" id="offNotice" role="status" hidden>
+      <span aria-hidden="true">✓</span>
+      <p><b id="offTitle">You're unsubscribed.</b> <span id="offText"></span> <button type="button" class="linkbtn" id="undoBtn">Undo</button></p>
+    </div>
+    <h1 id="readyTitle" tabindex="-1">How often should we email you?</h1>
+    <p>Changes save as soon as you choose. No sign-in needed from this link.</p>
+
+    <div class="setting">
+      <span class="flabel" id="checkinLabel">Your check-in email</span>
+      <div class="seg" role="radiogroup" aria-labelledby="checkinLabel" data-kind="checkin"></div>
+      <p class="hint" id="checkinHint"></p>
+    </div>
+
+    <div class="setting" id="orgSetting" hidden>
+      <span class="flabel" id="orgLabel">Company report email<span id="orgName"></span></span>
+      <div class="seg" role="radiogroup" aria-labelledby="orgLabel" data-kind="orgReport"></div>
+      <p class="hint" id="orgReportHint"></p>
+    </div>
+
+    <p class="status" id="status" role="status" aria-live="polite"></p>
+    <p class="small" style="margin:18px 0 0;">To change your weekly goal and focus areas, sign in and open <a href="/profile#goals">My profile</a>.</p>
+  </div>
+
+</div>
+
+<script>
+(function(){
+  const BACKEND = 'https://script.google.com/macros/s/AKfycbynJQYF9rv5maL_CGniS9UGhTDfBVeW3gVhEWUsFdGOqquv4osGx4nQvc8jNkaaY6wrrg/exec';
+  const N = window.NotifyCore;
+  const $ = (id) => document.getElementById(id);
+  const q = new URLSearchParams(location.search);
+  const link = { u: q.get('u') || '', k: q.get('k') || '' };
+  const offKind = q.get('off');
+  const NAMES = { checkin: 'check-in emails', orgReport: 'company report emails' };
+  const HINTS = {
+    checkin: { daily: 'Every morning: yesterday, your plan and your next lesson.', weekly: "Every Monday morning: last week's progress, your plan and your next lesson.",
+      monthly: 'On the 1st: last month, your plan and your next lesson.', off: 'No check-in emails.' },
+    orgReport: { daily: "Every morning: your team's numbers and a link to the full report.", weekly: "Every Monday morning: your team's week and a link to the full report.",
+      monthly: "On the 1st: your team's month and a link to the full report.", off: 'No report emails. The full report is always on your company dashboard.' }
+  };
+  const ERRORS = {
+    bad_link: ["This link doesn't work", 'It may have been copied only in part. Open the link from the email again, or sign in and change your emails on My profile.'],
+    no_account: ['This account has been closed', 'There is nothing to change: we no longer email this address.'],
+    not_set_up: ["Email settings aren't available yet", 'Please try again later, or sign in and change your emails on My profile.']
+  };
+  const state = { checkin: N.DEFAULT_FREQ, orgReport: N.DEFAULT_FREQ };
+  let undo = null;
+
+  function call(params){
+    return new Promise((resolve) => {
+      const cb = 'paEmailCb_' + Date.now() + '_' + Math.floor(Math.random() * 1e6);
+      const s = document.createElement('script');
+      let settled = false;
+      const finish = (v) => { if (settled) return; settled = true; clearTimeout(timer); delete window[cb]; s.remove(); resolve(v); };
+      const timer = setTimeout(() => finish(null), 20000);
+      window[cb] = (r) => finish(r || null);
+      s.onerror = () => finish(null);
+      s.src = BACKEND + '?' + new URLSearchParams(Object.assign({ action: 'emailPrefs', u: link.u, k: link.k }, params, { callback: cb })).toString();
+      document.body.appendChild(s);
+    });
+  }
+  function show(id){ ['stateLoading', 'stateError', 'stateReady'].forEach(k => { $(k).hidden = k !== id; }); }
+  function fail(code){
+    const e = ERRORS[code] || ["We couldn't load your settings", 'Please try again in a minute.'];
+    $('errorTitle').textContent = e[0]; $('errorText').textContent = e[1];
+    show('stateError'); $('errorTitle').focus();
+  }
+  function paint(){
+    document.querySelectorAll('.seg[data-kind]').forEach(seg => {
+      const kind = seg.dataset.kind;
+      seg.querySelectorAll('button').forEach(b => { const on = b.dataset.v === state[kind]; b.setAttribute('aria-checked', on ? 'true' : 'false'); b.tabIndex = on ? 0 : -1; });
+      $(kind + 'Hint').textContent = HINTS[kind][state[kind]];
+    });
+  }
+  function apply(r){
+    state.checkin = r.checkin; state.orgReport = r.orgReport;
+    $('orgSetting').hidden = !r.admin;
+    $('orgName').textContent = r.orgName ? ' (' + r.orgName + ')' : '';
+    paint();
+  }
+  async function choose(kind, freq, quiet){
+    if (state[kind] === freq) return true;
+    const before = state[kind];
+    state[kind] = freq; paint();
+    document.querySelectorAll('.seg button').forEach(b => { b.disabled = true; });
+    if (!quiet) { $('status').className = 'status'; $('status').textContent = 'Saving…'; }
+    const r = await call({ kind: kind, freq: freq });
+    document.querySelectorAll('.seg button').forEach(b => { b.disabled = false; });
+    if (r && r.ok){
+      apply(r);
+      if (!quiet) $('status').textContent = 'Saved: ' + NAMES[kind] + ' ' + (freq === 'off' ? 'are off.' : 'come ' + N.FREQ_LABELS[freq].toLowerCase() + '.');
+      return true;
+    }
+    state[kind] = before; paint();
+    $('status').className = 'status err';
+    $('status').textContent = "That didn't save. Please try again in a minute.";
+    return false;
+  }
+
+  document.querySelectorAll('.seg[data-kind]').forEach(seg => {
+    const kind = seg.dataset.kind;
+    N.FREQS.forEach(f => {
+      const b = document.createElement('button');
+      b.type = 'button'; b.setAttribute('role', 'radio'); b.dataset.v = f;
+      b.textContent = N.FREQ_LABELS[f] + (f === N.DEFAULT_FREQ ? ' (default)' : '');
+      b.addEventListener('click', () => { $('offNotice').hidden = true; choose(kind, f); });
+      seg.appendChild(b);
+    });
+    seg.addEventListener('keydown', (e) => {
+      const step = { ArrowRight: 1, ArrowDown: 1, ArrowLeft: -1, ArrowUp: -1 }[e.key];
+      if (!step) return;
+      e.preventDefault();
+      const next = N.FREQS[(N.FREQS.indexOf(state[kind]) + step + N.FREQS.length) % N.FREQS.length];
+      seg.querySelector('[data-v="' + next + '"]').click();
+      seg.querySelector('[data-v="' + next + '"]').focus();
+    });
+  });
+
+  $('undoBtn').addEventListener('click', async () => {
+    if (!undo) return;
+    if (await choose(undo.kind, undo.freq)) { $('offNotice').hidden = true; undo = null; $('readyTitle').focus(); }
+  });
+
+  (async function start(){
+    if (!link.u || !link.k){ fail('bad_link'); return; }
+    const r = await call({});
+    if (!r || !r.ok){ fail(r && r.error); return; }
+    apply(r);
+    show('stateReady');
+    // "Unsubscribe" in an email: switch that email off straight away, with a way back.
+    if (offKind === 'checkin' || (offKind === 'orgReport' && r.admin)){
+      const before = state[offKind];
+      if (await choose(offKind, 'off', true)){
+        undo = before !== 'off' ? { kind: offKind, freq: before } : null;
+        $('offTitle').textContent = "You're unsubscribed.";
+        $('offText').textContent = 'You will get no more ' + NAMES[offKind] + '.';
+        $('undoBtn').hidden = !undo;
+        $('offNotice').hidden = false;
+      }
+      // so reloading the page does not switch it off again after a change of mind
+      history.replaceState(null, '', location.pathname + '?u=' + encodeURIComponent(link.u) + '&k=' + encodeURIComponent(link.k));
+    }
+    $('readyTitle').focus();
+  })();
+})();
+</script>
+<script type="module" src="account-menu.js"></script>
+</body>
+</html>

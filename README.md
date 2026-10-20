@@ -247,6 +247,33 @@ manual review — it holds no uid and isn't read by the app.
 - **Weekly snapshots.** When an admin (or the owner) opens the dashboard and the last snapshot is a week old, the page saves a numbers-only record to `orgs/{orgId}/snapshots/{day}` (people, assessed, learning, finished, quiet, average scores; never a name or email). That builds the trend. The rule is in `firestore.rules` and must be published; snapshots can never be changed or deleted.
 - **Explain with AI** asks `orgReportAi` in the Apps Script (section 11). Only an active admin of that company, or the owner, is allowed. The server rebuilds the numbers from a fixed list (whole numbers, the seven skill-area names, the five funnel step names), so a name or email cannot be passed on, and limits each company to 5 a day (40 in total).
 
+## Goals, check-in emails and company report emails
+
+- **Goals.** On My profile (`profile.html#goals`) a learner sets a weekly goal (1 to 10 lessons, 2 by default) and up
+  to three focus areas. They are saved on `progress/{uid}` as `goals` and `notify` (`checkin`, `orgReport`: `daily`,
+  `weekly`, `monthly` or `off`; missing means weekly, so everyone, including existing accounts, gets the weekly email).
+  `lesson.html` adds each newly finished lesson to `lessonLog` (`{ 'YYYY-MM-DD': count }`, the learner's own calendar,
+  last 400 days), and the dashboard shows "This week: 1 of 2 lessons" next to Your Courses.
+- **The emails.** The learner's check-in: how they did against their goal over the period that just ended, their plan,
+  their focus areas (or their two weakest, suggested) and a button to the next lesson. A company admin's report: seats
+  (active, pending, available), the team's numbers, "What stands out" from the dashboard's own report rules, the focus
+  areas and a button to the full report. Admins choose the report frequency on My profile too. The daily email covers
+  yesterday, the weekly one (Mondays) last week and the monthly one (the 1st) last month. Nothing goes out before 8am.
+- **Unsubscribe and change.** Every email links to `email-settings.html?u=…&k=…`, signed for that account (an HMAC
+  with the `NOTIFY_SECRET` script property, made on first use), so it works without signing in and cannot be used for
+  anyone else. The Unsubscribe link adds `&off=checkin` (or `orgReport`): the page switches that email off as it opens
+  and offers Undo. The page does not load analytics.
+- **How it runs.** `notify-core.js` holds the logic (what is due, what each email says), shared with the website.
+  `apps-script/notify.gs` is built from it, `company-core.js` and `company-report.js` (`node tools/build-notify-gs.mjs`;
+  a test fails when it is out of date) and goes into Apps Script as a second file next to `Code.gs`. Section 16 of
+  `Code.gs` reads Firestore and the account list with a service account (a scheduled run has no signed-in person),
+  runs every hour, keeps 60 emails of the daily allowance for invites, welcomes and feedback, stops after 4.5
+  minutes, and records each send on a **Notifications** tab, so anything left over goes out on the next run.
+- **Setup:** the steps are at the top of section 16 in `Code.gs` (add `notify.gs`, add the `FIREBASE_SERVICE_ACCOUNT`
+  key, run `checkNotificationsSetup`, `sendMyCheckinPreview`, then `installNotifications`, and deploy a new version).
+- Tests: `tests/notify-core.test.mjs`, `tests/notify-server.test.mjs`, and "profile goals", "email settings", "last
+  lesson" and "dashboard" in the UI runner.
+
 ## Emails: who sends what
 
 - `apps-script/Code.gs` section 9 holds the list of addresses (`MAIL_ADDR_`). `sendMail_` sends from the chosen address when Gmail lists it as one this account may send as, and otherwise sends from the account that owns the script, so adding an address later needs no code change.

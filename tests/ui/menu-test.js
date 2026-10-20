@@ -69,6 +69,13 @@ const key = (k) => document.dispatchEvent(new KeyboardEvent('keydown', { key: k,
       t('"Send feedback" opens the feedback form, not an email', (() => { const a = Array.prototype.slice.call(document.querySelectorAll('#paAccountMenu a')).filter(x => x.textContent.trim() === 'Send feedback')[0]; return !!a && a.getAttribute('href') === '/feedback' && !document.querySelector('#paAccountMenu a[href^="mailto:"]'); })());
       const site = Array.prototype.slice.call(document.querySelectorAll('#paAccountMenu a')).filter(a => /^https:\/\/www\.productadvisory\.co/.test(a.href))[0];
       t('the website link opens in a new tab safely', site.target === '_blank' && /noopener/.test(site.rel));
+      const heads = Array.prototype.slice.call(document.querySelectorAll('#paAccountMenu .pa-acct-label')).map(x => x.textContent);
+      t('the menu is in labelled sections, Log out alone at the bottom', heads.indexOf('My learning') === 0 && heads.indexOf('Product Advisory') > -1 && heads.indexOf('Help') === heads.length - 1 &&
+        $('paAccountLogout').previousElementSibling.className === 'pa-acct-rule' && L.indexOf('Toolkits ↗') < L.indexOf('Visit Product Advisory ↗') && L.indexOf('Visit Product Advisory ↗') < L.indexOf('Send feedback'), heads.join(' | '));
+      const role = $('paAccountRole').textContent;
+      if (scn === 'owner') t('the owner is badged Super admin', role === 'Super admin' && $('paAccountRole').classList.contains('is-super') && heads.indexOf('Manage') > -1, role);
+      else if (scn === 'admin') t('a company admin is badged with their company', /^Company admin/.test(role) && heads.indexOf('My company') > -1, role);
+      else t('everyone else is badged Learner', role === 'Learner' && heads.indexOf('My company') === -1, role);
       const owner = L.indexOf('Owner console') > -1, reports = L.indexOf('Reports') > -1, company = L.indexOf('Company dashboard') > -1;
       if (scn === 'owner') t('the owner also gets Owner console and Reports', owner && reports && document.querySelector('#paAccountMenu a[href="/owner"]') && document.querySelector('#paAccountMenu a[href="/reports"]'), L.join(' | '));
       else t('nobody else sees the owner links', !owner && !reports, L.join(' | '));

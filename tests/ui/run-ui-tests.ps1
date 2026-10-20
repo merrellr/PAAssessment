@@ -30,6 +30,7 @@ Copy-Item "$repo\lead-core.js" $site
 Copy-Item "$repo\charts.js" $site
 Copy-Item "$repo\charts.css" $site
 Copy-Item "$repo\company-report.js" $site
+Copy-Item "$repo\notify-core.js" $site
 Copy-Item "$repo\pilot-core.js" $site
 Copy-Item "$repo\analytics.js" $site
 Copy-Item "$repo\pa-prefs.js" $site
@@ -70,6 +71,7 @@ Build-Page 'reports.html' 'reports-test.html' 'reports-seed.js' 'reports-test.js
 Build-Page 'owner-pilot.html' 'pilot-test.html' 'pilot-seed.js' 'pilot-test.js'
 Build-Page 'index.html' 'index-test.html' 'index-seed.js' 'index-test.js'
 Build-Page 'feedback.html' 'feedback-test.html' 'feedback-seed.js' 'feedback-test.js'
+Build-Page 'email-settings.html' 'es-test.html' 'es-seed.js' 'es-test.js'
 $menuPage = "<!doctype html><html><head><script src=`"menu-seed.js`"></script></head><body><div class=`"wrap`"><p>A page</p></div><script type=`"module`" src=`"account-menu.js`"></script><script type=`"module`" src=`"menu-test.js`"></script></body></html>"
 [System.IO.File]::WriteAllText("$site\menu-test.html", $menuPage)
 [System.IO.File]::WriteAllText("$site\consent-test.html", "<!doctype html><html><head><script src=`"consent-seed.js`"></script><script src=`"analytics.js`"></script></head><body><div class=`"wrap`"><p>A page</p></div><script type=`"module`" src=`"account-menu.js`"></script><script type=`"module`" src=`"consent-test.js`"></script></body></html>")
@@ -131,6 +133,7 @@ try {
   foreach ($s in 'member', 'focus', 'focusdefault', 'admin', 'plain', 'removed', 'owner', 'threelessons', 'allfive', 'recentdone', 'removedold') { $results += Run-Page "dashboard: $s" "$base/dash-test.html?scn=$s" 25000 }
   foreach ($s in 'member', 'nonmember', 'blocked', 'votefail') { $results += Run-Page "delete account: $s" "$base/del-test.html?scn=$s" 25000 }
   $results += Run-Page 'profile photo' "$base/del-test.html?scn=photo" 25000
+  foreach ($s in 'goals', 'goalsadmin') { $results += Run-Page "profile goals: $s" "$base/del-test.html?scn=$s" 25000 }
   foreach ($s in 'member', 'plain') { $results += Run-Page "last lesson: $s" "$base/les-test.html?scn=$s&course=discovery-novice&lesson=5" 30000 }
   foreach ($s in 'admin', 'empty', 'archived', 'nocopy', 'auditdenied', 'owner', 'ownernoorg', 'plain', 'member', 'removedadmin', 'denied', 'sharesdenied', 'signedout', 'history', 'snapshotsdenied', 'snapfail', 'noplatform', 'smallplatform') {
     $org = if ($s -eq 'owner') { '&org=orgA' } else { '' }
@@ -142,6 +145,11 @@ try {
   $results += Run-Page 'tool roadmap: deeplink' "$base/tool-requests-test.html?scn=deeplink&tool=t4" 40000
   foreach ($s in 'signedin', 'signedout', 'limit') { $results += Run-Page "feedback form: $s" "$base/feedback-test.html?scn=$s" 20000 }
   $results += Run-Page 'feedback form: about' "$base/feedback-test.html?scn=about&about=idea" 20000
+  foreach ($s in 'plain', 'monthly', 'savefail', 'badlink', 'down') { $results += Run-Page "email settings: $s" "$base/es-test.html?scn=$s&u=uLearn&k=goodsig" 20000 }
+  $results += Run-Page 'email settings: nolink' "$base/es-test.html?scn=nolink" 20000
+  $results += Run-Page 'email settings: off' "$base/es-test.html?scn=off&u=uLearn&k=goodsig&off=checkin" 20000
+  $results += Run-Page 'email settings: adminoff' "$base/es-test.html?scn=adminoff&u=uLearn&k=goodsig&off=orgReport" 20000
+  $results += Run-Page 'email settings: notadminoff' "$base/es-test.html?scn=notadminoff&u=uLearn&k=goodsig&off=orgReport" 20000
   foreach ($s in 'main', 'empty', 'notowner', 'signedout', 'launch') {
     $results += Run-Page "tool roadmap admin: $s" "$base/owner-tools-test.html?scn=$s" 40000
   }
