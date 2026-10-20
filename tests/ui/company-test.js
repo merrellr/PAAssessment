@@ -131,6 +131,8 @@ async function readBlob(d){ return await d.blob.text(); }
       t('no owner banner for a real admin', !vis('ownerBanner') && $('ownerBackLink').style.display === 'none');
       t('company name and plan', txt('orgName') === 'Acme Health' && /10 seats/.test(txt('orgPills')), txt('orgPills'));
       t('seat use counts every active person including admins, and waiting invitations', /6 of 10 seats in use, 2 invitations waiting/.test(txt('orgSummary')), txt('orgSummary'));
+      t('the first card shows active, pending and available seats up front', txt('orgSeats') === '6Active2Pending2Available of 10' || /6 ?Active ?2 ?Pending ?2 ?Available of 10/.test(txt('orgSeats')), txt('orgSeats'));
+      t('the rest of the company details are folded under More details', $('orgMore').tagName === 'DETAILS' && !$('orgMore').open && $('orgMore').contains($('orgSummary')) && $('orgMore').contains($('orgPills')));
       t('the focus ranking is shown in order, read-only', /1\. AI Fluency — Organizational/.test(txt('orgSummary')) && /2\. Customer & Market Discovery/.test(txt('orgSummary')));
       t('internal owner notes and billing address are NOT shown to company admins', !/secret owner notes/.test(document.body.textContent) && !/1 Main St/.test(document.body.textContent));
 

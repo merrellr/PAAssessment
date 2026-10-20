@@ -209,6 +209,14 @@ console.log('--- invite helpers (moved here from the owner console) ---');
   t('people already in the company are skipped', c.toCreate.length === 1 && c.skipped.length === 1);
   t('an invite past its date is expired', C.inviteStatus({ status: 'open', expiresAtMs: NOW - 1 }, NOW) === 'expired' && C.inviteStatus({ status: 'open', expiresAtMs: NOW + 1 }, NOW) === 'open');
   t('seats warn but never block', C.seatInfo({ plan: 'seat', seatLimit: 3 }, 2, 1, 1).wouldExceed === true && C.seatInfo({ plan: 'flat' }, 99, 9, 9).wouldExceed === false);
+  t('available seats exclude active people and waiting invitations', C.seatInfo({ plan: 'seat', seatLimit: 10 }, 6, 2).available === 2 && C.seatInfo({ plan: 'seat', seatLimit: 3 }, 3, 2).available === 0 && C.seatInfo({ plan: 'flat' }, 5, 1).available === null);
+  {
+    const sc = C.seatCounts({ plan: 'seat', seatLimit: 10 }, 6, 2);
+    t('seat counts read active, pending, available', sc.map(x => x.n).join() === '6,2,2' && sc[2].label === 'Available of 10' && !sc.some(x => x.warn));
+    const over = C.seatCounts({ plan: 'seat', seatLimit: 3 }, 4, 0);
+    t('over the limit is flagged', over[0].warn && /over the limit/.test(over[0].label) && over[2].n === 0 && over[2].warn);
+    t('a flat plan has no seat ceiling', C.seatCounts({ plan: 'flat' }, 5, 1)[2].n === '∞');
+  }
   t('course names read well', C.prettyCourseId('aiOrg-moderate') === 'AI Fluency — Organizational · Moderate Experience');
   t('tokens are 32 hex characters and differ', /^[0-9a-f]{32}$/.test(C.randomToken()) && C.randomToken() !== C.randomToken());
 }

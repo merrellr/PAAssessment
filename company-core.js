@@ -82,7 +82,21 @@
   function seatInfo(org, activeCount, pendingInvites, newInvites) {
     const limit = org.plan === 'seat' ? (org.seatLimit || 0) : null;
     const wanted = activeCount + pendingInvites + (newInvites || 0);
-    return { limit: limit, active: activeCount, pending: pendingInvites, wouldExceed: limit !== null && wanted > limit };
+    // available: seats not taken by an active person or held by a waiting invitation (null on a flat plan)
+    return { limit: limit, active: activeCount, pending: pendingInvites, wouldExceed: limit !== null && wanted > limit,
+      available: limit === null ? null : Math.max(0, limit - activeCount - pendingInvites) };
+  }
+
+  // The three counts at the top of a company card: active, pending and available seats.
+  function seatCounts(org, activeCount, pendingInvites) {
+    const s = seatInfo(org, activeCount, pendingInvites, 0);
+    return [
+      { key: 'active', n: s.active, label: 'Active' + (s.limit !== null && s.active > s.limit ? ' (over the limit)' : ''), warn: s.limit !== null && s.active > s.limit },
+      { key: 'pending', n: s.pending, label: 'Pending' },
+      s.limit === null
+        ? { key: 'available', n: '∞', label: 'Available (flat plan)' }
+        : { key: 'available', n: s.available, label: 'Available of ' + s.limit, warn: s.wouldExceed }
+    ];
   }
 
   const ORDER = { active: 0, invited: 1, expired: 2, removed: 3 };
@@ -496,7 +510,7 @@
 
   root.CompanyCore = {
     DOMAINS, EMAIL_RE, TIER_SLUGS, LEVEL_LABELS, LESSON_COUNTS, COURSE_ARTICLES, STATUS_LABELS, INACTIVE_DAYS,
-    domainLabel, parseInviteLines, classifyInvites, inviteStatus, seatInfo, buildPeopleRows, randomToken,
+    domainLabel, parseInviteLines, classifyInvites, inviteStatus, seatInfo, seatCounts, buildPeopleRows, randomToken,
     csvCell, buildInviteCsv, prettyCourseId, tierSlugForPct,
     assignedCourses, lessonsDone, memberProgress, buildTeamRows, filterTeamRows, rollup, buildTeamCsv, buildAnswersCsv,
     AUDIT_ACTIONS, buildAuditEntry, describeAudit,

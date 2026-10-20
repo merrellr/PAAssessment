@@ -105,6 +105,14 @@
   .domain-group{ margin-bottom: 22px; }
   .domain-title{ font-family:var(--display); font-weight:600; font-size: 0.875rem; color: var(--navy-deep); margin-bottom: 10px; }
   .tier-row{ display:grid; grid-template-columns: repeat(4, 1fr); gap:8px; }
+  /* Laptop and wider: each skill area is one row, its name on the left and its courses across, so the whole
+     list fits on a 13-inch screen. Narrower: the name above its courses, as before. */
+  @media (min-width: 980px){
+    .domain-group{ display:grid; grid-template-columns: minmax(260px, 350px) minmax(0, 1fr); gap: 18px; align-items:center; margin-bottom: 0; padding: 10px 0; border-top: 1px solid var(--line); }
+    .domain-group .domain-title{ margin-bottom: 0; flex-wrap: wrap; row-gap: 2px; line-height: 1.3; }
+    .domain-group .domain-title > span:last-child{ margin-left: 33px !important; flex-basis: 100%; }
+    .domain-group .tier-card{ padding: 8px 10px; }
+  }
   .tier-card{ position:relative; border:1px solid var(--line); border-radius: 10px; padding: 10px; text-align:center; text-decoration:none; color: var(--ink); background:var(--surface); }
   .tier-card:hover{ border-color: var(--cyan); }
   .tier-card .tname{ font-size: 0.7188rem; font-weight:600; margin-bottom: 6px; }

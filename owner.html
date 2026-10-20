@@ -100,7 +100,7 @@ const OwnerLogic = (function(){
   DOMAINS.forEach(d => { labels[d[0]] = d[1]; });
   const EMAIL_RE = CompanyCore.EMAIL_RE;
   // Invite, people and spreadsheet helpers live in company-core.js, shared with company.html.
-  const { parseInviteLines, classifyInvites, inviteStatus, seatInfo, buildPeopleRows, csvCell, buildInviteCsv,
+  const { parseInviteLines, classifyInvites, inviteStatus, seatInfo, seatCounts, buildPeopleRows, csvCell, buildInviteCsv,
     randomToken, prettyCourseId, DEFAULT_FOCUS_ORDER, moveItem, availableFocus, placeFocus, removeFocus } = CompanyCore;
 
   function domainLabel(key){ return labels[key] || key; }
@@ -185,7 +185,7 @@ const OwnerLogic = (function(){
   }
 
   return { DOMAINS, DEFAULT_FOCUS_ORDER, domainLabel, validateOrgForm, buildOrgFields, moveItem, availableFocus, placeFocus,
-    removeFocus, describePlan, parseInviteLines, classifyInvites, inviteStatus, seatInfo, buildPeopleRows, filterOrgs,
+    removeFocus, describePlan, parseInviteLines, classifyInvites, inviteStatus, seatInfo, seatCounts, buildPeopleRows, filterOrgs,
     buildInviteCsv, csvCell, randomToken, EMAIL_RE, summarizeShare, prettyCourseId };
 })();
 
@@ -350,7 +350,7 @@ const OwnerLogic = (function(){
         <div class="section-head">
           <div>
             <h1 id="detailName"></h1>
-            <div id="detailPills" style="margin-top:6px;"></div>
+            <div class="pa-seats" id="detailSeats" aria-label="Seats"></div>
           </div>
           <div class="btn-row">
             <a class="btn btn-ghost" id="pilotLink" href="#" style="text-decoration:none; display:inline-block; font-family:var(--display); font-weight:600; font-size:0.875rem; border-radius:8px; padding:10px 18px; border:1px solid var(--line); color:var(--ink-soft);">Pilot tracker</a>
@@ -361,7 +361,13 @@ const OwnerLogic = (function(){
         </div>
         <div class="notice" id="detailNotice"></div>
         <div class="field-error" id="detailError" style="margin:0 0 12px;"></div>
-        <dl class="summary" id="detailSummary"></dl>
+        <details class="pa-more" id="detailMore">
+          <summary>More details</summary>
+          <div class="pa-more-body">
+            <div id="detailPills" style="margin-bottom:12px;"></div>
+            <dl class="summary" id="detailSummary"></dl>
+          </div>
+        </details>
       </div>
 
       <div class="card" id="linksCard" style="display:none;">
@@ -962,6 +968,8 @@ function renderDetail(){
     ? active + ' of ' + org.seatLimit + ' seats in use' + pendingText
     : active + ' active user' + (active === 1 ? '' : 's') + ' (flat price)' + pendingText;
 
+  renderSeatCounts($('detailSeats'), L.seatCounts(org, active, pending));
+
   const focusChips = el('div', { class: 'chips' });
   if (org.focusAreas && org.focusAreas.length){
     org.focusAreas.forEach((k, i) => focusChips.appendChild(el('span', { class: 'pill', text: (i + 1) + '. ' + L.domainLabel(k) })));
@@ -984,6 +992,18 @@ function renderDetail(){
   $('usersHint').textContent = (org.plan === 'seat' ? 'Every active person, including admins, uses one seat. ' : '') + 'People join with their own invite link.';
   renderPeople();
   renderNewLinks();
+}
+
+// Active, pending and available seats, always visible; everything else sits under "More details".
+function renderSeatCounts(box, counts){
+  box.innerHTML = '';
+  counts.forEach(c => box.appendChild(el('span', { class: 'pa-seat' + (c.warn ? ' pa-seat-warn' : ''), 'data-k': c.key },
+    el('b', { text: String(c.n) }), el('span', { text: c.label }))));
+}
+rememberOpen($('detailMore'), 'pa_owner_more');
+function rememberOpen(d, key){
+  try { d.open = localStorage.getItem(key) === '1'; } catch (e) {}
+  d.addEventListener('toggle', () => { try { localStorage.setItem(key, d.open ? '1' : '0'); } catch (e) {} });
 }
 
 function personRow(p){
