@@ -204,7 +204,7 @@ if (window.self === window.top) {
   /* The welcome email. A brand-new account (made in the last two days) asks the email script, once, to send it.
      The script checks the sign-in token, sends only to that account's own address, and remembers who has had one,
      so asking again is harmless. If it fails (script busy, Gmail limit) the page simply asks again next time. */
-  const BACKEND = "https://script.google.com/macros/s/AKfycbynJQYF9rv5maL_CGniS9UGhTDfBVeW3gVhEWUsFdGOqquv4osGx4nQvc8jNkaaY6wrrg/exec";
+  const BACKEND = "https://script.google.com/macros/s/AKfycbyMQnshyho2q3igshqZmIm6RyJCYl1WsRJbShHz2blCt81iVmlngeNlYfO0QltR7TjwHg/exec";
   const WELCOME_WITHIN_MS = 2 * 86400000;
   const askedThisPage = {};
   function backend(params){
