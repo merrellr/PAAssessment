@@ -17,6 +17,9 @@
     : scn === 'voter' ? mkUser('uVoter', true)
     : mkUser('uFresh', true);
 
+  // 'draft': a request typed while signed out (kept by the page for this tab), back after signing in
+  if (scn === 'draft') { try { sessionStorage.setItem('pa_tool_request_draft', 'A churn early-warning checklist'); } catch (e) {} }
+
   window.__seed = function(store, Timestamp){
     const now = Timestamp.now();
     const tool = (title, status, votes, order, extra) => Object.assign({ title: title, description: title + ' helps you do something useful.', category: 'Strategy',

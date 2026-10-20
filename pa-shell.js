@@ -32,7 +32,8 @@
     sliders: tiny('<path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12"/><circle cx="16" cy="6" r="2"/><circle cx="10" cy="12" r="2"/><circle cx="18" cy="18" r="2"/>'),
     moon: tiny('<path d="M12 3a9 9 0 1 0 9 9 7 7 0 0 1-9-9Z"/>'),
     menu: tiny('<path d="M4 7h16M4 12h16M4 17h16"/>'),
-    close: tiny('<path d="M6 6l12 12M18 6 6 18"/>')
+    close: tiny('<path d="M6 6l12 12M18 6 6 18"/>'),
+    help: tiny('<circle cx="12" cy="12" r="9"/><path d="M9.6 9.3a2.5 2.5 0 0 1 4.8.9c0 1.7-2.4 2.2-2.4 3.6"/><path d="M12 17h.01"/>')
   };
   var WORDMARK = '<span class="pa-wm" aria-hidden="true"><span class="pa-wm-box">Product</span><span>&Lambda;dvisory</span></span>';
 
@@ -47,8 +48,9 @@
     var mac = /Mac|iPhone|iPad/.test(navigator.platform || navigator.userAgent);
     return '<header class="pa-nav" id="paNav"><div class="pa-nav-in">' +
       '<a class="pa-brand" href="/lms-dashboard" aria-label="Product Advisory Learning, my dashboard">' + WORDMARK + '<span class="pa-app">Learning</span></a>' +
-      '<nav class="pa-links" aria-label="Main">' + links + '<button type="button" class="pa-m-only" data-pa="prefs">Make it yours</button></nav>' +
+      '<nav class="pa-links" aria-label="Main">' + links + '<button type="button" class="pa-m-only" data-pa="help">Help</button><button type="button" class="pa-m-only" data-pa="prefs">Make it yours</button></nav>' +
       '<div class="pa-tools">' +
+      '<button type="button" class="pa-icon pa-help-btn" data-pa="help" aria-label="Help: answers, ask a question, send feedback" title="Help">' + ICON.help + '<span class="pa-help-lbl">Help</span></button>' +
       '<button type="button" class="pa-icon" data-pa="search" aria-label="Search courses and lessons">' + ICON.search + "<kbd>" + (mac ? "⌘" : "Ctrl") + "</kbd><kbd>K</kbd></button>" +
       '<button type="button" class="pa-icon pa-prefs-btn" data-pa="prefs" aria-label="Make it yours: change how this site looks" title="Make it yours">' + ICON.sliders + "</button>" +
       '<button type="button" class="pa-icon" data-pa="theme" aria-label="Toggle light or dark" title="Light / dark">' + ICON.moon + "</button>" +
@@ -176,6 +178,94 @@
     if (lastFocus && lastFocus.focus) lastFocus.focus();
   }
 
+  /* ---------------------------------------------------------------- Help (every page) */
+  // Short answers about using the site, searchable as you type: [group, question, answer (HTML), extra search words]. A question they don't cover can go to the lessons
+  // (Ask AI), to the feedback form, or to a person.
+  var HELP = [
+    ["Getting started", "What is Product Advisory Learning?", "A skill check and a set of short courses for product management and working with AI. The assessment shows where you are in seven skill areas, and your dashboard turns that into a course plan matched to your level.", "about what platform"],
+    ["Getting started", "Where do I start?", "Take the assessment first (it opens from your dashboard), then follow <b>Recommended for you</b> on your dashboard. Your progress saves as you go, so you can stop and come back any time.", "begin first step new"],
+    ["The assessment", "How does the assessment work?", "Fourteen quick questions about how you work today. When you finish you see your level in each of the seven skill areas, from Limited to Advanced Experience, and your dashboard builds a course plan from it.", "skill check test quiz questions results level"],
+    ["The assessment", "Can I take it again?", "Yes. Use <b>Retake</b> on your dashboard, next to your results. Your new results replace the old ones, and your course plan updates to match.", "retake redo again repeat assessment results"],
+    ["The assessment", "What do the four levels mean?", 'Limited, Moderate, Lots of and Advanced Experience describe how you work in each area today, not how long you have done the job. The <a href="/framework">training framework</a> describes each level in every area.', "level tier limited moderate advanced experience framework"],
+    ["Courses and progress", "Does my progress save?", "Yes, automatically, whenever you are signed in. Open a course from your dashboard and you pick up where you left off.", "progress save resume continue course lesson lost"],
+    ["Courses and progress", "Where are my notes?", "The answers you write in lessons are under <b>Your notes</b> on your dashboard. They are private to you, and are never shared with a company.", "notes reflections answers private"],
+    ["Courses and progress", "Can I ask a question about a lesson?", "Yes. Type your question in the box above and choose <b>Ask the lessons</b>, or press Ctrl K (⌘K on a Mac) on any page. The answer comes only from the course lessons, with links to them.", "ask ai question lesson course help"],
+    ["Your account", "How do I change my password or email?", 'Change your password from the <b>Profile</b> menu on your dashboard. Change your email on <a href="/profile">My profile</a>; we send a link to the new address to confirm it.', "password email change account login"],
+    ["Your account", "How do I add a profile photo?", 'On <a href="/profile">My profile</a>, choose <b>Upload photo</b>, then drag and zoom it to fit the circle. It shows on your Profile button, and only you see it.', "photo picture image avatar upload profile"],
+    ["Your account", "I forgot my password", 'On the <a href="/lms-dashboard">dashboard</a> sign-in, choose <b>Forgot password?</b> and we email you a link to set a new one. If you signed up with Google, use <b>Continue with Google</b> instead.', "password reset forgot login sign in"],
+    ["Your account", "How do I delete my account?", 'On <a href="/profile">My profile</a>, at the bottom. It removes your sign-in, your progress and your assessment results.', "delete remove account data privacy"],
+    ["Teams and companies", "What does my company see?", "If you joined through a company invitation, your assessment results, answers and course progress are shared with that company's admins while you are a member. Your notes and phone number are never shared, and the account stays yours if you leave.", "company employer admin share privacy see data team"],
+    ["Teams and companies", "My invitation link doesn't work", "Check that you copied the whole link from the email. If it still doesn't work, ask the person who invited you to send it again; links can expire or be replaced.", "invite invitation link join expired company"],
+    ["Teams and companies", "Can my whole team take the assessment?", 'Yes. <a href="/request-info?who=org">Tell us about your team</a> and we will set up a company account with its own dashboard.', "team company organization pricing group"],
+    ["Toolkits", "How do I request or vote for a toolkit?", 'On the <a href="/tool-requests">Toolkits Roadmap</a>: vote for up to three tools, or use <b>Request a tool</b> to suggest your own. Voting and requests need a free account with a verified email.', "tool toolkit request vote roadmap suggest"],
+    ["Toolkits", "Where are the free toolkits?", 'On <a href="https://www.productadvisory.co/toolkits" target="_blank" rel="noopener">productadvisory.co/toolkits<span aria-hidden="true"> ↗</span>' + NEW_TAB + "</a>: fillable PDFs and Google Sheets.", "toolkit tools download template pdf sheet free"],
+    ["This site", "Can I change how the site looks?", "Yes. <b>Make it yours</b> (the sliders button at the top) sets light or dark, text size, style and accent colour. Your choice follows you to www.productadvisory.co on this browser.", "dark mode light theme text size font accent"]
+  ];
+  var help, helpQ, helpFocus;
+  function buildHelp() {
+    help = document.createElement("div");
+    help.className = "pa-panel-back pa-help-back";
+    var grp = "", list = "";
+    HELP.forEach(function (h, i) {
+      if (h[0] !== grp) { grp = h[0]; list += '<h3 class="pa-help-grp">' + esc(grp) + "</h3>"; }
+      list += '<details class="pa-help-item" data-i="' + i + '"><summary>' + esc(h[1]) + "</summary><p>" + h[2] + "</p></details>";
+    });
+    help.innerHTML = '<div class="pa-panel pa-help" role="dialog" aria-modal="true" aria-labelledby="paHelpTitle">' +
+      '<div class="pa-panel-head"><div><h2 id="paHelpTitle">Help</h2></div><button type="button" class="pa-icon" data-pa="close" aria-label="Close">' + ICON.close + "</button></div>" +
+      "<p>Search the answers below, ask about the course content, or tell us what's missing.</p>" +
+      '<input type="search" class="pa-help-q" placeholder="What do you need help with?" aria-label="Search help" autocomplete="off">' +
+      '<div class="pa-help-ask" hidden></div>' +
+      '<div class="pa-help-list">' + list + '</div><p class="pa-help-none" hidden>No answer here yet. Ask the lessons, or send us a note below.</p>' +
+      '<div class="pa-panel-foot pa-help-foot"><a class="pa-btn" href="/feedback">Send feedback</a>' +
+      '<a class="pa-btn ghost" href="mailto:info@productadvisory.co?subject=' + encodeURIComponent("Help with Product Advisory Learning") + '">Email us</a>' +
+      '<a class="pa-btn ghost" href="' + CALENDLY + '" target="_blank" rel="noopener">Book a call<span aria-hidden="true"> ↗</span>' + NEW_TAB + "</a></div></div>";
+    document.body.appendChild(help);
+    helpQ = help.querySelector(".pa-help-q");
+    help.addEventListener("click", function (e) {
+      if (e.target === help) return closeHelp();
+      var b = e.target.closest ? e.target.closest("[data-pa]") : null;
+      if (b && b.getAttribute("data-pa") === "close") return closeHelp();
+      if (b && b.getAttribute("data-pa") === "ask") { var q = helpQ.value.trim(); closeHelp(); openPalette(); palInput.value = q; showAnswer(q); }
+    });
+    help.addEventListener("keydown", function (e) { if (e.key === "Escape") closeHelp(); });
+    helpQ.addEventListener("input", filterHelp);
+  }
+  function filterHelp() {
+    var q = helpQ.value.trim(), qs = terms(q), shown = 0;
+    // Answers that match every word you typed; if none do, those that match any of them.
+    var score = HELP.map(function (h) { var hay = terms(h[1] + " " + h[2].replace(/<[^>]+>/g, " ") + " " + (h[3] || "")).join(" ");
+      return qs.filter(function (w) { return hay.indexOf(w) > -1; }).length; });
+    var strict = qs.length > 0 && score.some(function (n) { return n === qs.length; });
+    var hits = score.map(function (n) { return strict ? n === qs.length : n > 0; });
+    Array.prototype.forEach.call(help.querySelectorAll(".pa-help-item"), function (d) {
+      d.hidden = !!qs.length && !hits[d.getAttribute("data-i")];
+      d.open = !!qs.length && !d.hidden && strict;
+      if (!d.hidden) shown++;
+    });
+    Array.prototype.forEach.call(help.querySelectorAll(".pa-help-grp"), function (g) {
+      var n = g.nextElementSibling, any = false;
+      while (n && n.classList.contains("pa-help-item")) { if (!n.hidden) any = true; n = n.nextElementSibling; }
+      g.hidden = !any;
+    });
+    help.querySelector(".pa-help-none").hidden = !qs.length || shown > 0;
+    var ask = help.querySelector(".pa-help-ask");
+    ask.hidden = !isQuestion(q);
+    ask.innerHTML = ask.hidden ? "" : '<button type="button" class="pa-help-askbtn" data-pa="ask"><span aria-hidden="true">✦</span> Ask the lessons: “' + esc(q) + "”</button>";
+  }
+  function openHelp() {
+    if (!help) buildHelp();
+    if (pal && pal.classList.contains("open")) closePalette();
+    helpFocus = document.activeElement;
+    help.classList.add("open");
+    helpQ.value = ""; filterHelp();
+    helpQ.focus();
+  }
+  function closeHelp() {
+    if (!help) return;
+    help.classList.remove("open");
+    if (helpFocus && helpFocus.focus) helpFocus.focus();
+  }
+
   /* ---------------------------------------------------------------- search (⌘K) */
   var ACTIONS = [
     { g: "Go to", t: "My learning dashboard", i: "⌂", u: "/lms-dashboard" },
@@ -188,7 +278,8 @@
     { g: "Product Advisory", t: "Contact", i: "↗", u: WWW + "contact", ext: true },
     { g: "Product Advisory", t: "Book a free 30-minute call", i: "☎", u: CALENDLY, ext: true },
     { g: "Make it yours", t: "Toggle light / dark", i: "◐", run: toggleTheme },
-    { g: "Make it yours", t: "Open Make it yours", i: "⚙", run: openPanel }
+    { g: "Make it yours", t: "Open Make it yours", i: "⚙", run: openPanel },
+    { g: "Help", t: "Help: answers, guidance and feedback", i: "?", run: function () { openHelp(); } }
   ];
   var KIND = { course: "Courses", lesson: "Lessons", framework: "Skill areas" };
   var pal, palInput, palList, palItems = [], palSel = 0, palFocus, indexLoading = false;
@@ -423,10 +514,11 @@
       if (a === "search") openPalette();
       else if (a === "prefs") openPanel();
       else if (a === "theme") toggleTheme();
+      else if (a === "help") openHelp();
       else if (a === "menu") { var open = nav.classList.toggle("open"); b.setAttribute("aria-expanded", open ? "true" : "false"); }
     });
   }
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init); else init();
 
-  window.PAShell = { openSearch: openPalette, openPrefs: openPanel, toggleTheme: toggleTheme, search: searchIndex, loadIndex: loadIndex, retrieve: retrieve, loadAsk: loadAsk, ask: showAnswer };
+  window.PAShell = { openHelp: openHelp, openSearch: openPalette, openPrefs: openPanel, toggleTheme: toggleTheme, search: searchIndex, loadIndex: loadIndex, retrieve: retrieve, loadAsk: loadAsk, ask: showAnswer };
 })();
