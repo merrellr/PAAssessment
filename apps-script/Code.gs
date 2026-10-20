@@ -1691,15 +1691,23 @@ function mailAlias_(address) {
   return false;
 }
 
+// When the address an email asks for is not set up, it comes from this one instead, so the script
+// owner's own address (rob@) is never shown. Only when this is not set up either does the owner's address appear.
+var MAIL_FALLBACK_KEY_ = 'assessment';
+
 // Sends one email. msg: { to, subject, body, htmlBody, name, replyTo }. fromKey: a key of MAIL_ADDR_.
-// Returns 'alias' when it went out as that address and 'default' when it went out from the script owner's account.
+// Returns 'alias' when it went out as that address, 'fallback' when it went out as MAIL_FALLBACK_KEY_'s
+// address instead, and 'default' when it went out from the script owner's account.
 function sendMail_(msg, fromKey) {
-  var from = MAIL_ADDR_[fromKey];
-  if (from && mailAlias_(from)) {
+  var tries = [[fromKey, 'alias']];
+  if (fromKey !== MAIL_FALLBACK_KEY_) tries.push([MAIL_FALLBACK_KEY_, 'fallback']);
+  for (var i = 0; i < tries.length; i++) {
+    var from = MAIL_ADDR_[tries[i][0]];
+    if (!from || !mailAlias_(from)) continue;
     try {
       GmailApp.sendEmail(msg.to, msg.subject, msg.body, { htmlBody: msg.htmlBody, name: msg.name, replyTo: msg.replyTo, from: from });
-      return 'alias';
-    } catch (err) { /* fall through to the normal way */ }
+      return tries[i][1];
+    } catch (err) { /* try the next address, then the normal way */ }
   }
   MailApp.sendEmail(msg);
   return 'default';
@@ -1715,7 +1723,7 @@ function authorizeMailAliases() {
     (list.map(function (a) { return String(a).toLowerCase(); }).indexOf(MAIL_ADDR_[k]) > -1 ? usable : missing).push(MAIL_ADDR_[k]);
   });
   Logger.log('Can send as: ' + (usable.join(', ') || '(none yet)'));
-  Logger.log('Not set up in Gmail yet (these still work, they just come from your main address): ' + (missing.join(', ') || '(none)'));
+  Logger.log('Not set up in Gmail yet (these still work, they just come from ' + MAIL_ADDR_[MAIL_FALLBACK_KEY_] + ' instead): ' + (missing.join(', ') || '(none)'));
 }
 
 
