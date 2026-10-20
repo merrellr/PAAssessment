@@ -179,7 +179,7 @@
       <div class="section-head" style="margin-bottom:6px;">
         <div>
           <h1 id="orgName"></h1>
-          <div id="orgPills" style="margin-top:6px;"></div>
+          <div class="pa-seats" id="orgSeats" aria-label="Seats"></div>
         </div>
         <div class="btn-row">
           <a id="ownerBackLink" href="/owner" class="back-link" style="display:none; margin:0;">← Owner console</a>
@@ -190,7 +190,13 @@
       <div class="error-line" id="errorLine" role="alert"></div>
       <div class="banner" id="archivedBanner" style="display:none;">This company is archived, so the dashboard is read-only. You can still see everything it holds. New invitations are switched off.</div>
       <div class="banner info" id="ownerBanner" style="display:none;">You are looking at this company as the platform owner.</div>
-      <dl class="summary" id="orgSummary"></dl>
+      <details class="pa-more" id="orgMore">
+        <summary>More details</summary>
+        <div class="pa-more-body">
+          <div id="orgPills"></div>
+          <dl class="summary" id="orgSummary"></dl>
+        </div>
+      </details>
     </div>
 
     <div class="card" id="reportCard">
@@ -643,6 +649,8 @@ function renderHeader(){
     ? active + ' of ' + org.seatLimit + ' seats in use' + (active > org.seatLimit ? ' (over the limit)' : '') + pendingText
     : plural(active, 'active person', 'active people') + pendingText;
 
+  renderSeatCounts($('orgSeats'), C.seatCounts(org, active, pending));
+
   const focus = el('div', { class: 'chips' });
   if (org.focusAreas && org.focusAreas.length){
     org.focusAreas.forEach((k, i) => focus.appendChild(el('span', { class: 'pill', text: (i + 1) + '. ' + C.domainLabel(k) })));
@@ -655,6 +663,18 @@ function renderHeader(){
   item('Seats', seatsText);
   item('Point of contact', [org.contactName, org.contactEmail, org.contactPhone].filter(Boolean).join('\n') || '—');
   item('Focus areas, in priority order', focus);
+}
+
+// Active, pending and available seats, always visible; everything else sits under "More details".
+function renderSeatCounts(box, counts){
+  box.innerHTML = '';
+  counts.forEach(c => box.appendChild(el('span', { class: 'pa-seat' + (c.warn ? ' pa-seat-warn' : ''), 'data-k': c.key },
+    el('b', { text: String(c.n) }), el('span', { text: c.label }))));
+}
+rememberOpen($('orgMore'), 'pa_company_more');
+function rememberOpen(d, key){
+  try { d.open = localStorage.getItem(key) === '1'; } catch (e) {}
+  d.addEventListener('toggle', () => { try { localStorage.setItem(key, d.open ? '1' : '0'); } catch (e) {} });
 }
 
 function tile(num, label, attn){

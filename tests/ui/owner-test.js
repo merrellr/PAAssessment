@@ -101,6 +101,7 @@ function finish(){
     t('creating the company is recorded in its activity log by the owner', created.some(e => e.action === 'company.created' && e.actorUid === 'owner1' && e.actorEmail === 'owner@x.com' && e.at && e.at.toMillis), JSON.stringify(created));
     const summaryText = textOf($('detailSummary'));
     t('company page shows point of contact and billing address', /Pat Jones/.test(summaryText) && /pat@acme\.com/.test(summaryText) && /Springfield/.test(summaryText));
+    t('company card shows the seat counts up front and folds the rest', $('detailSeats').querySelectorAll('.pa-seat').length === 3 && /Active/.test(textOf($('detailSeats'))) && /Available of 3/.test(textOf($('detailSeats'))) && $('detailMore').contains($('detailSummary')) && !$('detailMore').open, textOf($('detailSeats')));
     t('company page shows seats, notes and created / last modified', /of 3 seats in use/.test(summaryText) && /Pilot customer/.test(summaryText) && /Created/.test(summaryText) && /Last modified/.test(summaryText));
     const invPath = Object.keys(window.__store).find(p => p.indexOf('invites/') === 0);
     const inv = window.__store[invPath];

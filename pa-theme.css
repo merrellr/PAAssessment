@@ -654,6 +654,8 @@ html.pa-shell .icon-btn { background: var(--pa-card); }
   .pa-tools .pa-prefs-btn { display: none; }
   /* light/dark is also in the menu's "Make it yours" */
   .pa-nav:has(#paNavAccount:not(:empty)) .pa-tools [data-pa="theme"] { display: none; }
+  /* and Help, which is also in the menu, so the Profile button fits */
+  .pa-nav:has(#paNavAccount:not(:empty)) .pa-tools .pa-help-btn { display: none; }
 }
 
 /* ---------- Make it yours panel ---------- */
@@ -715,5 +717,19 @@ html.pa-shell .icon-btn { background: var(--pa-card); }
 .palette .pa-src li b { display: inline-block; min-width: 1.4em; color: var(--pa-cyan-ink); }
 .palette .pa-src li.pa-dim a { color: var(--pa-muted); }
 .palette .pa-note { margin: 10px 0 0; font-size: .8rem; color: var(--pa-muted); }
+
+/* ---------- company card: seat counts up front, the rest folded ---------- */
+.pa-seats { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+.pa-seat { display: flex; align-items: baseline; gap: 7px; padding: 6px 12px; border-radius: 10px; background: var(--pa-tint); color: var(--pa-ink); font-size: .82rem; }
+.pa-seat b { font-family: var(--pa-display, inherit); font-size: 1.25rem; line-height: 1; color: var(--pa-navy); font-variant-numeric: tabular-nums; }
+.pa-seat.pa-seat-warn { background: var(--warn-bg, #fdecea); }
+.pa-seat.pa-seat-warn b { color: var(--warn, #b3261e); }
+.pa-more { margin-top: 12px; border-top: 1px solid var(--pa-line); padding-top: 8px; }
+.pa-more > summary { cursor: pointer; list-style: none; display: inline-flex; align-items: center; gap: 6px; font-size: .85rem; font-weight: 700; color: var(--pa-navy); padding: 4px 0; border-radius: 6px; }
+.pa-more > summary::-webkit-details-marker { display: none; }
+.pa-more > summary::before { content: ""; width: 7px; height: 7px; border-right: 2px solid currentColor; border-bottom: 2px solid currentColor; transform: rotate(-45deg); transition: transform .15s; margin-right: 2px; }
+.pa-more[open] > summary::before { transform: rotate(45deg); }
+.pa-more > summary:focus-visible { outline: 2px solid var(--pa-cyan); outline-offset: 3px; }
+.pa-more > .pa-more-body { padding-top: 6px; }
 
 @media print { .pa-nav, .pa-panel-back, .palette-backdrop { display: none !important; } }
