@@ -316,6 +316,35 @@ re-points them on themed pages. The framework's seven skill-area icons are line 
 Fonts are Lato for text and Comfortaa for the logo. Font sizes are in `rem`, so "Text size" scales the whole page.
 `tests/theme.test.mjs` lists which pages are converted (`THEMED`).
 
+## Lessons: layout and building blocks
+
+- **Layout.** On screens 1080px and wider, `lesson.html` shows the course outline on the left: progress ring, every
+  lesson with its reading time and a tick when done, and the course's key takeaways. The lesson fills the rest.
+  Narrower screens keep one column with the lesson pills on top. A thin bar along the top of the window shows how far
+  you've read, and the line under the title shows "Lesson 2 of 5 · About 5 min · 12 min left in this course".
+- **Building blocks.** Besides `body`, a lesson in `content/` may list `blocks`, in reading order. They are drawn by
+  `lesson-blocks.js` (styles in `lesson-blocks.css`). Each type is described at the top of that file:
+  - story: a short scene with a cast, optionally pausing at "What happens next?";
+  - stat: one number with its source;
+  - bars: a horizontal bar chart, one series, with one bar highlighted, hover and focus tooltips, and a data table for
+    screen readers;
+  - curve: a line with a slider and a sentence that changes as you move it;
+  - matrix: a competitor grid with the gap column highlighted;
+  - compare: weaker vs better;
+  - sort: classify each item, with feedback and a score;
+  - scenario: choose what to do and see what happens;
+  - flow: steps in order;
+  - personas;
+  - takeaway;
+  - quote.
+- The words in blocks go into search and "Ask AI" (`LessonBlocks.text`, used by `tools/build-search-index.mjs`).
+  Rebuild the indexes after editing a course.
+- **The flagship course** is `content/discovery-novice.js` (Customer & Market Discovery, Limited Experience): one story
+  across five lessons, with every block type in use. The company and people in the story, and the numbers from their
+  pilot, are fictional and marked so on the page. Every other figure names its source.
+- Tests: "lesson blocks" and "last lesson" in the UI runner; `tests/company-core.test.mjs` checks each course's lesson
+  count by loading its file.
+
 ## "Ask AI": answers from the lessons
 
 Typing a question in the search menu (three or more words, or ending in "?") adds an **Ask the lessons** row at the top.

@@ -2,6 +2,7 @@
 // company dashboard).
 // Run:  node --experimental-default-type=module tests/company-core.test.mjs
 import fs from 'node:fs';
+import vm from 'node:vm';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import '../company-core.js';
@@ -27,9 +28,12 @@ console.log('--- lesson counts match the real course files ---');
   t('every course file has an entry (28 courses)', files.length === 28 && files.length === Object.keys(C.LESSON_COUNTS).length, files.length + ' files');
   files.forEach(f => {
     const id = f.replace(/\.js$/, '');
-    const text = fs.readFileSync(path.join(dir, f), 'utf8');
-    const i = text.indexOf('lessons:');
-    const n = (text.slice(i).match(/^\s{4}\{\s*\r?\n\s{6}id:\s*\d+/gm) || []).length;
+    // run the course file as the lesson page does, and count what it defines
+    const box = { window: {}, Math };
+    vm.createContext(box);
+    vm.runInContext(fs.readFileSync(path.join(dir, f), 'utf8'), box, { filename: f });
+    const course = (box.window.CONTENT_OVERRIDES || {})[id];
+    const n = course && Array.isArray(course.lessons) ? course.lessons.length : 0;
     t(id + ' has ' + C.LESSON_COUNTS[id] + ' lessons', n === C.LESSON_COUNTS[id], 'file has ' + n);
   });
 }
