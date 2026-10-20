@@ -2,7 +2,8 @@
 //
 // How to run (needs Node 20 and Java 21; none of this runs on the live site):
 //   npm install firebase-tools@13 @firebase/rules-unit-testing@3 firebase@10
-//   npx firebase emulators:exec --only firestore \   (from the repo root)
+//   (from the repo root)
+//   npx firebase emulators:exec --only firestore \
 //     --project demo-pa "node tests/firestore-rules.test.mjs"
 //
 // Each line is "can X do Y?". assertSucceeds means the rules must allow it,
