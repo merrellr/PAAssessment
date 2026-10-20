@@ -33,6 +33,7 @@ if (window.self === window.top) {
     '.pa-acct{position:absolute;z-index:40;font-family:"Space Grotesk","IBM Plex Sans",system-ui,sans-serif;}',
     '.pa-acct-btn{display:flex;align-items:center;gap:7px;padding:7px 14px 7px 10px;border-radius:20px;background:var(--navy,#1A4584);color:var(--btn-ink,#fff);border:none;cursor:pointer;font:600 13px "Space Grotesk","IBM Plex Sans",system-ui,sans-serif;}',
     '.pa-acct-btn:hover{background:var(--primary-strong,#12325F);}',
+    '.pa-avatar{width:22px;height:22px;border-radius:50%;object-fit:cover;display:block;margin:-3px 0;box-shadow:0 0 0 1.5px rgba(255,255,255,.85);}',
     '.pa-acct-btn:focus-visible,.pa-acct-item:focus-visible{outline:3px solid var(--cyan,#35C2E8);outline-offset:2px;}',
     '.pa-acct-menu{position:absolute;right:0;top:42px;width:250px;max-width:calc(100vw - 32px);background:var(--surface,#fff);border:1px solid var(--line,#DCE3EE);border-radius:12px;box-shadow:0 8px 24px rgba(22,33,62,0.12);padding:14px;}',
     '.pa-acct-menu[hidden]{display:none;}',
@@ -238,7 +239,44 @@ if (window.self === window.top) {
   }
   window.addEventListener('pa-membership-changed', () => { if (auth.currentUser) adminWelcomeIfDue(auth.currentUser); });
 
+  /* The profile photo (set on My profile) on the Profile button: this menu's and the dashboard's own. It is a small
+     JPEG kept on the person's own progress/{uid}.profile.photo, cached on this browser so it shows straight away. */
+  const PHOTO = /^data:image\/jpeg;base64,[A-Za-z0-9+/=]+$/;
+  let photoUid = '', photoUrl = '';
+  function paintAvatar(){
+    ['.pa-acct-btn', '#profileAvatarBtn'].forEach(sel => {
+      const b = document.querySelector(sel);
+      if (!b) return;
+      const icon = b.querySelector('svg'), img = b.querySelector('img.pa-avatar');
+      if (photoUrl){
+        if (img) img.src = photoUrl;
+        else { const i = document.createElement('img'); i.className = 'pa-avatar'; i.alt = ''; i.src = photoUrl; b.insertBefore(i, b.firstChild); }
+        if (icon) icon.style.display = 'none';
+      } else {
+        if (img) img.remove();
+        if (icon) icon.style.display = '';
+      }
+    });
+  }
+  function setPhoto(url){
+    photoUrl = PHOTO.test(url || '') ? url : '';
+    try { if (photoUrl) localStorage.setItem('pa_avatar_' + photoUid, photoUrl); else localStorage.removeItem('pa_avatar_' + photoUid); } catch (e) { /* fine */ }
+    paintAvatar();
+  }
+  async function loadPhoto(user){
+    photoUid = user.uid;
+    try { photoUrl = localStorage.getItem('pa_avatar_' + user.uid) || ''; } catch (e) { photoUrl = ''; }
+    paintAvatar();
+    try {
+      const snap = await getDoc(doc(db, 'progress', user.uid));
+      if (photoUid === user.uid) setPhoto(snap.exists() && snap.data().profile ? snap.data().profile.photo : '');
+    } catch (e) { /* keep the cached one */ }
+  }
+  // My profile announces a new or removed photo, so the button changes at once.
+  window.addEventListener('pa-avatar', (e) => { if (photoUid) setPhoto(e.detail || ''); });
+
   onAuthStateChanged(auth, async (user) => {
+    if (user) loadPhoto(user); else { photoUid = ''; photoUrl = ''; }
     // Pages that need to know (feedback.html) read PAAccount.user, or listen for 'pa-auth'.
     window.PAAccount.user = user ? { name: user.displayName || '', email: user.email || '' } : null;
     window.PAAccount.ready = true;
@@ -253,10 +291,12 @@ if (window.self === window.top) {
     const mine = ++token;
     if (!user){ remove(); return; }
     mount(user, { owner: false, companyAdmin: false });   // show it straight away, add the extra links when known
+    paintAvatar();
     const flags = await lookUp(user);
     if (mine !== token || !wrap) return;
     const wasOpen = !wrap.querySelector('.pa-acct-menu').hidden;
     mount(user, flags);
+    paintAvatar();
     if (wasOpen){ wrap.querySelector('.pa-acct-menu').hidden = false; wrap.querySelector('.pa-acct-btn').setAttribute('aria-expanded', 'true'); }
   });
 }

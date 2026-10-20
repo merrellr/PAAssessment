@@ -130,6 +130,7 @@ try {
   $results += Run-Page 'join page: badtoken' "$base/join-test.html?scn=badtoken&token=abc" 20000
   foreach ($s in 'member', 'focus', 'focusdefault', 'admin', 'plain', 'removed', 'owner', 'threelessons', 'allfive', 'recentdone', 'removedold') { $results += Run-Page "dashboard: $s" "$base/dash-test.html?scn=$s" 25000 }
   foreach ($s in 'member', 'nonmember', 'blocked', 'votefail') { $results += Run-Page "delete account: $s" "$base/del-test.html?scn=$s" 25000 }
+  $results += Run-Page 'profile photo' "$base/del-test.html?scn=photo" 25000
   foreach ($s in 'member', 'plain') { $results += Run-Page "last lesson: $s" "$base/les-test.html?scn=$s&course=discovery-novice&lesson=5" 30000 }
   foreach ($s in 'admin', 'empty', 'archived', 'nocopy', 'auditdenied', 'owner', 'ownernoorg', 'plain', 'member', 'removedadmin', 'denied', 'sharesdenied', 'signedout', 'history', 'snapshotsdenied', 'snapfail', 'noplatform', 'smallplatform') {
     $org = if ($s -eq 'owner') { '&org=orgA' } else { '' }

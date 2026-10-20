@@ -35,6 +35,25 @@
   .avatar-meta .name{ font-family:var(--display); font-weight:600; font-size: 1rem; }
   .avatar-meta .email{ font-size: 0.7812rem; color: var(--gray); }
   .avatar-meta .verified{ font-size: 0.7188rem; margin-top:2px; }
+  .avatar-circle{ overflow:hidden; flex-shrink:0; }
+  .avatar-circle img{ width:100%; height:100%; object-fit:cover; display:block; }
+  .photo-actions{ display:flex; gap:12px; margin-top:6px; }
+  .linkbtn{ background:none; border:0; padding:0; font:inherit; font-size:0.8125rem; color:var(--navy); text-decoration:underline; cursor:pointer; }
+  .photo-msg{ font-size:0.7812rem; color:var(--gray); min-height:1px; margin-top:2px; }
+  .photo-msg.err{ color:var(--warn); }
+  .crop-back{ position:fixed; inset:0; z-index:220; background:rgba(8,18,36,.55); display:flex; align-items:center; justify-content:center; padding:16px; }
+  .crop-back[hidden]{ display:none; }
+  .crop-box{ background:var(--surface); color:var(--ink); border-radius:18px; padding:22px; width:min(360px, 100%); box-shadow:0 20px 60px rgba(0,0,0,.35); }
+  .crop-box h2{ margin:0 0 4px; font-size:1.125rem; }
+  .crop-box p{ font-size:0.8438rem; margin:0 0 14px; }
+  .crop-stage{ position:relative; width:280px; height:280px; max-width:100%; margin:0 auto; border-radius:12px; overflow:hidden; cursor:grab; touch-action:none; background:#0b1220; }
+  .crop-stage:active{ cursor:grabbing; }
+  .crop-stage:focus-visible{ outline:3px solid var(--cyan); outline-offset:3px; }
+  .crop-stage canvas{ width:280px; height:280px; display:block; }
+  .crop-ring{ position:absolute; inset:0; pointer-events:none; border-radius:50%; box-shadow:0 0 0 999px rgba(8,18,36,.55); border:2px solid rgba(255,255,255,.9); }
+  .crop-zoom{ display:flex; align-items:center; gap:10px; margin:14px 0 4px; font-size:0.8125rem; color:var(--ink-soft); }
+  .crop-zoom input{ flex:1; accent-color: var(--navy); }
+  .crop-buttons{ display:flex; justify-content:flex-end; gap:10px; margin-top:14px; }
   .verified.yes{ color:var(--ok); }
   .verified.no{ color: var(--warn); }
 
@@ -89,6 +108,29 @@
         <div class="name" id="profileName"></div>
         <div class="email" id="profileEmail"></div>
         <div class="verified" id="profileVerified"></div>
+        <div class="photo-actions">
+          <button type="button" class="linkbtn" id="photoUploadBtn">Upload photo</button>
+          <button type="button" class="linkbtn" id="photoRemoveBtn" hidden>Remove photo</button>
+          <input type="file" id="photoFile" accept="image/*" hidden>
+        </div>
+        <div class="photo-msg" id="photoMsg" role="status"></div>
+      </div>
+    </div>
+
+    <!-- Size your photo: drag to position, zoom to fit the circle -->
+    <div class="crop-back" id="cropBack" hidden>
+      <div class="crop-box" role="dialog" aria-modal="true" aria-labelledby="cropTitle">
+        <h2 id="cropTitle">Size your photo</h2>
+        <p>Drag to move it, and zoom until your face fills the circle. It shows on your Profile button.</p>
+        <div class="crop-stage" id="cropStage" tabindex="0" aria-label="Photo position: drag, or use the arrow keys; plus and minus zoom">
+          <canvas id="cropCanvas" width="280" height="280"></canvas>
+          <div class="crop-ring" aria-hidden="true"></div>
+        </div>
+        <label class="crop-zoom"><span>Zoom</span><input type="range" id="cropZoom" min="1" max="4" step="0.01" value="1" aria-label="Zoom"></label>
+        <div class="crop-buttons">
+          <button type="button" class="btn btn-ghost" id="cropCancel">Cancel</button>
+          <button type="button" class="btn btn-primary" id="cropSave">Save photo</button>
+        </div>
       </div>
     </div>
 
@@ -378,11 +420,105 @@ onAuthStateChanged(auth, async (user) => {
   const snap = await getDoc(progressRef);
   const data = snap.exists() ? snap.data() : {};
   const profile = data.profile || {};
+  showPhoto(profile.photo || '');
   document.getElementById('editCompany').value = profile.company || '';
   document.getElementById('editPhone').value = profile.phone || '';
   document.getElementById('editJobTitle').value = profile.jobTitle || '';
   document.getElementById('editCompanySize').value = profile.companySize || '';
   document.getElementById('editIndustry').value = profile.industry || '';
+});
+
+/* ------------------------------------------------------------ profile photo */
+// The photo is resized in the browser to a 160 x 160 JPEG (about 10 KB) and kept on the person's own
+// progress/{uid}.profile.photo, so it needs no file storage. Never shared with a company.
+const PHOTO_SIZE = 160, STAGE = 280;
+const photoEl = (id) => document.getElementById(id);
+let cropImg = null, crop = { zoom: 1, x: 0, y: 0 };
+function initialLetter(){ return ((currentUser && (currentUser.displayName || currentUser.email)) || '?').charAt(0).toUpperCase(); }
+function showPhoto(url){
+  const circle = photoEl('avatarCircle');
+  circle.textContent = '';
+  if (url && /^data:image\/jpeg;base64,/.test(url)){ const img = document.createElement('img'); img.alt = 'Your profile photo'; img.src = url; circle.appendChild(img); }
+  else circle.textContent = initialLetter();
+  photoEl('photoRemoveBtn').hidden = !url;
+  photoEl('photoUploadBtn').textContent = url ? 'Change photo' : 'Upload photo';
+}
+function photoMsg(text, err){ photoEl('photoMsg').textContent = text || ''; photoEl('photoMsg').className = 'photo-msg' + (err ? ' err' : ''); }
+// The image covers the circle at zoom 1; x and y move it, kept so the circle is always covered.
+function baseScale(){ return Math.max(STAGE / cropImg.naturalWidth, STAGE / cropImg.naturalHeight); }
+function clampCrop(){
+  const sc = baseScale() * crop.zoom, w = cropImg.naturalWidth * sc, h = cropImg.naturalHeight * sc;
+  const mx = Math.max(0, (w - STAGE) / 2), my = Math.max(0, (h - STAGE) / 2);
+  crop.x = Math.min(mx, Math.max(-mx, crop.x)); crop.y = Math.min(my, Math.max(-my, crop.y));
+}
+function drawCrop(ctx, size){
+  const k = size / STAGE, sc = baseScale() * crop.zoom * k;
+  const w = cropImg.naturalWidth * sc, h = cropImg.naturalHeight * sc;
+  ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, size, size);
+  ctx.imageSmoothingQuality = 'high';
+  ctx.drawImage(cropImg, size / 2 - w / 2 + crop.x * k, size / 2 - h / 2 + crop.y * k, w, h);
+}
+function redraw(){ clampCrop(); drawCrop(photoEl('cropCanvas').getContext('2d'), STAGE); }
+function openCrop(img){
+  cropImg = img; crop = { zoom: 1, x: 0, y: 0 };
+  const cv = photoEl('cropCanvas'), dpr = Math.min(2, window.devicePixelRatio || 1);
+  cv.width = STAGE * dpr; cv.height = STAGE * dpr; cv.getContext('2d').setTransform(dpr, 0, 0, dpr, 0, 0);
+  photoEl('cropZoom').value = '1';
+  photoEl('cropBack').hidden = false;
+  redraw();
+  photoEl('cropStage').focus();
+}
+function closeCrop(){ photoEl('cropBack').hidden = true; cropImg = null; photoEl('photoUploadBtn').focus(); }
+photoEl('photoUploadBtn').addEventListener('click', () => photoEl('photoFile').click());
+photoEl('photoFile').addEventListener('change', () => {
+  const f = photoEl('photoFile').files[0];
+  photoEl('photoFile').value = '';
+  if (!f) return;
+  if (!/^image\//.test(f.type)){ photoMsg('That file is not an image. Choose a JPG or PNG.', true); return; }
+  if (f.size > 15 * 1024 * 1024){ photoMsg('That image is over 15 MB. Choose a smaller one.', true); return; }
+  const url = URL.createObjectURL(f), img = new Image();
+  img.onload = () => { URL.revokeObjectURL(url); photoMsg(''); openCrop(img); };
+  img.onerror = () => { URL.revokeObjectURL(url); photoMsg("That image couldn't be opened here. Try a JPG or PNG.", true); };
+  img.src = url;
+});
+photoEl('cropZoom').addEventListener('input', () => { crop.zoom = Number(photoEl('cropZoom').value); redraw(); });
+(function dragging(){
+  const stage = photoEl('cropStage'); let from = null;
+  stage.addEventListener('pointerdown', (e) => { from = { x: e.clientX - crop.x, y: e.clientY - crop.y }; stage.setPointerCapture(e.pointerId); });
+  stage.addEventListener('pointermove', (e) => { if (!from || !cropImg) return; crop.x = e.clientX - from.x; crop.y = e.clientY - from.y; redraw(); });
+  stage.addEventListener('pointerup', () => { from = null; });
+  stage.addEventListener('wheel', (e) => { if (!cropImg) return; e.preventDefault(); crop.zoom = Math.min(4, Math.max(1, crop.zoom - e.deltaY / 500)); photoEl('cropZoom').value = String(crop.zoom); redraw(); }, { passive: false });
+})();
+photoEl('cropBack').addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') return closeCrop();
+  if (!cropImg || e.target.id === 'cropZoom') return;
+  const step = e.shiftKey ? 20 : 6, moves = { ArrowLeft: [-step, 0], ArrowRight: [step, 0], ArrowUp: [0, -step], ArrowDown: [0, step] };
+  if (moves[e.key]){ e.preventDefault(); crop.x += moves[e.key][0]; crop.y += moves[e.key][1]; redraw(); }
+  if (e.key === '+' || e.key === '='){ crop.zoom = Math.min(4, crop.zoom + 0.1); photoEl('cropZoom').value = String(crop.zoom); redraw(); }
+  if (e.key === '-'){ crop.zoom = Math.max(1, crop.zoom - 0.1); photoEl('cropZoom').value = String(crop.zoom); redraw(); }
+});
+photoEl('cropBack').addEventListener('click', (e) => { if (e.target === photoEl('cropBack')) closeCrop(); });
+photoEl('cropCancel').addEventListener('click', closeCrop);
+async function savePhoto(url){
+  const ref = doc(db, 'progress', currentUser.uid), snap = await getDoc(ref);
+  const profile = Object.assign({}, snap.exists() && snap.data().profile, { photo: url });   // keeps the other details
+  await setDoc(ref, { profile: profile }, { merge: true });
+  showPhoto(url);
+  window.dispatchEvent(new CustomEvent('pa-avatar', { detail: url }));
+}
+photoEl('cropSave').addEventListener('click', async () => {
+  const out = document.createElement('canvas'); out.width = PHOTO_SIZE; out.height = PHOTO_SIZE;
+  drawCrop(out.getContext('2d'), PHOTO_SIZE);
+  let url = out.toDataURL('image/jpeg', 0.85);
+  if (url.length > 60000) url = out.toDataURL('image/jpeg', 0.7);
+  photoEl('cropSave').disabled = true;
+  try { await savePhoto(url); closeCrop(); photoMsg('Photo saved.'); }
+  catch (err){ photoMsg("Your photo couldn't be saved just now. Please try again.", true); }
+  finally { photoEl('cropSave').disabled = false; }
+});
+photoEl('photoRemoveBtn').addEventListener('click', async () => {
+  try { await savePhoto(''); photoMsg('Photo removed.'); }
+  catch (err){ photoMsg("Your photo couldn't be removed just now. Please try again.", true); }
 });
 
 window.handleSaveProfile = async function(){
@@ -401,15 +537,14 @@ window.handleSaveProfile = async function(){
   try {
     if (newName !== (currentUser.displayName || '')){
       await updateProfile(currentUser, { displayName: newName });
-      const initial = ((newName || currentUser.email || '?').charAt(0)).toUpperCase();
-      document.getElementById('avatarCircle').textContent = initial;
+      if (!photoEl('avatarCircle').querySelector('img')) photoEl('avatarCircle').textContent = initialLetter();
       document.getElementById('profileName').textContent = newName || 'Add your name';
     }
 
     const progressRef = doc(db, 'progress', currentUser.uid);
     const snap = await getDoc(progressRef);
     const data = snap.exists() ? snap.data() : { courses: {} };
-    data.profile = { company, phone, jobTitle, companySize, industry };
+    data.profile = Object.assign({}, data.profile, { company, phone, jobTitle, companySize, industry });   // keeps the photo
     await setDoc(progressRef, data);
 
     successEl.textContent = 'Profile saved.';
