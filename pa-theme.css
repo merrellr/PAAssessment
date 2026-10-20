@@ -613,6 +613,10 @@ html.pa-shell .icon-btn { background: var(--pa-card); }
 .pa-dom-ico .tick { stroke: var(--pa-cyan); }
 .pa-dom-badge { display: flex; align-items: center; justify-content: center; flex-shrink: 0; border-radius: 8px; background: var(--pa-tint); }
 
+/* "Continue with Google": Google's four-colour G on the left of the label */
+.g-btn { display: flex !important; align-items: center; justify-content: center; gap: 10px; }
+.g-btn .g-logo { flex: none; }
+
 /* ---------- site header ---------- */
 .pa-nav { position: sticky; top: 0; z-index: 60; background: color-mix(in srgb, var(--pa-bg) 90%, transparent); backdrop-filter: saturate(160%) blur(12px); -webkit-backdrop-filter: saturate(160%) blur(12px); border-bottom: 1px solid var(--pa-line); align-self: stretch; font-family: var(--pa-sans); }
 .pa-nav-in { max-width: 1120px; margin: 0 auto; padding: 0 clamp(16px, 4vw, 40px); height: 64px; display: flex; align-items: center; gap: 16px; }
@@ -669,6 +673,23 @@ html.pa-shell .icon-btn { background: var(--pa-card); }
 .pa-panel-foot { display: flex; gap: 10px; flex-wrap: wrap; padding-top: 18px; border-top: 1px solid var(--pa-line); }
 .pa-btn { display: inline-flex; align-items: center; gap: 6px; padding: 9px 16px; border-radius: var(--pa-pill); border: 2px solid var(--pa-primary); background: var(--pa-primary); color: var(--pa-btn-ink); font: 700 .9rem var(--pa-sans); text-decoration: none; cursor: pointer; }
 .pa-btn.ghost { background: transparent; color: var(--pa-navy); border-color: color-mix(in srgb, var(--pa-navy) 45%, transparent); }
+
+/* ---------- Help panel (pa-shell.js) ---------- */
+.pa-help-btn { gap: 6px; padding: 0 12px 0 9px; font-weight: 700; font-size: .9rem; color: var(--pa-navy); }
+.pa-help .pa-help-q { width: 100%; font: inherit; font-size: 1rem; padding: 11px 14px; border: 1.5px solid var(--pa-line); border-radius: 12px; background: var(--pa-card); color: var(--pa-ink); margin: 2px 0 10px; }
+.pa-help .pa-help-q:focus { outline: none; border-color: var(--pa-cyan); }
+.pa-help-askbtn { display: block; width: 100%; text-align: left; font: inherit; font-weight: 700; color: var(--pa-navy); background: var(--pa-tint); border: 1px solid var(--pa-tint-2); border-radius: 10px; padding: 10px 12px; cursor: pointer; margin-bottom: 10px; }
+.pa-help-askbtn:hover { border-color: var(--pa-cyan); }
+.pa-help-grp { font-size: .72rem; letter-spacing: .08em; text-transform: uppercase; color: var(--pa-muted); margin: 16px 0 6px; font-family: var(--pa-sans); }
+.pa-help-item { border-top: 1px solid var(--pa-line); }
+.pa-help-item summary { cursor: pointer; padding: 10px 2px; font-weight: 700; color: var(--pa-ink); list-style: none; display: flex; justify-content: space-between; gap: 10px; }
+.pa-help-item summary::-webkit-details-marker { display: none; }
+.pa-help-item summary::after { content: "+"; color: var(--pa-cyan-ink); font-weight: 700; }
+.pa-help-item[open] summary::after { content: "–"; }
+.pa-help-item p { margin: 0 0 12px; color: var(--pa-ink-2); font-size: .95rem; line-height: 1.55; }
+.pa-help-none { color: var(--pa-ink-2); margin: 10px 0; }
+.pa-help-foot { margin-top: 18px; }
+@media (max-width: 1080px) { .pa-help-lbl { display: none; } .pa-help-btn { padding: 0 9px; } }
 
 /* ---------- search results in the command menu ---------- */
 .palette button .pa-sub { display: block; font-size: .8rem; color: var(--pa-muted); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }

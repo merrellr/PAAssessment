@@ -33,6 +33,7 @@ console.log('--- ordering ---');
   ];
   t('most votes first, ties by the owner\'s order, released tools last', same(T.sortTools(tools).map(x => x.id), ['b', 'd', 'a', 'e', 'c']), T.sortTools(tools).map(x => x.id).join());
   t('sorting does not change the original list', tools[0].id === 'a');
+  t('voting blind: the owner\'s order only, released tools still last, so the order gives no totals away', same(T.sortTools(tools, { blind: true }).map(x => x.id), ['d', 'a', 'b', 'e', 'c']), T.sortTools(tools, { blind: true }).map(x => x.id).join());
 }
 
 console.log('--- who can vote ---');

@@ -9,6 +9,19 @@ const sleep = (ms) => new Promise(r => setTimeout(r, ms));
     const banner = document.getElementById('orgBanner');
     const ownerLink = document.getElementById('ownerConsoleMenuItem');
     if (window.__scn === 'member'){
+      // Help (pa-shell.js): on every page; checked here on the dashboard
+      const helpBtn = document.querySelector('.pa-tools [data-pa="help"]');
+      t('the header has a Help button', !!helpBtn);
+      helpBtn.click(); await sleep(60);
+      const panel = document.querySelector('.pa-help-back');
+      t('Help opens a panel with the search box ready', !!panel && panel.classList.contains('open') && document.activeElement === panel.querySelector('.pa-help-q'));
+      const q = panel.querySelector('.pa-help-q');
+      q.value = 'how do I retake the assessment'; q.dispatchEvent(new Event('input')); await sleep(30);
+      const shown = Array.prototype.filter.call(panel.querySelectorAll('.pa-help-item'), d => !d.hidden).map(d => d.querySelector('summary').textContent);
+      t('searching shows the matching answer, opened, and offers to ask the lessons', shown.join() === 'Can I take it again?' && panel.querySelector('.pa-help-item:not([hidden])').open && !panel.querySelector('.pa-help-ask').hidden, shown.join(' | '));
+      t('it links to the feedback form', !!panel.querySelector('a[href="/feedback"]'));
+      panel.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true })); await sleep(30);
+      t('Escape closes it', !panel.classList.contains('open'));
       t('opening the dashboard as a company member writes their shared record', !!share);
       t('it has their name, lower-case email, assessment, answers and course progress', share && share.identity.name === 'Dash User' && share.identity.email === 'dash@acme.com' && share.assessment.tier === 'Moderate Experience' && share.assessment.answers.length === 1 && share.courses['discovery-novice'].completed.length === 2);
       t('last active comes from their most recent activity', share && share.lastActiveAt === '2026-10-07T09:00:00.000Z', share && share.lastActiveAt);

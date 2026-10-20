@@ -31,11 +31,16 @@ function done(){
 
     if (scn === 'anon'){
       t('the roadmap is visible without signing in', cards().length === 5);
-      t('most votes first, released last', order() === 't2,t1,t4,t3,t5', order());
-      t('the totals are shown to everyone', count('t2') === 9 && count('t1') === 5 && count('t5') === 20);
-      t('bars share one scale: the most-voted tool is full width', card('t5').querySelector('.bar span').style.width === '100%' && card('t2').querySelector('.bar span').style.width === '45%' && card('t4').querySelector('.bar span').style.width === '10%', ['t5','t2','t4'].map(id => card(id).querySelector('.bar span').style.width).join(' '));
+      t('voting blind: before voting nobody sees the totals or bars, and the note says why', !document.querySelector('#toolList .count') && !document.querySelector('#toolList .bar') && !$('blindNote').hidden && $('toolList').classList.contains('blind'));
+      t('the list follows the roadmap order, released last, so the order gives no totals away', order() === 't1,t2,t3,t4,t5', order());
       t('status and category are shown in plain words', /Under consideration/.test(textOf(card('t2'))) && /Planned/.test(textOf(card('t1'))) && /In progress/.test(textOf(card('t3'))) && /Released/.test(textOf(card('t5'))));
-      t('the sign-in card is shown, and the signed-in bar and suggestion box are not', vis('authCard') && !vis('statusBar') && !vis('suggestCard') && !vis('nextCard'));
+      t('the sign-in card is shown, and the signed-in bar is not', vis('authCard') && !vis('statusBar') && !vis('nextCard'));
+      t('the request box is there for everyone, and says sending needs an account', vis('suggestCard') && $('suggestBtn').textContent === 'Sign in to send' && !$('suggestBtn').disabled && !$('suggestHint').hidden);
+      try { sessionStorage.removeItem('pa_tool_request_draft'); } catch (e) {}
+      setVal('suggestText', 'A churn early-warning checklist');
+      const before = Object.keys(window.__store).filter(k => /^toolSuggestions\//.test(k)).length;
+      $('suggestBtn').click(); await sleep(80);
+      t('"Sign in to send" keeps the request and moves to sign-in, sending nothing yet', sessionStorage.getItem('pa_tool_request_draft') === 'A churn early-warning checklist' && /Saved/.test(txt('suggestStatus')) && document.activeElement === $('authTitle') && Object.keys(window.__store).filter(k => /^toolSuggestions\//.test(k)).length === before, txt('suggestStatus'));
       t('every open tool says "Sign in to vote"', ['t1', 't2', 't3', 't4'].every(id => !!btn(card(id), 'Sign in to vote')));
       t('a released tool links to it and offers no vote', card('t5').querySelector('a').getAttribute('href') === 'https://example.com/epsilon' && !btn(card('t5'), 'Sign in to vote'));
       t('nothing was written by looking at the page', window.__writeLog.length === 0);
@@ -60,12 +65,19 @@ function done(){
       t('and is asked to verify their email before voting', vis('verifyBanner') && !vis('authCard'));
     }
 
+    if (scn === 'draft'){
+      t('a request typed before signing in is back in the box, ready to send', $('suggestText').value === 'A churn early-warning checklist' && /ready/.test(txt('suggestStatus')) && $('suggestBtn').textContent === 'Send request' && !sessionStorage.getItem('pa_tool_request_draft'), txt('suggestStatus'));
+      $('suggestBtn').click(); await sleep(150);
+      t('and sending it saves it for review', !!window.__store['toolSuggestions/uFresh'] && window.__store['toolSuggestions/uFresh'].text === 'A churn early-warning checklist' && /waiting for review/.test(txt('suggestStatus')));
+    }
+
     if (scn === 'fresh'){
       t('signed-in bar shows who they are and their votes', vis('statusBar') && /ufresh@Example\.com/i.test(txt('signedInAs')) && txt('votesLeft') === '3 votes left', txt('votesLeft'));
       t('the sign-in card is hidden and the suggestion box is shown', !vis('authCard') && vis('suggestCard'));
       t('no verify banner for a verified person', !vis('verifyBanner'));
       t('they are pointed at the assessment, because they have not taken it', vis('nextCard') && /take the assessment/i.test(txt('nextTitle')) && $('nextLink').getAttribute('href') === '/', txt('nextTitle'));
       t('open tools offer "Vote for this"', ['t1', 't2', 't3', 't4'].every(id => !!btn(card(id), 'Vote for this')));
+      t('signed in but not voted yet: still blind', !document.querySelector('#toolList .count') && !$('blindNote').hidden && order() === 't1,t2,t3,t4,t5', order());
 
       window.__writeLog.length = 0;
       btn(card('t2'), 'Vote for this').click(); await until(() => !!store()['toolVotes/uFresh_t2']);
@@ -74,6 +86,7 @@ function done(){
       t('voting saves one vote record: who, which tool, their lower-case email, no launch email yet, server time', !!v && v.uid === 'uFresh' && v.toolId === 't2' && v.email === 'ufresh@example.com' && v.notify === false && typeof v.createdAt.toMillis === 'function', JSON.stringify(v));
       t('and adds exactly one to the tool\'s count, in the same step', store()['tools/t2'].voteCount === 10 && window.__writeLog.map(w => w.op + ':' + w.path).sort().join() === 'set:toolVotes/uFresh_t2,update:tools/t2', window.__writeLog.map(w => w.op + ':' + w.path).join());
       t('the page shows the new total and that they voted', count('t2') === 10 && /Voted/.test(textOf(card('t2'))) && card('t2').classList.contains('voted'));
+      t('having voted, they see every total and bar, ranked by votes', $('blindNote').hidden && count('t1') === 5 && count('t5') === 20 && order() === 't2,t1,t4,t3,t5' && card('t5').querySelector('.bar span').style.width === '100%' && card('t2').querySelector('.bar span').style.width === '50%', order());
       t('2 votes left', txt('votesLeft') === '2 votes left', txt('votesLeft'));
       t('the voter is thanked', /Your vote for Beta Map is in/.test(txt('notice')), txt('notice'));
       t('they can ask for a launch email, and it is off until they ask', !!card('t2').querySelector('input[type="checkbox"]') && card('t2').querySelector('input[type="checkbox"]').checked === false);
@@ -110,18 +123,18 @@ function done(){
       t('it does not appear on the public list', !/pricing and packaging/.test($('toolList').textContent));
 
       $('signOutBtn').click(); await sleep(200);
-      t('signing out brings back the sign-in card and hides their votes, but the totals stay', vis('authCard') && !vis('statusBar') && !card('t2').classList.contains('voted') && count('t2') === 10);
+      t('signing out brings back the sign-in card, hides their votes and goes back to voting blind', vis('authCard') && !vis('statusBar') && !card('t2').classList.contains('voted') && !document.querySelector('#toolList .count') && !$('blindNote').hidden);
     }
 
     if (scn === 'unverified'){
       t('a person whose email is not verified sees the banner with their address', vis('verifyBanner') && /unver@Example\.com/i.test(txt('verifyEmail')));
-      t('the suggestion box is hidden until they verify', !vis('suggestCard'));
+      t('the request box is shown, but sending waits until they verify', vis('suggestCard') && $('suggestBtn').disabled && $('suggestBtn').textContent === 'Verify your email to send');
       t('no tool offers a vote button; each says to verify', ['t1', 't2', 't3', 't4'].every(id => !btn(card(id), 'Vote for this') && /Verify your email to vote/.test(textOf(card(id)))));
       $('verifiedBtn').click(); await sleep(150);
       t('pressing "I\'ve verified" before they have is explained', /can't see the verification yet/.test(txt('verifyMsg')) && vis('verifyBanner'), txt('verifyMsg'));
       window.__fakeUser.__willVerify = true;
       $('verifiedBtn').click(); await sleep(250);
-      t('once verified the banner goes and voting opens', !vis('verifyBanner') && ['t1', 't2', 't3', 't4'].every(id => !!btn(card(id), 'Vote for this')) && vis('suggestCard'));
+      t('once verified the banner goes and voting opens', !vis('verifyBanner') && ['t1', 't2', 't3', 't4'].every(id => !!btn(card(id), 'Vote for this')) && vis('suggestCard') && !$('suggestBtn').disabled && $('suggestBtn').textContent === 'Send request');
       t('they were asked for a fresh sign-in token so the vote rules see the verified flag', /Email verified/.test(txt('notice')), txt('notice'));
       $('verifiedBtn');
     }

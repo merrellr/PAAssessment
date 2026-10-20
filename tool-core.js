@@ -42,10 +42,13 @@
   function voteId(uid, toolId) { return uid + '_' + toolId; }
 
   // Most votes first; ties keep the owner's own order. Released tools go last.
-  function sortTools(tools) {
+  // { blind: true } ignores the votes (the owner's order only), so the order does not give the totals away
+  // to someone who has not voted yet.
+  function sortTools(tools, opts) {
+    const blind = !!(opts && opts.blind);
     return tools.slice().sort((a, b) => {
       const ra = a.status === 'released' ? 1 : 0, rb = b.status === 'released' ? 1 : 0;
-      return (ra - rb) || ((b.voteCount || 0) - (a.voteCount || 0)) || ((a.order || 0) - (b.order || 0)) || String(a.title).localeCompare(String(b.title));
+      return (ra - rb) || (blind ? 0 : ((b.voteCount || 0) - (a.voteCount || 0))) || ((a.order || 0) - (b.order || 0)) || String(a.title).localeCompare(String(b.title));
     });
   }
 

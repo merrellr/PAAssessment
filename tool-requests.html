@@ -17,7 +17,39 @@
   }
   *{ box-sizing: border-box; }
   body{ margin:0; background: var(--bg); font-family:var(--sans); color: var(--ink); }
-  .wrap{ max-width: 720px; margin: 0 auto; padding: 24px 16px 56px; }
+  .wrap{ max-width: 1180px; margin: 0 auto; padding: 24px 16px 56px; }
+  /* Laptop and wider: a compact grid of tools beside a column (sign-in, Request a tool) that stays in view, so the
+     whole list fits on a 13-inch screen. Narrower: one column, the tools first. */
+  .board{ display:grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 20px; align-items: start; }
+  .board-side{ position: sticky; top: 80px; max-height: calc(100vh - 96px); overflow-y: auto; }
+  .board-side .card, .board-side .banner, .board-side .cta{ margin-bottom: 14px; }
+  #toolList{ display:grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 12px; }
+  .hero{ display:grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: 24px; align-items: end; padding: 20px 24px; }
+  .hero .hero-text p{ margin-bottom: 0; max-width: 70ch; }
+  .hero .hero-actions{ margin: 0; }
+  .hero .status-bar{ grid-column: 1 / -1; margin: 14px 0 0; padding-top: 12px; border-top: 1px solid var(--line); }
+  @media (max-width: 760px){ .hero{ grid-template-columns: 1fr; } .hero .hero-actions{ margin-top: 14px; } }
+  .tool-desc{ display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .tool-actions{ flex-wrap: nowrap !important; justify-content: space-between; }
+  .tool-actions .btn{ white-space: nowrap; }
+  /* the vote count sits in the card's corner, so the title, status and description use the full width */
+  .tool{ position: relative; }
+  .tool-top{ display: block !important; }
+  .tool .count{ position: absolute; top: 14px; right: 16px; min-width: 0; }
+  .tool-title{ padding-right: 78px; }
+  .tool-actions .check-row span{ white-space: nowrap; }
+  .hero{ margin-bottom: 14px; padding: 18px 24px; }
+  .hero h1{ font-size: 1.375rem; margin-bottom: 6px; }
+  .blind-note{ margin: 0 0 10px; font-size: 0.8125rem; color: var(--ink-soft); }
+  .bar-space{ margin-top: auto; }
+  .tool .count{ display: flex; align-items: baseline; gap: 4px; }
+  .tool .count .num{ font-size: 1.25rem; }
+  .notice:empty, #errorLine:empty{ margin: 0 !important; }
+  .tool-actions{ gap: 8px !important; }
+  .tool-actions .btn-small{ padding: 7px 11px; }
+  .tool-actions .check-row{ gap: 5px; }
+  #toolList > .empty{ grid-column: 1 / -1; }
+  @media (max-width: 960px){ .board{ grid-template-columns: 1fr; } .board-side{ position: static; max-height: none; overflow: visible; } }
   .brand-header{ display:flex; align-items:center; gap:9px; padding: 0 0 14px; text-decoration:none; }
   .brand-word{ font-family:var(--display); font-weight:700; font-size: 1.1875rem; line-height:1.3; color: var(--navy-deep); }
   .brand-accent-bar{ height: 3px; background: linear-gradient(90deg, var(--navy) 0%, var(--cyan) 100%); border-radius: 2px; margin-bottom: 24px; }
@@ -66,7 +98,7 @@
   .cta{ border:1px solid var(--tint-2); background:var(--tint); border-radius: 12px; padding: 16px 18px; margin-bottom: 20px; }
   .cta h2{ margin-bottom: 4px; }
 
-  .tool{ background: var(--surface); border:1px solid var(--line); border-radius: 14px; padding: 18px 20px; margin-bottom: 12px; }
+  .tool{ background: var(--surface); border:1px solid var(--line); border-radius: 14px; padding: 14px 16px; display:flex; flex-direction:column; }
   .tool.voted{ border-color: var(--cyan); box-shadow: 0 0 0 1px var(--cyan) inset; }
   .tool.released{ background:var(--bg); }
   .tool.requested{ border-color: var(--navy); box-shadow: 0 0 0 3px rgba(53,194,232,0.35); }
@@ -80,9 +112,10 @@
   .pill.s-considering{ background:var(--bg); color: var(--ink-soft); }
   .tool-desc{ margin: 0; font-size: 0.8438rem; }
   .count{ text-align:right; min-width: 74px; }
-  .count .num{ font-family:var(--display); font-weight:700; font-size: 1.625rem; line-height:1; color: var(--navy-deep); font-variant-numeric: tabular-nums; }
+  .count .num{ font-family:var(--display); font-weight:700; font-size: 1.375rem; line-height:1; color: var(--navy-deep); font-variant-numeric: tabular-nums; }
   .count .lbl{ font-size: 0.7188rem; color: var(--gray); }
-  .bar{ height: 6px; border-radius: 3px; background:var(--bg); overflow:hidden; margin: 12px 0 12px; }
+  .bar{ height: 6px; border-radius: 3px; background:var(--line); overflow:hidden; margin: auto 0 10px; }
+  .tool-desc{ margin-bottom: 12px !important; }
   .bar span{ display:block; height:100%; background: linear-gradient(90deg, var(--navy), var(--cyan)); border-radius: 3px; }
   .tool-actions{ display:flex; gap:12px; align-items:center; flex-wrap:wrap; }
   .tool-actions .check-row{ margin: 0; font-size: 0.7812rem; }
@@ -109,10 +142,12 @@
   </a>
   <div class="brand-accent-bar"></div>
 
-  <div class="card">
+  <div class="card hero">
+    <div class="hero-text">
     <span class="eyebrow">Help us choose</span>
     <h1>Which toolkit should we build next?</h1>
-    <p>Back the tools you would actually use. You can vote for up to <strong>3 tools</strong>, one vote each, and change your mind any time. The tool with the most votes gets built first. Everyone can see the totals.</p>
+    <p>Back the tools you would actually use. You can vote for up to <strong>3 tools</strong>, one vote each, and change your mind any time. The tool with the most votes gets built first. You see everyone's totals once you have voted.</p>
+    </div>
     <div class="hero-actions">
       <button class="btn btn-primary" id="requestBtn" type="button">Request a tool</button>
       <a class="btn-out" href="https://www.productadvisory.co/toolkits" target="_blank" rel="noopener">See the live toolkits<span aria-hidden="true"> ↗</span><span class="sr-only"> (opens in a new tab)</span></a>
@@ -123,59 +158,69 @@
     </div>
   </div>
 
-  <!-- Sign in or create an account (shown when signed out) -->
-  <div class="card" id="authCard" style="display:none;">
-    <h2 id="authTitle" tabindex="-1">Sign in to vote or request a tool</h2>
-    <p>One vote per person, so we ask you to sign in. You need an account anyway to take the Product Learning Assessment. It's free.</p>
-    <div class="tabs">
-      <button class="tab active" id="tabLogin" type="button">Log in</button>
-      <button class="tab" id="tabSignup" type="button">Create account</button>
-    </div>
-    <input class="text-input" type="text" id="authName" placeholder="Full name" autocomplete="name" style="display:none;">
-    <input class="text-input" type="email" id="authEmail" placeholder="Email address" autocomplete="email">
-    <input class="text-input" type="password" id="authPassword" placeholder="Password" autocomplete="current-password">
-    <input class="text-input" type="password" id="authPasswordConfirm" placeholder="Confirm password" autocomplete="new-password" style="display:none;">
-    <label class="check-row" id="termsRow" style="display:none;">
-      <input type="checkbox" id="agreeTerms">
-      <span>By creating an account you agree to the <a href="https://www.productadvisory.co/terms-of-use" target="_blank" rel="noopener">Terms of Use</a> and <a href="https://www.productadvisory.co/privacy-policy" target="_blank" rel="noopener">Privacy Policy</a>.</span>
-    </label>
-    <div class="field-error" id="authError"></div>
-    <button class="btn btn-primary block" id="authSubmit" type="button">Log in</button>
-    <div class="divider">or</div>
-    <button class="btn btn-ghost block" id="googleBtn" type="button">Continue with Google</button>
-    <p class="small" style="margin-top:12px;">By continuing with account creation, you agree to the <a href="https://www.productadvisory.co/terms-of-use" target="_blank" rel="noopener">Terms of Use</a> and <a href="https://www.productadvisory.co/privacy-policy" target="_blank" rel="noopener">Privacy Policy</a>. We use your email address to make sure each person votes once and, only if you tick the box on a tool, to tell you when it launches.</p>
-  </div>
-
-  <!-- Verify email (shown when signed in but not verified) -->
-  <div class="banner" id="verifyBanner" style="display:none;">
-    <p><strong>Please verify your email to vote.</strong> We sent a link to <span id="verifyEmail"></span>. Open it, then come back and press the button below. (Signing in with Google skips this step.)</p>
-    <div class="row">
-      <button class="btn btn-primary btn-small" id="verifiedBtn" type="button">I've verified my email</button>
-      <button class="btn btn-ghost btn-small" id="resendBtn" type="button">Send the link again</button>
-    </div>
-    <div class="field-error" id="verifyMsg" style="margin:8px 0 0;"></div>
-  </div>
-
   <div class="notice" id="notice" role="status"></div>
   <div class="field-error" id="errorLine" role="alert" style="margin:0 0 12px;"></div>
 
-  <div id="toolList"><p class="empty">Loading the roadmap…</p></div>
+  <!-- On a laptop or wider: the tools on the left, sign-in and "Request a tool" in a column that stays in view -->
+  <div class="board">
+    <div class="board-main">
+      <p class="blind-note" id="blindNote" hidden>Totals are hidden until you vote, so everyone picks what they would really use. Vote, and you will see how every tool is doing.</p>
+    <div id="toolList"><p class="empty">Loading the roadmap…</p></div>
 
-  <!-- Suggest a tool -->
-  <div class="card" id="suggestCard" style="display:none;">
-    <h2 id="suggestTitle" tabindex="-1">Request a tool</h2>
-    <p>Not on the list? Tell us what you would use. We read every suggestion and add the good ones to the roadmap so others can vote on them.</p>
-    <div id="suggestStatus" class="small" style="margin-bottom:8px;"></div>
-    <textarea class="text-input" id="suggestText" maxlength="300" placeholder="e.g. A pricing and packaging worksheet for B2B products"></textarea>
-    <div class="field-error" id="suggestError"></div>
-    <button class="btn btn-primary btn-small" id="suggestBtn" type="button">Send request</button>
-  </div>
+    </div>
+    <aside class="board-side" aria-label="Your account and requests">
+    <!-- Sign in or create an account (shown when signed out) -->
+    <div class="card" id="authCard" style="display:none;">
+      <h2 id="authTitle" tabindex="-1">Sign in to vote or request a tool</h2>
+      <p>One vote per person, so we ask you to sign in. You need an account anyway to take the Product Learning Assessment. It's free.</p>
+      <div class="tabs">
+        <button class="tab active" id="tabLogin" type="button">Log in</button>
+        <button class="tab" id="tabSignup" type="button">Create account</button>
+      </div>
+      <input class="text-input" type="text" id="authName" placeholder="Full name" autocomplete="name" style="display:none;">
+      <input class="text-input" type="email" id="authEmail" placeholder="Email address" autocomplete="email">
+      <input class="text-input" type="password" id="authPassword" placeholder="Password" autocomplete="current-password">
+      <input class="text-input" type="password" id="authPasswordConfirm" placeholder="Confirm password" autocomplete="new-password" style="display:none;">
+      <label class="check-row" id="termsRow" style="display:none;">
+        <input type="checkbox" id="agreeTerms">
+        <span>By creating an account you agree to the <a href="https://www.productadvisory.co/terms-of-use" target="_blank" rel="noopener">Terms of Use</a> and <a href="https://www.productadvisory.co/privacy-policy" target="_blank" rel="noopener">Privacy Policy</a>.</span>
+      </label>
+      <div class="field-error" id="authError"></div>
+      <button class="btn btn-primary block" id="authSubmit" type="button">Log in</button>
+      <div class="divider">or</div>
+      <button class="btn btn-ghost block g-btn" id="googleBtn" type="button"><svg class="g-logo" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path fill="#4285F4" d="M23.52 12.27c0-.85-.08-1.67-.22-2.45H12v4.64h6.47a5.53 5.53 0 0 1-2.4 3.63v3h3.88c2.27-2.09 3.57-5.17 3.57-8.82z"/><path fill="#34A853" d="M12 24c3.24 0 5.95-1.07 7.94-2.91l-3.88-3c-1.08.72-2.45 1.15-4.06 1.15-3.13 0-5.78-2.11-6.73-4.96H1.27v3.11A12 12 0 0 0 12 24z"/><path fill="#FBBC05" d="M5.27 14.28A7.2 7.2 0 0 1 4.89 12c0-.79.14-1.56.38-2.28V6.61H1.27A12 12 0 0 0 0 12c0 1.94.46 3.77 1.27 5.39l4-3.11z"/><path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.44-3.44C17.94 1.19 15.24 0 12 0 7.31 0 3.26 2.69 1.27 6.61l4 3.11C6.22 6.86 8.87 4.75 12 4.75z"/></svg><span id="googleLabel">Continue with Google</span></button>
+      <p class="small" style="margin-top:12px;">By continuing with account creation, you agree to the <a href="https://www.productadvisory.co/terms-of-use" target="_blank" rel="noopener">Terms of Use</a> and <a href="https://www.productadvisory.co/privacy-policy" target="_blank" rel="noopener">Privacy Policy</a>. We use your email address to make sure each person votes once and, only if you tick the box on a tool, to tell you when it launches.</p>
+    </div>
 
-  <!-- What next (shown when signed in) -->
-  <div class="cta" id="nextCard" style="display:none;">
-    <h2 id="nextTitle">Now that you have an account, take the assessment</h2>
-    <p id="nextText">The Product Learning Assessment shows where you are strongest across seven product management skill areas, and gives you a course plan to match. It takes about 15 minutes.</p>
-    <a class="btn-link" id="nextLink" href="/">Take the assessment</a>
+    <!-- Verify email (shown when signed in but not verified) -->
+    <div class="banner" id="verifyBanner" style="display:none;">
+      <p><strong>Please verify your email to vote.</strong> We sent a link to <span id="verifyEmail"></span>. Open it, then come back and press the button below. (Signing in with Google skips this step.)</p>
+      <div class="row">
+        <button class="btn btn-primary btn-small" id="verifiedBtn" type="button">I've verified my email</button>
+        <button class="btn btn-ghost btn-small" id="resendBtn" type="button">Send the link again</button>
+      </div>
+      <div class="field-error" id="verifyMsg" style="margin:8px 0 0;"></div>
+    </div>
+
+    <!-- Suggest a tool -->
+    <div class="card" id="suggestCard" style="display:none;">
+      <h2 id="suggestTitle" tabindex="-1">Request a tool</h2>
+      <p>Not on the list? Tell us what you would use. We read every suggestion and add the good ones to the roadmap so others can vote on them.</p>
+      <p class="small" id="suggestHint" hidden>You'll sign in before it's sent (one account per person keeps the list fair). What you write here is kept.</p>
+      <div id="suggestStatus" class="small" style="margin-bottom:8px;"></div>
+      <textarea class="text-input" id="suggestText" maxlength="300" placeholder="e.g. A pricing and packaging worksheet for B2B products"></textarea>
+      <div class="field-error" id="suggestError"></div>
+      <button class="btn btn-primary btn-small" id="suggestBtn" type="button">Send request</button>
+    </div>
+
+    <!-- What next (shown when signed in) -->
+    <div class="cta" id="nextCard" style="display:none;">
+      <h2 id="nextTitle">Now that you have an account, take the assessment</h2>
+      <p id="nextText">The Product Learning Assessment shows where you are strongest across seven product management skill areas, and gives you a course plan to match. It takes about 15 minutes.</p>
+      <a class="btn-link" id="nextLink" href="/">Take the assessment</a>
+    </div>
+
+    </aside>
   </div>
 
   <p class="small" style="text-align:center;">Totals reflect the people who chose to vote, so treat them as a guide to what's wanted, not a poll.</p>
@@ -284,7 +329,8 @@ function render(){
   const signedIn = !!currentUser;
   $('authCard').style.display = signedIn ? 'none' : 'block';
   $('statusBar').style.display = signedIn ? 'flex' : 'none';
-  $('suggestCard').style.display = signedIn && verified() ? 'block' : 'none';
+  $('suggestCard').style.display = 'block';   // everyone can write a request; sending needs a verified account
+  suggestState();
   $('nextCard').style.display = signedIn ? $('nextCard').style.display : 'none';
   $('verifyBanner').style.display = signedIn && !verified() ? 'block' : 'none';
   if (signedIn){
@@ -313,16 +359,21 @@ function renderTools(){
     wrap.appendChild(el('p', { class: 'empty', text: 'The first tools are being added. Check back soon.' }));
     return;
   }
-  const sorted = TC.sortTools(tools);
+  // Vote blind: the totals, bars and vote order show once this person has a vote in. Until then the list follows
+  // the roadmap order, so what others chose doesn't steer their pick.
+  const blind = !myVoteIds().length;
+  $('blindNote').hidden = !blind;
+  wrap.classList.toggle('blind', blind);
+  const sorted = TC.sortTools(tools, { blind: blind });
   const max = Math.max.apply(null, sorted.map(t => t.voteCount || 0).concat([1]));
-  sorted.forEach(tool => wrap.appendChild(toolCard(tool, max)));
+  sorted.forEach(tool => wrap.appendChild(toolCard(tool, max, blind)));
   if (REQUESTED && !requestedShown){
     const card = wrap.querySelector('[data-tool="' + REQUESTED + '"]');
     if (card){ requestedShown = true; setTimeout(() => card.scrollIntoView({ behavior: 'smooth', block: 'center' }), 60); }
   }
 }
 
-function toolCard(tool, max){
+function toolCard(tool, max, blind){
   const mine = myVotes[tool.id];
   const blocker = TC.voteBlocker(tool, myVoteIds(), verified());
   const released = tool.status === 'released';
@@ -338,12 +389,12 @@ function toolCard(tool, max){
     actions.appendChild(el('button', { class: 'btn btn-primary btn-small', type: 'button', text: 'Sign in to vote',
       onclick: () => { $('authCard').scrollIntoView({ behavior: 'smooth', block: 'start' }); $('authEmail').focus(); } }));
   } else if (mine){
-    actions.appendChild(el('button', { class: 'btn btn-ghost btn-small', type: 'button', text: '✓ Voted · Remove my vote', disabled: busy[tool.id] ? 'disabled' : null,
+    actions.appendChild(el('button', { class: 'btn btn-ghost btn-small', type: 'button', text: '✓ Voted · Remove', disabled: busy[tool.id] ? 'disabled' : null,
       onclick: () => withdraw(tool) }));
     const box = el('input', { type: 'checkbox', 'aria-label': 'Email me when ' + tool.title + ' launches' });
     box.checked = !!mine.notify;
     box.addEventListener('change', () => setNotify(tool, box.checked));
-    actions.appendChild(el('label', { class: 'check-row' }, box, el('span', { text: 'Email me when this launches' })));
+    actions.appendChild(el('label', { class: 'check-row' }, box, el('span', { text: 'Notify me', title: 'Email me when this launches' })));
   } else if (blocker === 'verify'){
     actions.appendChild(el('span', { class: 'tool-note', text: 'Verify your email to vote.' }));
   } else if (blocker === 'full'){
@@ -362,9 +413,9 @@ function toolCard(tool, max){
         el('div', { class: 'tool-meta' },
           el('span', { class: 'pill s-' + tool.status, text: TC.STATUS_LABELS[tool.status] || tool.status }),
           tool.category ? el('span', { class: 'pill', text: tool.category }) : null),
-        el('p', { class: 'tool-desc', text: tool.description || '' })),
-      el('div', { class: 'count' }, el('div', { class: 'num', text: String(count) }), el('div', { class: 'lbl', text: count === 1 ? 'vote' : 'votes' }))),
-    el('div', { class: 'bar', role: 'img', 'aria-label': plural(count, 'vote') }, el('span', { style: 'width:' + (count / max * 100) + '%;' })),
+        el('p', { class: 'tool-desc', text: tool.description || '', title: tool.description || '' })),
+      blind ? null : el('div', { class: 'count' }, el('div', { class: 'num', text: String(count) }), el('div', { class: 'lbl', text: count === 1 ? 'vote' : 'votes' }))),
+    blind ? el('div', { class: 'bar-space' }) : el('div', { class: 'bar', role: 'img', 'aria-label': plural(count, 'vote') }, el('span', { style: 'width:' + (count / max * 100) + '%;' })),
     actions);
 }
 
@@ -433,7 +484,26 @@ async function setNotify(tool, on){
 }
 
 /* ------------------------------------------------------------ suggestions */
+// Signed out, the box still takes a request: "Sign in to send" keeps the text (this tab only) and moves to the
+// sign-in card; once they are signed in and verified, the text is back in the box, ready to send.
+const DRAFT_KEY = 'pa_tool_request_draft';
+let draftRestored = false;   // then the note about it stays, rather than the last suggestion's status
+function draft(v){ try { if (v === undefined) return sessionStorage.getItem(DRAFT_KEY) || ''; if (v) sessionStorage.setItem(DRAFT_KEY, v); else sessionStorage.removeItem(DRAFT_KEY); } catch (e) { return ''; } }
+function suggestState(){
+  const signedIn = !!currentUser, ok = signedIn && verified();
+  $('suggestBtn').textContent = !signedIn ? 'Sign in to send' : ok ? 'Send request' : 'Verify your email to send';
+  $('suggestBtn').disabled = signedIn && !ok;
+  $('suggestHint').hidden = signedIn;
+  if (ok && draft() && !$('suggestText').value){
+    $('suggestText').value = draft();
+    draft('');
+    $('suggestStatus').textContent = 'Your request is ready. Press "Send request" to send it.';
+    draftRestored = true;
+  }
+}
+
 async function loadSuggestion(){
+  if (draftRestored) return;
   $('suggestStatus').textContent = '';
   if (!currentUser || !verified()) return;
   try {
@@ -451,6 +521,13 @@ $('suggestBtn').addEventListener('click', async () => {
   $('notice').textContent = '';
   const check = TC.validateSuggestion($('suggestText').value);
   if (!check.ok){ $('suggestError').textContent = check.error; return; }
+  if (!currentUser){
+    draft(check.text);
+    $('suggestStatus').textContent = 'Saved. Sign in or create a free account, and your request will be here, ready to send.';
+    $('authCard').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    $('authTitle').focus({ preventScroll: true });
+    return;
+  }
   $('suggestBtn').disabled = true;
   try {
     await setDoc(doc(db, 'toolSuggestions', currentUser.uid), {
@@ -499,6 +576,7 @@ function setMode(signUp){
   $('authPasswordConfirm').style.display = signUp ? 'block' : 'none';
   $('termsRow').style.display = signUp ? 'flex' : 'none';
   $('authSubmit').textContent = signUp ? 'Create account' : 'Log in';
+  $('googleLabel').textContent = signUp ? 'Sign up with Google' : 'Continue with Google';
   $('authPassword').setAttribute('autocomplete', signUp ? 'new-password' : 'current-password');
   $('authError').textContent = '';
 }
