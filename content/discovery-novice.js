@@ -1,258 +1,345 @@
 /* ================================================================
-   COURSE CONTENT: Customer & Market Discovery, No Experience
-   Source: "The Product Manager's Playbook: A Strategic Guide to
-   Building, Scaling, and Optimizing Products" by Robert Merrell —
-   Chapter 2, "Understanding Market Needs and Validating Product Ideas"
-   Generalized from the book's healthcare-SaaS framing to a broad
-   SaaS/product audience.
+   COURSE CONTENT: Customer & Market Discovery, Limited Experience
+   The flagship course: one story told across five lessons, with the
+   richer building blocks from lesson-blocks.js (story, data, practice).
+   Grounded in Chapter 2 of "The Product Manager's Playbook" by Robert
+   Merrell ("Understanding Market Needs and Validating Product Ideas").
+
+   The company (Ledgerline) and its people are fictional, and so are
+   the numbers from their pilot; those are marked as such on the page.
+   Every other figure is from the named source.
    ================================================================
    This file only needs to be edited if you're changing THIS
-   course's content. Adding a new course means creating a new file
-   like this one, not editing this file.
+   course's content.
    ================================================================ */
 window.CONTENT_OVERRIDES = window.CONTENT_OVERRIDES || {};
 
-window.CONTENT_OVERRIDES["discovery-novice"] = {
-  sourceUrl: "",
-  template: {
-    title: "Problem statement worksheet",
-    intro: "Turn a vague idea into the kind of problem statement Lesson 1 describes.",
-    fields: [
-      { key: "who", label: "Who (a specific user or segment, not \"users\")", type: "text", placeholder: "e.g. Support staff reconciling billing by hand" },
-      { key: "problem", label: "The problem, in their words", type: "textarea", placeholder: "What they'd actually say if you asked what's frustrating" },
-      { key: "evidence", label: "Evidence it's real", type: "textarea", placeholder: "What you observed or heard, not an assumption" },
-      { key: "why", label: "Why it matters now", type: "text", placeholder: "e.g. Costs six hours a week and is getting worse as we scale" }
-    ]
-  },
-  recap: [
-    "Start every feature with a written problem statement — the pain, who has it, and why current options fall short — before any design.",
-    "Your 'users' are usually several groups (daily users, buyers, influencers); build a simple persona for each, covering their day, goals, and constraints.",
-    "Real research is primary (interviews, pilots) plus secondary (existing reports, competitor docs), and a competitive analysis that hunts for the gaps.",
-    "Validate before you build: ship a focused MVP to a small representative group and watch usability, stated feedback, and analytics together.",
-    "The sequence — problem, market, validate, then build — isn't hard; the discipline is doing it before you've sunk resources into a solution."
-  ],
-  lessons: [
-    {
-      id: 1,
-      title: "Lesson 1: Start With a Problem Statement",
-      preCheck: {
-        label: "Before you read on — predict",
-        question: "You have an idea for a new feature. What's the most useful first thing to write down?",
-        options: [
-          "A list of the screens and controls the feature will need",
-          "A clear statement of the problem: the pain point, who has it, and why today's options fall short",
-          "A rough timeline for when it could ship"
+(function () {
+  // The people in the story (all fictional).
+  const CAST = {
+    maya: { id: 'maya', name: 'Maya Chen', role: 'Product manager, 3 weeks in' },
+    lauren: { id: 'lauren', name: 'Lauren Brooks', role: 'CEO' },
+    rosa: { id: 'rosa', name: 'Rosa Alvarez', role: 'Billing specialist at a customer' },
+    tom: { id: 'tom', name: 'Tom Okafor', role: 'Controller at the same customer' },
+    dev: { id: 'dev', name: 'Dev Patel', role: 'Head of engineering' },
+    priya: { id: 'priya', name: 'Priya Shah', role: 'IT lead at the customer' }
+  };
+
+  // Nielsen & Landauer (1993): share of usability problems found by n users = 1 - (1 - 0.31)^n.
+  const FOUND = [];
+  for (let n = 1; n <= 15; n++) FOUND.push([n, Math.round(100 * (1 - Math.pow(0.69, n)))]);
+
+  window.CONTENT_OVERRIDES["discovery-novice"] = {
+    sourceUrl: "",
+    template: {
+      title: "Problem statement worksheet",
+      intro: "Turn a vague request into the kind of problem statement Maya wrote in Lesson 1.",
+      fields: [
+        { key: "who", label: "Who (a specific user or segment, not \"users\")", type: "text", placeholder: "e.g. Billing specialists at 50 to 500 person companies" },
+        { key: "problem", label: "The problem, in their words", type: "textarea", placeholder: "What they'd actually say if you asked what's frustrating" },
+        { key: "evidence", label: "Evidence it's real", type: "textarea", placeholder: "What you observed or heard, not an assumption" },
+        { key: "why", label: "Why it matters now", type: "text", placeholder: "e.g. Costs six hours every month-end and delays invoicing" }
+      ]
+    },
+    recap: [
+      "Start from the problem, not the request: write who has the pain, what it costs them, and why today's options fall short, with no solution in it.",
+      "Your \"user\" is usually several people: the one who does the work, the one who pays, and the one who can say no. Know what each wants and worries about.",
+      "Read before you talk (secondary research), then talk to five or so people about what they actually did last time, then look for where competitors leave the problem unsolved.",
+      "Test the riskiest assumption with the cheapest thing that could prove it wrong, and believe what people do over what they say.",
+      "None of this is hard. The discipline is doing it before the team has started building."
+    ],
+    lessons: [
+      {
+        id: 1,
+        title: "Lesson 1: Start With a Problem Statement",
+        preCheck: {
+          label: "Before you read on — predict",
+          question: "Your CEO asks for a redesign of a screen customers call \"clunky\". What's the most useful first thing to write down?",
+          options: [
+            "A list of the screens and controls the redesign will need",
+            "A clear statement of the problem: the pain, who has it, and why today's options fall short",
+            "A rough timeline for when it could ship"
+          ],
+          correct: 1,
+          explanation: "Hold on to your answer. Maya is about to face exactly this request."
+        },
+        blocks: [
+          { type: 'story', title: 'Monday, week three', cast: [CAST.maya, CAST.lauren, CAST.rosa], pause: 4, beats: [
+            { narration: 'Ledgerline sells invoicing software to companies with small finance teams. Maya joined three weeks ago as its second product manager.' },
+            { who: 'lauren', text: 'Customers keep telling sales that billing feels clunky. Can you get a redesign of the billing dashboard on next quarter\'s roadmap?' },
+            { who: 'maya', text: 'Yes. Before we scope it, can I spend this week finding out what "clunky" is costing them? I\'d like to get the redesign aimed at the right thing.' },
+            { narration: 'Maya books three calls with customers. The first is with Rosa, who runs billing at a 200-person distributor.' },
+            { who: 'rosa', text: 'The screen? It\'s fine, honestly. What kills me is month-end. Payments come in from the bank and I match them to invoices by hand. A customer pays three invoices in one transfer, or pays half. It takes me about six hours, every month.' },
+            { who: 'maya', text: 'What happens if a match is wrong?' },
+            { who: 'rosa', text: 'We chase someone who already paid. That\'s the call I hate making.' },
+            { narration: 'The other two calls tell the same story. A redesign would have made a slow, manual job look nicer. The problem was the matching.' }
+          ] },
+          { type: 'html', html: `
+            <p>Lauren's request was a <strong>solution</strong> ("redesign the dashboard"). What Maya needed first was the <strong>problem</strong>. A problem statement answers three questions, and names no solution:</p>
+            <ul>
+              <li><strong>What is the pain?</strong> Matching payments to invoices by hand at month-end.</li>
+              <li><strong>Who has it, and what does it cost them?</strong> Billing specialists; about six hours a month, plus the awkward calls when a match is wrong.</li>
+              <li><strong>Why do today's options fall short?</strong> Payments that cover several invoices, or part of one, can't be matched by the current screen at all.</li>
+            </ul>` },
+          { type: 'compare', items: [
+            { tone: 'bad', label: 'A request', text: '"Redesign the billing dashboard so it feels more modern."', why: 'Names a solution and a feeling. No pain, no people, no cost, nothing to test it against.' },
+            { tone: 'good', label: 'A problem statement', text: '"Billing specialists spend about six hours each month-end matching bank payments to invoices by hand, because payments that cover several invoices, or part of one, can\'t be matched automatically. Mistakes lead to chasing customers who already paid."', why: 'Pain, people, cost and the gap in today\'s tools. Every later decision can be checked against it.' }
+          ] },
+          { type: 'stat', value: '80%', label: 'of the features in the average software product are rarely or never used. Building from requests instead of problems is one of the ways that happens.', source: 'Pendo, 2019 Feature Adoption Report (usage data across hundreds of software products)' },
+          { type: 'sort', title: 'Problem or solution?', prompt: 'Product requests arrive dressed as solutions. Sort each one.', buckets: [{ id: 'problem', label: 'Problem' }, { id: 'solution', label: 'Solution' }], items: [
+            { text: '"Add a bulk-edit button to the invoice list."', bucket: 'solution', why: 'It describes a feature. The problem behind it might be "updating 40 invoices one at a time takes an afternoon", which bulk edit may or may not be the best fix for.' },
+            { text: '"New customers give up during setup because they can\'t find their bank details."', bucket: 'problem', why: 'Who (new customers), what happens (they give up) and where. No fix is assumed.' },
+            { text: '"We need an AI assistant in the app."', bucket: 'solution', why: 'A technology looking for a use. Ask: an assistant to help whom do what?' },
+            { text: '"Finance teams can\'t see which invoices are overdue until the customer complains."', bucket: 'problem', why: 'A pain, the people who have it, and its consequence.' },
+            { text: '"Make the dashboard load faster."', bucket: 'solution', why: 'Close to a problem, but it skips who is slowed down, doing what, and what it costs them. "Slow" may matter on one screen and not at all on another.' },
+            { text: '"Sales loses deals because prospects can\'t try the product without a call."', bucket: 'problem', why: 'Clear who and cost. A free trial is one possible solution; there are others.' }
+          ] },
+          { type: 'takeaway', text: 'When a request arrives, thank them, then ask "what happens today, and what does it cost?" The problem is usually one question behind the request.' }
         ],
-        correct: 1,
-        explanation: "See whether the lesson backs this up. The order you do things in matters more than it looks."
+        checks: [
+          {
+            question: "Which of these is a usable problem statement in the sense this lesson means?",
+            options: [
+              "\"Build a faster invoice screen with templates and shortcuts\"",
+              "\"Billing specialists spend hours each month-end matching payments to invoices by hand, which delays reporting and causes errors\"",
+              "\"Make the billing area of the product feel more modern\""
+            ],
+            correct: 1,
+            explanation: "It names the pain, who has it, and the cost, with no solution baked in. The other two describe a solution or a feeling."
+          },
+          {
+            question: "Why did Maya call customers before scoping the redesign?",
+            options: [
+              "To collect feature requests for the redesign",
+              "To find the problem behind the request, so every later decision could be checked against it",
+              "To get customers to approve the new design early"
+            ],
+            correct: 1,
+            explanation: "The request was a solution. Finding the problem changed what was worth building, before any time had been spent building it."
+          }
+        ]
       },
-      body: `
-        <p>Every solid product or feature starts with a clear <strong>problem statement</strong>. Before design, before scoping, before estimates, you write down what pain point or opportunity you're actually addressing.</p>
-        <p>A good problem statement answers three questions:</p>
-        <ul>
-          <li><strong>What specific pain point are we addressing?</strong></li>
-          <li><strong>Who is impacted by it?</strong></li>
-          <li><strong>What's the current solution, if any, and why is it insufficient?</strong></li>
-        </ul>
-        <p>An example: <em>"Clinicians spend so long on documentation in their records system that it cuts into patient time and drives up administrative cost."</em> Notice it names the pain, the people, and the cost, without naming a solution.</p>
-        <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:12px; margin:0 0 16px;">
-          <div style="border-top:3px solid #C0622A; background:#FCEFE9; border-radius:8px; padding:12px 14px;">
-            <div style="font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:0.04em; color:#C0622A; margin-bottom:6px;">Not a problem statement</div>
-            <div style="font-size:13px; line-height:1.5;">"Redesign the billing screen so it feels more modern."<br><span style="color:var(--gray);">Names a solution and a vibe — no pain, no people, no cost.</span></div>
-          </div>
-          <div style="border-top:3px solid #2E8B57; background:#EEF9F1; border-radius:8px; padding:12px 14px;">
-            <div style="font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:0.04em; color:#2E8B57; margin-bottom:6px;">A problem statement</div>
-            <div style="font-size:13px; line-height:1.5;">"Support staff spend about six hours a week reconciling billing by hand, which delays invoicing and introduces errors."<br><span style="color:var(--gray);">Pain, who, and the cost — with no solution baked in.</span></div>
-          </div>
-        </div>
-        <p>Writing this down creates a focused foundation. Every later decision, what to build, what to cut, how to tell if it worked, gets checked against it.</p>
-      `,
-      checks: [
-        {
-          question: "Which of these is a usable problem statement in the sense this lesson means?",
-          options: [
-            "\"Build a faster note-taking screen with templates and shortcuts\"",
-            "\"Support staff spend hours each week manually reconciling billing records, which delays invoicing and causes errors\"",
-            "\"Make the billing area of the product feel more modern\""
-          ],
-          correct: 1,
-          explanation: "It names the pain, who has it, and the cost — with no solution baked in. The other two describe a solution or a vibe."
-        },
-        {
-          question: "Why does the lesson say to write the problem statement before designing anything?",
-          options: [
-            "It's a formality that stakeholders expect to see",
-            "It becomes the thing every later decision is checked against — what to build, what to cut, how to judge success",
-            "It locks the scope so it can't change later"
-          ],
-          correct: 1,
-          explanation: "The statement is a reference point, not a contract. It keeps the work anchored to a real problem instead of drifting toward whatever's easy to build."
+      {
+        id: 2,
+        title: "Lesson 2: Know Who You're Building For",
+        blocks: [
+          { type: 'story', title: 'Three people, one purchase', cast: [CAST.maya, CAST.tom, CAST.priya], beats: [
+            { narration: 'Maya asks Rosa who else would care if payment matching changed. Rosa introduces her to two colleagues.' },
+            { who: 'tom', text: 'I sign the renewal. If this closes the month two days faster, I\'ll pay more for it. If it just looks better, I won\'t.' },
+            { who: 'priya', text: 'Anything that reads our bank feed needs single sign-on and an audit trail. Without those, it doesn\'t get switched on, however much finance wants it.' },
+            { narration: 'One customer, three people, three different tests. Rosa does the work, Tom pays, and Priya can say no.' }
+          ] },
+          { type: 'html', html: `<p>In most products, "the user" is several people. The person who uses it every day is often not the person who decides to buy it, and neither of them may be the one who can block it. Design only for the first and the product never gets bought. Pitch only to the second and it gets bought, then ignored.</p>
+            <p>For each group, build a short <strong>persona</strong>: not demographics, but their day, what they are trying to achieve, what worries them, and how comfortable they are with new tools.</p>` },
+          { type: 'personas', title: 'Maya\'s personas for payment matching', items: [
+            { name: 'Rosa', role: 'Billing specialist', kind: 'Does the work', quote: 'Month-end is six hours of matching I could do in my sleep, if I could sleep.', wants: 'Matches she can trust, and fewer calls to customers who already paid.', worries: 'A tool that guesses wrong and leaves her to find the mistakes.' },
+            { name: 'Tom', role: 'Controller', kind: 'Pays', quote: 'Show me the month closing faster.', wants: 'Faster close and cleaner numbers for the auditors.', worries: 'Paying for software the team doesn\'t use.' },
+            { name: 'Priya', role: 'IT lead', kind: 'Can say no', quote: 'If it touches the bank, I need to know who did what.', wants: 'Single sign-on, an audit trail, nothing to maintain.', worries: 'Another system with access to bank data.' }
+          ] },
+          { type: 'sort', title: 'Whose concern is it?', prompt: 'Each comment came up in Maya\'s calls. Who is it really about?', buckets: [{ id: 'user', label: 'Does the work' }, { id: 'buyer', label: 'Pays' }, { id: 'blocker', label: 'Can say no' }], items: [
+            { text: '"Can I undo a match if I get it wrong?"', bucket: 'user', why: 'A daily-use worry. It decides whether Rosa trusts the tool enough to use it.' },
+            { text: '"What will this cost per year, and when do we see the payback?"', bucket: 'buyer', why: 'Budget and return: Tom\'s questions.' },
+            { text: '"Where is the bank data stored, and who can see it?"', bucket: 'blocker', why: 'A security question. Get it wrong and Priya stops the rollout, whatever finance wants.' },
+            { text: '"Will it save us time at month-end?"', bucket: 'buyer', why: 'Rosa cares too, but for Tom it\'s the reason to pay. The same benefit has to be told in his terms: days saved, not clicks.' }
+          ] },
+          { type: 'scenario', title: 'The demo', setup: 'Two weeks later Maya demos a prototype to the customer. Tom loves it: "This is exactly what I need." Rosa, who will use it every month-end, says almost nothing.', question: 'What should Maya do next?', choices: [
+            { label: 'Count it as a win. The buyer is sold.', verdict: 'risky', outcome: 'Tom may well buy it. But if Rosa doesn\'t trust it, she\'ll keep matching by hand alongside it, and at renewal Tom will see a tool nobody uses.' },
+            { label: 'Book 30 minutes with Rosa alone and ask her to try it on last month\'s payments.', verdict: 'best', outcome: 'Silence from the daily user is a finding. Alone, Rosa admits she doesn\'t trust matches she can\'t see the reasoning for. Maya adds a "why this match" note, the change that later makes the product work.' },
+            { label: 'Send everyone a survey about the prototype.', verdict: 'ok', outcome: 'Better than nothing, but a survey won\'t show why Rosa went quiet. Watching her use it on real data will.' }
+          ] }
+        ],
+        checks: [
+          {
+            question: "Why does the lesson separate the person who does the work from the person who pays?",
+            options: [
+              "The person who pays doesn't matter for product design",
+              "They often aren't the same person, and each has different needs you have to design and sell for",
+              "It's only relevant for enterprise software"
+            ],
+            correct: 1,
+            explanation: "A feature that delights daily users but ignores what the buyer cares about may never be bought, and one that wins the buyer but not the user won't be used."
+          },
+          {
+            question: "What should a persona include beyond demographics?",
+            options: [
+              "Only the person's job title and seniority",
+              "Their day, their goals, what worries them, and how comfortable they are with new tools",
+              "A detailed list of features they've requested"
+            ],
+            correct: 1,
+            explanation: "Demographics don't tell you how to design for someone. What their day is like and what they're trying to achieve is what makes a persona useful."
+          }
+        ]
+      },
+      {
+        id: 3,
+        title: "Lesson 3: Do the Research",
+        blocks: [
+          { type: 'story', title: 'Two weeks, three kinds of evidence', cast: [CAST.maya, CAST.dev], beats: [
+            { who: 'dev', text: 'Three customer calls is a good story. Is it enough to bet a quarter on?' },
+            { who: 'maya', text: 'Not yet. I\'ll spend two days reading what\'s already out there, then talk to five more customers of different sizes, then look at how everyone else handles this.' },
+            { narration: 'Primary research tells you how people really work. Secondary research tells you the shape of the market, quickly and cheaply. Competitive analysis tells you where the openings are.' }
+          ] },
+          { type: 'html', html: `<p><strong>How many conversations is enough?</strong> Fewer than most people think, as long as they're with the right people. Jakob Nielsen and Tom Landauer showed that in usability testing each new person finds a share of the problems the earlier ones missed, so returns fall quickly. Interview research behaves in a similar way: in one well-known study, the main themes had appeared within the first six interviews and nothing new appeared after twelve.</p>` },
+          { type: 'curve', title: 'Each conversation finds less that\'s new', subtitle: 'Share of usability problems found as you add test users, using Nielsen and Landauer\'s model (each user finds about 31%).', xLabel: 'People you talk to', sliderLabel: 'People', yLabel: 'Problems found', unit: '%', points: FOUND, start: 4,
+            readout: (n, y) => 'With <b>' + n + (n === 1 ? ' person' : ' people') + '</b> you find about <b>' + y + '%</b> of the problems.' + (n <= 2 ? ' Too few: one loud voice can mislead you.' : n <= 6 ? ' The sweet spot: most of what matters, for a few days\' work.' : ' You\'re mostly hearing things you\'ve already heard. Spend the time on a different kind of customer instead.'),
+            source: 'Nielsen & Landauer, "A mathematical model of the finding of usability problems" (1993); interview themes: Guest, Bunce & Johnson, Field Methods (2006)' },
+          { type: 'compare', items: [
+            { tone: 'bad', label: 'Leading question', text: '"Would you use a tool that matched payments for you automatically?"', why: 'Hypothetical and leading. People are kind; almost everyone says yes.' },
+            { tone: 'good', label: 'Better question', text: '"Walk me through the last time you closed the month. Where did the time go?"', why: 'About something that already happened. You hear what they actually do, including the workarounds.' }
+          ] },
+          { type: 'sort', title: 'Good interview question, or not?', prompt: 'Maya drafts her interview guide. Which of these will get her real answers?', buckets: [{ id: 'good', label: 'Keep it' }, { id: 'bad', label: 'Rewrite it' }], items: [
+            { text: '"How much would you pay for automatic matching?"', bucket: 'bad', why: 'People are poor at predicting what they\'d pay for something they\'ve never used. Ask what the problem costs them today instead.' },
+            { text: '"What did you do the last time a payment didn\'t match any invoice?"', bucket: 'good', why: 'A real, recent event. You learn the workaround and how much it hurts.' },
+            { text: '"Don\'t you find month-end frustrating?"', bucket: 'bad', why: 'It tells them the answer you want. Ask "how did last month-end go?"' },
+            { text: '"Have you tried anything else to fix this? What happened?"', bucket: 'good', why: 'Shows whether they care enough to have looked for a fix, and what the alternatives get wrong.' }
+          ] },
+          { type: 'matrix', title: 'How today\'s options handle Rosa\'s problem', subtitle: 'Maya\'s competitive scan (illustrative). The question isn\'t "what do they have that we don\'t?" but "what does nobody do well?"', columns: ['Matches simple payments', 'One payment, several invoices', 'Part-payments', 'Audit trail', 'Fits a 2-person finance team'], gap: 2,
+            rows: [
+              { label: 'Ledgerline today', cells: ['part', 'no', 'no', 'yes', 'yes'] },
+              { label: 'Big accounting suite add-on', cells: ['yes', 'yes', 'part', 'yes', 'no'] },
+              { label: 'The bank\'s own portal', cells: ['yes', 'no', 'no', 'part', 'yes'] },
+              { label: 'Spreadsheet and macros', cells: ['part', 'part', 'part', 'no', 'yes'] }
+            ],
+            note: 'Part-payments are handled poorly everywhere, and the suite that comes closest is too heavy for small teams. That gap is Ledgerline\'s opening.' }
+        ],
+        steps: [
+          { title: "Secondary research (days 1 to 2)", detail: "Read what already exists: industry reports, analyst write-ups, competitor documentation and help pages, review sites, regulations. It's cheap and fast, and it means your interviews start from what's known instead of the basics." },
+          { title: "Primary research (days 3 to 7)", detail: "Talk to five or six people per type of customer, about what they did last time rather than what they'd like. Watch them do the task if you can. Write up each conversation the same day." },
+          { title: "Competitive analysis (day 8)", detail: "For the problem you're targeting, look at how each alternative handles it, including spreadsheets and doing nothing. You're hunting for the gap: the part of the problem nobody solves well for the people you care about." }
+        ],
+        checks: [
+          {
+            question: "You have two weeks for discovery in an area you don't know. What's the most efficient first move?",
+            options: [
+              "Book two full weeks of customer interviews straight away",
+              "Spend a day or two on secondary research first, so your interviews start from what's already known",
+              "Send a broad survey and wait for the replies"
+            ],
+            correct: 1,
+            explanation: "Secondary research is cheap and quick, and it makes the interviews far sharper because you aren't spending them on the basics."
+          },
+          {
+            question: "In a competitive analysis, what are you actually looking for?",
+            options: [
+              "A feature checklist so you can match everything competitors have",
+              "The gap: the part of the problem nobody solves well for the customers you care about",
+              "Proof that no competitor exists"
+            ],
+            correct: 1,
+            explanation: "Matching competitors feature for feature is a treadmill. The value is in spotting where they all fall short, like part-payments in Maya's scan."
+          }
+        ]
+      },
+      {
+        id: 4,
+        title: "Lesson 4: Validate Before You Build",
+        blocks: [
+          { type: 'story', title: 'Three months, or two weeks?', cast: [CAST.maya, CAST.dev, CAST.rosa], pause: 3, beats: [
+            { who: 'dev', text: 'A proper matching engine, with bank feeds, rules and part-payments, is about three months for two engineers.' },
+            { who: 'maya', text: 'Before we spend that, I want to know if people will actually change how they work. What if, for two weeks, five customers send us their bank export and we match it for them with a spreadsheet and some rules?' },
+            { who: 'dev', text: 'By hand? That doesn\'t scale.' },
+            { who: 'maya', text: 'It doesn\'t need to. It needs to tell us if they\'ll use it, and where the matching breaks.' },
+            { narration: 'They run the test with ten customers. Nearly all of them say it would help. Fewer keep using it.' },
+            { who: 'rosa', text: 'The simple ones were great. But half our payments are part-payments, and those all came back unmatched, so I still had to do them myself.' }
+          ] },
+          { type: 'flow', title: 'Ways to test an idea, cheapest first', steps: [
+            { title: 'Fake door', tag: 'Days', text: 'A button or landing page for a feature that doesn\'t exist yet. Count who clicks.' },
+            { title: 'Concierge', tag: '1 to 2 weeks', text: 'Do the job for a few customers by hand, as Maya did. You learn exactly where it\'s hard.' },
+            { title: 'Wizard of Oz', tag: '2 to 4 weeks', text: 'It looks automatic to the customer; a person does the work behind the scenes.' },
+            { title: 'Smallest real product', tag: 'Weeks', text: 'Build only the part that solves the core problem, for a small group, and learn from it.' }
+          ] },
+          { type: 'bars', title: 'What customers said, and what they did', subtitle: 'Maya\'s two-week pilot with 10 customers.', unit: '%', valueLabel: 'Share of pilot customers', highlight: 'Asked to keep it after the pilot', items: [
+            { label: 'Said it would help', value: 90 },
+            { label: 'Sent a bank export in week 1', value: 80 },
+            { label: 'Sent one again in week 2', value: 60 },
+            { label: 'Asked to keep it after the pilot', value: 50, detail: 'All five of the others had mostly part-payments.' }
+          ], note: 'Fictional numbers from the story, showing the usual gap between saying and doing.' },
+          { type: 'scenario', title: 'Half kept it, half drifted off', setup: 'Five of ten customers want to keep the service. The other five stopped sending files, and most of their payments were part-payments.', question: 'What should the team do?', choices: [
+            { label: 'Start the three-month engine now. Half is a strong result.', verdict: 'risky', outcome: 'The engine would match simple payments well and still fail the customers who need it most. The pilot has just told you where the hard part is; build without it and you\'ve paid three months to learn it again.' },
+            { label: 'Spend another week matching part-payments by hand, to learn the rules that make them work.', verdict: 'best', outcome: 'The drop-offs are the most useful data you have. Maya finds that most part-payments carry the invoice number in the bank reference, which a simple rule can catch. The first release does just that, in six weeks.' },
+            { label: 'Drop the idea. Only half wanted it.', verdict: 'risky', outcome: 'Half of customers asking to keep a manual service is a strong signal. The ones who left did so for a reason you can fix.' }
+          ] },
+          { type: 'html', html: `<p>A <strong>minimum viable product</strong> isn't a half-finished release. It's the smallest thing that delivers real value on the core problem and lets you learn. When you test it, watch three things together: <strong>what people do</strong> (usage), <strong>what they say</strong> (interviews and surveys) and <strong>where they struggle</strong> (watching them use it). A gap between saying and doing isn't noise. It's often the finding.</p>` }
+        ],
+        checks: [
+          {
+            question: "What's the lesson's definition of a minimum viable product?",
+            options: [
+              "A rushed, incomplete version shipped to hit a deadline",
+              "The smallest thing that delivers real value on the core problem and lets you learn from it",
+              "The full product with a few features hidden"
+            ],
+            correct: 1,
+            explanation: "Maya's spreadsheet service delivered real value (matched payments) to real customers in two weeks, and taught the team where the hard part was."
+          },
+          {
+            question: "Users say they like a new feature, but most stop using it after the first week. What should you trust?",
+            options: [
+              "What they said: users know their own experience best",
+              "Both, together: what they do tells you there's a problem, and talking to them tells you why",
+              "Neither; run a bigger pilot before concluding anything"
+            ],
+            correct: 1,
+            explanation: "Usage shows what happened, conversations explain it. Maya only understood the drop-off when Rosa explained the part-payments."
+          }
+        ]
+      },
+      {
+        id: 5,
+        title: "Lesson 5: The Discipline of Doing It First",
+        blocks: [
+          { type: 'story', title: 'Six weeks later', cast: [CAST.maya, CAST.lauren, CAST.rosa], beats: [
+            { narration: 'The first release suggests matches, including part-payments with the invoice number in the reference, and shows why it chose each one. Rosa approves them with one click.' },
+            { who: 'rosa', text: 'Month-end took me about an hour and a half. And I didn\'t chase anyone who\'d already paid.' },
+            { who: 'lauren', text: 'So we never built the redesign?' },
+            { who: 'maya', text: 'We built the thing that made people stop asking for it.' },
+            { narration: 'At renewal, Tom upgrades. Priya signs off because every match records who approved it. Each of the three people got what they needed.' }
+          ] },
+          { type: 'html', html: `<p>The whole course is one sequence: <strong>problem, then people, then research, then a cheap test, then build</strong>. None of the steps is hard. The discipline is doing them <em>before</em> the team is building, when building feels faster than finding out. Once work has started, discovery tends to become a search for evidence that the plan was right.</p>` },
+          { type: 'bars', title: 'Why startups fail, in their founders\' words', subtitle: 'Share of 111 startup post-mortems citing each reason. Most cite more than one.', unit: '%', valueLabel: 'Share of post-mortems', highlight: 'No market need', items: [
+            { label: 'Ran out of cash or couldn\'t raise', value: 38 },
+            { label: 'No market need', value: 35, detail: 'They built something nobody needed enough to pay for.' },
+            { label: 'Got outcompeted', value: 20 },
+            { label: 'Flawed business model', value: 19 },
+            { label: 'Regulatory or legal problems', value: 18 },
+            { label: 'Pricing or cost issues', value: 15 }
+          ], source: 'CB Insights, "The Top 12 Reasons Startups Fail" (2021)', note: 'More than a third built something the market didn\'t need: the problem this course is about.' },
+          { type: 'flow', title: 'Your two weeks of discovery', steps: [
+            { title: 'Read', tag: 'Days 1 to 2', text: 'Reports, competitor help pages, reviews. Write down what you think you know.' },
+            { title: 'Talk', tag: 'Days 3 to 7', text: 'Five or six people per type of customer, about what they did last time. Include the buyer and whoever can say no.' },
+            { title: 'Write it down', tag: 'Day 8', text: 'The problem statement, a persona for each group, and the gap in today\'s options.' },
+            { title: 'Test the riskiest part', tag: 'Days 9 to 10', text: 'Pick the cheapest test that could prove you wrong, and decide in advance what result would change your plan.' }
+          ] },
+          { type: 'takeaway', text: 'Two weeks of discovery is small and certain. Months spent building the wrong thing are large, and you find out late.' }
+        ],
+        checks: [
+          {
+            question: "The lesson says the steps aren't hard. So where's the difficulty?",
+            options: [
+              "The research tools are expensive",
+              "Doing them before you've started building, when building feels faster than finding out",
+              "Getting stakeholders to attend the research sessions"
+            ],
+            correct: 1,
+            explanation: "The sequence only pays off if it happens first. Once the team is building, discovery tends to become a way of justifying the plan."
+          },
+          {
+            label: "Bringing it together",
+            question: "A colleague says: \"We already know what to build. Let's not waste two weeks on discovery.\" What's the strongest response?",
+            options: [
+              "They're right if the team is confident; discovery is for risky bets",
+              "Two weeks finding the problem, talking to the right people and testing cheaply is small insurance against months building the wrong thing",
+              "Agree, but quietly do discovery in parallel once building starts"
+            ],
+            correct: 1,
+            explanation: "Maya's two weeks turned a three-month redesign into a six-week release that customers paid more for. The cost of skipping discovery is large and shows up late."
+          }
+        ],
+        reflection: {
+          prompt: "Take one thing your team is about to build. Write its problem statement in three sentences (the pain, who has it, why today's options fall short), then name the riskiest assumption in it and the cheapest test that could prove it wrong."
         }
-      ]
-    },
-    {
-      id: 2,
-      title: "Lesson 2: Know Who You're Building For",
-      body: `
-        <p>In most products your "users" are actually several groups with different needs. A person who uses the product daily is often not the person who decides to buy it, and neither is the person who has to approve it.</p>
-        <svg viewBox="0 0 400 132" style="width:100%; height:auto; margin:4px 0 2px;">
-          <g font-family="'Space Grotesk',sans-serif" font-size="10" font-weight="700" fill="#12305e" text-anchor="middle">
-            <rect x="8" y="34" width="112" height="38" rx="9" fill="#EEF3FA" stroke="#1A4584" stroke-width="1.3"/>
-            <text x="64" y="50">Primary users</text><text x="64" y="64" font-size="8" font-weight="400" fill="#4B5768">use it every day</text>
-            <rect x="144" y="34" width="112" height="38" rx="9" fill="#E7F7FC" stroke="#35C2E8" stroke-width="1.3"/>
-            <text x="200" y="50">Decision-makers</text><text x="200" y="64" font-size="8" font-weight="400" fill="#4B5768">approve the spend</text>
-            <rect x="280" y="34" width="112" height="38" rx="9" fill="#EEF3FA" stroke="#1A4584" stroke-width="1.3"/>
-            <text x="336" y="50">Influencers</text><text x="336" y="64" font-size="8" font-weight="400" fill="#4B5768">shape the choice</text>
-          </g>
-          <text x="200" y="100" text-anchor="middle" font-family="sans-serif" font-size="9" fill="#9AA3AD">each has different needs, priorities, and constraints — build a persona for each</text>
-        </svg>
-        <p>For each group, build a simple <strong>persona</strong>: not just demographics, but their daily experience, their goals, their pain points, and how comfortable they are with technology. Then ask which constraints apply to each, budget limits, approval chains, regulations, so you're not surprised later.</p>
-      `,
-      checks: [
-        {
-          question: "Why does the lesson separate \"primary users\" from \"decision-makers\"?",
-          options: [
-            "Decision-makers don't matter for product design",
-            "The person who uses the product daily is often not the one who approves buying it — and they have different needs you have to design and pitch for",
-            "It's only relevant for enterprise software"
-          ],
-          correct: 1,
-          explanation: "A feature that delights daily users but ignores what the buyer cares about can still fail to get adopted. You need a read on both."
-        },
-        {
-          question: "What should a persona include beyond demographics?",
-          options: [
-            "Only the person's job title and seniority",
-            "Their daily experience, goals, pain points, and how comfortable they are with technology",
-            "A detailed list of features they've requested"
-          ],
-          correct: 1,
-          explanation: "Demographics alone don't tell you how to design for someone. The lived detail — what their day is like, what they're trying to achieve — is what makes a persona useful."
-        }
-      ]
-    },
-    {
-      id: 3,
-      title: "Lesson 3: Do the Research",
-      body: `
-        <p>A real market assessment is more than a survey. It's two kinds of research plus a look at the competition — and they all feed one question.</p>
-        <svg viewBox="0 0 400 138" style="width:100%; height:auto; margin:4px 0 2px;">
-          <defs>
-            <marker id="dnResArrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
-              <path d="M0 0 L10 5 L0 10 z" fill="#9AA3AD"/>
-            </marker>
-          </defs>
-          <g font-family="'Space Grotesk',sans-serif" font-size="9.5" font-weight="700" fill="#12305e" text-anchor="middle">
-            <rect x="8" y="14" width="120" height="30" rx="8" fill="#EEF3FA" stroke="#1A4584" stroke-width="1.2"/><text x="68" y="27">Primary</text><text x="68" y="39" font-size="7.5" font-weight="400" fill="#4B5768">interviews, pilots</text>
-            <rect x="8" y="54" width="120" height="30" rx="8" fill="#E7F7FC" stroke="#35C2E8" stroke-width="1.2"/><text x="68" y="67">Secondary</text><text x="68" y="79" font-size="7.5" font-weight="400" fill="#4B5768">reports, competitor docs</text>
-            <rect x="8" y="94" width="120" height="30" rx="8" fill="#EEF3FA" stroke="#1A4584" stroke-width="1.2"/><text x="68" y="107">Competitive</text><text x="68" y="119" font-size="7.5" font-weight="400" fill="#4B5768">features, UX, pricing</text>
-            <rect x="250" y="52" width="140" height="34" rx="10" fill="#F7F9FC" stroke="#9AA3AD" stroke-width="1.3"/><text x="320" y="66">Where's the gap?</text><text x="320" y="78" font-size="7.5" font-weight="400" fill="#4B5768">that's your opening</text>
-          </g>
-          <line x1="128" y1="29" x2="248" y2="62" stroke="#9AA3AD" stroke-width="1.4" marker-end="url(#dnResArrow)"/>
-          <line x1="128" y1="69" x2="248" y2="69" stroke="#9AA3AD" stroke-width="1.4" marker-end="url(#dnResArrow)"/>
-          <line x1="128" y1="109" x2="248" y2="76" stroke="#9AA3AD" stroke-width="1.4" marker-end="url(#dnResArrow)"/>
-        </svg>
-      `,
-      steps: [
-        { title: "Primary research", detail: "Talk to people directly — interviews, small focus groups, pilot programs. This is where you learn the workflow frustrations and gaps you'd never guess from the outside. A handful of honest conversations beats a hundred survey responses to a vague question." },
-        { title: "Secondary research", detail: "Read what already exists: industry reports, analyst write-ups, competitor documentation, regulatory guidance. It's cheap, it's fast, and it tells you the shape of the landscape before you spend time in it." },
-        { title: "Competitive analysis", detail: "For the problem you're targeting, look at how competitors address it: their features and functionality, their user experience and where it frustrates people, and their pricing and value proposition. The gaps you find are your opportunities." }
-      ],
-      checks: [
-        {
-          question: "You have two weeks for discovery on a product area you don't know well. What's the most efficient first move?",
-          options: [
-            "Book a full two weeks of user interviews right away",
-            "Spend the first day or two on secondary research — reports, competitor docs, analyst write-ups — to map the landscape before you talk to anyone",
-            "Send a broad survey and wait for the responses to come in"
-          ],
-          correct: 1,
-          explanation: "Secondary research is cheap and fast and tells you the shape of the space. Going in with that context makes the primary research (the interviews) far sharper."
-        },
-        {
-          question: "In a competitive analysis, what are you actually looking for?",
-          options: [
-            "A feature-by-feature checklist to match everything a competitor has",
-            "The gaps — where competitors' features, user experience, or pricing leave the problem poorly solved — because those are your openings",
-            "Proof that no competitor exists"
-          ],
-          correct: 1,
-          explanation: "Matching competitors feature-for-feature is a treadmill. The value of the analysis is spotting where they fall short for the users you care about."
-        }
-      ]
-    },
-    {
-      id: 4,
-      title: "Lesson 4: Validate Before You Build",
-      body: `
-        <p>Once you've defined the problem and know who has it, test your assumptions with real users <em>before</em> committing serious engineering effort.</p>
-        <p><strong>Build a minimum viable product.</strong> An MVP isn't a half-baked release. It's the smallest thing that delivers real value on the core problem while letting you iterate from feedback. If the core issue is documentation speed, the MVP is a streamlined note-taking flow, not a full redesign.</p>
-        <p><strong>Then put it in front of a small, representative group</strong> and watch three things at once:</p>
-        <svg viewBox="0 0 400 118" style="width:100%; height:auto; margin:4px 0 2px;">
-          <g font-family="'Space Grotesk',sans-serif" font-size="9" font-weight="700" fill="#12305e" text-anchor="middle">
-            <rect x="10" y="18" width="118" height="34" rx="8" fill="#EEF3FA" stroke="#1A4584" stroke-width="1.2"/><text x="69" y="32">Usability test</text><text x="69" y="44" font-size="7.5" font-weight="400" fill="#4B5768">where they hesitate</text>
-            <rect x="141" y="18" width="118" height="34" rx="8" fill="#E7F7FC" stroke="#35C2E8" stroke-width="1.2"/><text x="200" y="32">Survey / interview</text><text x="200" y="44" font-size="7.5" font-weight="400" fill="#4B5768">what they say</text>
-            <rect x="272" y="18" width="118" height="34" rx="8" fill="#EEF3FA" stroke="#1A4584" stroke-width="1.2"/><text x="331" y="32">Analytics</text><text x="331" y="44" font-size="7.5" font-weight="400" fill="#4B5768">what they do</text>
-          </g>
-          <text x="200" y="82" text-anchor="middle" font-family="sans-serif" font-size="9.5" fill="#4B5768">A gap between what they <tspan font-style="italic">say</tspan> and what they <tspan font-style="italic">do</tspan> is a finding, not noise.</text>
-        </svg>
-      `,
-      checks: [
-        {
-          question: "What's the lesson's definition of an MVP?",
-          options: [
-            "A rushed, incomplete version shipped to hit a deadline",
-            "The smallest product that delivers real value on the core problem while letting you iterate from feedback",
-            "The full product with a few features hidden behind flags"
-          ],
-          correct: 1,
-          explanation: "\"An MVP is not about releasing a half-baked solution.\" It's a focused, genuinely useful slice aimed at the core problem, built to learn from."
-        },
-        {
-          question: "You run a pilot and users say they like the new flow, but analytics show most abandon it halfway. What does this lesson suggest you trust?",
-          options: [
-            "The survey responses — users know their own experience best",
-            "Both signals together — the qualitative \"why\" plus the behavioural data, which is exactly why you gather all three",
-            "Neither; run a bigger pilot before concluding anything"
-          ],
-          correct: 1,
-          explanation: "Usability observation, stated feedback, and analytics each catch something the others miss. A gap between what people say and what they do is a finding, not noise."
-        }
-      ]
-    },
-    {
-      id: 5,
-      title: "Lesson 5: The Discipline of Doing It First",
-      body: `
-        <p>The whole chapter is one sequence: <strong>problem &rarr; market &rarr; validate &rarr; then build</strong>. None of the steps are hard on their own. The discipline is doing them <em>before</em> you've sunk resources into a solution, when it still feels faster to just start building.</p>
-        <p>A structured approach up front, defining the problem, segmenting the market, validating with real users, is what lets you make informed decisions instead of expensive guesses. It's also what separates someone who's aware research matters from someone who actually runs discovery.</p>
-      `,
-      checks: [
-        {
-          question: "The lesson says the steps aren't hard individually — so where's the difficulty?",
-          options: [
-            "The tools required are expensive",
-            "Doing them before you've invested in a solution, when starting to build feels faster than validating",
-            "Getting stakeholders to attend the research sessions"
-          ],
-          correct: 1,
-          explanation: "The sequence only pays off if it happens up front. Once the team is building, discovery becomes a justification exercise rather than a decision input."
-        },
-        {
-          label: "Bringing it together",
-          question: "A colleague says: \"We already know what to build — let's not waste two weeks on discovery.\" Based on this course, what's the strongest response?",
-          options: [
-            "They're right if the team is confident; discovery is mostly for risky bets",
-            "Two weeks defining the problem, checking the market, and validating with a few real users is cheap insurance against months spent building the wrong thing",
-            "Agree, but do the discovery quietly in parallel after building starts"
-          ],
-          correct: 1,
-          explanation: "The cost of structured discovery is small and known. The cost of skipping it — building a solution to a misunderstood problem — is large and shows up late."
-        }
-      ],
-      reflection: {
-        prompt: "Take one thing your team is about to build. Write its problem statement in three sentences (pain / who / why current options fall short), and name one assumption in it you could test with three user conversations this week."
       }
-    }
-  ]
-};
+    ]
+  };
+})();

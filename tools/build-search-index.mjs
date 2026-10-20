@@ -6,6 +6,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import vm from 'node:vm';
 import { fileURLToPath } from 'node:url';
+import '../lesson-blocks.js';   // LessonBlocks.text: the words in a lesson's richer blocks (stories, practice, data)
 
 const root = path.join(path.dirname(fileURLToPath(import.meta.url)), '..');
 
@@ -50,7 +51,7 @@ export function buildIndex() {
         x: c.lessons.map(l => l.title).join(' · ') });
       c.lessons.forEach((l, i) => {
         items.push({ k: 'lesson', t: String(l.title || 'Lesson ' + (i + 1)).replace(/^Lesson \d+:\s*/, ''), s: course + ' · Lesson ' + (i + 1),
-          u: 'lesson.html?course=' + id + '&lesson=' + (i + 1), x: plain(l.body, 360) });
+          u: 'lesson.html?course=' + id + '&lesson=' + (i + 1), x: plain((l.body || '') + ' ' + globalThis.LessonBlocks.text(l.blocks), 360) });
       });
     }
   }
@@ -62,10 +63,11 @@ export function renderIndex(items) {
     'window.PA_SEARCH = ' + JSON.stringify(items) + ';\n';
 }
 
-// Everything a lesson teaches, as plain text: the body (diagrams left out), the steps, and each quick check's question,
+// Everything a lesson teaches, as plain text: the body (diagrams left out), its blocks, the steps, and each quick check's question,
 // right answer and explanation.
 function lessonText(l) {
   const parts = [plain(String(l.body || '').replace(/<svg[\s\S]*?<\/svg>/gi, ' '))];
+  if (l.blocks) parts.push(globalThis.LessonBlocks.text(l.blocks));
   (l.steps || []).forEach(st => parts.push(plain(st.title) + ': ' + plain(st.detail)));
   (l.checks || []).forEach(c => {
     const right = Array.isArray(c.options) && c.options[c.correct] !== undefined ? ' Answer: ' + plain(c.options[c.correct]) + '.' : '';

@@ -16,13 +16,45 @@
   }
   *{ box-sizing: border-box; }
   body{ margin:0; background: var(--bg); font-family:var(--sans); color: var(--ink); }
-  .wrap{ max-width: 640px; margin: 0 auto; padding: 24px 16px 48px; }
+  .wrap{ max-width: 1240px; margin: 0 auto; padding: 24px 16px 48px; }
+  /* Wide screens: the course outline on the left, the lesson filling the rest. Narrow: one column, lesson pills on top. */
+  .lesson-layout{ display:block; }
+  .lesson-rail{ display:none; }
+  @media (min-width: 1080px){
+    .lesson-layout{ display:grid; grid-template-columns: 272px minmax(0, 1fr); gap: 28px; align-items:start; }
+    .lesson-rail{ display:block; position: sticky; top: 84px; max-height: calc(100vh - 100px); overflow-y: auto; }
+    .lesson-layout .lesson-nav{ display:none; }
+    .lesson-layout:has(.lesson-rail:empty){ grid-template-columns: minmax(0, 1fr); }
+    .lesson-layout:has(.lesson-rail:empty) .lesson-nav{ display:flex; }
+  }
+  .rail-card{ background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 18px; }
+  .rail-course{ font-family: var(--display); font-weight: 700; font-size: 0.9375rem; line-height: 1.35; color: var(--navy-deep); margin: 0 0 12px; }
+  .rail-progress{ display:flex; align-items:center; gap: 12px; margin-bottom: 14px; font-size: 0.8125rem; color: var(--ink-soft); }
+  .rail-progress b{ display:block; color: var(--ink); font-size: 0.9375rem; }
+  .rail-ring .track{ stroke: var(--line); } .rail-ring .fill{ stroke: var(--cyan); transition: stroke-dashoffset .5s; }
+  .rail-list{ list-style:none; margin: 0; padding: 0; border-top: 1px solid var(--line); }
+  .rail-list a{ display:grid; grid-template-columns: 26px 1fr; gap: 10px; align-items:start; padding: 10px 6px; border-radius: 10px; text-decoration:none; color: var(--ink-soft); font-size: 0.8438rem; line-height: 1.4; }
+  .rail-list a:hover{ background: var(--bg); }
+  .rail-list a[aria-current="page"]{ background: var(--tint); color: var(--navy-deep); font-weight: 700; }
+  .rail-list small{ display:block; color: var(--gray); font-size: 0.7188rem; font-weight: 400; margin-top: 2px; }
+  .rail-n{ width: 24px; height: 24px; border-radius: 50%; border: 1.5px solid var(--line); display:inline-flex; align-items:center; justify-content:center; font-size: 0.7188rem; font-weight: 800; color: var(--gray); background: var(--surface); }
+  .rail-list a.done .rail-n{ background: var(--cyan); border-color: var(--cyan); color: #0a1526; }
+  .rail-list a[aria-current="page"] .rail-n{ border-color: var(--navy); color: var(--navy); }
+  .rail-recap{ margin-top: 14px; border-top: 1px solid var(--line); padding-top: 10px; }
+  .rail-recap summary{ cursor:pointer; font-size: 0.8125rem; font-weight: 700; color: var(--navy); }
+  .rail-recap ul{ margin: 8px 0 0; padding-left: 18px; font-size: 0.8125rem; color: var(--ink-soft); line-height: 1.5; }
+  .rail-recap li{ margin-bottom: 6px; }
+  .lesson-meta{ display:flex; flex-wrap:wrap; gap: 6px 14px; font-size: 0.8125rem; color: var(--gray); margin: -10px 0 18px; }
+  .read-progress{ position: fixed; left: 0; top: 0; height: 3px; width: 100%; z-index: 120; background: transparent; pointer-events:none; }
+  .read-progress span{ display:block; height: 100%; width: 0; background: linear-gradient(90deg, var(--navy), var(--cyan)); }
+  #lessonBody > p, #lessonBody > ul, #lessonBody > ol, .lb-html > p, .lb-html > ul{ max-width: 72ch; }
+  #lessonBody p, .lb-html p{ font-size: 1rem; line-height: 1.7; }
   .brand-accent-bar{ height: 3px; background: linear-gradient(90deg, var(--navy) 0%, var(--cyan) 100%); border-radius: 2px; margin-bottom: 24px; }
   .back-link{ font-size: 0.8125rem; color: var(--gray); text-decoration:none; display:inline-block; margin-bottom: 16px; }
   .back-link:hover{ color: var(--navy); }
-  .card{ background: var(--surface); border-radius: 16px; border: 1px solid var(--line); padding: 32px; box-shadow: 0 1px 2px rgba(22,33,62,0.04), 0 12px 32px rgba(22,33,62,0.06); }
+  .card{ background: var(--surface); border-radius: 16px; border: 1px solid var(--line); padding: clamp(20px, 4vw, 40px); box-shadow: 0 1px 2px rgba(22,33,62,0.04), 0 12px 32px rgba(22,33,62,0.06); }
   .eyebrow{ font-size: 0.75rem; font-weight:600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--cyan); margin-bottom: 8px; display:block; }
-  h1{ font-family:var(--display); font-size: 1.25rem; margin: 0 0 18px; color: var(--navy-deep); }
+  h1{ font-family:var(--display); font-size: clamp(1.375rem, 2.4vw, 1.75rem); line-height: 1.25; margin: 0 0 18px; color: var(--navy-deep); }
   p{ line-height:1.6; color: var(--ink-soft); }
   #lessonBody p{ margin: 0 0 14px; }
   #lessonBody ul{ margin: 0 0 14px; padding-left: 20px; }
@@ -113,9 +145,11 @@
   .status-msg{ font-size: 0.8125rem; color: var(--gray); margin-top: 10px; }
 </style>
 <link rel="stylesheet" href="pa-theme.css">
+<link rel="stylesheet" href="lesson-blocks.css">
 <script src="analytics.js"></script>
 <script src="company-core.js"></script>
 <script src="notify-core.js"></script>
+<script src="lesson-blocks.js"></script>
 </head>
 <body>
 <script src="pa-shell.js"></script>
@@ -132,10 +166,14 @@
   </a>
   <div class="brand-accent-bar"></div>
   <a class="back-link" href="/lms-dashboard">← Back to dashboard</a>
+  <div class="read-progress" aria-hidden="true"><span id="readProgress"></span></div>
 
-  <div class="card">
+  <div class="lesson-layout">
+  <aside class="lesson-rail" id="lessonRail" aria-label="Course outline"></aside>
+  <div class="card lesson-main">
     <span class="eyebrow" id="courseTitle">Loading…</span>
     <h1 id="lessonTitle"></h1>
+    <div class="lesson-meta" id="lessonMeta"></div>
 
     <div class="lesson-nav" id="lessonNav"></div>
 
@@ -161,6 +199,7 @@
       <button class="btn btn-primary" id="completeBtn" onclick="markCompleteAndContinue()">Next →</button>
     </div>
     <div class="status-msg" id="statusMsg"></div>
+  </div>
   </div>
 
   <div style="margin-top:40px; padding:20px 0; border-top:1px solid var(--line); text-align:center; font-size:0.75rem; color:var(--gray);">
@@ -235,7 +274,7 @@ const DOMAINS = {
   aiOrg: { label: "AI Fluency — Organizational" }
 };
 const TIERS = [
-  { slug: "novice", label: "No Experience" },
+  { slug: "novice", label: "Limited Experience" },
   { slug: "moderate", label: "Moderate Experience" },
   { slug: "experienced", label: "Lots of Experience" },
   { slug: "advanced", label: "Advanced Experience" }
@@ -448,7 +487,10 @@ function renderLesson(){
   const imageHtml = lesson.image
     ? `<img class="lesson-image" src="${lesson.image.src}" alt="${lesson.image.alt}"><div class="lesson-image-caption">${lesson.image.alt}</div>`
     : '';
-  document.getElementById('lessonBody').innerHTML = imageHtml + lesson.body;
+  const bodyEl = document.getElementById('lessonBody');
+  bodyEl.innerHTML = imageHtml + (lesson.body || '');
+  if (lesson.blocks && window.LessonBlocks) LessonBlocks.render(bodyEl, lesson.blocks);
+  renderRail(lesson);
 
   renderChart(lesson.chart);
   renderCalculator(lesson.calculator);
@@ -483,6 +525,34 @@ function renderLesson(){
     sourceRow.style.display = 'none';
   }
 }
+
+/* The course outline (wide screens), the "Lesson 2 of 5 · 8 min" line and the reading bar. */
+const lessonName = (l) => String(l.title || '').replace(/^Lesson\s+\d+\s*[:.\u2014-]\s*/i, '');
+const lessonMinutes = (l) => (window.LessonBlocks ? LessonBlocks.minutes(l) : 5);
+function renderRail(lesson){
+  const idx = course.lessons.indexOf(lesson);
+  const left = course.lessons.slice(idx).reduce((n, l) => n + lessonMinutes(l), 0);
+  document.getElementById('lessonMeta').innerHTML = '<span>Lesson ' + (idx + 1) + ' of ' + course.lessons.length + '</span><span>About ' + lessonMinutes(lesson) + ' min</span>' +
+    (idx < course.lessons.length - 1 ? '<span>' + left + ' min left in this course</span>' : '<span>Last lesson</span>');
+  const done = course.lessons.filter(l => completedLessons.includes(l.id)).length;
+  const C = 2 * Math.PI * 17, pct = done / course.lessons.length;
+  const items = course.lessons.map(l => {
+    const isDone = completedLessons.includes(l.id), here = l.id === lesson.id;
+    return '<li><a href="/lesson?course=' + encodeURIComponent(courseId) + '&lesson=' + l.id + '"' + (isDone ? ' class="done"' : '') + (here ? ' aria-current="page"' : '') + '>' +
+      '<span class="rail-n" aria-hidden="true">' + (isDone ? '✓' : l.id) + '</span><span>' + escapeText(lessonName(l)) + '<small>' + lessonMinutes(l) + ' min' + (isDone ? ' · done' : '') + '</small></span></a></li>';
+  }).join('');
+  const recap = (course.recap || []).length ? '<details class="rail-recap"><summary>Key takeaways</summary><ul>' + course.recap.map(r => '<li>' + escapeText(r) + '</li>').join('') + '</ul></details>' : '';
+  document.getElementById('lessonRail').innerHTML = '<div class="rail-card"><p class="rail-course">' + escapeText(course.title) + '</p>' +
+    '<div class="rail-progress"><svg class="rail-ring" width="42" height="42" viewBox="0 0 42 42" aria-hidden="true"><circle class="track" cx="21" cy="21" r="17" fill="none" stroke-width="4"/><circle class="fill" cx="21" cy="21" r="17" fill="none" stroke-width="4" stroke-linecap="round" transform="rotate(-90 21 21)" stroke-dasharray="' + C.toFixed(2) + '" stroke-dashoffset="' + (C * (1 - pct)).toFixed(2) + '"/></svg>' +
+    '<span><b>' + done + ' of ' + course.lessons.length + ' lessons</b>' + (done === course.lessons.length ? 'Course complete' : 'done') + '</span></div>' +
+    '<ol class="rail-list">' + items + '</ol>' + recap + '</div>';
+}
+function escapeText(s){ return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+(function readingBar(){
+  const bar = document.getElementById('readProgress');
+  const update = () => { const h = document.documentElement.scrollHeight - innerHeight; bar.style.width = (h > 0 ? Math.min(100, scrollY / h * 100) : 0) + '%'; };
+  addEventListener('scroll', update, { passive: true }); addEventListener('resize', update); update();
+})();
 
 /* Reusable interactive 2-series line chart. Draws an SVG line chart
    with an x-axis slider — as the user drags it, both lines redraw up
@@ -935,6 +1005,8 @@ function showCourseComplete(coursesMap){
   document.getElementById('statusMsg').textContent = '';
   document.getElementById('courseTitle').textContent = course.title;
   document.getElementById('lessonTitle').textContent = 'Course complete';
+  renderRail(course.lessons[course.lessons.length - 1]);
+  document.getElementById('lessonMeta').style.display = 'none';
 
   const recapItems = (course.recap && course.recap.length)
     ? course.recap
