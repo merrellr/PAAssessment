@@ -683,6 +683,7 @@ function verifyFirebaseIdToken_(idToken) {
   if (response.getResponseCode() !== 200) return null;
   var users = JSON.parse(response.getContentText()).users;
   if (!users || !users.length || !users[0].email) return null;
+  if (isBlockedSender_(users[0].email)) return null;   // see BLOCKED_SENDERS (section 7)
   return {
     uid: users[0].localId,
     email: String(users[0].email).toLowerCase().trim(),
@@ -1109,6 +1110,23 @@ function leadAssessmentText_(a) {
   return { level: a.tier + ' (' + a.overallPct + '% overall)', scores: parts.join(', ') };
 }
 
+/* Senders who are refused everywhere: the "Request more information" form drops their requests
+   quietly, and a sign-in token for one of these addresses is not accepted (so the welcome email,
+   feedback, Ask AI and the rest refuse them too). List them in the script property BLOCKED_SENDERS
+   (Project Settings > Script properties), separated by commas or new lines: a full address
+   (someone@example.com) or a whole domain starting with @ (@example.com). It is kept out of the
+   code so no address is published. To stop someone signing in at all, also disable their account
+   in the Firebase console (Authentication > Users). */
+function isBlockedSender_(email) {
+  var e = String(email || '').toLowerCase().trim();
+  if (!e) return false;
+  var raw = '';
+  try { raw = PropertiesService.getScriptProperties().getProperty('BLOCKED_SENDERS') || ''; } catch (err) { return false; }
+  return raw.toLowerCase().split(/[\s,;]+/).some(function (b) {
+    return b && (b === e || (b.charAt(0) === '@' && e.length > b.length && e.slice(-b.length) === b));
+  });
+}
+
 // Counts requests per day and per email address, and refuses past the caps.
 // Old counters are cleaned up on the first request of each day.
 function leadRateOk_(email) {
@@ -1227,6 +1245,8 @@ function handleLeadRequest_(data) {
   var lock = null, locked = false;
   try { lock = LockService.getScriptLock(); locked = lock.tryLock(10000); } catch (err) { /* carry on without it */ }
   try {
+    // A blocked sender is quietly dropped, like a robot: it looks like success, but nothing is saved or sent.
+    if (isBlockedSender_(lead.email)) { remember({ ok: true, dropped: true }); return reply; }
     if (!leadRateOk_(lead.email)) { remember({ ok: false, error: 'rate_limited' }); return reply; }
 
     var scored = leadScore_(lead);
