@@ -18,7 +18,7 @@
   // The assessment is reached from the dashboard (first launch, or Retake) and the Toolkits Roadmap
   // from www.productadvisory.co or the Profile menu, so the header stays this short.
   var LINKS = [
-    ["/lms-dashboard", "My learning"]
+    ["/lms-dashboard", "My Learning"]
   ];
 
   // This page's clean address (/lms-dashboard, / for the assessment), whether it was opened as /lms-dashboard or /lms-dashboard.html.
@@ -188,14 +188,14 @@
     ["The assessment", "Can I take it again?", "Yes. Use <b>Retake</b> on your dashboard, next to your results. Your new results replace the old ones, and your course plan updates to match.", "retake redo again repeat assessment results"],
     ["The assessment", "What do the four levels mean?", 'Limited, Moderate, Lots of and Advanced Experience describe how you work in each area today, not how long you have done the job. The <a href="/framework">training framework</a> describes each level in every area.', "level tier limited moderate advanced experience framework"],
     ["Courses and progress", "Does my progress save?", "Yes, automatically, whenever you are signed in. Open a course from your dashboard and you pick up where you left off.", "progress save resume continue course lesson lost"],
-    ["Courses and progress", "Can I set a weekly goal?", 'Yes. On <a href="/profile#goals">My profile</a>, choose how many lessons a week and up to three focus areas. Your dashboard shows how this week is going, and your check-in email reports on it.', "goal target weekly focus areas plan habit"],
+    ["Courses and progress", "Can I set a weekly goal?", 'Yes. On <a href="/profile#goals">My Profile</a>, choose how many lessons a week and up to three focus areas. Your dashboard shows how this week is going, and your check-in email reports on it.', "goal target weekly focus areas plan habit"],
     ["Courses and progress", "Where are my notes?", "The answers you write in lessons are under <b>Your notes</b> on your dashboard. They are private to you, and are never shared with a company.", "notes reflections answers private"],
     ["Courses and progress", "Can I ask a question about a lesson?", "Yes. Type your question in the box above and choose <b>Ask the lessons</b>, or press Ctrl K (⌘K on a Mac) on any page. The answer comes only from the course lessons, with links to them.", "ask ai question lesson course help"],
-    ["Your account", "How do I change my password or email?", 'Change your password from the <b>Profile</b> menu on your dashboard. Change your email on <a href="/profile">My profile</a>; we send a link to the new address to confirm it.', "password email change account login"],
-    ["Your account", "How do I add a profile photo?", 'On <a href="/profile">My profile</a>, choose <b>Upload photo</b>, then drag and zoom it to fit the circle. It shows on your Profile button, and only you see it.', "photo picture image avatar upload profile"],
-    ["Your account", "How do I change or stop the emails?", 'On <a href="/profile#goals">My profile</a>, under <b>Goals and check-in emails</b>, choose Daily, Weekly, Monthly or Off. Every email also has <b>Change how often</b> and <b>Unsubscribe</b> links at the bottom.', "email emails unsubscribe stop notifications check-in reminders frequency report weekly"],
+    ["Your account", "How do I change my password or email?", 'Change your password from the <b>Profile</b> menu on your dashboard. Change your email on <a href="/profile">My Profile</a>; we send a link to the new address to confirm it.', "password email change account login"],
+    ["Your account", "How do I add a profile photo?", 'On <a href="/profile">My Profile</a>, choose <b>Upload photo</b>, then drag and zoom it to fit the circle. It shows on your Profile button, and only you see it.', "photo picture image avatar upload profile"],
+    ["Your account", "How do I change or stop the emails?", 'On <a href="/profile#goals">My Profile</a>, under <b>Goals and check-in emails</b>, choose Daily, Weekly, Monthly or Off. Every email also has <b>Change how often</b> and <b>Unsubscribe</b> links at the bottom.', "email emails unsubscribe stop notifications check-in reminders frequency report weekly"],
     ["Your account", "I forgot my password", 'On the <a href="/lms-dashboard">dashboard</a> sign-in, choose <b>Forgot password?</b> and we email you a link to set a new one. If you signed up with Google, use <b>Continue with Google</b> instead.', "password reset forgot login sign in"],
-    ["Your account", "How do I delete my account?", 'On <a href="/profile">My profile</a>, at the bottom. It removes your sign-in, your progress and your assessment results.', "delete remove account data privacy"],
+    ["Your account", "How do I delete my account?", 'On <a href="/profile">My Profile</a>, at the bottom. It removes your sign-in, your progress and your assessment results.', "delete remove account data privacy"],
     ["Teams and companies", "What does my company see?", "If you joined through a company invitation, your assessment results, answers and course progress are shared with that company's admins while you are a member. Your notes and phone number are never shared, and the account stays yours if you leave.", "company employer admin share privacy see data team"],
     ["Teams and companies", "My invitation link doesn't work", "Check that you copied the whole link from the email. If it still doesn't work, ask the person who invited you to send it again; links can expire or be replaced.", "invite invitation link join expired company"],
     ["Teams and companies", "Can my whole team take the assessment?", 'Yes. <a href="/request-info?who=org">Tell us about your team</a> and we will set up a company account with its own dashboard.', "team company organization pricing group"],
@@ -270,9 +270,10 @@
 
   /* ---------------------------------------------------------------- search (⌘K) */
   var ACTIONS = [
-    { g: "Go to", t: "My learning dashboard", i: "⌂", u: "/lms-dashboard" },
+    { g: "Go to", t: "My Learning", i: "⌂", u: "/lms-dashboard" },
     { g: "Go to", t: "The training framework", i: "◆", u: "/framework" },
-    { g: "Go to", t: "My profile", i: "☺", u: "/profile" },
+    { g: "Go to", t: "My Profile", i: "☺", u: "/profile" },
+    { g: "Go to", t: "My Badges", i: "★", u: "/profile#badges" },
     { g: "Go to", t: "Team assessments for your company", i: "✉", u: "/request-info?who=org" },
     { g: "Product Advisory", t: "Services", i: "↗", u: WWW + "services", ext: true },
     { g: "Product Advisory", t: "Free toolkits", i: "↗", u: WWW + "toolkits", ext: true },

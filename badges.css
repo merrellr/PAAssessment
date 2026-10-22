@@ -83,10 +83,36 @@
 @media (max-width: 420px){ .bd-grid{ grid-template-columns: 1fr 1fr; } .bd-hero{ padding: 18px; } .bd-count{ font-size: 2.1rem; } }
 
 /* Dashboard: the badges pill and the "new badge" pop-up */
-.bd-pill{ display:inline-flex; align-items:center; gap:6px; padding: 3px 12px 3px 4px; border-radius: 999px; border: 1px solid var(--line); background: var(--surface); color: var(--ink-soft); font-size: 0.7812rem; text-decoration:none; }
-.bd-pill[hidden]{ display:none; }
-.bd-pill:hover{ border-color: var(--cyan); }
-.bd-pill b{ color: var(--navy-deep); }
+/* My Learning: the My Badges tile (opens the window below) */
+.bd-tile{ display:flex; align-items:center; gap: 18px; width: 100%; margin: 0 0 22px; padding: 16px 22px; text-align:left; font: inherit; color: inherit; cursor: pointer; background: linear-gradient(135deg, var(--tint) 0%, var(--surface) 70%); transition: transform .2s, box-shadow .2s, border-color .2s; }
+.bd-tile[hidden]{ display:none; }
+.bd-tile:hover{ transform: translateY(-2px); border-color: var(--cyan); box-shadow: var(--pa-shadow, 0 10px 28px rgba(22,33,62,.10)); }
+.bd-tile:focus-visible{ outline: 3px solid var(--cyan); outline-offset: 2px; }
+.bd-tile .bd-stack .bd-medal{ background: none; }
+.bd-tile-text{ flex: 1; min-width: 0; }
+.bd-tile-text .bd-eyebrow{ margin-bottom: 2px; }
+.bd-tile-count{ font-family: var(--display); font-size: 1.0625rem; color: var(--ink-soft); }
+.bd-tile-count b{ font-size: 1.5rem; font-weight: 800; color: var(--navy-deep); }
+.bd-tile .bd-bar{ margin: 6px 0 6px; max-width: 360px; height: 6px; }
+.bd-tile p{ margin: 0; font-size: 0.7812rem; color: var(--ink-soft); }
+.bd-tile p b{ color: var(--navy-deep); }
+.bd-tile-go{ font-size: 0.8438rem; font-weight: 700; color: var(--navy); white-space: nowrap; }
+@media (max-width: 560px){ .bd-tile{ flex-wrap: wrap; gap: 10px 14px; padding: 16px; } .bd-tile-go{ width: 100%; } .bd-tile .bd-stack .bd-medal{ margin-left: -18px; } .bd-tile .bd-stack .bd-medal:first-child{ margin-left: 0; } }
+
+/* the My Badges window */
+.bd-lock, .bd-lock body{ overflow: hidden; }
+.bd-modal{ position: fixed; inset: 0; z-index: 235; display:flex; align-items:flex-start; justify-content:center; padding: 32px 16px; background: rgba(8,18,36,.62); overflow-y: auto; }
+.bd-modal[hidden]{ display:none; }
+.bd-modal-box{ position: relative; width: min(900px, 100%); background: var(--surface); color: var(--ink); border-radius: 22px; box-shadow: 0 30px 80px rgba(0,0,0,.4); margin: auto 0; }
+.bd-modal-head{ position: sticky; top: 0; z-index: 2; display:flex; align-items:center; gap: 14px; padding: 18px 22px; background: var(--surface); border-bottom: 1px solid var(--line); border-radius: 22px 22px 0 0; }
+.bd-modal-head h2{ flex: 1; margin: 0; font-family: var(--display); font-size: 1.25rem; color: var(--navy-deep); }
+.bd-modal-head a{ font-size: 0.8125rem; color: var(--navy); }
+.bd-modal-head .bd-x{ background:none; border:0; font-size: 1.6rem; line-height: 1; color: var(--gray); cursor: pointer; padding: 0 4px; }
+.bd-modal-head .bd-x:focus-visible{ outline: 2px solid var(--cyan); }
+.bd-modal-body{ padding: 4px 22px 22px; }
+@media (max-width: 560px){ .bd-modal{ padding: 0; } .bd-modal-box{ border-radius: 0; min-height: 100%; } .bd-modal-head{ border-radius: 0; } .bd-modal-head a{ display:none; } }
+@media (prefers-reduced-motion: no-preference){ .bd-modal:not([hidden]) .bd-modal-box{ animation: bd-pop .3s ease-out; } }
+
 .bd-toast{ position: fixed; right: 16px; bottom: 16px; z-index: 230; display:flex; align-items:center; gap: 14px; max-width: min(390px, calc(100vw - 32px)); padding: 16px 16px 16px 18px; border-radius: 16px; background: var(--surface); border: 1px solid var(--line); border-left: 4px solid var(--cyan); box-shadow: 0 16px 40px rgba(22,33,62,.2); color: var(--ink); }
 .bd-toast[hidden]{ display:none; }
 .bd-toast .bd-eyebrow{ margin: 0 0 2px; }

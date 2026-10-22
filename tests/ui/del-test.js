@@ -103,7 +103,8 @@ async function badgesTests(store){
   t('a badge not yet earned shows how far along, in its own shape and number', !dlg.hidden && /5 of 50 · 45 to go/.test(dlg.textContent) && !!dlg.querySelector('.bd-shape-square'));
   dlg.click(); await sleep(30);
   t('clicking outside closes it', dlg.hidden);
-  t('the Profile menu has a My badges link', !!document.querySelector('.pa-acct-menu a[href="/profile#badges"]'));
+  t('the back link and the card use the same names as the menu', /Back to My Learning/.test(document.querySelector('.back-link').textContent) && /My Badges/.test(card.querySelector('h2').textContent));
+  t('the Profile menu has a My Badges link', !!document.querySelector('.pa-acct-menu a[href="/profile#badges"]'));
 }
 
 (async function(){

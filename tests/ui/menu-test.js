@@ -64,13 +64,13 @@ const key = (k) => document.dispatchEvent(new KeyboardEvent('keydown', { key: k,
       const L = labels();
       if (scn === 'noname') t('with no display name, the part of the email before the @ is used', name === 'pat.jones' && email === 'pat.jones@x.com', name + ' / ' + email);
       else t('it shows who is signed in', name.length > 0 && /@x\.com$/.test(email), name + ' / ' + email);
-      t('everyone gets the dashboard, profile, Toolkits, Request tools, feedback and website links, then Log out last', L[0] === 'My learning dashboard' && L[1] === 'My profile' && L.indexOf('Toolkits ↗') > -1 && L.indexOf('Request tools') > -1 && L.indexOf('Send feedback') > -1 && L.some(x => /Visit Product Advisory/.test(x)) && L[L.length - 1] === 'Log out', L.join(' | '));
+      t('everyone gets the dashboard, profile, Toolkits, Request tools, feedback and website links, then Log out last', L[0] === 'My Learning' && L[1] === 'My Profile' && L[2] === 'My Badges' && L.indexOf('Toolkits ↗') > -1 && L.indexOf('Request tools') > -1 && L.indexOf('Send feedback') > -1 && L.some(x => /Visit Product Advisory/.test(x)) && L[L.length - 1] === 'Log out', L.join(' | '));
       t('the links go to the right pages', document.querySelector('#paAccountMenu a[href="/lms-dashboard"]') && document.querySelector('#paAccountMenu a[href="/profile"]') && document.querySelector('#paAccountMenu a[href="/tool-requests#suggest"]') && document.querySelector('#paAccountMenu a[href="https://www.productadvisory.co/toolkits"][target="_blank"]'));
       t('"Send feedback" opens the feedback form, not an email', (() => { const a = Array.prototype.slice.call(document.querySelectorAll('#paAccountMenu a')).filter(x => x.textContent.trim() === 'Send feedback')[0]; return !!a && a.getAttribute('href') === '/feedback' && !document.querySelector('#paAccountMenu a[href^="mailto:"]'); })());
       const site = Array.prototype.slice.call(document.querySelectorAll('#paAccountMenu a')).filter(a => /^https:\/\/www\.productadvisory\.co/.test(a.href))[0];
       t('the website link opens in a new tab safely', site.target === '_blank' && /noopener/.test(site.rel));
       const heads = Array.prototype.slice.call(document.querySelectorAll('#paAccountMenu .pa-acct-label')).map(x => x.textContent);
-      t('the menu is in labelled sections, Log out alone at the bottom', heads.indexOf('My learning') === 0 && heads.indexOf('Product Advisory') > -1 && heads.indexOf('Help') === heads.length - 1 &&
+      t('the menu is in labelled sections, Log out alone at the bottom', heads.indexOf('My Learning') === 0 && heads.indexOf('Product Advisory') > -1 && heads.indexOf('Help') === heads.length - 1 &&
         $('paAccountLogout').previousElementSibling.className === 'pa-acct-rule' && L.indexOf('Toolkits ↗') < L.indexOf('Visit Product Advisory ↗') && L.indexOf('Visit Product Advisory ↗') < L.indexOf('Send feedback'), heads.join(' | '));
       const role = $('paAccountRole').textContent;
       if (scn === 'owner') t('the owner is badged Super admin', role === 'Super admin' && $('paAccountRole').classList.contains('is-super') && heads.indexOf('Manage') > -1, role);
@@ -83,7 +83,7 @@ const key = (k) => document.dispatchEvent(new KeyboardEvent('keydown', { key: k,
       else t('only an active company admin sees Company dashboard', !company, L.join(' | '));
       const onProfile = /\/profile(\.html)?$/.test(location.pathname);   // the address tidies to /profile
       const marked = Array.prototype.slice.call(document.querySelectorAll('#paAccountMenu [aria-current]')).map(a => a.getAttribute('href'));
-      t(onProfile ? 'on profile.html, "My profile" is marked as the current page and nothing else' : 'on a page that is not in the menu, nothing is marked', onProfile ? marked.join() === '/profile' : marked.length === 0, marked.join());
+      t(onProfile ? 'on profile.html, "My Profile" is marked as the current page and nothing else' : 'on a page that is not in the menu, nothing is marked', onProfile ? marked.join() === '/profile' : marked.length === 0, marked.join());
 
       document.body.click();
       t('clicking elsewhere closes it', $('paAccountMenu').hidden && btn.getAttribute('aria-expanded') === 'false');

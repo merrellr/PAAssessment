@@ -79,7 +79,7 @@
     </a>
   </div>
   <div class="brand-accent-bar"></div>
-  <a class="back-link" id="backLink" href="/lms-dashboard">← Back to dashboard</a>
+  <a class="back-link" id="backLink" href="/lms-dashboard">← Back to My Learning</a>
 
   <div class="card">
     <span class="eyebrow">The Training Framework</span>
@@ -285,7 +285,7 @@ onAuthStateChanged(auth, async (user) => {
     if (backLink){ backLink.textContent = '← Back to the assessment'; backLink.setAttribute('href', '/'); }
     return;
   }
-  if (backLink){ backLink.textContent = '← Back to dashboard'; backLink.setAttribute('href', '/lms-dashboard'); }
+  if (backLink){ backLink.textContent = '← Back to My Learning'; backLink.setAttribute('href', '/lms-dashboard'); }
   const result = await fetchAssessmentResult(user.email);
   if (result && cta) cta.textContent = 'Retake the Assessment →';
 });
