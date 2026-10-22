@@ -285,6 +285,11 @@ newly earned.
   `badges.css`. To add a badge, add a line to `BADGES` with a `metric` that `stats()` already counts (or add one).
 - Groups: Getting started, Showing up (7/14/30/60/100 days), Weekly goal, Lessons (10/25/50/100),
   Courses (1/5/10/20/all 28), Mastery (area or plan complete, Advanced in an area, Graduated to Advanced overall).
+- The look borrows from a smartwatch's awards: each group has its own shape (coin, hexagon, shield,
+  rounded square, octagon, star), each badge its own enamel colour (`hue`) and, for counting badges, an
+  embossed number (`num`, `unit`). The rim is the metal (bronze → platinum). Badges not yet earned show the
+  same shape, flat and pale. On My badges, medals tilt toward the pointer, and clicking a badge opens it up
+  close (with its date, or how far along). All drawn as SVG by `medalSvg`, no images.
 - Everything comes from the learner's own `progress/{uid}` document, so no new rules are needed. Two new fields:
   `activeLog` (`{ 'YYYY-MM-DD': 1 }`, written once a day by the dashboard and lesson pages, about a year kept)
   and `badges` (`{ id: 'ISO date first earned' }`). A badge once earned stays earned, even if a retake scores lower.

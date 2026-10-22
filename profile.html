@@ -638,15 +638,76 @@ function showBadges(data, user){
     const items = list.filter(b => b.group === g[0]);
     const got = items.filter(b => b.have).length;
     html += '<section class="bd-group" data-g="' + g[0] + '"><div class="bd-ghead"><h3>' + esc(g[1]) + '</h3><span class="bd-chip' + (got === items.length ? ' done' : '') + '">' + (got === items.length ? '✓ ' : '') + got + ' of ' + items.length + '</span></div><ul class="bd-grid">' +
-      items.map(b => '<li class="bd-item' + (b.have ? ' is-on' : '') + '" data-have="' + (b.have ? 1 : 0) + '" aria-label="' + esc(b.title + ' (' + METAL[b.metal] + '): ' + b.text + '. ' + (b.have ? (b.earnedAt ? 'Earned ' + when(b.earnedAt) : 'Earned') : 'Not earned yet, ' + b.value + ' of ' + b.goal)) + '">' +
-        '<span class="bd-medal-wrap">' + B.medalSvg(b, 72) + '<span class="bd-metal ' + b.metal + '">' + METAL[b.metal] + '</span></span>' +
+      items.map(b => '<li class="bd-item' + (b.have ? ' is-on' : '') + '" data-id="' + b.id + '" data-have="' + (b.have ? 1 : 0) + '" tabindex="0" role="button" aria-haspopup="dialog" aria-label="' + esc(b.title + ' (' + METAL[b.metal] + '): ' + b.text + '. ' + (b.have ? (b.earnedAt ? 'Earned ' + when(b.earnedAt) : 'Earned') : 'Not earned yet, ' + b.value + ' of ' + b.goal)) + '">' +
+        '<span class="bd-medal-wrap"><span class="bd-tilt">' + B.medalSvg(b, 76) + '</span>' + '<span class="bd-metal ' + b.metal + '">' + METAL[b.metal] + '</span></span>' +
         '<span class="bd-title">' + esc(b.title) + '</span><span class="bd-text">' + esc(b.text) + '</span>' +
         '<span class="bd-state">' + (b.have ? '✓ ' + (b.earnedAt ? 'Earned ' + when(b.earnedAt) : 'Earned') : bar(b) + b.value + ' of ' + b.goal) + '</span></li>').join('') + '</ul></section>';
   });
   $id('badgesBody').innerHTML = html;
+  badgeList = list;
   $id('badgesBody').querySelectorAll('.bd-tabs button').forEach(btn => btn.addEventListener('click', () => { badgeFilter = btn.dataset.f; paintBadgeFilter(); }));
+  $id('badgesBody').querySelectorAll('.bd-item').forEach(li => {
+    li.addEventListener('click', () => openBadge(li));
+    li.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' '){ e.preventDefault(); openBadge(li); } });
+  });
+  tiltable($id('badgesBody'));
   paintBadgeFilter();
   if (location.hash === '#badges') $id('badges').focus();
+}
+/* Medals lean toward the pointer, like turning a coin in your hand. Each .bd-tilt sets --rx and --ry. */
+function tiltable(root){
+  if (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  root.addEventListener('pointermove', (e) => {
+    const card = e.target.closest('.bd-item, .bd-detail-box');
+    const tilt = card && card.querySelector('.bd-tilt');
+    if (!tilt) return;
+    const r = card.getBoundingClientRect();
+    const x = (e.clientX - r.left) / r.width - 0.5, y = (e.clientY - r.top) / r.height - 0.5;
+    tilt.classList.add('is-moving');
+    tilt.style.setProperty('--ry', (x * 34).toFixed(1) + 'deg');
+    tilt.style.setProperty('--rx', (-y * 28).toFixed(1) + 'deg');
+  });
+  root.addEventListener('pointerout', (e) => {
+    const card = e.target.closest('.bd-item, .bd-detail-box');
+    if (!card || card.contains(e.relatedTarget)) return;
+    const tilt = card.querySelector('.bd-tilt');
+    if (tilt){ tilt.classList.remove('is-moving'); tilt.style.removeProperty('--rx'); tilt.style.removeProperty('--ry'); }
+  });
+}
+
+/* A badge up close: the medal large, what it is for, and when it was earned or how far along. */
+let badgeList = [], badgeOpener = null;
+function openBadge(li){
+  const B = window.BadgesCore;
+  const b = badgeList.filter(x => x.id === li.dataset.id)[0];
+  if (!b) return;
+  let box = $id('badgeDetail');
+  if (!box){
+    box = document.createElement('div');
+    box.id = 'badgeDetail'; box.className = 'bd-detail'; box.hidden = true;
+    box.innerHTML = '<div class="bd-detail-box" role="dialog" aria-modal="true" aria-labelledby="badgeDetailTitle"><button type="button" class="bd-x" aria-label="Close">×</button><div id="badgeDetailBody"></div></div>';
+    document.body.appendChild(box);
+    box.addEventListener('click', (e) => { if (e.target === box || e.target.closest('.bd-x')) closeBadge(); });
+    box.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeBadge(); if (e.key === 'Tab'){ e.preventDefault(); box.querySelector('.bd-x').focus(); } });
+    tiltable(box);
+  }
+  const METAL = { bronze: 'Bronze', silver: 'Silver', gold: 'Gold', platinum: 'Platinum' };
+  const group = B.GROUPS.filter(g => g[0] === b.group)[0];
+  const esc = (t) => String(t).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  $id('badgeDetailBody').innerHTML = '<span class="bd-tilt">' + B.medalSvg(b, 200) + '</span>' +
+    '<span class="bd-metal ' + b.metal + '">' + METAL[b.metal] + ' · ' + esc(group ? group[1] : '') + '</span>' +
+    '<h2 id="badgeDetailTitle">' + esc(b.title) + '</h2><p>' + esc(b.text) + '.</p>' +
+    (b.have ? '<p class="bd-when">✓ Earned' + (b.earnedAt ? ' ' + new Date(b.earnedAt).toLocaleDateString(undefined, { day: 'numeric', month: 'long', year: 'numeric' }) : '') + '</p>'
+      : '<div class="bd-mini" aria-hidden="true"><span style="width:' + b.pct + '%"></span></div><p>' + b.value + ' of ' + b.goal + ' · ' + (b.goal - b.value) + ' to go</p>');
+  badgeOpener = li;
+  box.hidden = false;
+  box.querySelector('.bd-x').focus();
+}
+function closeBadge(){
+  const box = $id('badgeDetail');
+  if (!box || box.hidden) return;
+  box.hidden = true;
+  if (badgeOpener) badgeOpener.focus();
 }
 window.addEventListener('hashchange', () => { if (location.hash === '#badges' || location.hash === '#goals') $id(location.hash.slice(1)).focus(); });
 function paintBadgeFilter(){

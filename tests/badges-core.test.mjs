@@ -100,10 +100,18 @@ t('the all-courses badge matches the real number of courses', byId(B.BADGES, 'co
 
 /* ---------------- drawing */
 {
-  const on = B.medalSvg({ have: true, pct: 100, metal: 'gold', icon: 'cap' });
-  const off = B.medalSvg({ have: false, pct: 25, metal: 'silver', icon: 'nope' });
-  t('a medal is drawn with its ring and icon', /bd-gold is-on/.test(on) && /stroke-dashoffset="0.00"/.test(on) && /<g class="bd-icon"/.test(on));
-  t('a locked medal shows partial progress and falls back to a star icon', !/is-on/.test(off) && !/stroke-dashoffset="0.00"/.test(off) && /m12 3.5/.test(off));
+  const get = (id, have) => Object.assign({}, byId(B.BADGES, id), { have: have, pct: have ? 100 : 25 });
+  const grad = B.medalSvg(get('graduate', true));
+  t('an earned medal has a metal rim, an enamel face in its own colour and a gloss', /bd-gold bd-shape-star is-on/.test(grad) && /id="bd-graduate-rim"/.test(grad) && /stop-color="#12305E"/.test(grad) && /-gloss\)/.test(grad));
+  t('it shows its icon, embossed with a shadow', (grad.match(/scale\(1.6\)/g) || []).length === 2 && /class="bd-icon"/.test(grad));
+  const days = B.medalSvg(get('active30', true), 72);
+  t('counting badges show their number and unit on a hexagon', /bd-shape-hexagon/.test(days) && />30<\/text>/.test(days) && />DAYS<\/text>/.test(days));
+  t('a small medal leaves the number off', !/<text/.test(B.medalSvg(get('active30', true), 22)));
+  const off = B.medalSvg(get('lessons50', false));
+  t('a locked medal is the same shape, flat, with no colours of its own', /bd-shape-square/.test(off) && !/is-on/.test(off) && !/<defs>/.test(off) && /bd-l-face/.test(off) && />50<\/text>/.test(off));
+  t('every group has its own shape', new Set(B.GROUPS.map(g => g[2])).size === B.GROUPS.length);
+  t('every badge has an enamel colour', B.BADGES.every(b => b.hue && /^#[0-9A-F]{6}$/i.test(b.hue[0]) && /^#[0-9A-F]{6}$/i.test(b.hue[1])));
+  t('an unknown icon falls back to a star', /m12 3.5/.test(B.medalSvg({ id: 'x', group: 'start', have: false, pct: 0, metal: 'silver', icon: 'nope' })));
 }
 
 console.log('\n' + pass + ' passed, ' + fail + ' failed');

@@ -92,6 +92,17 @@ async function badgesTests(store){
   t('"Still to earn" hides the earned ones', shown.length === total - on.length && shown.every(li => !li.classList.contains('is-on')));
   card.querySelector('[data-f="have"]').click();
   t('"Earned" shows only those, and drops empty groups', Array.prototype.filter.call(items, li => !li.hidden).length === on.length && Array.prototype.some.call(card.querySelectorAll('.bd-group'), g => g.hidden));
+  const grad = card.querySelector('.bd-item[data-id="graduate"]');
+  grad.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true })); await sleep(50);
+  const dlg = $('badgeDetail');
+  t('Enter on a badge opens it up close, with its date, and focus on Close', dlg && !dlg.hidden && /Graduated to Advanced/.test(dlg.textContent) && /Earned/.test(dlg.textContent) && document.activeElement === dlg.querySelector('.bd-x'));
+  dlg.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true })); await sleep(30);
+  t('Escape closes it and returns to the badge', dlg.hidden && document.activeElement === grad);
+  card.querySelector('[data-f="all"]').click();
+  card.querySelector('.bd-item[data-id="lessons50"]').click(); await sleep(50);
+  t('a badge not yet earned shows how far along, in its own shape and number', !dlg.hidden && /5 of 50 · 45 to go/.test(dlg.textContent) && !!dlg.querySelector('.bd-shape-square'));
+  dlg.click(); await sleep(30);
+  t('clicking outside closes it', dlg.hidden);
   t('the Profile menu has a My badges link', !!document.querySelector('.pa-acct-menu a[href="/profile#badges"]'));
 }
 
