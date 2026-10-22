@@ -1301,7 +1301,7 @@ function showBadgeToast(won){
   const top = won[won.length - 1];
   let el = document.getElementById('badgeToast');
   if (!el){ el = document.createElement('div'); el.id = 'badgeToast'; el.className = 'bd-toast'; el.setAttribute('role', 'status'); document.body.appendChild(el); }
-  el.innerHTML = B.medalSvg(top, 52) + '<div><span class="bd-t-eyebrow">' + (won.length > 1 ? won.length + ' new badges!' : 'New badge!') + '</span><b>' + esc(top.title) + '</b><p>' +
+  el.innerHTML = B.medalSvg(top, 52) + '<div><span class="bd-eyebrow">' + (won.length > 1 ? won.length + ' new badges!' : 'New badge!') + '</span><b>' + esc(top.title) + '</b><p>' +
     esc(won.length > 1 ? won.map(b => b.title).join(', ') : top.text) + '</p><a href="/profile#badges">See my badges →</a></div><button type="button" class="bd-t-close" aria-label="Close">×</button>';
   el.hidden = false;
   el.querySelector('.bd-t-close').addEventListener('click', () => { el.hidden = true; });
