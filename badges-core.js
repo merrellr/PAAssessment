@@ -199,17 +199,47 @@
     medal: '<circle cx="12" cy="14" r="5.5"/><path d="M8.5 9.5 6 3h4l2 4 2-4h4l-2.5 6.5"/><path d="m10 14 1.4 1.4L14.5 12"/>'
   };
 
-  // A medal with a progress ring: full colour when earned, grey with the ring partly drawn when not.
+  // Metal colours for the earned seal: light and dark ends of the gradient.
+  const METALS = {
+    bronze: ['#E2A06A', '#9A5A2B'],
+    silver: ['#DCE3EA', '#7D8A99'],
+    gold: ['#F6D167', '#B9860F'],
+    platinum: ['#6FD6F2', '#1A4584']
+  };
+  // A 16-point seal around the medal, like a rosette.
+  const SEAL = (function () {
+    const pts = [];
+    for (let i = 0; i < 32; i++) {
+      const a = Math.PI * i / 16 - Math.PI / 2, r = i % 2 ? 23.2 : 26;
+      pts.push((32 + r * Math.cos(a)).toFixed(2) + ' ' + (32 + r * Math.sin(a)).toFixed(2));
+    }
+    return 'M' + pts.join('L') + 'Z';
+  })();
+
+  /* A medal with a progress ring. Earned: a metal seal with a white icon and a full ring.
+     Not yet: a pale disc with the icon in outline and the ring drawn as far as the learner has got. */
   function medalSvg(b, size) {
     size = size || 64;
-    const r = 28, c = 2 * Math.PI * r;
+    const r = 29.5, c = 2 * Math.PI * r;
     const on = b.have;
+    const m = METALS[b.metal] || METALS.bronze;
+    const gid = 'bd-g-' + (b.metal || 'bronze');
+    let face;
+    if (on) {
+      face = '<defs><linearGradient id="' + gid + '" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="' + m[0] + '"/><stop offset="1" stop-color="' + m[1] + '"/></linearGradient></defs>' +
+        '<path class="bd-seal" d="' + SEAL + '" fill="url(#' + gid + ')"/>' +
+        '<circle class="bd-core" cx="32" cy="32" r="19" fill="url(#' + gid + ')"/>' +
+        '<circle cx="32" cy="32" r="16.6" fill="none" stroke="#fff" stroke-opacity=".55" stroke-width="1"/>' +
+        '<path d="M17 25a16 16 0 0 1 22-10" fill="none" stroke="#fff" stroke-opacity=".45" stroke-width="2" stroke-linecap="round"/>';
+    } else {
+      face = '<circle class="bd-face" cx="32" cy="32" r="22"/>';
+    }
     return '<svg class="bd-medal bd-' + b.metal + (on ? ' is-on' : '') + '" width="' + size + '" height="' + size + '" viewBox="0 0 64 64" aria-hidden="true">' +
-      '<circle class="bd-track" cx="32" cy="32" r="' + r + '" fill="none" stroke-width="4"/>' +
-      '<circle class="bd-ring" cx="32" cy="32" r="' + r + '" fill="none" stroke-width="4" stroke-linecap="round" transform="rotate(-90 32 32)" stroke-dasharray="' + c.toFixed(2) + '" stroke-dashoffset="' + (c * (1 - b.pct / 100)).toFixed(2) + '"/>' +
-      '<circle class="bd-face" cx="32" cy="32" r="22"/>' +
-      '<g class="bd-icon" transform="translate(20 20)" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">' + (ICONS[b.icon] || ICONS.star) + '</g></svg>';
+      '<circle class="bd-track" cx="32" cy="32" r="' + r + '" fill="none" stroke-width="2.5"/>' +
+      '<circle class="bd-ring" cx="32" cy="32" r="' + r + '" fill="none" stroke-width="2.5" stroke-linecap="round" transform="rotate(-90 32 32)" stroke-dasharray="' + c.toFixed(2) + '" stroke-dashoffset="' + (c * (1 - b.pct / 100)).toFixed(2) + '"' + '' + '/>' +
+      face +
+      '<g class="bd-icon" transform="translate(21.2 21.2) scale(.9)" fill="none" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">' + (ICONS[b.icon] || ICONS.star) + '</g></svg>';
   }
 
-  root.BadgesCore = { GROUPS, BADGES, logActive, stats, evaluate, newlyEarned, upNext, summary, medalSvg, weekOf };
+  root.BadgesCore = { GROUPS, BADGES, METALS, logActive, stats, evaluate, newlyEarned, upNext, summary, medalSvg, weekOf };
 })(typeof globalThis !== 'undefined' ? globalThis : window);

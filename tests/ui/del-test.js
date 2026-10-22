@@ -79,10 +79,11 @@ async function badgesTests(store){
   t('every badge is listed, in its group', items.length === total && card.querySelectorAll('.bd-group').length === window.BadgesCore.GROUPS.length);
   t('the earned ones are marked, the others are not', on.indexOf('Welcome aboard') > -1 && on.indexOf('Graduated to Advanced') > -1 && on.indexOf('First course') > -1 && on.indexOf('5 courses') === -1, on.join(' | '));
   t('a badge kept on their record stays earned', on.indexOf('7 days') > -1);
-  t('the count says how many are earned and how many more to go', new RegExp('^' + on.length + ' of ' + total + ' earned').test(card.querySelector('.bd-count').textContent) && card.textContent.indexOf((total - on.length) + ' more to earn') > -1, card.querySelector('.bd-head').textContent);
+  t('the count says how many are earned and how many more to go', new RegExp('^' + on.length + ' of ' + total + ' earned').test(card.querySelector('.bd-count').textContent) && card.textContent.indexOf((total - on.length) + ' more to earn') > -1, card.querySelector('.bd-hero').textContent);
   t('a stored badge shows the date it was earned', /Earned 5 Jan 2026|Earned Jan 5, 2026/.test(Array.prototype.filter.call(items, li => /Welcome aboard/.test(li.textContent))[0].textContent));
   t('a locked badge shows how far along they are', /1 of 5/.test(Array.prototype.filter.call(items, li => /^5 courses/.test(li.querySelector('.bd-title').textContent))[0].textContent));
-  t('"Up next" lists three badges still to earn', card.querySelectorAll('.bd-next li').length === 3);
+  t('"Up next" lists three badges still to earn, with how many to go', card.querySelectorAll('.bd-next li').length === 3 && / to go$/.test(card.querySelector('.bd-togo').textContent));
+  t('the latest badge is shown in the summary', !!card.querySelector('.bd-showcase .bd-medal.is-on'));
   const b = store['progress/uDel'].badges;
   t('newly earned badges are saved with a date, and the stored dates are left alone', b.account === '2026-01-05T12:00:00.000Z' && /^\d{4}-\d\d-\d\dT/.test(b.graduate || '') && /^\d{4}-\d\d-\d\dT/.test(b.course1 || '') && !b.course5, JSON.stringify(b));
   t('the profile details are left alone', store['progress/uDel'].profile.jobTitle === 'PM');
