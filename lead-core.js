@@ -17,7 +17,7 @@
   // The online booking page. People who lead a team, represent an organization, or asked for
   // a call are offered "Pick a time" on the thank-you screen. It must start with https://
   // (set it to '' to switch the button off).
-  const BOOKING_URL = 'https://calendly.com/productadvisory/30min';
+  const BOOKING_URL = 'https://www.productadvisory.co/book';
 
   const OPTIONS = {
     who: [

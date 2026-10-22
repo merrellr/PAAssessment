@@ -12,7 +12,7 @@
 (function () {
   "use strict";
   var WWW = "https://www.productadvisory.co/";
-  var CALENDLY = "https://calendly.com/productadvisory/30min";
+  var BOOK_CALL = "https://www.productadvisory.co/book";
   var NEW_TAB = '<span class="sr-only"> (opens in a new tab)</span>';
 
   // The assessment is reached from the dashboard (first launch, or Retake) and the Toolkits Roadmap
@@ -220,7 +220,7 @@
       '<div class="pa-help-list">' + list + '</div><p class="pa-help-none" hidden>No answer here yet. Ask the lessons, or send us a note below.</p>' +
       '<div class="pa-panel-foot pa-help-foot"><a class="pa-btn" href="/feedback">Send feedback</a>' +
       '<a class="pa-btn ghost" href="mailto:info@productadvisory.co?subject=' + encodeURIComponent("Help with Product Advisory Learning") + '">Email us</a>' +
-      '<a class="pa-btn ghost" href="' + CALENDLY + '" target="_blank" rel="noopener">Book a call<span aria-hidden="true"> ↗</span>' + NEW_TAB + "</a></div></div>";
+      '<a class="pa-btn ghost" href="' + BOOK_CALL + '" target="_blank" rel="noopener">Book a call<span aria-hidden="true"> ↗</span>' + NEW_TAB + "</a></div></div>";
     document.body.appendChild(help);
     helpQ = help.querySelector(".pa-help-q");
     help.addEventListener("click", function (e) {
@@ -279,7 +279,7 @@
     { g: "Product Advisory", t: "Free toolkits", i: "↗", u: WWW + "toolkits", ext: true },
     { g: "Product Advisory", t: "About", i: "↗", u: WWW + "about", ext: true },
     { g: "Product Advisory", t: "Contact", i: "↗", u: WWW + "contact", ext: true },
-    { g: "Product Advisory", t: "Book a free 30-minute call", i: "☎", u: CALENDLY, ext: true },
+    { g: "Product Advisory", t: "Book a free 30-minute call", i: "☎", u: BOOK_CALL, ext: true },
     { g: "Make it yours", t: "Toggle light / dark", i: "◐", run: toggleTheme },
     { g: "Make it yours", t: "Open Make it yours", i: "⚙", run: openPanel },
     { g: "Help", t: "Help: answers, guidance and feedback", i: "?", run: function () { openHelp(); } }

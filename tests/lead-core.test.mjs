@@ -109,7 +109,7 @@ console.log('--- the fallback and the thank-you ---');
 console.log('--- the booking link and the call button ---');
 {
   const org = withState({ who: 'org', name: 'Jane', email: 'Jane@Acme.com' });
-  t('the booking page is Rob\'s Calendly 30-minute call', L.BOOKING_URL === 'https://calendly.com/productadvisory/30min');
+  t('the booking page is the free 30-minute call on www', L.BOOKING_URL === 'https://www.productadvisory.co/book');
   t('an organization is offered it on the thank-you screen', L.thankYou(org).book.href === L.BOOKING_URL && /Pick a time/.test(L.thankYou(org).book.label));
   t('setting the link to nothing switches the button off', L.thankYou(org, '').book === null);
   t('an individual who did not ask for a call is not offered it', L.thankYou(withState({ who: 'individual', name: 'A', email: 'a@b.co' })).book === null);
