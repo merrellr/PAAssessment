@@ -52,8 +52,8 @@
   <div class="card" id="stateError" hidden>
     <span class="eyebrow">Email settings</span>
     <h1 id="errorTitle" tabindex="-1">This link doesn't work</h1>
-    <p id="errorText">It may have been copied only in part. Open the link from the email again, or sign in and change your emails on My profile.</p>
-    <a href="/profile#goals">Go to My profile →</a>
+    <p id="errorText">It may have been copied only in part. Open the link from the email again, or sign in and change your emails on My Profile.</p>
+    <a href="/profile#goals">Go to My Profile →</a>
   </div>
 
   <div class="card" id="stateReady" hidden>
@@ -78,7 +78,7 @@
     </div>
 
     <p class="status" id="status" role="status" aria-live="polite"></p>
-    <p class="small" style="margin:18px 0 0;">To change your weekly goal and focus areas, sign in and open <a href="/profile#goals">My profile</a>.</p>
+    <p class="small" style="margin:18px 0 0;">To change your weekly goal and focus areas, sign in and open <a href="/profile#goals">My Profile</a>.</p>
   </div>
 
 </div>
@@ -99,9 +99,9 @@
       monthly: "On the 1st: your team's month and a link to the full report.", off: 'No report emails. The full report is always on your company dashboard.' }
   };
   const ERRORS = {
-    bad_link: ["This link doesn't work", 'It may have been copied only in part. Open the link from the email again, or sign in and change your emails on My profile.'],
+    bad_link: ["This link doesn't work", 'It may have been copied only in part. Open the link from the email again, or sign in and change your emails on My Profile.'],
     no_account: ['This account has been closed', 'There is nothing to change: we no longer email this address.'],
-    not_set_up: ["Email settings aren't available yet", 'Please try again later, or sign in and change your emails on My profile.']
+    not_set_up: ["Email settings aren't available yet", 'Please try again later, or sign in and change your emails on My Profile.']
   };
   const state = { checkin: N.DEFAULT_FREQ, orgReport: N.DEFAULT_FREQ };
   let undo = null;

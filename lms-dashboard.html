@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="robots" content="noindex, nofollow">
-<title>Product Advisory Learning</title>
+<title>My Learning — Product Advisory Learning</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@600&family=Lato:ital,wght@0,300;0,400;0,700;0,900;1,400&display=swap" rel="stylesheet">
@@ -252,9 +252,9 @@
         </div>
 
         <div class="profile-dropdown-divider"></div>
-        <div class="profile-progress-label">My learning</div>
-        <a class="profile-dropdown-item" href="/profile">My profile</a>
-        <a class="profile-dropdown-item" href="/profile#badges">My badges</a>
+        <div class="profile-progress-label">My Learning</div>
+        <a class="profile-dropdown-item" href="/profile">My Profile</a>
+        <a class="profile-dropdown-item" href="/profile#badges" id="badgesMenuItem">My Badges</a>
         <a class="profile-dropdown-item" id="changePasswordMenuItem" onclick="openChangePassword()">Change password</a>
         <a class="profile-dropdown-item" onclick="replayDashboardTour()">Replay the tour</a>
 
@@ -290,7 +290,7 @@
   <div data-screen="auth" class="active">
     <div class="card" style="max-width:420px;margin:0 auto;">
 
-      <span style="display:block; font-size:0.6875rem; font-weight:600; letter-spacing:0.06em; text-transform:uppercase; color:var(--cyan); margin-bottom:6px;">Your learning dashboard</span>
+      <span style="display:block; font-size:0.6875rem; font-weight:600; letter-spacing:0.06em; text-transform:uppercase; color:var(--cyan); margin-bottom:6px;">My Learning</span>
       <h1 style="font-size:1.1875rem; margin:0 0 6px;">See your personalized results and course plan</h1>
       <p style="font-size:0.8438rem; color:var(--ink-soft); margin:0 0 16px; line-height:1.55;">Log in or create an account to view your assessment score across all seven skill areas and the courses matched to your level. Haven't taken the assessment yet? <a href="/" style="color:var(--navy);">Start here</a>.</p>
 
@@ -470,13 +470,15 @@
 
     </div>
 
+    <button type="button" class="card bd-tile" id="badgeTile" hidden aria-haspopup="dialog"></button>
+
     <div class="card" id="profilePromptCard" style="display:none; margin-bottom:22px; background:linear-gradient(135deg, var(--tint) 0%, var(--surface) 100%); border-color: var(--line);">
       <div style="display:flex; align-items:baseline; justify-content:space-between;">
         <span class="eyebrow" style="font-size:0.6875rem; font-weight:600; letter-spacing:0.06em; text-transform:uppercase; color:var(--cyan);">One quick thing</span>
         <a onclick="dismissProfilePrompt()" style="font-size:0.7812rem; color:var(--ink-soft); cursor:pointer; text-decoration:underline;">Not now</a>
       </div>
       <h2 style="font-size:1rem; margin:10px 0 4px;">Tell us a bit about your team</h2>
-      <p style="margin:0 0 16px;">This lets us shape the examples and course material around the kind of product work you actually do. About fifteen seconds, and you can change it any time from <a href="/profile" style="color:var(--navy);">your profile</a>.</p>
+      <p style="margin:0 0 16px;">This lets us shape the examples and course material around the kind of product work you actually do. About fifteen seconds, and you can change it any time from <a href="/profile" style="color:var(--navy);">My Profile</a>.</p>
       <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:0 16px;">
         <div>
           <label class="profile-field-label" for="profilePromptCompany">Company</label>
@@ -559,8 +561,7 @@
     <div style="display:flex; align-items:baseline; justify-content:space-between; gap:12px; flex-wrap:wrap; margin: 6px 0 14px;">
       <div style="display:flex; align-items:center; gap:14px; flex-wrap:wrap;">
         <h2 style="font-family:var(--display); font-size:1rem; color:var(--navy-deep); margin:0;">Your Courses</h2>
-        <a class="week-goal" id="weekGoal" href="/profile#goals" hidden title="Your weekly goal. Change it on My profile."></a>
-        <a class="bd-pill" id="badgePill" href="/profile#badges" hidden title="See all your badges on My profile."></a>
+        <a class="week-goal" id="weekGoal" href="/profile#goals" hidden title="Your weekly goal. Change it on My Profile."></a>
       </div>
       <div style="display:flex; align-items:center; gap:14px;">
         <div class="catalog-toggle" id="catalogToggle" style="display:none;">
@@ -606,6 +607,7 @@
 <script src="company-core.js"></script>
 <script src="notify-core.js"></script>
 <script src="badges-core.js"></script>
+<script src="badges-ui.js"></script>
 <script src="pa-icons.js"></script>
 <script type="module">
 /* ================================================================
@@ -1283,18 +1285,24 @@ function renderBadges(user, progress, assessmentResult){
   if (Object.keys(fresh).length){
     progress.badges = Object.assign({}, progress.badges, fresh);
     write.badges = progress.badges;
+    list.forEach(b => { if (fresh[b.id]) b.earnedAt = fresh[b.id]; });
   }
   if (Object.keys(write).length) setDoc(doc(db, 'progress', user.uid), write, { merge: true }).catch(() => {});
 
-  const sum = B.summary(list), pill = document.getElementById('badgePill');
-  const best = list.filter(b => b.have).slice(-1)[0] || list[0];
-  pill.innerHTML = B.medalSvg(best, 22) + '<span><b>' + sum.have + ' of ' + sum.total + '</b> badges</span>';
-  pill.setAttribute('aria-label', sum.have + ' of ' + sum.total + ' badges earned. See them on My profile.');
-  pill.hidden = false;
+  // The My Badges tile opens the whole collection in a window over this page.
+  dashBadges = list;
+  const tile = document.getElementById('badgeTile'), sum = B.summary(list);
+  tile.innerHTML = BadgesUI.tile(list);
+  tile.setAttribute('aria-label', 'My Badges: ' + sum.have + ' of ' + sum.total + ' earned. View all.');
+  tile.hidden = false;
 
   const won = list.filter(b => fresh[b.id]);
   if (won.length) showBadgeToast(won);
 }
+let dashBadges = null;
+function openBadges(opener){ if (dashBadges) BadgesUI.openModal(dashBadges, opener); }
+document.getElementById('badgeTile').addEventListener('click', (e) => openBadges(e.currentTarget));
+document.getElementById('badgesMenuItem').addEventListener('click', (e) => { if (!dashBadges) return; e.preventDefault(); openBadges(document.getElementById('badgeTile')); });
 function showBadgeToast(won){
   const B = window.BadgesCore;
   const esc = (t) => String(t).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
@@ -1302,9 +1310,10 @@ function showBadgeToast(won){
   let el = document.getElementById('badgeToast');
   if (!el){ el = document.createElement('div'); el.id = 'badgeToast'; el.className = 'bd-toast'; el.setAttribute('role', 'status'); document.body.appendChild(el); }
   el.innerHTML = B.medalSvg(top, 52) + '<div><span class="bd-eyebrow">' + (won.length > 1 ? won.length + ' new badges!' : 'New badge!') + '</span><b>' + esc(top.title) + '</b><p>' +
-    esc(won.length > 1 ? won.map(b => b.title).join(', ') : top.text) + '</p><a href="/profile#badges">See my badges →</a></div><button type="button" class="bd-t-close" aria-label="Close">×</button>';
+    esc(won.length > 1 ? won.map(b => b.title).join(', ') : top.text) + '</p><a href="/profile#badges" class="bd-t-open">See My Badges →</a></div><button type="button" class="bd-t-close" aria-label="Close">×</button>';
   el.hidden = false;
   el.querySelector('.bd-t-close').addEventListener('click', () => { el.hidden = true; });
+  el.querySelector('.bd-t-open').addEventListener('click', (e) => { e.preventDefault(); el.hidden = true; openBadges(document.getElementById('badgeTile')); });
   setTimeout(() => { if (!el.matches(':hover, :focus-within')) el.hidden = true; }, 12000);
 }
 
@@ -1319,7 +1328,7 @@ function renderWeekGoal(progress){
     '<circle class="wg-fill" cx="12" cy="12" r="9" fill="none" stroke-width="3" stroke-linecap="round" transform="rotate(-90 12 12)" stroke-dasharray="' + C.toFixed(2) + '" stroke-dashoffset="' + (C * (1 - w.pct / 100)).toFixed(2) + '"/></svg>' +
     '<span>This week: <b>' + w.done + ' of ' + w.target + '</b> ' + (w.target === 1 ? 'lesson' : 'lessons') + (w.done >= w.target ? ' · goal met' : '') + '</span><span class="wg-edit">' + (progress.goals ? 'Change goal' : 'Set a goal') + '</span>';
   el.classList.toggle('met', w.done >= w.target);
-  el.setAttribute('aria-label', 'This week: ' + w.done + ' of ' + w.target + ' lessons' + (w.done >= w.target ? ', goal met' : '') + '. ' + (progress.goals ? 'Change your goal' : 'Set a goal') + ' on My profile.');
+  el.setAttribute('aria-label', 'This week: ' + w.done + ' of ' + w.target + ' lessons' + (w.done >= w.target ? ', goal met' : '') + '. ' + (progress.goals ? 'Change your goal' : 'Set a goal') + ' on My Profile.');
   el.hidden = false;
 }
 

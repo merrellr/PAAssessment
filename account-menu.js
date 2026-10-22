@@ -120,10 +120,10 @@ if (window.self === window.top) {
     menu.appendChild(roleBadge(flags));
     const section = (label) => { menu.appendChild(el('div', 'pa-acct-rule')); if (label) menu.appendChild(el('div', 'pa-acct-label', label)); };
 
-    section('My learning');
-    menu.appendChild(link('My learning dashboard', '/lms-dashboard', page === 'lms-dashboard.html'));
-    menu.appendChild(link('My profile', '/profile', page === 'profile.html'));
-    menu.appendChild(link('My badges', '/profile#badges', false));
+    section('My Learning');
+    menu.appendChild(link('My Learning', '/lms-dashboard', page === 'lms-dashboard.html'));
+    menu.appendChild(link('My Profile', '/profile', page === 'profile.html'));
+    menu.appendChild(link('My Badges', '/profile#badges', false));
     if (flags.companyAdmin || flags.owner){
       section(flags.owner ? 'Manage' : 'My company');
       if (flags.companyAdmin) menu.appendChild(link('Company dashboard', '/company', page === 'company.html'));

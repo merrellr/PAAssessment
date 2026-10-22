@@ -108,6 +108,7 @@
 <script src="company-core.js"></script>
 <script src="notify-core.js"></script>
 <script src="badges-core.js"></script>
+<script src="badges-ui.js"></script>
 </head>
 <body>
 <script src="pa-shell.js"></script>
@@ -124,7 +125,7 @@
   </a>
   <div class="brand-accent-bar"></div>
   <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-    <a class="back-link" href="/lms-dashboard" style="margin-bottom:0;">← Back to dashboard</a>
+    <a class="back-link" href="/lms-dashboard" style="margin-bottom:0;">← Back to My Learning</a>
     <a href="https://www.productadvisory.co/" target="_blank" rel="noopener" style="font-size:0.8125rem; color:var(--navy); text-decoration:underline;">Visit Product Advisory ↗</a>
   </div>
 
@@ -212,7 +213,7 @@
   </div>
 
   <div class="card" id="badges" tabindex="-1">
-    <h2>My badges</h2>
+    <h2>My Badges</h2>
     <p style="margin-top:4px;">Earned by showing up, finishing lessons and courses, meeting your weekly goal and growing your skills. Once earned, a badge is yours to keep.</p>
     <div id="badgesBody"><p style="margin:0;">Loading your badges…</p></div>
   </div>
@@ -597,10 +598,9 @@ $id('goalsSaveBtn').addEventListener('click', async () => {
   }
 });
 
-/* ---------------------------------------------------------------- My badges */
-// Worked out by badges-core.js from the progress document. Badges seen for the first time
-// are stored in progress.badges with today's date, so "earned on" stays put.
-let badgeFilter = 'all';
+/* ---------------------------------------------------------------- My Badges */
+// Worked out by badges-core.js from the progress document and drawn by badges-ui.js. Badges seen
+// for the first time are stored in progress.badges with today's date, so "earned on" stays put.
 function showBadges(data, user){
   const B = window.BadgesCore;
   const st = B.stats({ progress: data, assessment: data.assessmentResult || null, nowMs: Date.now(), offsetMin: -new Date().getTimezoneOffset() });
@@ -610,112 +610,10 @@ function showBadges(data, user){
     setDoc(doc(db, 'progress', user.uid), { badges: Object.assign({}, data.badges, fresh) }, { merge: true }).catch(() => {});
     list.forEach(b => { if (fresh[b.id]) b.earnedAt = fresh[b.id]; });
   }
-  const sum = B.summary(list);
-  const left = sum.total - sum.have;
-  const esc = (t) => String(t).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
-  const when = (iso) => new Date(iso).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' });
-  const bar = (b) => '<div class="bd-mini" aria-hidden="true"><span style="width:' + b.pct + '%"></span></div>';
-  const METAL = { bronze: 'Bronze', silver: 'Silver', gold: 'Gold', platinum: 'Platinum' };
-  // the latest three earned, newest first (on the same day, the harder badge first), for the summary panel
-  const rank = (b) => B.BADGES.findIndex(x => x.id === b.id);
-  const latest = list.filter(b => b.have).sort((x, y) => String(y.earnedAt || '').localeCompare(String(x.earnedAt || '')) || (rank(y) - rank(x))).slice(0, 3);
-  let html = '<div class="bd-hero"><div><span class="bd-eyebrow">Your collection</span>' +
-    '<div class="bd-count">' + sum.have + ' <small>of ' + sum.total + ' earned</small></div>' +
-    '<div class="bd-bar" role="progressbar" aria-label="Badges earned" aria-valuemin="0" aria-valuemax="' + sum.total + '" aria-valuenow="' + sum.have + '"><span style="width:' + sum.pct + '%"></span></div>' +
-    '<p class="bd-left">' + (left ? '<b>' + left + '</b> more to earn. Keep going!' : 'Every badge earned. Amazing!') + '</p></div>';
-  if (latest.length){
-    html += '<div class="bd-showcase"><div class="bd-stack">' + latest.map(b => B.medalSvg(b, 56)).join('') + '</div><small><b>' + esc(latest[0].title) + '</b>Your latest badge</small></div>';
-  }
-  html += '</div>';
-  const next = B.upNext(list, 3);
-  if (next.length){
-    html += '<div class="bd-next"><span class="bd-eyebrow">Up next</span><ul>' + next.map(b => '<li>' + B.medalSvg(b, 44) + '<div><b>' + esc(b.title) + '</b><p>' + esc(b.text) + '</p>' + bar(b) +
-      '<span class="bd-togo">' + b.value + ' of ' + b.goal + ' · ' + (b.goal - b.value) + ' to go</span></div></li>').join('') + '</ul></div>';
-  }
-  const tabs = [['all', 'All', sum.total], ['have', 'Earned', sum.have], ['todo', 'Still to earn', left]];
-  html += '<div class="bd-tabs" role="group" aria-label="Show badges">' + tabs.map(f => '<button type="button" data-f="' + f[0] + '" aria-pressed="false">' + f[1] + '<em>' + f[2] + '</em></button>').join('') + '</div>';
-  B.GROUPS.forEach(g => {
-    const items = list.filter(b => b.group === g[0]);
-    const got = items.filter(b => b.have).length;
-    html += '<section class="bd-group" data-g="' + g[0] + '"><div class="bd-ghead"><h3>' + esc(g[1]) + '</h3><span class="bd-chip' + (got === items.length ? ' done' : '') + '">' + (got === items.length ? '✓ ' : '') + got + ' of ' + items.length + '</span></div><ul class="bd-grid">' +
-      items.map(b => '<li class="bd-item' + (b.have ? ' is-on' : '') + '" data-id="' + b.id + '" data-have="' + (b.have ? 1 : 0) + '" tabindex="0" role="button" aria-haspopup="dialog" aria-label="' + esc(b.title + ' (' + METAL[b.metal] + '): ' + b.text + '. ' + (b.have ? (b.earnedAt ? 'Earned ' + when(b.earnedAt) : 'Earned') : 'Not earned yet, ' + b.value + ' of ' + b.goal)) + '">' +
-        '<span class="bd-medal-wrap"><span class="bd-tilt">' + B.medalSvg(b, 76) + '</span>' + '<span class="bd-metal ' + b.metal + '">' + METAL[b.metal] + '</span></span>' +
-        '<span class="bd-title">' + esc(b.title) + '</span><span class="bd-text">' + esc(b.text) + '</span>' +
-        '<span class="bd-state">' + (b.have ? '✓ ' + (b.earnedAt ? 'Earned ' + when(b.earnedAt) : 'Earned') : bar(b) + b.value + ' of ' + b.goal) + '</span></li>').join('') + '</ul></section>';
-  });
-  $id('badgesBody').innerHTML = html;
-  badgeList = list;
-  $id('badgesBody').querySelectorAll('.bd-tabs button').forEach(btn => btn.addEventListener('click', () => { badgeFilter = btn.dataset.f; paintBadgeFilter(); }));
-  $id('badgesBody').querySelectorAll('.bd-item').forEach(li => {
-    li.addEventListener('click', () => openBadge(li));
-    li.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' '){ e.preventDefault(); openBadge(li); } });
-  });
-  tiltable($id('badgesBody'));
-  paintBadgeFilter();
+  window.BadgesUI.render($id('badgesBody'), list);
   if (location.hash === '#badges') $id('badges').focus();
 }
-/* Medals lean toward the pointer, like turning a coin in your hand. Each .bd-tilt sets --rx and --ry. */
-function tiltable(root){
-  if (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-  root.addEventListener('pointermove', (e) => {
-    const card = e.target.closest('.bd-item, .bd-detail-box');
-    const tilt = card && card.querySelector('.bd-tilt');
-    if (!tilt) return;
-    const r = card.getBoundingClientRect();
-    const x = (e.clientX - r.left) / r.width - 0.5, y = (e.clientY - r.top) / r.height - 0.5;
-    tilt.classList.add('is-moving');
-    tilt.style.setProperty('--ry', (x * 34).toFixed(1) + 'deg');
-    tilt.style.setProperty('--rx', (-y * 28).toFixed(1) + 'deg');
-  });
-  root.addEventListener('pointerout', (e) => {
-    const card = e.target.closest('.bd-item, .bd-detail-box');
-    if (!card || card.contains(e.relatedTarget)) return;
-    const tilt = card.querySelector('.bd-tilt');
-    if (tilt){ tilt.classList.remove('is-moving'); tilt.style.removeProperty('--rx'); tilt.style.removeProperty('--ry'); }
-  });
-}
-
-/* A badge up close: the medal large, what it is for, and when it was earned or how far along. */
-let badgeList = [], badgeOpener = null;
-function openBadge(li){
-  const B = window.BadgesCore;
-  const b = badgeList.filter(x => x.id === li.dataset.id)[0];
-  if (!b) return;
-  let box = $id('badgeDetail');
-  if (!box){
-    box = document.createElement('div');
-    box.id = 'badgeDetail'; box.className = 'bd-detail'; box.hidden = true;
-    box.innerHTML = '<div class="bd-detail-box" role="dialog" aria-modal="true" aria-labelledby="badgeDetailTitle"><button type="button" class="bd-x" aria-label="Close">×</button><div id="badgeDetailBody"></div></div>';
-    document.body.appendChild(box);
-    box.addEventListener('click', (e) => { if (e.target === box || e.target.closest('.bd-x')) closeBadge(); });
-    box.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeBadge(); if (e.key === 'Tab'){ e.preventDefault(); box.querySelector('.bd-x').focus(); } });
-    tiltable(box);
-  }
-  const METAL = { bronze: 'Bronze', silver: 'Silver', gold: 'Gold', platinum: 'Platinum' };
-  const group = B.GROUPS.filter(g => g[0] === b.group)[0];
-  const esc = (t) => String(t).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
-  $id('badgeDetailBody').innerHTML = '<span class="bd-tilt">' + B.medalSvg(b, 200) + '</span>' +
-    '<span class="bd-metal ' + b.metal + '">' + METAL[b.metal] + ' · ' + esc(group ? group[1] : '') + '</span>' +
-    '<h2 id="badgeDetailTitle">' + esc(b.title) + '</h2><p>' + esc(b.text) + '.</p>' +
-    (b.have ? '<p class="bd-when">✓ Earned' + (b.earnedAt ? ' ' + new Date(b.earnedAt).toLocaleDateString(undefined, { day: 'numeric', month: 'long', year: 'numeric' }) : '') + '</p>'
-      : '<div class="bd-mini" aria-hidden="true"><span style="width:' + b.pct + '%"></span></div><p>' + b.value + ' of ' + b.goal + ' · ' + (b.goal - b.value) + ' to go</p>');
-  badgeOpener = li;
-  box.hidden = false;
-  box.querySelector('.bd-x').focus();
-}
-function closeBadge(){
-  const box = $id('badgeDetail');
-  if (!box || box.hidden) return;
-  box.hidden = true;
-  if (badgeOpener) badgeOpener.focus();
-}
 window.addEventListener('hashchange', () => { if (location.hash === '#badges' || location.hash === '#goals') $id(location.hash.slice(1)).focus(); });
-function paintBadgeFilter(){
-  const body = $id('badgesBody');
-  body.querySelectorAll('.bd-tabs button').forEach(b => b.setAttribute('aria-pressed', b.dataset.f === badgeFilter ? 'true' : 'false'));
-  body.querySelectorAll('.bd-item').forEach(li => { li.hidden = (badgeFilter === 'have' && li.dataset.have !== '1') || (badgeFilter === 'todo' && li.dataset.have === '1'); });
-  body.querySelectorAll('.bd-group').forEach(g => { g.hidden = !g.querySelector('.bd-item:not([hidden])'); });
-}
 
 /* ------------------------------------------------------------ profile photo */
 // The photo is resized in the browser to a 160 x 160 JPEG (about 10 KB) and kept on the person's own

@@ -276,11 +276,13 @@ manual review — it holds no uid and isn't read by the app.
 
 ## My badges
 
-My profile → **My badges** (`/profile#badges`, also in both Profile menus) shows every badge, how many are
+My Profile → **My Badges** (`/profile#badges`, also in both Profile menus) shows every badge, how many are
 earned out of how many, the three closest to being earned ("Up next"), and a filter for earned / still to
-earn. The dashboard shows "X of 28 badges" next to the weekly goal and a "New badge!" pop-up when one is
-newly earned.
+earn. The dashboard shows a "New badge!" pop-up when one is newly earned.
 
+- On **My Learning**, a My Badges tile ("4 of 28 badges", the latest medals and the next badge) opens the whole
+  collection in a window over the page; so do the pop-up's "See My Badges" and the dropdown's My Badges.
+- The collection, the tile, the window and the close-up are drawn by `badges-ui.js`, shared by both pages.
 - The list and all the counting live in `badges-core.js` (tested by `tests/badges-core.test.mjs`); styles in
   `badges.css`. To add a badge, add a line to `BADGES` with a `metric` that `stats()` already counts (or add one).
 - Groups: Getting started, Showing up (7/14/30/60/100 days), Weekly goal, Lessons (10/25/50/100),
