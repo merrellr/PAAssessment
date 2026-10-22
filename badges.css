@@ -1,0 +1,60 @@
+/* Badges (My profile → My badges, and the dashboard). Drawn by BadgesCore.medalSvg in badges-core.js.
+   Metal colours are fixed so a gold medal reads as gold in light and dark themes alike. */
+.bd-medal{ display:block; flex-shrink:0; }
+.bd-medal .bd-track{ stroke: var(--line, #E3E9F0); }
+.bd-medal .bd-ring{ stroke: var(--cyan, #35C2E8); transition: stroke-dashoffset .5s; }
+.bd-medal .bd-face{ fill: var(--bg, #F5F8FB); stroke: var(--line, #E3E9F0); stroke-width: 1.5; }
+.bd-medal .bd-icon{ stroke: var(--gray, #9AA3AD); }
+.bd-medal.is-on .bd-icon{ stroke: #fff; }
+.bd-medal.is-on.bd-bronze .bd-ring{ stroke: #B4733C; }   .bd-medal.is-on.bd-bronze .bd-face{ fill: #B4733C; stroke: #8E5729; }
+.bd-medal.is-on.bd-silver .bd-ring{ stroke: #8C99A8; }   .bd-medal.is-on.bd-silver .bd-face{ fill: #8C99A8; stroke: #6B7787; }
+.bd-medal.is-on.bd-gold .bd-ring{ stroke: #D9A520; }     .bd-medal.is-on.bd-gold .bd-face{ fill: #D9A520; stroke: #A87C0E; }
+.bd-medal.is-on.bd-platinum .bd-ring{ stroke: #35C2E8; } .bd-medal.is-on.bd-platinum .bd-face{ fill: #1A4584; stroke: #35C2E8; }
+.bd-medal.is-on.bd-gold .bd-icon{ stroke: #3a2a00; }
+
+/* My badges card */
+.bd-head{ display:flex; align-items:center; gap:18px; flex-wrap:wrap; margin: 6px 0 18px; }
+.bd-count{ font-family: var(--display); font-weight:700; font-size: 1.75rem; color: var(--navy-deep); line-height:1; }
+.bd-count small{ font-size: 0.875rem; font-weight:600; color: var(--ink-soft); }
+.bd-bar{ flex:1; min-width: 160px; height: 8px; border-radius: 999px; background: var(--line); overflow:hidden; }
+.bd-bar span{ display:block; height:100%; background: linear-gradient(90deg, var(--navy), var(--cyan)); border-radius: inherit; }
+.bd-next{ background: var(--tint, #EEF4FA); border-radius: 12px; padding: 14px 16px; margin: 0 0 20px; }
+.bd-next h3, .bd-group h3{ font-family: var(--display); font-size: 0.8125rem; letter-spacing: .06em; text-transform: uppercase; color: var(--ink-soft); margin: 0 0 10px; }
+.bd-next ul{ list-style:none; margin:0; padding:0; display:grid; gap: 10px; }
+.bd-next li{ display:flex; align-items:center; gap: 12px; font-size: 0.8438rem; color: var(--ink); }
+.bd-next li b{ display:block; }
+.bd-next li span{ color: var(--ink-soft); }
+.bd-filter{ display:inline-flex; border:1.5px solid var(--line); border-radius: 10px; overflow:hidden; margin: 0 0 16px; }
+.bd-filter button{ font: inherit; font-size: 0.8125rem; padding: 7px 14px; border:0; border-right:1px solid var(--line); background: var(--surface); color: var(--ink-soft); cursor:pointer; }
+.bd-filter button:last-child{ border-right:0; }
+.bd-filter button[aria-pressed="true"]{ background: var(--navy); color: var(--btn-ink); font-weight:700; }
+.bd-filter button:focus-visible{ outline: 2px solid var(--cyan); outline-offset: 2px; }
+.bd-group{ margin: 0 0 20px; }
+.bd-group[hidden]{ display:none; }
+.bd-group h3 em{ font-style: normal; font-weight: 400; text-transform: none; letter-spacing: 0; color: var(--gray); }
+.bd-grid{ list-style:none; margin:0; padding:0; display:grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; }
+.bd-item{ display:flex; flex-direction:column; align-items:center; text-align:center; gap: 6px; padding: 14px 10px 12px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); }
+.bd-item[hidden]{ display:none; }
+.bd-item.is-on{ border-color: var(--cyan); box-shadow: 0 0 0 1px var(--cyan) inset; }
+.bd-item .bd-title{ font-family: var(--display); font-weight: 700; font-size: 0.8438rem; color: var(--navy-deep); }
+.bd-item .bd-text{ font-size: 0.75rem; color: var(--ink-soft); line-height: 1.4; }
+.bd-item .bd-state{ font-size: 0.7188rem; color: var(--gray); margin-top: auto; }
+.bd-item.is-on .bd-state{ color: var(--ok); font-weight: 700; }
+.bd-item:not(.is-on) .bd-title{ color: var(--ink-soft); }
+@media (max-width: 420px){ .bd-grid{ grid-template-columns: 1fr 1fr; } }
+
+/* Dashboard: the badges pill and the "new badge" pop-up */
+.bd-pill{ display:inline-flex; align-items:center; gap:6px; padding: 3px 12px 3px 4px; border-radius: 999px; border: 1px solid var(--line); background: var(--surface); color: var(--ink-soft); font-size: 0.7812rem; text-decoration:none; }
+.bd-pill[hidden]{ display:none; }
+.bd-pill:hover{ border-color: var(--cyan); }
+.bd-pill b{ color: var(--navy-deep); }
+.bd-toast{ position: fixed; right: 16px; bottom: 16px; z-index: 230; display:flex; align-items:center; gap: 14px; max-width: min(380px, calc(100vw - 32px)); padding: 14px 16px; border-radius: 14px; background: var(--surface); border: 1px solid var(--cyan); box-shadow: 0 12px 36px rgba(22,33,62,.22); color: var(--ink); }
+.bd-toast[hidden]{ display:none; }
+.bd-toast .bd-t-eyebrow{ display:block; font-size: 0.6875rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--cyan-ink, var(--navy)); }
+.bd-toast b{ display:block; font-family: var(--display); color: var(--navy-deep); }
+.bd-toast p{ margin: 2px 0 6px; font-size: 0.8125rem; color: var(--ink-soft); }
+.bd-toast a{ font-size: 0.8125rem; color: var(--navy); }
+.bd-toast .bd-t-close{ align-self:flex-start; background:none; border:0; font-size: 1.25rem; line-height:1; color: var(--gray); cursor:pointer; padding: 0 2px; }
+.bd-toast .bd-t-close:focus-visible{ outline: 2px solid var(--cyan); }
+@media (prefers-reduced-motion: no-preference){ .bd-toast:not([hidden]){ animation: bd-pop .35s ease-out; } }
+@keyframes bd-pop{ from{ transform: translateY(16px); opacity: 0; } to{ transform: none; opacity: 1; } }

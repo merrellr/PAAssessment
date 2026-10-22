@@ -149,6 +149,7 @@
 <script src="analytics.js"></script>
 <script src="company-core.js"></script>
 <script src="notify-core.js"></script>
+<script src="badges-core.js"></script>
 <script src="lesson-blocks.js"></script>
 </head>
 <body>
@@ -462,6 +463,11 @@ async function loadProgress(){
   const data = snap.exists() ? snap.data() : { courses: {} };
   allCourses = data.courses || {};
   userProfile = data.profile || {};
+  // Opening a lesson counts as a day of learning for the badges (once a day).
+  if (window.BadgesCore){
+    const today = NotifyCore.dateKey(Date.now(), -new Date().getTimezoneOffset());
+    if (!(data.activeLog || {})[today]) setDoc(progressRef, { activeLog: BadgesCore.logActive(data.activeLog, Date.now(), -new Date().getTimezoneOffset()) }, { merge: true }).catch(() => {});
+  }
   const courseProgress = allCourses[courseId] || { completed: [] };
   completedLessons = courseProgress.completed || [];
   reflections = courseProgress.reflections || {};
