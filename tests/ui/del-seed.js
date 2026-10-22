@@ -11,7 +11,7 @@
   Object.defineProperty(HTMLScriptElement.prototype, 'src', { configurable: true, get: function(){ return desc.get.call(this); }, set: function(v){
     if (String(v).indexOf('script.google.com') === -1) { desc.set.call(this, v); return; }
     var q = Object.fromEntries(new URL(v).searchParams); window.__calls.push(q.action + '@' + window.__writeLog.length);
-    setTimeout(function(){ var cb = window[q.callback]; if (!cb) return; cb(q.action === 'deleteAccount' ? { ok: true } : (q.action === 'companies' ? [] : null)); }, 10);
+    setTimeout(function(){ var cb = window[q.callback]; if (!cb) return; cb(q.action === 'deleteAccount' ? { ok: true } : (q.action === 'companyMatch' ? { ok: true, match: q.idToken ? '<img src=x onerror="window.__pwned=1">Acme' : null } : null)); }, 10);
   } });
   window.__seed = function(store, Timestamp){
     var ts = Timestamp.now();

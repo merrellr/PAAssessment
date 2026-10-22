@@ -1247,7 +1247,7 @@ async function loadDashboard(user){
   // Prefer the result saved on the person's own progress doc (written
   // when they finish the assessment). Fall back to the Google Sheet
   // lookup for accounts created before results were mirrored to Firestore.
-  const assessmentResult = progress.assessmentResult || await fetchAssessmentResult(user.email);
+  const assessmentResult = progress.assessmentResult || await fetchAssessmentResult(user);
 
   // Stash for setCatalogView(), which re-renders the catalog on toggle
   // without a full dashboard reload.
@@ -1266,7 +1266,7 @@ async function loadDashboard(user){
   renderWeekGoal(progress);
   renderBadges(user, progress, assessmentResult);
 
-  syncProgressReport(user.email, progress, assessmentResult);
+  syncProgressReport(user, progress, assessmentResult);
 }
 
 /* Badges: "3 of 28 badges" next to the weekly goal, and a pop-up when one is newly earned.
@@ -1819,8 +1819,10 @@ window.handleRetakeAssessment = function(){
 /* Quietly sends a full 28-course status snapshot to the Progress
    sheet every time the dashboard loads — fire-and-forget, never
    blocks anything the person sees. */
-function syncProgressReport(email, progress, assessmentResult){
+async function syncProgressReport(user, progress, assessmentResult){
   if (!RESULTS_LOG_URL) return;
+  // The backend keeps only the signed-in person's own rows, using the email in their sign-in token.
+  const email = user.email, idToken = await user.getIdToken().catch(() => '');
 
   const rows = [];
   Object.keys(DOMAINS).forEach(domainKey => {
@@ -1852,7 +1854,7 @@ function syncProgressReport(email, progress, assessmentResult){
   fetch(RESULTS_LOG_URL, {
     method: 'POST',
     headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-    body: JSON.stringify({ action: 'syncProgress', rows })
+    body: JSON.stringify({ action: 'syncProgress', idToken, rows })
   }).catch(() => { /* silently ignore — reporting sync is never allowed to block the dashboard */ });
 }
 
@@ -2214,7 +2216,9 @@ function renderLockedTeaser(wrap){
   });
 }
 
-function fetchAssessmentResult(email){
+// Their own latest result from the results sheet: the backend takes the email from the sign-in token.
+async function fetchAssessmentResult(user){
+  const email = user.email, idToken = await user.getIdToken().catch(() => '');
   return new Promise((resolve) => {
     if (!RESULTS_LOG_URL) { resolve(null); return; }
     const callbackName = 'lookupCallback_' + Date.now();
@@ -2224,7 +2228,7 @@ function fetchAssessmentResult(email){
       resolve(result || null);
     };
     const script = document.createElement('script');
-    script.src = RESULTS_LOG_URL + '?action=lookup&email=' + encodeURIComponent(email) + '&callback=' + callbackName;
+    script.src = RESULTS_LOG_URL + '?action=lookup&email=' + encodeURIComponent(email) + '&idToken=' + encodeURIComponent(idToken) + '&callback=' + callbackName;
     script.onerror = function(){ resolve(null); };
     document.body.appendChild(script);
   });

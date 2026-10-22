@@ -104,6 +104,10 @@ async function badgesTests(store){
   dlg.click(); await sleep(30);
   t('clicking outside closes it', dlg.hidden);
   t('the back link and the card use the same names as the menu', /Back to My Learning/.test(document.querySelector('.back-link').textContent) && /My Badges/.test(card.querySelector('h2').textContent));
+  $('editCompany').value = 'Acme Hlth'; window.handleCompanyInput(); await sleep(900);
+  const chip = $('companySuggest');
+  t('a company suggestion is shown as plain text, so a booby-trapped name cannot run', chip.style.display !== 'none' && /Did you mean <img/.test(chip.textContent) && !chip.querySelector('img') && !window.__pwned, chip.innerHTML);
+  t('the suggestion asks the backend with the sign-in, never for the whole list', window.__calls.some(c => /^companyMatch@/.test(c)) && !window.__calls.some(c => /^companies@/.test(c)), window.__calls.join());
   t('the Profile menu has a My Badges link', !!document.querySelector('.pa-acct-menu a[href="/profile#badges"]'));
 }
 

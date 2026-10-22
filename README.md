@@ -298,6 +298,20 @@ earn. The dashboard shows a "New badge!" pop-up when one is newly earned.
 - Days before this release count only where a lesson was finished (`lessonLog`), so "Showing up" starts
   counting visits from the day it goes live.
 
+## Security notes
+
+- **No secrets in this repository.** Keys live in Apps Script script properties (GROQ_API_KEY,
+  FIREBASE_SERVICE_ACCOUNT, NOTIFY_SECRET, BLOCKED_SENDERS). The Firebase web API key in the pages is public by
+  design; restrict it in Google Cloud (APIs & Services → Credentials) to the site's addresses.
+- **Who sees what** is enforced by `firestore.rules` (tested in `tests/firestore-rules.test.mjs`).
+- **The Apps Script backend** answers anyone on the internet, so:
+  - anything about a person (their result lookup, progress sync, welcome, feedback, Ask AI) needs their Firebase
+    sign-in token, and the email always comes from that token, never from the request;
+  - the list of companies people entered is never sent out; My Profile asks for one close spelling (`companyMatch`);
+  - text from visitors is written to the sheets with `leadSafeCell_`, so it can never run as a formula;
+  - JSONP callback names are checked (`safeCallback_`).
+- **Pages** show other people's text with `textContent` or an escape function, never as raw HTML.
+
 ## Emails: who sends what
 
 - `apps-script/Code.gs` section 9 holds the list of addresses (`MAIL_ADDR_`). `sendMail_` sends from the chosen address when Gmail lists it as one this account may send as, and otherwise sends from the account that owns the script, so adding an address later needs no code change.

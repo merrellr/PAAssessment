@@ -40,8 +40,9 @@ const mkSheet = (name) => {
   const rows = sheets[name];
   return {
     appendRow: (r) => { rows.push(r); }, getLastRow: () => rows.length, setFrozenRows(){},
-    getDataRange: () => ({ getValues: () => rows }),
-    getRange: (row, col, n) => ({ getValues: () => rows.slice(row - 1, row - 1 + n).map(r => [r[col - 1]]) }),
+    getDataRange: () => ({ getValues: () => rows.map(r => r.slice()) }),
+    getRange: (row, col, n) => ({ getValues: () => rows.slice(row - 1, row - 1 + n).map(r => [r[col - 1]]), setValues: (v) => { rows[row - 1] = v[0].slice(); } }),
+    getLastColumn: () => 999,
     deleteRow: (i) => { rows.splice(i - 1, 1); }
   };
 };
@@ -350,6 +351,37 @@ console.log('--- blocked senders ---');
   props.BLOCKED_SENDERS = 'new.person@example.com';
   t('a token for a blocked address is refused (so welcome, feedback and Ask AI all refuse them)', G('verifyFirebaseIdToken_')('new-token') === null && !!G('verifyFirebaseIdToken_')('noname-token'));
   t('the welcome endpoint refuses a blocked address', G('welcomeEndpoint_')('new-token').error === 'not_verified' && sentMail.length === 0);
+}
+
+console.log('--- security: lookups, company names, sheet cells, callback names ---');
+{
+  reset();
+  const out = (r) => r.text;
+  t('a callback name that is not a plain function name is replaced', out(G('jsonpOut_')('alert(1);x', { ok: 1 })) === 'callback({"ok":1});' && out(G('jsonpOut_')('cb_12$', 1)) === 'cb_12$(1);');
+  // a results sheet: header, then two people
+  const row = (email, company, pct) => { const r = [new Date('2026-01-01'), 'N', email, company, '', '', '', pct, 'Moderate Experience']; for (let i = 0; i < 7; i++) r.push(pct); return r; };
+  sheets.Responses = [['Timestamp'], row('new.person@example.com', 'Acme Health', 55), row('victim@example.com', 'Secret Client Ltd', 80)];
+  const get = (p) => JSON.parse(out(G('doGet')({ parameter: Object.assign({ callback: 'cb' }, p) })).replace(/^cb\(|\);$/g, ''));
+  t('looking up a result without signing in returns nothing, even with an email', get({ action: 'lookup', email: 'victim@example.com' }) === null);
+  t('signed in, the lookup returns only your own result, whatever email is asked for', get({ action: 'lookup', email: 'victim@example.com', idToken: 'new-token' }).overallPct === 55);
+  t('the old full company list is no longer sent', !Array.isArray(get({ action: 'companies' })));
+  t('company suggestions need a sign-in', get({ action: 'companyMatch', q: 'Acme Helth' }).error === 'not_verified');
+  t('signed in, a close misspelling gets the one matching name', get({ action: 'companyMatch', q: 'Acme Helth', idToken: 'new-token' }).match === 'Acme Health');
+  t('anything not close gets nothing, so the list cannot be read out', get({ action: 'companyMatch', q: 'Secret', idToken: 'new-token' }).match === null && get({ action: 'companyMatch', q: 'Acme Health', idToken: 'new-token' }).match === null);
+  // the assessment form (anyone can send it): a formula never lands as a formula
+  sheets.Responses = [['Timestamp']];
+  G('doPost')({ postData: { contents: JSON.stringify({ name: '=IMPORTXML("http://x.test","//a")', email: 'a@b.com', company: '+SUM(1)', jobTitle: '@x', overallPct: 50 }) } });
+  const saved = sheets.Responses[1];
+  t('text that would run as a formula is saved as plain text', saved[1] === '\'=IMPORTXML("http://x.test","//a")' && saved[3] === "'+SUM(1)" && saved[4] === "'@x" && saved[7] === 50);
+  // progress sync: only the signed-in person's own rows
+  sheets.Progress = [['Timestamp']];
+  const sync = (body) => G('doPost')({ postData: { contents: JSON.stringify(Object.assign({ action: 'syncProgress' }, body)) } });
+  const r1 = { email: 'victim@example.com', domain: 'discovery', tier: 'novice', courseId: 'discovery-novice', status: 'Assigned', lessonsCompleted: 5, totalLessons: 5, percentComplete: 100, courseStatus: '=HYPERLINK("x")' };
+  t('progress without a sign-in is refused', sync({ rows: [r1] }).text === 'NOT_VERIFIED' && sheets.Progress.length === 1);
+  sync({ idToken: 'new-token', rows: [r1] });
+  t('signed in, the rows are saved under their own email, never the one in the request', sheets.Progress.length === 2 && sheets.Progress[1][1] === 'new.person@example.com' && sheets.Progress[1][9] === '\'=HYPERLINK("x")');
+  sync({ idToken: 'new-token', rows: [Object.assign({}, r1, { lessonsCompleted: 4 })] });
+  t('a later sync updates the same row', sheets.Progress.length === 2 && sheets.Progress[1][6] === 4);
 }
 
 console.log('\n' + pass + ' passed, ' + fail + ' failed');

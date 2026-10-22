@@ -169,8 +169,7 @@
       </div>
       <div>
         <label class="profile-field-label">Company</label>
-        <input class="text-input has-companion" type="text" id="editCompany" placeholder="Company (start typing)" list="companyList" autocomplete="off" oninput="handleCompanyInput()">
-        <datalist id="companyList"></datalist>
+        <input class="text-input has-companion" type="text" id="editCompany" placeholder="Company (start typing)" autocomplete="off" oninput="handleCompanyInput()">
         <div class="suggest-chip" id="companySuggest" style="display:none;"></div>
       </div>
     </div>
@@ -380,70 +379,28 @@ function populateStaticDatalists(){
 }
 populateStaticDatalists();
 
-let knownCompanies = [];
-
-function loadKnownCompanies(){
-  if (!RESULTS_LOG_URL) return;
-  const callbackName = 'companiesCallback_' + Date.now();
-  window[callbackName] = function(list){
-    knownCompanies = list || [];
-    const dl = document.getElementById('companyList');
-    dl.innerHTML = '';
-    knownCompanies.forEach(name => {
-      const el = document.createElement('option');
-      el.value = name;
-      dl.appendChild(el);
-    });
-    delete window[callbackName];
-    script.remove();
-  };
-  const script = document.createElement('script');
-  script.src = RESULTS_LOG_URL + '?action=companies&callback=' + callbackName;
-  script.onerror = function(){ /* fail silently — company field still works as plain text */ };
-  document.body.appendChild(script);
-}
-loadKnownCompanies();
-
-function editDistance(a, b){
-  a = a.toLowerCase().trim(); b = b.toLowerCase().trim();
-  const dp = Array(a.length + 1).fill(null).map(() => Array(b.length + 1).fill(0));
-  for (let i = 0; i <= a.length; i++) dp[i][0] = i;
-  for (let j = 0; j <= b.length; j++) dp[0][j] = j;
-  for (let i = 1; i <= a.length; i++){
-    for (let j = 1; j <= b.length; j++){
-      dp[i][j] = a[i-1] === b[j-1] ? dp[i-1][j-1] : 1 + Math.min(dp[i-1][j], dp[i][j-1], dp[i-1][j-1]);
-    }
-  }
-  return dp[a.length][b.length];
-}
-
+/* "Did you mean …?" for the company name. The backend compares what was typed with the companies
+   people have entered and sends back at most one close spelling, only to someone signed in, so the
+   list of companies is never sent to the browser. The suggestion is shown as text, never as HTML. */
+let companyTimer = null, companySeq = 0;
 window.handleCompanyInput = function(){
   const input = document.getElementById('editCompany');
   const chip = document.getElementById('companySuggest');
   const typed = input.value.trim();
-
-  if (typed.length < 3 || knownCompanies.includes(typed)){
-    chip.style.display = 'none';
-    return;
-  }
-
-  let bestMatch = null, bestDist = Infinity;
-  knownCompanies.forEach(name => {
-    const dist = editDistance(typed, name);
-    if (dist < bestDist) { bestDist = dist; bestMatch = name; }
-  });
-
-  const threshold = typed.length <= 6 ? 1 : 2;
-  if (bestMatch && bestDist > 0 && bestDist <= threshold){
-    chip.innerHTML = 'Did you mean <b>' + bestMatch + '</b>?';
+  chip.style.display = 'none';
+  clearTimeout(companyTimer);
+  if (typed.length < 3 || !currentUser || !window.PAAccount) return;
+  const seq = ++companySeq;
+  companyTimer = setTimeout(async () => {
+    const r = await window.PAAccount.backend({ action: 'companyMatch', q: typed, idToken: await currentUser.getIdToken() });
+    if (seq !== companySeq || !r || !r.ok || !r.match || input.value.trim() !== typed) return;
+    const match = String(r.match);
+    chip.textContent = '';
+    chip.append('Did you mean ');
+    const b = document.createElement('b'); b.textContent = match; chip.append(b, '?');
     chip.style.display = 'inline-flex';
-    chip.onclick = () => {
-      input.value = bestMatch;
-      chip.style.display = 'none';
-    };
-  } else {
-    chip.style.display = 'none';
-  }
+    chip.onclick = () => { input.value = match; chip.style.display = 'none'; };
+  }, 450);
 };
 
 function friendlyAuthError(code){

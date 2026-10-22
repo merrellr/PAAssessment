@@ -266,13 +266,15 @@ const app = initializeApp({
 const auth = getAuth(app);
 const RESULTS_LOG_URL = "https://script.google.com/macros/s/AKfycbyMQnshyho2q3igshqZmIm6RyJCYl1WsRJbShHz2blCt81iVmlngeNlYfO0QltR7TjwHg/exec";
 
-function fetchAssessmentResult(email){
+// Their own latest result from the results sheet: the backend takes the email from the sign-in token.
+async function fetchAssessmentResult(user){
+  const email = user.email, idToken = await user.getIdToken().catch(() => '');
   return new Promise((resolve) => {
     if (!RESULTS_LOG_URL || !email){ resolve(null); return; }
     const cb = 'fwLookup_' + Date.now();
     const script = document.createElement('script');
     window[cb] = function(result){ delete window[cb]; script.remove(); resolve(result || null); };
-    script.src = RESULTS_LOG_URL + '?action=lookup&email=' + encodeURIComponent(email) + '&callback=' + cb;
+    script.src = RESULTS_LOG_URL + '?action=lookup&email=' + encodeURIComponent(email) + '&idToken=' + encodeURIComponent(idToken) + '&callback=' + cb;
     script.onerror = function(){ delete window[cb]; script.remove(); resolve(null); };
     document.body.appendChild(script);
   });
@@ -286,7 +288,7 @@ onAuthStateChanged(auth, async (user) => {
     return;
   }
   if (backLink){ backLink.textContent = '← Back to My Learning'; backLink.setAttribute('href', '/lms-dashboard'); }
-  const result = await fetchAssessmentResult(user.email);
+  const result = await fetchAssessmentResult(user);
   if (result && cta) cta.textContent = 'Retake the Assessment →';
 });
 </script>

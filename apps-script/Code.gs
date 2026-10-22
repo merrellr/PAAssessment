@@ -56,7 +56,7 @@ function doPost(e) {
   // two records of one assessment can be matched up.
   row.push(data.assessmentId || "");
 
-  sheet.appendRow(row);
+  sheet.appendRow(row.map(leadSafeCell_));
   return ContentService.createTextOutput("OK");
 }
 
@@ -64,18 +64,22 @@ function doPost(e) {
 // found, otherwise appends a new one. This keeps the Progress sheet as a
 // current snapshot instead of growing forever with duplicate history.
 function handleProgressSync(data) {
+  // Only the signed-in person's own rows: the email comes from their sign-in, not from the request.
+  var who = null;
+  try { who = verifyFirebaseIdToken_(data.idToken || ""); } catch (err) { who = null; }
+  if (!who || !Array.isArray(data.rows)) return ContentService.createTextOutput("NOT_VERIFIED");
   const sheet = getOrCreateProgressSheet();
   const values = sheet.getDataRange().getValues();
 
   data.rows.forEach(function (r) {
     const rowData = [
-      new Date(), r.email, r.domain, r.tier, r.courseId,
+      new Date(), who.email, r.domain, r.tier, r.courseId,
       r.status, r.lessonsCompleted, r.totalLessons, r.percentComplete, r.courseStatus
-    ];
+    ].map(leadSafeCell_);
 
     let foundIndex = -1;
     for (let i = 1; i < values.length; i++) {
-      if (values[i][1] === r.email && values[i][4] === r.courseId) {
+      if (values[i][1] === who.email && values[i][4] === rowData[4]) {
         foundIndex = i;
         break;
       }
@@ -179,22 +183,21 @@ function doGet(e) {
   const values = sheet.getDataRange().getValues();
   const rows = values.slice(1); // drop header row
 
-  if (e.parameter.action === "companies") {
-    const names = rows.map(function (r) { return r[3]; }).filter(function (v) { return v; });
-    const unique = Array.from(new Set(names)).sort();
-    const callback = e.parameter.callback;
-    const json = JSON.stringify(unique);
-    const output = callback ? (callback + "(" + json + ")") : json;
-    const mimeType = callback ? ContentService.MimeType.JAVASCRIPT : ContentService.MimeType.JSON;
-    return ContentService.createTextOutput(output).setMimeType(mimeType);
+  // "Did you mean …?" on My Profile: one close spelling of a company already entered, for someone
+  // signed in. The full list of companies is never sent out.
+  if (e.parameter.action === "companyMatch") {
+    return jsonpOut_(e.parameter.callback, companyMatch_(e.parameter.idToken || "", e.parameter.q || "", rows));
   }
 
-  // Runs when the LMS dashboard looks up someone's most recent
-  // assessment result (by email) to build their recommendations.
+  // The dashboard, lessons and framework page look up the signed-in person's own latest
+  // assessment result (for accounts from before results were saved with the account).
+  // The email comes from their sign-in, never from the request.
   if (e.parameter.action === "lookup") {
-    const email = (e.parameter.email || "").toLowerCase().trim();
+    var who = null;
+    try { who = verifyFirebaseIdToken_(e.parameter.idToken || ""); } catch (err) { who = null; }
+    const email = who ? who.email : "";
     let match = null, firstMatch = null;
-    rows.forEach(function (r) {
+    if (email) rows.forEach(function (r) {
       if (String(r[2]).toLowerCase().trim() === email) {
         if (!firstMatch) firstMatch = r; // first one encountered is the earliest submission
         match = r; // later rows keep overwriting, so this ends up the most recent
@@ -211,12 +214,7 @@ function doGet(e) {
         result.categoryPct[key] = match[9 + i];
       });
     }
-
-    const callback = e.parameter.callback;
-    const json = JSON.stringify(result);
-    const output = callback ? (callback + "(" + json + ")") : json;
-    const mimeType = callback ? ContentService.MimeType.JAVASCRIPT : ContentService.MimeType.JSON;
-    return ContentService.createTextOutput(output).setMimeType(mimeType);
+    return jsonpOut_(e.parameter.callback, result);
   }
 
   const stats = {
@@ -239,12 +237,40 @@ function doGet(e) {
     });
   }
 
-  const callback = e.parameter.callback;
-  const json = JSON.stringify(stats);
-  const output = callback ? (callback + "(" + json + ")") : json;
-  const mimeType = callback ? ContentService.MimeType.JAVASCRIPT : ContentService.MimeType.JSON;
+  if (e.parameter.callback) return jsonpOut_(e.parameter.callback, stats);
+  return ContentService.createTextOutput(JSON.stringify(stats)).setMimeType(ContentService.MimeType.JSON);
+}
 
-  return ContentService.createTextOutput(output).setMimeType(mimeType);
+// The closest company name to what was typed, if it is a likely misspelling (1 letter off for short
+// names, 2 for longer ones). Only for someone signed in.
+function companyMatch_(idToken, q, rows) {
+  var who = null;
+  try { who = verifyFirebaseIdToken_(idToken); } catch (err) { who = null; }
+  if (!who) return { ok: false, error: 'not_verified' };
+  var typed = String(q || '').trim().slice(0, 100);
+  if (typed.length < 3) return { ok: true, match: null };
+  var low = typed.toLowerCase(), best = null, bestDist = Infinity, seen = {};
+  rows.forEach(function (r) {
+    var name = String(r[3] || '').trim();
+    if (!name || seen[name]) return;
+    seen[name] = 1;
+    if (Math.abs(name.length - typed.length) > 2) return;
+    var d = editDistance_(low, name.toLowerCase());
+    if (d < bestDist) { bestDist = d; best = name; }
+  });
+  var limit = typed.length <= 6 ? 1 : 2;
+  return { ok: true, match: best && bestDist > 0 && bestDist <= limit ? best : null };
+}
+
+function editDistance_(a, b) {
+  var prev = [], cur, i, j;
+  for (j = 0; j <= b.length; j++) prev[j] = j;
+  for (i = 1; i <= a.length; i++) {
+    cur = [i];
+    for (j = 1; j <= b.length; j++) cur[j] = a[i - 1] === b[j - 1] ? prev[j - 1] : 1 + Math.min(prev[j], cur[j - 1], prev[j - 1]);
+    prev = cur;
+  }
+  return prev[b.length];
 }
 
 function getOrCreateSheet() {
@@ -287,8 +313,15 @@ var SCENARIO_MIN_WORD_COUNT_ = 12;
 
 function jsonpOut_(callback, data) {
   return ContentService
-    .createTextOutput(callback + '(' + JSON.stringify(data) + ');')
+    .createTextOutput(safeCallback_(callback) + '(' + JSON.stringify(data) + ');')
     .setMimeType(ContentService.MimeType.JAVASCRIPT);
+}
+
+// The page names the function our answer calls. Only a plain JavaScript name is accepted, so the
+// answer can never carry other code.
+function safeCallback_(callback) {
+  var c = String(callback || '');
+  return /^[A-Za-z_$][\w$]{0,99}$/.test(c) ? c : 'callback';
 }
 
 function looksLikeGibberish_(text) {
@@ -417,7 +450,7 @@ function logScenarioGrading_(answer, result, note) {
     }
     sheet.appendRow([
       new Date(),
-      answer,
+      leadSafeCell_(String(answer || '')),
       result ? result.total : '',
       result ? result.tier : '',
       result ? result.internal_rationale : '',
@@ -765,8 +798,8 @@ function handleFunnelEvent_(data) {
     sheet.appendRow([
       new Date(),                  // server receive time
       data.ts || '',               // client ISO timestamp
-      String(data.event || ''),    // assessmentStarted | resultsViewed | accountCreated
-      String(data.tier || ''),     // tier band when the event carries one
+      leadSafeCell_(String(data.event || '')),    // assessmentStarted | resultsViewed | accountCreated
+      leadSafeCell_(String(data.tier || '')),     // tier band when the event carries one
       JSON.stringify(data)         // full payload, forward-compatible with new fields
     ]);
 

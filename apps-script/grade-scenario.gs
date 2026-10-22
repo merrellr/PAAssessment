@@ -78,7 +78,7 @@ var SCENARIO_MIN_WORD_COUNT_ = 12;
 
 function jsonpOut_(callback, data) {
   return ContentService
-    .createTextOutput(callback + '(' + JSON.stringify(data) + ');')
+    .createTextOutput((/^[A-Za-z_$][\w$]{0,99}$/.test(String(callback)) ? callback : 'callback') + '(' + JSON.stringify(data) + ');')
     .setMimeType(ContentService.MimeType.JAVASCRIPT);
 }
 

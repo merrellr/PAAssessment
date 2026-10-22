@@ -331,7 +331,9 @@ const db = getFirestore(app);
    RESULTS_LOG_URL in lms-dashboard.html and index.html. */
 const RESULTS_LOG_URL = "https://script.google.com/macros/s/AKfycbyMQnshyho2q3igshqZmIm6RyJCYl1WsRJbShHz2blCt81iVmlngeNlYfO0QltR7TjwHg/exec";
 
-function fetchAssessmentResult(email){
+// Their own latest result from the results sheet: the backend takes the email from the sign-in token.
+async function fetchAssessmentResult(user){
+  const email = user.email, idToken = await user.getIdToken().catch(() => '');
   return new Promise((resolve) => {
     if (!RESULTS_LOG_URL) { resolve(null); return; }
     const callbackName = 'lookupCallback_' + Date.now();
@@ -341,7 +343,7 @@ function fetchAssessmentResult(email){
       resolve(result || null);
     };
     const script = document.createElement('script');
-    script.src = RESULTS_LOG_URL + '?action=lookup&email=' + encodeURIComponent(email) + '&callback=' + callbackName;
+    script.src = RESULTS_LOG_URL + '?action=lookup&email=' + encodeURIComponent(email) + '&idToken=' + encodeURIComponent(idToken) + '&callback=' + callbackName;
     script.onerror = function(){ resolve(null); };
     document.body.appendChild(script);
   });
@@ -408,7 +410,7 @@ onAuthStateChanged(auth, async (user) => {
     assessmentResult = (gateSnap.exists() && gateSnap.data().assessmentResult) || null;
   } catch (e){ /* fall through to the Sheet lookup */ }
   if (!assessmentResult){
-    assessmentResult = await fetchAssessmentResult(user.email);
+    assessmentResult = await fetchAssessmentResult(user);
   }
   if (!assessmentResult){
     showAssessmentLock();
