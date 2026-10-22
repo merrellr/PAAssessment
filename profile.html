@@ -103,9 +103,11 @@
   .setting-hint{ font-size: 0.7812rem; color: var(--gray); margin: 6px 0 0; }
 </style>
 <link rel="stylesheet" href="pa-theme.css">
+<link rel="stylesheet" href="badges.css">
 <script src="analytics.js"></script>
 <script src="company-core.js"></script>
 <script src="notify-core.js"></script>
+<script src="badges-core.js"></script>
 </head>
 <body>
 <script src="pa-shell.js"></script>
@@ -207,6 +209,12 @@
     <div class="field-error" id="editProfileSuccess" style="color:var(--ok);"></div>
 
     <button class="btn btn-primary" onclick="handleSaveProfile()">Save profile</button>
+  </div>
+
+  <div class="card" id="badges" tabindex="-1">
+    <h2>My badges</h2>
+    <p style="margin-top:4px;">Earned by showing up, finishing lessons and courses, meeting your weekly goal and growing your skills. Once earned, a badge is yours to keep.</p>
+    <div id="badgesBody"><p style="margin:0;">Loading your badges…</p></div>
   </div>
 
   <div class="card" id="goals" tabindex="-1">
@@ -491,6 +499,7 @@ onAuthStateChanged(auth, async (user) => {
   document.getElementById('editCompanySize').value = profile.companySize || '';
   document.getElementById('editIndustry').value = profile.industry || '';
   showGoals(data);
+  showBadges(data, user);
   // Company admins also choose how often their company's report comes.
   getDoc(doc(db, 'memberships', user.uid))
     .then(m => { if (m.exists() && m.data().role === 'admin' && m.data().status === 'active') $id('orgReportSetting').hidden = false; })
@@ -587,6 +596,51 @@ $id('goalsSaveBtn').addEventListener('click', async () => {
     $id('goalsSaveBtn').disabled = false;
   }
 });
+
+/* ---------------------------------------------------------------- My badges */
+// Worked out by badges-core.js from the progress document. Badges seen for the first time
+// are stored in progress.badges with today's date, so "earned on" stays put.
+let badgeFilter = 'all';
+function showBadges(data, user){
+  const B = window.BadgesCore;
+  const st = B.stats({ progress: data, assessment: data.assessmentResult || null, nowMs: Date.now(), offsetMin: -new Date().getTimezoneOffset() });
+  const list = B.evaluate(st, data.badges);
+  const fresh = B.newlyEarned(list, Date.now());
+  if (Object.keys(fresh).length){
+    setDoc(doc(db, 'progress', user.uid), { badges: Object.assign({}, data.badges, fresh) }, { merge: true }).catch(() => {});
+    list.forEach(b => { if (fresh[b.id]) b.earnedAt = fresh[b.id]; });
+  }
+  const sum = B.summary(list);
+  const left = sum.total - sum.have;
+  const esc = (t) => String(t).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  const when = (iso) => new Date(iso).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' });
+  const stateOf = (b) => b.have ? (b.earnedAt ? 'Earned ' + when(b.earnedAt) : 'Earned') : b.value + ' of ' + b.goal;
+  let html = '<div class="bd-head"><div class="bd-count">' + sum.have + ' <small>of ' + sum.total + ' earned</small></div>' +
+    '<div class="bd-bar" role="progressbar" aria-label="Badges earned" aria-valuemin="0" aria-valuemax="' + sum.total + '" aria-valuenow="' + sum.have + '"><span style="width:' + sum.pct + '%"></span></div>' +
+    '<div style="font-size:0.8125rem; color:var(--ink-soft);">' + (left ? left + ' more to earn' : 'Every badge earned. Amazing!') + '</div></div>';
+  const next = B.upNext(list, 3);
+  if (next.length){
+    html += '<div class="bd-next"><h3>Up next</h3><ul>' + next.map(b => '<li>' + B.medalSvg(b, 40) + '<div><b>' + esc(b.title) + '</b><span>' + esc(b.text) + ' · ' + b.value + ' of ' + b.goal + '</span></div></li>').join('') + '</ul></div>';
+  }
+  html += '<div class="bd-filter" role="group" aria-label="Show badges">' + [['all', 'All'], ['have', 'Earned'], ['todo', 'Still to earn']].map(f => '<button type="button" data-f="' + f[0] + '" aria-pressed="false">' + f[1] + '</button>').join('') + '</div>';
+  B.GROUPS.forEach(g => {
+    const items = list.filter(b => b.group === g[0]);
+    html += '<section class="bd-group" data-g="' + g[0] + '"><h3>' + esc(g[1]) + ' <em>' + items.filter(b => b.have).length + ' of ' + items.length + '</em></h3><ul class="bd-grid">' +
+      items.map(b => '<li class="bd-item' + (b.have ? ' is-on' : '') + '" data-have="' + (b.have ? 1 : 0) + '" aria-label="' + esc(b.title + ': ' + b.text + '. ' + (b.have ? stateOf(b) : 'Not earned yet, ' + stateOf(b))) + '">' +
+        B.medalSvg(b, 64) + '<span class="bd-title">' + esc(b.title) + '</span><span class="bd-text">' + esc(b.text) + '</span><span class="bd-state">' + (b.have ? '✓ ' : '') + stateOf(b) + '</span></li>').join('') + '</ul></section>';
+  });
+  $id('badgesBody').innerHTML = html;
+  $id('badgesBody').querySelectorAll('.bd-filter button').forEach(btn => btn.addEventListener('click', () => { badgeFilter = btn.dataset.f; paintBadgeFilter(); }));
+  paintBadgeFilter();
+  if (location.hash === '#badges') $id('badges').focus();
+}
+window.addEventListener('hashchange', () => { if (location.hash === '#badges' || location.hash === '#goals') $id(location.hash.slice(1)).focus(); });
+function paintBadgeFilter(){
+  const body = $id('badgesBody');
+  body.querySelectorAll('.bd-filter button').forEach(b => b.setAttribute('aria-pressed', b.dataset.f === badgeFilter ? 'true' : 'false'));
+  body.querySelectorAll('.bd-item').forEach(li => { li.hidden = (badgeFilter === 'have' && li.dataset.have !== '1') || (badgeFilter === 'todo' && li.dataset.have === '1'); });
+  body.querySelectorAll('.bd-group').forEach(g => { g.hidden = !g.querySelector('.bd-item:not([hidden])'); });
+}
 
 /* ------------------------------------------------------------ profile photo */
 // The photo is resized in the browser to a 160 x 160 JPEG (about 10 KB) and kept on the person's own

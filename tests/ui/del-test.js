@@ -71,12 +71,36 @@ async function goalsTests(store){
   t('saving the profile form afterwards keeps the goals', store['progress/uDel'].goals.weeklyLessons === 2 && store['progress/uDel'].notify.checkin === 'daily');
 }
 
+// My badges: what they have, how many are left, what is next, and the dates kept on their record.
+async function badgesTests(store){
+  const card = $('badges'), items = card.querySelectorAll('.bd-item');
+  const on = Array.prototype.filter.call(items, li => li.classList.contains('is-on')).map(li => li.querySelector('.bd-title').textContent);
+  const total = window.BadgesCore.BADGES.length;
+  t('every badge is listed, in its group', items.length === total && card.querySelectorAll('.bd-group').length === window.BadgesCore.GROUPS.length);
+  t('the earned ones are marked, the others are not', on.indexOf('Welcome aboard') > -1 && on.indexOf('Graduated to Advanced') > -1 && on.indexOf('First course') > -1 && on.indexOf('5 courses') === -1, on.join(' | '));
+  t('a badge kept on their record stays earned', on.indexOf('7 days') > -1);
+  t('the count says how many are earned and how many more to go', new RegExp('^' + on.length + ' of ' + total + ' earned').test(card.querySelector('.bd-count').textContent) && card.textContent.indexOf((total - on.length) + ' more to earn') > -1, card.querySelector('.bd-head').textContent);
+  t('a stored badge shows the date it was earned', /Earned 5 Jan 2026|Earned Jan 5, 2026/.test(Array.prototype.filter.call(items, li => /Welcome aboard/.test(li.textContent))[0].textContent));
+  t('a locked badge shows how far along they are', /1 of 5/.test(Array.prototype.filter.call(items, li => /^5 courses/.test(li.querySelector('.bd-title').textContent))[0].textContent));
+  t('"Up next" lists three badges still to earn', card.querySelectorAll('.bd-next li').length === 3);
+  const b = store['progress/uDel'].badges;
+  t('newly earned badges are saved with a date, and the stored dates are left alone', b.account === '2026-01-05T12:00:00.000Z' && /^\d{4}-\d\d-\d\dT/.test(b.graduate || '') && /^\d{4}-\d\d-\d\dT/.test(b.course1 || '') && !b.course5, JSON.stringify(b));
+  t('the profile details are left alone', store['progress/uDel'].profile.jobTitle === 'PM');
+  card.querySelector('[data-f="todo"]').click();
+  const shown = Array.prototype.filter.call(items, li => !li.hidden);
+  t('"Still to earn" hides the earned ones', shown.length === total - on.length && shown.every(li => !li.classList.contains('is-on')));
+  card.querySelector('[data-f="have"]').click();
+  t('"Earned" shows only those, and drops empty groups', Array.prototype.filter.call(items, li => !li.hidden).length === on.length && Array.prototype.some.call(card.querySelectorAll('.bd-group'), g => g.hidden));
+  t('the Profile menu has a My badges link', !!document.querySelector('.pa-acct-menu a[href="/profile#badges"]'));
+}
+
 (async function(){
   try {
     await sleep(1500);
     const store = window.__store;
     if (window.__scn === 'photo') await photoTests(store);
     else if (/^goals/.test(window.__scn)) await goalsTests(store);
+    else if (window.__scn === 'badges') await badgesTests(store);
     else {
       $('deleteConfirmText').value = 'DELETE';
       $('deletePassword').value = 'secret';

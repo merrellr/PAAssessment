@@ -274,6 +274,23 @@ manual review — it holds no uid and isn't read by the app.
 - Tests: `tests/notify-core.test.mjs`, `tests/notify-server.test.mjs`, and "profile goals", "email settings", "last
   lesson" and "dashboard" in the UI runner.
 
+## My badges
+
+My profile → **My badges** (`/profile#badges`, also in both Profile menus) shows every badge, how many are
+earned out of how many, the three closest to being earned ("Up next"), and a filter for earned / still to
+earn. The dashboard shows "X of 28 badges" next to the weekly goal and a "New badge!" pop-up when one is
+newly earned.
+
+- The list and all the counting live in `badges-core.js` (tested by `tests/badges-core.test.mjs`); styles in
+  `badges.css`. To add a badge, add a line to `BADGES` with a `metric` that `stats()` already counts (or add one).
+- Groups: Getting started, Showing up (7/14/30/60/100 days), Weekly goal, Lessons (10/25/50/100),
+  Courses (1/5/10/20/all 28), Mastery (area or plan complete, Advanced in an area, Graduated to Advanced overall).
+- Everything comes from the learner's own `progress/{uid}` document, so no new rules are needed. Two new fields:
+  `activeLog` (`{ 'YYYY-MM-DD': 1 }`, written once a day by the dashboard and lesson pages, about a year kept)
+  and `badges` (`{ id: 'ISO date first earned' }`). A badge once earned stays earned, even if a retake scores lower.
+- Days before this release count only where a lesson was finished (`lessonLog`), so "Showing up" starts
+  counting visits from the day it goes live.
+
 ## Emails: who sends what
 
 - `apps-script/Code.gs` section 9 holds the list of addresses (`MAIL_ADDR_`). `sendMail_` sends from the chosen address when Gmail lists it as one this account may send as, and otherwise sends from the account that owns the script, so adding an address later needs no code change.

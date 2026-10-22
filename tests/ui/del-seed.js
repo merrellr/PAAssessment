@@ -17,6 +17,13 @@
     var ts = Timestamp.now();
     store['progress/uDel'] = { courses: {}, profile: { phone: '555' }, orgIds: scn === 'nonmember' ? [] : ['orgOld', 'orgA'] };
     if (scn === 'goals') { store['progress/uDel'].goals = { weeklyLessons: 3, focus: ['aiOrg'] }; store['progress/uDel'].notify = { checkin: 'monthly' }; store['progress/uDel'].lessonLog = { '2026-10-01': 2 }; }
+    if (scn === 'badges'){
+      var u = store['progress/uDel'];
+      u.profile = { company: 'Acme', jobTitle: 'PM' };
+      u.courses = { 'discovery-novice': { completed: [1, 2, 3, 4, 5], reflections: { '1': 'My note' } } };
+      u.assessmentResult = { tier: 'Advanced Experience', overallPct: 82, categoryPct: { discovery: 90, strategy: 60, prioritization: 60, execution: 60, stakeholder: 60, aiIndividual: 60, aiOrg: 60 } };
+      u.badges = { account: '2026-01-05T12:00:00.000Z', active7: '2026-02-01T12:00:00.000Z' };
+    }
     if (scn !== 'nonmember'){
       store['memberships/uDel'] = { orgId: 'orgA', orgName: 'Acme', role: scn === 'goalsadmin' ? 'admin' : 'member', status: 'active', inviteToken: 't', joinedAt: ts, endedAt: null, email: 'del@acme.com', displayName: 'Del User', phone: '555-0100' };
       var sh = function(){ return { identity: { name: 'Del User', email: 'del@acme.com' }, assessment: { tier: 'Lots of Experience', overallPct: 80 }, courses: {}, lastActiveAt: null, updatedAt: ts }; };

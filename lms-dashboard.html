@@ -213,6 +213,7 @@
   }
 </style>
 <link rel="stylesheet" href="pa-theme.css">
+<link rel="stylesheet" href="badges.css">
 <script src="analytics.js"></script>
 </head>
 <body>
@@ -253,6 +254,7 @@
         <div class="profile-dropdown-divider"></div>
         <div class="profile-progress-label">My learning</div>
         <a class="profile-dropdown-item" href="/profile">My profile</a>
+        <a class="profile-dropdown-item" href="/profile#badges">My badges</a>
         <a class="profile-dropdown-item" id="changePasswordMenuItem" onclick="openChangePassword()">Change password</a>
         <a class="profile-dropdown-item" onclick="replayDashboardTour()">Replay the tour</a>
 
@@ -558,6 +560,7 @@
       <div style="display:flex; align-items:center; gap:14px; flex-wrap:wrap;">
         <h2 style="font-family:var(--display); font-size:1rem; color:var(--navy-deep); margin:0;">Your Courses</h2>
         <a class="week-goal" id="weekGoal" href="/profile#goals" hidden title="Your weekly goal. Change it on My profile."></a>
+        <a class="bd-pill" id="badgePill" href="/profile#badges" hidden title="See all your badges on My profile."></a>
       </div>
       <div style="display:flex; align-items:center; gap:14px;">
         <div class="catalog-toggle" id="catalogToggle" style="display:none;">
@@ -602,6 +605,7 @@
 <script src="content/framework-data.js"></script>
 <script src="company-core.js"></script>
 <script src="notify-core.js"></script>
+<script src="badges-core.js"></script>
 <script src="pa-icons.js"></script>
 <script type="module">
 /* ================================================================
@@ -1258,8 +1262,50 @@ async function loadDashboard(user){
   populateProfileProgressSummary(progress, assessmentResult);
   renderAssignedStat(progress, assessmentResult);
   renderWeekGoal(progress);
+  renderBadges(user, progress, assessmentResult);
 
   syncProgressReport(user.email, progress, assessmentResult);
+}
+
+/* Badges: "3 of 28 badges" next to the weekly goal, and a pop-up when one is newly earned.
+   Visiting counts as a day of learning (progress.activeLog), written once a day. */
+function renderBadges(user, progress, assessmentResult){
+  const B = window.BadgesCore;
+  if (!B) return;
+  const now = Date.now(), off = -new Date().getTimezoneOffset();
+  const write = {};
+  if (!(progress.activeLog || {})[NotifyCore.dateKey(now, off)]){
+    progress.activeLog = B.logActive(progress.activeLog, now, off);
+    write.activeLog = progress.activeLog;
+  }
+  const list = B.evaluate(B.stats({ progress: progress, assessment: assessmentResult || null, nowMs: now, offsetMin: off }), progress.badges);
+  const fresh = B.newlyEarned(list, now);
+  if (Object.keys(fresh).length){
+    progress.badges = Object.assign({}, progress.badges, fresh);
+    write.badges = progress.badges;
+  }
+  if (Object.keys(write).length) setDoc(doc(db, 'progress', user.uid), write, { merge: true }).catch(() => {});
+
+  const sum = B.summary(list), pill = document.getElementById('badgePill');
+  const best = list.filter(b => b.have).slice(-1)[0] || list[0];
+  pill.innerHTML = B.medalSvg(best, 22) + '<span><b>' + sum.have + ' of ' + sum.total + '</b> badges</span>';
+  pill.setAttribute('aria-label', sum.have + ' of ' + sum.total + ' badges earned. See them on My profile.');
+  pill.hidden = false;
+
+  const won = list.filter(b => fresh[b.id]);
+  if (won.length) showBadgeToast(won);
+}
+function showBadgeToast(won){
+  const B = window.BadgesCore;
+  const esc = (t) => String(t).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  const top = won[won.length - 1];
+  let el = document.getElementById('badgeToast');
+  if (!el){ el = document.createElement('div'); el.id = 'badgeToast'; el.className = 'bd-toast'; el.setAttribute('role', 'status'); document.body.appendChild(el); }
+  el.innerHTML = B.medalSvg(top, 52) + '<div><span class="bd-t-eyebrow">' + (won.length > 1 ? won.length + ' new badges!' : 'New badge!') + '</span><b>' + esc(top.title) + '</b><p>' +
+    esc(won.length > 1 ? won.map(b => b.title).join(', ') : top.text) + '</p><a href="/profile#badges">See my badges →</a></div><button type="button" class="bd-t-close" aria-label="Close">×</button>';
+  el.hidden = false;
+  el.querySelector('.bd-t-close').addEventListener('click', () => { el.hidden = true; });
+  setTimeout(() => { if (!el.matches(':hover, :focus-within')) el.hidden = true; }, 12000);
 }
 
 /* "This week: 1 of 2 lessons", a ring that fills as lessons are finished, next to

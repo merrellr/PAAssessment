@@ -123,6 +123,7 @@ if (window.self === window.top) {
     section('My learning');
     menu.appendChild(link('My learning dashboard', '/lms-dashboard', page === 'lms-dashboard.html'));
     menu.appendChild(link('My profile', '/profile', page === 'profile.html'));
+    menu.appendChild(link('My badges', '/profile#badges', false));
     if (flags.companyAdmin || flags.owner){
       section(flags.owner ? 'Manage' : 'My company');
       if (flags.companyAdmin) menu.appendChild(link('Company dashboard', '/company', page === 'company.html'));
