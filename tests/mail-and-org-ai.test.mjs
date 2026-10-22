@@ -343,5 +343,14 @@ console.log('--- the feedback form ---');
   t('the web address "?action=feedback" is wired up and answers in JSONP', /^cb\(\{"ok":true/.test(routed.text) && rows().length === 1, routed.text.slice(0, 60));
 }
 
+console.log('--- blocked senders ---');
+{
+  reset();
+  t('without a blocklist, a valid token is accepted', !!G('verifyFirebaseIdToken_')('new-token'));
+  props.BLOCKED_SENDERS = 'new.person@example.com';
+  t('a token for a blocked address is refused (so welcome, feedback and Ask AI all refuse them)', G('verifyFirebaseIdToken_')('new-token') === null && !!G('verifyFirebaseIdToken_')('noname-token'));
+  t('the welcome endpoint refuses a blocked address', G('welcomeEndpoint_')('new-token').error === 'not_verified' && sentMail.length === 0);
+}
+
 console.log('\n' + pass + ' passed, ' + fail + ' failed');
 process.exit(fail ? 1 : 0);

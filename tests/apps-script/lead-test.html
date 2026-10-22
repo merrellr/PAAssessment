@@ -105,6 +105,15 @@ try {
   reset(); var noTime = good(); delete noTime.elapsedMs; var nt = submit(noTime);
   t('leaving out the time taken is treated as too fast', nt.status.ok === true && leads().length === 0);
 
+  /* ---- blocked senders (script property BLOCKED_SENDERS) ---- */
+  reset(); props.BLOCKED_SENDERS = 'spam@x.org, @blocked.edu';
+  var bl = submit(good({ email: 'Spam@X.org' }));
+  t('a blocked address is quietly dropped: it looks like success, but nothing is saved or sent', bl.status.ok === true && leads().length === 0 && sent.length === 0);
+  var bd = submit(good({ email: 'teacher@blocked.edu' }));
+  t('a whole blocked domain is dropped too', bd.status.ok === true && leads().length === 0 && sent.length === 0);
+  var fine = submit(good({ email: 'someone@notblocked.edu' }));
+  t('everyone else gets through as normal', fine.status.ok === true && leads().length === 1 && sent.length === 2);
+
   /* ---- repeats and limits ---- */
   reset(); var d1 = good(); submit(d1); submit(d1); submit(d1);
   t('the same request sent three times is saved once, with one notice and one thank-you', leads().length === 1 && sent.length === 2);
