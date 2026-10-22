@@ -161,12 +161,12 @@ try {
   t('it welcomes them by first name and promises a reply within two business days', /^Thanks, Jane - we have your request$/.test(ack.subject) && /Hi Jane,/.test(ack.body) && /Welcome, and thanks for sharing/.test(ack.body) && /within two business days/.test(ack.body) && /within two business days/.test(ack.htmlBody), ack.subject);
   t('the promise is worded the same on the page and in the email', LEAD_REPLY_WINDOW_ === LeadCore.REPLY_WINDOW);
   t('it recaps what they said, including their note', /You are interested in: AI fluency for my organization/.test(ack.body) && /Your note: We want to assess all 60/.test(ack.body));
-  t('a team leader, organization or anyone who asked for a call is offered the booking page', /calendly\.com\/productadvisory\/30min/.test(ack.body) && ack.htmlBody.indexOf('calendly.com/productadvisory/30min') > -1);
+  t('a team leader, organization or anyone who asked for a call is offered the booking page', /productadvisory\.co\/book/.test(ack.body) && ack.htmlBody.indexOf('productadvisory.co/book') > -1);
   t('and everyone is offered the free assessment', /assessment\.productadvisory\.co\/index\.html/.test(ack.body));
   t('the booking address is the same as the page\'s', LEAD_BOOKING_URL_ === LeadCore.BOOKING_URL);
   t('it says what to do if they did not make the request', /If you did not make this request, you can ignore this email/.test(ack.body));
   reset(); submit(good({ who: 'individual', size: '', role: '', contactPref: 'email', message: '' }));
-  t('an individual who did not ask for a call is not offered the booking page', sent[1].body.indexOf('calendly.com') === -1 && /free Product Learning Assessment/.test(sent[1].body));
+  t('an individual who did not ask for a call is not offered the booking page', sent[1].body.indexOf('productadvisory.co/book') === -1 && /free Product Learning Assessment/.test(sent[1].body));
   reset(); submit(good({ name: '<b>Eve</b> Smith' }));
   t('a name with markup in it is escaped in the thank-you', sent[1].htmlBody.indexOf('<b>Eve') === -1 && sent[1].htmlBody.indexOf('&lt;b&gt;Eve') > -1);
   reset(); submit(good({ id: newId() })); submit(good({ id: newId(), website: 'x' }));

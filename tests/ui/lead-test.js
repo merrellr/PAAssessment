@@ -90,7 +90,7 @@ async function walkOrg(){
       t('it checked at the start that this version of the server is live', window.__calls[0] === 'leadsCheck' && $('backendNote').hidden);
       t('success replaces the form with a thank-you naming the person and the email', shown() === 'doneCard' && /Thanks, Jane/.test(txt('doneTitle')) && /Rob will reply to jane@acme-health\.com within two business days/.test(txt('doneText')), txt('doneText'));
       t('it points on to the free assessment and the Tool Roadmap', $('doneCta').getAttribute('href') === '/' && $('doneSecond').getAttribute('href') === '/tool-requests');
-      t('an organization is offered the booking page as well', !$('doneBook').hidden && $('doneBook').getAttribute('href') === 'https://calendly.com/productadvisory/30min');
+      t('an organization is offered the booking page as well', !$('doneBook').hidden && $('doneBook').getAttribute('href') === 'https://www.productadvisory.co/book');
       t('it shows a short reference', /^Reference: [0-9A-F]{8}$/.test(txt('doneRef')), txt('doneRef'));
       t('the saved draft is cleared once it has been sent', sessionStorage.getItem('pa_lead_form') === null);
     }
@@ -147,7 +147,7 @@ async function walkOrg(){
       $('sendBtn').click();
       await until(() => !$('doneCard').hidden, 12000);
       t('and the request says so', posted().body.contactPref === 'call');
-      t('the thank-you offers a button to pick a time on the booking page, opening in a new tab', !$('doneBook').hidden && $('doneBook').getAttribute('href') === 'https://calendly.com/productadvisory/30min' && $('doneBook').getAttribute('target') === '_blank' && /Pick a time/.test($('doneBook').textContent), $('doneBook').getAttribute('href'));
+      t('the thank-you offers a button to pick a time on the booking page, opening in a new tab', !$('doneBook').hidden && $('doneBook').getAttribute('href') === 'https://www.productadvisory.co/book' && $('doneBook').getAttribute('target') === '_blank' && /Pick a time/.test($('doneBook').textContent), $('doneBook').getAttribute('href'));
       t('the free-assessment button becomes the second choice', $('doneCta').className.indexOf('btn-ghost') > -1);
     }
 
