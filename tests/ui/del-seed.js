@@ -5,7 +5,7 @@
   var scn = new URLSearchParams(location.search).get('scn') || 'member';
   window.__scn = scn;
   window.__fakeUser = { uid: 'uDel', email: 'del@acme.com', displayName: 'Del User', emailVerified: true, providerData: [{ providerId: 'password', email: 'del@acme.com' }], getIdToken: async function(){ return 'tok'; }, reload: async function(){} };
-  if (scn === 'signingoogle' || scn === 'signinlink' || scn === 'mergeother') window.__fakeUser.providerData = [{ providerId: 'google.com', email: 'del@acme.com' }];
+  if (scn === 'signingoogle' || scn === 'signinbrand' || scn === 'signinlink' || scn === 'mergeother') window.__fakeUser.providerData = [{ providerId: 'google.com', email: 'del@acme.com' }];
   if (scn === 'signinlink') { try { localStorage.setItem('pa_link_email', 'me@home.net'); } catch (e) {} history.replaceState(null, '', location.pathname + '?scn=signinlink&linkEmail=1&oobCode=abc&mode=signIn'); }
   // Two accounts: keep one. The other account the second sign-in finds, with more progress than this one.
   if (scn === 'mergekeep'){
@@ -24,7 +24,8 @@
   Object.defineProperty(HTMLScriptElement.prototype, 'src', { configurable: true, get: function(){ return desc.get.call(this); }, set: function(v){
     if (String(v).indexOf('script.google.com') === -1) { desc.set.call(this, v); return; }
     var q = Object.fromEntries(new URL(v).searchParams); window.__calls.push(q.action + '@' + window.__writeLog.length);
-    setTimeout(function(){ var cb = window[q.callback]; if (!cb) return; cb(q.action === 'deleteAccount' ? { ok: true } : (q.action === 'companyMatch' ? { ok: true, match: q.idToken ? '<img src=x onerror="window.__pwned=1">Acme' : null } : null)); }, 10);
+    setTimeout(function(){ var cb = window[q.callback]; if (!cb) return; if (q.action === 'signinLink') { window.__brandAsk = q; cb(scn !== 'signinbrand' ? null : q.email === 'busy@x.com' ? { ok: false, error: 'rate' } : { ok: true, sent: true }); return; }
+      cb(q.action === 'deleteAccount' ? { ok: true } : (q.action === 'companyMatch' ? { ok: true, match: q.idToken ? '<img src=x onerror="window.__pwned=1">Acme' : null } : null)); }, 10);
   } });
   window.__seed = function(store, Timestamp){
     var ts = Timestamp.now();

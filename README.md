@@ -138,6 +138,11 @@ their progress if they change jobs:
   a link is emailed to that address (`sendSignInLinkToEmail`), and opening it on the same device links it
   (`linkWithCredential` with `credentialWithLink`), proving the person owns it. They then set a password for it.
   Needs **Authentication → Sign-in method → Email/Password → Email link (passwordless sign-in)** switched on.
+  The email itself is ours: the page asks the Apps Script (`action=signinLink`, section 17 of `Code.gs`), which
+  asks Firebase for the link only (`accounts:sendOobCode` with `returnOobLink`, using section 16's
+  `FIREBASE_SERVICE_ACCOUNT`) and sends a Product Advisory email from noreply@ with it. Limits: 5 an hour per
+  person, 3 an hour per address, 40 a day. If the script can't send, the page falls back to Firebase's plain
+  email. Check it from the editor with `checkSigninLinkSetup`. Tests: `tests/signin-link.test.mjs`.
 - **Remove** a way, as long as one is left.
 - The account's main email (where emails go, what companies see, the sign-in token's email) never changes here;
   "Change email" does that.

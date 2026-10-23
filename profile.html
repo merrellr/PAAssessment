@@ -715,10 +715,21 @@ $id('linkEmailSend').addEventListener('click', async () => {
   const email = $id('linkEmailInput').value.trim().toLowerCase();
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { signinSay('Please enter a full email address.'); return; }
   if (email === (currentUser.email || '').toLowerCase()) { signinSay('That is already your main email.'); return; }
-  try {
-    await sendSignInLinkToEmail(auth, email, { url: location.origin + '/profile?linkEmail=1#signin', handleCodeInApp: true });
+  const btn = $id('linkEmailSend'); btn.disabled = true;
+  const sent = () => {
     try { localStorage.setItem(LINK_EMAIL_KEY, email); } catch (e) { /* asked again on return */ }
     signinSay('', 'Check ' + email + ' for an email from us, and open the link on this device to finish.');
+  };
+  // Our own email first (Apps Script section 17); Firebase's plain one if that isn't working.
+  let r = null;
+  try { r = await window.PAAccount.backend({ action: 'signinLink', idToken: await currentUser.getIdToken(), email }); } catch (e) { r = null; }
+  btn.disabled = false;
+  if (r && r.ok){ sent(); return; }
+  if (r && r.error === 'rate'){ signinSay("We've sent a few of these already. Please wait an hour, then try again."); return; }
+  if (r && (r.error === 'bad_email' || r.error === 'same_email')){ signinSay(r.error === 'same_email' ? 'That is already your main email.' : 'Please check that email address.'); return; }
+  try {
+    await sendSignInLinkToEmail(auth, email, { url: location.origin + '/profile?linkEmail=1#signin', handleCodeInApp: true });
+    sent();
   } catch (err){
     signinSay(err && err.code === 'auth/operation-not-allowed' ? 'Adding another email is not switched on yet. Please try Google sign-in instead.' : "That email couldn't be sent just now. Please try again.");
   }
