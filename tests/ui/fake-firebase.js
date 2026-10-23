@@ -56,22 +56,45 @@ if (window.__seed) window.__seed(store, Timestamp);
 
 const authCbs = [];   // like the real SDK, every listener hears about every sign-in and sign-out
 function fireAuth(u){ authCbs.slice().forEach(cb => cb(u)); }
-export function initializeApp(){ return {}; }
-export function getAuth(){ return { get currentUser(){ return window.__fakeUser || null; } }; }   // like the real thing, the signed-in person
+export function initializeApp(cfg, name){ return { name: name || '[DEFAULT]' }; }
+// A second app (My Profile's "two accounts: keep one") has its own sign-in: window.__otherUser is the account
+// it can sign in to, and window.__otherSignedIn is who it is signed in as. Its sign-ins tell no listener.
+const otherAuth = { other: true, get currentUser(){ return window.__otherSignedIn || null; } };
+const isOther = (auth) => !!(auth && auth.other);
+function otherSignIn(){
+  if (!window.__otherUser) throw Object.assign(new Error('no user'), { code: 'auth/user-not-found' });
+  window.__otherSignedIn = window.__otherUser; return { user: window.__otherUser };
+}
+export function getAuth(app){
+  if (app && app.name === 'pa-other') return otherAuth;
+  return { get currentUser(){ return window.__fakeUser || null; } };   // like the real thing, the signed-in person
+}
 export function onAuthStateChanged(auth, cb){
   authCbs.push(cb);
   setTimeout(() => cb(window.__fakeUser === undefined ? { uid: 'owner1', email: 'owner@x.com', getIdToken: async () => 'fake-id-token' } : window.__fakeUser), 0);
 }
-export async function signOut(){ window.__fakeUser = null; fireAuth(null); }
+export async function signOut(auth){ if (isOther(auth)) { window.__otherSignedIn = null; return; } window.__fakeUser = null; fireAuth(null); }
 export async function createUserWithEmailAndPassword(auth, email){ window.__fakeUser = { uid: 'uCreated', email, displayName: null }; fireAuth(window.__fakeUser); return { user: window.__fakeUser }; }
 export async function signInWithEmailAndPassword(auth, email, pw){
   if (pw === 'wrong') throw Object.assign(new Error('bad'), { code: 'auth/invalid-credential' });
+  if (isOther(auth)) { window.__otherPw = pw; return otherSignIn(); }
   window.__fakeUser = { uid: 'uSignedIn', email, displayName: 'Signed In' }; fireAuth(window.__fakeUser);
 }
 export async function updateProfile(user, p){ Object.assign(user, p); }
 export async function sendEmailVerification(){}
-export class GoogleAuthProvider {}
-export async function signInWithPopup(){ window.__fakeUser = { uid: 'uGoogle', email: 'g@x.com', displayName: 'G User' }; fireAuth(window.__fakeUser); return { user: window.__fakeUser }; }
+export class GoogleAuthProvider {
+  static credentialFromError(err){ return err && err.customData ? { providerId: 'google.com', email: err.customData.email } : null; }
+  static credentialFromResult(r){ return r && r.user ? { providerId: 'google.com', email: r.user.email } : null; }
+}
+// Signing in with a sign-in that belongs to an account: on the second app, the other account; on the page's
+// own, switching to the other account (window.__failSwitch makes that fail).
+export async function signInWithCredential(auth, cred){
+  if (isOther(auth)) return otherSignIn();
+  if (window.__failSwitch) throw Object.assign(new Error('fail'), { code: 'auth/network-request-failed' });
+  window.__switchedWith = cred; window.__fakeUser = window.__otherUser; fireAuth(window.__fakeUser); return { user: window.__fakeUser };
+}
+export async function signInWithPopup(auth){
+  if (isOther(auth)) return otherSignIn(); window.__fakeUser = { uid: 'uGoogle', email: 'g@x.com', displayName: 'G User' }; fireAuth(window.__fakeUser); return { user: window.__fakeUser }; }
 export function getAdditionalUserInfo(){ return { isNewUser: false }; }
 export function getFirestore(){ return {}; }
 export function doc(db, ...segs){
@@ -143,19 +166,29 @@ export function writeBatch(){
 
 export async function sendPasswordResetEmail(){}
 export async function updatePassword(){}
-export async function reauthenticateWithCredential(){}
-export const EmailAuthProvider = { credential: () => ({}), credentialWithLink: (email, link) => ({ email, link }) };
+export async function reauthenticateWithCredential(user, cred){ if (cred && cred.password === 'wrong') throw Object.assign(new Error('bad'), { code: 'auth/wrong-password' }); }
+export const EmailAuthProvider = { credential: (email, password) => ({ providerId: 'password', email, password }), credentialWithLink: (email, link) => ({ email, link }) };
 // Linking a second way to sign in (My Profile → Ways to sign in). window.__linkError makes the next link fail with that code.
-function linkFail(){ const c = window.__linkError; window.__linkError = null; if (c) { const e = new Error(c); e.code = c; throw e; } }
+function linkFail(){ const c = window.__linkError; window.__linkError = null; if (c) { const e = new Error(c); e.code = c; e.customData = { email: window.__linkErrorEmail }; throw e; } }
 export async function linkWithPopup(user){ linkFail(); user.providerData.push({ providerId: 'google.com', email: 'me.personal@gmail.com' }); return { user }; }
-export async function linkWithCredential(user, cred){ linkFail(); window.__linked = cred; user.providerData.push({ providerId: 'password', email: cred.email }); return { user }; }
+export async function linkWithCredential(user, cred){
+  linkFail();
+  const pid = cred.providerId || 'password';
+  if (user.providerData.some(p => p.providerId === pid)) throw Object.assign(new Error('linked'), { code: 'auth/provider-already-linked' });
+  window.__linked = cred; (window.__linkedAll = window.__linkedAll || []).push(user.uid + ':' + pid + ':' + cred.email);
+  user.providerData.push({ providerId: pid, email: cred.email }); return { user };
+}
 export async function unlink(user, providerId){ user.providerData = user.providerData.filter(p => p.providerId !== providerId); return user; }
 export async function sendSignInLinkToEmail(auth, email, settings){ window.__linkSent = { email, settings }; }
 export function isSignInWithEmailLink(auth, href){ return /[?&]oobCode=/.test(href); }
 export const increment = (n) => ({ __increment: n });
 export async function verifyBeforeUpdateEmail(){}
-export async function reauthenticateWithPopup(){}
+export async function reauthenticateWithPopup(user){ return { user }; }
 export async function deleteUser(user){
+  if (user === window.__otherSignedIn){
+    window.__otherDeleted = true; window.__otherSignedIn = null; window.__otherUser = null;
+    window.__writeLog.push({ op: 'deleteUser', path: user.uid }); return;
+  }
   window.__deleted = true;
   window.__fakeUser = null;
   window.__writeLog.push({ op: 'deleteUser', path: user.uid });

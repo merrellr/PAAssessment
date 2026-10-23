@@ -5,8 +5,19 @@
   var scn = new URLSearchParams(location.search).get('scn') || 'member';
   window.__scn = scn;
   window.__fakeUser = { uid: 'uDel', email: 'del@acme.com', displayName: 'Del User', emailVerified: true, providerData: [{ providerId: 'password', email: 'del@acme.com' }], getIdToken: async function(){ return 'tok'; }, reload: async function(){} };
-  if (scn === 'signingoogle' || scn === 'signinlink') window.__fakeUser.providerData = [{ providerId: 'google.com', email: 'del@acme.com' }];
+  if (scn === 'signingoogle' || scn === 'signinlink' || scn === 'mergeother') window.__fakeUser.providerData = [{ providerId: 'google.com', email: 'del@acme.com' }];
   if (scn === 'signinlink') { try { localStorage.setItem('pa_link_email', 'me@home.net'); } catch (e) {} history.replaceState(null, '', location.pathname + '?scn=signinlink&linkEmail=1&oobCode=abc&mode=signIn'); }
+  // Two accounts: keep one. The other account the second sign-in finds, with more progress than this one.
+  if (scn === 'mergekeep'){
+    window.__linkErrorEmail = 'me.personal@gmail.com';
+    window.__otherUser = { uid: 'uHome', email: 'me.personal@gmail.com', providerData: [{ providerId: 'google.com', email: 'me.personal@gmail.com' }], getIdToken: async function(){ return 'tok2'; }, reload: async function(){} };
+  }
+  if (scn === 'mergeother'){
+    try { localStorage.setItem('pa_link_email', 'me@home.net'); } catch (e) {}
+    history.replaceState(null, '', location.pathname + '?scn=mergeother&linkEmail=1&oobCode=abc&mode=signIn');
+    window.__linkError = 'auth/email-already-in-use';
+    window.__otherUser = { uid: 'uHome', email: 'me@home.net', emailVerified: true, providerData: [{ providerId: 'password', email: 'me@home.net' }], getIdToken: async function(){ return 'tok2'; }, reload: async function(){} };
+  }
   window.__calls = [];
   // the Apps Script spreadsheet clean-up and the company list are reached through a <script> tag; answer them here
   var desc = Object.getOwnPropertyDescriptor(HTMLScriptElement.prototype, 'src');
@@ -17,7 +28,11 @@
   } });
   window.__seed = function(store, Timestamp){
     var ts = Timestamp.now();
-    store['progress/uDel'] = { courses: {}, profile: { phone: '555' }, orgIds: scn === 'nonmember' ? [] : ['orgOld', 'orgA'] };
+    store['progress/uDel'] = { courses: {}, profile: { phone: '555' }, orgIds: scn === 'nonmember' || scn === 'mergeother' ? [] : ['orgOld', 'orgA'] };
+    if (/^merge/.test(scn)){
+      store['progress/uHome'] = { courses: { 'discovery-novice': { completed: [1, 2, 3, 4, 5, 6] } }, assessmentResult: { tier: 'Lots of Experience', overallPct: 70, categoryPct: {} }, lessonLog: { '2026-10-02': 3 }, profile: { company: 'Home' } };
+      store['toolVotes/uHome_t1'] = { uid: 'uHome', toolId: 't1', email: 'x', notify: false, createdAt: ts };
+    }
     if (scn === 'goals') { store['progress/uDel'].goals = { weeklyLessons: 3, focus: ['aiOrg'] }; store['progress/uDel'].notify = { checkin: 'monthly' }; store['progress/uDel'].lessonLog = { '2026-10-01': 2 }; }
     if (scn === 'badges'){
       var u = store['progress/uDel'];
@@ -26,7 +41,7 @@
       u.assessmentResult = { tier: 'Advanced Experience', overallPct: 82, categoryPct: { discovery: 90, strategy: 60, prioritization: 60, execution: 60, stakeholder: 60, aiIndividual: 60, aiOrg: 60 } };
       u.badges = { account: '2026-01-05T12:00:00.000Z', active7: '2026-02-01T12:00:00.000Z' };
     }
-    if (scn !== 'nonmember'){
+    if (scn !== 'nonmember' && scn !== 'mergeother'){
       store['memberships/uDel'] = { orgId: 'orgA', orgName: 'Acme', role: scn === 'goalsadmin' ? 'admin' : 'member', status: 'active', inviteToken: 't', joinedAt: ts, endedAt: null, email: 'del@acme.com', displayName: 'Del User', phone: '555-0100' };
       var sh = function(){ return { identity: { name: 'Del User', email: 'del@acme.com' }, assessment: { tier: 'Lots of Experience', overallPct: 80 }, courses: {}, lastActiveAt: null, updatedAt: ts }; };
       store['orgs/orgA/members/uDel'] = sh();
