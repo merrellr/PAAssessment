@@ -401,6 +401,10 @@ sign in; a question the lessons do not cover is pointed to the Ask on www.produc
 `Code.gs`, redeploy it (Deploy → Manage deployments → pencil → New version) so the live address has the new action.
 Tests: `tests/mail-and-org-ai.test.mjs` (the script) and `tests/theme.test.mjs` (the passages).
 
+- **Unanswered questions:** a question no lesson matched (reported by the page for signed-in learners, `askMiss`), or
+  one the AI says the lessons don't cover (it starts its reply with `[NO-ANSWER]`, which is removed), goes on the
+  **Unanswered questions** tab of the results sheet: time, question, why, lessons it looked at. No name or email.
+
 ## Clean addresses
 
 Pages are files (`lms-dashboard.html`), but links use the clean address: `/lms-dashboard`, `/lesson?course=…`, and `/`

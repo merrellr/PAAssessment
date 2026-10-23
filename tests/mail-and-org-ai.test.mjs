@@ -84,6 +84,7 @@ const sandbox = {
     if (url.indexOf('api.groq.com') > -1) {
       if (groqMode === 'error') return res(500, { error: 'boom' });
       if (groqMode === 'empty') return res(200, { choices: [{ message: { content: '' } }] });
+      if (groqMode === 'noanswer') return res(200, { choices: [{ message: { content: '[NO-ANSWER] The lessons do not cover pricing; see [1].' } }] });
       if (groqMode === 'cite') return res(200, { choices: [{ message: { content: 'Start with **secondary** research [1]. Then interview people [2][2]. Not [7].' } }] });
       return res(200, { choices: [{ message: { content: 'What it shows: A first look.\nWhat to watch:\n- Quiet people\nNext steps:\n- Send a reminder' } }] });
     }
@@ -382,6 +383,22 @@ console.log('--- security: lookups, company names, sheet cells, callback names -
   t('signed in, the rows are saved under their own email, never the one in the request', sheets.Progress.length === 2 && sheets.Progress[1][1] === 'new.person@example.com' && sheets.Progress[1][9] === '\'=HYPERLINK("x")');
   sync({ idToken: 'new-token', rows: [Object.assign({}, r1, { lessonsCompleted: 4 })] });
   t('a later sync updates the same row', sheets.Progress.length === 2 && sheets.Progress[1][6] === 4);
+}
+
+console.log('--- unanswered questions ---');
+{
+  reset(); props.GROQ_API_KEY = 'k';
+  const ctx = JSON.stringify([{ u: 'lesson.html?course=discovery-novice&lesson=1', t: 'Discovery basics', x: 'Talk to customers before you build.' }]);
+  const plain = G('askLessonsEndpoint_')('memberA-token', 'How do I interview users?', ctx);
+  t('an answered question is not logged as unanswered', plain.ok && !sheets['Unanswered questions']);
+  groqMode = 'noanswer';
+  const miss = G('askLessonsEndpoint_')('memberA-token', 'What does consulting cost?', ctx);
+  const row = (sheets['Unanswered questions'] || [])[1] || [];
+  t('when the lessons do not cover it, the answer loses the marker and the question is logged', miss.ok && !/NO-ANSWER/.test(miss.text) && row[1] === 'What does consulting cost?' && row[2] === 'The lessons do not cover it' && row[3] === 'Discovery basics', JSON.stringify(row));
+  t('no name or email is kept with it', !JSON.stringify(sheets['Unanswered questions']).includes('acme.com'));
+  t('a question no lesson matched is logged for signed-in learners only', G('askMissEndpoint_')('', 'x y z').error === 'not_verified' && G('askMissEndpoint_')('memberA-token', '=HYPERLINK("x")').ok && sheets['Unanswered questions'][2][1] === '\'=HYPERLINK("x")' && sheets['Unanswered questions'][2][2] === 'No lesson matched');
+  const via = G('doGet')({ parameter: { action: 'askMiss', idToken: 'memberA-token', q: 'Do you cover OKRs?', callback: 'cb' } });
+  t('the page reaches it through doGet', /"ok":true/.test(via.text) && sheets['Unanswered questions'].length === 4);
 }
 
 console.log('\n' + pass + ' passed, ' + fail + ' failed');
