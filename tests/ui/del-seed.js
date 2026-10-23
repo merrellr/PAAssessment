@@ -4,7 +4,9 @@
   addEventListener('unhandledrejection', function(e){ window.__errs.push('rejection: ' + (e.reason && e.reason.message || e.reason)); });
   var scn = new URLSearchParams(location.search).get('scn') || 'member';
   window.__scn = scn;
-  window.__fakeUser = { uid: 'uDel', email: 'del@acme.com', displayName: 'Del User', emailVerified: true, providerData: [{ providerId: 'password' }], getIdToken: async function(){ return 'tok'; } };
+  window.__fakeUser = { uid: 'uDel', email: 'del@acme.com', displayName: 'Del User', emailVerified: true, providerData: [{ providerId: 'password', email: 'del@acme.com' }], getIdToken: async function(){ return 'tok'; }, reload: async function(){} };
+  if (scn === 'signingoogle' || scn === 'signinlink') window.__fakeUser.providerData = [{ providerId: 'google.com', email: 'del@acme.com' }];
+  if (scn === 'signinlink') { try { localStorage.setItem('pa_link_email', 'me@home.net'); } catch (e) {} history.replaceState(null, '', location.pathname + '?scn=signinlink&linkEmail=1&oobCode=abc&mode=signIn'); }
   window.__calls = [];
   // the Apps Script spreadsheet clean-up and the company list are reached through a <script> tag; answer them here
   var desc = Object.getOwnPropertyDescriptor(HTMLScriptElement.prototype, 'src');

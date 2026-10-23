@@ -144,7 +144,14 @@ export function writeBatch(){
 export async function sendPasswordResetEmail(){}
 export async function updatePassword(){}
 export async function reauthenticateWithCredential(){}
-export const EmailAuthProvider = { credential: () => ({}) };
+export const EmailAuthProvider = { credential: () => ({}), credentialWithLink: (email, link) => ({ email, link }) };
+// Linking a second way to sign in (My Profile → Ways to sign in). window.__linkError makes the next link fail with that code.
+function linkFail(){ const c = window.__linkError; window.__linkError = null; if (c) { const e = new Error(c); e.code = c; throw e; } }
+export async function linkWithPopup(user){ linkFail(); user.providerData.push({ providerId: 'google.com', email: 'me.personal@gmail.com' }); return { user }; }
+export async function linkWithCredential(user, cred){ linkFail(); window.__linked = cred; user.providerData.push({ providerId: 'password', email: cred.email }); return { user }; }
+export async function unlink(user, providerId){ user.providerData = user.providerData.filter(p => p.providerId !== providerId); return user; }
+export async function sendSignInLinkToEmail(auth, email, settings){ window.__linkSent = { email, settings }; }
+export function isSignInWithEmailLink(auth, href){ return /[?&]oobCode=/.test(href); }
 export const increment = (n) => ({ __increment: n });
 export async function verifyBeforeUpdateEmail(){}
 export async function reauthenticateWithPopup(){}

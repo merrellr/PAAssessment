@@ -111,6 +111,41 @@ async function badgesTests(store){
   t('the Profile menu has a My Badges link', !!document.querySelector('.pa-acct-menu a[href="/profile#badges"]'));
 }
 
+// Ways to sign in: add a Google account or another email to the same account, and remove one.
+async function signinTests(store){
+  const list = () => Array.prototype.map.call($('signinList').querySelectorAll('li'), li => li.querySelector('.si-main').textContent + (li.querySelector('.si-tag') ? '|main' : '') + (li.querySelector('.linkbtn') ? '|remove' : ''));
+  if (window.__scn === 'signin'){
+    t('an email-and-password account lists its sign-in, marked as the main email, with no Remove', list().join() === 'Email and passworddel@acme.com|main', list().join());
+    window.__linkError = 'auth/credential-already-in-use';
+    $('linkGoogleBtn').click(); await sleep(60);
+    t('a Google account that already has its own learning account is explained, not added', /already has its own learning account/.test($('signinError').textContent) && window.__fakeUser.providerData.length === 1);
+    $('linkGoogleBtn').click(); await sleep(60);
+    t('adding Google sign-in lists it, with Remove on both', /Google sign-in added/.test($('signinSuccess').textContent) && list().join() === 'Email and passworddel@acme.com|main|remove,Googleme.personal@gmail.com|remove' && $('linkGoogleBtn').hidden, list().join());
+    $('linkEmailBtn').click(); await sleep(30);
+    t('another email cannot be added to an account that already has an email and password, and it says why', $('linkEmailForm').hidden && !$('linkEmailNote').hidden);
+    window.confirm = () => true;
+    $('signinList').querySelectorAll('.linkbtn')[1].click(); await sleep(60);
+    t('a sign-in can be removed, and the last one cannot', list().join() === 'Email and passworddel@acme.com|main' && /Removed Google sign-in/.test($('signinSuccess').textContent));
+  }
+  if (window.__scn === 'signingoogle'){
+    $('linkEmailBtn').click(); await sleep(30);
+    t('a Google account can add another email', !$('linkEmailForm').hidden && $('linkEmailNote').hidden);
+    $('linkEmailInput').value = 'not an email'; $('linkEmailSend').click(); await sleep(30);
+    t('a bad address is caught', /full email address/.test($('signinError').textContent) && !window.__linkSent);
+    $('linkEmailInput').value = 'Me@Home.net'; $('linkEmailSend').click(); await sleep(60);
+    t('a link is sent to the other address, to come back to this page', window.__linkSent && window.__linkSent.email === 'me@home.net' && /\/profile\?linkEmail=1#signin$/.test(window.__linkSent.settings.url) && window.__linkSent.settings.handleCodeInApp === true && /Check me@home\.net/.test($('signinSuccess').textContent));
+  }
+  if (window.__scn === 'signinlink'){
+    t('back from the link, the address is added to this account', window.__linked && window.__linked.email === 'me@home.net' && /oobCode=abc/.test(window.__linked.link) && list().join() === 'Googledel@acme.com|main|remove,Email and passwordme@home.net|remove', list().join());
+    t('the link is cleared from the address bar', !/oobCode/.test(location.href));
+    t('it asks for a password for the new address', !$('linkPwForm').hidden && $('linkPwEmail').textContent === 'me@home.net');
+    $('linkPwInput').value = 'short'; $('linkPwSave').click(); await sleep(30);
+    t('a short password is refused', /at least 8/.test($('signinError').textContent));
+    $('linkPwInput').value = 'a-long-password'; $('linkPwSave').click(); await sleep(60);
+    t('the password is saved', $('linkPwForm').hidden && /Password saved/.test($('signinSuccess').textContent));
+  }
+}
+
 (async function(){
   try {
     await sleep(1500);
@@ -118,6 +153,7 @@ async function badgesTests(store){
     if (window.__scn === 'photo') await photoTests(store);
     else if (/^goals/.test(window.__scn)) await goalsTests(store);
     else if (window.__scn === 'badges') await badgesTests(store);
+    else if (/^signin/.test(window.__scn)) await signinTests(store);
     else {
       $('deleteConfirmText').value = 'DELETE';
       $('deletePassword').value = 'secret';

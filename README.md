@@ -128,6 +128,20 @@ when volume outgrows the free tier) and writes `blocked:` rows to the
   to match what the software does.
 - Tests: see `tests/README.md`.
 
+## Ways to sign in (a business and a personal email)
+
+My Profile → **Ways to sign in** (`/profile#signin`) adds a second way into the same Firebase account, so a learner keeps
+their progress if they change jobs:
+
+- **Add Google sign-in** (`linkWithPopup`): any Google account, for example a personal Gmail.
+- **Add another email** (for accounts that sign in with Google; Firebase allows one email-and-password per account):
+  a link is emailed to that address (`sendSignInLinkToEmail`), and opening it on the same device links it
+  (`linkWithCredential` with `credentialWithLink`), proving the person owns it. They then set a password for it.
+  Needs **Authentication → Sign-in method → Email/Password → Email link (passwordless sign-in)** switched on.
+- **Remove** a way, as long as one is left.
+- The account's main email (where emails go, what companies see, the sign-in token's email) never changes here;
+  "Change email" does that. A sign-in that already has its own learning account can't be added (Firebase refuses).
+
 ## Closing an account
 
 `profile.html` has a "Delete account" card. It re-checks the person's
