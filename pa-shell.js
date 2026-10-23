@@ -397,6 +397,13 @@
     });
     return '<div class="pa-src"><h4>From the lessons</h4><ol>' + rows + "</ol></div>";
   }
+  // A question no lesson matched goes on the "Unanswered questions" tab (signed-in learners only), so the
+  // missing lessons show up. Fire and forget: the visitor sees nothing different.
+  function reportMiss(q) {
+    var acct = window.PAAccount;
+    if (!acct) return;
+    acct.idToken().then(function (tok) { if (tok) acct.backend({ action: "askMiss", idToken: tok, q: q }); }).catch(function () {});
+  }
   var askSeq = 0;
   function showAnswer(q) {
     var seq = ++askSeq;
@@ -420,6 +427,7 @@
         '<p class="pa-note">An AI answer written only from your course lessons. Open a lesson for the full picture.</p>');
     }).catch(function (e) {
       var code = e && e.code, msg;
+      if (code === "nothing") reportMiss(q);
       if (code === "nothing") msg = "The lessons don't cover that yet. Try other words, or <a href=\"" + WWW + "?ask=" + encodeURIComponent(q) + "\" target=\"_blank\" rel=\"noopener\">ask on productadvisory.co<span aria-hidden=\"true\"> ↗</span>" + NEW_TAB + "</a>.";
       else if (code === "signin" || code === "not_verified") msg = 'Answers from the lessons are for signed-in learners. <a href="/lms-dashboard">Sign in on your dashboard</a>, then ask again.';
       else if (code === "daily_limit") msg = "You've asked a lot today. Ask again tomorrow; the lessons below are the closest matches.";
