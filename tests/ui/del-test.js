@@ -118,7 +118,9 @@ async function signinTests(store){
     t('an email-and-password account lists its sign-in, marked as the main email, with no Remove', list().join() === 'Email and passworddel@acme.com|main', list().join());
     window.__linkError = 'auth/credential-already-in-use';
     $('linkGoogleBtn').click(); await sleep(60);
-    t('a Google account that already has its own learning account is explained, not added', /already has its own learning account/.test($('signinError').textContent) && window.__fakeUser.providerData.length === 1);
+    t('a Google account that already has its own learning account opens "keep one", and is not added', !$('mergePanel').hidden && /already has its own learning account/.test($('mergeIntro').textContent) && window.__fakeUser.providerData.length === 1);
+    $('mergeCancel').click(); await sleep(30);
+    t('Cancel closes it', $('mergePanel').hidden);
     $('linkGoogleBtn').click(); await sleep(60);
     t('adding Google sign-in lists it, with Remove on both', /Google sign-in added/.test($('signinSuccess').textContent) && list().join() === 'Email and passworddel@acme.com|main|remove,Googleme.personal@gmail.com|remove' && $('linkGoogleBtn').hidden, list().join());
     $('linkEmailBtn').click(); await sleep(30);
@@ -146,6 +148,52 @@ async function signinTests(store){
   }
 }
 
+// Two accounts: keep one. mergekeep: this account is in a company, so it is kept and the other is closed.
+// mergeother: the other account has more progress and is kept; this one is closed and the page switches.
+async function mergeTests(store){
+  const cards = () => Array.prototype.slice.call($('mergeCards').querySelectorAll('.merge-card'));
+  const card = (w) => cards().filter(c => c.dataset.which === w)[0];
+  if (window.__scn === 'mergekeep'){
+    window.__linkError = 'auth/credential-already-in-use';
+    $('linkGoogleBtn').click(); await sleep(120);
+    t('the panel opens and, for Google, signs in to the other account without asking again', !$('mergePanel').hidden && /me\.personal@gmail\.com already has its own learning account/.test($('mergeIntro').textContent) && !$('mergeStepCompare').hidden && window.__otherSignedIn && window.__otherSignedIn.uid === 'uHome');
+    t('both accounts are shown side by side, with what each holds', /del@acme\.com/.test(card('me').textContent) && /Company: Acme/.test(card('me').textContent) && /5 lessons finished/.test(card('other').textContent) && /Assessment: Lots of Experience/.test(card('other').textContent), cards().map(c => c.textContent).join(' / '));
+    t('an account in a company has to be the one kept: it says why, and the other choice is off', /belongs to Acme, so it has to be the one you keep/.test(card('me').textContent) && card('other').disabled && card('me').getAttribute('aria-checked') === 'true');
+    t('nothing happens until they tick that they understand', $('mergeGo').disabled && /me\.personal@gmail\.com's progress, assessment results, notes and badges will be deleted/.test($('mergeAgreeText').textContent));
+    $('mergeAgree').checked = true; $('mergeAgree').dispatchEvent(new Event('change'));
+    t('ticking it turns the button on', !$('mergeGo').disabled && /Keep del@acme\.com/.test($('mergeGo').textContent));
+    $('mergeGo').click(); await sleep(400);
+    const log = window.__writeLog.map(w => w.op + ':' + w.path);
+    t('the other account\'s records go: progress, Tool Roadmap votes (off the total) and spreadsheet rows', !store['progress/uHome'] && !store['toolVotes/uHome_t1'] && store['tools/t1'].voteCount === 3 && window.__calls.some(c => /^deleteAccount@/.test(c)), log.join(' | '));
+    t('then its sign-in is closed, after its records', window.__otherDeleted === true && log.indexOf('deleteUser:uHome') > log.indexOf('delete:progress/uHome'));
+    t('this account is untouched and stays signed in', !!store['progress/uDel'] && store['toolVotes/uDel_t1'] && window.__fakeUser.uid === 'uDel' && !window.__deleted);
+    t('the closed account\'s Google sign-in now opens this one', window.__fakeUser.providerData.some(p => p.providerId === 'google.com' && p.email === 'me.personal@gmail.com') && /account is closed\. It now signs in to this account/.test($('signinSuccess').textContent) && $('mergePanel').hidden, $('signinSuccess').textContent);
+  }
+  if (window.__scn === 'mergeother'){
+    t('back from an email link to an address with its own account, the panel asks to sign in to it', !$('mergePanel').hidden && /me@home\.net already has its own learning account/.test($('mergeIntro').textContent) && !$('mergeStepSignIn').hidden && $('mergeStepCompare').hidden);
+    $('mergePw').value = 'wrong'; $('mergePwBtn').click(); await sleep(60);
+    t('a wrong password is explained', /password is not right/.test($('mergeError').textContent) && $('mergeStepCompare').hidden);
+    const real = window.__otherUser;
+    window.__otherUser = { uid: 'uX', email: 'someone@else.com', providerData: [], getIdToken: async () => 't' };
+    $('mergePw').value = 'right'; $('mergePwBtn').click(); await sleep(60);
+    t('signing in to a different account is refused', /different account \(someone@else\.com\)/.test($('mergeError').textContent) && !window.__otherSignedIn && $('mergeStepCompare').hidden);
+    window.__otherUser = real;
+    $('mergePw').value = 'right'; $('mergePwBtn').click(); await sleep(120);
+    t('the one with more progress is suggested and chosen', !$('mergeStepCompare').hidden && /Suggested: more progress/.test(card('other').textContent) && card('other').getAttribute('aria-checked') === 'true' && !card('me').disabled);
+    card('me').click(); await sleep(20);
+    t('either can be chosen', card('me').getAttribute('aria-checked') === 'true' && /Keep del@acme\.com/.test($('mergeGo').textContent));
+    card('other').click(); await sleep(20);
+    t('closing a Google account needs no password box (it confirms in a pop-up)', $('mergeMyPw').hidden);
+    $('mergeAgree').checked = true; $('mergeAgree').dispatchEvent(new Event('change'));
+    $('mergeGo').click(); await sleep(600);
+    const log = window.__writeLog.map(w => w.op + ':' + w.path);
+    t('this account\'s records go, then its sign-in', !store['progress/uDel'] && !store['toolVotes/uDel_t1'] && !store['toolSuggestions/uDel'] && log.indexOf('deleteUser:uDel') > log.indexOf('delete:progress/uDel'), log.join(' | '));
+    t('the kept account is untouched', !!store['progress/uHome'] && !!store['toolVotes/uHome_t1']);
+    t('the page switches to the kept account, with no trip back to sign in', window.__fakeUser && window.__fakeUser.uid === 'uHome' && window.__switchedWith && window.__switchedWith.email === 'me@home.net' && $('profileEmail').textContent === 'me@home.net' && /del-test/.test(location.pathname), [window.__fakeUser && window.__fakeUser.uid, JSON.stringify(window.__switchedWith), $('profileEmail').textContent, location.pathname, $('mergeError').textContent].join(' ; '));
+    t('the closed account\'s Google sign-in now opens the kept one', window.__fakeUser.providerData.some(p => p.providerId === 'google.com' && p.email === 'del@acme.com') && /now signed in to me@home\.net\. The other account is closed, and its sign-in now opens this account/.test($('signinSuccess').textContent), $('signinSuccess').textContent);
+  }
+}
+
 (async function(){
   try {
     await sleep(1500);
@@ -154,6 +202,7 @@ async function signinTests(store){
     else if (/^goals/.test(window.__scn)) await goalsTests(store);
     else if (window.__scn === 'badges') await badgesTests(store);
     else if (/^signin/.test(window.__scn)) await signinTests(store);
+    else if (/^merge/.test(window.__scn)) await mergeTests(store);
     else {
       $('deleteConfirmText').value = 'DELETE';
       $('deletePassword').value = 'secret';

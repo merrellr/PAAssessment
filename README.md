@@ -140,7 +140,24 @@ their progress if they change jobs:
   Needs **Authentication → Sign-in method → Email/Password → Email link (passwordless sign-in)** switched on.
 - **Remove** a way, as long as one is left.
 - The account's main email (where emails go, what companies see, the sign-in token's email) never changes here;
-  "Change email" does that. A sign-in that already has its own learning account can't be added (Firebase refuses).
+  "Change email" does that.
+
+**Two accounts: keep one.** When the sign-in being added already has its own learning account (Firebase refuses to
+link it), a panel opens instead of an error. The person signs in to that other account on the same page, through a
+second Firebase app (`initializeApp(config, 'pa-other')`), so this page stays signed in. A Google sign-in needs no
+second step (`GoogleAuthProvider.credentialFromError`); an email signs in with its password, or gets a link to set one.
+The page checks it is the right account and not this one. Both accounts are then shown side by side: assessment,
+lessons, courses, badges, company and last active. The one with more lessons is suggested, then the assessed one,
+then the one with more badges. The person picks one, ticks that they understand, and:
+
+- **keeps this one:** the other's records go (`closeRecords`, the same steps as Delete account), then its sign-in
+  (`deleteUser`), then its Google or email sign-in is added here;
+- **keeps the other:** this account is confirmed again (password or Google pop-up), its records and sign-in go, the
+  page signs in to the other (`signInWithCredential`), redraws for it, and this account's sign-in is added there.
+
+An account in a company (an active membership) or the owner's account can't be the one closed: it is marked
+"has to be the one you keep". If both are, nothing can be closed here and the person is asked to contact us.
+Progress is not combined; only one account's records are kept. Tests: `del-test.html?scn=mergekeep` and `mergeother`.
 
 ## Closing an account
 

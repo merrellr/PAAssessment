@@ -82,6 +82,23 @@
   .link-email{ margin: 12px 0 4px; padding: 14px; border-radius: 12px; background: var(--tint); }
   .link-email .text-input{ background: var(--surface); }
   .link-email[hidden]{ display:none; }
+  .merge{ margin: 14px 0 6px; padding: 18px; border-radius: 14px; border: 1.5px solid var(--cyan); background: var(--surface); outline: none; }
+  .merge[hidden], .merge [hidden]{ display:none !important; }
+  .merge h3{ font-family: var(--display); font-size: 1rem; color: var(--navy-deep); margin: 0 0 6px; }
+  .merge-row{ display:flex; flex-wrap:wrap; align-items:center; gap: 10px; margin: 6px 0; }
+  .merge-row .text-input{ margin: 0; flex: 1 1 180px; width: auto; }
+  .merge-or{ font-size: 0.8125rem; color: var(--gray); }
+  .merge-cards{ display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; margin: 12px 0; }
+  .merge-card{ display: flex; flex-direction: column; align-items: flex-start; position: relative; text-align: left; font: inherit; color: var(--ink); background: var(--surface); border: 1.5px solid var(--line); border-radius: 12px; padding: 14px; cursor: pointer; }
+  .merge-card[aria-checked="true"]{ border-color: var(--navy); box-shadow: 0 0 0 2px var(--navy) inset; }
+  .merge-card:disabled{ cursor: default; opacity: .75; }
+  .merge-card:focus-visible{ outline: 3px solid var(--cyan); outline-offset: 2px; }
+  .merge-card b{ display:block; word-break: break-all; margin-bottom: 2px; }
+  .merge-card .mc-which{ font-size: 0.6875rem; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; color: var(--gray); }
+  .merge-card ul{ list-style:none; margin: 8px 0 0; padding: 0; font-size: 0.8125rem; color: var(--ink-soft); display:grid; gap: 3px; }
+  .merge-card .mc-tip{ display:inline-block; margin-top: 8px; font-size: 0.6875rem; font-weight: 700; color: var(--ok); background: var(--ok-bg); padding: 2px 8px; border-radius: 999px; }
+  .merge-card .mc-lock{ display:block; margin-top: 8px; font-size: 0.75rem; color: var(--warn); }
+  .merge-check{ display:flex; gap: 8px; align-items:flex-start; font-size: 0.8125rem; margin: 10px 0; }
 
   a.btn-link{ display:inline-block; font-family:var(--display); font-weight:600; font-size:0.875rem; border-radius:8px; padding:11px 20px; text-decoration:none; background: linear-gradient(90deg, var(--navy) 0%, var(--primary-strong) 100%); color:var(--btn-ink); }
   a.btn-link:hover{ opacity:0.92; }
@@ -289,6 +306,31 @@
       <button type="button" class="btn btn-primary" id="linkPwSave">Save password</button>
       <p class="setting-hint">Then you can sign in with that email and this password.</p>
     </div>
+    <div class="merge" id="mergePanel" hidden tabindex="-1" aria-labelledby="mergeTitle">
+      <h3 id="mergeTitle">Two accounts: keep one</h3>
+      <p id="mergeIntro"></p>
+      <div id="mergeStepSignIn">
+        <p class="setting-hint">First, sign in to that account here to compare them. You stay signed in to this one.</p>
+        <div class="merge-row">
+          <button type="button" class="btn btn-ghost" id="mergeGoogle">Continue with Google</button>
+          <span class="merge-or">or</span>
+          <input class="text-input" type="password" id="mergePw" placeholder="Its password" autocomplete="current-password" aria-label="Password for the other account">
+          <button type="button" class="btn btn-primary" id="mergePwBtn">Sign in</button>
+        </div>
+        <button type="button" class="linkbtn" id="mergeReset">Forgot its password? Email me a link to set one</button>
+      </div>
+      <div id="mergeStepCompare" hidden>
+        <p class="setting-hint">Choose the account to keep. The other one is closed: its progress, assessment results, notes and badges are deleted, and its email becomes another way to sign in to the one you keep.</p>
+        <div class="merge-cards" id="mergeCards" role="radiogroup" aria-label="Account to keep"></div>
+        <div id="mergeConfirm" hidden>
+          <input class="text-input" type="password" id="mergeMyPw" placeholder="" autocomplete="current-password" hidden>
+          <label class="merge-check"><input type="checkbox" id="mergeAgree"> <span id="mergeAgreeText"></span></label>
+          <button type="button" class="btn btn-danger" id="mergeGo" disabled></button>
+        </div>
+      </div>
+      <div class="field-error" id="mergeError" role="alert"></div>
+      <button type="button" class="linkbtn" id="mergeCancel">Cancel</button>
+    </div>
     <div class="field-error" id="signinError" role="alert"></div>
     <div class="field-error" id="signinSuccess" role="status" style="color:var(--ok);"></div>
   </div>
@@ -348,7 +390,8 @@ import {
   getAuth, onAuthStateChanged, GoogleAuthProvider,
   reauthenticateWithCredential, reauthenticateWithPopup, EmailAuthProvider,
   linkWithPopup, linkWithCredential, unlink, sendSignInLinkToEmail, isSignInWithEmailLink, updatePassword,
-  updateProfile, verifyBeforeUpdateEmail, deleteUser
+  updateProfile, verifyBeforeUpdateEmail, deleteUser,
+  signInWithPopup, signInWithCredential, signInWithEmailAndPassword, sendPasswordResetEmail, signOut
 } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
 import { getFirestore, doc, getDoc, getDocs, setDoc, deleteDoc, collection, query, where, writeBatch, increment } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
 import { anonymizeOrgShares } from "./org-share.js";
@@ -360,18 +403,19 @@ const db = getFirestore(app);
 /* Each vote is deleted together with taking one off its tool's public count (the
    security rules require the two to happen together). A tool that no longer
    exists, or whose count is already zero, needs no change to the count. */
-async function removeToolActivity(user){
-  const snap = await getDocs(query(collection(db, 'toolVotes'), where('uid', '==', user.uid)));
+async function removeToolActivity(user, database){
+  database = database || db;
+  const snap = await getDocs(query(collection(database, 'toolVotes'), where('uid', '==', user.uid)));
   for (const d of snap.docs){
     const toolId = d.data().toolId;
-    const toolRef = doc(db, 'tools', toolId);
+    const toolRef = doc(database, 'tools', toolId);
     const tool = await getDoc(toolRef);
-    const batch = writeBatch(db);
-    batch.delete(doc(db, 'toolVotes', d.id));
+    const batch = writeBatch(database);
+    batch.delete(doc(database, 'toolVotes', d.id));
     if (tool.exists() && (tool.data().voteCount || 0) > 0) batch.update(toolRef, { voteCount: increment(-1) });
     await batch.commit();
   }
-  await deleteDoc(doc(db, 'toolSuggestions', user.uid));
+  await deleteDoc(doc(database, 'toolSuggestions', user.uid));
 }
 
 let currentUser = null;
@@ -455,10 +499,12 @@ function friendlyAuthError(code){
 // Set just before the auth user is deleted, so the sign-out that follows
 // shows the "account deleted" notice instead of bouncing to the dashboard.
 let accountDeleted = false;
+// Set while closing this account to keep the other one (see "two accounts: keep one").
+let switchingAccount = false;
 
 onAuthStateChanged(auth, async (user) => {
   if (!user){
-    if (accountDeleted) return;
+    if (accountDeleted || switchingAccount) return;
     window.location.href = '/lms-dashboard';
     return;
   }
@@ -640,9 +686,11 @@ $id('linkGoogleBtn').addEventListener('click', async () => {
   } catch (err){
     const c = err && err.code;
     if (c === 'auth/popup-closed-by-user' || c === 'auth/cancelled-popup-request') return;
-    signinSay(c === 'auth/credential-already-in-use' || c === 'auth/email-already-in-use'
-      ? 'That Google account already has its own learning account, so it can\'t be added here. Sign in with it, delete that account at the bottom of My Profile, then add it here.'
-      : c === 'auth/provider-already-linked' ? 'This account already has a Google sign-in.' : "That didn't work just now. Please try again.");
+    if (c === 'auth/credential-already-in-use' || c === 'auth/email-already-in-use'){
+      openMerge((err.customData && err.customData.email) || '', GoogleAuthProvider.credentialFromError ? GoogleAuthProvider.credentialFromError(err) : null);
+      return;
+    }
+    signinSay(c === 'auth/provider-already-linked' ? 'This account already has a Google sign-in.' : "That didn't work just now. Please try again.");
   }
 });
 $id('linkEmailBtn').addEventListener('click', () => {
@@ -685,8 +733,11 @@ async function finishEmailLink(){
     $id('signin').focus();
   } catch (err){
     const c = err && err.code;
-    signinSay(c === 'auth/credential-already-in-use' || c === 'auth/email-already-in-use' ? 'That email already has its own learning account, so it can\'t be added here.'
-      : c === 'auth/invalid-action-code' || c === 'auth/expired-action-code' ? 'That link has expired or was already used. Send a new one.'
+    if (c === 'auth/credential-already-in-use' || c === 'auth/email-already-in-use'){
+      try { localStorage.removeItem(LINK_EMAIL_KEY); } catch (e) { /* fine */ }
+      openMerge(email, null); return;
+    }
+    signinSay(c === 'auth/invalid-action-code' || c === 'auth/expired-action-code' ? 'That link has expired or was already used. Send a new one.'
       : c === 'auth/invalid-email' ? 'That isn\'t the email the link was sent to. Send a new link.' : "That didn't work just now. Send a new link and try again.");
     $id('signin').focus();
   }
@@ -716,6 +767,211 @@ async function removeSignIn(p){
   } catch (err){
     signinSay(err && err.code === 'auth/requires-recent-login' ? 'For your security, sign out and back in, then try again.' : "That didn't work just now. Please try again.");
   }
+}
+
+/* ---------------------------------------------------------------- two accounts: keep one */
+// When the sign-in being added already has its own learning account, the person signs in to that account
+// here (a second, separate Firebase app, so this page stays signed in), sees both side by side, and keeps one.
+// The other is closed with closeRecords() and deleteUser(), and its sign-in is then added to the one kept.
+// An account in a company, or the owner's account, can't be the one closed.
+const otherApp = initializeApp(firebaseConfig, 'pa-other');
+const otherAuth = getAuth(otherApp), otherDb = getFirestore(otherApp);
+let merge = null;   // { email, cred (the other account's sign-in), pw, me, other (summaries), keep: 'me' | 'other' }
+function mergeSay(msg){ $id('mergeError').textContent = msg || ''; }
+function openMerge(email, cred){
+  signinSay();
+  merge = { email: String(email || '').toLowerCase(), cred: cred || null };
+  $id('mergeIntro').textContent = (email ? email : 'That sign-in') + ' already has its own learning account. Each person keeps one account, so choose which one to keep.';
+  $id('mergeStepSignIn').hidden = false; $id('mergeStepCompare').hidden = true; $id('mergePw').value = ''; mergeSay();
+  $id('mergePanel').hidden = false; $id('mergePanel').focus();
+  $id('linkEmailForm').hidden = true;
+  if (cred) mergeSignIn(() => signInWithCredential(otherAuth, cred));   // Google: no second sign-in needed
+}
+function closeMerge(){
+  merge = null; $id('mergePanel').hidden = true;
+  signOut(otherAuth).catch(() => {});
+}
+$id('mergeCancel').addEventListener('click', closeMerge);
+$id('mergeGoogle').addEventListener('click', () => mergeSignIn(async () => {
+  const r = await signInWithPopup(otherAuth, new GoogleAuthProvider());
+  merge.cred = GoogleAuthProvider.credentialFromResult ? GoogleAuthProvider.credentialFromResult(r) : null;
+  return r;
+}));
+$id('mergePwBtn').addEventListener('click', () => {
+  const pw = $id('mergePw').value;
+  if (!merge.email) { mergeSay('Use "Continue with Google" for that account.'); return; }
+  if (!pw) { mergeSay('Enter the password for ' + merge.email + '.'); return; }
+  mergeSignIn(async () => {
+    const r = await signInWithEmailAndPassword(otherAuth, merge.email, pw);
+    merge.cred = EmailAuthProvider.credential(merge.email, pw); merge.pw = pw;
+    return r;
+  });
+});
+$id('mergeReset').addEventListener('click', async () => {
+  if (!merge.email) { mergeSay('Use "Continue with Google" for that account.'); return; }
+  try {
+    await sendPasswordResetEmail(otherAuth, merge.email); mergeSay('');
+    $id('mergeIntro').textContent = 'We emailed ' + merge.email + ' a link to set its password. Set it, then come back here and sign in to it.';
+  } catch (e){ mergeSay("That email couldn't be sent just now. Please try again."); }
+});
+async function mergeSignIn(how){
+  mergeSay();
+  try { await how(); }
+  catch (err){
+    const c = err && err.code;
+    if (c === 'auth/popup-closed-by-user' || c === 'auth/cancelled-popup-request') return;
+    mergeSay(c === 'auth/wrong-password' || c === 'auth/invalid-credential' ? 'That password is not right. Try again, or set a new one with the link below.' : "That sign-in didn't work. Please try again.");
+    return;
+  }
+  const other = otherAuth.currentUser;
+  if (!other) { mergeSay("That sign-in didn't work. Please try again."); return; }
+  if (other.uid === currentUser.uid) { closeMerge(); signinSay('', 'That sign-in already opens this account.'); return; }
+  const emails = [other.email].concat((other.providerData || []).map(p => p.email)).filter(Boolean).map(e => e.toLowerCase());
+  if (merge.email && emails.indexOf(merge.email) < 0){
+    await signOut(otherAuth).catch(() => {});
+    mergeSay('That is a different account (' + (other.email || '') + '). Sign in as ' + merge.email + '.');
+    return;
+  }
+  merge.email = merge.email || (other.email || '').toLowerCase();
+  try {
+    const both = await Promise.all([accountSummary(db, currentUser), accountSummary(otherDb, other)]);
+    merge.me = both[0]; merge.other = both[1];
+  } catch (err){ console.error(err); mergeSay("We couldn't load that account just now. Please try again."); return; }
+  showMergeChoice();
+}
+async function accountSummary(database, user){
+  const safe = (pr) => pr.catch(() => null);
+  const got = await Promise.all([getDoc(doc(database, 'progress', user.uid)), safe(getDoc(doc(database, 'memberships', user.uid))), safe(getDoc(doc(database, 'platformAdmins', user.uid)))]);
+  const data = got[0].exists() ? got[0].data() : {};
+  const mem = got[1] && got[1].exists() ? got[1].data() : null;
+  const B = window.BadgesCore;
+  const st = B.stats({ progress: data, assessment: data.assessmentResult || null, nowMs: Date.now(), offsetMin: -new Date().getTimezoneOffset() });
+  const days = Object.keys(data.activeLog || {}).concat(Object.keys(data.lessonLog || {})).sort();
+  const a = data.assessmentResult || null;
+  return { uid: user.uid, email: user.email || '', created: user.metadata && user.metadata.creationTime ? new Date(user.metadata.creationTime) : null,
+    lastActive: days.length ? days[days.length - 1] : '', tier: a ? a.tier : '', lessons: st.lessons, courses: st.courses,
+    badges: B.summary(B.evaluate(st, data.badges)).have, company: mem && mem.status === 'active' ? (mem.orgName || 'a company') : '',
+    owner: !!(got[2] && got[2].exists()), password: (user.providerData || []).some(x => x.providerId === 'password') };
+}
+// The one with more learning is suggested; then the assessed one; then the one with more badges; then this one.
+function suggestKeep(me, other){
+  if (other.lessons !== me.lessons) return other.lessons > me.lessons ? 'other' : 'me';
+  if (!!other.tier !== !!me.tier) return other.tier ? 'other' : 'me';
+  return other.badges > me.badges ? 'other' : 'me';
+}
+function lockReason(acc){
+  if (acc.owner) return 'This is the owner account, so it has to be the one you keep.';
+  if (acc.company) return 'This account belongs to ' + acc.company + ', so it has to be the one you keep. To close it, ask ' + acc.company + "'s admin to remove you first.";
+  return '';
+}
+function showMergeChoice(){
+  const me = merge.me, other = merge.other;
+  const meLocked = lockReason(me), otherLocked = lockReason(other);
+  if (meLocked && otherLocked) mergeSay('Both accounts belong to a company or are the owner account, so neither can be closed here. Please contact us and we will sort it out.');
+  const tip = suggestKeep(me, other);
+  merge.keep = otherLocked ? 'other' : meLocked ? 'me' : tip;
+  const when = (d) => d ? d.toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' }) : '';
+  const card = (which, acc) => {
+    const btn = document.createElement('button');
+    btn.type = 'button'; btn.className = 'merge-card'; btn.setAttribute('role', 'radio'); btn.dataset.which = which;
+    const lockedOut = which === 'me' ? otherLocked : meLocked;   // this one can't be kept if the other can't be closed
+    if (lockedOut || (meLocked && otherLocked)) btn.disabled = true;
+    const head = document.createElement('span'); head.className = 'mc-which'; head.textContent = which === 'me' ? 'Signed in now' : 'The other account';
+    const b = document.createElement('b'); b.textContent = acc.email;
+    const ul = document.createElement('ul');
+    [acc.tier ? 'Assessment: ' + acc.tier : 'No assessment yet',
+     acc.lessons + (acc.lessons === 1 ? ' lesson' : ' lessons') + ' finished, ' + acc.courses + (acc.courses === 1 ? ' course' : ' courses') + ' complete',
+     acc.badges + (acc.badges === 1 ? ' badge' : ' badges'),
+     acc.company ? 'Company: ' + acc.company : 'No company',
+     acc.lastActive ? 'Last active ' + when(new Date(acc.lastActive + 'T12:00:00')) : (acc.created ? 'Created ' + when(acc.created) : '')]
+      .filter(Boolean).forEach(t => { const li = document.createElement('li'); li.textContent = t; ul.appendChild(li); });
+    btn.append(head, b, ul);
+    if (which === tip && !lockedOut){ const t = document.createElement('span'); t.className = 'mc-tip'; t.textContent = 'Suggested: more progress'; btn.appendChild(t); }
+    const lock = lockReason(acc);
+    if (lock){ const l = document.createElement('span'); l.className = 'mc-lock'; l.textContent = lock; btn.appendChild(l); }
+    btn.addEventListener('click', () => { merge.keep = which; paintMergeChoice(); });
+    return btn;
+  };
+  const cards = $id('mergeCards'); cards.textContent = '';
+  cards.append(card('me', me), card('other', other));
+  $id('mergeStepSignIn').hidden = true; $id('mergeStepCompare').hidden = false;
+  $id('mergeConfirm').hidden = !!(meLocked && otherLocked);
+  paintMergeChoice();
+}
+function paintMergeChoice(){
+  const keep = merge.keep === 'me' ? merge.me : merge.other, close = merge.keep === 'me' ? merge.other : merge.me;
+  $id('mergeCards').querySelectorAll('.merge-card').forEach(c => c.setAttribute('aria-checked', c.dataset.which === merge.keep ? 'true' : 'false'));
+  $id('mergeAgree').checked = false;
+  $id('mergeAgreeText').textContent = 'I understand ' + close.email + "'s progress, assessment results, notes and badges will be deleted, and this can't be undone.";
+  $id('mergeGo').textContent = 'Keep ' + keep.email + ' and close the other';
+  $id('mergeGo').disabled = true;
+  // closing the account signed in now needs its password again (a Google account confirms in a pop-up)
+  const needPw = merge.keep === 'other' && merge.me.password;
+  $id('mergeMyPw').hidden = !needPw; $id('mergeMyPw').value = '';
+  $id('mergeMyPw').placeholder = 'Your password for ' + merge.me.email;
+}
+$id('mergeAgree').addEventListener('change', () => { $id('mergeGo').disabled = !$id('mergeAgree').checked; });
+$id('mergeGo').addEventListener('click', async () => {
+  const go = $id('mergeGo'), label = go.textContent;
+  go.disabled = true; go.textContent = 'Working…'; mergeSay();
+  try {
+    if (merge.keep === 'me') await keepThisOne(); else await keepTheOther();
+  } catch (err){
+    go.textContent = label; go.disabled = false;
+    mergeSay(err.message || "That didn't work just now. Please try again.");
+  }
+});
+// Keep the account signed in now: close the other, then add its sign-in here.
+async function keepThisOne(){
+  const other = otherAuth.currentUser;
+  if (!other) throw new Error('Please sign in to the other account again.');
+  await closeRecords(otherDb, other);
+  await deleteUser(other);
+  let added = false;
+  if (merge.cred && !(merge.pw && merge.me.password)){
+    try { await linkWithCredential(currentUser, merge.cred); added = true; } catch (e){ /* they can add it again */ }
+  }
+  const email = merge.email;
+  closeMerge();
+  await currentUser.reload(); showSignIns();
+  signinSay('', email + "'s account is closed. " + (added ? 'It now signs in to this account.' : "Its sign-in wasn't added here, because an account holds one Google sign-in and one password."));
+}
+// Keep the other account: confirm this one, close it, switch to the other, then add this one's sign-in there.
+async function keepTheOther(){
+  let myCred = null;
+  try {
+    if (merge.me.password){
+      const pw = $id('mergeMyPw').value;
+      if (!pw) throw Object.assign(new Error(), { code: 'need-pw' });
+      myCred = EmailAuthProvider.credential(currentUser.email, pw);
+      await reauthenticateWithCredential(currentUser, myCred);
+    } else {
+      const r = await reauthenticateWithPopup(currentUser, new GoogleAuthProvider());
+      myCred = GoogleAuthProvider.credentialFromResult ? GoogleAuthProvider.credentialFromResult(r) : null;
+    }
+  } catch (err){
+    throw new Error(err.code === 'need-pw' ? 'Enter your password for ' + merge.me.email + ' to confirm.' : friendlyAuthError(err.code));
+  }
+  const keepEmail = merge.other.email, otherCred = merge.cred, bothPw = merge.other.password && merge.me.password;
+  await closeRecords(db, currentUser);
+  switchingAccount = true;
+  await deleteUser(currentUser);
+  // The page's sign-in listener hears the switch and shows the kept account (it ignores the moment between).
+  try { await signInWithCredential(auth, otherCred); }
+  catch (e){
+    switchingAccount = false;
+    $id('mergeConfirm').hidden = true; $id('mergeCancel').hidden = true;
+    mergeSay('This account is closed. Sign in with ' + keepEmail + ' to carry on. Taking you to sign in…');
+    setTimeout(() => { location.href = '/lms-dashboard'; }, 5000);
+    return;
+  }
+  switchingAccount = false;
+  let added = false;
+  if (myCred && !bothPw){ try { await linkWithCredential(auth.currentUser, myCred); added = true; } catch (e){ /* add it again later */ } }
+  closeMerge();
+  await auth.currentUser.reload(); showSignIns();
+  signinSay('', 'You are now signed in to ' + keepEmail + '. The other account is closed' + (added ? ', and its sign-in now opens this account.' : ". Its sign-in wasn't added here, because an account holds one Google sign-in and one password."));
+  $id('signin').focus();
 }
 
 /* ---------------------------------------------------------------- My Badges */
@@ -922,6 +1178,25 @@ function requestSheetDeletion(idToken){
   });
 }
 
+/* An account's records, removed before its sign-in is deleted (Delete account, and closing the account
+   not kept in "two accounts: keep one"). database and user may be the other account's. Each step stops
+   everything if it fails, with the reason as the error's message, and every step is safe to repeat:
+   1. blank their name and email on any company's copy (the results stay with the company);
+   2. withdraw their Tool Roadmap votes and suggestion;
+   3. remove their rows from the results spreadsheet (needs them still signed in);
+   4. delete their progress record. */
+async function closeRecords(database, user){
+  try { await anonymizeOrgShares(database, user); }
+  catch (err){ console.error('Could not remove the name from the company copy:', err); throw new Error("We couldn't remove your name from the copy your company holds, so nothing has been deleted. Please try again in a minute."); }
+  try { await removeToolActivity(user, database); }
+  catch (err){ console.error('Could not remove the Tool Roadmap votes:', err); throw new Error("We couldn't remove your Tool Roadmap votes, so nothing has been deleted. Please try again in a minute."); }
+  let sheetResult = null;
+  try { sheetResult = await requestSheetDeletion(await user.getIdToken(true)); } catch (err){ /* a failed attempt */ }
+  if (!sheetResult || sheetResult.ok !== true) throw new Error("We couldn't remove your records from our results spreadsheet, so nothing has been deleted. Please try again in a minute.");
+  try { await deleteDoc(doc(database, 'progress', user.uid)); }
+  catch (err){ console.error('Could not delete the progress record:', err); throw new Error("We couldn't remove your learning records just now. Please try again in a minute."); }
+}
+
 /* Order matters: spreadsheet rows first (needs the person still signed in
    to prove who they are), then the Firestore record, then the sign-in
    itself. If any step fails nothing later runs, and every step is safe to
@@ -959,43 +1234,15 @@ window.handleDeleteAccount = async function(){
     return;
   }
 
-  const uid = currentUser.uid;
-
-  // If this person has been in a company, blank their name and email on the
-  // copy the company keeps (the results stay with the company). This runs
-  // first, while their records still exist, and stops everything if it fails.
   try {
-    await anonymizeOrgShares(db, currentUser);
+    await closeRecords(db, currentUser);
   } catch (err){
-    console.error('Could not remove your name from your company\'s copy:', err);
-    errorEl.textContent = "We couldn't remove your name from the copy your company holds, so nothing has been deleted. Please try again in a minute.";
-    resetButton();
-    return;
-  }
-
-  // Withdraw their Tool Roadmap votes (taking each off the tool's public total)
-  // and delete any tool suggestion. Stops everything if it fails.
-  try {
-    await removeToolActivity(currentUser);
-  } catch (err){
-    console.error('Could not remove the Tool Roadmap votes:', err);
-    errorEl.textContent = "We couldn't remove your Tool Roadmap votes, so nothing has been deleted. Please try again in a minute.";
-    resetButton();
-    return;
-  }
-
-  let sheetResult = null;
-  try {
-    sheetResult = await requestSheetDeletion(await currentUser.getIdToken(true));
-  } catch (err){ /* treated as a failed attempt below */ }
-  if (!sheetResult || sheetResult.ok !== true){
-    errorEl.textContent = "We couldn't remove your records from our results spreadsheet, so nothing has been deleted. Please try again in a minute.";
+    errorEl.textContent = err.message;
     resetButton();
     return;
   }
 
   try {
-    await deleteDoc(doc(db, 'progress', uid));
     accountDeleted = true;
     await deleteUser(currentUser);
   } catch (err){
