@@ -70,6 +70,18 @@
   .btn-primary{ background: linear-gradient(90deg, var(--navy) 0%, var(--primary-strong) 100%); color:var(--btn-ink); }
   .btn-primary:hover{ opacity:0.92; }
   .btn-ghost{ background:none; color: var(--gray); border: 1px solid var(--line); }
+  /* Ways to sign in */
+  .signin-list{ list-style:none; margin: 14px 0; padding:0; display:grid; gap: 8px; }
+  .signin-list li{ display:flex; align-items:center; gap: 12px; padding: 10px 12px; border: 1px solid var(--line); border-radius: 10px; }
+  .signin-list .si-ico{ width: 32px; height: 32px; border-radius: 50%; display:grid; place-items:center; background: var(--tint); color: var(--navy); flex-shrink:0; font-weight:700; }
+  .signin-list .si-main{ flex:1; min-width:0; }
+  .signin-list .si-main b{ display:block; font-size: 0.875rem; }
+  .signin-list .si-main span{ font-size: 0.7812rem; color: var(--ink-soft); word-break: break-all; }
+  .signin-list .si-tag{ font-size: 0.6875rem; font-weight:700; color: var(--ok); background: var(--ok-bg); padding: 2px 8px; border-radius: 999px; white-space: nowrap; }
+  .signin-add{ display:flex; gap: 10px; flex-wrap: wrap; margin-bottom: 8px; }
+  .link-email{ margin: 12px 0 4px; padding: 14px; border-radius: 12px; background: var(--tint); }
+  .link-email .text-input{ background: var(--surface); }
+  .link-email[hidden]{ display:none; }
 
   a.btn-link{ display:inline-block; font-family:var(--display); font-weight:600; font-size:0.875rem; border-radius:8px; padding:11px 20px; text-decoration:none; background: linear-gradient(90deg, var(--navy) 0%, var(--primary-strong) 100%); color:var(--btn-ink); }
   a.btn-link:hover{ opacity:0.92; }
@@ -256,6 +268,31 @@
     <button class="btn btn-primary" id="goalsSaveBtn" type="button">Save goals and emails</button>
   </div>
 
+  <div class="card" id="signin" tabindex="-1">
+    <h2>Ways to sign in</h2>
+    <p style="margin-top:4px;">Add a second way into this same account, for example your personal Google account, so your learning stays with you if you change jobs. Emails still go to your main address.</p>
+    <ul class="signin-list" id="signinList"></ul>
+    <div class="signin-add">
+      <button type="button" class="btn btn-ghost" id="linkGoogleBtn">+ Add Google sign-in</button>
+      <button type="button" class="btn btn-ghost" id="linkEmailBtn">+ Add another email</button>
+    </div>
+    <p class="setting-hint" id="linkEmailNote" hidden>This account already signs in with an email and password, and each account can have one. To add a personal address, add Google sign-in (for Gmail or any Google account), or make it your main email below.</p>
+    <div class="link-email" id="linkEmailForm" hidden>
+      <label class="profile-field-label" for="linkEmailInput">The other email</label>
+      <input class="text-input" type="email" id="linkEmailInput" placeholder="you@example.com" autocomplete="email">
+      <button type="button" class="btn btn-primary" id="linkEmailSend">Send a link to confirm it</button>
+      <p class="setting-hint">We email a link to that address. Open it on this device to finish adding it.</p>
+    </div>
+    <div class="link-email" id="linkPwForm" hidden>
+      <label class="profile-field-label" for="linkPwInput">Set a password for <span id="linkPwEmail"></span></label>
+      <input class="text-input" type="password" id="linkPwInput" autocomplete="new-password" placeholder="At least 8 characters">
+      <button type="button" class="btn btn-primary" id="linkPwSave">Save password</button>
+      <p class="setting-hint">Then you can sign in with that email and this password.</p>
+    </div>
+    <div class="field-error" id="signinError" role="alert"></div>
+    <div class="field-error" id="signinSuccess" role="status" style="color:var(--ok);"></div>
+  </div>
+
   <div class="card">
     <h2>Change email</h2>
     <p>We'll send a confirmation link to your new address — the change won't take effect until you click it there.</p>
@@ -310,6 +347,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/fireba
 import {
   getAuth, onAuthStateChanged, GoogleAuthProvider,
   reauthenticateWithCredential, reauthenticateWithPopup, EmailAuthProvider,
+  linkWithPopup, linkWithCredential, unlink, sendSignInLinkToEmail, isSignInWithEmailLink, updatePassword,
   updateProfile, verifyBeforeUpdateEmail, deleteUser
 } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
 import { getFirestore, doc, getDoc, getDocs, setDoc, deleteDoc, collection, query, where, writeBatch, increment } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
@@ -436,6 +474,8 @@ onAuthStateChanged(auth, async (user) => {
 
   document.getElementById('editDisplayName').value = user.displayName || '';
 
+  showSignIns();
+  finishEmailLink();
   const hasPasswordProvider = user.providerData.some(p => p.providerId === 'password');
   document.getElementById('editEmailCurrentPassword').style.display = hasPasswordProvider ? 'block' : 'none';
   document.getElementById('deletePassword').style.display = hasPasswordProvider ? 'block' : 'none';
@@ -555,6 +595,129 @@ $id('goalsSaveBtn').addEventListener('click', async () => {
   }
 });
 
+/* ---------------------------------------------------------------- ways to sign in */
+// A second way into the same account: a Google account, or (for accounts that sign in with Google) another email,
+// proven by a link sent to it, with its own password. The account's main email, where emails go and what
+// companies see, doesn't change; "Change email" below changes that.
+const LINK_EMAIL_KEY = 'pa_link_email';
+function signinSay(err, ok){ $id('signinError').textContent = err || ''; $id('signinSuccess').textContent = ok || ''; }
+function showSignIns(){
+  const u = currentUser, list = $id('signinList');
+  const methods = u.providerData.filter(p => p.providerId === 'google.com' || p.providerId === 'password');
+  list.textContent = '';
+  methods.forEach(p => {
+    const li = document.createElement('li');
+    const ico = document.createElement('span'); ico.className = 'si-ico'; ico.setAttribute('aria-hidden', 'true');
+    ico.textContent = p.providerId === 'google.com' ? 'G' : '@';
+    const main = document.createElement('div'); main.className = 'si-main';
+    const b = document.createElement('b'); b.textContent = p.providerId === 'google.com' ? 'Google' : 'Email and password';
+    const sp = document.createElement('span'); sp.textContent = p.email || '';
+    main.append(b, sp);
+    li.append(ico, main);
+    if ((p.email || '').toLowerCase() === (u.email || '').toLowerCase()){
+      const tag = document.createElement('span'); tag.className = 'si-tag'; tag.textContent = 'Main email'; li.appendChild(tag);
+    }
+    if (methods.length > 1){
+      const rm = document.createElement('button'); rm.type = 'button'; rm.className = 'linkbtn'; rm.textContent = 'Remove';
+      rm.setAttribute('aria-label', 'Remove ' + b.textContent + ' sign-in for ' + (p.email || ''));
+      rm.addEventListener('click', () => removeSignIn(p));
+      li.appendChild(rm);
+    }
+    list.appendChild(li);
+  });
+  const hasGoogle = methods.some(p => p.providerId === 'google.com'), hasPw = methods.some(p => p.providerId === 'password');
+  $id('linkGoogleBtn').hidden = hasGoogle;
+  $id('linkEmailBtn').hidden = hasPw && hasGoogle;
+  if (hasPw) $id('linkEmailForm').hidden = true;
+}
+$id('linkGoogleBtn').addEventListener('click', async () => {
+  signinSay();
+  try {
+    await linkWithPopup(currentUser, new GoogleAuthProvider());
+    await currentUser.reload();
+    showSignIns();
+    signinSay('', 'Google sign-in added. You can now use "Continue with Google" with that account to open this same account.');
+  } catch (err){
+    const c = err && err.code;
+    if (c === 'auth/popup-closed-by-user' || c === 'auth/cancelled-popup-request') return;
+    signinSay(c === 'auth/credential-already-in-use' || c === 'auth/email-already-in-use'
+      ? 'That Google account already has its own learning account, so it can\'t be added here. Sign in with it, delete that account at the bottom of My Profile, then add it here.'
+      : c === 'auth/provider-already-linked' ? 'This account already has a Google sign-in.' : "That didn't work just now. Please try again.");
+  }
+});
+$id('linkEmailBtn').addEventListener('click', () => {
+  signinSay();
+  const hasPw = currentUser.providerData.some(p => p.providerId === 'password');
+  $id('linkEmailNote').hidden = !hasPw;
+  $id('linkEmailForm').hidden = hasPw;
+  if (!hasPw) $id('linkEmailInput').focus();
+});
+$id('linkEmailSend').addEventListener('click', async () => {
+  signinSay();
+  const email = $id('linkEmailInput').value.trim().toLowerCase();
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { signinSay('Please enter a full email address.'); return; }
+  if (email === (currentUser.email || '').toLowerCase()) { signinSay('That is already your main email.'); return; }
+  try {
+    await sendSignInLinkToEmail(auth, email, { url: location.origin + '/profile?linkEmail=1#signin', handleCodeInApp: true });
+    try { localStorage.setItem(LINK_EMAIL_KEY, email); } catch (e) { /* asked again on return */ }
+    signinSay('', 'Check ' + email + ' for an email from us, and open the link on this device to finish.');
+  } catch (err){
+    signinSay(err && err.code === 'auth/operation-not-allowed' ? 'Adding another email is not switched on yet. Please try Google sign-in instead.' : "That email couldn't be sent just now. Please try again.");
+  }
+});
+// Back from the link in that email: add the address to this account.
+async function finishEmailLink(){
+  if (!isSignInWithEmailLink(auth, location.href)) return;
+  let email = '';
+  try { email = localStorage.getItem(LINK_EMAIL_KEY) || ''; } catch (e) { /* no storage */ }
+  if (!email) email = (window.prompt('To finish, type the email address you are adding:') || '').trim().toLowerCase();
+  const href = location.href;
+  history.replaceState(null, '', location.pathname + '#signin');
+  if (!email) return;
+  try {
+    await linkWithCredential(currentUser, EmailAuthProvider.credentialWithLink(email, href));
+    try { localStorage.removeItem(LINK_EMAIL_KEY); } catch (e) { /* fine */ }
+    await currentUser.reload();
+    showSignIns();
+    $id('linkPwEmail').textContent = email;
+    $id('linkPwForm').hidden = false;
+    signinSay('', email + ' is added to your account. Set a password for it below to sign in with it.');
+    $id('signin').focus();
+  } catch (err){
+    const c = err && err.code;
+    signinSay(c === 'auth/credential-already-in-use' || c === 'auth/email-already-in-use' ? 'That email already has its own learning account, so it can\'t be added here.'
+      : c === 'auth/invalid-action-code' || c === 'auth/expired-action-code' ? 'That link has expired or was already used. Send a new one.'
+      : c === 'auth/invalid-email' ? 'That isn\'t the email the link was sent to. Send a new link.' : "That didn't work just now. Send a new link and try again.");
+    $id('signin').focus();
+  }
+}
+$id('linkPwSave').addEventListener('click', async () => {
+  signinSay();
+  const pw = $id('linkPwInput').value;
+  if (pw.length < 8) { signinSay('Please use at least 8 characters.'); return; }
+  try {
+    await updatePassword(currentUser, pw);
+    $id('linkPwForm').hidden = true; $id('linkPwInput').value = '';
+    signinSay('', 'Password saved. You can sign in with ' + $id('linkPwEmail').textContent + ' and this password.');
+  } catch (err){
+    signinSay(err && err.code === 'auth/weak-password' ? 'That password is too easy to guess. Try a longer one.'
+      : err && err.code === 'auth/requires-recent-login' ? 'For your security, sign out and back in, then use "Forgot password?" on the sign-in page for that email.' : "That didn't save. Please try again.");
+  }
+});
+async function removeSignIn(p){
+  signinSay();
+  const label = (p.providerId === 'google.com' ? 'Google sign-in' : 'email sign-in') + ' for ' + (p.email || '');
+  if (!window.confirm('Remove ' + label + '? You will no longer be able to sign in that way.')) return;
+  try {
+    await unlink(currentUser, p.providerId);
+    await currentUser.reload();
+    showSignIns();
+    signinSay('', 'Removed ' + label + '.');
+  } catch (err){
+    signinSay(err && err.code === 'auth/requires-recent-login' ? 'For your security, sign out and back in, then try again.' : "That didn't work just now. Please try again.");
+  }
+}
+
 /* ---------------------------------------------------------------- My Badges */
 // Worked out by badges-core.js from the progress document and drawn by badges-ui.js. Badges seen
 // for the first time are stored in progress.badges with today's date, so "earned on" stays put.
@@ -570,7 +733,7 @@ function showBadges(data, user){
   window.BadgesUI.render($id('badgesBody'), list);
   if (location.hash === '#badges') $id('badges').focus();
 }
-window.addEventListener('hashchange', () => { if (location.hash === '#badges' || location.hash === '#goals') $id(location.hash.slice(1)).focus(); });
+window.addEventListener('hashchange', () => { if (location.hash === '#badges' || location.hash === '#goals' || location.hash === '#signin') $id(location.hash.slice(1)).focus(); });
 
 /* ------------------------------------------------------------ profile photo */
 // The photo is resized in the browser to a 160 x 160 JPEG (about 10 KB) and kept on the person's own
