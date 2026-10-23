@@ -96,9 +96,14 @@
   .merge-card b{ display:block; word-break: break-all; margin-bottom: 2px; }
   .merge-card .mc-which{ font-size: 0.6875rem; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; color: var(--gray); }
   .merge-card ul{ list-style:none; margin: 8px 0 0; padding: 0; font-size: 0.8125rem; color: var(--ink-soft); display:grid; gap: 3px; }
-  .merge-card .mc-tip{ display:inline-block; margin-top: 8px; font-size: 0.6875rem; font-weight: 700; color: var(--ok); background: var(--ok-bg); padding: 2px 8px; border-radius: 999px; }
+  .merge-card .mc-main{ display:none; margin-top: 8px; font-size: 0.6875rem; font-weight: 700; color: var(--ok); background: var(--ok-bg); padding: 2px 8px; border-radius: 999px; }
+  .merge-card[aria-checked="true"] .mc-main{ display:inline-block; }
+  .merge-label{ font-size: 0.875rem; margin: 4px 0 0; }
+  .merge-result{ border-radius: 12px; background: var(--ok-bg); padding: 12px 14px; margin: 0 0 12px; }
+  .merge-result ul{ margin: 6px 0 4px; padding-left: 18px; font-size: 0.875rem; display:grid; gap: 3px; }
+  .merge-result .setting-hint{ margin: 4px 0 0; }
+  .merge-result .mc-which{ font-size: 0.6875rem; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; color: var(--ok); }
   .merge-card .mc-lock{ display:block; margin-top: 8px; font-size: 0.75rem; color: var(--warn); }
-  .merge-check{ display:flex; gap: 8px; align-items:flex-start; font-size: 0.8125rem; margin: 10px 0; }
 
   a.btn-link{ display:inline-block; font-family:var(--display); font-weight:600; font-size:0.875rem; border-radius:8px; padding:11px 20px; text-decoration:none; background: linear-gradient(90deg, var(--navy) 0%, var(--primary-strong) 100%); color:var(--btn-ink); }
   a.btn-link:hover{ opacity:0.92; }
@@ -137,6 +142,7 @@
 <script src="company-core.js"></script>
 <script src="notify-core.js"></script>
 <script src="badges-core.js"></script>
+<script src="merge-core.js"></script>
 <script src="badges-ui.js"></script>
 </head>
 <body>
@@ -307,10 +313,10 @@
       <p class="setting-hint">Then you can sign in with that email and this password.</p>
     </div>
     <div class="merge" id="mergePanel" hidden tabindex="-1" aria-labelledby="mergeTitle">
-      <h3 id="mergeTitle">Two accounts: keep one</h3>
+      <h3 id="mergeTitle">Combine your two accounts</h3>
       <p id="mergeIntro"></p>
       <div id="mergeStepSignIn">
-        <p class="setting-hint">First, sign in to that account here to compare them. You stay signed in to this one.</p>
+        <p class="setting-hint">First, sign in to <b id="mergeWho"></b> here, so we can show you what each account holds. You stay signed in to this one.</p>
         <div class="merge-row">
           <button type="button" class="btn btn-ghost" id="mergeGoogle">Continue with Google</button>
           <span class="merge-or">or</span>
@@ -320,12 +326,16 @@
         <button type="button" class="linkbtn" id="mergeReset">Forgot its password? Email me a link to set one</button>
       </div>
       <div id="mergeStepCompare" hidden>
-        <p class="setting-hint">Choose the account to keep. The other one is closed: its progress, assessment results, notes and badges are deleted, and its email becomes another way to sign in to the one you keep.</p>
-        <div class="merge-cards" id="mergeCards" role="radiogroup" aria-label="Account to keep"></div>
+        <p class="merge-label">Your two accounts. Choose the <b>main email</b>: where we send your emails, and the one a company sees.</p>
+        <div class="merge-cards" id="mergeCards" role="radiogroup" aria-label="Main email"></div>
+        <div class="merge-result">
+          <span class="mc-which">After combining: one account</span>
+          <ul id="mergeResult"></ul>
+          <p class="setting-hint">Goals and email settings come from the main email's account. Nothing either account earned is lost.</p>
+        </div>
         <div id="mergeConfirm" hidden>
-          <input class="text-input" type="password" id="mergeMyPw" placeholder="" autocomplete="current-password" hidden>
-          <label class="merge-check"><input type="checkbox" id="mergeAgree"> <span id="mergeAgreeText"></span></label>
-          <button type="button" class="btn btn-danger" id="mergeGo" disabled></button>
+          <input class="text-input" type="password" id="mergeMyPw" placeholder="" autocomplete="current-password" aria-label="Your password, to confirm" hidden>
+          <button type="button" class="btn btn-primary" id="mergeGo">Combine accounts</button>
         </div>
       </div>
       <div class="field-error" id="mergeError" role="alert"></div>
@@ -393,7 +403,7 @@ import {
   updateProfile, verifyBeforeUpdateEmail, deleteUser,
   signInWithPopup, signInWithCredential, signInWithEmailAndPassword, sendPasswordResetEmail, signOut
 } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
-import { getFirestore, doc, getDoc, getDocs, setDoc, deleteDoc, collection, query, where, writeBatch, increment } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+import { getFirestore, doc, getDoc, getDocs, setDoc, deleteDoc, collection, query, where, writeBatch, increment, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
 import { anonymizeOrgShares } from "./org-share.js";
 
 const app = initializeApp(firebaseConfig);
@@ -499,7 +509,7 @@ function friendlyAuthError(code){
 // Set just before the auth user is deleted, so the sign-out that follows
 // shows the "account deleted" notice instead of bouncing to the dashboard.
 let accountDeleted = false;
-// Set while closing this account to keep the other one (see "two accounts: keep one").
+// Set while closing this account to switch to the other one (see "combine two accounts").
 let switchingAccount = false;
 
 onAuthStateChanged(auth, async (user) => {
@@ -769,19 +779,22 @@ async function removeSignIn(p){
   }
 }
 
-/* ---------------------------------------------------------------- two accounts: keep one */
+/* ---------------------------------------------------------------- combine two accounts */
 // When the sign-in being added already has its own learning account, the person signs in to that account
-// here (a second, separate Firebase app, so this page stays signed in), sees both side by side, and keeps one.
-// The other is closed with closeRecords() and deleteUser(), and its sign-in is then added to the one kept.
-// An account in a company, or the owner's account, can't be the one closed.
+// here (a second, separate Firebase app, so this page stays signed in) and the two are combined into one:
+// everything from both (merge-core.js), kept on the account whose email they choose as the main one. The
+// other account is then closed (closeRecords, deleteUser) and its sign-in added to the main one, so both
+// emails sign in. An account in a company, or the owner's account, has to be the main one.
 const otherApp = initializeApp(firebaseConfig, 'pa-other');
 const otherAuth = getAuth(otherApp), otherDb = getFirestore(otherApp);
-let merge = null;   // { email, cred (the other account's sign-in), pw, me, other (summaries), keep: 'me' | 'other' }
+let merge = null;   // { email, cred (the other account's sign-in), pw, me, other (summaries), main: 'me' | 'other' }
 function mergeSay(msg){ $id('mergeError').textContent = msg || ''; }
 function openMerge(email, cred){
   signinSay();
   merge = { email: String(email || '').toLowerCase(), cred: cred || null };
-  $id('mergeIntro').textContent = (email ? email : 'That sign-in') + ' already has its own learning account. Each person keeps one account, so choose which one to keep.';
+  $id('mergeIntro').textContent = (email ? email : 'That sign-in') + ' already has its own learning account. You can combine the two: '
+    + 'both emails then sign in to one account, with the courses, badges and notes from both and your most recent assessment.';
+  $id('mergeWho').textContent = email || 'that account';
   $id('mergeStepSignIn').hidden = false; $id('mergeStepCompare').hidden = true; $id('mergePw').value = ''; mergeSay();
   $id('mergePanel').hidden = false; $id('mergePanel').focus();
   $id('linkEmailForm').hidden = true;
@@ -839,105 +852,138 @@ async function mergeSignIn(how){
   } catch (err){ console.error(err); mergeSay("We couldn't load that account just now. Please try again."); return; }
   showMergeChoice();
 }
+// What an account holds, for the side-by-side cards (data is its progress document).
+function holdings(data, createdIso){
+  const B = window.BadgesCore;
+  const st = B.stats({ progress: data, assessment: data.assessmentResult || null, nowMs: Date.now(), offsetMin: -new Date().getTimezoneOffset(), createdMs: Date.parse(createdIso || '') || undefined });
+  return { lessons: st.lessons, courses: st.courses, badges: B.summary(B.evaluate(st, data.badges)).have };
+}
 async function accountSummary(database, user){
   const safe = (pr) => pr.catch(() => null);
   const got = await Promise.all([getDoc(doc(database, 'progress', user.uid)), safe(getDoc(doc(database, 'memberships', user.uid))), safe(getDoc(doc(database, 'platformAdmins', user.uid)))]);
   const data = got[0].exists() ? got[0].data() : {};
   const mem = got[1] && got[1].exists() ? got[1].data() : null;
-  const B = window.BadgesCore;
-  const st = B.stats({ progress: data, assessment: data.assessmentResult || null, nowMs: Date.now(), offsetMin: -new Date().getTimezoneOffset() });
   const days = Object.keys(data.activeLog || {}).concat(Object.keys(data.lessonLog || {})).sort();
-  const a = data.assessmentResult || null;
-  return { uid: user.uid, email: user.email || '', created: user.metadata && user.metadata.creationTime ? new Date(user.metadata.creationTime) : null,
-    lastActive: days.length ? days[days.length - 1] : '', tier: a ? a.tier : '', lessons: st.lessons, courses: st.courses,
-    badges: B.summary(B.evaluate(st, data.badges)).have, company: mem && mem.status === 'active' ? (mem.orgName || 'a company') : '',
-    owner: !!(got[2] && got[2].exists()), password: (user.providerData || []).some(x => x.providerId === 'password') };
-}
-// The one with more learning is suggested; then the assessed one; then the one with more badges; then this one.
-function suggestKeep(me, other){
-  if (other.lessons !== me.lessons) return other.lessons > me.lessons ? 'other' : 'me';
-  if (!!other.tier !== !!me.tier) return other.tier ? 'other' : 'me';
-  return other.badges > me.badges ? 'other' : 'me';
+  const created = user.metadata && user.metadata.creationTime ? new Date(user.metadata.creationTime) : null;
+  return Object.assign({ uid: user.uid, email: user.email || '', created, data,
+    lastActive: days.length ? days[days.length - 1] : '', assessment: data.assessmentResult || null,
+    company: mem && mem.status === 'active' ? (mem.orgName || 'a company') : '',
+    owner: !!(got[2] && got[2].exists()), password: (user.providerData || []).some(x => x.providerId === 'password') },
+    holdings(data, created && created.toISOString()));
 }
 function lockReason(acc){
-  if (acc.owner) return 'This is the owner account, so it has to be the one you keep.';
-  if (acc.company) return 'This account belongs to ' + acc.company + ', so it has to be the one you keep. To close it, ask ' + acc.company + "'s admin to remove you first.";
+  if (acc.owner) return 'The owner account, so it stays the main email.';
+  if (acc.company) return 'In ' + acc.company + ', so it stays the main email.';
   return '';
+}
+const mergeWhen = (d) => d ? d.toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' }) : '';
+const plural = (n, one) => n + ' ' + one + (n === 1 ? '' : 's');
+function assessmentLine(a){
+  return a ? 'Assessment: ' + a.tier + (a.submittedAt ? ' (' + mergeWhen(new Date(a.submittedAt)) + ')' : '') : 'No assessment yet';
 }
 function showMergeChoice(){
   const me = merge.me, other = merge.other;
   const meLocked = lockReason(me), otherLocked = lockReason(other);
-  if (meLocked && otherLocked) mergeSay('Both accounts belong to a company or are the owner account, so neither can be closed here. Please contact us and we will sort it out.');
-  const tip = suggestKeep(me, other);
-  merge.keep = otherLocked ? 'other' : meLocked ? 'me' : tip;
-  const when = (d) => d ? d.toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' }) : '';
+  if (meLocked && otherLocked){
+    mergeSay('Both accounts belong to a company or are the owner account, so they can\'t be combined here. Please contact us and we will sort it out.');
+  }
+  merge.main = otherLocked ? 'other' : 'me';
   const card = (which, acc) => {
     const btn = document.createElement('button');
     btn.type = 'button'; btn.className = 'merge-card'; btn.setAttribute('role', 'radio'); btn.dataset.which = which;
-    const lockedOut = which === 'me' ? otherLocked : meLocked;   // this one can't be kept if the other can't be closed
-    if (lockedOut || (meLocked && otherLocked)) btn.disabled = true;
+    if ((which === 'me' ? otherLocked : meLocked) || (meLocked && otherLocked)) btn.disabled = true;   // the other one has to be the main one
     const head = document.createElement('span'); head.className = 'mc-which'; head.textContent = which === 'me' ? 'Signed in now' : 'The other account';
     const b = document.createElement('b'); b.textContent = acc.email;
     const ul = document.createElement('ul');
-    [acc.tier ? 'Assessment: ' + acc.tier : 'No assessment yet',
-     acc.lessons + (acc.lessons === 1 ? ' lesson' : ' lessons') + ' finished, ' + acc.courses + (acc.courses === 1 ? ' course' : ' courses') + ' complete',
-     acc.badges + (acc.badges === 1 ? ' badge' : ' badges'),
+    [assessmentLine(acc.assessment),
+     plural(acc.lessons, 'lesson') + ' finished, ' + plural(acc.courses, 'course') + ' complete',
+     plural(acc.badges, 'badge'),
      acc.company ? 'Company: ' + acc.company : 'No company',
-     acc.lastActive ? 'Last active ' + when(new Date(acc.lastActive + 'T12:00:00')) : (acc.created ? 'Created ' + when(acc.created) : '')]
+     acc.lastActive ? 'Last active ' + mergeWhen(new Date(acc.lastActive + 'T12:00:00')) : (acc.created ? 'Created ' + mergeWhen(acc.created) : '')]
       .filter(Boolean).forEach(t => { const li = document.createElement('li'); li.textContent = t; ul.appendChild(li); });
-    btn.append(head, b, ul);
-    if (which === tip && !lockedOut){ const t = document.createElement('span'); t.className = 'mc-tip'; t.textContent = 'Suggested: more progress'; btn.appendChild(t); }
+    const pick = document.createElement('span'); pick.className = 'mc-main'; pick.textContent = 'Main email';
+    btn.append(head, b, ul, pick);
     const lock = lockReason(acc);
     if (lock){ const l = document.createElement('span'); l.className = 'mc-lock'; l.textContent = lock; btn.appendChild(l); }
-    btn.addEventListener('click', () => { merge.keep = which; paintMergeChoice(); });
+    btn.addEventListener('click', () => { merge.main = which; paintMergeChoice(); });
     return btn;
   };
   const cards = $id('mergeCards'); cards.textContent = '';
   cards.append(card('me', me), card('other', other));
+  // What the combined account will hold
+  const all = MergeCore.combine(me.data, other.data);
+  const firstMade = [me.created, other.created].filter(Boolean).sort((x, y) => x - y)[0];
+  const h = holdings(all, firstMade && firstMade.toISOString());
+  const ul = $id('mergeResult'); ul.textContent = '';
+  [assessmentLine(all.assessmentResult) + (me.assessment && other.assessment ? ', your most recent' : ''),
+   plural(h.lessons, 'lesson') + ' finished, ' + plural(h.courses, 'course') + ' complete',
+   plural(h.badges, 'badge'),
+   'Sign in with ' + me.email + ' or ' + other.email]
+    .forEach(t => { const li = document.createElement('li'); li.textContent = t; ul.appendChild(li); });
   $id('mergeStepSignIn').hidden = true; $id('mergeStepCompare').hidden = false;
   $id('mergeConfirm').hidden = !!(meLocked && otherLocked);
   paintMergeChoice();
 }
 function paintMergeChoice(){
-  const keep = merge.keep === 'me' ? merge.me : merge.other, close = merge.keep === 'me' ? merge.other : merge.me;
-  $id('mergeCards').querySelectorAll('.merge-card').forEach(c => c.setAttribute('aria-checked', c.dataset.which === merge.keep ? 'true' : 'false'));
-  $id('mergeAgree').checked = false;
-  $id('mergeAgreeText').textContent = 'I understand ' + close.email + "'s progress, assessment results, notes and badges will be deleted, and this can't be undone.";
-  $id('mergeGo').textContent = 'Keep ' + keep.email + ' and close the other';
-  $id('mergeGo').disabled = true;
-  // closing the account signed in now needs its password again (a Google account confirms in a pop-up)
-  const needPw = merge.keep === 'other' && merge.me.password;
+  $id('mergeCards').querySelectorAll('.merge-card').forEach(c => c.setAttribute('aria-checked', c.dataset.which === merge.main ? 'true' : 'false'));
+  // making the other account the main one closes this one, which needs its password again (Google confirms in a pop-up)
+  const needPw = merge.main === 'other' && merge.me.password;
   $id('mergeMyPw').hidden = !needPw; $id('mergeMyPw').value = '';
-  $id('mergeMyPw').placeholder = 'Your password for ' + merge.me.email;
+  $id('mergeMyPw').placeholder = 'Your password for ' + merge.me.email + ', to confirm';
+  $id('mergeGo').disabled = false;
 }
-$id('mergeAgree').addEventListener('change', () => { $id('mergeGo').disabled = !$id('mergeAgree').checked; });
 $id('mergeGo').addEventListener('click', async () => {
   const go = $id('mergeGo'), label = go.textContent;
-  go.disabled = true; go.textContent = 'Working…'; mergeSay();
-  try {
-    if (merge.keep === 'me') await keepThisOne(); else await keepTheOther();
-  } catch (err){
+  go.disabled = true; go.textContent = 'Combining…'; mergeSay();
+  try { await combineAccounts(); }
+  catch (err){
     go.textContent = label; go.disabled = false;
     mergeSay(err.message || "That didn't work just now. Please try again.");
   }
 });
-// Keep the account signed in now: close the other, then add its sign-in here.
-async function keepThisOne(){
+// Writes the combined record to the main account, once (mergedFrom makes a retry safe), and votes there for
+// the tools only the closing account voted for, so each tool's total stays the same once its votes go.
+async function combineInto(mainDb, mainUser, closeDb, closeUser){
+  const read = async (database, user) => { const s = await getDoc(doc(database, 'progress', user.uid)); return s.exists() ? s.data() : {}; };
+  const mainData = await read(mainDb, mainUser);
+  if ((mainData.mergedFrom || []).indexOf(closeUser.uid) < 0){
+    const all = MergeCore.combine(mainData, await read(closeDb, closeUser));
+    all.mergedFrom = (mainData.mergedFrom || []).concat(closeUser.uid);
+    try { await setDoc(doc(mainDb, 'progress', mainUser.uid), all); }
+    catch (err){ console.error('Could not save the combined record:', err); throw new Error("We couldn't combine the records just now, so nothing has changed. Please try again in a minute."); }
+  }
+  try {
+    const votes = async (database, user) => (await getDocs(query(collection(database, 'toolVotes'), where('uid', '==', user.uid)))).docs.map(d => d.data());
+    const mine = await votes(mainDb, mainUser), theirs = await votes(closeDb, closeUser);
+    for (const toolId of MergeCore.votesToMove(mine.map(v => v.toolId), theirs.map(v => v.toolId))){
+      const was = theirs.filter(v => v.toolId === toolId)[0];
+      const batch = writeBatch(mainDb);
+      batch.set(doc(mainDb, 'toolVotes', mainUser.uid + '_' + toolId), { uid: mainUser.uid, toolId, email: (mainUser.email || '').toLowerCase(), notify: !!was.notify, createdAt: serverTimestamp() });
+      batch.update(doc(mainDb, 'tools', toolId), { voteCount: increment(1) });
+      await batch.commit().catch(() => { /* a tool no longer open to votes */ });
+    }
+  } catch (err){ console.error('Could not move the Tool Roadmap votes:', err); /* the votes are a nice-to-have */ }
+}
+async function combineAccounts(){
   const other = otherAuth.currentUser;
   if (!other) throw new Error('Please sign in to the other account again.');
-  await closeRecords(otherDb, other);
-  await deleteUser(other);
-  let added = false;
-  if (merge.cred && !(merge.pw && merge.me.password)){
-    try { await linkWithCredential(currentUser, merge.cred); added = true; } catch (e){ /* they can add it again */ }
+  if (merge.main === 'me'){
+    await combineInto(db, currentUser, otherDb, other);
+    await closeRecords(otherDb, other);
+    await deleteUser(other);
+    let added = false;
+    if (merge.cred && !(merge.pw && merge.me.password)){
+      try { await linkWithCredential(currentUser, merge.cred); added = true; } catch (e){ /* see the message */ }
+    }
+    const email = merge.email;
+    closeMerge();
+    await currentUser.reload(); showSignIns();
+    const snap = await getDoc(doc(db, 'progress', currentUser.uid));
+    showBadges(snap.exists() ? snap.data() : {}, currentUser);
+    signinSay('', 'Combined. Everything from ' + email + ' is now in this account' + (added ? ', and ' + email + ' signs in here too.' : ". Its sign-in wasn't added, because an account holds one Google sign-in and one password."));
+    return;
   }
-  const email = merge.email;
-  closeMerge();
-  await currentUser.reload(); showSignIns();
-  signinSay('', email + "'s account is closed. " + (added ? 'It now signs in to this account.' : "Its sign-in wasn't added here, because an account holds one Google sign-in and one password."));
-}
-// Keep the other account: confirm this one, close it, switch to the other, then add this one's sign-in there.
-async function keepTheOther(){
+  // The other account is the main one: confirm this one, combine into the other, close this one and switch.
   let myCred = null;
   try {
     if (merge.me.password){
@@ -952,25 +998,26 @@ async function keepTheOther(){
   } catch (err){
     throw new Error(err.code === 'need-pw' ? 'Enter your password for ' + merge.me.email + ' to confirm.' : friendlyAuthError(err.code));
   }
-  const keepEmail = merge.other.email, otherCred = merge.cred, bothPw = merge.other.password && merge.me.password;
+  const mainEmail = merge.other.email, myEmail = merge.me.email, otherCred = merge.cred, bothPw = merge.other.password && merge.me.password;
+  await combineInto(otherDb, other, db, currentUser);
   await closeRecords(db, currentUser);
   switchingAccount = true;
   await deleteUser(currentUser);
-  // The page's sign-in listener hears the switch and shows the kept account (it ignores the moment between).
+  // The page's sign-in listener hears the switch and shows the main account (it ignores the moment between).
   try { await signInWithCredential(auth, otherCred); }
   catch (e){
     switchingAccount = false;
     $id('mergeConfirm').hidden = true; $id('mergeCancel').hidden = true;
-    mergeSay('This account is closed. Sign in with ' + keepEmail + ' to carry on. Taking you to sign in…');
+    mergeSay('Combined into ' + mainEmail + '. Sign in with it to carry on. Taking you to sign in…');
     setTimeout(() => { location.href = '/lms-dashboard'; }, 5000);
     return;
   }
   switchingAccount = false;
   let added = false;
-  if (myCred && !bothPw){ try { await linkWithCredential(auth.currentUser, myCred); added = true; } catch (e){ /* add it again later */ } }
+  if (myCred && !bothPw){ try { await linkWithCredential(auth.currentUser, myCred); added = true; } catch (e){ /* see the message */ } }
   closeMerge();
   await auth.currentUser.reload(); showSignIns();
-  signinSay('', 'You are now signed in to ' + keepEmail + '. The other account is closed' + (added ? ', and its sign-in now opens this account.' : ". Its sign-in wasn't added here, because an account holds one Google sign-in and one password."));
+  signinSay('', 'Combined. You are now in ' + mainEmail + ', your main email, with everything from both' + (added ? '. ' + myEmail + ' signs in here too.' : ". " + myEmail + "'s sign-in wasn't added, because an account holds one Google sign-in and one password."));
   $id('signin').focus();
 }
 
@@ -1179,7 +1226,7 @@ function requestSheetDeletion(idToken){
 }
 
 /* An account's records, removed before its sign-in is deleted (Delete account, and closing the account
-   not kept in "two accounts: keep one"). database and user may be the other account's. Each step stops
+   whose records were combined into the main one in "combine two accounts"). database and user may be the other account's. Each step stops
    everything if it fails, with the reason as the error's message, and every step is safe to repeat:
    1. blank their name and email on any company's copy (the results stay with the company);
    2. withdraw their Tool Roadmap votes and suggestion;

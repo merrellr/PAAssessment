@@ -32,6 +32,8 @@
     if (/^merge/.test(scn)){
       store['progress/uHome'] = { courses: { 'discovery-novice': { completed: [1, 2, 3, 4, 5, 6] } }, assessmentResult: { tier: 'Lots of Experience', overallPct: 70, categoryPct: {} }, lessonLog: { '2026-10-02': 3 }, profile: { company: 'Home' } };
       store['toolVotes/uHome_t1'] = { uid: 'uHome', toolId: 't1', email: 'x', notify: false, createdAt: ts };
+      store['tools/t3'] = { title: 'Three', description: '', category: '', status: 'planned', order: 3, voteCount: 1, createdAt: ts, updatedAt: ts };
+      store['toolVotes/uHome_t3'] = { uid: 'uHome', toolId: 't3', email: 'x', notify: true, createdAt: ts };
     }
     if (scn === 'goals') { store['progress/uDel'].goals = { weeklyLessons: 3, focus: ['aiOrg'] }; store['progress/uDel'].notify = { checkin: 'monthly' }; store['progress/uDel'].lessonLog = { '2026-10-01': 2 }; }
     if (scn === 'badges'){

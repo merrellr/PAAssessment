@@ -142,22 +142,30 @@ their progress if they change jobs:
 - The account's main email (where emails go, what companies see, the sign-in token's email) never changes here;
   "Change email" does that.
 
-**Two accounts: keep one.** When the sign-in being added already has its own learning account (Firebase refuses to
-link it), a panel opens instead of an error. The person signs in to that other account on the same page, through a
-second Firebase app (`initializeApp(config, 'pa-other')`), so this page stays signed in. A Google sign-in needs no
-second step (`GoogleAuthProvider.credentialFromError`); an email signs in with its password, or gets a link to set one.
-The page checks it is the right account and not this one. Both accounts are then shown side by side: assessment,
-lessons, courses, badges, company and last active. The one with more lessons is suggested, then the assessed one,
-then the one with more badges. The person picks one, ticks that they understand, and:
+**Combine your two accounts.** When the sign-in being added already has its own learning account (Firebase
+refuses to link it), a panel opens instead of an error. The person signs in to that other account on the same page,
+through a second Firebase app (`initializeApp(config, 'pa-other')`), so this page stays signed in. A Google sign-in
+needs no second step (`GoogleAuthProvider.credentialFromError`); an email signs in with its password, or gets a link
+to set one. The page checks it is the right account and not this one.
 
-- **keeps this one:** the other's records go (`closeRecords`, the same steps as Delete account), then its sign-in
-  (`deleteUser`), then its Google or email sign-in is added here;
-- **keeps the other:** this account is confirmed again (password or Google pop-up), its records and sign-in go, the
-  page signs in to the other (`signInWithCredential`), redraws for it, and this account's sign-in is added there.
+Both accounts are shown side by side (assessment and its date, lessons, courses, badges, company, last active), with
+a preview of the combined account. The person chooses the **main email** (where emails go, and the one a company
+sees) and clicks **Combine accounts**:
 
-An account in a company (an active membership) or the owner's account can't be the one closed: it is marked
-"has to be the one you keep". If both are, nothing can be closed here and the person is asked to contact us.
-Progress is not combined; only one account's records are kept. Tests: `del-test.html?scn=mergekeep` and `mergeother`.
+1. the two progress records are combined onto the main account (`merge-core.js`, tested in
+   `tests/merge-core.test.mjs`): every lesson, course, note and badge from both, the most recent assessment (with
+   the first-ever attempt kept for "since you started"), active days and time added together, and the main
+   account's goals, email settings and profile (blanks filled from the other). `mergedFrom` records the other
+   account, so a retry never counts anything twice;
+2. Tool Roadmap votes only the other account cast are cast again by the main one, so totals stay the same;
+3. the other account is closed (`closeRecords`, the same steps as Delete account, then `deleteUser`);
+4. its sign-in is added to the main account, so both emails sign in to it. If the main one is the other account,
+   the page signs in to it (`signInWithCredential`) and redraws.
+
+An account in a company (an active membership), or the owner's account, has to be the main one. If both are,
+they can't be combined here and the person is asked to contact us. An account holds one Google sign-in and one
+password, so when both accounts have the same kind, everything is combined but that sign-in can't be added.
+Tests: `del-test.html?scn=mergekeep` and `mergeother`.
 
 ## Closing an account
 
