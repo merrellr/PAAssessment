@@ -178,6 +178,11 @@ function doGet(e) {
     return jsonpOut_(e.parameter.callback, deleteAccountData_(e.parameter.token || ""));
   }
 
+  // "Add another email" on My Profile: our own email with the sign-in link (section 17).
+  if (e.parameter.action === "signinLink") {
+    return jsonpOut_(e.parameter.callback, signinLinkEndpoint_(e.parameter.idToken || "", e.parameter.email || ""));
+  }
+
   if (e.parameter.action === "gradeScenario") {
     return jsonpOut_(e.parameter.callback, gradeScenarioWithQuota_(e.parameter.answer || "", e.parameter.cid || ""));
   }
@@ -2854,4 +2859,116 @@ function installNotifications() {
 function removeNotifications() {
   ScriptApp.getProjectTriggers().forEach(function (t) { if (t.getHandlerFunction() === 'runNotifications') ScriptApp.deleteTrigger(t); });
   Logger.log('Check-ins and company reports are off.');
+}
+
+
+/* ==================================================================
+   17. "ADD ANOTHER EMAIL": OUR OWN SIGN-IN LINK EMAIL
+   ------------------------------------------------------------------
+   My Profile > Ways to sign in > Add another email. Firebase's own
+   email for this can't be designed, so the page asks here first: we ask
+   Firebase for the link only (returnOobLink, so Firebase sends nothing)
+   and send it in our own email. If this part isn't working, the page
+   falls back to Firebase's plain email, so nothing breaks.
+
+   Safeguards:
+   1. Only a signed-in person can ask (their sign-in token is checked).
+   2. The link always returns to My Profile on our site; the page can't
+      choose where it goes.
+   3. Limits: 5 an hour per person, 3 an hour to any one address, and
+      SIGNIN_LINK_DAILY_CAP_ a day in total, leaving the rest of Gmail's
+      daily allowance for everything else.
+
+   SETUP: none beyond section 16's FIREBASE_SERVICE_ACCOUNT (the same
+   key asks Firebase for the link). Deploy > Manage deployments > edit >
+   New version after pasting.
+   ================================================================== */
+
+var SIGNIN_LINK_DAILY_CAP_ = 40;
+var SIGNIN_LINK_RETURN_ = SITE_BASE_URL_ + 'profile?linkEmail=1#signin';
+var SIGNIN_LINK_RE_ = /^[^\s@,;<>"]+@[^\s@,;<>"]+\.[^\s@,;<>"]+$/;
+
+// Counts one use of a limit kept for an hour in the script cache; false when it is used up.
+function signinLinkTake_(key, max) {
+  var cache = CacheService.getScriptCache();
+  var n = Number(cache.get(key) || 0);
+  if (n >= max) return false;
+  cache.put(key, String(n + 1), 3600);
+  return true;
+}
+
+// The sign-in link for an address, from Firebase, without Firebase sending anything.
+function signinLinkFetch_(email) {
+  var res = UrlFetchApp.fetch('https://identitytoolkit.googleapis.com/v1/projects/' + FIRESTORE_PROJECT_ID_ + '/accounts:sendOobCode', {
+    method: 'post', contentType: 'application/json', muteHttpExceptions: true,
+    headers: { Authorization: 'Bearer ' + fsServiceToken_() },
+    payload: JSON.stringify({ requestType: 'EMAIL_SIGNIN', email: email, continueUrl: SIGNIN_LINK_RETURN_, canHandleCodeInApp: true, returnOobLink: true })
+  });
+  if (res.getResponseCode() !== 200) throw new Error('link_' + res.getResponseCode());
+  var link = JSON.parse(res.getContentText()).oobLink;
+  if (!/^https:\/\//.test(String(link || ''))) throw new Error('link_missing');
+  return link;
+}
+
+function signinLinkBuild_(to, from, link) {
+  var text = 'Hello,\n\n' +
+    from + ' asked to add this address (' + to + ') as another way to sign in to their Product Advisory Learning account. ' +
+    'Their courses, badges and assessment stay with the account whichever email they sign in with.\n\n' +
+    'To add it, open this link, ideally on the device where you asked:\n' + link + '\n\n' +
+    'The link works once and expires after a few hours.\n\n' +
+    'Didn\'t ask for this? You can ignore this email. Nothing changes unless the link is opened.\n\n' +
+    'Questions: reply to this email, or write to ' + MAIL_ADDR_.assessment + '.\n\n' +
+    'Product Advisory\n';
+  var html = '<div style="font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:1.55;color:#16213E;max-width:540px;">' +
+    '<p style="margin:0 0 4px;color:#6B7686;font-size:13px;text-transform:uppercase;letter-spacing:.04em;">Product Advisory Learning</p>' +
+    '<h1 style="margin:0 0 14px;font-size:22px;line-height:1.3;color:#12305e;">Add this email to your account</h1>' +
+    '<p><strong>' + escapeHtml_(from) + '</strong> asked to add <strong>' + escapeHtml_(to) + '</strong> as another way to sign in to their account. ' +
+    'Their courses, badges and assessment stay with the account whichever email they sign in with.</p>' +
+    '<p style="margin:20px 0;"><a href="' + escapeHtml_(link) + '" style="display:inline-block;padding:12px 22px;border-radius:8px;font-weight:bold;text-decoration:none;background:#1A4584;color:#ffffff;">Add this email</a></p>' +
+    '<p style="font-size:14px;color:#4A5568;">Open it on the device where you asked, if you can. The link works once and expires after a few hours.</p>' +
+    '<p style="margin:18px 0 6px;color:#6B7686;font-size:13px;text-transform:uppercase;letter-spacing:.04em;">Didn&rsquo;t ask for this?</p>' +
+    '<p style="font-size:14px;margin:0;">You can ignore this email. Nothing changes unless the link is opened.</p>' +
+    '<p style="font-size:14px;margin:18px 0 0;">Questions: reply to this email, or write to <a href="mailto:' + MAIL_ADDR_.assessment + '">' + MAIL_ADDR_.assessment + '</a>.</p>' +
+    '<p style="margin-top:20px;">Product Advisory</p></div>';
+  return { subject: 'Add ' + to + ' to your Product Advisory Learning account', text: text, html: html };
+}
+
+function signinLinkEndpoint_(idToken, email) {
+  var who = null;
+  try { who = verifyFirebaseIdToken_(idToken); } catch (err) { who = null; }
+  if (!who) return { ok: false, error: 'not_verified' };
+  email = String(email || '').toLowerCase().trim();
+  if (email.length > 254 || !SIGNIN_LINK_RE_.test(email)) return { ok: false, error: 'bad_email' };
+  if (email === who.email) return { ok: false, error: 'same_email' };
+  if (isBlockedSender_(email)) return { ok: false, error: 'bad_email' };
+
+  var props = PropertiesService.getScriptProperties();
+  var dayKey = 'signinlinkday_' + Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'yyyy-MM-dd');
+  var sentToday = Number(props.getProperty(dayKey) || 0);
+  if (sentToday >= SIGNIN_LINK_DAILY_CAP_ || MailApp.getRemainingDailyQuota() < 20) return { ok: false, error: 'daily_limit' };
+  if (!signinLinkTake_('signinlink_u_' + who.uid, 5) || !signinLinkTake_('signinlink_e_' + email, 3)) return { ok: false, error: 'rate' };
+
+  var link;
+  try { link = signinLinkFetch_(email); }
+  catch (err) { return { ok: false, error: 'link_error', detail: String(err && err.message || err).slice(0, 100) }; }
+  var mail = signinLinkBuild_(email, who.email, link);
+  try {
+    sendMail_({ to: email, subject: mail.subject, body: mail.text, htmlBody: mail.html, name: 'Product Advisory Learning', replyTo: MAIL_ADDR_.assessment }, 'noreply');
+  } catch (err) {
+    return { ok: false, error: 'mail_error' };
+  }
+  props.getKeys().forEach(function (k) { if (k.indexOf('signinlinkday_') === 0 && k !== dayKey) props.deleteProperty(k); });
+  props.setProperty(dayKey, String(sentToday + 1));
+  return { ok: true, sent: true };
+}
+
+// Run once from the editor to check: asks Firebase for a link for your own address (sends nothing) and logs whether it worked.
+function checkSigninLinkSetup() {
+  var me = Session.getEffectiveUser().getEmail().toLowerCase();
+  try { signinLinkFetch_(me); Logger.log('Working: Firebase gave a sign-in link, so "Add another email" will send our own email.'); }
+  catch (err) {
+    var m = String(err && err.message || err);
+    Logger.log(m === 'no_service_account' ? 'Add the FIREBASE_SERVICE_ACCOUNT script property first (section 16).'
+      : 'Not working yet (' + m + '). The page keeps using Firebase\'s own email until this works.');
+  }
 }

@@ -137,6 +137,16 @@ async function signinTests(store){
     $('linkEmailInput').value = 'Me@Home.net'; $('linkEmailSend').click(); await sleep(60);
     t('a link is sent to the other address, to come back to this page', window.__linkSent && window.__linkSent.email === 'me@home.net' && /\/profile\?linkEmail=1#signin$/.test(window.__linkSent.settings.url) && window.__linkSent.settings.handleCodeInApp === true && /Check me@home\.net/.test($('signinSuccess').textContent));
   }
+  if (window.__scn === 'signingoogle'){
+    t('when our own email is not working, Firebase sends its email instead', window.__brandAsk && window.__brandAsk.email === 'me@home.net' && window.__brandAsk.idToken === 'tok');
+  }
+  if (window.__scn === 'signinbrand'){
+    $('linkEmailBtn').click(); await sleep(30);
+    $('linkEmailInput').value = 'Me@Home.net'; $('linkEmailSend').click(); await sleep(80);
+    t('our own email is sent, with the sign-in, and Firebase sends nothing', window.__brandAsk && window.__brandAsk.email === 'me@home.net' && window.__brandAsk.idToken === 'tok' && !window.__linkSent && /Check me@home\.net/.test($('signinSuccess').textContent) && localStorage.getItem('pa_link_email') === 'me@home.net');
+    $('linkEmailInput').value = 'busy@x.com'; $('linkEmailSend').click(); await sleep(80);
+    t('past the hourly limit it says to wait, and does not fall back to Firebase', /wait an hour/.test($('signinError').textContent) && !window.__linkSent && !$('linkEmailSend').disabled);
+  }
   if (window.__scn === 'signinlink'){
     t('back from the link, the address is added to this account', window.__linked && window.__linked.email === 'me@home.net' && /oobCode=abc/.test(window.__linked.link) && list().join() === 'Googledel@acme.com|main|remove,Email and passwordme@home.net|remove', list().join());
     t('the link is cleared from the address bar', !/oobCode/.test(location.href));
