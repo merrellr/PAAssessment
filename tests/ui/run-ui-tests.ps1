@@ -32,6 +32,7 @@ Copy-Item "$repo\charts.css" $site
 Copy-Item "$repo\company-report.js" $site
 Copy-Item "$repo\notify-core.js" $site
 Copy-Item "$repo\badges-core.js" $site
+Copy-Item "$repo\merge-core.js" $site
 Copy-Item "$repo\badges-ui.js" $site
 Copy-Item "$repo\badges.css" $site
 Copy-Item "$repo\lesson-blocks.js" $site
