@@ -182,6 +182,12 @@ yet, so their latest result and the first attempt kept on it (overall score only
 Combining two accounts keeps every attempt from both. My Profile → **My assessments** (`/profile#assessments`)
 lists them newest first, with the change from the one before, overall and per area; the dashboard links to it.
 
+**Past assessments from before the history existed:** section 18 of `Code.gs` copies every row of the Responses tab
+into the history of the account it belongs to (its main email and every linked email), using the same rules
+(`assessment-history.js` is part of `notify.gs`). Run `previewAssessmentHistoryImport` (changes nothing, logs the
+counts), then `importAssessmentHistory`; running it again adds nothing. Only `assessmentHistory` is written, and
+only to accounts that already have a progress record. Tests: `tests/history-import.test.mjs`.
+
 ## Closing an account
 
 `profile.html` has a "Delete account" card. It re-checks the person's

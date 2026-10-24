@@ -1,5 +1,5 @@
-// Builds apps-script/notify.gs: the pure logic the email check-ins need (company-core.js,
-// company-report.js and notify-core.js, unchanged), as one file to paste into Apps Script
+// Builds apps-script/notify.gs: the pure logic the email check-ins and the history import need (company-core.js,
+// company-report.js, notify-core.js and assessment-history.js, unchanged), as one file to paste into Apps Script
 // next to Code.gs. Run after changing any of those three files:
 //   node tools/build-notify-gs.mjs
 // tests/notify-core.test.mjs fails if apps-script/notify.gs is out of date.
@@ -8,7 +8,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const root = path.join(path.dirname(fileURLToPath(import.meta.url)), '..');
-export const SOURCES = ['company-core.js', 'company-report.js', 'notify-core.js'];
+export const SOURCES = ['company-core.js', 'company-report.js', 'notify-core.js', 'assessment-history.js'];
 
 export function renderNotifyGs() {
   const head = '/* ==================================================================\n' +

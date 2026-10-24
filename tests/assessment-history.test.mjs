@@ -33,6 +33,16 @@ t('combining the same account with itself adds nothing', H.combine(doc2, doc2).l
 const full = H.combine({ assessmentHistory: [{ submittedAt: '2026-01-01T00:00:00Z', overallPct: 40, tier: 'Little', partial: true }] }, { assessmentHistory: [r('a1', '2026-01-01T00:00:00Z', 40)] });
 t('a full record replaces the partial one for the same attempt', full.length === 1 && !full[0].partial && !!full[0].categoryPct, J(full));
 
+const sheetRow = { submittedAt: '2026-01-01T00:00:07Z', tier: 'Little', overallPct: 40, categoryPct: cat(40) };
+const fromSheet = H.combine({ assessmentHistory: [sheetRow] }, old);
+t('the same attempt in the spreadsheet (seconds apart, no id) counts once, and fills in the area scores', fromSheet.length === 2 && !fromSheet[0].partial && fromSheet[0].categoryPct.discovery === 40, JSON.stringify(fromSheet));
+const latestSheet = H.combine({ assessmentHistory: [{ submittedAt: '2026-03-01T00:00:05Z', tier: 'T60', overallPct: 60, categoryPct: cat(60) }] }, old);
+t('and the latest one, already on the account with its id, counts once too', latestSheet.length === 2 && latestSheet[1].assessmentId === 'a2', JSON.stringify(latestSheet));
+const twoSame = H.combine({ assessmentHistory: [{ submittedAt: '2026-01-01T00:00:00Z', overallPct: 40, categoryPct: cat(40) }] }, { assessmentHistory: [{ submittedAt: '2026-01-01T02:00:00Z', overallPct: 40, categoryPct: cat(40) }] });
+t('the same score hours apart is two attempts', twoSame.length === 2);
+const diffScore = H.combine({ assessmentHistory: [{ submittedAt: '2026-01-01T00:00:00Z', overallPct: 40 }] }, { assessmentHistory: [{ submittedAt: '2026-01-01T00:03:00Z', overallPct: 55 }] });
+t('different scores minutes apart are two attempts', diffScore.length === 2);
+
 const many = { assessmentHistory: Array.from({ length: 60 }, (_, i) => r('m' + i, new Date(Date.UTC(2025, 0, 1 + i)).toISOString(), i)) };
 const capped = H.list(many);
 t('at most ' + H.MAX + ' are kept: the newest', capped.length === H.MAX && capped[capped.length - 1].overallPct === 59 && capped[0].overallPct === 10);

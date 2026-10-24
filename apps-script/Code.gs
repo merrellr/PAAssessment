@@ -2615,7 +2615,10 @@ function notifyUsers_() {
     if (res.getResponseCode() !== 200) throw new Error('users_' + res.getResponseCode());
     var j = JSON.parse(res.getContentText());
     (j.users || []).forEach(function (u) {
-      out.push({ uid: u.localId, email: String(u.email || '').toLowerCase().trim(), name: String(u.displayName || ''), verified: !!u.emailVerified, disabled: !!u.disabled, createdAtMs: Number(u.createdAt) || 0 });
+      var email = String(u.email || '').toLowerCase().trim();
+      var emails = [email];   // the main email and every email linked to the account (Ways to sign in)
+      (u.providerUserInfo || []).forEach(function (p) { var e = String(p.email || '').toLowerCase().trim(); if (e && emails.indexOf(e) < 0) emails.push(e); });
+      out.push({ uid: u.localId, email: email, emails: emails.filter(Boolean), name: String(u.displayName || ''), verified: !!u.emailVerified, disabled: !!u.disabled, createdAtMs: Number(u.createdAt) || 0 });
     });
     page = j.nextPageToken || '';
   } while (page && ++guard < 50);
@@ -2972,3 +2975,98 @@ function checkSigninLinkSetup() {
       : 'Not working yet (' + m + '). The page keeps using Firebase\'s own email until this works.');
   }
 }
+
+
+/* ==================================================================
+   18. PAST ASSESSMENTS INTO "MY ASSESSMENTS" (run once)
+   ------------------------------------------------------------------
+   My Profile > My assessments shows every assessment kept on the
+   account (assessmentHistory). Until October 2026 a retake replaced the
+   earlier result, but every attempt is still a row in the Responses
+   tab. This copies those rows into each account's history: rows for the
+   account's main email and for every email linked to it, so combined
+   accounts get both. The same rules as the site (assessment-history.js,
+   in notify.gs) keep each attempt once, so it is safe to run again.
+   Nothing else on the account changes, and nobody is emailed.
+
+   HOW TO RUN (after pasting this Code.gs and the new notify.gs)
+   1. Choose previewAssessmentHistoryImport and click Run. It changes
+      nothing and logs how many accounts and assessments it would add.
+   2. Choose importAssessmentHistory and click Run. If the log says it
+      ran out of time, run it again: it carries on where it stopped.
+   ================================================================== */
+
+var HISTORY_IMPORT_BUDGET_MS_ = 270000;   // 4.5 minutes; Apps Script stops any run at 6
+
+// A value in Firestore's REST form.
+function fsEnc_(v) {
+  if (v === null || v === undefined) return { nullValue: null };
+  if (typeof v === 'string') return { stringValue: v };
+  if (typeof v === 'boolean') return { booleanValue: v };
+  if (typeof v === 'number') return Math.floor(v) === v ? { integerValue: String(v) } : { doubleValue: v };
+  if (Object.prototype.toString.call(v) === '[object Array]') return { arrayValue: { values: v.map(fsEnc_) } };
+  var f = {};
+  Object.keys(v).forEach(function (k) { f[k] = fsEnc_(v[k]); });
+  return { mapValue: { fields: f } };
+}
+
+// Every assessment row in the Responses tab, by email: { email: [ entry ] }.
+function historyRowsByEmail_() {
+  var out = {};
+  var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(SHEET_NAME);
+  if (!sheet) return out;
+  var v = sheet.getDataRange().getValues();
+  var idCol = 9 + CATEGORY_KEYS.length + QUESTION_COUNT;
+  for (var i = 1; i < v.length; i++) {
+    var email = String(v[i][2] || '').toLowerCase().trim();
+    var when = v[i][0] instanceof Date ? v[i][0] : new Date(v[i][0]);
+    var pct = Number(v[i][7]);
+    if (!email || !isFinite(when.getTime()) || v[i][7] === '' || !isFinite(pct)) continue;
+    var cat = {};
+    CATEGORY_KEYS.forEach(function (k, j) { var n = Number(v[i][9 + j]); if (v[i][9 + j] !== '' && isFinite(n)) cat[k] = n; });
+    var entry = { submittedAt: when.toISOString(), tier: String(v[i][8] || ''), overallPct: pct };
+    if (Object.keys(cat).length) entry.categoryPct = cat;
+    var id = String(v[i][idCol] || '').replace(/^'/, '').trim();
+    if (id) entry.assessmentId = id;
+    (out[email] = out[email] || []).push(entry);
+  }
+  return out;
+}
+
+// Works out (and with write, saves) each account's history. Returns what it found.
+function historyImport_(write) {
+  var started = Date.now();
+  var rows = historyRowsByEmail_(), users = notifyUsers_();
+  var st = { accounts: 0, updated: 0, added: 0, noRecord: 0, unmatchedEmails: 0, unfinished: false };
+  var matched = {};
+  for (var i = 0; i < users.length; i++) {
+    var u = users[i], list = [];
+    (u.emails || [u.email]).forEach(function (e) { if (rows[e]) { list = list.concat(rows[e]); matched[e] = 1; } });
+    if (!list.length) continue;
+    if (Date.now() - started > HISTORY_IMPORT_BUDGET_MS_) { st.unfinished = true; break; }
+    st.accounts++;
+    var doc = fsGet_('progress/' + encodeURIComponent(u.uid), ['assessmentResult', 'assessmentHistory']);
+    if (!doc) { st.noRecord++; continue; }
+    var before = AssessHistory.list(doc), after = AssessHistory.combine({ assessmentHistory: list }, doc);
+    if (JSON.stringify(after) === JSON.stringify(before) && (doc.assessmentHistory || []).length === after.length) continue;
+    st.updated++;
+    st.added += Math.max(0, after.length - before.length);
+    if (write) {
+      fsCall_('patch', fsBase_() + '/progress/' + encodeURIComponent(u.uid) + '?updateMask.fieldPaths=assessmentHistory&currentDocument.exists=true',
+        { fields: { assessmentHistory: fsEnc_(after) } });
+    }
+  }
+  Object.keys(rows).forEach(function (e) { if (!matched[e]) st.unmatchedEmails++; });
+  return st;
+}
+
+function historyImportLog_(st, write) {
+  Logger.log((write ? 'Done. ' : 'Preview, nothing changed. ') + st.accounts + ' accounts have assessments in the Responses tab; '
+    + st.updated + (write ? ' were updated' : ' would be updated') + ', with ' + st.added + ' earlier assessments added to My assessments.');
+  if (st.noRecord) Logger.log(st.noRecord + ' accounts were skipped because they have no learning record yet.');
+  Logger.log(st.unmatchedEmails + ' emails in the Responses tab have no account (people who took the assessment without signing up). They are left as they are.');
+  if (st.unfinished) Logger.log('It ran out of time before the end. Run it again to carry on; nothing is added twice.');
+}
+
+function previewAssessmentHistoryImport() { historyImportLog_(historyImport_(false), false); }
+function importAssessmentHistory() { historyImportLog_(historyImport_(true), true); }
