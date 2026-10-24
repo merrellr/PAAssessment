@@ -3070,3 +3070,110 @@ function historyImportLog_(st, write) {
 
 function previewAssessmentHistoryImport() { historyImportLog_(historyImport_(false), false); }
 function importAssessmentHistory() { historyImportLog_(historyImport_(true), true); }
+
+
+/* ==================================================================
+   19. BENCHMARK REPORT (anonymised, for articles and the site)
+   ------------------------------------------------------------------
+   Original data is what search engines, AI assistants and journalists
+   cite most. This works out what the assessment results say across
+   everyone, without names, emails or companies:
+   - each person counted once, at their latest attempt;
+   - the script owner, @productadvisory.co addresses and anything in the
+     BENCHMARK_EXCLUDE script property (comma separated emails or
+     @domains, e.g. test accounts) are left out;
+   - any group (a company size or an industry) with fewer than
+     BENCHMARK_MIN_GROUP_ people is not shown.
+   Run benchmarkReport from the editor. It writes the "Benchmark" tab
+   (replaced each run) and logs a summary. Nobody is emailed.
+   ================================================================== */
+
+var BENCHMARK_MIN_GROUP_ = 10;     // smallest group shown
+var BENCHMARK_MIN_PUBLISH_ = 30;   // below this, the numbers are for you, not for publishing
+var BENCHMARK_LABELS_ = { discovery: 'Customer & market discovery', strategy: 'Product strategy & roadmapping', prioritization: 'Prioritization & trade-offs',
+  execution: 'Execution & delivery', stakeholder: 'Stakeholder communication & influence', aiIndividual: 'AI fluency (individual)', aiOrg: 'AI fluency (organizational)' };
+
+function bmMean_(xs) { return xs.length ? xs.reduce(function (a, b) { return a + b; }, 0) / xs.length : 0; }
+function bmMedian_(xs) { if (!xs.length) return 0; var s = xs.slice().sort(function (a, b) { return a - b; }); var m = Math.floor(s.length / 2); return s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2; }
+function bmRound_(n) { return Math.round(n * 10) / 10; }
+
+function bmExcluded_() {
+  var list = [];
+  try { list.push(String(Session.getEffectiveUser().getEmail() || '').toLowerCase()); } catch (err) { /* fine */ }
+  var raw = '';
+  try { raw = PropertiesService.getScriptProperties().getProperty('BENCHMARK_EXCLUDE') || ''; } catch (err) { /* fine */ }
+  return list.concat(raw.toLowerCase().split(/[\s,;]+/)).concat(['@productadvisory.co']).filter(Boolean);
+}
+function bmIsExcluded_(email, ex) {
+  return ex.some(function (x) { return x === email || (x.charAt(0) === '@' && email.slice(-x.length) === x); });
+}
+
+// The anonymised numbers, from the Responses rows (pure: easy to test).
+function benchmarkFrom_(rows, ex) {
+  var people = {};
+  rows.forEach(function (r) {
+    var email = String(r[2] || '').toLowerCase().trim();
+    var when = r[0] instanceof Date ? r[0].getTime() : new Date(r[0]).getTime();
+    var pct = Number(r[7]);
+    if (!email || !isFinite(when) || r[7] === '' || !isFinite(pct) || bmIsExcluded_(email, ex)) return;
+    var cat = {};
+    CATEGORY_KEYS.forEach(function (k, j) { var n = Number(r[9 + j]); if (r[9 + j] !== '' && isFinite(n)) cat[k] = n; });
+    var a = { when: when, pct: pct, tier: String(r[8] || ''), cat: cat, size: String(r[5] || '').trim(), industry: String(r[6] || '').trim() };
+    (people[email] = people[email] || []).push(a);
+  });
+  var latest = [], changes = [], from = Infinity, to = 0, attempts = 0;
+  Object.keys(people).forEach(function (e) {
+    var list = people[e].sort(function (x, y) { return x.when - y.when; });
+    attempts += list.length;
+    from = Math.min(from, list[0].when); to = Math.max(to, list[list.length - 1].when);
+    latest.push(list[list.length - 1]);
+    if (list.length > 1) changes.push(list[list.length - 1].pct - list[0].pct);
+  });
+  var n = latest.length;
+  var out = { people: n, attempts: attempts, from: n ? new Date(from) : null, to: n ? new Date(to) : null, publishable: n >= BENCHMARK_MIN_PUBLISH_,
+    overall: { mean: bmRound_(bmMean_(latest.map(function (a) { return a.pct; }))), median: bmRound_(bmMedian_(latest.map(function (a) { return a.pct; }))) },
+    tiers: [], areas: [], groups: [], retakes: null };
+  var tiers = {};
+  latest.forEach(function (a) { if (a.tier) tiers[a.tier] = (tiers[a.tier] || 0) + 1; });
+  out.tiers = Object.keys(tiers).map(function (t) { return { tier: t, share: n ? Math.round(tiers[t] / n * 100) : 0 }; }).sort(function (x, y) { return y.share - x.share; });
+  out.areas = CATEGORY_KEYS.map(function (k) {
+    var xs = latest.map(function (a) { return a.cat[k]; }).filter(function (v) { return v !== undefined; });
+    return { key: k, label: BENCHMARK_LABELS_[k] || k, mean: bmRound_(bmMean_(xs)), below50: xs.length ? Math.round(xs.filter(function (v) { return v < 50; }).length / xs.length * 100) : 0, n: xs.length };
+  }).sort(function (x, y) { return y.mean - x.mean; });
+  ['size', 'industry'].forEach(function (field) {
+    var g = {};
+    latest.forEach(function (a) { if (a[field]) (g[a[field]] = g[a[field]] || []).push(a); });
+    Object.keys(g).forEach(function (name) {
+      var xs = g[name];
+      if (xs.length < BENCHMARK_MIN_GROUP_) return;
+      var weakest = CATEGORY_KEYS.map(function (k) { return { k: k, m: bmMean_(xs.map(function (a) { return a.cat[k]; }).filter(function (v) { return v !== undefined; })) }; })
+        .sort(function (x, y) { return x.m - y.m; })[0];
+      out.groups.push({ by: field === 'size' ? 'Company size' : 'Industry', name: name, people: xs.length, mean: bmRound_(bmMean_(xs.map(function (a) { return a.pct; }))), weakest: BENCHMARK_LABELS_[weakest.k] || weakest.k });
+    });
+  });
+  if (changes.length) out.retakes = { people: changes.length, meanChange: bmRound_(bmMean_(changes)), improved: Math.round(changes.filter(function (c) { return c > 0; }).length / changes.length * 100) };
+  return out;
+}
+
+function benchmarkReport() {
+  var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(SHEET_NAME);
+  var rows = sheet ? sheet.getDataRange().getValues().slice(1) : [];
+  var b = benchmarkFrom_(rows, bmExcluded_());
+  var day = function (d) { return d ? Utilities.formatDate(d, Session.getScriptTimeZone(), 'MMM d, yyyy') : ''; };
+  var lines = [['Benchmark', 'Value', 'Detail'],
+    ['People', b.people, b.attempts + ' assessments in total, ' + day(b.from) + ' to ' + day(b.to) + '. Each person counted once, at their latest attempt.'],
+    ['Ready to publish?', b.publishable ? 'Yes' : 'Not yet', b.publishable ? '' : 'Fewer than ' + BENCHMARK_MIN_PUBLISH_ + ' people: use these for your own reading, not as published statistics.'],
+    ['Average overall score', b.overall.mean + '%', 'Median ' + b.overall.median + '%']];
+  b.tiers.forEach(function (t) { lines.push(['Tier: ' + t.tier, t.share + '%', 'of people']); });
+  b.areas.forEach(function (a, i) { lines.push(['Area: ' + a.label, a.mean + '%', a.below50 + '% score under 50%' + (i === 0 ? ' (strongest)' : i === b.areas.length - 1 ? ' (weakest)' : '')]); });
+  if (b.retakes) lines.push(['Retakes', (b.retakes.meanChange >= 0 ? '+' : '') + b.retakes.meanChange + ' points', b.retakes.people + ' people retook it; ' + b.retakes.improved + '% improved']);
+  b.groups.forEach(function (g) { lines.push([g.by + ': ' + g.name, g.mean + '%', g.people + ' people; weakest area: ' + g.weakest]); });
+  lines.push(['Groups under ' + BENCHMARK_MIN_GROUP_ + ' people', 'hidden', 'so nobody can be identified']);
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var tab = ss.getSheetByName('Benchmark') || ss.insertSheet('Benchmark');
+  tab.clear();
+  tab.getRange(1, 1, lines.length, 3).setValues(lines.map(function (l) { return l.map(function (v) { return typeof v === 'string' ? leadSafeCell_(v) : v; }); }));
+  tab.setFrozenRows(1);
+  Logger.log(b.people + ' people (' + b.attempts + ' assessments). Average ' + b.overall.mean + '%. Strongest: ' + (b.areas[0] || {}).label + '. Weakest: ' + (b.areas[b.areas.length - 1] || {}).label
+    + '. ' + (b.publishable ? 'Enough to publish.' : 'Not enough yet to publish (fewer than ' + BENCHMARK_MIN_PUBLISH_ + ' people).') + ' Full table on the Benchmark tab.');
+}
