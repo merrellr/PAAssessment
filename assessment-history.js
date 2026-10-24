@@ -24,10 +24,15 @@
     return e;
   }
 
-  // One attempt counts once: the same assessmentId, or (without one) the same moment.
+  // One attempt counts once: the same assessmentId; or, when one of them has none (older results, and the
+  // first attempt kept on an older account), the same score saved within a few minutes of each other: the
+  // results spreadsheet and the account record the same attempt seconds apart.
+  const SAME_MS = 15 * 60000;
   function sameAttempt(a, b) {
     if (a.assessmentId && b.assessmentId) return a.assessmentId === b.assessmentId;
-    return !!a.submittedAt && time(a.submittedAt) === time(b.submittedAt);
+    if (!a.submittedAt || !b.submittedAt) return false;
+    const gap = Math.abs(time(a.submittedAt) - time(b.submittedAt));
+    return gap === 0 || (gap <= SAME_MS && a.overallPct === b.overallPct);
   }
 
   // Adds each entry unless it's already there; a full entry replaces a partial one for the same attempt.
@@ -36,9 +41,10 @@
     lists.forEach(list => (list || []).forEach(raw => {
       const e = entry(raw);
       if (!e) return;
-      const i = out.findIndex(x => sameAttempt(x, e) || (x.partial !== e.partial && x.submittedAt && time(x.submittedAt) === time(e.submittedAt)));
+      const i = out.findIndex(x => sameAttempt(x, e));
       if (i < 0) out.push(e);
-      else if (out[i].partial && !e.partial) out[i] = e;
+      else if ((out[i].partial && !e.partial) || (!out[i].categoryPct && e.categoryPct)) out[i] = Object.assign({}, e, { assessmentId: e.assessmentId || out[i].assessmentId });
+      else if (!out[i].assessmentId && e.assessmentId) out[i].assessmentId = e.assessmentId;
     }));
     out.sort((a, b) => time(a.submittedAt) - time(b.submittedAt));
     return out.slice(-MAX);
