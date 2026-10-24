@@ -18,6 +18,17 @@ function done(){
 (async function run(){
   try {
     await sleep(400);
+    if (scn === 'retake') {
+      const res = { overallPct: 78, overallTotal: 30, overallMax: 40, tier: 'Lots of Experience', categoryPct: { discovery: 80 }, assessmentId: 'a3', answers: [{ n: 1 }] };
+      await window.saveAssessmentResult(res);
+      await window.saveAssessmentResult(res);   // the page can save the same result twice
+      const d = window.__store['progress/uR'];
+      const h = (d.assessmentHistory || []).map(e => e.overallPct + (e.partial ? 'p' : ''));
+      t('a retake becomes the latest result, and the first attempt is still remembered', d.assessmentResult.overallPct === 78 && d.assessmentResult.firstOverallPct === 40 && d.assessmentResult.firstTier === 'Limited Experience');
+      t('every earlier assessment is kept in the history, once each, oldest first', JSON.stringify(h) === '["40p","60","78"]', JSON.stringify(d.assessmentHistory));
+      t('the history keeps the area scores but not the answers', d.assessmentHistory[2].categoryPct.discovery === 80 && !('answers' in d.assessmentHistory[2]) && !!d.assessmentResult.answers);
+      done(); return;
+    }
     t('the analytics script is on the page but does nothing on a local test server', !!document.querySelector('script[src="analytics.js"]') && window.dataLayer === undefined && !document.querySelector('script[src*="googletagmanager"]'));
     t('the intro screen is showing', active() === 'intro' || /intro|start/.test(active()), active());
     document.querySelector('button[onclick="startQuiz()"]').click();

@@ -108,6 +108,10 @@ async function badgesTests(store){
   const chip = $('companySuggest');
   t('a company suggestion is shown as plain text, so a booby-trapped name cannot run', chip.style.display !== 'none' && /Did you mean <img/.test(chip.textContent) && !chip.querySelector('img') && !window.__pwned, chip.innerHTML);
   t('the suggestion asks the backend with the sign-in, never for the whole list', window.__calls.some(c => /^companyMatch@/.test(c)) && !window.__calls.some(c => /^companies@/.test(c)), window.__calls.join());
+  const ab = $('assessBody'), rows = ab.querySelectorAll('.as-list details');
+  t('My assessments lists every assessment, newest first, with the newest open', rows.length === 2 && /Advanced Experience/.test(rows[0].querySelector('summary').textContent) && rows[0].open && !rows[1].open && /Latest/.test(rows[0].textContent), ab.textContent);
+  t('it shows how much each one changed, overall and in each area', /\+22 points/.test(rows[0].querySelector('summary').textContent) && /Customer & Market Discovery90%\+20Product Strategy/.test(rows[0].querySelector('.as-areas').textContent) && /Since your first assessment \(.*\): \+22 points, from Moderate Experience to Advanced Experience/.test(ab.textContent), ab.textContent);
+  t('and offers to take it again', !!ab.querySelector('a.btn[href="/"]'));
   t('the Profile menu has a My Badges link', !!document.querySelector('.pa-acct-menu a[href="/profile#badges"]'));
 }
 
@@ -180,6 +184,7 @@ async function mergeTests(store){
     t('a vote only the other account cast moves across, and the tool total stays the same', !!store['toolVotes/uDel_t3'] && store['toolVotes/uDel_t3'].notify === true && !store['toolVotes/uHome_t3'] && store['tools/t3'].voteCount === 1, JSON.stringify(store['tools/t3']));
     t('a vote both cast is counted once', !store['toolVotes/uHome_t1'] && !!store['toolVotes/uDel_t1'] && store['tools/t1'].voteCount === 3);
     t('the other account is closed after its records are combined', !store['progress/uHome'] && window.__otherDeleted === true && window.__fakeUser.uid === 'uDel' && !window.__deleted);
+    t('My assessments now shows the other account\'s assessment too', /Lots of Experience/.test($('assessBody').textContent) && (mine.assessmentHistory || []).length === 1);
     t('its Google sign-in now opens this account, so both emails sign in', window.__fakeUser.providerData.some(p => p.providerId === 'google.com' && p.email === 'me.personal@gmail.com') && /Combined\. Everything from me\.personal@gmail\.com is now in this account, and me\.personal@gmail\.com signs in here too/.test($('signinSuccess').textContent) && $('mergePanel').hidden, $('signinSuccess').textContent);
   }
   if (window.__scn === 'mergeother'){

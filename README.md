@@ -172,6 +172,16 @@ they can't be combined here and the person is asked to contact us. An account ho
 password, so when both accounts have the same kind, everything is combined but that sign-in can't be added.
 Tests: `del-test.html?scn=mergekeep` and `mergeother`.
 
+## My assessments (every attempt kept)
+
+A retake no longer replaces the earlier result. `assessmentResult` on the progress record is still the latest
+(the dashboard, lessons and plan use it), and `assessmentHistory` keeps every attempt (score, tier, the seven area
+scores, date and `assessmentId`, without the answers), oldest first, up to 50 (`assessment-history.js`, tested in
+`tests/assessment-history.test.mjs`). Saving the same attempt twice counts it once. Older accounts have no list
+yet, so their latest result and the first attempt kept on it (overall score only) are shown as history.
+Combining two accounts keeps every attempt from both. My Profile → **My assessments** (`/profile#assessments`)
+lists them newest first, with the change from the one before, overall and per area; the dashboard links to it.
+
 ## Closing an account
 
 `profile.html` has a "Delete account" card. It re-checks the person's

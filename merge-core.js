@@ -8,6 +8,7 @@
                       the rest from whichever account touched the course last
      assessmentResult the most recent one (submittedAt), with the first-ever attempt (firstSubmittedAt,
                       firstOverallPct, firstTier) from whichever account took it first
+     assessmentHistory every assessment either account took (assessment-history.js, when loaded)
      badges           every badge either earned, with the earliest date
      activeLog        every day either was active
      lessonLog        lessons per day, added together
@@ -64,6 +65,10 @@
 
     const a = assessment(main.assessmentResult || null, other.assessmentResult || null);
     if (a) out.assessmentResult = a; else delete out.assessmentResult;
+    if (root.AssessHistory){
+      const h = root.AssessHistory.combine(main, other);
+      if (h.length) out.assessmentHistory = h; else delete out.assessmentHistory;
+    }
 
     const badges = Object.assign({}, obj(other.badges));
     Object.keys(obj(main.badges)).forEach(id => {

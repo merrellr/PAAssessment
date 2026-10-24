@@ -238,6 +238,7 @@
 </style>
 <link rel="stylesheet" href="pa-theme.css">
 <script src="analytics.js"></script>
+<script src="assessment-history.js"></script>
 </head>
 <body>
 <script src="pa-shell.js"></script>
@@ -492,14 +493,17 @@ window.getAuthUid = function(){
    without depending on the Google Sheet lookup (a single point of
    failure). First-attempt fields are preserved across retakes so the
    dashboard's "since you started" comparison keeps working. Expects a
-   plain object: { overallPct, overallTotal, overallMax, tier, categoryPct }. */
+   plain object: { overallPct, overallTotal, overallMax, tier, categoryPct }.
+   Earlier results are kept in assessmentHistory (assessment-history.js), so a retake adds to the
+   history instead of replacing it. */
 window.saveAssessmentResult = async function(resultObj){
   if (!resultObj || !auth.currentUser) return;
   const ref = doc(db, 'progress', auth.currentUser.uid);
-  let existing = null;
+  let existing = null, existingDoc = {};
   try {
     const snap = await getDoc(ref);
-    existing = (snap.exists() && snap.data().assessmentResult) || null;
+    existingDoc = (snap.exists() && snap.data()) || {};
+    existing = existingDoc.assessmentResult || null;
   } catch (e){ /* first write, or offline — treat as no prior attempt */ }
 
   const now = new Date().toISOString();
@@ -510,7 +514,9 @@ window.saveAssessmentResult = async function(resultObj){
     firstTier: (existing && existing.firstTier) || resultObj.tier
   });
   try {
-    await setDoc(ref, { assessmentResult: merged }, { merge: true });
+    const write = { assessmentResult: merged };
+    if (window.AssessHistory) write.assessmentHistory = window.AssessHistory.add(existingDoc, merged);
+    await setDoc(ref, write, { merge: true });
   } catch (e){ /* never block the user's results on a write failure */ }
 };
 

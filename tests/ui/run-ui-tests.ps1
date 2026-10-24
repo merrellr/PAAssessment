@@ -33,6 +33,7 @@ Copy-Item "$repo\company-report.js" $site
 Copy-Item "$repo\notify-core.js" $site
 Copy-Item "$repo\badges-core.js" $site
 Copy-Item "$repo\merge-core.js" $site
+Copy-Item "$repo\assessment-history.js" $site
 Copy-Item "$repo\badges-ui.js" $site
 Copy-Item "$repo\badges.css" $site
 Copy-Item "$repo\lesson-blocks.js" $site
@@ -168,7 +169,7 @@ try {
   foreach ($s in 'main', 'notowner', 'signedout', 'oldscript', 'unreachable', 'serverrefuses') {
     $results += Run-Page "reports: $s" "$base/reports-test.html?scn=$s" 60000
   }
-  foreach ($s in 'high', 'low') {
+  foreach ($s in 'high', 'low', 'retake') {
     $results += Run-Page "assessment: $s" "$base/index-test.html?scn=$s" 60000
   }
   foreach ($s in 'main', 'fresh', 'customer', 'saverefused', 'snapfail', 'deniedpilot', 'notowner', 'signedout') {

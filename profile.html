@@ -102,6 +102,28 @@
   .merge-result{ border-radius: 12px; background: var(--ok-bg); padding: 12px 14px; margin: 0 0 12px; }
   .merge-result ul{ margin: 6px 0 4px; padding-left: 18px; font-size: 0.875rem; display:grid; gap: 3px; }
   .merge-result .setting-hint{ margin: 4px 0 0; }
+  .as-since{ font-size: 0.9375rem; margin: 0 0 12px; }
+  .as-list{ list-style: none; margin: 0 0 14px; padding: 0; display: grid; gap: 8px; }
+  .as-list details{ border: 1px solid var(--line); border-radius: 12px; background: var(--surface); }
+  .as-list summary{ display: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px; padding: 12px 14px; cursor: pointer; list-style: none; }
+  .as-list summary::-webkit-details-marker{ display: none; }
+  .as-list summary::after{ content: '▾'; margin-left: auto; color: var(--gray); transition: transform .15s; }
+  .as-list details[open] summary::after{ transform: rotate(180deg); }
+  .as-date{ font-size: 0.8125rem; color: var(--gray); min-width: 92px; }
+  .as-tier{ font-weight: 700; color: var(--navy-deep); }
+  .as-pct{ font-family: var(--display); font-weight: 700; }
+  .as-chg{ font-size: 0.75rem; font-weight: 700; padding: 1px 8px; border-radius: 999px; }
+  .as-chg.up{ color: var(--ok); background: var(--ok-bg); }
+  .as-chg.down{ color: var(--warn); background: color-mix(in srgb, var(--warn) 12%, transparent); }
+  .as-chg.same{ color: var(--gray); background: color-mix(in srgb, var(--gray) 12%, transparent); }
+  .as-latest{ font-size: 0.6875rem; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; color: var(--cyan); }
+  .as-areas{ list-style: none; margin: 0; padding: 0 14px 12px; display: grid; gap: 6px; }
+  .as-areas li{ display: grid; grid-template-columns: minmax(0, 1fr) 42px 44px; gap: 8px; align-items: center; font-size: 0.8125rem; }
+  .as-bar{ grid-column: 1 / -1; height: 5px; border-radius: 3px; background: color-mix(in srgb, var(--gray) 18%, transparent); overflow: hidden; }
+  .as-bar span{ display: block; height: 100%; background: var(--navy); border-radius: 3px; }
+  .as-areas b{ text-align: right; }
+  .as-areas .as-chg{ justify-self: end; }
+  .as-note{ font-size: 0.8125rem; color: var(--gray); padding: 0 14px 12px; margin: 0; }
   .merge-result .mc-which{ font-size: 0.6875rem; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; color: var(--ok); }
   .merge-card .mc-lock{ display:block; margin-top: 8px; font-size: 0.75rem; color: var(--warn); }
 
@@ -142,6 +164,7 @@
 <script src="company-core.js"></script>
 <script src="notify-core.js"></script>
 <script src="badges-core.js"></script>
+<script src="assessment-history.js"></script>
 <script src="merge-core.js"></script>
 <script src="badges-ui.js"></script>
 </head>
@@ -250,6 +273,12 @@
     <h2>My Badges</h2>
     <p style="margin-top:4px;">Earned by showing up, finishing lessons and courses, meeting your weekly goal and growing your skills. Once earned, a badge is yours to keep.</p>
     <div id="badgesBody"><p style="margin:0;">Loading your badges…</p></div>
+  </div>
+
+  <div class="card" id="assessments" tabindex="-1">
+    <h2>My assessments</h2>
+    <p style="margin-top:4px;">Every assessment you've taken, newest first. Your plan uses the most recent one; the earlier ones are kept so you can see how you've grown.</p>
+    <div id="assessBody"><p style="margin:0;">Loading…</p></div>
   </div>
 
   <div class="card" id="goals" tabindex="-1">
@@ -554,6 +583,7 @@ onAuthStateChanged(auth, async (user) => {
   document.getElementById('editIndustry').value = profile.industry || '';
   showGoals(data);
   showBadges(data, user);
+  showAssessments(data);
   // Company admins also choose how often their company's report comes.
   getDoc(doc(db, 'memberships', user.uid))
     .then(m => { if (m.exists() && m.data().role === 'admin' && m.data().status === 'active') $id('orgReportSetting').hidden = false; })
@@ -804,7 +834,7 @@ function openMerge(email, cred){
   signinSay();
   merge = { email: String(email || '').toLowerCase(), cred: cred || null };
   $id('mergeIntro').textContent = (email ? email : 'That sign-in') + ' already has its own learning account. You can combine the two: '
-    + 'both emails then sign in to one account, with the courses, badges and notes from both and your most recent assessment.';
+    + 'both emails then sign in to one account, with the courses, badges and notes from both. Your most recent assessment leads, and every earlier one is kept to look back on.';
   $id('mergeWho').textContent = email || 'that account';
   $id('mergeStepSignIn').hidden = false; $id('mergeStepCompare').hidden = true; $id('mergePw').value = ''; mergeSay();
   $id('mergePanel').hidden = false; $id('mergePanel').focus();
@@ -926,11 +956,13 @@ function showMergeChoice(){
   const firstMade = [me.created, other.created].filter(Boolean).sort((x, y) => x - y)[0];
   const h = holdings(all, firstMade && firstMade.toISOString());
   const ul = $id('mergeResult'); ul.textContent = '';
+  const kept = AssessHistory.list(all).length;
   [assessmentLine(all.assessmentResult) + (me.assessment && other.assessment ? ', your most recent' : ''),
+   kept > 1 ? 'All ' + kept + ' assessments kept, to look back on' : '',
    plural(h.lessons, 'lesson') + ' finished, ' + plural(h.courses, 'course') + ' complete',
    plural(h.badges, 'badge'),
    'Sign in with ' + me.email + ' or ' + other.email]
-    .forEach(t => { const li = document.createElement('li'); li.textContent = t; ul.appendChild(li); });
+    .filter(Boolean).forEach(t => { const li = document.createElement('li'); li.textContent = t; ul.appendChild(li); });
   $id('mergeStepSignIn').hidden = true; $id('mergeStepCompare').hidden = false;
   $id('mergeConfirm').hidden = !!(meLocked && otherLocked);
   paintMergeChoice();
@@ -991,6 +1023,7 @@ async function combineAccounts(){
     await currentUser.reload(); showSignIns();
     const snap = await getDoc(doc(db, 'progress', currentUser.uid));
     showBadges(snap.exists() ? snap.data() : {}, currentUser);
+    showAssessments(snap.exists() ? snap.data() : {});
     signinSay('', 'Combined. Everything from ' + email + ' is now in this account' + (added ? ', and ' + email + ' signs in here too.' : ". Its sign-in wasn't added, because an account holds one Google sign-in and one password."));
     return;
   }
@@ -1030,6 +1063,65 @@ async function combineAccounts(){
   await auth.currentUser.reload(); showSignIns();
   signinSay('', 'Combined. You are now in ' + mainEmail + ', your main email, with everything from both' + (added ? '. ' + myEmail + ' signs in here too.' : ". " + myEmail + "'s sign-in wasn't added, because an account holds one Google sign-in and one password."));
   $id('signin').focus();
+}
+
+/* ---------------------------------------------------------------- My assessments */
+// Every assessment taken (assessment-history.js), newest first: the score, how it changed from the one
+// before, and each skill area. The newest is open; the others open on click.
+function showAssessments(data){
+  const body = $id('assessBody'); body.textContent = '';
+  const all = AssessHistory.list(data).reverse();
+  const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text !== undefined) e.textContent = text; return e; };
+  const day = (iso) => iso ? new Date(iso).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' }) : 'Date not saved';
+  // short: "+20" in an area row, where no change shows nothing
+  const change = (now, before, short) => {
+    if (before === undefined || before === null) return null;
+    const d = Math.round(now - before);
+    if (short && !d) return null;
+    return el('span', 'as-chg ' + (d > 0 ? 'up' : d < 0 ? 'down' : 'same'), (d > 0 ? '+' : d < 0 ? '−' : '') + Math.abs(d) + (short ? '' : (Math.abs(d) === 1 ? ' point' : ' points')));
+  };
+  if (!all.length){
+    const p = el('p'); p.style.margin = '0';
+    p.append('No assessment yet. ');
+    const a = el('a', '', 'Take the free assessment'); a.href = '/'; p.append(a, ' (about 10 minutes) to get a plan made for you.');
+    body.appendChild(p); return;
+  }
+  if (all.length > 1){
+    const first = all[all.length - 1], last = all[0], d = Math.round(last.overallPct - first.overallPct);
+    body.appendChild(el('p', 'as-since', 'Since your first assessment (' + day(first.submittedAt) + '): ' + (d > 0 ? '+' : '') + d + ' points'
+      + (first.tier && first.tier !== last.tier ? ', from ' + first.tier + ' to ' + last.tier : '') + '.'));
+  }
+  const list = el('ol', 'as-list');
+  all.forEach((a, i) => {
+    const prev = all[i + 1];
+    const det = el('details'); if (i === 0) det.open = true;
+    const sum = el('summary');
+    sum.append(el('span', 'as-date', day(a.submittedAt)), el('span', 'as-tier', a.tier || 'Assessment'), el('span', 'as-pct', a.overallPct + '%'));
+    const c = prev ? change(a.overallPct, prev.overallPct) : null;
+    if (c) sum.appendChild(c);
+    if (i === 0) sum.appendChild(el('span', 'as-latest', 'Latest'));
+    det.appendChild(sum);
+    if (a.categoryPct){
+      const before = all.slice(i + 1).filter(x => x.categoryPct)[0];
+      const ul = el('ul', 'as-areas');
+      CompanyCore.DOMAINS.forEach(dm => {
+        const v = a.categoryPct[dm[0]];
+        if (v === undefined) return;
+        const li = el('li');
+        const bar = el('span', 'as-bar'); const fill = el('span'); fill.style.width = Math.max(0, Math.min(100, v)) + '%'; bar.appendChild(fill);
+        const cc = before ? change(v, before.categoryPct[dm[0]], true) : null;
+        li.append(el('span', '', dm[1]), el('b', '', v + '%'), cc || el('span'), bar);
+        ul.appendChild(li);
+      });
+      det.appendChild(ul);
+    } else {
+      det.appendChild(el('p', 'as-note', 'Only the overall score was saved for this one.'));
+    }
+    const li = el('li'); li.appendChild(det); list.appendChild(li);
+  });
+  body.appendChild(list);
+  const again = el('a', 'btn btn-primary', 'Take it again'); again.href = '/';
+  body.appendChild(again);
 }
 
 /* ---------------------------------------------------------------- My Badges */
