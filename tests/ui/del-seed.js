@@ -41,7 +41,8 @@
       var u = store['progress/uDel'];
       u.profile = { company: 'Acme', jobTitle: 'PM' };
       u.courses = { 'discovery-novice': { completed: [1, 2, 3, 4, 5], reflections: { '1': 'My note' } } };
-      u.assessmentResult = { tier: 'Advanced Experience', overallPct: 82, categoryPct: { discovery: 90, strategy: 60, prioritization: 60, execution: 60, stakeholder: 60, aiIndividual: 60, aiOrg: 60 } };
+      u.assessmentHistory = [{ submittedAt: '2026-05-01T12:00:00.000Z', tier: 'Moderate Experience', overallPct: 60, assessmentId: 'old', categoryPct: { discovery: 70, strategy: 50, prioritization: 60, execution: 60, stakeholder: 60, aiIndividual: 60, aiOrg: 60 } }];
+      u.assessmentResult = { submittedAt: '2026-09-01T12:00:00.000Z', assessmentId: 'new', tier: 'Advanced Experience', overallPct: 82, categoryPct: { discovery: 90, strategy: 60, prioritization: 60, execution: 60, stakeholder: 60, aiIndividual: 60, aiOrg: 60 } };
       u.badges = { account: '2026-01-05T12:00:00.000Z', active7: '2026-02-01T12:00:00.000Z' };
     }
     if (scn !== 'nonmember' && scn !== 'mergeother'){

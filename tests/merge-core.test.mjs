@@ -1,5 +1,6 @@
 // Tests for merge-core.js (combining two learning accounts).
 // Run:  node --experimental-default-type=module tests/merge-core.test.mjs
+import '../assessment-history.js';
 import '../merge-core.js';
 
 const M = globalThis.MergeCore;
@@ -60,6 +61,9 @@ t('the company list stays the main account\'s', J(c.orgIds) === '["orgA"]');
 t('agreed to terms: the earliest; welcome seen if either saw it', c.agreedToTermsAt === '2025-12-01T00:00:00.000Z' && c.hasSeenWelcome === true);
 
 const r = M.combine(home, work);
+const hist = (c.assessmentHistory || []).map(e => e.overallPct);
+t('every assessment from both accounts is kept, oldest first (the first attempts too)', JSON.stringify(hist) === '[40,55,82]', JSON.stringify(c.assessmentHistory));
+t('the history keeps no answers', c.assessmentHistory.every(e => !('answers' in e)));
 t('the other way round, the newest assessment still wins', r.assessmentResult.tier === 'Advanced Experience');
 t('and the main account\'s profile comes first', r.profile.company === 'Home Co' && r.profile.phone === '555');
 
