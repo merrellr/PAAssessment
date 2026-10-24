@@ -188,6 +188,15 @@ into the history of the account it belongs to (its main email and every linked e
 counts), then `importAssessmentHistory`; running it again adds nothing. Only `assessmentHistory` is written, and
 only to accounts that already have a progress record. Tests: `tests/history-import.test.mjs`.
 
+## Benchmark report (anonymised)
+
+`benchmarkReport` (section 19 of `Code.gs`, run from the editor) works out what the assessment results say across
+everyone, for articles and the site: average and median score, tier shares, each skill area from strongest to weakest
+with the share scoring under 50%, how much people who retook it improved, and averages by company size and industry.
+Each person counts once (latest attempt); the script owner, @productadvisory.co and `BENCHMARK_EXCLUDE` (a script
+property of emails or @domains, for test accounts) are left out; groups under 10 people are hidden; under 30 people it
+says the numbers aren't ready to publish. It writes the "Benchmark" tab and logs a summary. Tests: `tests/benchmark.test.mjs`.
+
 ## Closing an account
 
 `profile.html` has a "Delete account" card. It re-checks the person's
