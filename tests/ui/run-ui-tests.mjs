@@ -34,7 +34,7 @@ for (const m of ps.matchAll(/Copy-Item "\$repo\\([^"]+)" (?:\$site|"\$site\\([^"
   const dst = path.join(site, (m[2] || path.basename(m[1])).replace(/\\/g, '/'));
   fs.cpSync(src, dst, { recursive: true });
 }
-for (const f of ['org-share.js', 'account-menu.js']) fs.writeFileSync(path.join(site, f), fs.readFileSync(path.join(repo, f), 'utf8').replace(FB, './fake-firebase.js'));
+for (const f of ['org-share.js', 'account-menu.js', 'two-step.js']) fs.writeFileSync(path.join(site, f), fs.readFileSync(path.join(repo, f), 'utf8').replace(FB, './fake-firebase.js'));
 // pages
 for (const m of ps.matchAll(/Build-Page '([^']+)' '([^']+)' (\$null|'[^']+') '([^']+)'/g)) {
   let html = fs.readFileSync(path.join(repo, m[1]), 'utf8').replace(FB, './fake-firebase.js');

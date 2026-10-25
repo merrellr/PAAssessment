@@ -55,6 +55,8 @@ $share = [System.IO.File]::ReadAllText("$repo\org-share.js") -replace $fb, './fa
 [System.IO.File]::WriteAllText("$site\org-share.js", $share)
 $menu = [System.IO.File]::ReadAllText("$repo\account-menu.js") -replace $fb, './fake-firebase.js'
 [System.IO.File]::WriteAllText("$site\account-menu.js", $menu)
+$twoStep = [System.IO.File]::ReadAllText("$repo\two-step.js") -replace $fb, './fake-firebase.js'
+[System.IO.File]::WriteAllText("$site\two-step.js", $twoStep)
 
 function Build-Page($page, $out, $seedScript, $testScript) {
   $html = [System.IO.File]::ReadAllText("$repo\$page") -replace $fb, './fake-firebase.js'
@@ -68,6 +70,7 @@ function Build-Page($page, $out, $seedScript, $testScript) {
 Build-Page 'owner.html' 'owner-test.html' $null 'owner-test.js'
 Build-Page 'join.html' 'join-test.html' 'join-seed.js' 'join-test.js'
 Build-Page 'lms-dashboard.html' 'dash-test.html' 'dash-seed.js' 'dash-test.js'
+Build-Page 'lms-dashboard.html' 'twostep-test.html' 'twostep-seed.js' 'twostep-test.js'
 Build-Page 'profile.html' 'del-test.html' 'del-seed.js' 'del-test.js'
 Build-Page 'lesson.html' 'les-test.html' 'les-seed.js' 'les-test.js'
 Build-Page 'company.html' 'company-test.html' 'company-seed.js' 'company-test.js'
@@ -138,9 +141,10 @@ try {
   }
   $results += Run-Page 'join page: badtoken' "$base/join-test.html?scn=badtoken&token=abc" 20000
   foreach ($s in 'member', 'focus', 'focusdefault', 'admin', 'plain', 'removed', 'owner', 'threelessons', 'allfive', 'recentdone', 'removedold') { $results += Run-Page "dashboard: $s" "$base/dash-test.html?scn=$s" 25000 }
+  foreach ($s in 'signin', 'nudge', 'owner', 'on', 'unverified', 'google', 'googleowner') { $results += Run-Page "two-step on the dashboard: $s" "$base/twostep-test.html?scn=$s" 25000 }
   foreach ($s in 'member', 'nonmember', 'blocked', 'votefail') { $results += Run-Page "delete account: $s" "$base/del-test.html?scn=$s" 25000 }
   $results += Run-Page 'profile photo' "$base/del-test.html?scn=photo" 25000
-  foreach ($s in 'goals', 'goalsadmin', 'badges', 'signin', 'signingoogle', 'signinbrand', 'signinlink', 'mergekeep', 'mergeother') { $results += Run-Page "profile goals: $s" "$base/del-test.html?scn=$s" 25000 }
+  foreach ($s in 'goals', 'goalsadmin', 'badges', 'signin', 'signingoogle', 'signinbrand', 'signinlink', 'mergekeep', 'mergeother', 'twostep', 'twostepauto', 'twostepunverified', 'twostepadmin') { $results += Run-Page "profile goals: $s" "$base/del-test.html?scn=$s" 25000 }
   foreach ($s in 'member', 'plain') { $results += Run-Page "last lesson: $s" "$base/les-test.html?scn=$s&course=discovery-novice&lesson=5" 30000 }
   foreach ($s in '1', '2', '3', '4', '5') { $results += Run-Page "lesson blocks: lesson $s" "$base/les-test.html?scn=blocks&course=discovery-novice&lesson=$s" 30000 }
   foreach ($s in 'admin', 'empty', 'archived', 'nocopy', 'auditdenied', 'owner', 'ownernoorg', 'plain', 'member', 'removedadmin', 'denied', 'sharesdenied', 'signedout', 'history', 'snapshotsdenied', 'snapfail', 'noplatform', 'smallplatform') {

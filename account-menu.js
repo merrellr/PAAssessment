@@ -6,6 +6,7 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
 import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
 import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+import { hasTwoStep } from "./two-step.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyAcECtS5c6WeOhKlwRK-LYFE47npbuq_eU",
@@ -300,6 +301,50 @@ if (window.self === window.top) {
   // My profile announces a new or removed photo, so the button changes at once.
   window.addEventListener('pa-avatar', (e) => { if (photoUid) setPhoto(e.detail || ''); });
 
+
+  /* Two-step verification (two-step.js): a small card inviting people to turn it on, once their email is verified.
+     Required for the owner and company admins (they can see other people's results): their card comes back on every
+     page until it is on ("Later" hides it for this page only). Everyone else can say "Not now", which hides it for
+     30 days on this device. Learners who sign in only with Google don't see it: their Google account already guards
+     the sign-in, and a second code would mostly get in the way (they can still turn it on in My Profile). Not shown
+     on a page with the setting itself (My Profile, #two-step) or the invitation page. */
+  const TWO_STEP_SNOOZE_MS = 30 * 86400000;
+  function twoStepNudge(user, flags){
+    const page = location.pathname.replace(/\.html$/, '').split('/').pop();
+    if (document.getElementById('two-step') || page === 'join' || !user.emailVerified || hasTwoStep(user) || document.getElementById('pa-2s-nudge')) return;
+    const required = !!(flags.owner || flags.companyAdmin);
+    const googleOnly = (user.providerData || []).length > 0 && user.providerData.every(p => p.providerId === 'google.com');
+    if (!required && googleOnly) return;
+    const key = 'pa_2step_snooze_' + user.uid;
+    if (!required){
+      try { const t = Number(localStorage.getItem(key)); if (t && Date.now() - t < TWO_STEP_SNOOZE_MS) return; } catch (e) { /* storage off: show it */ }
+    }
+    if (!document.getElementById('pa-2s-nudge-css')){
+      const st = document.createElement('style');
+      st.id = 'pa-2s-nudge-css';
+      st.textContent = '.pa-2s-nudge{position:fixed;top:76px;right:16px;z-index:900;width:340px;max-width:calc(100vw - 32px);background:var(--surface,#fff);color:var(--ink,#16213E);border:1px solid var(--line,#DCE3EE);border-left:4px solid var(--cyan,#35C2E8);border-radius:12px;box-shadow:0 8px 24px rgba(22,33,62,.16);padding:14px 16px;font:14px/1.45 var(--sans,"IBM Plex Sans",system-ui,sans-serif)}' +
+        '.pa-2s-nudge b{display:block;font-size:15px;margin-bottom:4px;color:var(--navy,#1A4584)}.pa-2s-nudge p{margin:0 0 10px}' +
+        '.pa-2s-nudge .row{display:flex;gap:8px;flex-wrap:wrap}.pa-2s-nudge a,.pa-2s-nudge button{font:600 13px "Space Grotesk","IBM Plex Sans",system-ui,sans-serif;border-radius:999px;padding:7px 14px;cursor:pointer;text-decoration:none;border:1.5px solid var(--navy,#1A4584)}' +
+        '.pa-2s-nudge a{background:var(--navy,#1A4584);color:var(--btn-ink,#fff)}.pa-2s-nudge button{background:transparent;color:var(--navy,#1A4584)}' +
+        '.pa-2s-nudge a:focus-visible,.pa-2s-nudge button:focus-visible{outline:3px solid var(--cyan,#35C2E8);outline-offset:2px}';
+      document.head.appendChild(st);
+    }
+    const card = document.createElement('div');
+    card.id = 'pa-2s-nudge'; card.className = 'pa-2s-nudge'; card.setAttribute('role', 'region'); card.setAttribute('aria-label', 'Two-step verification');
+    card.innerHTML = '<b></b><p></p><div class="row"><a href="/profile?twostep=setup">Set it up (2 minutes)</a><button type="button"></button></div>';
+    card.querySelector('b').textContent = required ? 'Turn on two-step verification' : 'Protect your account';
+    card.querySelector('p').textContent = required
+      ? (flags.owner ? 'The platform owner' : 'Company admins') + ' need two-step verification, because you can see other people\'s results. It takes a code from an app on your phone.'
+      : 'Add a 6-digit code from an app on your phone when you sign in, so a stolen password isn\'t enough.';
+    const later = card.querySelector('button');
+    later.textContent = required ? 'Later' : 'Not now';
+    later.addEventListener('click', () => {
+      if (!required) try { localStorage.setItem(key, String(Date.now())); } catch (e) { /* storage off */ }
+      card.remove();
+    });
+    document.body.appendChild(card);
+  }
+
   onAuthStateChanged(auth, async (user) => {
     if (user) loadPhoto(user); else { photoUid = ''; photoUrl = ''; }
     // Pages that need to know (feedback.html) read PAAccount.user, or listen for 'pa-auth'.
@@ -312,12 +357,15 @@ if (window.self === window.top) {
       // (unless they had clicked Decline on this device, which is respected).
       if (window.PAAnalytics && window.PAAnalytics.acceptFromAccount) window.PAAnalytics.acceptFromAccount();
     }
+    const flagsP = user ? lookUp(user) : null;
+    if (user) flagsP.then(f => { if (auth.currentUser && auth.currentUser.uid === user.uid) twoStepNudge(user, f); });
+    else { const n = document.getElementById('pa-2s-nudge'); if (n) n.remove(); }
     if (!MENU) return;
     const mine = ++token;
     if (!user){ remove(); return; }
     mount(user, { owner: false, companyAdmin: false });   // show it straight away, add the extra links when known
     paintAvatar();
-    const flags = await lookUp(user);
+    const flags = await flagsP;
     if (mine !== token || !wrap) return;
     const wasOpen = !wrap.querySelector('.pa-acct-menu').hidden;
     mount(user, flags);
