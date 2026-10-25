@@ -144,7 +144,7 @@ try {
   foreach ($s in 'signin', 'nudge', 'owner', 'on', 'unverified', 'google', 'googleowner') { $results += Run-Page "two-step on the dashboard: $s" "$base/twostep-test.html?scn=$s" 25000 }
   foreach ($s in 'member', 'nonmember', 'blocked', 'votefail') { $results += Run-Page "delete account: $s" "$base/del-test.html?scn=$s" 25000 }
   $results += Run-Page 'profile photo' "$base/del-test.html?scn=photo" 25000
-  foreach ($s in 'goals', 'goalsadmin', 'badges', 'signin', 'signingoogle', 'signinbrand', 'signinlink', 'mergekeep', 'mergeother', 'twostep', 'twostepauto', 'twostepunverified', 'twostepadmin') { $results += Run-Page "profile goals: $s" "$base/del-test.html?scn=$s" 25000 }
+  foreach ($s in 'goals', 'goalsadmin', 'badges', 'signin', 'signingoogle', 'signinbrand', 'signinlink', 'mergekeep', 'mergeother', 'twostep', 'twostepauto', 'twostepunverified', 'twostepadmin', 'twostepgoogle', 'twostepgoogleblocked', 'twostepcode') { $results += Run-Page "profile goals: $s" "$base/del-test.html?scn=$s" 25000 }
   foreach ($s in 'member', 'plain') { $results += Run-Page "last lesson: $s" "$base/les-test.html?scn=$s&course=discovery-novice&lesson=5" 30000 }
   foreach ($s in '1', '2', '3', '4', '5') { $results += Run-Page "lesson blocks: lesson $s" "$base/les-test.html?scn=blocks&course=discovery-novice&lesson=$s" 30000 }
   foreach ($s in 'admin', 'empty', 'archived', 'nocopy', 'auditdenied', 'owner', 'ownernoorg', 'plain', 'member', 'removedadmin', 'denied', 'sharesdenied', 'signedout', 'history', 'snapshotsdenied', 'snapfail', 'noplatform', 'smallplatform') {

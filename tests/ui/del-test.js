@@ -223,7 +223,8 @@ async function twoStepTests(store){
     t('no "Protect your account" card on My Profile itself (the setting is right here)', !document.getElementById('pa-2s-nudge'));
     $('twoStepOn').click(); await sleep(400);
     t('set-up opens a window with a QR code and the key to type instead', !!dlg() && !!dlg().querySelector('.pa-2s-qr svg') && /JBSW Y3DP EHPK 3PXP/.test(dlg().querySelector('.pa-2s-key').textContent));
-    t('on a phone, a link adds it straight to the authenticator app (otpauth://, named Product Advisory and the email)', /^otpauth:\/\/totp\/Product%20Advisory%3Adel%40acme\.com\?secret=JBSWY3DPEHPK3PXP/.test(dlg().querySelector('.pa-2s-fine a').getAttribute('href')), dlg().querySelector('.pa-2s-fine a').getAttribute('href'));
+    const uri = dlg().querySelector('.pa-2s-fine a').getAttribute('href');
+    t('on a phone, a link adds it straight to the authenticator app, named Product Advisory and the email, with no raw spaces', uri === 'otpauth://totp/Product%20Advisory:del%40acme.com?secret=JBSWY3DPEHPK3PXP&issuer=Product%20Advisory&algorithm=SHA1&digits=6&period=30&image=' + encodeURIComponent('https://www.productadvisory.co/assets/img/favicon-192.png'), uri);
     t('the code box is ready to type into, and is a one-time-code field', document.activeElement === dlgInput() && dlgInput().autocomplete === 'one-time-code' && dlgInput().inputMode === 'numeric');
     await dlgSubmit('12');
     t('a code that is not 6 digits is caught before asking', /6 digits/.test(dlg().querySelector('.pa-2s-err').textContent) && !window.__enrolled);
@@ -252,6 +253,21 @@ async function twoStepTests(store){
     t('the right password carries straight on to the QR code', !!dlg() && !!dlg().querySelector('.pa-2s-qr svg'));
     dlg().querySelector('.no').click(); await sleep(60);
     t('cancelling leaves it off, with no error', !dlg() && /^Off\./.test($('twoStepStatus').textContent) && $('twoStepError').textContent === '' && !window.__enrolled);
+  }
+  if (scn === 'twostepgoogle' || scn === 'twostepgoogleblocked'){
+    $('twoStepOn').click(); await sleep(150);
+    t('a Google account asked to confirm it\'s you gets a "Continue with Google" button (the window opens from that click, so it isn\'t blocked)', !!dlg() && /Confirm it's you/.test(dlg().textContent) && !dlgInput() && dlg().querySelector('.go').textContent === 'Continue with Google');
+    dlg().querySelector('.go').click(); await sleep(400);
+    if (scn === 'twostepgoogle') t('after Google confirms, it carries on to the QR code', !!dlg() && !!dlg().querySelector('.pa-2s-qr svg'));
+    else {
+      t('if the browser blocks the Google window it says how to fix it, and stays open to try again', !!dlg() && /blocked the Google window/.test(dlg().querySelector('.pa-2s-err').textContent));
+      dlg().querySelector('.no').click(); await sleep(60);
+      t('and cancelling then leaves no error behind', !dlg() && $('twoStepError').textContent === '');
+    }
+  }
+  if (scn === 'twostepcode'){
+    $('twoStepOn').click(); await sleep(300);
+    t('an error with no plain wording shows its code, so it can be traced', /Something went wrong.*\(auth\/odd-thing\)/.test($('twoStepError').textContent), $('twoStepError').textContent);
   }
   if (scn === 'twostepunverified'){
     t('before the email is confirmed, the button is off and the page says why', $('twoStepOn').disabled && !$('twoStepNote').hidden && /Confirm your email address first/.test($('twoStepNote').textContent));
