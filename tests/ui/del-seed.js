@@ -6,6 +6,10 @@
   window.__scn = scn;
   window.__fakeUser = { uid: 'uDel', email: 'del@acme.com', displayName: 'Del User', emailVerified: true, providerData: [{ providerId: 'password', email: 'del@acme.com' }], getIdToken: async function(){ return 'tok'; }, reload: async function(){} };
   if (scn === 'signingoogle' || scn === 'signinbrand' || scn === 'signinlink' || scn === 'mergeother') window.__fakeUser.providerData = [{ providerId: 'google.com', email: 'del@acme.com' }];
+  // Two-step verification: twostepauto arrives from the "Set it up" card (?twostep=setup), with Firebase wanting a
+  // recent sign-in first; twostepunverified has not confirmed its email yet.
+  if (scn === 'twostepunverified') window.__fakeUser.emailVerified = false;
+  if (scn === 'twostepauto') { window.__mfaNeedRecent = true; history.replaceState(null, '', location.pathname + '?scn=twostepauto&twostep=setup'); }
   if (scn === 'signinlink') { try { localStorage.setItem('pa_link_email', 'me@home.net'); } catch (e) {} history.replaceState(null, '', location.pathname + '?scn=signinlink&linkEmail=1&oobCode=abc&mode=signIn'); }
   // Two accounts: keep one. The other account the second sign-in finds, with more progress than this one.
   if (scn === 'mergekeep'){
@@ -46,7 +50,7 @@
       u.badges = { account: '2026-01-05T12:00:00.000Z', active7: '2026-02-01T12:00:00.000Z' };
     }
     if (scn !== 'nonmember' && scn !== 'mergeother'){
-      store['memberships/uDel'] = { orgId: 'orgA', orgName: 'Acme', role: scn === 'goalsadmin' ? 'admin' : 'member', status: 'active', inviteToken: 't', joinedAt: ts, endedAt: null, email: 'del@acme.com', displayName: 'Del User', phone: '555-0100' };
+      store['memberships/uDel'] = { orgId: 'orgA', orgName: 'Acme', role: scn === 'goalsadmin' || scn === 'twostepadmin' ? 'admin' : 'member', status: 'active', inviteToken: 't', joinedAt: ts, endedAt: null, email: 'del@acme.com', displayName: 'Del User', phone: '555-0100' };
       var sh = function(){ return { identity: { name: 'Del User', email: 'del@acme.com' }, assessment: { tier: 'Lots of Experience', overallPct: 80 }, courses: {}, lastActiveAt: null, updatedAt: ts }; };
       store['orgs/orgA/members/uDel'] = sh();
       store['orgs/orgOld/members/uDel'] = sh();

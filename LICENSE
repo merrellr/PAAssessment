@@ -10,7 +10,8 @@ permission from the copyright holder. Viewing the files on GitHub, and using the
 websites as intended, is allowed.
 
 Third-party code keeps its own license: vendor/Sortable.min.js is SortableJS (MIT
-License, (c) SortableJS contributors), and the Firebase SDK is loaded from Google under
-its own terms. This notice does not apply to them.
+License, (c) SortableJS contributors), vendor/qrcode.js is qrcode-generator (MIT
+License, (c) 2009 Kazuhiko Arase), and the Firebase SDK is loaded from Google under its
+own terms. This notice does not apply to them.
 
 To ask for permission, email info@productadvisory.co.

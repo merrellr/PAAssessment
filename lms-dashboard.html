@@ -702,6 +702,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
 import { getFirestore, doc, getDoc, setDoc, increment } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
 import { syncOrgShare } from "./org-share.js";
+import { withTwoStep, twoStepError } from "./two-step.js";
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
@@ -841,21 +842,21 @@ window.handleAuthSubmit = async function(){
         agreedToTermsAt: new Date().toISOString()
       }, { merge: true });
     } else {
-      await signInWithEmailAndPassword(auth, email, password);
+      await withTwoStep(auth, () => signInWithEmailAndPassword(auth, email, password));
     }
   } catch (err){
-    errorEl.textContent = friendlyAuthError(err.code);
+    errorEl.textContent = twoStepError(err.code) || friendlyAuthError(err.code);
   }
 };
 
 window.handleGoogleSignIn = async function(){
   try {
-    const result = await signInWithPopup(auth, new GoogleAuthProvider());
+    const result = await withTwoStep(auth, () => signInWithPopup(auth, new GoogleAuthProvider()));
     if (getAdditionalUserInfo(result)?.isNewUser){
       await setDoc(doc(db, 'progress', result.user.uid), { agreedToTermsAt: new Date().toISOString() }, { merge: true });
     }
   } catch (err){
-    document.getElementById('authError').textContent = friendlyAuthError(err.code);
+    document.getElementById('authError').textContent = twoStepError(err.code) || friendlyAuthError(err.code);
   }
 };
 
@@ -1092,14 +1093,14 @@ window.handleChangePassword = async function(){
 
   try {
     const credential = EmailAuthProvider.credential(currentUser.email, currentPassword);
-    await reauthenticateWithCredential(currentUser, credential);
+    await withTwoStep(auth, () => reauthenticateWithCredential(currentUser, credential));
     await updatePassword(currentUser, newPassword);
     successEl.textContent = 'Password updated.';
     document.getElementById('currentPasswordInput').value = '';
     document.getElementById('newPasswordInput').value = '';
     document.getElementById('newPasswordConfirmInput').value = '';
   } catch (err){
-    errorEl.textContent = friendlyAuthError(err.code);
+    errorEl.textContent = twoStepError(err.code) || friendlyAuthError(err.code);
   }
 };
 

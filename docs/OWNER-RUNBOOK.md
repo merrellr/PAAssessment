@@ -268,6 +268,50 @@ Open a company in the Owner Console and press **Pilot tracker**. The full playbo
 
 ---
 
+## 12f. Two-step verification (a code from an authenticator app)
+
+**What it is.** Besides their password or Google account, people can also enter a 6-digit code from an app on their
+phone (Google Authenticator, Microsoft Authenticator, 1Password and similar) when they sign in. A stolen password
+alone is then not enough. Text-message codes are **not** used: they cost money per message and are easier to abuse.
+
+**Who sees what.**
+- **Everyone** with a confirmed email can turn it on or off in **My Profile → Two-step verification**.
+- **Learners** see a small "Protect your account" card in the top right. "Not now" hides it for 30 days on that device.
+- **You (the owner) and company admins** see "Turn on two-step verification" on every page until it is on. "Later"
+  only hides it for that page. It is a strong reminder, not a lock: nothing is blocked if they don't.
+- Someone who has not confirmed their email yet sees nothing: Firebase needs a confirmed email first.
+
+**Turn it on for yourself first.** My Profile → Two-step verification → Set up. You need your phone with an
+authenticator app.
+
+**How it was switched on (already done, October 2026).** Firebase console → Authentication → Settings → upgrade to
+"Firebase Authentication with Identity Platform", then one command in Cloud Shell turned on authenticator-app codes.
+To check it is still on, open https://shell.cloud.google.com/?project=product-advisory-lms and run:
+
+```
+curl -s "https://identitytoolkit.googleapis.com/admin/v2/projects/product-advisory-lms/config" -H "Authorization: Bearer $(gcloud auth print-access-token)" -H "X-Goog-User-Project: product-advisory-lms" | grep -A8 '"mfa"'
+```
+
+It should show `"totpProviderConfig"` with `"state": "ENABLED"`.
+
+**Someone lost their phone.** Authenticator codes have no backup codes, so you remove their two-step verification
+and they set it up again on the new phone.
+1. Be sure it's really them: reply from the email address on their account, or a quick call.
+2. Find their **User UID**: Firebase console → Authentication → Users → search their email → copy the UID column.
+3. In Cloud Shell (link above), run this with their UID in place of `THEIR_UID`:
+
+```
+curl -s -X POST "https://identitytoolkit.googleapis.com/v1/projects/product-advisory-lms/accounts:update" -H "Authorization: Bearer $(gcloud auth print-access-token)" -H "Content-Type: application/json" -H "X-Goog-User-Project: product-advisory-lms" -d '{"localId":"THEIR_UID","mfa":{}}'
+```
+
+4. They can now sign in with just their password or Google, and should set it up again in My Profile.
+
+The first time you do this, ask Claude to check it worked. (This is a manual step for now; a button on the owner
+page can come later if it happens often.)
+
+**Email they get.** When someone turns it on, Firebase emails them, with a link to undo it if it wasn't them.
+The wording is in Firebase console → Authentication → Templates → "Multi-factor enrollment notification".
+
 ## 13. Costs and limits (free plan)
 
 You are on the Firebase free plan (Spark). It is enough for a pilot. You will

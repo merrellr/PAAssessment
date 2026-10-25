@@ -211,6 +211,56 @@ async function mergeTests(store){
   }
 }
 
+// Two-step verification (two-step.js), on My Profile: set up with a QR code and a code from the app, turn off, the
+// confirm-it's-you step Firebase asks for, and who it is required for.
+const dlg = () => document.querySelector('.pa-2s');
+const dlgInput = () => dlg() && dlg().querySelector('input');
+async function dlgSubmit(value){ const i = dlgInput(); if (i) i.value = value; dlg().querySelector('.go').click(); await sleep(80); }
+async function twoStepTests(store){
+  const scn = window.__scn;
+  if (scn === 'twostep'){
+    t('it starts off, with a button to set it up and none to turn it off', /^Off\./.test($('twoStepStatus').textContent) && !$('twoStepOn').hidden && !$('twoStepOn').disabled && $('twoStepOff').hidden, $('twoStepStatus').textContent);
+    t('no "Protect your account" card on My Profile itself (the setting is right here)', !document.getElementById('pa-2s-nudge'));
+    $('twoStepOn').click(); await sleep(400);
+    t('set-up opens a window with a QR code and the key to type instead', !!dlg() && !!dlg().querySelector('.pa-2s-qr svg') && /JBSW Y3DP EHPK 3PXP/.test(dlg().querySelector('.pa-2s-key').textContent));
+    t('on a phone, a link adds it straight to the authenticator app (otpauth://, named Product Advisory and the email)', /^otpauth:\/\/totp\/Product%20Advisory%3Adel%40acme\.com\?secret=JBSWY3DPEHPK3PXP/.test(dlg().querySelector('.pa-2s-fine a').getAttribute('href')), dlg().querySelector('.pa-2s-fine a').getAttribute('href'));
+    t('the code box is ready to type into, and is a one-time-code field', document.activeElement === dlgInput() && dlgInput().autocomplete === 'one-time-code' && dlgInput().inputMode === 'numeric');
+    await dlgSubmit('12');
+    t('a code that is not 6 digits is caught before asking', /6 digits/.test(dlg().querySelector('.pa-2s-err').textContent) && !window.__enrolled);
+    await dlgSubmit('000000');
+    t('a wrong code says so, and the window stays open', !!dlg() && /didn't match/.test(dlg().querySelector('.pa-2s-err').textContent) && !window.__enrolled);
+    await dlgSubmit('123456');
+    t('the right code turns it on, named "Authenticator app"', !dlg() && window.__enrolled === 'Authenticator app');
+    t('the page says it is on, and offers Turn off instead', /^On\./.test($('twoStepStatus').textContent) && $('twoStepOn').hidden && !$('twoStepOff').hidden && /is on/.test($('twoStepOk').textContent), $('twoStepStatus').textContent);
+    $('twoStepOff').click(); await sleep(80);
+    t('turning off asks first', !!dlg() && /Turn off two-step/.test(dlg().textContent));
+    dlg().querySelector('.no').click(); await sleep(60);
+    t('"Keep it on" keeps it on', !dlg() && /^On\./.test($('twoStepStatus').textContent) && !window.__unenrolled);
+    $('twoStepOff').click(); await sleep(80); await dlgSubmit(''); await sleep(80);
+    t('confirming turns it off', !dlg() && window.__unenrolled === 1 && /^Off\./.test($('twoStepStatus').textContent) && !$('twoStepOn').hidden);
+    $('twoStepOn').click(); await sleep(300);
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true })); await sleep(60);
+    t('Escape closes the set-up without changing anything', !dlg() && /^Off\./.test($('twoStepStatus').textContent) && $('twoStepError').textContent === '');
+  }
+  if (scn === 'twostepauto'){
+    await sleep(300);
+    t('arriving from "Set it up", it asks to confirm it\'s you first (Firebase wants a recent sign-in)', !!dlg() && /Confirm it's you/.test(dlg().textContent) && dlgInput().type === 'password');
+    t('the address bar is tidied to #two-step', !/twostep=setup/.test(location.search) && location.hash === '#two-step');
+    await dlgSubmit('wrong');
+    t('a wrong password says so', !!dlg() && /password isn't right/.test(dlg().querySelector('.pa-2s-err').textContent));
+    await dlgSubmit('secret'); await sleep(300);
+    t('the right password carries straight on to the QR code', !!dlg() && !!dlg().querySelector('.pa-2s-qr svg'));
+    dlg().querySelector('.no').click(); await sleep(60);
+    t('cancelling leaves it off, with no error', !dlg() && /^Off\./.test($('twoStepStatus').textContent) && $('twoStepError').textContent === '' && !window.__enrolled);
+  }
+  if (scn === 'twostepunverified'){
+    t('before the email is confirmed, the button is off and the page says why', $('twoStepOn').disabled && !$('twoStepNote').hidden && /Confirm your email address first/.test($('twoStepNote').textContent));
+  }
+  if (scn === 'twostepadmin'){
+    t('company admins are told it is required, and why', !$('twoStepNote').hidden && /Required for company admins/.test($('twoStepNote').textContent), $('twoStepNote').textContent);
+  }
+}
+
 (async function(){
   try {
     await sleep(1500);
@@ -220,6 +270,7 @@ async function mergeTests(store){
     else if (window.__scn === 'badges') await badgesTests(store);
     else if (/^signin/.test(window.__scn)) await signinTests(store);
     else if (/^merge/.test(window.__scn)) await mergeTests(store);
+    else if (/^twostep/.test(window.__scn)) await twoStepTests(store);
     else {
       $('deleteConfirmText').value = 'DELETE';
       $('deletePassword').value = 'secret';

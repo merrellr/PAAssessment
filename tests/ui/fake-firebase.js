@@ -78,6 +78,7 @@ export async function createUserWithEmailAndPassword(auth, email){ window.__fake
 export async function signInWithEmailAndPassword(auth, email, pw){
   if (pw === 'wrong') throw Object.assign(new Error('bad'), { code: 'auth/invalid-credential' });
   if (isOther(auth)) { window.__otherPw = pw; return otherSignIn(); }
+  twoStepGate(email);
   window.__fakeUser = { uid: 'uSignedIn', email, displayName: 'Signed In' }; fireAuth(window.__fakeUser);
 }
 export async function updateProfile(user, p){ Object.assign(user, p); }
@@ -94,7 +95,7 @@ export async function signInWithCredential(auth, cred){
   window.__switchedWith = cred; window.__fakeUser = window.__otherUser; fireAuth(window.__fakeUser); return { user: window.__fakeUser };
 }
 export async function signInWithPopup(auth){
-  if (isOther(auth)) return otherSignIn(); window.__fakeUser = { uid: 'uGoogle', email: 'g@x.com', displayName: 'G User' }; fireAuth(window.__fakeUser); return { user: window.__fakeUser }; }
+  if (isOther(auth)) return otherSignIn(); twoStepGate('g@x.com'); window.__fakeUser = { uid: 'uGoogle', email: 'g@x.com', displayName: 'G User' }; fireAuth(window.__fakeUser); return { user: window.__fakeUser }; }
 export function getAdditionalUserInfo(){ return { isNewUser: false }; }
 export function getFirestore(){ return {}; }
 export function doc(db, ...segs){
@@ -193,4 +194,40 @@ export async function deleteUser(user){
   window.__fakeUser = null;
   window.__writeLog.push({ op: 'deleteUser', path: user.uid });
   fireAuth(null);
+}
+// Two-step verification (two-step.js). window.__mfaAccounts = { 'me@x.com': true } makes signing in to that address
+// stop for a code (Google sign-in uses g@x.com); 123456 is the only code that works. window.__mfaNeedRecent makes the
+// next set-up or turn-off ask for a recent sign-in first, as Firebase does.
+const CODE_OK = '123456';
+const codeErr = () => Object.assign(new Error('bad code'), { code: 'auth/invalid-verification-code' });
+function twoStepGate(email){
+  if (!(window.__mfaAccounts && window.__mfaAccounts[email])) return;
+  const pending = { uid: 'uMfa', email, displayName: 'Two Step', emailVerified: true, providerData: [{ providerId: 'password', email }], __factors: [{ uid: 'f1', factorId: 'totp', displayName: 'Authenticator app' }], getIdToken: async () => 'tok' };
+  window.__mfaAsked = (window.__mfaAsked || 0) + 1;
+  throw Object.assign(new Error('second factor'), { code: 'auth/multi-factor-auth-required', __pending: pending });
+}
+function needRecent(){ if (window.__mfaNeedRecent){ window.__mfaNeedRecent = false; throw Object.assign(new Error('recent'), { code: 'auth/requires-recent-login' }); } }
+export const TotpMultiFactorGenerator = {
+  FACTOR_ID: 'totp',
+  generateSecret: async () => { needRecent(); return { secretKey: 'JBSWY3DPEHPK3PXP', generateQrCodeUrl: (account, issuer) => 'otpauth://totp/' + encodeURIComponent(issuer + ':' + account) + '?secret=JBSWY3DPEHPK3PXP&issuer=' + encodeURIComponent(issuer) }; },
+  assertionForEnrollment: (secret, code) => ({ code }),
+  assertionForSignIn: (uid, code) => ({ uid, code })
+};
+export function multiFactor(user){
+  if (!user.__factors) user.__factors = [];
+  return {
+    get enrolledFactors(){ return user.__factors; },
+    getSession: async () => ({ session: true }),
+    enroll: async (a, name) => { if (a.code !== CODE_OK) throw codeErr(); user.__factors = user.__factors.concat([{ uid: 'f' + (user.__factors.length + 1), factorId: 'totp', displayName: name }]); window.__enrolled = name; },
+    unenroll: async (f) => { needRecent(); user.__factors = user.__factors.filter(x => x !== f); window.__unenrolled = (window.__unenrolled || 0) + 1; }
+  };
+}
+export function getMultiFactorResolver(auth, e){
+  return {
+    hints: [{ uid: 'f1', factorId: 'totp', displayName: 'Authenticator app' }],
+    resolveSignIn: async (a) => {
+      if (a.code !== CODE_OK) throw codeErr();
+      window.__fakeUser = e.__pending; fireAuth(e.__pending); return { user: e.__pending };
+    }
+  };
 }

@@ -250,6 +250,7 @@ import {
   getAuth, onAuthStateChanged, signOut, createUserWithEmailAndPassword, signInWithEmailAndPassword,
   GoogleAuthProvider, signInWithPopup, getAdditionalUserInfo, updateProfile, sendEmailVerification
 } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
+import { withTwoStep, twoStepError } from './two-step.js';
 import {
   getFirestore, doc, getDoc, getDocs, setDoc, updateDoc, collection, query, where, writeBatch, increment, serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
@@ -626,10 +627,10 @@ $('authSubmit').addEventListener('click', async () => {
       sendEmailVerification(cred.user).catch(() => {});
       await setDoc(doc(db, 'progress', cred.user.uid), { courses: {}, agreedToTermsAt: new Date().toISOString() }, { merge: true });
     } else {
-      await signInWithEmailAndPassword(auth, email, password);
+      await withTwoStep(auth, () => signInWithEmailAndPassword(auth, email, password));
     }
   } catch (err){
-    errorEl.textContent = friendlyAuthError(err.code);
+    errorEl.textContent = twoStepError(err.code) || friendlyAuthError(err.code);
   } finally {
     $('authSubmit').disabled = false;
   }
@@ -637,12 +638,12 @@ $('authSubmit').addEventListener('click', async () => {
 
 $('googleBtn').addEventListener('click', async () => {
   try {
-    const result = await signInWithPopup(auth, new GoogleAuthProvider());
+    const result = await withTwoStep(auth, () => signInWithPopup(auth, new GoogleAuthProvider()));
     if (getAdditionalUserInfo(result)?.isNewUser){
       await setDoc(doc(db, 'progress', result.user.uid), { agreedToTermsAt: new Date().toISOString() }, { merge: true });
     }
   } catch (err){
-    $('authError').textContent = friendlyAuthError(err.code);
+    $('authError').textContent = twoStepError(err.code) || friendlyAuthError(err.code);
   }
 });
 

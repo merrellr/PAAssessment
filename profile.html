@@ -72,6 +72,10 @@
   .btn-ghost{ background:none; color: var(--gray); border: 1px solid var(--line); }
   /* Ways to sign in */
   .signin-list{ list-style:none; margin: 14px 0; padding:0; display:grid; gap: 8px; }
+  .two-step-status{ margin: 12px 0 6px; }
+  .two-step-on{ color: var(--ok); }
+  .two-step-off{ color: var(--gray); }
+  .two-step-btns{ display:flex; gap: 10px; flex-wrap: wrap; margin-top: 8px; }
   .signin-list li{ display:flex; align-items:center; gap: 12px; padding: 10px 12px; border: 1px solid var(--line); border-radius: 10px; }
   .signin-list .si-ico{ width: 32px; height: 32px; border-radius: 50%; display:grid; place-items:center; background: var(--tint); color: var(--navy); flex-shrink:0; font-weight:700; }
   .signin-list .si-main{ flex:1; min-width:0; }
@@ -374,6 +378,19 @@
     <div class="field-error" id="signinSuccess" role="status" style="color:var(--ok);"></div>
   </div>
 
+  <div class="card" id="two-step" tabindex="-1">
+    <h2>Two-step verification</h2>
+    <p style="margin-top:4px;">When you sign in, also enter a 6-digit code from an authenticator app on your phone, such as Google Authenticator or Microsoft Authenticator. A stolen password alone then isn't enough to get into your account.</p>
+    <p class="two-step-status" id="twoStepStatus"></p>
+    <p class="setting-hint" id="twoStepNote" hidden></p>
+    <div class="two-step-btns">
+      <button type="button" class="btn btn-primary" id="twoStepOn">Set up two-step verification</button>
+      <button type="button" class="btn btn-ghost" id="twoStepOff" hidden>Turn off</button>
+    </div>
+    <div class="field-error" id="twoStepError" role="alert"></div>
+    <div class="field-error" id="twoStepOk" role="status" style="color:var(--ok);"></div>
+  </div>
+
   <div class="card">
     <h2>Change email</h2>
     <p>We'll send a confirmation link to your new address — the change won't take effect until you click it there.</p>
@@ -434,6 +451,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
 import { getFirestore, doc, getDoc, getDocs, setDoc, deleteDoc, collection, query, where, writeBatch, increment, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
 import { anonymizeOrgShares } from "./org-share.js";
+import { withTwoStep, hasTwoStep, setUpTwoStep, turnOffTwoStep, twoStepError } from "./two-step.js";
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
@@ -525,6 +543,7 @@ window.handleCompanyInput = function(){
 };
 
 function friendlyAuthError(code){
+  if (twoStepError(code)) return twoStepError(code);
   const map = {
     'auth/wrong-password': 'Incorrect password.',
     'auth/invalid-credential': 'Incorrect password.',
@@ -560,6 +579,7 @@ onAuthStateChanged(auth, async (user) => {
   document.getElementById('editDisplayName').value = user.displayName || '';
 
   showSignIns();
+  showTwoStep();
   finishEmailLink();
   const hasPasswordProvider = user.providerData.some(p => p.providerId === 'password');
   document.getElementById('editEmailCurrentPassword').style.display = hasPasswordProvider ? 'block' : 'none';
@@ -568,7 +588,7 @@ onAuthStateChanged(auth, async (user) => {
   // Only the platform owner has a platformAdmins/{uid} document; for
   // everyone else this finds nothing and the card stays hidden.
   getDoc(doc(db, 'platformAdmins', user.uid))
-    .then(ownerSnap => { if (ownerSnap.exists()) document.getElementById('ownerCard').style.display = 'block'; })
+    .then(ownerSnap => { if (ownerSnap.exists()){ document.getElementById('ownerCard').style.display = 'block'; twoStepRole = 'owner'; showTwoStep(); } })
     .catch(() => { /* not the owner, or the rules are not published: keep it hidden */ });
 
   const progressRef = doc(db, 'progress', user.uid);
@@ -586,12 +606,54 @@ onAuthStateChanged(auth, async (user) => {
   showAssessments(data);
   // Company admins also choose how often their company's report comes.
   getDoc(doc(db, 'memberships', user.uid))
-    .then(m => { if (m.exists() && m.data().role === 'admin' && m.data().status === 'active') $id('orgReportSetting').hidden = false; })
+    .then(m => { if (m.exists() && m.data().role === 'admin' && m.data().status === 'active'){ $id('orgReportSetting').hidden = false; if (!twoStepRole) twoStepRole = 'admin'; showTwoStep(); } })
     .catch(() => { /* not in a company: keep it hidden */ });
 });
 
 /* ---------------------------------------------------------------- goals and check-in emails */
 const $id = (id) => document.getElementById(id);
+
+/* ---------------------------------------------------------------- two-step verification (two-step.js) */
+// Required for the platform owner and company admins (they can see other people's data); optional for everyone else.
+// The dashboard and the account menu send people here with ?twostep=setup, which opens the set-up straight away.
+let twoStepRole = '', twoStepAutoOpened = false;
+function showTwoStep(){
+  const u = currentUser;
+  if (!u) return;
+  const on = hasTwoStep(u);
+  $id('twoStepStatus').innerHTML = on
+    ? '<b class="two-step-on">On.</b> Signing in asks for a code from your authenticator app.'
+    : '<b class="two-step-off">Off.</b> Signing in needs only your password or Google account.';
+  const note = $id('twoStepNote');
+  note.hidden = on && u.emailVerified;
+  note.textContent = !u.emailVerified ? 'Confirm your email address first: open the link we emailed you. Then you can set this up.'
+    : twoStepRole ? 'Required for ' + (twoStepRole === 'owner' ? 'the platform owner' : 'company admins') + ', because you can see other people\'s results.' : '';
+  if (!note.textContent) note.hidden = true;
+  $id('twoStepOn').hidden = on;
+  $id('twoStepOn').disabled = !u.emailVerified;
+  $id('twoStepOff').hidden = !on;
+  if (!on && u.emailVerified && !twoStepAutoOpened && new URLSearchParams(location.search).get('twostep') === 'setup'){
+    twoStepAutoOpened = true;
+    history.replaceState(null, '', location.pathname + '#two-step');
+    $id('two-step').scrollIntoView({ block: 'center' });
+    $id('twoStepOn').click();
+  }
+}
+async function twoStepRun(change, okText){
+  $id('twoStepError').textContent = ''; $id('twoStepOk').textContent = '';
+  $id('twoStepOn').disabled = true; $id('twoStepOff').disabled = true;
+  try {
+    if (await change()){ $id('twoStepOk').textContent = okText; showTwoStep(); }
+  } catch (err){
+    $id('twoStepError').textContent = friendlyAuthError(err.code);
+  } finally {
+    $id('twoStepOn').disabled = !(currentUser && currentUser.emailVerified); $id('twoStepOff').disabled = false;
+  }
+}
+$id('twoStepOn').addEventListener('click', () => twoStepRun(() => setUpTwoStep(auth, currentUser),
+  'Two-step verification is on. Next time you sign in, have your phone handy.'));
+$id('twoStepOff').addEventListener('click', () => twoStepRun(() => turnOffTwoStep(auth, currentUser), 'Two-step verification is off.'));
+
 const N = window.NotifyCore;
 const goals = { weeklyLessons: N.DEFAULT_GOAL, focus: [], checkin: N.DEFAULT_FREQ, orgReport: N.DEFAULT_FREQ };
 const HINTS = {
@@ -839,7 +901,7 @@ function openMerge(email, cred){
   $id('mergeStepSignIn').hidden = false; $id('mergeStepCompare').hidden = true; $id('mergePw').value = ''; mergeSay();
   $id('mergePanel').hidden = false; $id('mergePanel').focus();
   $id('linkEmailForm').hidden = true;
-  if (cred) mergeSignIn(() => signInWithCredential(otherAuth, cred));   // Google: no second sign-in needed
+  if (cred) mergeSignIn(() => withTwoStep(otherAuth, () => signInWithCredential(otherAuth, cred)));   // Google: no second sign-in needed
 }
 function closeMerge(){
   merge = null; $id('mergePanel').hidden = true;
@@ -847,7 +909,7 @@ function closeMerge(){
 }
 $id('mergeCancel').addEventListener('click', closeMerge);
 $id('mergeGoogle').addEventListener('click', () => mergeSignIn(async () => {
-  const r = await signInWithPopup(otherAuth, new GoogleAuthProvider());
+  const r = await withTwoStep(otherAuth, () => signInWithPopup(otherAuth, new GoogleAuthProvider()));
   merge.cred = GoogleAuthProvider.credentialFromResult ? GoogleAuthProvider.credentialFromResult(r) : null;
   return r;
 }));
@@ -856,7 +918,7 @@ $id('mergePwBtn').addEventListener('click', () => {
   if (!merge.email) { mergeSay('Use "Continue with Google" for that account.'); return; }
   if (!pw) { mergeSay('Enter the password for ' + merge.email + '.'); return; }
   mergeSignIn(async () => {
-    const r = await signInWithEmailAndPassword(otherAuth, merge.email, pw);
+    const r = await withTwoStep(otherAuth, () => signInWithEmailAndPassword(otherAuth, merge.email, pw));
     merge.cred = EmailAuthProvider.credential(merge.email, pw); merge.pw = pw;
     return r;
   });
@@ -1034,9 +1096,9 @@ async function combineAccounts(){
       const pw = $id('mergeMyPw').value;
       if (!pw) throw Object.assign(new Error(), { code: 'need-pw' });
       myCred = EmailAuthProvider.credential(currentUser.email, pw);
-      await reauthenticateWithCredential(currentUser, myCred);
+      await withTwoStep(auth, () => reauthenticateWithCredential(currentUser, myCred));
     } else {
-      const r = await reauthenticateWithPopup(currentUser, new GoogleAuthProvider());
+      const r = await withTwoStep(auth, () => reauthenticateWithPopup(currentUser, new GoogleAuthProvider()));
       myCred = GoogleAuthProvider.credentialFromResult ? GoogleAuthProvider.credentialFromResult(r) : null;
     }
   } catch (err){
@@ -1048,7 +1110,7 @@ async function combineAccounts(){
   switchingAccount = true;
   await deleteUser(currentUser);
   // The page's sign-in listener hears the switch and shows the main account (it ignores the moment between).
-  try { await signInWithCredential(auth, otherCred); }
+  try { await withTwoStep(auth, () => signInWithCredential(auth, otherCred)); }
   catch (e){
     switchingAccount = false;
     $id('mergeConfirm').hidden = true; $id('mergeCancel').hidden = true;
@@ -1288,9 +1350,9 @@ window.handleChangeEmail = async function(){
         return;
       }
       const credential = EmailAuthProvider.credential(currentUser.email, currentPassword);
-      await reauthenticateWithCredential(currentUser, credential);
+      await withTwoStep(auth, () => reauthenticateWithCredential(currentUser, credential));
     } else {
-      await reauthenticateWithPopup(currentUser, new GoogleAuthProvider());
+      await withTwoStep(auth, () => reauthenticateWithPopup(currentUser, new GoogleAuthProvider()));
     }
 
     await verifyBeforeUpdateEmail(currentUser, newEmail);
@@ -1374,9 +1436,9 @@ window.handleDeleteAccount = async function(){
 
   try {
     if (hasPasswordProvider){
-      await reauthenticateWithCredential(currentUser, EmailAuthProvider.credential(currentUser.email, password));
+      await withTwoStep(auth, () => reauthenticateWithCredential(currentUser, EmailAuthProvider.credential(currentUser.email, password)));
     } else {
-      await reauthenticateWithPopup(currentUser, new GoogleAuthProvider());
+      await withTwoStep(auth, () => reauthenticateWithPopup(currentUser, new GoogleAuthProvider()));
     }
   } catch (err){
     errorEl.textContent = friendlyAuthError(err.code);
