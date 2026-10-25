@@ -5,7 +5,7 @@
    before </body>:   <script type="module" src="account-menu.js"></script>        */
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
 import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
-import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
 import { hasTwoStep } from "./two-step.js";
 
 const firebaseConfig = {
@@ -307,15 +307,19 @@ if (window.self === window.top) {
      page until it is on ("Later" hides it for this page only). Everyone else can say "Not now", which hides it for
      30 days on this device. Learners who sign in only with Google don't see it: their Google account already guards
      the sign-in, and a second code would mostly get in the way (they can still turn it on in My Profile). Not shown
-     on a page with the setting itself (My Profile, #two-step) or the invitation page. */
+     on a page with the setting itself (My Profile, #two-step) or the invitation page. "Don't remind me again" turns the
+     card off for good, on every device (progress/{uid}.twoStepNudgeOff); the setting stays in My Profile. */
   const TWO_STEP_SNOOZE_MS = 30 * 86400000;
-  function twoStepNudge(user, flags){
+  async function twoStepNudge(user, flags){
     const page = location.pathname.replace(/\.html$/, '').split('/').pop();
     if (document.getElementById('two-step') || page === 'join' || !user.emailVerified || hasTwoStep(user) || document.getElementById('pa-2s-nudge')) return;
     const required = !!(flags.owner || flags.companyAdmin);
     const googleOnly = (user.providerData || []).length > 0 && user.providerData.every(p => p.providerId === 'google.com');
     if (!required && googleOnly) return;
-    const key = 'pa_2step_snooze_' + user.uid;
+    const key = 'pa_2step_snooze_' + user.uid, offKey = 'pa_2step_off_' + user.uid;
+    try { if (localStorage.getItem(offKey)) return; } catch (e) { /* storage off */ }
+    try { const p = await getDoc(doc(db, 'progress', user.uid)); if (p.exists() && p.data().twoStepNudgeOff) return; } catch (e) { /* can't tell: show it */ }
+    if (!auth.currentUser || auth.currentUser.uid !== user.uid || document.getElementById('pa-2s-nudge')) return;
     if (!required){
       try { const t = Number(localStorage.getItem(key)); if (t && Date.now() - t < TWO_STEP_SNOOZE_MS) return; } catch (e) { /* storage off: show it */ }
     }
@@ -326,20 +330,27 @@ if (window.self === window.top) {
         '.pa-2s-nudge b{display:block;font-size:15px;margin-bottom:4px;color:var(--navy,#1A4584)}.pa-2s-nudge p{margin:0 0 10px}' +
         '.pa-2s-nudge .row{display:flex;gap:8px;flex-wrap:wrap}.pa-2s-nudge a,.pa-2s-nudge button{font:600 13px "Space Grotesk","IBM Plex Sans",system-ui,sans-serif;border-radius:999px;padding:7px 14px;cursor:pointer;text-decoration:none;border:1.5px solid var(--navy,#1A4584)}' +
         '.pa-2s-nudge a{background:var(--navy,#1A4584);color:var(--btn-ink,#fff)}.pa-2s-nudge button{background:transparent;color:var(--navy,#1A4584)}' +
-        '.pa-2s-nudge a:focus-visible,.pa-2s-nudge button:focus-visible{outline:3px solid var(--cyan,#35C2E8);outline-offset:2px}';
+        '.pa-2s-nudge a:focus-visible,.pa-2s-nudge button:focus-visible{outline:3px solid var(--cyan,#35C2E8);outline-offset:2px}' +
+        '.pa-2s-nudge button.never{display:block;margin-top:8px;padding:0;border:0;background:none;color:var(--gray,#5f6b7a);font:500 12.5px var(--sans,system-ui,sans-serif);text-decoration:underline}';
       document.head.appendChild(st);
     }
     const card = document.createElement('div');
     card.id = 'pa-2s-nudge'; card.className = 'pa-2s-nudge'; card.setAttribute('role', 'region'); card.setAttribute('aria-label', 'Two-step verification');
-    card.innerHTML = '<b></b><p></p><div class="row"><a href="/profile?twostep=setup">Set it up (2 minutes)</a><button type="button"></button></div>';
+    card.innerHTML = '<b></b><p></p><div class="row"><a href="/profile?twostep=setup">Set it up (2 minutes)</a><button type="button" class="later"></button></div>' +
+      '<button type="button" class="never">Don\'t remind me again</button>';
     card.querySelector('b').textContent = required ? 'Turn on two-step verification' : 'Protect your account';
     card.querySelector('p').textContent = required
       ? (flags.owner ? 'The platform owner' : 'Company admins') + ' need two-step verification, because you can see other people\'s results. It takes a code from an app on your phone.'
       : 'Add a 6-digit code from an app on your phone when you sign in, so a stolen password isn\'t enough.';
-    const later = card.querySelector('button');
+    const later = card.querySelector('button.later');
     later.textContent = required ? 'Later' : 'Not now';
     later.addEventListener('click', () => {
       if (!required) try { localStorage.setItem(key, String(Date.now())); } catch (e) { /* storage off */ }
+      card.remove();
+    });
+    card.querySelector('button.never').addEventListener('click', () => {
+      try { localStorage.setItem(offKey, '1'); } catch (e) { /* storage off */ }
+      setDoc(doc(db, 'progress', user.uid), { twoStepNudgeOff: true }, { merge: true }).catch(() => { /* this device still remembers */ });
       card.remove();
     });
     document.body.appendChild(card);

@@ -42,6 +42,13 @@ const nudge = () => document.getElementById('pa-2s-nudge');
       later.click(); await sleep(30);
       t('"Later" hides it without remembering it', !nudge() && !localStorage.getItem('pa_2step_snooze_uTwo'));
     }
+    if (scn === 'ownernever'){
+      const never = nudge() && nudge().querySelector('button.never');
+      t('the card offers "Don\'t remind me again"', !!never && /Don't remind me again/.test(never.textContent));
+      never.click(); await sleep(80);
+      t('it hides the card and remembers it on the account, for every device, and on this one', !nudge() && window.__store['progress/uTwo'].twoStepNudgeOff === true && localStorage.getItem('pa_2step_off_uTwo') === '1');
+    }
+    if (scn === 'turnedoff') t('turned off on another device: no card here either', !nudge());
     if (scn === 'on') t('with two-step already on, there is no card', !nudge());
     if (scn === 'google') t('a learner who signs in only with Google gets no card (Google already guards the sign-in)', !nudge());
     if (scn === 'googleowner') t('the owner still gets the required card when signing in with Google', !!nudge() && /Turn on two-step verification/.test(nudge().textContent) && nudge().querySelector('button').textContent === 'Later');
