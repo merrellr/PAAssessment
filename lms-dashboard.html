@@ -479,7 +479,7 @@
         <a onclick="dismissProfilePrompt()" style="font-size:0.7812rem; color:var(--ink-soft); cursor:pointer; text-decoration:underline;">Not now</a>
       </div>
       <h2 style="font-size:1rem; margin:10px 0 4px;">Tell us a bit about your team</h2>
-      <p style="margin:0 0 16px;">This lets us shape the examples and course material around the kind of product work you actually do. About fifteen seconds, and you can change it any time from <a href="/profile" style="color:var(--navy);">My Profile</a>.</p>
+      <p style="margin:0 0 16px;">This lets us shape the examples and course material around the kind of product work you actually do. About fifteen seconds, it earns you a badge, and you can change it any time from <a href="/profile" style="color:var(--navy);">My Profile</a>.</p>
       <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:0 16px;">
         <div>
           <label class="profile-field-label" for="profilePromptCompany">Company</label>
@@ -561,7 +561,7 @@
 
     <div style="display:flex; align-items:baseline; justify-content:space-between; gap:12px; flex-wrap:wrap; margin: 6px 0 14px;">
       <div style="display:flex; align-items:center; gap:14px; flex-wrap:wrap;">
-        <h2 style="font-family:var(--display); font-size:1rem; color:var(--navy-deep); margin:0;">Your Courses</h2>
+        <h2 id="courses" tabindex="-1" style="font-family:var(--display); font-size:1rem; color:var(--navy-deep); margin:0;">Your Courses</h2>
         <a class="week-goal" id="weekGoal" href="/profile#goals" hidden title="Your weekly goal. Change it on My Profile."></a>
       </div>
       <div style="display:flex; align-items:center; gap:14px;">
@@ -1566,6 +1566,8 @@ window.saveProfilePrompt = async function(){
     const existing = (snap.exists() && snap.data().profile) || {};
     const merged = Object.assign({}, existing, profile);
     await setDoc(progressRef, { profile: merged }, { merge: true });
+    // Company and role earn the "All about you" badge: say so now, not on the next visit.
+    if (dashProgress){ dashProgress.profile = merged; renderBadges(currentUser, dashProgress, dashAssessmentResult); }
     document.getElementById('profilePromptIndustry').blur();
     document.getElementById('profilePromptSaved').style.display = 'inline';
     setTimeout(() => {

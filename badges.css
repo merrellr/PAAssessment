@@ -134,6 +134,12 @@
 .bd-detail-box .bd-tilt{ display: block; width: max-content; margin: 0 auto 16px; }
 .bd-detail-box h2{ font-family: var(--display); font-size: 1.375rem; color: var(--navy-deep); margin: 6px 0 4px; }
 .bd-detail-box p{ margin: 0 0 10px; font-size: 0.9062rem; color: var(--ink-soft); line-height: 1.5; }
+/* "Start here": where to go to earn a badge not earned yet */
+.bd-start{ display:inline-block; margin-top: 6px; font-size: 0.75rem; font-weight: 700; color: var(--navy); text-decoration: none; }
+.bd-start:hover{ text-decoration: underline; }
+.bd-start:focus-visible{ outline: 2px solid var(--cyan); outline-offset: 2px; border-radius: 4px; }
+.bd-start-btn{ margin-top: 8px; padding: 10px 20px; border-radius: 999px; background: var(--navy); color: var(--btn-ink, #fff); font-size: 0.875rem; }
+.bd-start-btn:hover{ text-decoration: none; filter: brightness(1.08); }
 .bd-detail-box .bd-metal{ display:inline-block; font-size: 0.6562rem; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; padding: 3px 10px; border-radius: 999px; background: var(--tint); color: var(--navy); }
 .bd-detail-box .bd-mini{ max-width: 200px; margin: 6px auto; height: 8px; }
 .bd-detail-box .bd-when{ font-weight: 700; color: var(--ok); }

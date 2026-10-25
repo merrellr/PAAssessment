@@ -51,7 +51,10 @@ const nudge = () => document.getElementById('pa-2s-nudge');
     if (scn === 'turnedoff') t('turned off on another device: no card here either', !nudge());
     if (scn === 'on') t('with two-step already on, there is no card', !nudge());
     if (scn === 'google') t('a learner who signs in only with Google gets no card (Google already guards the sign-in)', !nudge());
-    if (scn === 'googleowner') t('the owner still gets the required card when signing in with Google', !!nudge() && /Turn on two-step verification/.test(nudge().textContent) && nudge().querySelector('button').textContent === 'Later');
+    if (scn === 'googleowner') t('the owner signing in only with Google gets no card either (no double check)', !nudge());
+    if (scn === 'firstlogin') t('on the first sign-in of a new account there is no card yet', !nudge());
+    if (scn === 'profilefirst') t('signed in again, but the "tell us about your team" card comes first', !nudge());
+    if (scn === 'secondlogin') t('signed in again with their details given, the card appears', !!nudge() && /Protect your account/.test(nudge().textContent));
     if (scn === 'unverified') t('before the email is confirmed there is no card yet (Firebase needs a verified email)', !nudge());
   } catch (e) { out.push('FAIL crashed: ' + (e && e.stack ? e.stack.split('\n').slice(0, 2).join(' / ') : e)); }
   (window.__errs || []).forEach(e => out.push('PAGE-ERROR [' + window.__scn + '] ' + e));

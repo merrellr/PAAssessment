@@ -24,6 +24,7 @@
     // finished only 3 days ago: too soon to review
     if (scn === 'recentdone') store['progress/uDash'].courses['discovery-moderate'] = { completed: [1, 2, 3, 4, 5], lastLesson: 5, updatedAt: new Date(Date.now() - 3 * 864e5).toISOString() };
     // a company ranking: customised for 'focus', the untouched standard order for 'focusdefault', none at all for 'member'
+    if (scn === 'profilecard') store['progress/uDash'].hasSeenWelcome = true;
     if (scn === 'focus') store['orgFocus/orgA'] = { focusAreas: ['strategy', 'aiIndividual', 'discovery'], updatedAt: Timestamp.now() };
     if (scn === 'focusdefault') store['orgFocus/orgA'] = { focusAreas: ['discovery', 'strategy', 'prioritization', 'execution', 'stakeholder', 'aiIndividual', 'aiOrg'], updatedAt: Timestamp.now() };
     if (scn === 'admin') store['memberships/uDash'] = { orgId: 'orgA', orgName: 'Acme Health', role: 'admin', status: 'active', inviteToken: 't', joinedAt: Timestamp.now(), endedAt: null, email: 'dash@acme.com', displayName: 'Dash User' };
