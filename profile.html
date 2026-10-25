@@ -645,7 +645,10 @@ async function twoStepRun(change, okText){
   try {
     if (await change()){ $id('twoStepOk').textContent = okText; showTwoStep(); }
   } catch (err){
-    $id('twoStepError').textContent = friendlyAuthError(err.code);
+    const msg = friendlyAuthError(err && err.code);
+    // A message we have no wording for shows its code, so the cause can be traced.
+    $id('twoStepError').textContent = /^Something went wrong/.test(msg) && err && err.code ? msg + ' (' + err.code + ')' : msg;
+    if (window.console) console.warn('two-step', err);
   } finally {
     $id('twoStepOn').disabled = !(currentUser && currentUser.emailVerified); $id('twoStepOff').disabled = false;
   }

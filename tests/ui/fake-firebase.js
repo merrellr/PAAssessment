@@ -184,7 +184,7 @@ export async function sendSignInLinkToEmail(auth, email, settings){ window.__lin
 export function isSignInWithEmailLink(auth, href){ return /[?&]oobCode=/.test(href); }
 export const increment = (n) => ({ __increment: n });
 export async function verifyBeforeUpdateEmail(){}
-export async function reauthenticateWithPopup(user){ return { user }; }
+export async function reauthenticateWithPopup(user){ if (window.__popupBlocked) throw Object.assign(new Error('blocked'), { code: 'auth/popup-blocked' }); return { user }; }
 export async function deleteUser(user){
   if (user === window.__otherSignedIn){
     window.__otherDeleted = true; window.__otherSignedIn = null; window.__otherUser = null;
@@ -206,7 +206,7 @@ function twoStepGate(email){
   window.__mfaAsked = (window.__mfaAsked || 0) + 1;
   throw Object.assign(new Error('second factor'), { code: 'auth/multi-factor-auth-required', __pending: pending });
 }
-function needRecent(){ if (window.__mfaNeedRecent){ window.__mfaNeedRecent = false; throw Object.assign(new Error('recent'), { code: 'auth/requires-recent-login' }); } }
+function needRecent(){ if (window.__mfaOddError) throw Object.assign(new Error('odd'), { code: window.__mfaOddError }); if (window.__mfaNeedRecent){ window.__mfaNeedRecent = false; throw Object.assign(new Error('recent'), { code: 'auth/requires-recent-login' }); } }
 export const TotpMultiFactorGenerator = {
   FACTOR_ID: 'totp',
   generateSecret: async () => { needRecent(); return { secretKey: 'JBSWY3DPEHPK3PXP', generateQrCodeUrl: (account, issuer) => 'otpauth://totp/' + encodeURIComponent(issuer + ':' + account) + '?secret=JBSWY3DPEHPK3PXP&issuer=' + encodeURIComponent(issuer) }; },

@@ -20,6 +20,17 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
 
 const ISSUER = 'Product Advisory';
+const LOGO = 'https://www.productadvisory.co/assets/img/favicon-192.png';   // shown by apps that read it (FreeOTP, 2FAS, Aegis)
+
+// The link the QR code holds (otpauth://, the "Key URI" format authenticator apps read). Built here, not with
+// Firebase's generateQrCodeUrl, which leaves the issuer unencoded: "Product Advisory" then has a raw space, and apps
+// misread the name (and guess a wrong logo).
+function keyUri(secret, account){
+  const enc = encodeURIComponent;
+  return 'otpauth://totp/' + enc(ISSUER) + ':' + enc(account) + '?secret=' + enc(secret.secretKey) + '&issuer=' + enc(ISSUER) +
+    '&algorithm=' + enc(secret.hashingAlgorithm || 'SHA1') + '&digits=' + enc(String(secret.codeLength || 6)) +
+    '&period=' + enc(String(secret.codeIntervalSeconds || 30)) + '&image=' + enc(LOGO);
+}
 
 /* ---------- the dialog: one at a time, a title, some content, an optional input and two buttons ---------- */
 const CSS = `
@@ -125,7 +136,9 @@ export function twoStepError(code){
     'auth/maximum-second-factor-count-exceeded': 'This account already has the most authenticator apps it can have.',
     'auth/second-factor-already-in-use': 'This authenticator is already set up on your account.',
     'auth/too-many-requests': 'Too many tries. Wait a few minutes, then try again.',
-    'auth/unsupported-first-factor': 'Two-step verification can\'t be added to this kind of sign-in.'
+    'auth/unsupported-first-factor': 'Two-step verification can\'t be added to this kind of sign-in.',
+    'auth/popup-blocked': 'Your browser blocked the Google window. Allow pop-ups for this site, then try again.',
+    'auth/network-request-failed': 'We couldn\'t reach the sign-in service. Check your connection, then try again.'
   }[code] || '';
 }
 function shown(e){ return new Error(twoStepError(e && e.code) || 'That didn\'t work. Try again.'); }
@@ -159,7 +172,21 @@ export function hasTwoStep(user){
 /* ---------- confirm it's you (Firebase asks for a recent sign-in before changing the second step) ---------- */
 async function confirmItsYou(auth, user){
   const pw = user.providerData.some(p => p.providerId === 'password');
-  if (!pw){ await withTwoStep(auth, () => reauthenticateWithPopup(user, new GoogleAuthProvider())); return true; }
+  if (!pw){
+    // The Google window opens from the button in this dialog: browsers block one that opens on its own after a wait.
+    const ok = await dialog({
+      title: 'Confirm it\'s you',
+      body: '<p>For your security, confirm with your Google account to continue.</p>', submit: 'Continue with Google',
+      onSubmit: async () => {
+        try { await withTwoStep(auth, () => reauthenticateWithPopup(user, new GoogleAuthProvider())); return true; }
+        catch (x){
+          if (x && /two-step-cancelled|popup-closed-by-user|cancelled-popup-request/.test(x.code)) return false;
+          throw new Error(twoStepError(x && x.code) || 'That didn\'t work' + (x && x.code ? ' (' + x.code + ')' : '') + '. Try again.');
+        }
+      }
+    });
+    return !!ok;
+  }
   const ok = await dialog({
     title: 'Confirm it\'s you',
     body: '<p>For your security, enter your password to continue.</p>',
@@ -174,9 +201,14 @@ async function confirmItsYou(auth, user){
   });
   return !!ok;
 }
-// Runs a change; when Firebase wants a recent sign-in, confirms it's them and runs it once more.
+// Runs a change; when Firebase wants a recent sign-in, confirms it's them and runs it once more. A passing hiccup
+// (network, or Firebase's own internal error) gets one quiet retry first.
+const PASSING = new Set(['auth/network-request-failed', 'auth/internal-error', 'auth/timeout']);
 async function fresh(auth, user, change){
-  try { return await change(); }
+  try {
+    try { return await change(); }
+    catch (e){ if (!e || !PASSING.has(e.code)) throw e; await new Promise(r => setTimeout(r, 700)); return await change(); }
+  }
   catch (e){
     if (!e || e.code !== 'auth/requires-recent-login') throw e;
     if (!(await confirmItsYou(auth, user))) return null;
@@ -208,7 +240,7 @@ const esc = (s) => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;
 export async function setUpTwoStep(auth, user){
   const secret = await fresh(auth, user, async () => TotpMultiFactorGenerator.generateSecret(await multiFactor(user).getSession()));
   if (!secret) return false;
-  const uri = secret.generateQrCodeUrl(user.email || 'account', ISSUER);
+  const uri = keyUri(secret, user.email || 'account');
   let qr = '';
   try { qr = qrSvg(uri, await loadQr()); } catch (e) { qr = ''; }   // no QR: the key below still works
   const key = String(secret.secretKey || '').replace(/(.{4})/g, '$1 ').trim();

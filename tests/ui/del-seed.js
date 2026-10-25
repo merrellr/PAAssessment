@@ -9,6 +9,11 @@
   // Two-step verification: twostepauto arrives from the "Set it up" card (?twostep=setup), with Firebase wanting a
   // recent sign-in first; twostepunverified has not confirmed its email yet.
   if (scn === 'twostepunverified') window.__fakeUser.emailVerified = false;
+  // twostepgoogle: a Google account that Firebase asks to confirm (blocked: the browser blocks the Google window);
+  // twostepcode: an error with no wording of its own
+  if (/^twostepgoogle/.test(scn)) { window.__fakeUser.providerData = [{ providerId: 'google.com', email: 'del@acme.com' }]; window.__mfaNeedRecent = true; }
+  if (scn === 'twostepgoogleblocked') window.__popupBlocked = true;
+  if (scn === 'twostepcode') window.__mfaOddError = 'auth/odd-thing';
   if (scn === 'twostepauto') { window.__mfaNeedRecent = true; history.replaceState(null, '', location.pathname + '?scn=twostepauto&twostep=setup'); }
   if (scn === 'signinlink') { try { localStorage.setItem('pa_link_email', 'me@home.net'); } catch (e) {} history.replaceState(null, '', location.pathname + '?scn=signinlink&linkEmail=1&oobCode=abc&mode=signIn'); }
   // Two accounts: keep one. The other account the second sign-in finds, with more progress than this one.
