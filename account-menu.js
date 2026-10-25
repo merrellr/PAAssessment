@@ -305,12 +305,16 @@ if (window.self === window.top) {
   /* Two-step verification (two-step.js): a small card inviting people to turn it on, once their email is verified.
      Required for the owner and company admins (they can see other people's results): their card comes back on every
      page until it is on ("Later" hides it for this page only). Everyone else can say "Not now", which hides it for
-     30 days on this device. Not shown on a page with the setting itself (My Profile, #two-step) or the invitation page. */
+     30 days on this device. Learners who sign in only with Google don't see it: their Google account already guards
+     the sign-in, and a second code would mostly get in the way (they can still turn it on in My Profile). Not shown
+     on a page with the setting itself (My Profile, #two-step) or the invitation page. */
   const TWO_STEP_SNOOZE_MS = 30 * 86400000;
   function twoStepNudge(user, flags){
     const page = location.pathname.replace(/\.html$/, '').split('/').pop();
     if (document.getElementById('two-step') || page === 'join' || !user.emailVerified || hasTwoStep(user) || document.getElementById('pa-2s-nudge')) return;
     const required = !!(flags.owner || flags.companyAdmin);
+    const googleOnly = (user.providerData || []).length > 0 && user.providerData.every(p => p.providerId === 'google.com');
+    if (!required && googleOnly) return;
     const key = 'pa_2step_snooze_' + user.uid;
     if (!required){
       try { const t = Number(localStorage.getItem(key)); if (t && Date.now() - t < TWO_STEP_SNOOZE_MS) return; } catch (e) { /* storage off: show it */ }

@@ -54,7 +54,8 @@ async function settle(){ for (let i = 0; i < 80 && $('stateLoading').style.displ
         } else {
           t('joining starts the shared record straight away, under their own company', !!share && share.identity.email === 'new@a.com' && share.identity.name === 'New Person', JSON.stringify(share));
           t('it has no assessment or courses yet, because they have none', share.assessment === null && JSON.stringify(share.courses) === '{}' && share.lastActiveAt === null);
-          t('and nothing private or contact-related is in it (no phone, no profile)', !/555|profile|phone|reflection/.test(JSON.stringify(share)));
+          // (the phone numbers are matched as text: a bare 555 can turn up inside a timestamp)
+          t('and nothing private or contact-related is in it (no phone, no profile)', !/"555"|555-0100|profile|phone|reflection/.test(JSON.stringify(share)));
         }
       }
     } else if (scn === 'signedout'){

@@ -3,6 +3,7 @@
 //   nudge: a learner with a verified email and no two-step: the "Protect your account" card, with Not now
 //   owner: the platform owner without two-step: the card says it's required, and only offers Later
 //   on: already set up: no card.   unverified: email not confirmed yet: no card
+//   google: a learner who signs in only with Google: no card.   googleowner: the owner signing in with Google: still required
 (function(){
   window.__errs = [];
   addEventListener('error', function(e){ window.__errs.push((e.message || 'error') + ' @' + (e.filename || '').split('/').pop() + ':' + e.lineno); });
@@ -11,11 +12,12 @@
   window.__scn = scn;
   try { localStorage.removeItem('pa_2step_snooze_uTwo'); } catch (e) {}
   window.__fakeUser = scn === 'signin' ? null : { uid: 'uTwo', email: 'two@acme.com', displayName: 'Two Step', emailVerified: scn !== 'unverified', providerData: [{ providerId: 'password', email: 'two@acme.com' }], getIdToken: async function(){ return 'tok'; } };
+  if (scn === 'google' || scn === 'googleowner') window.__fakeUser.providerData = [{ providerId: 'google.com', email: 'two@acme.com' }];
   if (scn === 'on') window.__fakeUser.__factors = [{ uid: 'f1', factorId: 'totp', displayName: 'Authenticator app' }];
   if (scn === 'signin') window.__mfaAccounts = { 'mfa@x.com': true, 'g@x.com': true };
   window.__seed = function(store){
     store['progress/uTwo'] = { courses: {} };
     store['progress/uMfa'] = { courses: {} };
-    if (scn === 'owner') store['platformAdmins/uTwo'] = { note: 'owner' };
+    if (scn === 'owner' || scn === 'googleowner') store['platformAdmins/uTwo'] = { note: 'owner' };
   };
 })();

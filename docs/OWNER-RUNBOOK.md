@@ -277,6 +277,8 @@ alone is then not enough. Text-message codes are **not** used: they cost money p
 **Who sees what.**
 - **Everyone** with a confirmed email can turn it on or off in **My Profile → Two-step verification**.
 - **Learners** see a small "Protect your account" card in the top right. "Not now" hides it for 30 days on that device.
+  Learners who sign in **only with Google** don't see the card: their Google account already guards the sign-in, and a
+  second code would mostly get in the way. They can still turn it on in My Profile.
 - **You (the owner) and company admins** see "Turn on two-step verification" on every page until it is on. "Later"
   only hides it for that page. It is a strong reminder, not a lock: nothing is blocked if they don't.
 - Someone who has not confirmed their email yet sees nothing: Firebase needs a confirmed email first.
