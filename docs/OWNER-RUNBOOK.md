@@ -316,6 +316,21 @@ page can come later if it happens often.)
 **Email they get.** When someone turns it on, Firebase emails them, with a link to undo it if it wasn't them.
 The wording is in Firebase console → Authentication → Templates → "Multi-factor enrollment notification".
 
+## 12g. The sign-in address (auth.productadvisory.co)
+
+Google's sign-in window shows **Product Advisory Learning** (the verified brand in Google Cloud → Google Auth Platform
+→ Branding) and the address **auth.productadvisory.co** instead of Firebase's own `product-advisory-lms.firebaseapp.com`.
+What makes that work, in case anything ever needs checking:
+- **Firebase console → Hosting:** `auth.productadvisory.co` is connected as a custom domain (nothing is published there;
+  it only serves Firebase's sign-in page at `/__/auth/handler`).
+- **Domain.com DNS:** a CNAME record, host `auth`, pointing to `product-advisory-lms.web.app`. Don't delete it.
+- **Firebase → Authentication → Settings → Authorized domains:** includes `auth.productadvisory.co`.
+- **Google Cloud → Credentials → "Web client (auto created by Google Service)":** has the origin
+  `https://auth.productadvisory.co` and the redirect URI `https://auth.productadvisory.co/__/auth/handler`.
+- **The app:** every page's `authDomain` is `auth.productadvisory.co` (tests/auth-domain.test.mjs checks they agree).
+
+If Google sign-in ever fails with a "redirect_uri_mismatch" or "unauthorized domain" message, one of these has changed.
+
 ## 13. Costs and limits (free plan)
 
 You are on the Firebase free plan (Spark). It is enough for a pilot. You will
