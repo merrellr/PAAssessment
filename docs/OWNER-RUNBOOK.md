@@ -281,6 +281,8 @@ alone is then not enough. Text-message codes are **not** used: they cost money p
   second code would mostly get in the way. They can still turn it on in My Profile.
 - **You (the owner) and company admins** see "Turn on two-step verification" on every page until it is on. "Later"
   only hides it for that page. It is a strong reminder, not a lock: nothing is blocked if they don't.
+- Anyone can choose **"Don't remind me again"** on the card: it is then off for good on every device. The setting
+  itself stays in My Profile.
 - Someone who has not confirmed their email yet sees nothing: Firebase needs a confirmed email first.
 
 **Turn it on for yourself first.** My Profile → Two-step verification → Set up. You need your phone with an

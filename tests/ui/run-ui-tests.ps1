@@ -141,7 +141,7 @@ try {
   }
   $results += Run-Page 'join page: badtoken' "$base/join-test.html?scn=badtoken&token=abc" 20000
   foreach ($s in 'member', 'focus', 'focusdefault', 'admin', 'plain', 'removed', 'owner', 'threelessons', 'allfive', 'recentdone', 'removedold') { $results += Run-Page "dashboard: $s" "$base/dash-test.html?scn=$s" 25000 }
-  foreach ($s in 'signin', 'nudge', 'owner', 'on', 'unverified', 'google', 'googleowner') { $results += Run-Page "two-step on the dashboard: $s" "$base/twostep-test.html?scn=$s" 25000 }
+  foreach ($s in 'signin', 'nudge', 'owner', 'on', 'unverified', 'google', 'googleowner', 'ownernever', 'turnedoff') { $results += Run-Page "two-step on the dashboard: $s" "$base/twostep-test.html?scn=$s" 25000 }
   foreach ($s in 'member', 'nonmember', 'blocked', 'votefail') { $results += Run-Page "delete account: $s" "$base/del-test.html?scn=$s" 25000 }
   $results += Run-Page 'profile photo' "$base/del-test.html?scn=photo" 25000
   foreach ($s in 'goals', 'goalsadmin', 'badges', 'signin', 'signingoogle', 'signinbrand', 'signinlink', 'mergekeep', 'mergeother', 'twostep', 'twostepauto', 'twostepunverified', 'twostepadmin', 'twostepgoogle', 'twostepgoogleblocked', 'twostepcode') { $results += Run-Page "profile goals: $s" "$base/del-test.html?scn=$s" 25000 }
