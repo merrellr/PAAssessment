@@ -303,22 +303,34 @@ if (window.self === window.top) {
 
 
   /* Two-step verification (two-step.js): a small card inviting people to turn it on, once their email is verified.
-     Required for the owner and company admins (they can see other people's results): their card comes back on every
-     page until it is on ("Later" hides it for this page only). Everyone else can say "Not now", which hides it for
-     30 days on this device. Learners who sign in only with Google don't see it: their Google account already guards
-     the sign-in, and a second code would mostly get in the way (they can still turn it on in My Profile). Not shown
-     on a page with the setting itself (My Profile, #two-step) or the invitation page. "Don't remind me again" turns the
-     card off for good, on every device (progress/{uid}.twoStepNudgeOff); the setting stays in My Profile. */
-  const TWO_STEP_SNOOZE_MS = 30 * 86400000;
+     Only for accounts that sign in with a password: Google already has its own two-step check, so a Google-only
+     account (whatever its role) is never asked for a second one. Required for the owner and company admins (they can
+     see other people's results): their card comes back on every page until it is on ("Later" hides it for this page
+     only). Everyone else can say "Not now", which hides it for 30 days on this device.
+     Not on the first visit: that belongs to the welcome, then the "tell us about your team" card (which earns a
+     badge). The card waits for a later sign-in (or a week), and while the dashboard is still asking for those
+     details it waits for them too (for up to two weeks). Not shown on a page with the setting itself (My Profile,
+     #two-step) or the invitation page. "Don't remind me again" turns the card off for good, on every device
+     (progress/{uid}.twoStepNudgeOff); the setting stays in My Profile. */
+  const TWO_STEP_SNOOZE_MS = 30 * 86400000, HOUR_MS = 3600000, DAY_MS = 86400000;
   async function twoStepNudge(user, flags){
     const page = location.pathname.replace(/\.html$/, '').split('/').pop();
     if (document.getElementById('two-step') || page === 'join' || !user.emailVerified || hasTwoStep(user) || document.getElementById('pa-2s-nudge')) return;
+    if (!(user.providerData || []).some(p => p.providerId === 'password')) return;
+    const meta = user.metadata || {};
+    const made = Date.parse(meta.creationTime || '') || 0, last = Date.parse(meta.lastSignInTime || '') || 0;
+    const age = made ? Date.now() - made : Infinity;
+    if (made && age < 7 * DAY_MS && !(last - made >= HOUR_MS)) return;   // still the first sign-in
     const required = !!(flags.owner || flags.companyAdmin);
-    const googleOnly = (user.providerData || []).length > 0 && user.providerData.every(p => p.providerId === 'google.com');
-    if (!required && googleOnly) return;
     const key = 'pa_2step_snooze_' + user.uid, offKey = 'pa_2step_off_' + user.uid;
     try { if (localStorage.getItem(offKey)) return; } catch (e) { /* storage off */ }
-    try { const p = await getDoc(doc(db, 'progress', user.uid)); if (p.exists() && p.data().twoStepNudgeOff) return; } catch (e) { /* can't tell: show it */ }
+    try {
+      const p = await getDoc(doc(db, 'progress', user.uid));
+      const d = p.exists() ? p.data() : {}, prof = d.profile || {};
+      if (d.twoStepNudgeOff) return;
+      // The welcome and the profile card come first.
+      if (age < 14 * DAY_MS && (!d.hasSeenWelcome || (!d.profilePromptDismissed && !(prof.company && prof.jobTitle)))) return;
+    } catch (e) { /* can't tell: show it */ }
     if (!auth.currentUser || auth.currentUser.uid !== user.uid || document.getElementById('pa-2s-nudge')) return;
     if (!required){
       try { const t = Number(localStorage.getItem(key)); if (t && Date.now() - t < TWO_STEP_SNOOZE_MS) return; } catch (e) { /* storage off: show it */ }

@@ -254,15 +254,20 @@ async function twoStepTests(store){
     dlg().querySelector('.no').click(); await sleep(60);
     t('cancelling leaves it off, with no error', !dlg() && /^Off\./.test($('twoStepStatus').textContent) && $('twoStepError').textContent === '' && !window.__enrolled);
   }
+  if (scn === 'twostepgooglenone'){
+    t('a Google-only account without two-step does not see the setting (Google has its own check)', $('two-step').style.display === 'none');
+  }
   if (scn === 'twostepgoogle' || scn === 'twostepgoogleblocked'){
-    $('twoStepOn').click(); await sleep(150);
-    t('a Google account asked to confirm it\'s you gets a "Continue with Google" button (the window opens from that click, so it isn\'t blocked)', !!dlg() && /Confirm it's you/.test(dlg().textContent) && !dlgInput() && dlg().querySelector('.go').textContent === 'Continue with Google');
+    t('a Google-only account that already has it on sees it, with Turn off and no way to set it up again', $('two-step').style.display !== 'none' && /^On\./.test($('twoStepStatus').textContent) && !$('twoStepOff').hidden && $('twoStepOn').hidden);
+    t('it says Google already has its own check, so it can be turned off', !$('twoStepNote').hidden && /has its own two-step check/.test($('twoStepNote').textContent), $('twoStepNote').textContent);
+    $('twoStepOff').click(); await sleep(80); await dlgSubmit(''); await sleep(150);
+    t('when Firebase asks to confirm it\'s you, a Google account gets a "Continue with Google" button (the window opens from that click, so it isn\'t blocked)', !!dlg() && /Confirm it's you/.test(dlg().textContent) && !dlgInput() && dlg().querySelector('.go').textContent === 'Continue with Google');
     dlg().querySelector('.go').click(); await sleep(400);
-    if (scn === 'twostepgoogle') t('after Google confirms, it carries on to the QR code', !!dlg() && !!dlg().querySelector('.pa-2s-qr svg'));
+    if (scn === 'twostepgoogle') t('after Google confirms, it is turned off, and the card stays to say so', !dlg() && window.__unenrolled === 1 && /^Off\./.test($('twoStepStatus').textContent) && /is off/.test($('twoStepOk').textContent) && $('twoStepOn').hidden, $('twoStepStatus').textContent);
     else {
       t('if the browser blocks the Google window it says how to fix it, and stays open to try again', !!dlg() && /blocked the Google window/.test(dlg().querySelector('.pa-2s-err').textContent));
       dlg().querySelector('.no').click(); await sleep(60);
-      t('and cancelling then leaves no error behind', !dlg() && $('twoStepError').textContent === '');
+      t('and cancelling then leaves it on, with no error behind', !dlg() && $('twoStepError').textContent === '' && /^On\./.test($('twoStepStatus').textContent));
     }
   }
   if (scn === 'twostepcode'){

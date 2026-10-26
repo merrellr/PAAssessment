@@ -191,7 +191,7 @@
     <a href="https://www.productadvisory.co/" target="_blank" rel="noopener" style="font-size:0.8125rem; color:var(--navy); text-decoration:underline;">Visit Product Advisory ↗</a>
   </div>
 
-  <div class="card">
+  <div class="card" id="details" tabindex="-1">
     <div class="avatar-row">
       <div class="avatar-circle" id="avatarCircle"></div>
       <div class="avatar-meta">
@@ -614,25 +614,32 @@ onAuthStateChanged(auth, async (user) => {
 const $id = (id) => document.getElementById(id);
 
 /* ---------------------------------------------------------------- two-step verification (two-step.js) */
-// Required for the platform owner and company admins (they can see other people's data); optional for everyone else.
-// The dashboard and the account menu send people here with ?twostep=setup, which opens the set-up straight away.
-let twoStepRole = '', twoStepAutoOpened = false;
+// Offered only to accounts that sign in with a password: Google already has its own two-step check, so a Google-only
+// account would be asked twice. Required for the platform owner and company admins who use a password (they can see
+// other people's data); optional for everyone else. A Google-only account that already turned it on still sees it,
+// so it can turn it off. The dashboard and the account menu send people here with ?twostep=setup, which opens the set-up.
+let twoStepRole = '', twoStepAutoOpened = false, twoStepShown = false;
 function showTwoStep(){
   const u = currentUser;
   if (!u) return;
   const on = hasTwoStep(u);
+  const pw = (u.providerData || []).some(p => p.providerId === 'password');
+  // Once shown on this page (say it was just turned off), it stays, so the "it's off" message can be read.
+  if (!pw && !on && !twoStepShown){ $id('two-step').style.display = 'none'; return; }
+  twoStepShown = true;
+  $id('two-step').style.display = '';
   $id('twoStepStatus').innerHTML = on
     ? '<b class="two-step-on">On.</b> Signing in asks for a code from your authenticator app.'
-    : '<b class="two-step-off">Off.</b> Signing in needs only your password or Google account.';
+    : '<b class="two-step-off">Off.</b> Signing in needs only your ' + (pw ? 'password' : 'Google account') + '.';
   const note = $id('twoStepNote');
-  note.hidden = on && u.emailVerified;
-  note.textContent = !u.emailVerified ? 'Confirm your email address first: open the link we emailed you. Then you can set this up.'
-    : twoStepRole ? 'Required for ' + (twoStepRole === 'owner' ? 'the platform owner' : 'company admins') + ', because you can see other people\'s results.' : '';
-  if (!note.textContent) note.hidden = true;
-  $id('twoStepOn').hidden = on;
+  note.textContent = !pw ? 'You sign in with Google, which has its own two-step check, so you don\'t need this here as well. You can turn it off.'
+    : !u.emailVerified ? 'Confirm your email address first: open the link we emailed you. Then you can set this up.'
+    : twoStepRole && !on ? 'Required for ' + (twoStepRole === 'owner' ? 'the platform owner' : 'company admins') + ', because you can see other people\'s results.' : '';
+  note.hidden = !note.textContent || (!pw && !on);
+  $id('twoStepOn').hidden = on || !pw;
   $id('twoStepOn').disabled = !u.emailVerified;
   $id('twoStepOff').hidden = !on;
-  if (!on && u.emailVerified && !twoStepAutoOpened && new URLSearchParams(location.search).get('twostep') === 'setup'){
+  if (pw && !on && u.emailVerified && !twoStepAutoOpened && new URLSearchParams(location.search).get('twostep') === 'setup'){
     twoStepAutoOpened = true;
     history.replaceState(null, '', location.pathname + '#two-step');
     $id('two-step').scrollIntoView({ block: 'center' });
@@ -1203,8 +1210,9 @@ function showBadges(data, user){
   }
   window.BadgesUI.render($id('badgesBody'), list);
   if (location.hash === '#badges') $id('badges').focus();
+  return fresh;
 }
-window.addEventListener('hashchange', () => { if (location.hash === '#badges' || location.hash === '#goals' || location.hash === '#signin') $id(location.hash.slice(1)).focus(); });
+window.addEventListener('hashchange', () => { if (/^#(badges|goals|signin|details)$/.test(location.hash)) $id(location.hash.slice(1)).focus(); });
 
 /* ------------------------------------------------------------ profile photo */
 // The photo is resized in the browser to a 160 x 160 JPEG (about 10 KB) and kept on the person's own
@@ -1325,7 +1333,8 @@ window.handleSaveProfile = async function(){
     data.profile = Object.assign({}, data.profile, { company, phone, jobTitle, companySize, industry });   // keeps the photo
     await setDoc(progressRef, data);
 
-    successEl.textContent = 'Profile saved.';
+    const won = showBadges(data, currentUser);
+    successEl.textContent = won.profile ? 'Profile saved. You earned a badge: All about you!' : 'Profile saved.';
   } catch (err){
     console.error('Could not save profile:', err);
     errorEl.textContent = 'Something went wrong saving your profile — please try again.';

@@ -4,7 +4,9 @@
 //   owner: the platform owner without two-step: the card says it's required, and only offers Later
 //   on: already set up: no card.   unverified: email not confirmed yet: no card
 //   ownernever: the owner chooses "Don't remind me again".   turnedoff: they already did, on another device
-//   google: a learner who signs in only with Google: no card.   googleowner: the owner signing in with Google: still required
+//   google: a learner who signs in only with Google: no card.   googleowner: the owner signing in only with Google: no card either
+//   firstlogin: a new account on its first sign-in: no card yet.   profilefirst: signed in again, but the dashboard is still
+//   asking about their team: that comes first.   secondlogin: signed in again with the details given: the card
 (function(){
   window.__errs = [];
   addEventListener('error', function(e){ window.__errs.push((e.message || 'error') + ' @' + (e.filename || '').split('/').pop() + ':' + e.lineno); });
@@ -14,6 +16,9 @@
   try { localStorage.removeItem('pa_2step_snooze_uTwo'); localStorage.removeItem('pa_2step_off_uTwo'); } catch (e) {}
   window.__fakeUser = scn === 'signin' ? null : { uid: 'uTwo', email: 'two@acme.com', displayName: 'Two Step', emailVerified: scn !== 'unverified', providerData: [{ providerId: 'password', email: 'two@acme.com' }], getIdToken: async function(){ return 'tok'; } };
   if (scn === 'google' || scn === 'googleowner') window.__fakeUser.providerData = [{ providerId: 'google.com', email: 'two@acme.com' }];
+  var now = Date.now(), day = 864e5;
+  if (scn === 'firstlogin') window.__fakeUser.metadata = { creationTime: new Date(now - 60000).toUTCString(), lastSignInTime: new Date(now - 60000).toUTCString() };
+  if (scn === 'profilefirst' || scn === 'secondlogin') window.__fakeUser.metadata = { creationTime: new Date(now - 2 * day).toUTCString(), lastSignInTime: new Date(now - 60000).toUTCString() };
   if (scn === 'on') window.__fakeUser.__factors = [{ uid: 'f1', factorId: 'totp', displayName: 'Authenticator app' }];
   if (scn === 'signin') window.__mfaAccounts = { 'mfa@x.com': true, 'g@x.com': true };
   window.__seed = function(store){
@@ -21,5 +26,7 @@
     store['progress/uMfa'] = { courses: {} };
     if (scn === 'owner' || scn === 'googleowner' || scn === 'ownernever' || scn === 'turnedoff') store['platformAdmins/uTwo'] = { note: 'owner' };
     if (scn === 'turnedoff') store['progress/uTwo'].twoStepNudgeOff = true;
+    if (scn === 'firstlogin' || scn === 'profilefirst' || scn === 'secondlogin') store['progress/uTwo'].hasSeenWelcome = true;
+    if (scn === 'secondlogin') store['progress/uTwo'].profile = { company: 'Acme', jobTitle: 'PM' };
   };
 })();

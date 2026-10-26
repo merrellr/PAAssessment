@@ -9,9 +9,11 @@
   // Two-step verification: twostepauto arrives from the "Set it up" card (?twostep=setup), with Firebase wanting a
   // recent sign-in first; twostepunverified has not confirmed its email yet.
   if (scn === 'twostepunverified') window.__fakeUser.emailVerified = false;
-  // twostepgoogle: a Google account that Firebase asks to confirm (blocked: the browser blocks the Google window);
-  // twostepcode: an error with no wording of its own
+  // twostepgoogle: a Google-only account that turned two-step on before it was offered only to password accounts;
+  // turning it off, Firebase asks to confirm it's you (blocked: the browser blocks the Google window).
+  // twostepgooglenone: a Google-only account without it: the setting is not shown. twostepcode: an error with no wording of its own
   if (/^twostepgoogle/.test(scn)) { window.__fakeUser.providerData = [{ providerId: 'google.com', email: 'del@acme.com' }]; window.__mfaNeedRecent = true; }
+  if (scn === 'twostepgoogle' || scn === 'twostepgoogleblocked') window.__fakeUser.__factors = [{ uid: 'f1', factorId: 'totp', displayName: 'Authenticator app' }];
   if (scn === 'twostepgoogleblocked') window.__popupBlocked = true;
   if (scn === 'twostepcode') window.__mfaOddError = 'auth/odd-thing';
   if (scn === 'twostepauto') { window.__mfaNeedRecent = true; history.replaceState(null, '', location.pathname + '?scn=twostepauto&twostep=setup'); }

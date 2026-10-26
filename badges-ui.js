@@ -9,6 +9,25 @@
   const when = (iso, long) => new Date(iso).toLocaleDateString(undefined, { day: 'numeric', month: long ? 'long' : 'short', year: 'numeric' });
   const bar = (b) => '<div class="bd-mini" aria-hidden="true"><span style="width:' + b.pct + '%"></span></div>';
   const rank = (b) => B.BADGES.findIndex(x => x.id === b.id);
+  /* Where to go to earn a badge not earned yet, by what it counts: [link, what to do there]. */
+  const START = {
+    assessed: ['/', 'Take the assessment'],
+    profile: ['/profile#details', 'Add your company and role'],
+    lessons: ['/lms-dashboard#courses', 'Pick your next lesson'],
+    notes: ['/lms-dashboard#courses', 'Open a lesson and write a reflection'],
+    activeDays: ['/lms-dashboard#courses', 'Do a lesson today'],
+    goalWeeks: ['/profile#goals', 'Set your weekly goal'],
+    goalStreak: ['/profile#goals', 'Set your weekly goal'],
+    courses: ['/lms-dashboard#courses', 'Continue a course'],
+    areasDone: ['/lms-dashboard#courses', 'See the courses in your plan'],
+    planDone: ['/lms-dashboard#courses', 'See the courses in your plan'],
+    areasAdvanced: ['/', 'Retake the assessment'],
+    advancedOverall: ['/', 'Retake the assessment']
+  };
+  const startLink = (b, cls) => {
+    const go = !b.have && START[b.metric];
+    return go ? '<a class="' + cls + '" href="' + go[0] + '">' + esc(go[1]) + ' <span aria-hidden="true">→</span></a>' : '';
+  };
 
   // The latest earned, newest first (on the same day, the harder badge first).
   function latest(list, n) {
@@ -32,7 +51,7 @@
     const next = B.upNext(list, 3);
     if (next.length) {
       html += '<div class="bd-next"><span class="bd-eyebrow">Up next</span><ul>' + next.map(b => '<li>' + B.medalSvg(b, 44) + '<div><b>' + esc(b.title) + '</b><p>' + esc(b.text) + '</p>' + bar(b) +
-        '<span class="bd-togo">' + b.value + ' of ' + b.goal + ' · ' + (b.goal - b.value) + ' to go</span></div></li>').join('') + '</ul></div>';
+        '<span class="bd-togo">' + b.value + ' of ' + b.goal + ' · ' + (b.goal - b.value) + ' to go</span>' + startLink(b, 'bd-start') + '</div></li>').join('') + '</ul></div>';
     }
     const tabs = [['all', 'All', sum.total], ['have', 'Earned', sum.have], ['todo', 'Still to earn', left]];
     html += '<div class="bd-tabs" role="group" aria-label="Show badges">' + tabs.map(f => '<button type="button" data-f="' + f[0] + '" aria-pressed="' + (f[0] === 'all') + '">' + f[1] + '<em>' + f[2] + '</em></button>').join('') + '</div>';
@@ -89,6 +108,7 @@
       box.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeModal(); });
     }
     render(document.getElementById('badgesModalBody'), list);
+    box.querySelectorAll('.bd-next .bd-start').forEach(a => a.addEventListener('click', () => closeModal()));
     modalOpener = opener || null;
     box.hidden = false;
     document.documentElement.classList.add('bd-lock');
@@ -115,7 +135,11 @@
       box.addEventListener('click', (e) => { if (e.target === box || e.target.closest('.bd-x')) closeDetail(); });
       box.addEventListener('keydown', (e) => {
         if (e.key === 'Escape') { e.stopPropagation(); closeDetail(); }
-        if (e.key === 'Tab') { e.preventDefault(); box.querySelector('.bd-x').focus(); }
+        if (e.key === 'Tab') {   // keep the focus inside: Close, and the start link when there is one
+          e.preventDefault();
+          const f = Array.from(box.querySelectorAll('.bd-x, .bd-start')), i = f.indexOf(document.activeElement);
+          f[(i + (e.shiftKey ? f.length - 1 : 1)) % f.length].focus();
+        }
       });
       tiltable(box);
     }
@@ -124,7 +148,9 @@
       '<span class="bd-metal ' + b.metal + '">' + METAL[b.metal] + ' · ' + esc(group ? group[1] : '') + '</span>' +
       '<h2 id="badgeDetailTitle">' + esc(b.title) + '</h2><p>' + esc(b.text) + '.</p>' +
       (b.have ? '<p class="bd-when">✓ Earned' + (b.earnedAt ? ' ' + when(b.earnedAt, true) : '') + '</p>'
-        : bar(b) + '<p>' + b.value + ' of ' + b.goal + ' · ' + (b.goal - b.value) + ' to go</p>');
+        : bar(b) + '<p>' + b.value + ' of ' + b.goal + ' · ' + (b.goal - b.value) + ' to go</p>' + startLink(b, 'bd-start bd-start-btn'));
+    // Following a link closes the windows, so a link to this same page (#courses) lands on the page, not behind them.
+    document.querySelectorAll('#badgeDetailBody .bd-start').forEach(a => a.addEventListener('click', () => { closeDetail(); closeModal(); }));
     detailOpener = opener || null;
     box.hidden = false;
     box.querySelector('.bd-x').focus();

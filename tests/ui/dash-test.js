@@ -24,8 +24,25 @@ const sleep = (ms) => new Promise(r => setTimeout(r, ms));
       win.querySelector('.bd-item[data-id="lesson1"]').click(); await sleep(40);
       const det = document.getElementById('badgeDetail');
       t('a badge in the window opens up close, with the date it was earned', !det.hidden && /First step/.test(det.textContent) && /Earned \w+/.test(det.querySelector('.bd-when').textContent), det.textContent);
+      t('an earned badge has no "start here" link', !det.querySelector('.bd-start'));
       det.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true })); await sleep(30);
       t('Escape closes the close-up only, the window stays open', det.hidden && !win.hidden);
+      win.querySelector('.bd-item[data-id="profile"]').click(); await sleep(40);
+      const go = det.querySelector('.bd-start');
+      t('a badge still to earn says where to start: All about you goes to the profile details', !!go && go.getAttribute('href') === '/profile#details' && /Add your company and role/.test(go.textContent), go && go.outerHTML);
+      det.dispatchEvent(new KeyboardEvent('keydown', { key: 'Tab', bubbles: true })); await sleep(10);
+      t('Tab reaches the link inside the close-up', document.activeElement === go);
+      det.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true })); await sleep(30);
+      win.querySelector('.bd-item[data-id="lessons10"]').click(); await sleep(40);
+      const go2 = det.querySelector('.bd-start');
+      t('lesson badges go to Your Courses on My Learning', !!go2 && go2.getAttribute('href') === '/lms-dashboard#courses', go2 && go2.outerHTML);
+      t('"Up next" has start links too', win.querySelectorAll('.bd-next .bd-start').length === 3);
+      const stay = (e) => e.preventDefault();
+      document.addEventListener('click', stay);
+      go2.click(); await sleep(30);
+      document.removeEventListener('click', stay);
+      t('following the link closes the close-up and the window, so the page shows', det.hidden && win.hidden && !document.documentElement.classList.contains('bd-lock'));
+      tile.click(); await sleep(40);   // open the window again for the checks below
       win.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true })); await sleep(30);
       t('Escape again closes the window and returns to the tile', win.hidden && document.activeElement === tile);
       tile.click(); await sleep(40);
@@ -53,6 +70,15 @@ const sleep = (ms) => new Promise(r => setTimeout(r, ms));
       t('the Owner Console link stays hidden for a normal member', ownerLink.style.display === 'none');
       const writes = window.__writeLog.filter(w => w.path === 'orgs/orgA/members/uDash').length;
       t('exactly one write for the shared record on this visit', writes === 1, String(writes));
+    }
+    if (window.__scn === 'profilecard'){
+      const card = document.getElementById('profilePromptCard');
+      t('on a later visit, the "tell us about your team" card asks for their details, and says it earns a badge', card.style.display === 'block' && /earns you a badge/.test(card.textContent));
+      document.getElementById('profilePromptJobTitle').value = 'Product Manager';
+      await window.saveProfilePrompt(); await sleep(100);
+      const toast = document.getElementById('badgeToast');
+      t('saving company and role pops up the "All about you" badge straight away', !!toast && !toast.hidden && /New badge!/.test(toast.textContent) && /All about you/.test(toast.textContent), toast && toast.textContent);
+      t('and it is saved with a date', /^\d{4}-\d\d-\d\dT/.test((store['progress/uDash'].badges || {}).profile || ''), JSON.stringify(store['progress/uDash'].badges));
     }
     const chips = Array.prototype.map.call(document.querySelectorAll('#recChips .rec-chip'), c => c.textContent.trim());
     // Four areas are tied for the most work left (3 courses each): AI Org (35%), Discovery (40%), AI Individual (45%), Strategy (50%).

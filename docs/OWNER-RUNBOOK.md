@@ -275,12 +275,16 @@ phone (Google Authenticator, Microsoft Authenticator, 1Password and similar) whe
 alone is then not enough. Text-message codes are **not** used: they cost money per message and are easier to abuse.
 
 **Who sees what.**
-- **Everyone** with a confirmed email can turn it on or off in **My Profile → Two-step verification**.
-- **Learners** see a small "Protect your account" card in the top right. "Not now" hides it for 30 days on that device.
-  Learners who sign in **only with Google** don't see the card: their Google account already guards the sign-in, and a
-  second code would mostly get in the way. They can still turn it on in My Profile.
-- **You (the owner) and company admins** see "Turn on two-step verification" on every page until it is on. "Later"
-  only hides it for that page. It is a strong reminder, not a lock: nothing is blocked if they don't.
+- It is offered only to accounts that **sign in with an email and password**. Google already has its own two-step
+  check, so anyone who signs in **only with Google** (owner and admins included) never sees the card, and My Profile
+  hides the setting. A Google-only account that turned it on earlier still sees it in My Profile, with **Turn off**.
+- Not on the first visit. A new account first gets the welcome and the "Welcome aboard" badge; on the next visit the
+  dashboard asks about their team (company and role earn the "All about you" badge straight away). The two-step card
+  waits for a later sign-in (or a week), and until the team card is answered or dismissed (for up to two weeks).
+- **Learners** with a password see a small "Protect your account" card in the top right. "Not now" hides it for 30
+  days on that device.
+- **You (the owner) and company admins** with a password see "Turn on two-step verification" on every page until it
+  is on. "Later" only hides it for that page. It is a strong reminder, not a lock: nothing is blocked if they don't.
 - Anyone can choose **"Don't remind me again"** on the card: it is then off for good on every device. The setting
   itself stays in My Profile.
 - Someone who has not confirmed their email yet sees nothing: Firebase needs a confirmed email first.
