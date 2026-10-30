@@ -41,6 +41,10 @@
   window.__seed = function(store, Timestamp){
     var ts = Timestamp.now();
     store['progress/uDel'] = { courses: {}, profile: { phone: '555' }, orgIds: scn === 'nonmember' || scn === 'mergeother' ? [] : ['orgOld', 'orgA'] };
+    // saved tools (my-tools.html): two of this account's, and somebody else's
+    store['savedTools/st1'] = { uid: 'uDel', tool: 'bbp', title: 'Vendor choice', summary: 'Leading: Buy', data: 'AAA', createdAt: ts, updatedAt: ts };
+    store['savedTools/st2'] = { uid: 'uDel', tool: 'impact', title: '', summary: '', data: 'BBB', createdAt: ts, updatedAt: ts };
+    store['savedTools/so1'] = { uid: 'uOther', tool: 'ai', title: 'Theirs', summary: '', data: 'CCC', createdAt: ts, updatedAt: ts };
     if (/^merge/.test(scn)){
       store['progress/uHome'] = { courses: { 'discovery-novice': { completed: [1, 2, 3, 4, 5, 6] } }, assessmentResult: { tier: 'Lots of Experience', overallPct: 70, categoryPct: {} }, lessonLog: { '2026-10-02': 3 }, profile: { company: 'Home' } };
       store['toolVotes/uHome_t1'] = { uid: 'uHome', toolId: 't1', email: 'x', notify: false, createdAt: ts };

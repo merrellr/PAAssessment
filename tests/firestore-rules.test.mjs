@@ -739,6 +739,37 @@ await allow('a person can delete their own suggestion (for example when they del
 await allow('deleting when there is none is harmless', () => deleteDoc(doc(verified('s11'), 'toolSuggestions/s11')));
 await allow('the owner can delete one', async () => { await setDoc(doc(verified('s12'), 'toolSuggestions/s12'), goodSuggestion('s12')); return deleteDoc(doc(owner, 'toolSuggestions/s12')); });
 
+
+/* ------------------------------------------------------------ saved tools (my-tools.html) */
+console.log('\n--- saved tools ---');
+const goodSaved = (uid, over = {}) => Object.assign({
+  uid, tool: 'bbp', title: 'Analytics dashboard', summary: 'Leading: Partner', data: 'eyJ0IjoiQSJ9',
+  createdAt: serverTimestamp(), updatedAt: serverTimestamp()
+}, over);
+const ann = asUser('ann', 'ann@x.com'), bob = asUser('bob', 'bob@x.com');
+await allow('a signed-in person saves a tool to their account', () => setDoc(doc(ann, 'savedTools/t1'), goodSaved('ann')));
+await deny('not under somebody else\'s name', () => setDoc(doc(ann, 'savedTools/t2'), goodSaved('bob')));
+await deny('a signed-out visitor cannot save', () => setDoc(doc(anon, 'savedTools/t3'), goodSaved('ann')));
+await deny('only the four tools', () => setDoc(doc(ann, 'savedTools/t4'), goodSaved('ann', { tool: 'other' })));
+await deny('the data must be a share-link encoding', () => setDoc(doc(ann, 'savedTools/t5'), goodSaved('ann', { data: '<script>' })));
+await deny('and not too large', () => setDoc(doc(ann, 'savedTools/t6'), goodSaved('ann', { data: 'a'.repeat(20001) })));
+await deny('a title over 100 characters is refused', () => setDoc(doc(ann, 'savedTools/t7'), goodSaved('ann', { title: 'x'.repeat(101) })));
+await deny('extra fields are refused', () => setDoc(doc(ann, 'savedTools/t8'), goodSaved('ann', { shared: true })));
+await allow('the owner reads their saved tool', () => getDoc(doc(ann, 'savedTools/t1')));
+await deny('nobody else can read it', () => getDoc(doc(bob, 'savedTools/t1')));
+await deny('not even the platform owner', () => getDoc(doc(owner, 'savedTools/t1')));
+await allow('the owner lists their own saved tools', () => getDocs(query(collection(ann, 'savedTools'), where('uid', '==', 'ann'))));
+await deny('nobody can list everyone\'s', () => getDocs(collection(ann, 'savedTools')));
+await deny('or list somebody else\'s', () => getDocs(query(collection(bob, 'savedTools'), where('uid', '==', 'ann'))));
+await allow('the owner updates it, keeping when it was created', async () => {
+  const snap = await getDoc(doc(ann, 'savedTools/t1'));
+  return setDoc(doc(ann, 'savedTools/t1'), goodSaved('ann', { title: 'Renamed', createdAt: snap.data().createdAt }));
+});
+await deny('an update cannot change when it was created', () => setDoc(doc(ann, 'savedTools/t1'), goodSaved('ann')));
+await deny('nobody else can overwrite it', () => setDoc(doc(bob, 'savedTools/t1'), goodSaved('bob')));
+await deny('nobody else can delete it', () => deleteDoc(doc(bob, 'savedTools/t1')));
+await allow('the owner deletes it', () => deleteDoc(doc(ann, 'savedTools/t1')));
+
 console.log('\n==============================');
 console.log(passes + ' passed, ' + failures + ' failed');
 await env.cleanup();

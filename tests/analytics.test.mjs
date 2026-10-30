@@ -62,7 +62,7 @@ console.log('--- what is sent about the address ---');
 
 console.log('--- which pages have it ---');
 {
-  const withIt = ['index', 'framework', 'request-info', 'tool-requests', 'lms-dashboard', 'lesson', 'profile', 'feedback'];
+  const withIt = ['index', 'framework', 'request-info', 'tool-requests', 'lms-dashboard', 'lesson', 'profile', 'feedback', 'my-tools'];
   const without = ['owner', 'owner-tools', 'owner-pilot', 'reports', 'company', 'join', 'assessment-dashboard', 'email-settings'];
   const has = (p) => /<script src="analytics\.js"><\/script>/.test(fs.readFileSync(path.join(root, p + '.html'), 'utf8'));
   withIt.forEach(p => t(p + '.html has it', has(p)));
@@ -112,7 +112,7 @@ console.log('--- the visitor\'s choice ---');
 console.log('--- the notice is wired into the pages ---');
 {
   const read = (f) => fs.readFileSync(path.join(root, f), 'utf8');
-  ['index', 'lesson', 'profile', 'tool-requests'].forEach(p => t(p + '.html has a "Cookie settings" link in its footer', /data-cookie-settings[^>]*>Cookie settings<\/a>/.test(read(p + '.html'))));
+  ['index', 'lesson', 'profile', 'tool-requests', 'my-tools'].forEach(p => t(p + '.html has a "Cookie settings" link in its footer', /data-cookie-settings[^>]*>Cookie settings<\/a>/.test(read(p + '.html'))));
   t('the dashboard\'s Profile menu has "Cookie settings"', /profile-dropdown-item" href="#" data-cookie-settings>Cookie settings<\/a>/.test(read('lms-dashboard.html')));
   const menu = read('account-menu.js');
   t('signing in counts as accepting (account-menu.js calls acceptFromAccount for every signed-in person, with or without the menu)', /PAAnalytics\.acceptFromAccount\(\)/.test(menu) && menu.indexOf('acceptFromAccount') < menu.indexOf('if (!MENU) return;'));

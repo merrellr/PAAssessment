@@ -205,6 +205,7 @@ async function mergeTests(store){
     const kept = store['progress/uHome'] || {};
     t('the main account now holds this one\'s records too', kept.profile && kept.profile.phone === '555' && kept.profile.company === 'Home' && JSON.stringify(kept.mergedFrom) === '["uDel"]', JSON.stringify(kept));
     t('this account\'s votes move across where the main one had not voted', !!store['toolVotes/uHome_t2'] && !store['toolVotes/uDel_t2'] && store['tools/t2'].voteCount === 0 && store['tools/t1'].voteCount === 3, JSON.stringify(store['tools/t2']));
+    t('this account\'s saved tools move to the main account (copies named after the originals), and the originals go', store['savedTools/mst1'] && store['savedTools/mst1'].uid === 'uHome' && store['savedTools/mst1'].title === 'Vendor choice' && store['savedTools/mst2'] && store['savedTools/mst2'].data === 'BBB' && !store['savedTools/st1'] && !store['savedTools/st2'] && !!store['savedTools/so1'], Object.keys(store).filter(k => /savedTools/.test(k)).join());
     t('then this account is closed: its records, then its sign-in', !store['progress/uDel'] && !store['toolSuggestions/uDel'] && log.indexOf('deleteUser:uDel') > log.indexOf('delete:progress/uDel'), log.join(' | '));
     t('the page switches to the main account, with no trip back to sign in', window.__fakeUser && window.__fakeUser.uid === 'uHome' && window.__switchedWith && window.__switchedWith.email === 'me@home.net' && $('profileEmail').textContent === 'me@home.net' && /del-test/.test(location.pathname));
     t('this account\'s Google sign-in now opens the main one, so both emails sign in', window.__fakeUser.providerData.some(p => p.providerId === 'google.com' && p.email === 'del@acme.com') && /Combined\. You are now in me@home\.net, your main email, with everything from both\. del@acme\.com signs in here too/.test($('signinSuccess').textContent), $('signinSuccess').textContent);
@@ -320,6 +321,9 @@ async function twoStepTests(store){
         t('a total that was already 0 is left at 0, never negative', store['tools/t2'].voteCount === 0);
         t('somebody else\'s vote is untouched', !!store['toolVotes/uOther_t1']);
         t('their tool suggestion is deleted', !store['toolSuggestions/uDel']);
+        t('their saved tools are deleted, and somebody else\'s are not', !store['savedTools/st1'] && !store['savedTools/st2'] && !!store['savedTools/so1']);
+        const savedDel = log.findIndex(x => /delete:savedTools\//.test(x));
+        t('the saved tools go before the progress record', savedDel > -1 && savedDel < log.findIndex(x => x === 'delete:progress/uDel'));
         const firstVoteDelete = log.findIndex(x => /delete:toolVotes\//.test(x));
         const delProg = log.findIndex(x => x === 'delete:progress/uDel');
         t('the votes go before the progress record and the sign-in', firstVoteDelete > -1 && firstVoteDelete < delProg, log.join(' | '));

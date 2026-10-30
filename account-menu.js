@@ -125,6 +125,7 @@ if (window.self === window.top) {
     menu.appendChild(link('My Learning', '/lms-dashboard', page === 'lms-dashboard.html'));
     menu.appendChild(link('My Profile', '/profile', page === 'profile.html'));
     menu.appendChild(link('My Badges', '/profile#badges', false));
+    menu.appendChild(link('My saved tools', '/my-tools', page === 'my-tools.html'));
     if (flags.companyAdmin || flags.owner){
       section(flags.owner ? 'Manage' : 'My company');
       if (flags.companyAdmin) menu.appendChild(link('Company dashboard', '/company', page === 'company.html'));
