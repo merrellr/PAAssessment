@@ -7,12 +7,15 @@
   'use strict';
 
   const WWW = 'https://www.productadvisory.co/';
+  // core: the tool's scoring file on www (its decode and toCSV draw a saved tool's results here, so the sums are
+  // never copied into this site) and the name it puts on window.
   const TOOLS = {
-    scorecard: { name: 'Feature Prioritization Scorecard', short: 'Scorecard', url: WWW + 'scorecard', prefix: 's' },
-    ai: { name: 'AI Use Case Prioritization', short: 'AI use cases', url: WWW + 'ai-use-cases', prefix: 'u' },
-    bbp: { name: 'Build, Buy, or Partner Decision Matrix', short: 'Build, buy, or partner', url: WWW + 'build-buy-partner', prefix: 'm' },
-    impact: { name: 'Organizational Impact Score', short: 'Impact score', url: WWW + 'impact-score', prefix: 's' }
+    scorecard: { name: 'Feature Prioritization Scorecard', short: 'Scorecard', url: WWW + 'scorecard', prefix: 's', core: 'scorecard-core.js', global: 'ScorecardCore' },
+    ai: { name: 'AI Use Case Prioritization', short: 'AI use cases', url: WWW + 'ai-use-cases', prefix: 'u', core: 'ai-usecases-core.js', global: 'AIUseCaseCore' },
+    bbp: { name: 'Build, Buy, or Partner Decision Matrix', short: 'Build, buy, or partner', url: WWW + 'build-buy-partner', prefix: 'm', core: 'bbp-core.js', global: 'BBPCore' },
+    impact: { name: 'Organizational Impact Score', short: 'Impact score', url: WWW + 'impact-score', prefix: 's', core: 'impact-core.js', global: 'ImpactCore' }
   };
+  const CORE_BASE = WWW + 'assets/js/';
   const MAX_DATA = 20000;
 
   const clean = (s, max) => String(s == null ? '' : s).replace(/\s+/g, ' ').trim().slice(0, max);
@@ -55,5 +58,72 @@
     return list.slice().sort((a, b) => ms(b) - ms(a));
   }
 
-  root.SavedToolsCore = { TOOLS, MAX_DATA, parseHandoff, record, openUrl, displayTitle, copyTitle, sortNewest };
+  // The list on My saved tools: one tool or all ('' or 'all'), words to look for in the name, summary or tool, and
+  // an order: 'newest' (default), 'oldest', 'name' or 'tool'.
+  function filterSort(list, opts) {
+    const o = opts || {}, tool = o.tool && o.tool !== 'all' ? o.tool : '';
+    const words = String(o.q || '').toLowerCase().split(/\s+/).filter(Boolean);
+    const hay = (d) => (displayTitle(d) + ' ' + (d.summary || '') + ' ' + (TOOLS[d.tool] ? TOOLS[d.tool].name : '')).toLowerCase();
+    let out = list.filter(d => (!tool || d.tool === tool) && words.every(w => hay(d).indexOf(w) > -1));
+    const byName = (a, b) => displayTitle(a).localeCompare(displayTitle(b), undefined, { sensitivity: 'base' });
+    if (o.sort === 'name') return out.slice().sort(byName);
+    out = sortNewest(out);
+    if (o.sort === 'oldest') return out.reverse();
+    if (o.sort === 'tool') {
+      const order = Object.keys(TOOLS);
+      return out.map((d, i) => [d, i]).sort((a, b) => (order.indexOf(a[0].tool) - order.indexOf(b[0].tool)) || (a[1] - b[1])).map(x => x[0]);
+    }
+    return out;
+  }
+
+  function countByTool(list) {
+    const n = { all: list.length };
+    Object.keys(TOOLS).forEach(k => { n[k] = 0; });
+    list.forEach(d => { if (d.tool in n) n[d.tool]++; });
+    return n;
+  }
+
+  // A tool's export (toCSV) read back into rows of cells. Cells the tool guarded against spreadsheet formulas
+  // ('=..., '-5) are shown as typed.
+  function parseCSV(text) {
+    const rows = []; let row = [], cell = '', q = false;
+    const s = String(text || '');
+    for (let i = 0; i < s.length; i++) {
+      const c = s[i];
+      if (q) {
+        if (c === '"' && s[i + 1] === '"') { cell += '"'; i++; } else if (c === '"') q = false; else cell += c;
+      } else if (c === '"') q = true;
+      else if (c === ',') { row.push(cell); cell = ''; }
+      else if (c === '\n' || c === '\r') { if (c === '\r' && s[i + 1] === '\n') i++; row.push(cell); rows.push(row); row = []; cell = ''; }
+      else cell += c;
+    }
+    if (cell !== '' || row.length) { row.push(cell); rows.push(row); }
+    return rows.map(r => r.map(v => (/^'[=+\-@\t\r]/.test(v) ? v.slice(1) : v)));
+  }
+
+  // The export split at its blank lines into parts: a table (first row the headings) or, when no row has more
+  // than two filled cells, a list of label and value pairs.
+  function csvSections(text) {
+    const parts = []; let cur = [];
+    parseCSV(text).forEach(r => {
+      if (r.every(v => v === '')) { if (cur.length) parts.push(cur); cur = []; } else cur.push(r);
+    });
+    if (cur.length) parts.push(cur);
+    return parts.map(rows => {
+      const filled = (r) => r.filter(v => v !== '').length;
+      if (rows.every(r => filled(r) <= 2)) return { kind: 'pairs', rows: rows.map(r => [r[0] || '', r.slice(1).filter(v => v !== '').join(' ')]) };
+      const width = Math.max.apply(null, rows.map(r => r.length));
+      const pad = (r) => r.concat(Array(width - r.length).fill(''));
+      return { kind: 'table', head: pad(rows[0]), rows: rows.slice(1).map(pad) };
+    });
+  }
+
+  // A file name for a saved tool's download: "Q3 roadmap - Organizational Impact Score.csv".
+  function fileName(d) {
+    const name = (displayTitle(d) + (TOOLS[d.tool] ? ' - ' + TOOLS[d.tool].name : '')).replace(/[\\/:*?"<>|]+/g, ' ').replace(/\s+/g, ' ').trim();
+    return name.slice(0, 120) + '.csv';
+  }
+
+  root.SavedToolsCore = { TOOLS, CORE_BASE, MAX_DATA, parseHandoff, record, openUrl, displayTitle, copyTitle, sortNewest,
+    filterSort, countByTool, parseCSV, csvSections, fileName };
 })(typeof window !== 'undefined' ? window : globalThis);

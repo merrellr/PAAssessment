@@ -110,6 +110,30 @@
   .rec-banner .eyebrow{ font-size:0.6875rem; font-weight:600; letter-spacing:0.06em; text-transform:uppercase; color: var(--cyan); }
   .rec-chip{ display:inline-block; background:var(--surface); border:1px solid var(--line); border-radius:7px; padding:6px 12px; margin: 8px 8px 0 0; font-size:0.8125rem; font-weight:500; color: var(--navy); text-decoration:none; }
   .rec-chip:hover{ border-color: var(--cyan); }
+  /* Pick up where you left off: the top of the page */
+  .home-band{ margin-bottom: 22px; }
+  .home-hello{ font-family:var(--display); font-size: 1.375rem; color: var(--navy-deep); margin: 0 0 4px; }
+  .home-sub{ font-size: 0.8438rem; color: var(--ink-soft); margin: 0 0 14px; }
+  .home-grid{ display:grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+  @media (max-width: 900px){ .home-grid{ grid-template-columns: 1fr; } }
+  .home-card{ background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 18px; display:flex; flex-direction:column; gap: 6px; min-width: 0;
+    box-shadow: 0 1px 2px rgba(22,33,62,0.04), 0 8px 24px rgba(22,33,62,0.05); }
+  .home-card.lead{ border: 2px solid var(--cyan); }
+  .home-card .eyebrow{ display:block; font-size:0.6875rem; font-weight:600; letter-spacing:0.06em; text-transform:uppercase; color: var(--cyan-ink, var(--cyan)); margin: 0; }
+  .home-card h2{ font-family:var(--display); font-size: 1rem; color: var(--navy-deep); margin: 0; line-height: 1.35; }
+  .home-card p{ font-size: 0.8125rem; color: var(--ink-soft); margin: 0; line-height: 1.5; }
+  .home-bar{ height: 8px; border-radius: 99px; background: var(--line); overflow:hidden; margin: 4px 0 2px; }
+  .home-bar span{ display:block; height: 100%; border-radius: inherit; background: linear-gradient(90deg, var(--navy), var(--cyan)); }
+  .home-go{ margin-top: auto; padding-top: 10px; display:flex; flex-wrap:wrap; gap: 8px 14px; align-items:center; }
+  .home-go a.btn{ display:inline-block; width:auto; padding: 9px 16px; font-family:var(--display); font-weight:600; font-size: 0.8125rem; color: var(--btn-ink); border-radius: 24px; text-decoration:none; }
+  .home-go a.home-out{ display:inline-block; font-family:var(--display); font-weight:600; font-size:0.8125rem; color: var(--navy); background: var(--surface); border: 1.5px solid var(--line); border-radius: 24px; padding: 8px 15px; text-decoration:none; }
+  .home-go a.home-out:hover, .home-go a.home-out:focus-visible{ border-color: var(--cyan); }
+  .home-go a.more{ font-size: 0.7812rem; color: var(--navy); }
+  .home-saved{ list-style:none; margin: 4px 0 0; padding: 0; display:flex; flex-direction:column; gap: 6px; }
+  .home-saved a{ display:block; text-decoration:none; border: 1px solid var(--line); border-radius: 9px; padding: 7px 10px; color: var(--ink); }
+  .home-saved a:hover, .home-saved a:focus-visible{ border-color: var(--cyan); }
+  .home-saved b{ display:block; font-size: 0.8125rem; color: var(--navy-deep); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .home-saved small{ font-size: 0.7188rem; color: var(--gray); }
 
   .domain-group{ margin-bottom: 22px; }
   .domain-title{ font-family:var(--display); font-weight:600; font-size: 0.875rem; color: var(--navy-deep); margin-bottom: 10px; }
@@ -218,6 +242,8 @@
 <link rel="stylesheet" href="pa-theme.css">
 <link rel="stylesheet" href="badges.css">
 <script src="analytics.js"></script>
+<script src="learning-home-core.js"></script>
+<script src="saved-tools-core.js"></script>
 </head>
 <body>
 <script src="pa-shell.js"></script>
@@ -401,6 +427,17 @@
       <span style="font-size:0.8125rem; color:var(--ink-soft);">Please verify your email — check your inbox for a link.</span>
       <a onclick="handleResendVerification()" style="margin-left:10px; font-size:0.8125rem; color:var(--navy); text-decoration:underline; cursor:pointer;">Resend email</a>
     </div>
+
+    <!-- Pick up where you left off: the course in progress, what to learn next, and saved tools -->
+    <section class="home-band" id="homeBand" hidden aria-labelledby="homeHello">
+      <h1 class="home-hello" id="homeHello">Welcome back</h1>
+      <p class="home-sub" id="homeSub">Pick up where you left off.</p>
+      <div class="home-grid">
+        <div class="home-card lead" id="homeResume"></div>
+        <div class="home-card" id="homeNext"></div>
+        <div class="home-card" id="homeTools"></div>
+      </div>
+    </section>
 
     <div class="card" id="welcomeCard" style="display:none; margin-bottom:22px; background:linear-gradient(135deg, var(--tint) 0%, var(--surface) 100%); border-color: var(--line);">
       <span class="eyebrow">Welcome</span>
@@ -703,7 +740,7 @@ import {
   sendPasswordResetEmail, sendEmailVerification, updateProfile,
   updatePassword, reauthenticateWithCredential, EmailAuthProvider
 } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
-import { getFirestore, doc, getDoc, setDoc, increment } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+import { getFirestore, doc, getDoc, setDoc, increment, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
 import { syncOrgShare } from "./org-share.js";
 import { withTwoStep, twoStepError } from "./two-step.js";
 
@@ -1265,7 +1302,8 @@ async function loadDashboard(user){
   renderSpacedReview(progress);
   renderArticlesShortcuts();
   renderProfilePrompt(progress);
-  if (assessmentResult) renderRecommendations(assessmentResult, progress, await fetchCompanyFocus(user));
+  const recommended = assessmentResult ? renderRecommendations(assessmentResult, progress, await fetchCompanyFocus(user)) : [];
+  renderHome(user, progress, assessmentResult, recommended, assessmentUrl);
   populateProfileProgressSummary(progress, assessmentResult);
   renderAssignedStat(progress, assessmentResult);
   renderWeekGoal(progress);
@@ -2273,6 +2311,7 @@ function renderRecommendations(result, progress, companyFocus){
   const banner = document.getElementById('recBanner');
   const chips = document.getElementById('recChips');
   chips.innerHTML = '';
+  const picked = [];   // the courses recommended, in order (the top of the page uses them too)
 
   topDomains.forEach(({ domainKey }) => {
     let tierIndex = TIER_ORDER.indexOf(tierSlugForPct(result.categoryPct[domainKey]));
@@ -2288,6 +2327,7 @@ function renderRecommendations(result, progress, companyFocus){
     const course = CATALOG[courseId];
     if (!course || isCourseComplete(progress, courseId)) return; // fully done, nothing further to recommend here
 
+    picked.push(courseId);
     const a = document.createElement('a');
     a.className = 'rec-chip';
     a.href = '/lesson?course=' + courseId + '&v=' + CONTENT_VERSION;
@@ -2298,6 +2338,89 @@ function renderRecommendations(result, progress, companyFocus){
   });
 
   if (chips.children.length > 0) banner.style.display = 'block';
+  return picked;
+}
+
+/* The top of the page, "Pick up where you left off": the course in progress (and the lesson to open next), the
+   next recommended course (or the assessment, before there is one), and the newest saved tools. The choices are
+   made in learning-home-core.js. */
+function renderHome(user, progress, assessmentResult, recommended, assessmentUrl){
+  const H = window.LearningHomeCore;
+  if (!H) return;
+  const esc = (t) => String(t).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  const href = (c) => '/lesson?course=' + encodeURIComponent(c.courseId) + '&lesson=' + c.next + '&v=' + CONTENT_VERSION;
+  const ago = (iso) => { const d = daysSince(iso); return d === Infinity ? '' : d <= 0 ? 'today' : d === 1 ? 'yesterday' : d + ' days ago'; };
+  const area = (c) => (DOMAINS[c.domain] ? DOMAINS[c.domain].label : '');
+  const bar = (c) => '<div class="home-bar" role="img" aria-label="' + c.done + ' of ' + c.total + ' lessons done"><span style="width:' + c.pct + '%"></span></div>';
+  const go = (url, label, more) => '<div class="home-go"><a class="btn btn-primary btn-gradient" href="' + esc(url) + '">' + esc(label) + '</a>' + (more || '') + '</div>';
+  const courseBody = (eyebrow, c, line) => '<span class="eyebrow">' + eyebrow + '</span><h2>' + esc(c.title) + '</h2>' +
+    '<p>' + line + '</p>' + (c.done ? bar(c) : '') +
+    go(href(c), (c.done ? 'Continue with lesson ' : 'Start lesson ') + c.next + ' →');
+
+  const resume = H.resume(progress, CATALOG);
+  const first = resume || (assessmentResult ? H.upNext(recommended, progress, CATALOG, '') : null);
+  const next = assessmentResult ? H.upNext(recommended, progress, CATALOG, first && first.courseId) : null;
+
+  document.getElementById('homeHello').textContent = H.greeting(user.displayName, new Date().getHours());
+  document.getElementById('homeSub').textContent = resume ? 'Pick up where you left off, or see what is next for you.'
+    : assessmentResult ? 'Here is the best place to start, from your assessment.' : 'Start with the skill assessment, and we will build your course plan.';
+
+  const a = document.getElementById('homeResume');
+  if (resume){
+    const when = ago(resume.updatedAt);
+    a.innerHTML = courseBody('Continue where you left off', resume, 'Lesson ' + resume.next + ' of ' + resume.total + ' is next. ' + resume.done + ' of ' + resume.total + ' lessons done' + (when ? ', last studied ' + when : '') + '.');
+  } else if (first){
+    a.innerHTML = courseBody('Start here', first, 'Your best first course: ' + esc(area(first)) + ' is where you have the most to gain. ' + first.total + ' short lessons.');
+  } else if (!assessmentResult){
+    a.innerHTML = '<span class="eyebrow">Start here</span><h2>Find your starting point</h2><p>A short skill assessment shows your strengths across seven areas and builds a course plan around your gaps.</p>' +
+      go(assessmentUrl, 'Take the assessment →');
+  } else {
+    a.innerHTML = '<span class="eyebrow">Your plan</span><h2>You have finished every course in your plan</h2><p>Great work. Browse all the courses, or retake the assessment to see how far you have come.</p>' +
+      go(assessmentUrl, 'Retake the assessment →');
+  }
+
+  const b = document.getElementById('homeNext');
+  if (next){
+    b.innerHTML = courseBody('Up next for you', next, 'Recommended from your assessment, in ' + esc(area(next)) + '. ' + (next.done ? next.done + ' of ' + next.total + ' lessons done.' : next.total + ' short lessons.'));
+  } else if (!assessmentResult && resume){
+    b.innerHTML = '<span class="eyebrow">Up next for you</span><h2>Get a personal course plan</h2><p>Take the skill assessment and we will recommend what to learn next, starting with your biggest gaps.</p>' +
+      go(assessmentUrl, 'Take the assessment →');
+  } else {
+    b.innerHTML = '<span class="eyebrow">Explore</span><h2>Browse every course</h2><p>Seven skill areas, each at four levels, from limited to advanced experience. Pick any course to begin.</p>' +
+      '<div class="home-go"><a class="home-out" href="#courses" id="homeBrowse">See the courses ↓</a></div>';
+    const link = document.getElementById('homeBrowse');
+    link.addEventListener('click', (e) => { e.preventDefault(); if (assessmentResult) setCatalogView('all'); const h = document.getElementById('courses'); h.scrollIntoView({ behavior: 'smooth' }); h.focus({ preventScroll: true }); });
+  }
+
+  renderHomeTools(user);
+  document.getElementById('homeBand').hidden = false;
+}
+
+async function renderHomeTools(user){
+  const box = document.getElementById('homeTools'), T = window.SavedToolsCore, H = window.LearningHomeCore;
+  const esc = (t) => String(t).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  const head = '<span class="eyebrow">Your toolkit</span><h2>My saved tools</h2>';
+  box.innerHTML = head + '<p>Loading…</p>';
+  let list = null;
+  try {
+    const snap = await getDocs(query(collection(db, 'savedTools'), where('uid', '==', user.uid)));
+    list = snap.docs.map(d => Object.assign({ id: d.id }, d.data()));
+  } catch (err){ console.error('Could not load saved tools:', err); }
+  if (list === null){
+    box.innerHTML = head + '<p>Your scorecards, decision matrices and impact scores.</p><div class="home-go"><a class="more" href="/my-tools">Open My saved tools →</a></div>';
+    return;
+  }
+  if (!list.length){
+    box.innerHTML = head + '<p>Prioritize features, rank AI use cases, decide build, buy or partner, or score your roadmap with the free tools. Save one and it waits for you here.</p>' +
+      '<div class="home-go"><a class="home-out" href="https://www.productadvisory.co/toolkits">Try a free tool</a><a class="more" href="/my-tools">My saved tools →</a></div>';
+    return;
+  }
+  const items = H.recentSaved(list, 3).map(d => {
+    const tool = T.TOOLS[d.tool] ? T.TOOLS[d.tool].short : 'Tool';
+    const when = d.updatedAt && d.updatedAt.toDate ? ' · ' + d.updatedAt.toDate().toLocaleDateString(undefined, { day: 'numeric', month: 'short' }) : '';
+    return '<li><a href="/my-tools?view=' + encodeURIComponent(d.id) + '"><b>' + esc(T.displayTitle(d)) + '</b><small>' + esc(tool + when) + '</small></a></li>';
+  }).join('');
+  box.innerHTML = head + '<ul class="home-saved">' + items + '</ul><div class="home-go"><a class="more" href="/my-tools">All saved tools (' + list.length + ') →</a></div>';
 }
 </script>
 <script>document.getElementById("footerYear").textContent = new Date().getFullYear();</script>

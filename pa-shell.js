@@ -18,7 +18,8 @@
   // The assessment is reached from the dashboard (first launch, or Retake) and the Toolkits Roadmap
   // from www.productadvisory.co or the Profile menu, so the header stays this short.
   var LINKS = [
-    ["/lms-dashboard", "My Learning"]
+    ["/lms-dashboard", "My Learning"],
+    ["/my-tools", "My saved tools"]
   ];
 
   // This page's clean address (/lms-dashboard, / for the assessment), whether it was opened as /lms-dashboard or /lms-dashboard.html.

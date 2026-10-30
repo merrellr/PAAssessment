@@ -343,6 +343,20 @@ manual review — it holds no uid and isn't read by the app.
 - Tests: `tests/notify-core.test.mjs`, `tests/notify-server.test.mjs`, and "profile goals", "email settings", "last
   lesson" and "dashboard" in the UI runner.
 
+## My Learning home and My saved tools
+
+- **Pick up where you left off** (top of `lms-dashboard.html`): a greeting, the course in progress with the lesson
+  to open next, the next recommended course (or the assessment, before there is one), and the newest saved tools.
+  The choices are made in `learning-home-core.js` (tested in `tests/learning-home.test.mjs`).
+- **My saved tools** (`my-tools.html`, linked in the header): the free tools on www.productadvisory.co have a
+  "Save to my account" button that hands the work here; it is stored in `savedTools/{id}` (owner only, see
+  `firestore.rules`). After saving, people stay in Learning on the saved tool (`my-tools?view=<id>`), which shows
+  its results as tables, with Download CSV, Make a copy, Rename, Delete, and **Edit in the tool** (back to www,
+  remembering the copy). The results are drawn by the tool's own scoring file loaded from
+  `https://www.productadvisory.co/assets/js/<tool>-core.js` (its `decode` and `toCSV`), so the sums live in one
+  place. The list has filters by tool, search and order once there are more than two. Logic: `saved-tools-core.js`
+  (tested in `tests/saved-tools.test.mjs`).
+
 ## My badges
 
 My Profile → **My Badges** (`/profile#badges`, also in both Profile menus) shows every badge, how many are
