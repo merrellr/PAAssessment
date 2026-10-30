@@ -412,7 +412,7 @@
 
   <div class="card" id="deleteCard" style="border-color:var(--warn);">
     <h2 style="color:var(--warn);">Delete account</h2>
-    <p>This permanently deletes your sign-in, your course progress and assessment results, and the records we keep about you in our results spreadsheet. It can't be undone. You're welcome to take the assessment again later with a new account.</p>
+    <p>This permanently deletes your sign-in, your course progress and assessment results, your saved tools, and the records we keep about you in our results spreadsheet. It can't be undone. You're welcome to take the assessment again later with a new account.</p>
     <input class="text-input" type="password" id="deletePassword" placeholder="Current password" style="display:none;" autocomplete="current-password">
     <label class="profile-field-label" for="deleteConfirmText">Type DELETE to confirm</label>
     <input class="text-input" type="text" id="deleteConfirmText" placeholder="DELETE" autocomplete="off">
@@ -476,6 +476,23 @@ async function removeToolActivity(user, database){
     await batch.commit();
   }
   await deleteDoc(doc(database, 'toolSuggestions', user.uid));
+}
+
+/* Saved tools (my-tools.html) belong to the person, so they go with the account. */
+async function removeSavedTools(user, database){
+  const snap = await getDocs(query(collection(database, 'savedTools'), where('uid', '==', user.uid)));
+  for (const d of snap.docs) await deleteDoc(doc(database, 'savedTools', d.id));
+}
+
+/* Combining two accounts moves the closing account's saved tools to the main one. Each copy's id comes from the
+   original's, so trying again after a failure doesn't make doubles. */
+async function moveSavedTools(mainDb, mainUser, closeDb, closeUser){
+  const theirs = await getDocs(query(collection(closeDb, 'savedTools'), where('uid', '==', closeUser.uid)));
+  for (const d of theirs.docs){
+    const ref = doc(mainDb, 'savedTools', 'm' + d.id), x = d.data();
+    if ((await getDoc(ref)).exists()) continue;
+    await setDoc(ref, { uid: mainUser.uid, tool: x.tool, title: x.title || '', summary: x.summary || '', data: x.data, createdAt: serverTimestamp(), updatedAt: serverTimestamp() });
+  }
 }
 
 let currentUser = null;
@@ -1081,6 +1098,8 @@ async function combineInto(mainDb, mainUser, closeDb, closeUser){
       await batch.commit().catch(() => { /* a tool no longer open to votes */ });
     }
   } catch (err){ console.error('Could not move the Tool Roadmap votes:', err); /* the votes are a nice-to-have */ }
+  try { await moveSavedTools(mainDb, mainUser, closeDb, closeUser); }
+  catch (err){ console.error('Could not move the saved tools:', err); throw new Error("We couldn't move your saved tools just now, so nothing has been deleted. Please try again in a minute."); }
 }
 async function combineAccounts(){
   const other = otherAuth.currentUser;
@@ -1409,7 +1428,7 @@ function requestSheetDeletion(idToken){
    whose records were combined into the main one in "combine two accounts"). database and user may be the other account's. Each step stops
    everything if it fails, with the reason as the error's message, and every step is safe to repeat:
    1. blank their name and email on any company's copy (the results stay with the company);
-   2. withdraw their Tool Roadmap votes and suggestion;
+   2. withdraw their Tool Roadmap votes and suggestion, and delete their saved tools;
    3. remove their rows from the results spreadsheet (needs them still signed in);
    4. delete their progress record. */
 async function closeRecords(database, user){
@@ -1417,6 +1436,8 @@ async function closeRecords(database, user){
   catch (err){ console.error('Could not remove the name from the company copy:', err); throw new Error("We couldn't remove your name from the copy your company holds, so nothing has been deleted. Please try again in a minute."); }
   try { await removeToolActivity(user, database); }
   catch (err){ console.error('Could not remove the Tool Roadmap votes:', err); throw new Error("We couldn't remove your Tool Roadmap votes, so nothing has been deleted. Please try again in a minute."); }
+  try { await removeSavedTools(user, database); }
+  catch (err){ console.error('Could not remove the saved tools:', err); throw new Error("We couldn't remove your saved tools, so nothing has been deleted. Please try again in a minute."); }
   let sheetResult = null;
   try { sheetResult = await requestSheetDeletion(await user.getIdToken(true)); } catch (err){ /* a failed attempt */ }
   if (!sheetResult || sheetResult.ok !== true) throw new Error("We couldn't remove your records from our results spreadsheet, so nothing has been deleted. Please try again in a minute.");

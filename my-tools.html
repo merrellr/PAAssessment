@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My saved tools — Product Advisory Learning</title>
+<link rel="icon" href="/images/icons/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="/images/icons/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="/images/icons/apple-touch-icon.png">
+<meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@600&family=Lato:ital,wght@0,300;0,400;0,700;0,900;1,400&display=swap" rel="stylesheet">
+<script src="pa-prefs.js"></script>
+<style>
+  :root{
+    --navy: #1A4584; --navy-deep: #12305e; --gray: #9AA3AD; --cyan: #35C2E8;
+    --bg: #F5F8FB; --surface: #FFFFFF; --ink: #16213E; --ink-soft: #4B5768; --line: #E3E9F0;
+    --warn: #C0622A; --ok: #2E8B57;
+  }
+  *{ box-sizing: border-box; }
+  body{ margin:0; background: var(--bg); font-family:var(--sans); color: var(--ink); }
+  .wrap{ max-width: 1180px; margin: 0 auto; padding: 24px 16px 56px; }
+  /* Laptop and wider: a compact grid of tools beside a column (sign-in, Request a tool) that stays in view, so the
+     whole list fits on a 13-inch screen. Narrower: one column, the tools first. */
+  /* the vote count sits in the card's corner, so the title, status and description use the full width */
+  .notice:empty, #errorLine:empty{ margin: 0 !important; }
+  .brand-header{ display:flex; align-items:center; gap:9px; padding: 0 0 14px; text-decoration:none; }
+  .brand-word{ font-family:var(--display); font-weight:700; font-size: 1.1875rem; line-height:1.3; color: var(--navy-deep); }
+  .brand-accent-bar{ height: 3px; background: linear-gradient(90deg, var(--navy) 0%, var(--cyan) 100%); border-radius: 2px; margin-bottom: 24px; }
+  .card{ background: var(--surface); border-radius: 16px; border: 1px solid var(--line); padding: 24px; box-shadow: 0 1px 2px rgba(22,33,62,0.04), 0 12px 32px rgba(22,33,62,0.06); margin-bottom: 20px; }
+  .btn-out{ display:inline-flex; align-items:center; font-family:var(--display); font-weight:600; font-size:0.875rem; border-radius: 8px; padding: 9.5px 16px; border: 1.5px solid var(--line); background:var(--surface); color: var(--navy); text-decoration:none; }
+  .btn-out:hover{ border-color: var(--cyan); }
+  .eyebrow{ display:block; font-size:0.6875rem; font-weight:600; letter-spacing:0.06em; text-transform:uppercase; color: var(--cyan); margin-bottom: 6px; }
+  h1{ font-family:var(--display); font-size: 1.5rem; margin: 0 0 8px; color: var(--navy-deep); line-height: 1.2; }
+  h2{ font-family:var(--display); font-size: 1rem; margin: 0 0 6px; color: var(--navy-deep); }
+  p{ line-height:1.55; color: var(--ink-soft); font-size: 0.875rem; margin: 0 0 10px; }
+  a{ color: var(--navy); }
+  .small{ font-size: 0.7812rem; color: var(--gray); }
+
+  .status-bar{ display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap; font-size: 0.8125rem; color: var(--ink-soft); margin-bottom: 16px; }
+  .linklike{ background:none; border:none; padding:0; font:inherit; color: var(--navy); text-decoration: underline; cursor:pointer; }
+
+  .tabs{ display:flex; border-bottom: 1.5px solid var(--line); margin: 14px 0 16px; }
+  .tab{ flex:1; text-align:center; padding: 9px 0; font-family:var(--display); font-weight:600; font-size:0.875rem; color: var(--gray); cursor:pointer; border:none; background:none; border-bottom: 2.5px solid transparent; }
+  .tab.active{ color: var(--navy); border-bottom-color: var(--navy); }
+  .text-input{ width:100%; padding: 12px 14px; margin-bottom: 12px; border: 1.5px solid var(--line); border-radius: 9px; font-family:var(--sans); font-size: 0.9062rem; background:var(--surface); color: var(--ink); }
+  textarea.text-input{ resize: vertical; min-height: 84px; line-height: 1.5; }
+  .text-input:focus{ outline:none; border-color: var(--cyan); }
+  .field-error{ font-size: 0.7812rem; color: var(--warn); margin: -4px 0 12px 2px; min-height: 1px; }
+  .notice{ font-size: 0.8125rem; color: var(--ok); margin: 0 0 10px; min-height: 1px; }
+  .check-row{ display:flex; align-items:flex-start; gap:8px; font-size:0.8125rem; color: var(--ink-soft); margin: 10px 0 14px; cursor:pointer; line-height: 1.5; }
+  .check-row input{ margin-top: 3px; }
+  .divider{ text-align:center; font-size:0.7812rem; color: var(--gray); margin: 14px 0; }
+
+  button.btn{ font-family:var(--display); font-weight:600; font-size:0.875rem; border-radius: 8px; padding: 11px 18px; border: none; cursor:pointer; }
+  button.btn.block{ width:100%; }
+  button.btn.btn-primary{ background: linear-gradient(90deg, var(--navy) 0%, var(--primary-strong) 100%); color:var(--btn-ink); }
+  button.btn.btn-primary:hover{ opacity:0.92; }
+  button.btn.btn-ghost{ background:var(--surface); color: var(--ink); border: 1.5px solid var(--line); }
+  button.btn.btn-ghost:hover{ border-color: var(--cyan); }
+  button.btn.btn-small{ padding: 8px 14px; font-size: 0.8125rem; }
+  button.btn:disabled{ opacity:0.55; cursor: default; }
+  button.btn:focus-visible, .text-input:focus-visible, .tab:focus-visible{ outline: 2px solid var(--cyan); outline-offset: 2px; }
+  a.btn-link{ display:inline-block; text-align:center; font-family:var(--display); font-weight:600; font-size:0.875rem; border-radius:8px; padding:11px 18px; text-decoration:none; background: linear-gradient(90deg, var(--navy) 0%, var(--primary-strong) 100%); color:var(--btn-ink); }
+
+  .banner{ border:1px solid var(--note-line); background:var(--note-bg); color:var(--note-ink); border-radius: 12px; padding: 14px 16px; font-size: 0.8125rem; line-height: 1.5; margin-bottom: 20px; }
+  .banner p{ color: inherit; font-size: 0.8125rem; }
+  .banner .row{ display:flex; gap:10px; flex-wrap:wrap; margin-top: 8px; }
+  .cta{ border:1px solid var(--tint-2); background:var(--tint); border-radius: 12px; padding: 16px 18px; margin-bottom: 20px; }
+  .cta h2{ margin-bottom: 4px; }
+
+  .pill{ display:inline-block; font-size: 0.7188rem; font-weight:600; padding: 2px 9px; border-radius: 20px; background:var(--tint); color: var(--navy); white-space: nowrap; }
+  /* My saved tools */
+  .page{ max-width: 980px; margin: 0 auto; }
+  .head{ display:flex; flex-wrap:wrap; justify-content:space-between; align-items:flex-end; gap: 12px 20px; }
+  .head p{ margin-bottom: 0; max-width: 62ch; }
+  .new-tools{ display:flex; flex-wrap:wrap; gap: 8px; margin-top: 14px; }
+  .new-tools a{ font-size: 0.8125rem; font-weight: 600; text-decoration:none; color: var(--navy); background: var(--surface); border: 1.5px solid var(--line); border-radius: 999px; padding: 6px 12px; }
+  .new-tools a:hover, .new-tools a:focus-visible{ border-color: var(--cyan); }
+  .pending{ border: 2px solid var(--cyan); }
+  .pending .row{ display:flex; flex-wrap:wrap; gap: 10px; margin-top: 12px; }
+  .pending-what{ background: var(--bg); border-radius: 10px; padding: 12px 14px; margin-top: 10px; }
+  .pending-what b{ display:block; color: var(--navy-deep); }
+  .layout{ display:grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 20px; align-items: start; }
+  .layout.signed-in{ grid-template-columns: minmax(0, 1fr); }
+  @media (max-width: 860px){ .layout{ grid-template-columns: 1fr; } }
+  #savedList{ display:grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 14px; }
+  .saved{ background: var(--surface); border:1px solid var(--line); border-radius: 14px; padding: 16px; display:flex; flex-direction:column; gap: 6px; }
+  .saved.just-saved{ border-color: var(--cyan); box-shadow: 0 0 0 3px rgba(53,194,232,0.3); }
+  .saved .pill{ align-self:flex-start; }
+  .saved h3{ font-family: var(--display); font-size: 1rem; color: var(--navy-deep); margin: 2px 0 0; overflow-wrap:anywhere; }
+  .saved .sum{ font-size: 0.8125rem; color: var(--ink-soft); margin: 0; }
+  .saved .when{ font-size: 0.75rem; color: var(--gray); margin: 0; }
+  .saved .acts{ display:flex; flex-wrap:wrap; gap: 8px; margin-top: auto; padding-top: 8px; align-items:center; }
+  .saved .acts a.btn-link{ padding: 8px 14px; font-size: 0.8125rem; }
+  .saved .rename{ display:flex; gap: 8px; }
+  .saved .rename .text-input{ margin: 0; padding: 8px 10px; }
+  .pill{ display:inline-block; font-size: 0.7188rem; font-weight:600; padding: 2px 9px; border-radius: 20px; background:var(--tint); color: var(--navy); white-space: nowrap; }
+  .empty-box{ text-align:center; padding: 28px 16px; }
+</style>
+<link rel="stylesheet" href="pa-theme.css">
+<script src="saved-tools-core.js"></script>
+<script src="analytics.js"></script>
+</head>
+<body>
+<script src="pa-shell.js"></script>
+<div class="wrap page">
+  <a href="/lms-dashboard" class="brand-header">
+    <svg width="28" height="28" viewBox="0 0 40 40" aria-hidden="true">
+      <polygon points="20,3 35,11.5 35,28.5 20,37 5,28.5 5,11.5" fill="#1A4584"/>
+      <polygon points="20,10 29,15 29,25 20,30 11,25 11,15" fill="none" stroke="#35C2E8" stroke-width="1.5"/>
+    </svg>
+    <div>
+      <div style="font-family:var(--sans); font-weight:600; font-size:0.6562rem; letter-spacing:0.06em; color:var(--gray); line-height:1;">PRODUCT ADVISORY LEARNING</div>
+      <div class="brand-word">My saved tools</div>
+    </div>
+  </a>
+  <div class="brand-accent-bar"></div>
+
+  <div class="card">
+    <div class="head">
+      <div>
+        <span class="eyebrow">Your toolkit</span>
+        <h1>My saved tools</h1>
+        <p>Scorecards, AI use case lists, build, buy or partner decisions and impact scores you've saved from the free toolkits. Open one to keep working on it, make a copy to try another version, or start a new one.</p>
+      </div>
+    </div>
+    <nav class="new-tools" id="newTools" aria-label="Start a new tool"></nav>
+    <div class="status-bar" id="statusBar" style="display:none; margin:14px 0 0;">
+      <span id="signedInAs"></span>
+      <button class="linklike" id="signOutBtn" type="button">Sign out</button>
+    </div>
+  </div>
+
+  <div class="notice" id="notice" role="status"></div>
+  <div class="field-error" id="errorLine" role="alert" style="margin:0 0 12px;"></div>
+
+  <!-- Work handed over by a tool's "Save to my account" button, waiting for the person to save it -->
+  <div class="card pending" id="pendingCard" style="display:none;">
+    <h2 id="pendingTitle" tabindex="-1">Save this to your account</h2>
+    <div class="pending-what"><span class="pill" id="pendingTool"></span><b id="pendingName"></b><p class="small" id="pendingSummary" style="margin:4px 0 0;"></p></div>
+    <p class="small" id="pendingHint" style="margin-top:10px;"></p>
+    <div class="row" id="pendingActions"></div>
+  </div>
+
+  <div class="layout" id="layout">
+    <section aria-labelledby="listTitle">
+      <h2 id="listTitle" style="margin:4px 0 12px;">Saved</h2>
+      <div id="savedList"><p class="small">Loading…</p></div>
+    </section>
+
+    <!-- Sign in or create an account (shown when signed out) -->
+    <aside class="card" id="authCard" style="display:none;" aria-label="Log in or create an account">
+      <h2 id="authTitle" tabindex="-1">Log in to see your saved tools</h2>
+      <p id="authText">Your saved tools live in your free Product Advisory Learning account, the same one you use for the skill assessment and courses.</p>
+      <div class="tabs">
+        <button class="tab active" id="tabLogin" type="button">Log in</button>
+        <button class="tab" id="tabSignup" type="button">Create account</button>
+      </div>
+      <input class="text-input" type="text" id="authName" placeholder="Full name" autocomplete="name" style="display:none;">
+      <input class="text-input" type="email" id="authEmail" placeholder="Email address" autocomplete="email">
+      <input class="text-input" type="password" id="authPassword" placeholder="Password" autocomplete="current-password">
+      <input class="text-input" type="password" id="authPasswordConfirm" placeholder="Confirm password" autocomplete="new-password" style="display:none;">
+      <label class="check-row" id="termsRow" style="display:none;">
+        <input type="checkbox" id="agreeTerms">
+        <span>I agree to the <a href="https://www.productadvisory.co/terms-of-use" target="_blank" rel="noopener">Terms of Use</a> and <a href="https://www.productadvisory.co/privacy-policy" target="_blank" rel="noopener">Privacy Policy</a>.</span>
+      </label>
+      <div class="field-error" id="authError"></div>
+      <button class="btn btn-primary block" id="authSubmit" type="button">Log in</button>
+      <div class="divider">or</div>
+      <button class="btn btn-ghost block g-btn" id="googleBtn" type="button"><svg class="g-logo" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path fill="#4285F4" d="M23.52 12.27c0-.85-.08-1.67-.22-2.45H12v4.64h6.47a5.53 5.53 0 0 1-2.4 3.63v3h3.88c2.27-2.09 3.57-5.17 3.57-8.82z"/><path fill="#34A853" d="M12 24c3.24 0 5.95-1.07 7.94-2.91l-3.88-3c-1.08.72-2.45 1.15-4.06 1.15-3.13 0-5.78-2.11-6.73-4.96H1.27v3.11A12 12 0 0 0 12 24z"/><path fill="#FBBC05" d="M5.27 14.28A7.2 7.2 0 0 1 4.89 12c0-.79.14-1.56.38-2.28V6.61H1.27A12 12 0 0 0 0 12c0 1.94.46 3.77 1.27 5.39l4-3.11z"/><path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.44-3.44C17.94 1.19 15.24 0 12 0 7.31 0 3.26 2.69 1.27 6.61l4 3.11C6.22 6.86 8.87 4.75 12 4.75z"/></svg><span id="googleLabel">Continue with Google</span></button>
+      <p class="small" style="margin-top:12px;">Free, and private: only you can see what you save. You can delete anything, or your whole account, at any time.</p>
+    </aside>
+  </div>
+
+  <div class="site-foot" style="margin-top:28px; padding:20px 0; border-top:1px solid var(--line); text-align:center; font-size:0.75rem; color:var(--gray);">
+    © <span id="footerYear"></span> Product Advisory, LLC. All rights reserved. &nbsp;·&nbsp;
+    <a href="https://www.productadvisory.co/privacy-policy" target="_blank" rel="noopener" style="color:var(--gray); text-decoration:underline;">Privacy Policy</a> &nbsp;·&nbsp;
+    <a href="https://www.productadvisory.co/terms-of-use" target="_blank" rel="noopener" style="color:var(--gray); text-decoration:underline;">Terms of Use</a> &nbsp;·&nbsp;
+    <a href="#" data-cookie-settings style="color:var(--gray); text-decoration:underline;">Cookie settings</a>
+  </div>
+</div>
+<script>document.getElementById("footerYear").textContent = new Date().getFullYear();</script>
+
+<script type="module">
+const firebaseConfig = {
+  apiKey: "AIzaSyAcECtS5c6WeOhKlwRK-LYFE47npbuq_eU",
+  authDomain: "auth.productadvisory.co",
+  projectId: "product-advisory-lms",
+  storageBucket: "product-advisory-lms.firebasestorage.app",
+  messagingSenderId: "1081134406437",
+  appId: "1:1081134406437:web:72e28604d093219e7698cc"
+};
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
+import {
+  getAuth, onAuthStateChanged, signOut, createUserWithEmailAndPassword, signInWithEmailAndPassword,
+  GoogleAuthProvider, signInWithPopup, getAdditionalUserInfo, updateProfile, sendEmailVerification
+} from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
+import { withTwoStep, twoStepError } from './two-step.js';
+import {
+  getFirestore, doc, getDoc, getDocs, setDoc, addDoc, deleteDoc, collection, query, where, serverTimestamp
+} from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+const $ = (id) => document.getElementById(id);
+const C = SavedToolsCore;
+const PENDING_KEY = 'pa_pending_save';
+
+function el(tag, attrs, ...kids){
+  const node = document.createElement(tag);
+  Object.keys(attrs || {}).forEach(k => {
+    const v = attrs[k];
+    if (v === null || v === undefined) return;
+    if (k === 'class') node.className = v;
+    else if (k === 'text') node.textContent = v;
+    else if (k.slice(0, 2) === 'on') node.addEventListener(k.slice(2), v);
+    else node.setAttribute(k, v);
+  });
+  kids.forEach(c => { if (c !== null && c !== undefined) node.append(c.nodeType ? c : document.createTextNode(String(c))); });
+  return node;
+}
+const track = (name, tool) => { try { if (window.gtag) window.gtag('event', name, { tool }); } catch (e) { /* no analytics */ } };
+
+let currentUser = null;
+let saved = [];          // [{ id, tool, title, summary, data, updatedAt }]
+let pending = null;      // work handed over by a tool, waiting to be saved
+let justSaved = '';      // the id to highlight after a save
+let signUpMode = false;
+
+/* ------------------------------------------------- the work a tool handed over */
+// A tool's "Save to my account" opens this page with the work in the #. It is kept for this tab (so it survives
+// signing in or creating an account) and the # is cleared, so a reload or a shared address carries nothing.
+(function takeHandoff(){
+  const h = C.parseHandoff(location.hash);
+  if (h){
+    try { sessionStorage.setItem(PENDING_KEY, JSON.stringify(h)); } catch (e) { /* storage off: keep it in memory */ }
+    pending = h;
+    history.replaceState(null, '', location.pathname);
+    return;
+  }
+  try { const s = sessionStorage.getItem(PENDING_KEY); pending = s ? JSON.parse(s) : null; } catch (e) { pending = null; }
+})();
+function clearPending(){ pending = null; try { sessionStorage.removeItem(PENDING_KEY); } catch (e) { /* storage off */ } }
+
+/* ------------------------------------------------------------ start a new tool */
+Object.keys(C.TOOLS).forEach(k => $('newTools').appendChild(el('a', { href: C.TOOLS[k].url }, '+ ' + C.TOOLS[k].name)));
+
+/* ---------------------------------------------------------------- loading */
+async function loadSaved(){
+  saved = [];
+  if (!currentUser) return;
+  try {
+    const snap = await getDocs(query(collection(db, 'savedTools'), where('uid', '==', currentUser.uid)));
+    saved = C.sortNewest(snap.docs.map(d => Object.assign({ id: d.id }, d.data())));
+  } catch (err){
+    console.error('Could not load your saved tools:', err);
+    $('errorLine').textContent = "We couldn't load your saved tools just now. Please refresh the page.";
+  }
+}
+
+/* ---------------------------------------------------------------- saving */
+async function savePending(asNew){
+  if (!pending || !currentUser) return;
+  $('errorLine').textContent = '';
+  const btns = $('pendingActions').querySelectorAll('button');
+  btns.forEach(b => { b.disabled = true; });
+  const rec = C.record(currentUser.uid, pending);
+  try {
+    let id = '';
+    if (pending.doc && !asNew){
+      const ref = doc(db, 'savedTools', pending.doc);
+      const old = await getDoc(ref).catch(() => null);
+      if (old && old.exists() && old.data().uid === currentUser.uid){
+        await setDoc(ref, Object.assign({}, rec, { createdAt: old.data().createdAt, updatedAt: serverTimestamp() }));
+        id = pending.doc;
+      }
+    }
+    if (!id){
+      const ref = await addDoc(collection(db, 'savedTools'), Object.assign({}, rec, { createdAt: serverTimestamp(), updatedAt: serverTimestamp() }));
+      id = ref.id;
+    }
+    track(pending.doc && !asNew ? 'tool_save_update' : 'tool_save_new', pending.tool);
+    const back = C.openUrl(pending.tool, pending.data, id), name = C.TOOLS[pending.tool].name;
+    clearPending();
+    justSaved = id;
+    $('notice').textContent = '';
+    $('notice').append('Saved to your account. ', el('a', { href: back }, 'Back to the ' + name));
+    await loadSaved();
+    render();
+  } catch (err){
+    console.error('Could not save:', err);
+    $('errorLine').textContent = "That didn't save just now. Please try again.";
+    btns.forEach(b => { b.disabled = false; });
+  }
+}
+
+/* ---------------------------------------------------------------- showing */
+function renderPending(){
+  const card = $('pendingCard');
+  if (!pending){ card.style.display = 'none'; return; }
+  const tool = C.TOOLS[pending.tool];
+  $('pendingTool').textContent = tool.name;
+  $('pendingName').textContent = C.displayTitle(pending);
+  $('pendingSummary').textContent = pending.summary || '';
+  const acts = $('pendingActions');
+  acts.textContent = '';
+  const existing = pending.doc && saved.filter(s => s.id === pending.doc)[0];
+  if (!currentUser){
+    $('pendingTitle').textContent = 'Log in or create a free account to save this';
+    $('pendingHint').textContent = 'It is kept for you while you sign in. Nothing is saved until you choose Save.';
+  } else if (existing){
+    $('pendingTitle').textContent = 'Update your saved copy?';
+    $('pendingHint').textContent = 'You opened "' + C.displayTitle(existing) + '" from here. Update it, or keep that one as it is and save this as a new copy.';
+    acts.append(el('button', { class: 'btn btn-primary', type: 'button', onclick: () => savePending(false) }, 'Update my saved copy'),
+                el('button', { class: 'btn btn-ghost', type: 'button', onclick: () => savePending(true) }, 'Save as a new copy'));
+  } else {
+    $('pendingTitle').textContent = 'Save this to your account';
+    $('pendingHint').textContent = 'Only you can see it. Open it any time to keep working.';
+    acts.append(el('button', { class: 'btn btn-primary', type: 'button', onclick: () => savePending(true) }, 'Save'));
+  }
+  if (currentUser) acts.append(el('button', { class: 'btn btn-ghost', type: 'button', onclick: () => { clearPending(); render(); } }, "Don't save"));
+  card.style.display = 'block';
+}
+
+function when(d){
+  if (!d.updatedAt || !d.updatedAt.toDate) return 'Saved just now';
+  return 'Saved ' + d.updatedAt.toDate().toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' });
+}
+
+function card(d){
+  const tool = C.TOOLS[d.tool] || { name: 'Tool' };
+  const box = el('article', { class: 'saved' + (d.id === justSaved ? ' just-saved' : ''), 'data-id': d.id });
+  const title = el('h3', {}, C.displayTitle(d));
+  box.append(el('span', { class: 'pill' }, tool.name), title);
+  if (d.summary) box.append(el('p', { class: 'sum' }, d.summary));
+  box.append(el('p', { class: 'when' }, when(d)));
+  const acts = el('div', { class: 'acts' });
+  acts.append(el('a', { class: 'btn-link', href: C.openUrl(d.tool, d.data, d.id) }, 'Open'));
+  acts.append(el('button', { class: 'btn btn-ghost btn-small', type: 'button', onclick: () => copy(d) }, 'Make a copy'));
+  acts.append(el('button', { class: 'btn btn-ghost btn-small', type: 'button', onclick: () => rename(d, box, title) }, 'Rename'));
+  acts.append(el('button', { class: 'linklike', type: 'button', 'aria-label': 'Delete ' + C.displayTitle(d), onclick: () => remove(d) }, 'Delete'));
+  box.append(acts);
+  return box;
+}
+
+function renderList(){
+  const list = $('savedList');
+  list.textContent = '';
+  if (!currentUser){ list.append(el('p', { class: 'small' }, 'Log in to see the tools you have saved.')); return; }
+  if (!saved.length){
+    list.append(el('div', { class: 'card empty-box' },
+      el('h3', { style: 'margin:0 0 6px; font-family:var(--display); color:var(--navy-deep);' }, 'Nothing saved yet'),
+      el('p', {}, 'Open any of the free tools above, then choose "Save to my account" to keep it here.')));
+    return;
+  }
+  saved.forEach(d => list.append(card(d)));
+}
+
+function render(){
+  const signedIn = !!currentUser;
+  $('authCard').style.display = signedIn ? 'none' : 'block';
+  $('layout').classList.toggle('signed-in', signedIn);
+  $('statusBar').style.display = signedIn ? 'flex' : 'none';
+  if (signedIn) $('signedInAs').textContent = 'Signed in as ' + (currentUser.email || currentUser.displayName || 'you');
+  if (!signedIn && pending){
+    $('authTitle').textContent = 'Log in or create a free account';
+    $('authText').textContent = 'Save your ' + C.TOOLS[pending.tool].name + ' to your free Product Advisory Learning account, and come back to it any time. The same account works for the skill assessment and courses.';
+    setMode(true);
+  }
+  renderPending();
+  renderList();
+}
+
+/* -------------------------------------------------- copy, rename and delete */
+async function copy(d){
+  $('errorLine').textContent = '';
+  try {
+    const rec = C.record(currentUser.uid, { tool: d.tool, title: C.copyTitle(C.displayTitle(d)), summary: d.summary, data: d.data });
+    const ref = await addDoc(collection(db, 'savedTools'), Object.assign(rec, { createdAt: serverTimestamp(), updatedAt: serverTimestamp() }));
+    justSaved = ref.id;
+    $('notice').textContent = 'Copied. Open the copy to try another version.';
+    track('tool_copy', d.tool);
+    await loadSaved(); render();
+  } catch (err){ console.error(err); $('errorLine').textContent = "That didn't copy just now. Please try again."; }
+}
+
+function rename(d, box, title){
+  if (box.querySelector('.rename')) return;
+  const input = el('input', { class: 'text-input', maxlength: '100', 'aria-label': 'New name' });
+  input.value = d.title || '';
+  const go = async () => {
+    const name = input.value.replace(/\s+/g, ' ').trim().slice(0, 100);
+    try {
+      await setDoc(doc(db, 'savedTools', d.id), Object.assign(C.record(currentUser.uid, Object.assign({}, d, { title: name })), { createdAt: d.createdAt, updatedAt: serverTimestamp() }));
+      justSaved = d.id;
+      await loadSaved(); render();
+    } catch (err){ console.error(err); $('errorLine').textContent = "That didn't rename just now. Please try again."; }
+  };
+  const form = el('div', { class: 'rename' }, input,
+    el('button', { class: 'btn btn-primary btn-small', type: 'button', onclick: go }, 'Save'),
+    el('button', { class: 'btn btn-ghost btn-small', type: 'button', onclick: () => { form.replaceWith(title); } }, 'Cancel'));
+  input.addEventListener('keydown', (e) => { if (e.key === 'Enter') go(); if (e.key === 'Escape') form.replaceWith(title); });
+  title.replaceWith(form);
+  input.focus(); input.select();
+}
+
+async function remove(d){
+  if (!window.confirm('Delete "' + C.displayTitle(d) + '"? This can\'t be undone.')) return;
+  try {
+    await deleteDoc(doc(db, 'savedTools', d.id));
+    $('notice').textContent = 'Deleted.';
+    track('tool_delete', d.tool);
+    await loadSaved(); render();
+  } catch (err){ console.error(err); $('errorLine').textContent = "That didn't delete just now. Please try again."; }
+}
+
+onAuthStateChanged(auth, async (user) => {
+  currentUser = user;
+  $('errorLine').textContent = '';
+  await loadSaved();
+  render();
+  if (user && pending) $('pendingTitle').focus();
+});
+
+/* ---------------------------------------------------- sign in / create account */
+function setMode(signUp){
+  signUpMode = signUp;
+  $('tabLogin').classList.toggle('active', !signUp);
+  $('tabSignup').classList.toggle('active', signUp);
+  $('authName').style.display = signUp ? 'block' : 'none';
+  $('authPasswordConfirm').style.display = signUp ? 'block' : 'none';
+  $('termsRow').style.display = signUp ? 'flex' : 'none';
+  $('authSubmit').textContent = signUp ? 'Create account' : 'Log in';
+  $('googleLabel').textContent = signUp ? 'Sign up with Google' : 'Continue with Google';
+  $('authPassword').setAttribute('autocomplete', signUp ? 'new-password' : 'current-password');
+  $('authError').textContent = '';
+}
+$('tabLogin').addEventListener('click', () => setMode(false));
+$('tabSignup').addEventListener('click', () => setMode(true));
+
+function friendlyAuthError(code){
+  const map = {
+    'auth/email-already-in-use': 'That email already has an account. Try logging in instead.',
+    'auth/invalid-email': 'That email address looks invalid.',
+    'auth/weak-password': 'Password should be at least 8 characters.',
+    'auth/wrong-password': 'Incorrect password.',
+    'auth/user-not-found': 'No account found with that email.',
+    'auth/invalid-credential': 'Incorrect email or password.',
+    'auth/popup-closed-by-user': ''
+  };
+  return code in map ? map[code] : 'Something went wrong. Please try again.';
+}
+
+$('authSubmit').addEventListener('click', async () => {
+  const email = $('authEmail').value.trim(), password = $('authPassword').value, errorEl = $('authError');
+  errorEl.textContent = '';
+  if (!email || !password){ errorEl.textContent = 'Enter both an email and a password.'; return; }
+  let name = '';
+  if (signUpMode){
+    name = $('authName').value.trim();
+    if (!name){ errorEl.textContent = 'Enter your name.'; return; }
+    if (password.length < 8){ errorEl.textContent = 'Password should be at least 8 characters.'; return; }
+    if (password !== $('authPasswordConfirm').value){ errorEl.textContent = 'Passwords do not match.'; return; }
+    if (!$('agreeTerms').checked){ errorEl.textContent = 'Please agree to the Terms of Use and Privacy Policy to create an account.'; return; }
+  }
+  $('authSubmit').disabled = true;
+  try {
+    if (signUpMode){
+      const cred = await createUserWithEmailAndPassword(auth, email, password);
+      await updateProfile(cred.user, { displayName: name });
+      sendEmailVerification(cred.user).catch(() => {});
+      await setDoc(doc(db, 'progress', cred.user.uid), { courses: {}, agreedToTermsAt: new Date().toISOString() }, { merge: true });
+      track('tool_save_signup', pending ? pending.tool : '');
+    } else {
+      await withTwoStep(auth, () => signInWithEmailAndPassword(auth, email, password));
+    }
+  } catch (err){
+    errorEl.textContent = twoStepError(err.code) || friendlyAuthError(err.code);
+  } finally {
+    $('authSubmit').disabled = false;
+  }
+});
+
+$('googleBtn').addEventListener('click', async () => {
+  try {
+    const result = await withTwoStep(auth, () => signInWithPopup(auth, new GoogleAuthProvider()));
+    if (getAdditionalUserInfo(result)?.isNewUser){
+      await setDoc(doc(db, 'progress', result.user.uid), { agreedToTermsAt: new Date().toISOString() }, { merge: true });
+      track('tool_save_signup', pending ? pending.tool : '');
+    }
+  } catch (err){
+    $('authError').textContent = twoStepError(err.code) || friendlyAuthError(err.code);
+  }
+});
+
+$('signOutBtn').addEventListener('click', () => signOut(auth));
+</script>
+<script type="module" src="account-menu.js"></script>
+</body>
+</html>

@@ -518,6 +518,27 @@ service cloud.firestore {
         && d.createdAt == request.time;
     }
 
+    // ---------------------------------------------------------- saved tools
+    // Work saved from the free interactive tools on www.productadvisory.co (the scorecard, AI use cases,
+    // build/buy/partner, impact score), kept in the person's own account (my-tools.html). Private to its owner:
+    // nobody else, including the platform owner, can read it. `data` is the tool's own share-link encoding.
+    function validSavedTool(d) {
+      return d.keys().hasOnly(['uid', 'tool', 'title', 'summary', 'data', 'createdAt', 'updatedAt'])
+        && d.uid == request.auth.uid
+        && d.tool in ['scorecard', 'ai', 'bbp', 'impact']
+        && d.title is string && d.title.size() <= 100
+        && d.summary is string && d.summary.size() <= 200
+        && d.data is string && d.data.size() >= 1 && d.data.size() <= 20000 && d.data.matches('^[A-Za-z0-9_-]+$')
+        && d.updatedAt == request.time;
+    }
+
+    match /savedTools/{docId} {
+      allow read, delete: if isSignedIn() && resource.data.uid == request.auth.uid;
+      allow create: if isSignedIn() && validSavedTool(request.resource.data) && request.resource.data.createdAt == request.time;
+      allow update: if isSignedIn() && resource.data.uid == request.auth.uid
+        && validSavedTool(request.resource.data) && request.resource.data.createdAt == resource.data.createdAt;
+    }
+
     match /toolSuggestions/{uid} {
       allow get: if isSignedIn() && (uid == request.auth.uid || isPlatformOwner());
       allow list: if isPlatformOwner();

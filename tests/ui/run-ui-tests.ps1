@@ -26,6 +26,7 @@ Copy-Item "$repo\company-core.js" $site
 Copy-Item "$repo\focus-board.js" $site
 Copy-Item "$repo\focus-board.css" $site
 Copy-Item "$repo\tool-core.js" $site
+Copy-Item "$repo\saved-tools-core.js" $site
 Copy-Item "$repo\lead-core.js" $site
 Copy-Item "$repo\charts.js" $site
 Copy-Item "$repo\charts.css" $site
@@ -75,6 +76,7 @@ Build-Page 'profile.html' 'del-test.html' 'del-seed.js' 'del-test.js'
 Build-Page 'lesson.html' 'les-test.html' 'les-seed.js' 'les-test.js'
 Build-Page 'company.html' 'company-test.html' 'company-seed.js' 'company-test.js'
 Build-Page 'tool-requests.html' 'tool-requests-test.html' 'tool-seed.js' 'tool-test.js'
+Build-Page 'my-tools.html' 'mytools-test.html' 'mytools-seed.js' 'mytools-test.js'
 Build-Page 'owner-tools.html' 'owner-tools-test.html' 'owner-tools-seed.js' 'owner-tools-test.js'
 Build-Page 'request-info.html' 'request-info-test.html' 'lead-seed.js' 'lead-test.js'
 Build-Page 'reports.html' 'reports-test.html' 'reports-seed.js' 'reports-test.js'
@@ -155,6 +157,7 @@ try {
     $results += Run-Page "tool roadmap: $s" "$base/tool-requests-test.html?scn=$s" 40000
   }
   $results += Run-Page 'tool roadmap: deeplink' "$base/tool-requests-test.html?scn=deeplink&tool=t4" 40000
+  foreach ($s in 'handoff', 'update', 'list', 'empty', 'bad') { $results += Run-Page "my saved tools: $s" "$base/mytools-test.html?scn=$s" 25000 }
   foreach ($s in 'signedin', 'signedout', 'limit') { $results += Run-Page "feedback form: $s" "$base/feedback-test.html?scn=$s" 20000 }
   $results += Run-Page 'feedback form: about' "$base/feedback-test.html?scn=about&about=idea" 20000
   foreach ($s in 'plain', 'monthly', 'savefail', 'badlink', 'down') { $results += Run-Page "email settings: $s" "$base/es-test.html?scn=$s&u=uLearn&k=goodsig" 20000 }
