@@ -95,9 +95,43 @@
   .saved .acts{ display:flex; flex-wrap:wrap; gap: 8px; margin-top: auto; padding-top: 8px; align-items:center; }
   .saved .acts a.btn-link{ padding: 8px 14px; font-size: 0.8125rem; }
   .saved .rename{ display:flex; gap: 8px; }
+  .saved .acts .linklike, .detail-acts .linklike{ font-size: 0.7812rem; color: var(--ink-soft); }
+  .saved .acts .linklike:hover, .detail-acts .linklike:hover{ color: var(--navy); }
   .saved .rename .text-input{ margin: 0; padding: 8px 10px; }
   .pill{ display:inline-block; font-size: 0.7188rem; font-weight:600; padding: 2px 9px; border-radius: 20px; background:var(--tint); color: var(--navy); white-space: nowrap; }
   .empty-box{ text-align:center; padding: 28px 16px; }
+  .saved h3 a{ color: inherit; text-decoration: none; }
+  .saved h3 a:hover, .saved h3 a:focus-visible{ text-decoration: underline; }
+  /* filter, search and order */
+  .list-head{ display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap: 10px 16px; margin: 4px 0 12px; }
+  .list-head h2{ margin: 0; }
+  .toolbar{ display:flex; flex-wrap:wrap; gap: 8px; align-items:center; margin-bottom: 14px; }
+  .chips{ display:flex; flex-wrap:wrap; gap: 6px; flex: 1 1 auto; }
+  .chip{ font: 600 0.7812rem var(--sans); color: var(--ink-soft); background: var(--surface); border: 1.5px solid var(--line); border-radius: 999px; padding: 5px 11px; cursor:pointer; }
+  .chip[aria-pressed="true"]{ background: var(--navy); border-color: var(--navy); color: var(--btn-ink, #fff); }
+  .chip:hover{ border-color: var(--cyan); }
+  .chip .n{ opacity: 0.75; font-weight: 400; margin-left: 3px; }
+  .toolbar .text-input{ margin: 0; padding: 8px 11px; font-size: 0.8438rem; width: auto; }
+  #searchBox{ flex: 0 1 220px; min-width: 150px; }
+  #sortBox{ flex: 0 0 auto; }
+  /* one saved tool, opened here */
+  .back{ display:inline-block; font-size: 0.8125rem; margin-bottom: 12px; }
+  .detail-head{ display:flex; flex-wrap:wrap; justify-content:space-between; gap: 12px 20px; align-items:flex-start; }
+  .detail-head h1{ margin: 6px 0 4px; overflow-wrap:anywhere; }
+  .detail-acts{ display:flex; flex-wrap:wrap; gap: 8px; align-items:center; }
+  .detail-acts a.btn-link{ padding: 9px 15px; font-size: 0.8125rem; }
+  .result-part{ margin-top: 18px; }
+  .table-wrap{ overflow-x:auto; border: 1px solid var(--line); border-radius: 12px; }
+  table.res{ border-collapse: collapse; width: 100%; font-size: 0.8125rem; }
+  table.res th, table.res td{ padding: 8px 10px; text-align:left; border-bottom: 1px solid var(--line); vertical-align: top; }
+  table.res th{ background: var(--bg); color: var(--navy-deep); font-weight: 700; font-size: 0.75rem; }
+  table.res td.num{ text-align:right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  table.res tr:last-child td{ border-bottom: none; }
+  table.res td.wide{ min-width: 220px; }
+  dl.pairs{ display:grid; grid-template-columns: minmax(140px, max-content) 1fr; gap: 6px 16px; margin: 0; font-size: 0.875rem; }
+  dl.pairs dt{ color: var(--ink-soft); font-weight: 700; }
+  dl.pairs dd{ margin: 0; color: var(--ink); overflow-wrap:anywhere; }
+  @media (max-width: 560px){ dl.pairs{ grid-template-columns: 1fr; } dl.pairs dd{ margin-bottom: 6px; } }
 </style>
 <link rel="stylesheet" href="pa-theme.css">
 <script src="saved-tools-core.js"></script>
@@ -144,9 +178,33 @@
     <div class="row" id="pendingActions"></div>
   </div>
 
+  <!-- One saved tool, opened here (my-tools?view=<id>): its results, drawn by the tool's own scoring file -->
+  <section class="card" id="detail" style="display:none;" aria-labelledby="detailTitle">
+    <a href="/my-tools" class="back" id="detailBack">← All my saved tools</a>
+    <div class="detail-head">
+      <div>
+        <span class="pill" id="detailTool"></span>
+        <h1 id="detailTitle" tabindex="-1"></h1>
+        <p class="small" id="detailWhen" style="margin:0;"></p>
+      </div>
+      <div class="detail-acts" id="detailActs"></div>
+    </div>
+    <p id="detailSummary" style="margin-top:12px;"></p>
+    <div id="detailBody"></div>
+  </section>
   <div class="layout" id="layout">
-    <section aria-labelledby="listTitle">
-      <h2 id="listTitle" style="margin:4px 0 12px;">Saved</h2>
+    <section aria-labelledby="listTitle" id="listSection">
+      <div class="list-head"><h2 id="listTitle">Saved</h2></div>
+      <div class="toolbar" id="toolbar" style="display:none;">
+        <div class="chips" id="chips" role="group" aria-label="Show"></div>
+        <input class="text-input" type="search" id="searchBox" placeholder="Search" aria-label="Search your saved tools">
+        <select class="text-input" id="sortBox" aria-label="Order">
+          <option value="newest">Newest first</option>
+          <option value="oldest">Oldest first</option>
+          <option value="name">Name A–Z</option>
+          <option value="tool">By tool</option>
+        </select>
+      </div>
       <div id="savedList"><p class="small">Loading…</p></div>
     </section>
 
@@ -229,6 +287,20 @@ let saved = [];          // [{ id, tool, title, summary, data, updatedAt }]
 let pending = null;      // work handed over by a tool, waiting to be saved
 let justSaved = '';      // the id to highlight after a save
 let signUpMode = false;
+let view = { tool: 'all', q: '', sort: 'newest' };   // the list's filter, search and order
+// One saved tool opened here: my-tools?view=<id>. Back and forward move between it and the list.
+let viewId = new URLSearchParams(location.search).get('view') || '';
+function go(id){
+  viewId = id || '';
+  const qs = new URLSearchParams(location.search);
+  if (viewId) qs.set('view', viewId); else qs.delete('view');
+  history.pushState(null, '', location.pathname + (qs.toString() ? '?' + qs : ''));
+  render();
+  if (viewId) { window.scrollTo(0, 0); $('detailTitle').focus({ preventScroll: true }); }
+}
+$('detailBack').addEventListener('click', (e) => { e.preventDefault(); go(''); });
+addEventListener('popstate', () => { viewId = new URLSearchParams(location.search).get('view') || ''; render(); });
+const viewHref = (id) => location.pathname + '?view=' + encodeURIComponent(id);
 
 /* ------------------------------------------------- the work a tool handed over */
 // A tool's "Save to my account" opens this page with the work in the #. It is kept for this tab (so it survives
@@ -283,13 +355,12 @@ async function savePending(asNew){
       id = ref.id;
     }
     track(pending.doc && !asNew ? 'tool_save_update' : 'tool_save_new', pending.tool);
-    const back = C.openUrl(pending.tool, pending.data, id), name = C.TOOLS[pending.tool].name;
     clearPending();
     justSaved = id;
-    $('notice').textContent = '';
-    $('notice').append('Saved to your account. ', el('a', { href: back }, 'Back to the ' + name));
+    $('notice').textContent = 'Saved to your account. Here it is; you can find it any time under My saved tools.';
     await loadSaved();
-    render();
+    go(id);   // stay in Learning, on the saved tool
+
   } catch (err){
     console.error('Could not save:', err);
     $('errorLine').textContent = "That didn't save just now. Please try again.";
@@ -333,18 +404,35 @@ function when(d){
 function card(d){
   const tool = C.TOOLS[d.tool] || { name: 'Tool' };
   const box = el('article', { class: 'saved' + (d.id === justSaved ? ' just-saved' : ''), 'data-id': d.id });
-  const title = el('h3', {}, C.displayTitle(d));
+  const title = el('h3', {}, el('a', { href: viewHref(d.id), onclick: (e) => { e.preventDefault(); go(d.id); } }, C.displayTitle(d)));
   box.append(el('span', { class: 'pill' }, tool.name), title);
   if (d.summary) box.append(el('p', { class: 'sum' }, d.summary));
   box.append(el('p', { class: 'when' }, when(d)));
   const acts = el('div', { class: 'acts' });
-  acts.append(el('a', { class: 'btn-link', href: C.openUrl(d.tool, d.data, d.id) }, 'Open'));
-  acts.append(el('button', { class: 'btn btn-ghost btn-small', type: 'button', onclick: () => copy(d) }, 'Make a copy'));
-  acts.append(el('button', { class: 'btn btn-ghost btn-small', type: 'button', onclick: () => rename(d, box, title) }, 'Rename'));
+  acts.append(el('a', { class: 'btn-link', href: viewHref(d.id), onclick: (e) => { e.preventDefault(); go(d.id); } }, 'View'));
+  acts.append(el('a', { class: 'btn-out', href: C.openUrl(d.tool, d.data, d.id), style: 'padding:7px 13px; font-size:0.8125rem;' }, 'Edit in the tool'));
+  acts.append(el('button', { class: 'linklike', type: 'button', onclick: () => copy(d) }, 'Make a copy'));
+  acts.append(el('button', { class: 'linklike', type: 'button', onclick: () => rename(d, box, title) }, 'Rename'));
   acts.append(el('button', { class: 'linklike', type: 'button', 'aria-label': 'Delete ' + C.displayTitle(d), onclick: () => remove(d) }, 'Delete'));
   box.append(acts);
   return box;
 }
+
+function renderToolbar(){
+  // Filter, search and order appear once there is enough to look through.
+  $('toolbar').style.display = currentUser && saved.length > 2 ? 'flex' : 'none';
+  const n = C.countByTool(saved), chips = $('chips');
+  if (view.tool !== 'all' && !n[view.tool]) view.tool = 'all';
+  chips.textContent = '';
+  ['all'].concat(Object.keys(C.TOOLS)).forEach(k => {
+    if (k !== 'all' && !n[k]) return;
+    chips.append(el('button', { class: 'chip', type: 'button', 'aria-pressed': String(view.tool === k), onclick: () => { view.tool = k; renderToolbar(); renderList(); } },
+      k === 'all' ? 'All' : C.TOOLS[k].short, el('span', { class: 'n' }, String(n[k]))));
+  });
+  $('listTitle').textContent = saved.length ? 'Saved (' + saved.length + ')' : 'Saved';
+}
+$('searchBox').addEventListener('input', () => { view.q = $('searchBox').value; renderList(); });
+$('sortBox').addEventListener('change', () => { view.sort = $('sortBox').value; renderList(); });
 
 function renderList(){
   const list = $('savedList');
@@ -356,7 +444,132 @@ function renderList(){
       el('p', {}, 'Open any of the free tools above, then choose "Save to my account" to keep it here.')));
     return;
   }
-  saved.forEach(d => list.append(card(d)));
+  const shown = C.filterSort(saved, view);
+  if (!shown.length){ list.append(el('p', { class: 'small' }, 'Nothing matches. Try other words, or show all.')); return; }
+  shown.forEach(d => list.append(card(d)));
+}
+
+/* ------------------------------------------------- one saved tool, opened here */
+// The results are drawn by the tool's own scoring file from www (the same sums as the tool and its downloads),
+// loaded once, the first time a saved tool of that kind is opened.
+const cores = {};
+function loadCore(tool){
+  const t = C.TOOLS[tool];
+  if (window[t.global]) return Promise.resolve(window[t.global]);
+  if (!cores[tool]) cores[tool] = new Promise((resolve, reject) => {
+    const sc = document.createElement('script');
+    sc.src = (window.PA_TOOL_CORE_BASE || C.CORE_BASE) + t.core;
+    sc.onload = () => (window[t.global] ? resolve(window[t.global]) : reject(new Error('no ' + t.global)));
+    sc.onerror = () => { delete cores[tool]; reject(new Error('could not load ' + t.core)); };
+    document.head.appendChild(sc);
+  });
+  return cores[tool];
+}
+const isNum = (v) => /^-?\d+(\.\d+)?%?$/.test(v);
+
+function drawResults(csv, tool){
+  const body = el('div', {});
+  C.csvSections(csv).forEach(part => {
+    // the export's own title line ("Organizational Impact Score, <name>") repeats the heading above
+    if (part.kind === 'pairs' && part.rows.length === 1 && part.rows[0][0] === C.TOOLS[tool].name) return;
+    const box = el('div', { class: 'result-part' });
+    if (part.kind === 'pairs'){
+      const dl = el('dl', { class: 'pairs' });
+      part.rows.forEach(r => dl.append(el('dt', {}, r[0]), el('dd', {}, r[1])));
+      box.append(dl);
+    } else {
+      const table = el('table', { class: 'res' }), tr = el('tr', {});
+      part.head.forEach(h => tr.append(el('th', { scope: 'col' }, h)));
+      table.append(el('thead', {}, tr));
+      const tb = el('tbody', {});
+      part.rows.forEach(r => {
+        const row = el('tr', {});
+        r.forEach(v => row.append(el('td', { class: isNum(v) ? 'num' : (v.length > 60 ? 'wide' : null) }, v)));
+        tb.append(row);
+      });
+      table.append(tb);
+      box.append(el('div', { class: 'table-wrap' }, table));
+    }
+    body.append(box);
+  });
+  return body;
+}
+
+let drawn = '';   // which saved tool (and version) the results below belong to
+function renderDetail(){
+  const d = viewId && saved.filter(x => x.id === viewId)[0];
+  const show = !!(currentUser && viewId);
+  $('detail').style.display = show ? 'block' : 'none';
+  $('layout').style.display = show ? 'none' : '';
+  $('pendingCard').style.display = show ? 'none' : $('pendingCard').style.display;
+  if (!show) { drawn = ''; return; }
+  const acts = $('detailActs'), body = $('detailBody');
+  if (!d){
+    $('detailTool').textContent = ''; $('detailTitle').textContent = 'Not found'; $('detailWhen').textContent = '';
+    $('detailSummary').textContent = "This saved tool isn't in your account. It may have been deleted.";
+    acts.textContent = ''; body.textContent = ''; drawn = '';
+    return;
+  }
+  const tool = C.TOOLS[d.tool];
+  $('detailTool').textContent = tool.name;
+  $('detailTitle').textContent = C.displayTitle(d);
+  $('detailWhen').textContent = when(d);
+  $('detailSummary').textContent = d.summary || '';
+  acts.textContent = '';
+  acts.append(el('a', { class: 'btn-link', href: C.openUrl(d.tool, d.data, d.id) }, 'Edit in the tool'));
+  const dl = el('button', { class: 'btn btn-ghost btn-small', type: 'button', disabled: 'disabled' }, 'Download CSV');
+  acts.append(dl,
+    el('button', { class: 'btn btn-ghost btn-small', type: 'button', onclick: () => copy(d) }, 'Make a copy'),
+    el('button', { class: 'linklike', type: 'button', onclick: () => renameDetail(d) }, 'Rename'),
+    el('button', { class: 'linklike', type: 'button', 'aria-label': 'Delete ' + C.displayTitle(d), onclick: () => remove(d) }, 'Delete'));
+  const key = d.id + ':' + d.data;
+  if (drawn === key && body.firstChild) { wireDownload(dl, d, body.getAttribute('data-csv')); return; }
+  drawn = key;
+  body.textContent = '';
+  body.append(el('p', { class: 'small' }, 'Loading the results…'));
+  loadCore(d.tool).then(core => {
+    if (drawn !== key) return;
+    const state = core.decode(d.data);
+    if (!state) throw new Error('could not read the saved work');
+    const csv = core.toCSV(state);
+    body.textContent = '';
+    body.setAttribute('data-csv', csv);
+    body.append(drawResults(csv, d.tool));
+    wireDownload(dl, d, csv);
+  }).catch(err => {
+    console.error(err);
+    if (drawn !== key) return;
+    body.textContent = '';
+    body.append(el('p', { class: 'small' }, "The results can't be shown here just now. ", el('a', { href: C.openUrl(d.tool, d.data, d.id) }, 'Open it in the tool'), ' to see them.'));
+  });
+}
+function wireDownload(btn, d, csv){
+  if (!csv) return;
+  btn.disabled = false;
+  btn.onclick = () => {
+    const url = URL.createObjectURL(new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8' }));
+    const a = el('a', { href: url, download: C.fileName(d) });
+    document.body.append(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+    track('tool_download', d.tool);
+  };
+}
+function renameDetail(d){
+  const h = $('detailTitle');
+  if (h.querySelector('input')) return;
+  const input = el('input', { class: 'text-input', maxlength: '100', 'aria-label': 'New name', style: 'margin:0;' });
+  input.value = d.title || '';
+  const done = () => renderDetail();
+  const save = async () => {
+    try { await saveName(d, input.value); } catch (err){ console.error(err); $('errorLine').textContent = "That didn't rename just now. Please try again."; }
+    render();
+  };
+  h.textContent = '';
+  h.append(el('span', { class: 'rename', style: 'display:flex; gap:8px; font-size:0.875rem;' }, input,
+    el('button', { class: 'btn btn-primary btn-small', type: 'button', onclick: save }, 'Save'),
+    el('button', { class: 'btn btn-ghost btn-small', type: 'button', onclick: done }, 'Cancel')));
+  input.addEventListener('keydown', (e) => { if (e.key === 'Enter') save(); if (e.key === 'Escape') done(); });
+  input.focus(); input.select();
 }
 
 function render(){
@@ -371,7 +584,9 @@ function render(){
     setMode(true);
   }
   renderPending();
+  renderToolbar();
   renderList();
+  renderDetail();
 }
 
 /* -------------------------------------------------- copy, rename and delete */
@@ -381,9 +596,10 @@ async function copy(d){
     const rec = C.record(currentUser.uid, { tool: d.tool, title: C.copyTitle(C.displayTitle(d)), summary: d.summary, data: d.data });
     const ref = await addDoc(collection(db, 'savedTools'), Object.assign(rec, { createdAt: serverTimestamp(), updatedAt: serverTimestamp() }));
     justSaved = ref.id;
-    $('notice').textContent = 'Copied. Open the copy to try another version.';
+    $('notice').textContent = viewId ? 'Copied. This is the copy: edit it in the tool to try another version.' : 'Copied. Open the copy to try another version.';
     track('tool_copy', d.tool);
-    await loadSaved(); render();
+    await loadSaved();
+    if (viewId) go(ref.id); else render();
   } catch (err){ console.error(err); $('errorLine').textContent = "That didn't copy just now. Please try again."; }
 }
 
@@ -391,20 +607,23 @@ function rename(d, box, title){
   if (box.querySelector('.rename')) return;
   const input = el('input', { class: 'text-input', maxlength: '100', 'aria-label': 'New name' });
   input.value = d.title || '';
-  const go = async () => {
-    const name = input.value.replace(/\s+/g, ' ').trim().slice(0, 100);
-    try {
-      await setDoc(doc(db, 'savedTools', d.id), Object.assign(C.record(currentUser.uid, Object.assign({}, d, { title: name })), { createdAt: d.createdAt, updatedAt: serverTimestamp() }));
-      justSaved = d.id;
-      await loadSaved(); render();
-    } catch (err){ console.error(err); $('errorLine').textContent = "That didn't rename just now. Please try again."; }
+  const save = async () => {
+    try { await saveName(d, input.value); render(); }
+    catch (err){ console.error(err); $('errorLine').textContent = "That didn't rename just now. Please try again."; }
   };
   const form = el('div', { class: 'rename' }, input,
-    el('button', { class: 'btn btn-primary btn-small', type: 'button', onclick: go }, 'Save'),
+    el('button', { class: 'btn btn-primary btn-small', type: 'button', onclick: save }, 'Save'),
     el('button', { class: 'btn btn-ghost btn-small', type: 'button', onclick: () => { form.replaceWith(title); } }, 'Cancel'));
-  input.addEventListener('keydown', (e) => { if (e.key === 'Enter') go(); if (e.key === 'Escape') form.replaceWith(title); });
+  input.addEventListener('keydown', (e) => { if (e.key === 'Enter') save(); if (e.key === 'Escape') form.replaceWith(title); });
   title.replaceWith(form);
   input.focus(); input.select();
+}
+
+async function saveName(d, value){
+  const name = String(value || '').replace(/\s+/g, ' ').trim().slice(0, 100);
+  await setDoc(doc(db, 'savedTools', d.id), Object.assign(C.record(currentUser.uid, Object.assign({}, d, { title: name })), { createdAt: d.createdAt, updatedAt: serverTimestamp() }));
+  justSaved = d.id;
+  await loadSaved();
 }
 
 async function remove(d){
@@ -413,7 +632,8 @@ async function remove(d){
     await deleteDoc(doc(db, 'savedTools', d.id));
     $('notice').textContent = 'Deleted.';
     track('tool_delete', d.tool);
-    await loadSaved(); render();
+    await loadSaved();
+    if (viewId === d.id) go(''); else render();
   } catch (err){ console.error(err); $('errorLine').textContent = "That didn't delete just now. Please try again."; }
 }
 

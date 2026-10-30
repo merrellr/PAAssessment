@@ -130,6 +130,22 @@ const sleep = (ms) => new Promise(r => setTimeout(r, ms));
     if (window.__scn === 'threelessons') t('3 of a course\'s 5 lessons does NOT count as a finished course', doneStat === '0', doneStat);
     if (window.__scn === 'threelessons') t('a lesson finished today counts toward this week, older ones do not', /This week: 1 of 2 lessons/.test(document.getElementById('weekGoal').textContent) && /Change goal/.test(document.getElementById('weekGoal').textContent) && !document.getElementById('weekGoal').classList.contains('met'), document.getElementById('weekGoal').textContent);
     if (window.__scn === 'allfive') t('all 5 of its 5 lessons does', doneStat === '1', doneStat);
+    // Pick up where you left off (the top of the page)
+    const hb = document.getElementById('homeBand'), resumeCard = document.getElementById('homeResume'), nextCard = document.getElementById('homeNext'), toolsCard = document.getElementById('homeTools');
+    t('the top of the page greets them by first name', !hb.hidden && /, Dash$/.test(document.getElementById('homeHello').textContent), document.getElementById('homeHello').textContent);
+    const goA = resumeCard.querySelector('a.btn');
+    t('"Continue where you left off": the course in progress, with the next lesson to open', /Continue where you left off/.test(resumeCard.textContent) && /Customer & Market Discovery/.test(resumeCard.textContent) && (window.__scn === 'threelessons' ? /3 of 5 lessons done/.test(resumeCard.textContent) && goA && /course=discovery-moderate&lesson=4/.test(goA.getAttribute('href')) && /lesson 4/.test(goA.textContent)
+      : /2 of 5 lessons done/.test(resumeCard.textContent) && goA && /course=discovery-novice&lesson=3/.test(goA.getAttribute('href')) && /lesson 3/.test(goA.textContent)), resumeCard.textContent + ' ' + (goA && goA.getAttribute('href')));
+    const nextA = nextCard.querySelector('a.btn');
+    t('"Up next for you": a recommended course that is not the one in progress', /Up next for you/.test(nextCard.textContent) && nextA && !/discovery-novice/.test(nextA.getAttribute('href')) && /lesson=\d/.test(nextA.getAttribute('href')), nextCard.textContent + ' ' + (nextA && nextA.getAttribute('href')));
+    if (window.__scn === 'member'){
+      await (async () => { const s0 = Date.now(); while (Date.now() - s0 < 3000 && !toolsCard.querySelector('.home-saved')) await sleep(30); })();
+      const links = Array.prototype.map.call(toolsCard.querySelectorAll('.home-saved a'), a => a.getAttribute('href'));
+      t('their newest saved tools, opening in Learning, never someone else\'s', links.join() === '/my-tools?view=t2,/my-tools?view=t1' && /Untitled build, buy, or partner/.test(toolsCard.textContent) && !/Not mine/.test(toolsCard.textContent) && /All saved tools \(2\)/.test(toolsCard.textContent), links.join() + ' ' + toolsCard.textContent);
+      t('the header links to My saved tools', !!document.querySelector('.pa-links a[href="/my-tools"]'));
+    } else if (window.__scn === 'plain'){
+      t('nothing saved: it points to the free tools', /Try a free tool/.test(toolsCard.textContent) && !!toolsCard.querySelector('a[href="https://www.productadvisory.co/toolkits"]'), toolsCard.textContent);
+    }
     const companyLink = document.getElementById('companyDashMenuItem');
     const roleBadge = document.getElementById('profileRoleBadge').textContent;
     t('the Profile menu shows a role badge', window.__scn === 'owner' ? roleBadge === 'Super admin' : window.__scn === 'admin' ? /^Company admin/.test(roleBadge) : roleBadge === 'Learner', roleBadge);

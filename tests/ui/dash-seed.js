@@ -31,5 +31,11 @@
     if (scn === 'removed') store['memberships/uDash'] = { orgId: 'orgA', orgName: 'Acme Health', role: 'member', status: 'removed', inviteToken: 't', joinedAt: Timestamp.now(), endedAt: Timestamp.now(), email: 'dash@acme.com', displayName: 'Dash User' };
     if (scn === 'removedold') store['memberships/uDash'] = { orgId: 'orgA', orgName: 'Acme Health', role: 'member', status: 'removed', inviteToken: 't', joinedAt: Timestamp.fromMillis(Date.now() - 400 * 864e5), endedAt: Timestamp.fromMillis(Date.now() - 90 * 864e5), email: 'dash@acme.com', displayName: 'Dash User' };
     if (scn === 'owner') store['platformAdmins/uDash'] = { note: 'owner' };
+    // My saved tools on the top of the page (and someone else's, never shown)
+    if (scn === 'member'){
+      store['savedTools/t1'] = { uid: 'uDash', tool: 'impact', title: 'Q3 roadmap', summary: '1. SSO', data: 'X', createdAt: Timestamp.fromMillis(Date.now() - 5 * 864e5), updatedAt: Timestamp.fromMillis(Date.now() - 2 * 864e5) };
+      store['savedTools/t2'] = { uid: 'uDash', tool: 'bbp', title: '', summary: 'Leading: Partner', data: 'Y', createdAt: Timestamp.fromMillis(Date.now() - 864e5), updatedAt: Timestamp.fromMillis(Date.now() - 864e5) };
+      store['savedTools/t9'] = { uid: 'uOther', tool: 'ai', title: 'Not mine', summary: '', data: 'Z', createdAt: Timestamp.now(), updatedAt: Timestamp.now() };
+    }
   };
 })();
