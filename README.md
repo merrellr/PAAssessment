@@ -348,14 +348,19 @@ manual review — it holds no uid and isn't read by the app.
 - **Pick up where you left off** (top of `lms-dashboard.html`): a greeting, the course in progress with the lesson
   to open next, the next recommended course (or the assessment, before there is one), and the newest saved tools.
   The choices are made in `learning-home-core.js` (tested in `tests/learning-home.test.mjs`).
-- **My saved tools** (`my-tools.html`, linked in the header): the free tools on www.productadvisory.co have a
-  "Save to my account" button that hands the work here; it is stored in `savedTools/{id}` (owner only, see
-  `firestore.rules`). After saving, people stay in Learning on the saved tool (`my-tools?view=<id>`), which shows
-  its results as tables, with Download CSV, Make a copy, Rename, Delete, and **Edit in the tool** (back to www,
-  remembering the copy). The results are drawn by the tool's own scoring file loaded from
-  `https://www.productadvisory.co/assets/js/<tool>-core.js` (its `decode` and `toCSV`), so the sums live in one
-  place. The list has filters by tool, search and order once there are more than two. Logic: `saved-tools-core.js`
-  (tested in `tests/saved-tools.test.mjs`).
+- **My toolkit** (`my-tools.html`, linked in the header and the Profile menu): the hub (start any of the four tools,
+  new or from the example, and everything saved, with filters, search and order) and the **workspace**
+  (`my-tools?open=<id>`, `my-tools?new=<tool>[&start=example]`). The workspace runs the tool from its page on
+  www.productadvisory.co in a frame with `?embed=1`: www's `prefs.js` and `site.css` show just the tool, and its
+  `save.js` posts each change (`pa-tool-change`), its height (`pa-size`) and `pa-ready` to Learning only. This page
+  accepts messages only from that frame and from www, saves each change a second later (a new piece of work is
+  created on its first change), and sends light or dark (`pa-theme`) and the saved name (`pa-title`) back. Links
+  inside a tool to another tool open in the workspace; anything else opens in a new tab, so Learning never turns
+  into the public site. **Share** gives a link to the public tool page with a copy of the work (never the saved
+  original); whoever opens it sees "Someone shared this with you" and can save their own copy. Work is stored in
+  `savedTools/{id}` (owner only, see `firestore.rules`). The public tools' "Save to my account" still hands work
+  over in the # (`#save=`), and after saving the person lands in the workspace. Logic: `saved-tools-core.js` (tested
+  in `tests/saved-tools.test.mjs`); UI tests use `tests/ui/fake-tool.html` in place of the www tools.
 
 ## My badges
 

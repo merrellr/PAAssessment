@@ -1,0 +1,10 @@
+import { chromium } from 'playwright';
+import http from 'node:http'; import fs from 'node:fs'; import path from 'node:path';
+const site='/tmp/pa-ui-site';
+const srv=http.createServer((req,res)=>{let p=path.join(site,decodeURIComponent(new URL(req.url,'http://x').pathname));if(!fs.existsSync(p)||fs.statSync(p).isDirectory())p+='.html';if(fs.existsSync(p)){res.writeHead(200,{'Content-Type':p.endsWith('.js')?'text/javascript':p.endsWith('.css')?'text/css':'text/html'});res.end(fs.readFileSync(p));}else{res.writeHead(404);res.end();}}).listen(8799);
+const b=await chromium.launch(); const p=await b.newPage();
+p.on('console', m=>console.log('CONSOLE', m.text().slice(0,200))); p.on('pageerror', e=>console.log('ERR', e.message));
+p.on('dialog', d=>{console.log('DIALOG', d.type()); d.accept();});
+await p.goto('http://127.0.0.1:8799/mytools-test.html?scn=open'); await p.waitForTimeout(20000);
+console.log('URL', p.url()); console.log((await p.title()).slice(0,1500));
+await b.close(); srv.close();

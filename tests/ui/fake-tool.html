@@ -1,0 +1,18 @@
+<!doctype html>
+<!-- Stands in for a www tool page running inside My toolkit's workspace (?embed=1): it speaks the same messages as
+     www's save.js. Copied by the UI runners to faketool-<page>.html; the tests drive it with window.__change(). -->
+<html><head><meta charset="utf-8"><title>Fake tool</title></head>
+<body style="margin:0"><main id="main" style="height:640px">Fake tool</main>
+<script>
+  var page = location.pathname.split('/').pop().replace(/^faketool-/, '').replace(/\.html$/, '');
+  var tool = { 'impact-score': 'impact', 'scorecard': 'scorecard', 'build-buy-partner': 'bbp', 'ai-use-cases': 'ai' }[page];
+  var tell = function (m) { parent.postMessage(m, location.origin); };
+  window.__start = new URLSearchParams(location.search).get('start') || '';
+  window.__hash = location.hash;
+  window.__got = [];
+  addEventListener('message', function (e) { if (e.source === parent) window.__got.push(e.data); });
+  window.__change = function (data, title, summary) { tell({ type: 'pa-tool-change', tool: tool, data: data, title: title, summary: summary }); };
+  window.__open = function (href) { tell({ type: 'pa-open', href: href }); };
+  addEventListener('load', function () { tell({ type: 'pa-size', h: 1234 }); tell({ type: 'pa-ready' }); });
+</script>
+</body></html>

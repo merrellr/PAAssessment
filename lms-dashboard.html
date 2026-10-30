@@ -297,7 +297,7 @@
 
         <div class="profile-dropdown-divider"></div>
         <div class="profile-progress-label">Product Advisory</div>
-        <a class="profile-dropdown-item" href="https://www.productadvisory.co/toolkits" target="_blank" rel="noopener">Toolkits ↗</a>
+        <a class="profile-dropdown-item" href="/my-tools">My toolkit</a>
         <a class="profile-dropdown-item" href="/tool-requests#suggest">Request tools</a>
         <a class="profile-dropdown-item" href="https://www.productadvisory.co/" target="_blank" rel="noopener">Visit Product Advisory ↗</a>
 
@@ -2399,7 +2399,7 @@ function renderHome(user, progress, assessmentResult, recommended, assessmentUrl
 async function renderHomeTools(user){
   const box = document.getElementById('homeTools'), T = window.SavedToolsCore, H = window.LearningHomeCore;
   const esc = (t) => String(t).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
-  const head = '<span class="eyebrow">Your toolkit</span><h2>My saved tools</h2>';
+  const head = '<span class="eyebrow">Your toolkit</span><h2>My toolkit</h2>';
   box.innerHTML = head + '<p>Loading…</p>';
   let list = null;
   try {
@@ -2407,20 +2407,20 @@ async function renderHomeTools(user){
     list = snap.docs.map(d => Object.assign({ id: d.id }, d.data()));
   } catch (err){ console.error('Could not load saved tools:', err); }
   if (list === null){
-    box.innerHTML = head + '<p>Your scorecards, decision matrices and impact scores.</p><div class="home-go"><a class="more" href="/my-tools">Open My saved tools →</a></div>';
+    box.innerHTML = head + '<p>Your scorecards, decision matrices and impact scores.</p><div class="home-go"><a class="more" href="/my-tools">Open My toolkit →</a></div>';
     return;
   }
   if (!list.length){
-    box.innerHTML = head + '<p>Prioritize features, rank AI use cases, decide build, buy or partner, or score your roadmap with the free tools. Save one and it waits for you here.</p>' +
-      '<div class="home-go"><a class="home-out" href="https://www.productadvisory.co/toolkits">Try a free tool</a><a class="more" href="/my-tools">My saved tools →</a></div>';
+    box.innerHTML = head + '<p>Prioritize features, rank AI use cases, decide build, buy or partner, or score your roadmap. Your work saves here as you go.</p>' +
+      '<div class="home-go"><a class="home-out" href="/my-tools">Open My toolkit</a></div>';
     return;
   }
   const items = H.recentSaved(list, 3).map(d => {
     const tool = T.TOOLS[d.tool] ? T.TOOLS[d.tool].short : 'Tool';
     const when = d.updatedAt && d.updatedAt.toDate ? ' · ' + d.updatedAt.toDate().toLocaleDateString(undefined, { day: 'numeric', month: 'short' }) : '';
-    return '<li><a href="/my-tools?view=' + encodeURIComponent(d.id) + '"><b>' + esc(T.displayTitle(d)) + '</b><small>' + esc(tool + when) + '</small></a></li>';
+    return '<li><a href="/my-tools?open=' + encodeURIComponent(d.id) + '"><b>' + esc(T.displayTitle(d)) + '</b><small>' + esc(tool + when) + '</small></a></li>';
   }).join('');
-  box.innerHTML = head + '<ul class="home-saved">' + items + '</ul><div class="home-go"><a class="more" href="/my-tools">All saved tools (' + list.length + ') →</a></div>';
+  box.innerHTML = head + '<ul class="home-saved">' + items + '</ul><div class="home-go"><a class="more" href="/my-tools">All your work (' + list.length + ') →</a></div>';
 }
 </script>
 <script>document.getElementById("footerYear").textContent = new Date().getFullYear();</script>
