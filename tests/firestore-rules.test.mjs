@@ -766,6 +766,10 @@ await allow('the owner updates it, keeping when it was created', async () => {
   return setDoc(doc(ann, 'savedTools/t1'), goodSaved('ann', { title: 'Renamed', createdAt: snap.data().createdAt }));
 });
 await deny('an update cannot change when it was created', () => setDoc(doc(ann, 'savedTools/t1'), goodSaved('ann')));
+await allow('the toolkit workspace saves each change (just the work, its name and summary, and the time)', () => updateDoc(doc(ann, 'savedTools/t1'), { title: 'Autosaved', summary: '1. A', data: 'abc_DEF-1', updatedAt: serverTimestamp() }));
+await deny('but not without the time', () => updateDoc(doc(ann, 'savedTools/t1'), { data: 'abc' }));
+await deny('or with anything that is not the tool\'s encoding', () => updateDoc(doc(ann, 'savedTools/t1'), { data: '<b>', updatedAt: serverTimestamp() }));
+await deny('or by anyone else', () => updateDoc(doc(bob, 'savedTools/t1'), { data: 'abc', updatedAt: serverTimestamp() }));
 await deny('nobody else can overwrite it', () => setDoc(doc(bob, 'savedTools/t1'), goodSaved('bob')));
 await deny('nobody else can delete it', () => deleteDoc(doc(bob, 'savedTools/t1')));
 await allow('the owner deletes it', () => deleteDoc(doc(ann, 'savedTools/t1')));

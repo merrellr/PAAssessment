@@ -2,7 +2,7 @@
    tested in tests/learning-home.test.mjs.
    - resume: the course someone was last working on and the lesson to open next
    - upNext: the first course the dashboard recommends that isn't that one and isn't finished
-   - recentSaved: their newest saved tools (My saved tools, my-tools.html) */
+   - recentSaved: their newest saved work (My toolkit, my-tools.html) */
 (function (root) {
   'use strict';
 

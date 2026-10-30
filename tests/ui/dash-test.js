@@ -141,10 +141,10 @@ const sleep = (ms) => new Promise(r => setTimeout(r, ms));
     if (window.__scn === 'member'){
       await (async () => { const s0 = Date.now(); while (Date.now() - s0 < 3000 && !toolsCard.querySelector('.home-saved')) await sleep(30); })();
       const links = Array.prototype.map.call(toolsCard.querySelectorAll('.home-saved a'), a => a.getAttribute('href'));
-      t('their newest saved tools, opening in Learning, never someone else\'s', links.join() === '/my-tools?view=t2,/my-tools?view=t1' && /Untitled build, buy, or partner/.test(toolsCard.textContent) && !/Not mine/.test(toolsCard.textContent) && /All saved tools \(2\)/.test(toolsCard.textContent), links.join() + ' ' + toolsCard.textContent);
-      t('the header links to My saved tools', !!document.querySelector('.pa-links a[href="/my-tools"]'));
+      t('their newest saved tools, opening in Learning, never someone else\'s', links.join() === '/my-tools?open=t2,/my-tools?open=t1' && /Untitled build, buy, or partner/.test(toolsCard.textContent) && !/Not mine/.test(toolsCard.textContent) && /All your work \(2\)/.test(toolsCard.textContent), links.join() + ' ' + toolsCard.textContent);
+      t('the header links to My toolkit', !!document.querySelector('.pa-links a[href="/my-tools"]'));
     } else if (window.__scn === 'plain'){
-      t('nothing saved: it points to the free tools', /Try a free tool/.test(toolsCard.textContent) && !!toolsCard.querySelector('a[href="https://www.productadvisory.co/toolkits"]'), toolsCard.textContent);
+      t('nothing saved: it opens My toolkit, in Learning (never the public site)', /Open My toolkit/.test(toolsCard.textContent) && !!toolsCard.querySelector('a[href="/my-tools"]') && !toolsCard.querySelector('a[href*="productadvisory.co"]'), toolsCard.textContent);
     }
     const companyLink = document.getElementById('companyDashMenuItem');
     const roleBadge = document.getElementById('profileRoleBadge').textContent;

@@ -1,8 +1,9 @@
-/* My saved tools (my-tools.html): the parts with no Firebase in them, so they can be tested on their own
-   (tests/saved-tools.test.mjs). The four free interactive tools live on www.productadvisory.co; their "Save to my
-   account" button opens /my-tools#save=<base64url JSON { v, tool, doc, title, summary, data }>, where `data` is the
-   tool's own share-link encoding. A saved tool opens back on www as <tool url>#<prefix>=<data>&doc=<id>, and the
-   tool remembers the id so its next Save updates the same copy. */
+/* My toolkit (my-tools.html): the parts with no Firebase in them, so they can be tested on their own
+   (tests/saved-tools.test.mjs). The four interactive tools are built on www.productadvisory.co. In Learning they run
+   inside the toolkit's workspace (a frame on the tool's page with ?embed=1; see www's save.js), which saves each
+   change to the person's account. On the public pages, "Save to my account" opens
+   /my-tools#save=<base64url JSON { v, tool, doc, title, summary, data }>, where `data` is the tool's own share-link
+   encoding. */
 (function (root) {
   'use strict';
 
@@ -10,10 +11,14 @@
   // core: the tool's scoring file on www (its decode and toCSV draw a saved tool's results here, so the sums are
   // never copied into this site) and the name it puts on window.
   const TOOLS = {
-    scorecard: { name: 'Feature Prioritization Scorecard', short: 'Scorecard', url: WWW + 'scorecard', prefix: 's', core: 'scorecard-core.js', global: 'ScorecardCore' },
-    ai: { name: 'AI Use Case Prioritization', short: 'AI use cases', url: WWW + 'ai-use-cases', prefix: 'u', core: 'ai-usecases-core.js', global: 'AIUseCaseCore' },
-    bbp: { name: 'Build, Buy, or Partner Decision Matrix', short: 'Build, buy, or partner', url: WWW + 'build-buy-partner', prefix: 'm', core: 'bbp-core.js', global: 'BBPCore' },
-    impact: { name: 'Organizational Impact Score', short: 'Impact score', url: WWW + 'impact-score', prefix: 's', core: 'impact-core.js', global: 'ImpactCore' }
+    scorecard: { name: 'Feature Prioritization Scorecard', short: 'Scorecard', url: WWW + 'scorecard', prefix: 's', core: 'scorecard-core.js', global: 'ScorecardCore',
+      blurb: 'Rank features by value, effort and risk, or by RICE.', noun: 'scorecard' },
+    ai: { name: 'AI Use Case Prioritization', short: 'AI use cases', url: WWW + 'ai-use-cases', prefix: 'u', core: 'ai-usecases-core.js', global: 'AIUseCaseCore',
+      blurb: 'Sort AI ideas into quick wins and bets, and pick a first pilot.', noun: 'AI use case list' },
+    bbp: { name: 'Build, Buy, or Partner Decision Matrix', short: 'Build, buy, or partner', url: WWW + 'build-buy-partner', prefix: 'm', core: 'bbp-core.js', global: 'BBPCore',
+      blurb: 'Compare build, buy and partner on weighted criteria and three-year cost.', noun: 'decision matrix' },
+    impact: { name: 'Organizational Impact Score', short: 'Impact score', url: WWW + 'impact-score', prefix: 's', core: 'impact-core.js', global: 'ImpactCore',
+      blurb: 'Score initiatives against weighted KPIs and get a suggested action for each.', noun: 'impact score' }
   };
   const CORE_BASE = WWW + 'assets/js/';
   const MAX_DATA = 20000;
@@ -49,6 +54,41 @@
     return t ? t.url + '#' + t.prefix + '=' + data + (id ? '&doc=' + id : '') : WWW + 'toolkits';
   }
 
+  // A link that gives whoever opens it their own copy, on the public tool page (no id: it never touches the original).
+  function shareUrl(tool, data) { return TOOLS[tool] && data ? openUrl(tool, data, '') : ''; }
+
+  // The tool running inside Learning's workspace: its page on www (or `base`, for tests) with ?embed=1, the saved
+  // work in the #, and start=example for "Try the example".
+  function embedUrl(tool, data, opts) {
+    const t = TOOLS[tool], o = opts || {};
+    if (!t) return '';
+    const base = o.base || WWW;
+    return base + t.url.slice(WWW.length) + '?embed=1' + (o.example && !data ? '&start=example' : '') + (data ? '#' + t.prefix + '=' + data : '');
+  }
+
+  // Which tool a link inside a tool points at ('' for anything else), so Learning opens it in the workspace.
+  function toolForUrl(href, base) {
+    let u;
+    try { u = new URL(href); } catch (e) { return ''; }
+    const bare = u.origin + u.pathname.replace(/\.html$/, '').replace(/\/$/, '');
+    const page = [WWW].concat(base ? [base] : []).map(b => (bare.indexOf(b) === 0 ? bare.slice(b.length) : null)).filter(x => x !== null)[0];
+    if (page === undefined) return '';
+    return Object.keys(TOOLS).filter(k => TOOLS[k].url.slice(WWW.length) === page)[0] || '';
+  }
+
+  // "just now", "5 minutes ago", "3 hours ago", "yesterday", "4 days ago", then the date.
+  function ago(ms, now) {
+    if (!ms) return 'just now';
+    const s = Math.max(0, ((now || Date.now()) - ms) / 1000);
+    if (s < 45) return 'just now';
+    if (s < 3600) { const m = Math.max(1, Math.round(s / 60)); return m + (m === 1 ? ' minute' : ' minutes') + ' ago'; }
+    if (s < 86400) { const h = Math.round(s / 3600); return h + (h === 1 ? ' hour' : ' hours') + ' ago'; }
+    const d = Math.floor(s / 86400);
+    if (d === 1) return 'yesterday';
+    if (d < 7) return d + ' days ago';
+    return new Date(ms).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' });
+  }
+
   function displayTitle(d) { return d.title || 'Untitled ' + (TOOLS[d.tool] ? TOOLS[d.tool].short.toLowerCase() : 'tool'); }
   function copyTitle(title) { return clean('Copy of ' + (title || 'untitled'), 100); }
 
@@ -58,7 +98,7 @@
     return list.slice().sort((a, b) => ms(b) - ms(a));
   }
 
-  // The list on My saved tools: one tool or all ('' or 'all'), words to look for in the name, summary or tool, and
+  // The list in My toolkit: one tool or all ('' or 'all'), words to look for in the name, summary or tool, and
   // an order: 'newest' (default), 'oldest', 'name' or 'tool'.
   function filterSort(list, opts) {
     const o = opts || {}, tool = o.tool && o.tool !== 'all' ? o.tool : '';
@@ -83,41 +123,6 @@
     return n;
   }
 
-  // A tool's export (toCSV) read back into rows of cells. Cells the tool guarded against spreadsheet formulas
-  // ('=..., '-5) are shown as typed.
-  function parseCSV(text) {
-    const rows = []; let row = [], cell = '', q = false;
-    const s = String(text || '');
-    for (let i = 0; i < s.length; i++) {
-      const c = s[i];
-      if (q) {
-        if (c === '"' && s[i + 1] === '"') { cell += '"'; i++; } else if (c === '"') q = false; else cell += c;
-      } else if (c === '"') q = true;
-      else if (c === ',') { row.push(cell); cell = ''; }
-      else if (c === '\n' || c === '\r') { if (c === '\r' && s[i + 1] === '\n') i++; row.push(cell); rows.push(row); row = []; cell = ''; }
-      else cell += c;
-    }
-    if (cell !== '' || row.length) { row.push(cell); rows.push(row); }
-    return rows.map(r => r.map(v => (/^'[=+\-@\t\r]/.test(v) ? v.slice(1) : v)));
-  }
-
-  // The export split at its blank lines into parts: a table (first row the headings) or, when no row has more
-  // than two filled cells, a list of label and value pairs.
-  function csvSections(text) {
-    const parts = []; let cur = [];
-    parseCSV(text).forEach(r => {
-      if (r.every(v => v === '')) { if (cur.length) parts.push(cur); cur = []; } else cur.push(r);
-    });
-    if (cur.length) parts.push(cur);
-    return parts.map(rows => {
-      const filled = (r) => r.filter(v => v !== '').length;
-      if (rows.every(r => filled(r) <= 2)) return { kind: 'pairs', rows: rows.map(r => [r[0] || '', r.slice(1).filter(v => v !== '').join(' ')]) };
-      const width = Math.max.apply(null, rows.map(r => r.length));
-      const pad = (r) => r.concat(Array(width - r.length).fill(''));
-      return { kind: 'table', head: pad(rows[0]), rows: rows.slice(1).map(pad) };
-    });
-  }
-
   // A file name for a saved tool's download: "Q3 roadmap - Organizational Impact Score.csv".
   function fileName(d) {
     const name = (displayTitle(d) + (TOOLS[d.tool] ? ' - ' + TOOLS[d.tool].name : '')).replace(/[\\/:*?"<>|]+/g, ' ').replace(/\s+/g, ' ').trim();
@@ -125,5 +130,5 @@
   }
 
   root.SavedToolsCore = { TOOLS, CORE_BASE, MAX_DATA, parseHandoff, record, openUrl, displayTitle, copyTitle, sortNewest,
-    filterSort, countByTool, parseCSV, csvSections, fileName };
+    filterSort, countByTool, fileName, shareUrl, embedUrl, toolForUrl, ago };
 })(typeof window !== 'undefined' ? window : globalThis);
