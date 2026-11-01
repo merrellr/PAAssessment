@@ -1513,6 +1513,12 @@ window.handleDeleteAccount = async function(){
     return;
   }
 
+  // A last "are you sure?", naming what goes. Cancel leaves everything as it was.
+  if (!window.confirm('Delete your account for good?\n\nYour sign-in, course progress, assessment results, badges, notes and saved tools will be deleted. This can\'t be undone.')){
+    errorEl.textContent = 'Nothing was deleted.';
+    return;
+  }
+
   const resetButton = () => { btn.disabled = false; btn.textContent = 'Delete my account'; };
   btn.disabled = true;
   btn.textContent = 'Deleting…';

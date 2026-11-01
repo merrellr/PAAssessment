@@ -113,6 +113,7 @@
   .rec-banner .eyebrow{ font-size:0.6875rem; font-weight:600; letter-spacing:0.06em; text-transform:uppercase; color: var(--cyan); }
   .rec-chip{ display:inline-block; background:var(--surface); border:1px solid var(--line); border-radius:7px; padding:6px 12px; margin: 8px 8px 0 0; font-size:0.8125rem; font-weight:500; color: var(--navy); text-decoration:none; }
   .rec-chip:hover{ border-color: var(--cyan); }
+  .dom-ico{ display:inline-flex; align-items:center; justify-content:center; flex-shrink: 0; }
   /* Pick up where you left off: the top of the page */
   .home-band{ margin-bottom: 22px; }
   .home-hello{ font-family:var(--display); font-size: 1.375rem; color: var(--navy-deep); margin: 0 0 4px; }
@@ -607,6 +608,7 @@
           <button type="button" id="catViewAll" onclick="setCatalogView('all')">Browse all</button>
         </div>
         <a href="/framework" style="font-size:0.7812rem; color:var(--navy); text-decoration:underline;">About the framework →</a>
+        <a href="/framework#articles" style="font-size:0.7812rem; color:var(--navy); text-decoration:underline;">Companion articles →</a>
       </div>
     </div>
 
@@ -625,10 +627,6 @@
       <div id="notesList" style="margin-top:14px;"></div>
     </div>
 
-    <div class="card" id="articlesCard" style="display:none; margin-top:22px;">
-      <span class="eyebrow">Companion articles</span>
-      <div id="articlesList" style="margin-top:14px;"></div>
-    </div>
 
     </div>
   </div>
@@ -1164,7 +1162,7 @@ const DASHBOARD_TOUR_STEPS = [
   { sel: '#heroBand', title: 'Your assessment result', body: 'Where you landed overall. Open "View details" for the full breakdown across all seven skill areas.' },
   { sel: '#recBanner', title: 'Where to start', body: 'Your best next courses, drawn from your lowest-scoring areas at the level the assessment placed you.' },
   { sel: '#courseCatalog .tier-card', title: 'Jump into a course', body: 'Click any tile to begin. Progress saves automatically, and the dots beside each domain fill in as you complete its courses.' },
-  { sel: '#articlesCard', title: 'Notes and articles', body: 'A companion article for every course sits here at the bottom. Notes you write during lessons collect just above them.' }
+  { sel: '#myNotesCard', title: 'Your notes', body: 'Notes you write during lessons collect here, each with a link back to its lesson.' }
 ];
 
 let dashboardTourCleanup = null;
@@ -1286,7 +1284,6 @@ async function loadDashboard(user){
   renderCatalog(progress, assessmentResult, catalogView);
   renderMyNotes(progress);
   renderSpacedReview(progress);
-  renderArticlesShortcuts();
   renderProfilePrompt(progress);
   const recommended = assessmentResult ? renderRecommendations(assessmentResult, progress, await fetchCompanyFocus(user)) : [];
   renderHome(user, progress, assessmentResult, recommended, assessmentUrl);
@@ -1665,9 +1662,10 @@ const DOMAIN_SHORT_LABELS = {
   aiOrg: "AI, org"
 };
 
-/* The skill-area icons come from pa-icons.js (the same set as the framework page), on a soft tile. */
+/* The skill-area icons come from pa-icons.js (the same set as the framework page). Here they stand on their own,
+   without the framework page's soft tile, so the course list stays light. */
 function domainIconBadgeHtml(domainKey, size){
-  return `<div class="pa-dom-badge" style="width:${size}px; height:${size}px;">${window.paDomainIcon(domainKey, size - 6)}</div>`;
+  return `<span class="dom-ico" style="width:${size}px; height:${size}px;">${window.paDomainIcon(domainKey, size)}</span>`;
 }
 
 const TIER_LABEL_BY_SLUG = { novice: "Limited Experience", moderate: "Moderate Experience", experienced: "Lots of Experience", advanced: "Advanced Experience" };
@@ -2076,29 +2074,6 @@ function paintNotes(items, list, card){
       ${n.prompt ? `<div class="notes-prompt">${n.prompt}</div>` : ''}
       <div class="notes-text">${n.text.replace(/</g, '&lt;')}</div>
       <a href="/lesson?course=${n.cid}&lesson=${n.lid}&v=${CONTENT_VERSION}">Open the lesson →</a>
-    </div>
-  `).join('');
-  card.style.display = 'block';
-}
-
-/* Quick-access shortcuts to every course's companion article, shown
-   regardless of progress — a standing reading list, not tied to what
-   you've unlocked or completed. Courses authored from a book chapter
-   have no sourceUrl and just don't appear here. */
-function renderArticlesShortcuts(){
-  const card = document.getElementById('articlesCard');
-  const list = document.getElementById('articlesList');
-  const items = Object.keys(CATALOG)
-    .filter(cid => CATALOG[cid].sourceUrl)
-    .map(cid => ({ title: CATALOG[cid].title, url: CATALOG[cid].sourceUrl }));
-
-  if (!items.length){ card.style.display = 'none'; return; }
-  items.sort((a, b) => a.title.localeCompare(b.title));
-
-  list.innerHTML = items.map(it => `
-    <div class="article-item">
-      <div class="article-course">${it.title}</div>
-      <a href="${it.url}" target="_blank" rel="noopener">Read the article ↗</a>
     </div>
   `).join('');
   card.style.display = 'block';

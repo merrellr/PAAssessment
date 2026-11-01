@@ -122,9 +122,9 @@ const sleep = (ms) => new Promise(r => setTimeout(r, ms));
       t('no review card when nothing was finished a week ago (an unfinished course, a very recent one, or none)', reviewCard.style.display === 'none');
     }
     if (window.__scn === 'plain'){
-      const articles = Array.prototype.slice.call(document.querySelectorAll('#articlesList .article-item'));
-      t('every course that has a companion article is listed under Notes and articles (12)', document.getElementById('articlesCard').style.display === 'block' && articles.length === 12, String(articles.length));
-      t('each links to its article', articles.every(a => /^https:\/\/www\.linkedin\.com\/pulse\//.test(a.querySelector('a').getAttribute('href'))));
+      t('no list of companion articles on the dashboard: a link to them on the framework page instead, beside the framework link', !document.getElementById('articlesCard') && !!document.querySelector('a[href="/framework#articles"]') && !!document.querySelector('a[href="/framework"]'));
+      const ico = document.querySelector('#courseCatalog .dom-ico');
+      t('the skill-area icons stand on their own (no tile behind them)', !!ico && !document.querySelector('#courseCatalog .pa-dom-badge') && getComputedStyle(ico).backgroundColor === 'rgba(0, 0, 0, 0)');
     }
     const doneStat = document.getElementById('statAssignedCompleted').textContent.trim();
     if (window.__scn === 'threelessons') t('3 of a course\'s 5 lessons does NOT count as a finished course', doneStat === '0', doneStat);

@@ -73,6 +73,10 @@
 
   .cta-row{ text-align:center; margin-top:28px; }
   .btn{ display:inline-block; background:linear-gradient(135deg, var(--navy) 0%, var(--primary-strong) 100%); color:var(--btn-ink); padding:12px 26px; border-radius:24px; text-decoration:none; font-weight:600; font-size:0.9062rem; }
+  .art-list{ display:grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 10px 22px; }
+  .art-area{ display:flex; gap: 10px; align-items:flex-start; padding: 8px 0; border-top: 1px solid var(--line); }
+  .art-area b{ display:block; font-size: 0.875rem; color: var(--navy-deep); margin-bottom: 4px; }
+  .art-area a{ display:block; font-size: 0.8125rem; color: var(--navy); margin: 3px 0; }
 </style>
 <link rel="stylesheet" href="pa-theme.css">
 <script src="analytics.js"></script>
@@ -118,6 +122,14 @@
 
   <div id="domainsContainer"></div>
 
+  <!-- Companion articles: a longer read for the courses that have one, by skill area (linked from My Learning) -->
+  <div class="card" id="articles" tabindex="-1" hidden>
+    <span class="eyebrow">Companion articles</span>
+    <h2 style="font-size:1.1875rem; margin-bottom:6px;">Read more on each topic</h2>
+    <p style="margin-bottom:14px;">Articles by Robert Merrell that go deeper on a course's ideas. They open on LinkedIn in a new tab.</p>
+    <div id="articlesList" class="art-list"></div>
+  </div>
+
   <div class="cta-row">
     <a href="/" class="btn" id="assessmentCta">Take the Assessment →</a>
   </div>
@@ -130,6 +142,7 @@
 </div>
 
 <script src="content/framework-data.js"></script>
+<script src="company-core.js"></script>
 <script src="pa-icons.js"></script>
 <script>
 const DOMAIN_COLORS = {
@@ -261,6 +274,26 @@ if (location.hash){
 document.getElementById('footerYear').textContent = new Date().getFullYear();
 </script>
 
+<script>
+/* Companion articles (company-core.js keeps the list): grouped by skill area, easiest level first. */
+(function(){
+  const C = window.CompanyCore, box = document.getElementById('articles');
+  if (!C || !box) return;
+  const LEVELS = ['novice', 'moderate', 'experienced', 'advanced'];
+  const byArea = {};
+  Object.keys(C.COURSE_ARTICLES).forEach(id => {
+    const i = id.lastIndexOf('-'), area = id.slice(0, i), level = id.slice(i + 1);
+    (byArea[area] = byArea[area] || []).push({ level, url: C.COURSE_ARTICLES[id] });
+  });
+  const esc = (t) => String(t).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  const areas = Object.keys(DOMAIN_COLORS).filter(k => byArea[k]);
+  document.getElementById('articlesList').innerHTML = areas.map(k => '<div class="art-area">' + window.paDomainIcon(k, 26) + '<div><b>' + esc(C.domainLabel(k)) + '</b>' +
+    byArea[k].sort((a, b) => LEVELS.indexOf(a.level) - LEVELS.indexOf(b.level)).map(a => '<a href="' + esc(a.url) + '" target="_blank" rel="noopener">' + esc(C.LEVEL_LABELS[a.level]) + ' <span aria-hidden="true">↗</span><span class="sr-only"> (opens in a new tab)</span></a>').join('') +
+    '</div></div>').join('');
+  box.hidden = !areas.length;
+  if (location.hash === '#articles' && !box.hidden) setTimeout(() => { box.scrollIntoView(); box.focus({ preventScroll: true }); }, 50);
+})();
+</script>
 <script type="module">
 /* Adjusts the two navigation CTAs to who's viewing:
    - Signed in and already assessed  -> "Retake the Assessment", back to dashboard.
