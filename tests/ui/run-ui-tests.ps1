@@ -43,6 +43,8 @@ Copy-Item "$repo\badges-ui.js" $site
 Copy-Item "$repo\badges.css" $site
 Copy-Item "$repo\lesson-blocks.js" $site
 Copy-Item "$repo\lesson-blocks.css" $site
+Copy-Item "$repo\lesson-figures.js" $site
+Copy-Item "$repo\lesson-figures.css" $site
 Copy-Item "$repo\pilot-core.js" $site
 Copy-Item "$repo\analytics.js" $site
 Copy-Item "$repo\pa-prefs.js" $site
@@ -153,6 +155,8 @@ try {
   foreach ($s in 'goals', 'goalsadmin', 'badges', 'signin', 'signingoogle', 'signinbrand', 'signinlink', 'mergekeep', 'mergeother', 'twostep', 'twostepauto', 'twostepunverified', 'twostepadmin', 'twostepgoogle', 'twostepgoogleblocked', 'twostepgooglenone', 'twostepcode') { $results += Run-Page "profile goals: $s" "$base/del-test.html?scn=$s" 25000 }
   foreach ($s in 'member', 'plain') { $results += Run-Page "last lesson: $s" "$base/les-test.html?scn=$s&course=discovery-novice&lesson=5" 30000 }
   foreach ($s in '1', '2', '3', '4', '5') { $results += Run-Page "lesson blocks: lesson $s" "$base/les-test.html?scn=blocks&course=discovery-novice&lesson=$s" 30000 }
+  $results += Run-Page "lesson figures: metrics and a column chart" "$base/les-test.html?scn=figs&course=aiOrg-experienced&lesson=6" 30000
+  $results += Run-Page "lesson figures: a value-vs-effort matrix and a scoring equation" "$base/les-test.html?scn=figs&course=prioritization-novice&lesson=2" 30000
   foreach ($s in 'admin', 'empty', 'archived', 'nocopy', 'auditdenied', 'owner', 'ownernoorg', 'plain', 'member', 'removedadmin', 'denied', 'sharesdenied', 'signedout', 'history', 'snapshotsdenied', 'snapfail', 'noplatform', 'smallplatform') {
     $org = if ($s -eq 'owner') { '&org=orgA' } else { '' }
     $results += Run-Page "company dashboard: $s" "$base/company-test.html?scn=$s$org" 40000

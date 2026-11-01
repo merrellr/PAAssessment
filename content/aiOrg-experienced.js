@@ -34,8 +34,42 @@ window.CONTENT_OVERRIDES["aiOrg-experienced"] = {
         correct: 1,
         explanation: "Keep that prediction in mind: this is exactly the pattern the lesson opens with."
       },
-      image: { src: "images/copilot-org-map.png", alt: "A grid of departments (Sales, Customer Success, Operations, Product, Support, Finance) with a teal path connecting them and a copilot marker placed in Finance" },
+      figures: {
+        "rigor": {
+          "type": "compare",
+          "title": "An internal copilot is still a product",
+          "sub": "Internal stakeholders are users too.",
+          "arrow": true,
+          "columns": [
+            {
+              "label": "Treated like IT work",
+              "tone": "coral",
+              "mark": "x",
+              "items": [
+                "Built in a sprint",
+                "Dropped in Slack",
+                "Nobody validated the problem",
+                "No way to learn and adjust"
+              ],
+              "foot": "Fails quietly: no collapse, just non-use"
+            },
+            {
+              "label": "Treated like product work",
+              "tone": "teal",
+              "mark": "check",
+              "items": [
+                "Validate the problem first",
+                "Involve the users early",
+                "Pilot, then widen",
+                "Build in a way to learn and adjust"
+              ],
+              "foot": "Becomes part of how the team works"
+            }
+          ]
+        }
+      },
       body: `
+        <div data-fig="rigor"></div>
         <p>Most agentic AI conversations point outward: agents for customers, AI features to compete on. But some of the highest-leverage AI work never touches a customer at all. It shows up inside the company, changing how sales reps prep for calls or how support triages tickets. Call these <strong>PM Copilots</strong>.</p>
         <p>Here's the trap: building a copilot for your own team is still product work. It just gets treated like IT work, which is exactly why so many stall out after a promising demo. Someone builds it in a sprint, drops it in Slack, and everyone moves on. Nobody validated the problem, involved the users early, or built in a way to learn and adjust.</p>
         <p>Internal stakeholders are still users. They have workflows, trust issues, and opinions about tools getting shoved into their day. Treat them as an afterthought and the project fails quietly: no dramatic collapse, just quiet non-use.</p>
@@ -66,8 +100,41 @@ window.CONTENT_OVERRIDES["aiOrg-experienced"] = {
     {
       id: 2,
       title: "Lesson 2: Discovery, Finding the Work Worth Automating",
-      image: { src: "images/copilot-lifecycle.png", alt: "The PM Copilot Product Lifecycle shown as five connected stages: Discovery, Pilot, Feedback, Iteration, and Adoption" },
+      figures: {
+        "lifecycle": {
+          "type": "loop",
+          "title": "The PM copilot product lifecycle",
+          "center": "Treat the internal agent like a product",
+          "items": [
+            {
+              "title": "Discovery",
+              "text": "Shadow the team; find painful, high-volume work"
+            },
+            {
+              "title": "Pilot",
+              "text": "Small group, real low-stakes tasks",
+              "tone": "mint"
+            },
+            {
+              "title": "Feedback",
+              "text": "Every correction is a signal",
+              "tone": "amber"
+            },
+            {
+              "title": "Iteration",
+              "text": "Adjust prompts, guardrails, handoffs",
+              "tone": "coral"
+            },
+            {
+              "title": "Adoption",
+              "text": "Measure it like a product",
+              "tone": "navy"
+            }
+          ]
+        }
+      },
       body: `
+        <div data-fig="lifecycle"></div>
         <p>This is the first of five stages you'll walk through in this course. The instinct with agentic AI is to reach for the most ambitious use case. A copilot that handles an entire renewal end to end sounds impressive in a slide. It's also a terrible place to start.</p>
         <p>Good discovery here looks like good discovery anywhere else: sit in on real calls, read a week's worth of support tickets, shadow someone doing the task you assume is automatable. You're looking for work that's <strong>repetitive, high-volume, and low-risk if the agent gets something wrong early on</strong>. Drafting a first-pass follow-up email is a good candidate. Deciding whether to escalate a churn risk is not, at least not yet.</p>
         <p>Ask the team what they'd actually want help with, not what leadership assumes they need. That gap is where most failed pilots come from.</p>
@@ -174,30 +241,28 @@ window.CONTENT_OVERRIDES["aiOrg-experienced"] = {
     {
       id: 5,
       title: "Lesson 5: Iteration, Earning the Next Stage of Rollout",
+      figures: {
+        "gate": {
+          "type": "decision",
+          "title": "Earning the next stage of rollout",
+          "start": "The current version",
+          "question": "Same corrections every week?",
+          "yes": {
+            "label": "Yes",
+            "title": "Iterate",
+            "text": "Fix the prompt, guardrails or scope"
+          },
+          "no": {
+            "label": "No",
+            "title": "Expand the rollout",
+            "text": "It has earned the next group"
+          },
+          "back": "Then check the corrections again"
+        }
+      },
       body: `
         <p>Every round of pilot feedback should change something concrete: adjusting the prompt or guardrails, changing what the agent can do without a human checking its work, or narrowing scope because you tried to solve too much at once.</p>
-        <svg viewBox="0 0 400 120" style="width:100%; height:auto; margin:4px 0 2px;" xmlns="http://www.w3.org/2000/svg">
-          <defs>
-            <marker id="aoeGate" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-              <path d="M0,0 L10,5 L0,10 z" fill="#9AA3AD"/>
-            </marker>
-          </defs>
-          <rect x="6" y="44" width="80" height="30" rx="5" fill="#EEF3FA" stroke="#1A4584" stroke-width="1.2"/>
-          <text x="46" y="63" text-anchor="middle" font-family="'Space Grotesk',sans-serif" font-size="8" font-weight="700" fill="#12305e">Current version</text>
-          <polygon points="170,32 236,59 170,86 104,59" fill="#FBF0E9" stroke="#C0622A" stroke-width="1.2"/>
-          <text x="170" y="55" text-anchor="middle" font-family="'Space Grotesk',sans-serif" font-size="7.5" font-weight="700" fill="#7a3d18">Same corrections</text>
-          <text x="170" y="65" text-anchor="middle" font-family="'Space Grotesk',sans-serif" font-size="7.5" font-weight="700" fill="#7a3d18">every week?</text>
-          <rect x="270" y="10" width="124" height="26" rx="5" fill="#E7F7FC" stroke="#35C2E8" stroke-width="1.2"/>
-          <text x="332" y="26" text-anchor="middle" font-family="sans-serif" font-size="7.5" fill="#12305e">Iterate: prompt / guardrails / scope</text>
-          <rect x="278" y="80" width="116" height="26" rx="5" fill="#EEF9F1" stroke="#2E8B57" stroke-width="1.2"/>
-          <text x="336" y="96" text-anchor="middle" font-family="sans-serif" font-size="7.5" fill="#12305e">Expand the rollout</text>
-          <line x1="86" y1="59" x2="102" y2="59" stroke="#9AA3AD" stroke-width="1.2" marker-end="url(#aoeGate)"/>
-          <line x1="236" y1="50" x2="268" y2="30" stroke="#C0622A" stroke-width="1.2" marker-end="url(#aoeGate)"/>
-          <text x="250" y="34" font-family="sans-serif" font-size="7" fill="#7a3d18">yes</text>
-          <line x1="236" y1="68" x2="276" y2="88" stroke="#2E8B57" stroke-width="1.2" marker-end="url(#aoeGate)"/>
-          <text x="248" y="86" font-family="sans-serif" font-size="7" fill="#256b45">no</text>
-          <path d="M332 36 C332 114, 46 114, 46 76" fill="none" stroke="#9AA3AD" stroke-width="1.1" stroke-dasharray="4 3" marker-end="url(#aoeGate)"/>
-        </svg>
+        <div data-fig="gate"></div>
         <p>Here's the rule worth internalizing: <strong>don't expand the rollout until the current version has earned it.</strong> If a copilot is getting corrected on the same kind of task every week, more users won't fix that. They'll just multiply the frustration. Iteration is where you build the trust that adoption actually depends on.</p>
       `,
       checks: [
@@ -216,8 +281,84 @@ window.CONTENT_OVERRIDES["aiOrg-experienced"] = {
     {
       id: 6,
       title: "Lesson 6: Adoption, Measured Like the Product It Is",
-      image: { src: "images/copilot-adoption-metrics.png", alt: "Four metric cards (Weekly Active Users 68%, Task Success Rate 84%, Time Saved per Task 11 minutes, Voluntary Return Rate 76%) above a bar chart showing weekly active users climbing over eight weeks" },
+      figures: {
+        "metrics": {
+          "type": "stats",
+          "title": "Four numbers that tell you if the copilot is working",
+          "items": [
+            {
+              "label": "Weekly active users",
+              "value": "68%",
+              "text": "of eligible team, up from 22%"
+            },
+            {
+              "label": "Task success rate",
+              "value": "84%",
+              "text": "completed without escalation",
+              "tone": "mint"
+            },
+            {
+              "label": "Time saved per task",
+              "value": "11 min",
+              "text": "median across the pilot group",
+              "tone": "amber"
+            },
+            {
+              "label": "Voluntary return rate",
+              "value": "76%",
+              "text": "used it again without a nudge",
+              "tone": "violet"
+            }
+          ],
+          "columns": {
+            "caption": "Weekly active users, first eight weeks",
+            "values": [
+              {
+                "label": "Wk 1",
+                "value": 22,
+                "display": "22%"
+              },
+              {
+                "label": "Wk 2",
+                "value": 27,
+                "display": "27%"
+              },
+              {
+                "label": "Wk 3",
+                "value": 38,
+                "display": "38%"
+              },
+              {
+                "label": "Wk 4",
+                "value": 43,
+                "display": "43%"
+              },
+              {
+                "label": "Wk 5",
+                "value": 52,
+                "display": "52%"
+              },
+              {
+                "label": "Wk 6",
+                "value": 58,
+                "display": "58%"
+              },
+              {
+                "label": "Wk 7",
+                "value": 65,
+                "display": "65%"
+              },
+              {
+                "label": "Wk 8",
+                "value": 68,
+                "display": "68%"
+              }
+            ]
+          }
+        }
+      },
       body: `
+        <div data-fig="metrics"></div>
         <p>This is the stage most internal AI efforts skip entirely, and it's the one that determines whether the tool survives past its first quarter. If you can't point to numbers showing the copilot is actually helping, it gets quietly deprioritized the moment budget gets tight.</p>
         <p><strong>Weekly active users</strong> among the eligible group tells you whether the tool has staying power beyond initial curiosity. <strong>Task success rate</strong> (the share completed without a human stepping in) tells you if the agent is actually reliable. <strong>Time saved per task</strong> is the number your VP or CFO will care about most, so measure it honestly, not optimistically. And <strong>voluntary return rate</strong> (people coming back without being reminded) is maybe the most honest signal of all. People don't return to tools that waste their time.</p>
       `,

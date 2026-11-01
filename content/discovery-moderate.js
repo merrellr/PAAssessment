@@ -72,6 +72,34 @@ window.CONTENT_OVERRIDES["discovery-moderate"] = {
     {
       id: 2,
       title: "Lesson 2: Collecting Feedback That's Actually Actionable",
+      figures: {
+        "mix": {
+          "type": "compare",
+          "title": "Two kinds of feedback, two questions",
+          "columns": [
+            {
+              "label": "Quantitative",
+              "title": "What, and how widely",
+              "tone": "sky",
+              "icon": "chart",
+              "items": [
+                "Surveys",
+                "Analytics"
+              ]
+            },
+            {
+              "label": "Qualitative",
+              "title": "Why",
+              "tone": "teal",
+              "icon": "chat",
+              "items": [
+                "Interviews",
+                "Support calls"
+              ]
+            }
+          ]
+        }
+      },
       body: `
         <p>Data alone doesn't tell the whole story; anecdotes alone give a skewed one. Good feedback collection blends the two.</p>
         <ul>
@@ -80,18 +108,7 @@ window.CONTENT_OVERRIDES["discovery-moderate"] = {
           <li><strong>Support and success teams</strong> are often the first to hear complaints and feature requests. That channel is free and continuous, so use it.</li>
         </ul>
         <p>The pattern:</p>
-        <svg viewBox="0 0 400 96" style="width:100%; height:auto; margin:4px 0 2px;">
-          <rect x="8" y="14" width="188" height="66" rx="10" fill="#E7F7FC" stroke="#35C2E8" stroke-width="1.3"/>
-          <rect x="204" y="14" width="188" height="66" rx="10" fill="#EEF3FA" stroke="#1A4584" stroke-width="1.3"/>
-          <g text-anchor="middle" font-family="'Space Grotesk',sans-serif">
-            <text x="102" y="36" font-size="11" font-weight="700" fill="#12305e">Quantitative</text>
-            <text x="102" y="54" font-size="8.5" font-weight="400" fill="#4B5768" font-family="sans-serif">surveys, analytics</text>
-            <text x="102" y="70" font-size="9" font-weight="700" fill="#1A4584">what, and how widely</text>
-            <text x="298" y="36" font-size="11" font-weight="700" fill="#12305e">Qualitative</text>
-            <text x="298" y="54" font-size="8.5" font-weight="400" fill="#4B5768" font-family="sans-serif">interviews, support calls</text>
-            <text x="298" y="70" font-size="9" font-weight="700" fill="#1A4584">why</text>
-          </g>
-        </svg>
+        <div data-fig="mix"></div>
       `,
       checks: [
         {
@@ -119,25 +136,33 @@ window.CONTENT_OVERRIDES["discovery-moderate"] = {
     {
       id: 3,
       title: "Lesson 3: Close the Loop",
+      figures: {
+        "loop": {
+          "type": "loop",
+          "title": "Closing the feedback loop",
+          "center": "When users see it landed, they keep telling you",
+          "items": [
+            {
+              "title": "Users give feedback"
+            },
+            {
+              "title": "The team decides and acts",
+              "tone": "amber"
+            },
+            {
+              "title": "Ship it, or explain why not",
+              "tone": "violet"
+            },
+            {
+              "title": "Users see it landed",
+              "tone": "mint"
+            }
+          ]
+        }
+      },
       body: `
         <p>Gathering feedback isn't enough. If users don't see that their input went anywhere, they stop giving it. Closing the loop is how you keep the channel alive.</p>
-        <svg viewBox="0 0 400 150" style="width:100%; height:auto; margin:4px 0 2px;">
-          <defs>
-            <marker id="flArrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
-              <path d="M0 0 L10 5 L0 10 z" fill="#9AA3AD"/>
-            </marker>
-          </defs>
-          <g font-family="'Space Grotesk',sans-serif" font-size="9.5" font-weight="700" fill="#12305e" text-anchor="middle">
-            <rect x="30" y="16" width="120" height="32" rx="9" fill="#EEF3FA" stroke="#1A4584" stroke-width="1.2"/><text x="90" y="36">Users give feedback</text>
-            <rect x="250" y="16" width="120" height="32" rx="9" fill="#E7F7FC" stroke="#35C2E8" stroke-width="1.2"/><text x="310" y="36">Team decides + acts</text>
-            <rect x="250" y="102" width="120" height="32" rx="9" fill="#EEF3FA" stroke="#1A4584" stroke-width="1.2"/><text x="310" y="122">Ship or explain why not</text>
-            <rect x="30" y="102" width="120" height="32" rx="9" fill="#E7F7FC" stroke="#35C2E8" stroke-width="1.2"/><text x="90" y="118">Users see it landed</text>
-          </g>
-          <line x1="150" y1="32" x2="248" y2="32" stroke="#9AA3AD" stroke-width="1.5" marker-end="url(#flArrow)"/>
-          <line x1="310" y1="48" x2="310" y2="100" stroke="#9AA3AD" stroke-width="1.5" marker-end="url(#flArrow)"/>
-          <line x1="250" y1="118" x2="152" y2="118" stroke="#9AA3AD" stroke-width="1.5" marker-end="url(#flArrow)"/>
-          <line x1="90" y1="100" x2="90" y2="50" stroke="#9AA3AD" stroke-width="1.5" marker-end="url(#flArrow)"/>
-        </svg>
+        <div data-fig="loop"></div>
         <p>Three practices that close it: <strong>be transparent about decisions</strong>, including when feedback can't be acted on and why; <strong>keep a roadmap visible</strong> to key stakeholders so they can see their input in the plan; and <strong>run pilot groups</strong> so users test changes before wide release and feel part of the process.</p>
       `,
       checks: [
@@ -166,6 +191,24 @@ window.CONTENT_OVERRIDES["discovery-moderate"] = {
     {
       id: 4,
       title: "Lesson 4: Feedback vs. Market Signal",
+      figures: {
+        "venn": {
+          "type": "venn",
+          "title": "Feedback vs market signal",
+          "foot": "Need alone can be niche. Opportunity alone can be a solution nobody wants.",
+          "left": {
+            "title": "Real user need",
+            "text": "What people struggle with"
+          },
+          "right": {
+            "title": "Market opportunity",
+            "text": "Where the business can win"
+          },
+          "overlap": {
+            "title": "Prioritize here"
+          }
+        }
+      },
       body: `
         <p>Not all user feedback reflects a broader market need. Some of it is one person's individual pain point; some of it points at a trend showing up across the industry. A big part of doing discovery well is telling those apart.</p>
         <p>Two techniques:</p>
@@ -173,17 +216,7 @@ window.CONTENT_OVERRIDES["discovery-moderate"] = {
           <li><strong>Cross-functional reviews.</strong> Sit down regularly with sales, marketing, and support to discuss which feedback lines up with broader market movement and which doesn't.</li>
           <li><strong>Segment the feedback.</strong> Break it down by role, region, or company size. If the same theme shows up across multiple segments, it's a signal. If it's isolated to one, treat it as a data point, not a mandate.</li>
         </ul>
-        <svg viewBox="0 0 400 150" style="width:100%; height:auto; margin:6px 0 2px;">
-          <circle cx="150" cy="75" r="62" fill="#E7F7FC" fill-opacity="0.7" stroke="#35C2E8" stroke-width="1.3"/>
-          <circle cx="250" cy="75" r="62" fill="#EEF3FA" fill-opacity="0.7" stroke="#1A4584" stroke-width="1.3"/>
-          <text x="112" y="70" text-anchor="middle" font-family="'Space Grotesk',sans-serif" font-size="10" font-weight="700" fill="#12305e">Real user</text>
-          <text x="112" y="84" text-anchor="middle" font-family="'Space Grotesk',sans-serif" font-size="10" font-weight="700" fill="#12305e">need</text>
-          <text x="288" y="70" text-anchor="middle" font-family="'Space Grotesk',sans-serif" font-size="10" font-weight="700" fill="#12305e">Market</text>
-          <text x="288" y="84" text-anchor="middle" font-family="'Space Grotesk',sans-serif" font-size="10" font-weight="700" fill="#12305e">opportunity</text>
-          <text x="200" y="72" text-anchor="middle" font-family="sans-serif" font-size="8.5" font-weight="700" fill="#12305e">prioritize</text>
-          <text x="200" y="83" text-anchor="middle" font-family="sans-serif" font-size="8.5" font-weight="700" fill="#12305e">here</text>
-          <text x="200" y="140" text-anchor="middle" font-family="sans-serif" font-size="9" fill="#9AA3AD">need alone can be niche; opportunity alone can be a solution nobody wants</text>
-        </svg>
+        <div data-fig="venn"></div>
       `,
       checks: [
         {

@@ -69,21 +69,32 @@ window.CONTENT_OVERRIDES["prioritization-advanced"] = {
     {
       id: 2,
       title: "Lesson 2: A Shared, Legible Method",
+      figures: {
+        "method": {
+          "type": "steps",
+          "title": "A shared, legible method",
+          "items": [
+            {
+              "title": "Teams A, B and C",
+              "text": "Each with its own backlog",
+              "tone": "sand"
+            },
+            {
+              "title": "One method",
+              "text": "Shared definitions and data",
+              "tone": "teal"
+            },
+            {
+              "title": "Ranked and comparable",
+              "text": "Across every team",
+              "tone": "navy"
+            }
+          ]
+        }
+      },
       body: `
         <p>A prioritization method other teams will actually adopt has three properties.</p>
-        <svg viewBox="0 0 400 150" style="width:100%; height:auto; margin:4px 0 2px;">
-          <g font-family="'Space Grotesk',sans-serif" font-size="9" font-weight="700" fill="#12305e" text-anchor="middle">
-            <rect x="20" y="18" width="80" height="26" rx="7" fill="#E7F7FC" stroke="#35C2E8" stroke-width="1.2"/><text x="60" y="35">Team A</text>
-            <rect x="20" y="62" width="80" height="26" rx="7" fill="#E7F7FC" stroke="#35C2E8" stroke-width="1.2"/><text x="60" y="79">Team B</text>
-            <rect x="20" y="106" width="80" height="26" rx="7" fill="#E7F7FC" stroke="#35C2E8" stroke-width="1.2"/><text x="60" y="123">Team C</text>
-            <rect x="160" y="52" width="110" height="46" rx="10" fill="#EEF3FA" stroke="#1A4584" stroke-width="1.4"/><text x="215" y="72">one method</text><text x="215" y="86" font-size="7.5" font-weight="400" fill="#4B5768">shared defs + data</text>
-            <rect x="322" y="52" width="66" height="46" rx="10" fill="#EEF9F1" stroke="#2E8B57" stroke-width="1.3"/><text x="355" y="72">ranked</text><text x="355" y="85" font-size="7.5" font-weight="400" fill="#4B5768">comparable</text>
-          </g>
-          <g stroke="#9AA3AD" stroke-width="1.4">
-            <line x1="100" y1="31" x2="158" y2="62"/><line x1="100" y1="75" x2="158" y2="75"/><line x1="100" y1="119" x2="158" y2="88"/>
-            <line x1="270" y1="75" x2="320" y2="75"/>
-          </g>
-        </svg>
+        <div data-fig="method"></div>
         <p><strong>Shared criteria and definitions</strong>, so "impact" and "value" mean the same thing on Team A and Team C. <strong>A common data source</strong>: one place everyone pulls the metrics from, so nobody's arguing from a different number. And <strong>defensible outputs</strong>: each item's rank traceable to its inputs, so the order survives scrutiny from any direction. When all three hold, two teams' priority lists are actually comparable, which is the precondition for resolving a conflict between them.</p>
       `,
       checks: [
@@ -158,22 +169,37 @@ window.CONTENT_OVERRIDES["prioritization-advanced"] = {
     {
       id: 4,
       title: "Lesson 4: Portfolio Thinking",
+      figures: {
+        "portfolio": {
+          "type": "split",
+          "title": "Total product and engineering capacity",
+          "sub": "Set the cross-product split first, then each team prioritizes within its slice.",
+          "foot": "Skip this step and the loudest team's backlog sets the split by default. Rebalance on a cadence as products change stage.",
+          "items": [
+            {
+              "label": "Product A",
+              "value": 45,
+              "tone": "teal",
+              "text": "growth"
+            },
+            {
+              "label": "Product B",
+              "value": 28,
+              "tone": "sand",
+              "text": "mature"
+            },
+            {
+              "label": "Product C",
+              "value": 27,
+              "tone": "mint",
+              "text": "growth"
+            }
+          ]
+        }
+      },
       body: `
         <p>With multiple products or teams, prioritization isn't only <em>within</em> a backlog. It's allocating capacity <em>across</em> them. That's portfolio management.</p>
-        <svg viewBox="0 0 400 118" style="width:100%; height:auto; margin:4px 0 2px;" xmlns="http://www.w3.org/2000/svg">
-          <text x="8" y="16" font-family="'Space Grotesk',sans-serif" font-size="8.5" font-weight="700" fill="#12305e">Total product + engineering capacity</text>
-          <rect x="8" y="24" width="176" height="30" fill="#EEF3FA" stroke="#1A4584" stroke-width="1.1"/>
-          <rect x="184" y="24" width="112" height="30" fill="#E7F7FC" stroke="#35C2E8" stroke-width="1.1"/>
-          <rect x="296" y="24" width="96" height="30" fill="#EEF3FA" stroke="#1A4584" stroke-width="1.1"/>
-          <g font-family="sans-serif" font-size="7.5" fill="#12305e" text-anchor="middle">
-            <text x="96" y="38" font-weight="700">Product A &#183; 45%</text><text x="96" y="48">growth</text>
-            <text x="240" y="38" font-weight="700">Product B &#183; 28%</text><text x="240" y="48">mature</text>
-            <text x="344" y="38" font-weight="700">C &#183; 27%</text><text x="344" y="48">growth</text>
-          </g>
-          <text x="8" y="76" font-family="sans-serif" font-size="8" fill="#4B5768">Set the cross-product split first &#8212; then each team prioritizes within its slice.</text>
-          <text x="8" y="94" font-family="sans-serif" font-size="8" fill="#4B5768">Skip this step and the loudest team's backlog sets the split by default.</text>
-          <text x="8" y="112" font-family="sans-serif" font-size="8" fill="#9AA3AD">Rebalance on a cadence as products change stage.</text>
-        </svg>
+        <div data-fig="portfolio"></div>
       `,
       steps: [
         { title: "Classify products by stage", detail: "Growth-stage products that need investment to capture a market, and mature products that generate cash but need less. The right prioritization pressure is different for each." },

@@ -64,28 +64,41 @@ window.CONTENT_OVERRIDES["aiOrg-advanced"] = {
     {
       id: 2,
       title: "Lesson 2: What AI Does Well, What Only People Do",
+      figures: {
+        "what-how": {
+          "type": "compare",
+          "title": "What AI does well, what only people do",
+          "columns": [
+            {
+              "label": "AI handles the \"what\"",
+              "tone": "sky",
+              "icon": "bolt",
+              "items": [
+                "24/7 availability on common issues",
+                "Data-driven personalization",
+                "Routing and summarizing history",
+                "Scaled, instant, consistent"
+              ],
+              "foot": "Efficient, not empathetic"
+            },
+            {
+              "label": "People deliver the \"how\"",
+              "tone": "teal",
+              "icon": "heart",
+              "items": [
+                "Empathy for charged moments",
+                "Creative, off-script problem-solving",
+                "Bending rules when it's right",
+                "Building rapport and trust"
+              ],
+              "foot": "Turns satisfied into loyal"
+            }
+          ]
+        }
+      },
       body: `
         <p>Blending the two starts with being honest about each one's strengths.</p>
-        <svg viewBox="0 0 400 170" style="width:100%; height:auto; margin:4px 0 2px;">
-          <rect x="6" y="8" width="188" height="154" rx="10" fill="#E7F7FC" stroke="#35C2E8" stroke-width="1.3"/>
-          <rect x="206" y="8" width="188" height="154" rx="10" fill="#EEF3FA" stroke="#1A4584" stroke-width="1.3"/>
-          <text x="100" y="28" text-anchor="middle" font-family="'Space Grotesk',sans-serif" font-size="11" font-weight="700" fill="#12305e">AI handles the "what"</text>
-          <text x="300" y="28" text-anchor="middle" font-family="'Space Grotesk',sans-serif" font-size="11" font-weight="700" fill="#12305e">People deliver the "how"</text>
-          <g font-family="sans-serif" font-size="9.5" fill="#4B5768">
-            <text x="18" y="52">24/7 availability on common issues</text>
-            <text x="18" y="74">Data-driven personalization</text>
-            <text x="18" y="96">Routing, summarizing history</text>
-            <text x="18" y="118">Scaled, instant, consistent</text>
-            <text x="18" y="148" fill="#9AA3AD">efficient, not empathetic</text>
-          </g>
-          <g font-family="sans-serif" font-size="9.5" fill="#4B5768">
-            <text x="218" y="52">Empathy for charged moments</text>
-            <text x="218" y="74">Creative, off-script problem-solving</text>
-            <text x="218" y="96">Bending rules when it's right</text>
-            <text x="218" y="118">Building rapport and trust</text>
-            <text x="218" y="148" fill="#9AA3AD">turns satisfied into loyal</text>
-          </g>
-        </svg>
+        <div data-fig="what-how"></div>
         <p>AI analyzes history and behavior to anticipate needs, automates routine inquiries around the clock, and summarizes long threads so an agent is up to speed in seconds. A person reads between the lines, responds to frustration or delight with genuine care, thinks creatively when a problem falls outside the script, and builds the trust that turns a satisfied customer into an advocate.</p>
       `,
       checks: [
@@ -114,29 +127,37 @@ window.CONTENT_OVERRIDES["aiOrg-advanced"] = {
     {
       id: 3,
       title: "Lesson 3: Engineering the Quick Win",
+      figures: {
+        "quick-win": {
+          "type": "steps",
+          "title": "Engineering the quick win",
+          "foot": "AI does the legwork. The person delivers the part that creates loyalty.",
+          "items": [
+            {
+              "title": "AI watches",
+              "text": "Usage and sentiment",
+              "tone": "sky"
+            },
+            {
+              "title": "Spots the moment",
+              "tone": "sky"
+            },
+            {
+              "title": "Routes to the right person",
+              "tone": "sky"
+            },
+            {
+              "title": "A person delivers the quick win",
+              "tone": "teal"
+            }
+          ]
+        }
+      },
       body: `
         <p>The forward-thinking model isn't AI <em>or</em> people. It's <strong>collaborative intelligence</strong>: AI as a co-pilot that identifies the perfect moment for a human to step in and deliver a "quick win" that builds loyalty.</p>
         <p><strong>Proactive, personal outreach.</strong> AI flags an account that keeps failing to use a new feature correctly. Instead of firing off a generic help article, it alerts a specialist, who sends a short personal note: "I noticed you were working with the new dashboard. Would a quick five-minute walkthrough help? How about tomorrow at 10?" The customer feels seen, learns the feature, and gets more invested in the product.</p>
         <p><strong>Empathetic escalation.</strong> Sentiment analysis detects a frustrated tone in a chat and hands it to a senior agent with the note "high frustration detected." The agent opens with "I'm sorry you're having a hard time. I've read the history and I'm taking personal ownership of this." A negative moment becomes a trust-building one.</p>
-        <svg viewBox="0 0 400 108" style="width:100%; height:auto; margin:4px 0 2px;" xmlns="http://www.w3.org/2000/svg">
-          <defs>
-            <marker id="aoaQw" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-              <path d="M0,0 L10,5 L0,10 z" fill="#9AA3AD"/>
-            </marker>
-          </defs>
-          <g text-anchor="middle" font-family="'Space Grotesk',sans-serif" font-size="7.5" font-weight="700" fill="#12305e">
-            <rect x="6" y="30" width="86" height="32" rx="5" fill="#E7F7FC" stroke="#35C2E8" stroke-width="1.2"/><text x="49" y="43">AI watches</text><text x="49" y="53" font-size="7" font-weight="400" fill="#4B5768">usage, sentiment</text>
-            <rect x="106" y="30" width="86" height="32" rx="5" fill="#E7F7FC" stroke="#35C2E8" stroke-width="1.2"/><text x="149" y="43">Spots the</text><text x="149" y="53">moment</text>
-            <rect x="206" y="30" width="86" height="32" rx="5" fill="#E7F7FC" stroke="#35C2E8" stroke-width="1.2"/><text x="249" y="43">Routes to the</text><text x="249" y="53">right person</text>
-            <rect x="306" y="30" width="88" height="32" rx="5" fill="#EEF9F1" stroke="#2E8B57" stroke-width="1.2"/><text x="350" y="43">Person delivers</text><text x="350" y="53">the quick win</text>
-          </g>
-          <g stroke="#9AA3AD" stroke-width="1.2">
-            <line x1="92" y1="46" x2="104" y2="46" marker-end="url(#aoaQw)"/>
-            <line x1="192" y1="46" x2="204" y2="46" marker-end="url(#aoaQw)"/>
-            <line x1="292" y1="46" x2="304" y2="46" marker-end="url(#aoaQw)"/>
-          </g>
-          <text x="200" y="84" text-anchor="middle" font-family="sans-serif" font-size="7.5" fill="#4B5768">AI does the legwork; the human delivers the part that creates loyalty.</text>
-        </svg>
+        <div data-fig="quick-win"></div>
         <p>In both cases the AI does the legwork: watching for the moment. The human delivers the part that creates loyalty.</p>
       `,
       checks: [

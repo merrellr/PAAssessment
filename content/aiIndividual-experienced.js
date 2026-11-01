@@ -64,8 +64,44 @@ window.CONTENT_OVERRIDES["aiIndividual-experienced"] = {
     {
       id: 2,
       title: "Lesson 2: Start With Human-Led Conversations",
-      image: { src: "images/discovery-loop.png", alt: "The Discovery Loop: five stages arranged in a circle, alternating human-led (Customer Conversations, Sense Making, Validation and Testing) and agent-assisted (Synthesis and Clustering, Hypothesis Expansion), all built around the center message: Humans Own the Insight, AI accelerates the loop" },
+      figures: {
+        "loop": {
+          "type": "loop",
+          "title": "The discovery loop",
+          "sub": "Human-led and agent-assisted stages take turns.",
+          "center": "Humans own the insight. AI accelerates the loop.",
+          "items": [
+            {
+              "tag": "Human led",
+              "title": "Customer conversations",
+              "tone": "navy"
+            },
+            {
+              "tag": "Agent assisted",
+              "title": "Synthesis and clustering",
+              "tone": "sky"
+            },
+            {
+              "tag": "Human led",
+              "title": "Sense making",
+              "text": "Human judgment",
+              "tone": "navy"
+            },
+            {
+              "tag": "Agent assisted",
+              "title": "Hypothesis expansion",
+              "tone": "sky"
+            },
+            {
+              "tag": "Human led",
+              "title": "Validation and testing",
+              "tone": "navy"
+            }
+          ]
+        }
+      },
       body: `
+        <div data-fig="loop"></div>
         <p>No AI workflow can compensate for skipping real conversations. Product discovery still begins the way it always has: someone on the product team talks directly to a customer and listens without trying to sell, validate, or steer toward a predetermined outcome.</p>
         <p>Customers rarely describe their problems cleanly. They circle around them, contradict themselves, and use language that doesn't map to your roadmap. They reveal priorities through frustration and workarounds rather than tidy feature requests. Those signals are easy to miss if discovery is reduced to text analysis alone. A transcript doesn't capture tone, a summary doesn't capture tension, and a cluster doesn't capture why something feels urgent.</p>
         <p>This is why the people building the product need to hear customers themselves, not just through researchers or summaries. Direct exposure builds intuition, and intuition is still a core product skill. AI belongs later in the process, not here.</p>
@@ -96,25 +132,42 @@ window.CONTENT_OVERRIDES["aiIndividual-experienced"] = {
     {
       id: 3,
       title: "Lesson 3: Use Agents to Synthesize, Not Interpret",
+      figures: {
+        "line": {
+          "type": "compare",
+          "title": "Where the line sits",
+          "sub": "The agent synthesizes. The human interprets.",
+          "arrow": true,
+          "columns": [
+            {
+              "label": "Agent",
+              "title": "Synthesize",
+              "tone": "sky",
+              "icon": "layers",
+              "items": [
+                "Group feedback by recurring theme",
+                "Surface the common phrases",
+                "Spot patterns across more data than a person could read"
+              ]
+            },
+            {
+              "label": "Human",
+              "title": "Interpret",
+              "tone": "teal",
+              "icon": "user",
+              "items": [
+                "Say what a cluster actually means",
+                "Decide what's worth acting on",
+                "Rewrite labels in the customer's own words, not product taxonomy"
+              ]
+            }
+          ]
+        }
+      },
       body: `
         <p>Once you have real conversations, this is where agents earn their keep. Most teams drown in qualitative data: interview notes, support tickets, and sales call notes scattered across half a dozen tools. AI agents are excellent at organizing that chaos: grouping feedback by recurring themes, surfacing common phrases, spotting patterns across more data than any human could reasonably process alone.</p>
         <p>What they shouldn't do is interpret meaning on your behalf. When agents label clusters, those labels need to be reviewed, and often rewritten, by humans. Customers rarely talk in product taxonomy. They talk in lived experience, and preserving their actual language matters because it carries intent and emotion that a tidy label erases.</p>
-        <svg viewBox="0 0 400 138" style="width:100%; height:auto; margin:4px 0 2px;" xmlns="http://www.w3.org/2000/svg">
-          <line x1="200" y1="10" x2="200" y2="128" stroke="#E3E9F0" stroke-width="1.5"/>
-          <text x="200" y="122" text-anchor="middle" font-family="'Space Grotesk',sans-serif" font-size="7.5" font-weight="700" fill="#9AA3AD">the line</text>
-          <text x="100" y="20" text-anchor="middle" font-family="'Space Grotesk',sans-serif" font-size="9" font-weight="700" fill="#35C2E8">Agent: synthesize</text>
-          <text x="300" y="20" text-anchor="middle" font-family="'Space Grotesk',sans-serif" font-size="9" font-weight="700" fill="#1A4584">Human: interpret</text>
-          <g font-family="sans-serif" font-size="8" fill="#4B5768">
-            <text x="14" y="42">group feedback by recurring theme</text>
-            <text x="14" y="62">surface the common phrases</text>
-            <text x="14" y="82">spot patterns across more data</text>
-            <text x="14" y="102">than a person could read</text>
-            <text x="212" y="42">say what a cluster actually means</text>
-            <text x="212" y="62">decide what's worth acting on</text>
-            <text x="212" y="82">rewrite labels in the customer's</text>
-            <text x="212" y="102">own words, not product taxonomy</text>
-          </g>
-        </svg>
+        <div data-fig="line"></div>
         <p>A good test: if a synthesized insight sounds like internal jargon rather than something a customer would actually say, that's your signal to intervene.</p>
       `,
       checks: [

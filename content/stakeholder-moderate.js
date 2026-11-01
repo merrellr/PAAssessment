@@ -33,23 +33,43 @@ window.CONTENT_OVERRIDES["stakeholder-moderate"] = {
         correct: 1,
         explanation: "See if the breakdown below matches this."
       },
+      figures: {
+        "roles": {
+          "type": "cards",
+          "title": "What each role needs from you",
+          "sub": "The PM is the connective tissue.",
+          "cols": 2,
+          "items": [
+            {
+              "icon": "flag",
+              "title": "Product owner",
+              "text": "Priorities clear enough to turn into stories",
+              "tone": "teal"
+            },
+            {
+              "icon": "eye",
+              "title": "UX and UI design",
+              "text": "The user problem and success criteria, early",
+              "tone": "amber"
+            },
+            {
+              "icon": "gear",
+              "title": "Engineering",
+              "text": "Stable scope, the \"why\", and room to shape the how",
+              "tone": "violet"
+            },
+            {
+              "icon": "shield",
+              "title": "Quality assurance",
+              "text": "Acceptance criteria and a shared definition of done",
+              "tone": "coral"
+            }
+          ]
+        }
+      },
       body: `
         <p>Creating an impactful product isn't just about the product itself. It's about the team behind it. A well-rounded product team requires a diverse set of skills and clearly understood roles. Step through the core roles you'll typically find on a strong product team.</p>
-        <svg viewBox="0 0 400 156" style="width:100%; height:auto; margin:4px 0 2px;" xmlns="http://www.w3.org/2000/svg">
-          <text x="8" y="14" font-family="'Space Grotesk',sans-serif" font-size="8.5" font-weight="700" fill="#12305e">What each role needs from you (the PM)</text>
-          <g font-family="'Space Grotesk',sans-serif" font-size="8" font-weight="700" fill="#12305e" text-anchor="middle">
-            <rect x="8" y="24" width="104" height="26" rx="5" fill="#EEF3FA" stroke="#1A4584" stroke-width="1"/><text x="60" y="41">Product Owner</text>
-            <rect x="8" y="56" width="104" height="26" rx="5" fill="#EEF3FA" stroke="#1A4584" stroke-width="1"/><text x="60" y="73">UX / UI Design</text>
-            <rect x="8" y="88" width="104" height="26" rx="5" fill="#EEF3FA" stroke="#1A4584" stroke-width="1"/><text x="60" y="105">Engineering</text>
-            <rect x="8" y="120" width="104" height="26" rx="5" fill="#EEF3FA" stroke="#1A4584" stroke-width="1"/><text x="60" y="137">Quality Assurance</text>
-          </g>
-          <g font-family="sans-serif" font-size="8" fill="#4B5768">
-            <text x="124" y="40">priorities clear enough to turn into stories</text>
-            <text x="124" y="72">the user problem and success criteria, early</text>
-            <text x="124" y="104">stable scope, the "why", room to shape the how</text>
-            <text x="124" y="136">acceptance criteria and a shared definition of done</text>
-          </g>
-        </svg>
+        <div data-fig="roles"></div>
       `,
       steps: [
         { title: "Product Manager", detail: "The linchpin between stakeholders and the development team. Responsible for market research, defining features, prioritizing the roadmap, and aligning the product with business strategy." },

@@ -7,6 +7,7 @@ import path from 'node:path';
 import vm from 'node:vm';
 import { fileURLToPath } from 'node:url';
 import '../lesson-blocks.js';   // LessonBlocks.text: the words in a lesson's richer blocks (stories, practice, data)
+import '../lesson-figures.js';  // PAFig.text: the words in a lesson's figures
 
 const root = path.join(path.dirname(fileURLToPath(import.meta.url)), '..');
 
@@ -63,10 +64,11 @@ export function renderIndex(items) {
     'window.PA_SEARCH = ' + JSON.stringify(items) + ';\n';
 }
 
-// Everything a lesson teaches, as plain text: the body (diagrams left out), its blocks, the steps, and each quick check's question,
+// Everything a lesson teaches, as plain text: the body (diagrams left out), the words in its figures, its blocks, the steps, and each quick check's question,
 // right answer and explanation.
 function lessonText(l) {
   const parts = [plain(String(l.body || '').replace(/<svg[\s\S]*?<\/svg>/gi, ' '))];
+  Object.keys(l.figures || {}).forEach(k => parts.push(globalThis.PAFig.text(l.figures[k])));
   if (l.blocks) parts.push(globalThis.LessonBlocks.text(l.blocks));
   (l.steps || []).forEach(st => parts.push(plain(st.title) + ': ' + plain(st.detail)));
   (l.checks || []).forEach(c => {

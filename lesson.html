@@ -10,7 +10,7 @@
 <link rel="apple-touch-icon" href="/images/icons/apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@600&family=Lato:ital,wght@0,300;0,400;0,700;0,900;1,400&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@600&family=Fraunces:ital,opsz,wght@0,9..144,600;1,9..144,500&family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@600&family=Lato:ital,wght@0,300;0,400;0,700;0,900;1,400&display=swap" rel="stylesheet">
 <script src="pa-prefs.js"></script>
 <style>
   :root{
@@ -82,8 +82,6 @@
   #lessonBody ul{ margin: 0 0 14px; padding-left: 20px; }
   #lessonBody li{ line-height:1.6; color: var(--ink-soft); margin-bottom: 8px; }
   #lessonBody strong{ color: var(--ink); }
-  .lesson-image{ width:100%; border-radius: 10px; border: 1px solid var(--line); margin-bottom: 16px; display:block; }
-  .lesson-image-caption{ font-size: 0.7812rem; color: var(--gray); text-align:center; margin: -8px 0 18px; }
 
   .check-box{ background:var(--bg); border: 1.5px solid var(--line); border-radius: 12px; padding: 18px 20px; margin-top: 24px; }
   .check-box .check-eyebrow{ font-size: 0.6875rem; font-weight:600; letter-spacing:0.06em; text-transform:uppercase; color: var(--cyan); display:block; margin-bottom: 8px; }
@@ -168,11 +166,13 @@
 </style>
 <link rel="stylesheet" href="pa-theme.css">
 <link rel="stylesheet" href="lesson-blocks.css">
+<link rel="stylesheet" href="lesson-figures.css">
 <script src="analytics.js"></script>
 <script src="company-core.js"></script>
 <script src="notify-core.js"></script>
 <script src="badges-core.js"></script>
 <script src="lesson-blocks.js"></script>
+<script src="lesson-figures.js"></script>
 </head>
 <body>
 <script src="pa-shell.js"></script>
@@ -514,11 +514,9 @@ function renderLesson(){
   // rather than just absorbing information passively.
   renderChecksInto('preCheckContainer', lesson.preCheck ? [lesson.preCheck] : null);
 
-  const imageHtml = lesson.image
-    ? `<img class="lesson-image" src="${lesson.image.src}" alt="${lesson.image.alt}"><div class="lesson-image-caption">${lesson.image.alt}</div>`
-    : '';
   const bodyEl = document.getElementById('lessonBody');
-  bodyEl.innerHTML = imageHtml + (lesson.body || '');
+  bodyEl.innerHTML = lesson.body || '';
+  if (lesson.figures && window.PAFig) PAFig.mount(bodyEl, lesson.figures);
   if (lesson.blocks && window.LessonBlocks) LessonBlocks.render(bodyEl, lesson.blocks);
   renderRail(lesson);
 

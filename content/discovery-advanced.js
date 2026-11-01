@@ -75,43 +75,77 @@ window.CONTENT_OVERRIDES["discovery-advanced"] = {
     {
       id: 2,
       title: "Lesson 2: Empathy Maps and Living Personas",
+      figures: {
+        "map": {
+          "type": "cards",
+          "title": "The four quadrants of an empathy map",
+          "cols": 2,
+          "items": [
+            {
+              "icon": "chat",
+              "label": "Says",
+              "title": "In interviews and support tickets",
+              "tone": "teal"
+            },
+            {
+              "icon": "spark",
+              "label": "Thinks",
+              "title": "But doesn't voice",
+              "tone": "violet"
+            },
+            {
+              "icon": "hand",
+              "label": "Does",
+              "title": "The actual, observed workflow",
+              "tone": "amber"
+            },
+            {
+              "icon": "heart",
+              "label": "Feels",
+              "title": "The emotion underneath it",
+              "tone": "coral"
+            }
+          ]
+        },
+        "map-filled": {
+          "type": "cards",
+          "title": "A filled-in empathy map",
+          "sub": "Says \"fine\", but does a weekly workaround and feels resentful.",
+          "foot": "That gap, not the stated feedback, is the churn risk.",
+          "cols": 2,
+          "items": [
+            {
+              "icon": "chat",
+              "label": "Says",
+              "title": "\"The reports are fine. We just export to a sheet.\"",
+              "tone": "teal"
+            },
+            {
+              "icon": "spark",
+              "label": "Thinks",
+              "title": "\"This wasn't built for a team our size.\"",
+              "tone": "violet"
+            },
+            {
+              "icon": "hand",
+              "label": "Does",
+              "title": "Exports every Monday and rebuilds the same pivot by hand",
+              "tone": "amber"
+            },
+            {
+              "icon": "heart",
+              "label": "Feels",
+              "title": "Quietly resentful; would not champion the renewal",
+              "tone": "coral"
+            }
+          ]
+        }
+      },
       body: `
         <p>An <strong>empathy map</strong> organizes what you learn into four quadrants: what the user <em>says</em>, <em>thinks</em>, <em>does</em>, and <em>feels</em>. The gaps between quadrants are often the most revealing part: what someone says versus what they actually do, or what they do versus how they feel about it.</p>
-        <svg viewBox="0 0 400 170" style="width:100%; height:auto; margin:4px 0 2px;">
-          <line x1="200" y1="12" x2="200" y2="158" stroke="#E3E9F0" stroke-width="1"/>
-          <line x1="14" y1="85" x2="386" y2="85" stroke="#E3E9F0" stroke-width="1"/>
-          <g font-family="'Space Grotesk',sans-serif" font-size="12" font-weight="700" fill="#12305e" text-anchor="middle">
-            <text x="107" y="42">SAYS</text>
-            <text x="293" y="42">THINKS</text>
-            <text x="107" y="122">DOES</text>
-            <text x="293" y="122">FEELS</text>
-          </g>
-          <g font-family="sans-serif" font-size="8.5" fill="#4B5768" text-anchor="middle">
-            <text x="107" y="58">in interviews and support tickets</text>
-            <text x="293" y="58">but doesn't voice</text>
-            <text x="107" y="138">the actual observed workflow</text>
-            <text x="293" y="138">the emotion underneath it</text>
-          </g>
-        </svg>
+        <div data-fig="map"></div>
         <p>Here's one filled in for a real person, an operations manager at a mid-market customer:</p>
-        <svg viewBox="0 0 400 214" style="width:100%; height:auto; margin:4px 0 2px;">
-          <line x1="200" y1="10" x2="200" y2="176" stroke="#E3E9F0" stroke-width="1"/>
-          <line x1="12" y1="93" x2="388" y2="93" stroke="#E3E9F0" stroke-width="1"/>
-          <g font-family="'Space Grotesk',sans-serif" font-size="10" font-weight="700" fill="#12305e">
-            <text x="18" y="26">SAYS</text><text x="214" y="26">THINKS</text>
-            <text x="18" y="112">DOES</text><text x="214" y="112">FEELS</text>
-          </g>
-          <g font-family="sans-serif" font-size="8.5" fill="#4B5768">
-            <text x="18" y="42">"The reports are fine —</text><text x="18" y="54">we just export to a sheet."</text>
-            <text x="214" y="42">"This wasn't built for a</text><text x="214" y="54">team our size."</text>
-            <text x="18" y="128">Exports every Monday and</text><text x="18" y="140">rebuilds the same pivot</text><text x="18" y="152">by hand.</text>
-            <text x="214" y="128">Quietly resentful; would</text><text x="214" y="140">not champion the renewal.</text>
-          </g>
-          <g text-anchor="middle" font-family="sans-serif" font-size="8.5" fill="#C0622A">
-            <text x="200" y="196">Says "fine", but does a weekly workaround and feels resentful.</text>
-            <text x="200" y="208">That gap — not the stated feedback — is the churn risk.</text>
-          </g>
-        </svg>
+        <div data-fig="map-filled"></div>
         <p>Build empathy maps from interviews and direct observation, then turn them into <strong>personas that stay alive</strong>: not a one-time slide, but a living description of each group's daily experience, goals, pain points, and technical comfort, updated as you learn more.</p>
       `,
       checks: [
@@ -140,25 +174,33 @@ window.CONTENT_OVERRIDES["discovery-advanced"] = {
     {
       id: 3,
       title: "Lesson 3: Discovery Systems, Not Discovery Sprints",
+      figures: {
+        "system": {
+          "type": "loop",
+          "title": "A discovery system runs all the time",
+          "center": "Not a sprint: a loop that keeps turning",
+          "items": [
+            {
+              "title": "Watch the KPIs"
+            },
+            {
+              "title": "Study wins and fails",
+              "tone": "amber"
+            },
+            {
+              "title": "Ship a small change",
+              "tone": "violet"
+            },
+            {
+              "title": "Validate it",
+              "tone": "mint"
+            }
+          ]
+        }
+      },
       body: `
         <p>At an advanced level, a user-centric product is never "finished." The work shifts from running discovery <em>projects</em> to maintaining a <strong>continuous improvement loop</strong> that refines the product against evolving user needs, without anyone having to schedule it.</p>
-        <svg viewBox="0 0 400 132" style="width:100%; height:auto; margin:4px 0 4px;">
-          <defs>
-            <marker id="daLoop" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
-              <path d="M0 0 L10 5 L0 10 z" fill="#9AA3AD"/>
-            </marker>
-          </defs>
-          <g font-family="'Space Grotesk',sans-serif" font-size="9" font-weight="700" fill="#12305e" text-anchor="middle">
-            <rect x="150" y="8" width="100" height="26" rx="8" fill="#EEF3FA" stroke="#1A4584" stroke-width="1.2"/><text x="200" y="25">Watch the KPIs</text>
-            <rect x="286" y="53" width="104" height="26" rx="8" fill="#E7F7FC" stroke="#35C2E8" stroke-width="1.2"/><text x="338" y="70">Study wins + fails</text>
-            <rect x="150" y="98" width="100" height="26" rx="8" fill="#EEF3FA" stroke="#1A4584" stroke-width="1.2"/><text x="200" y="115">Ship small change</text>
-            <rect x="10" y="53" width="104" height="26" rx="8" fill="#E7F7FC" stroke="#35C2E8" stroke-width="1.2"/><text x="62" y="70">Validate it</text>
-          </g>
-          <path d="M250 21 Q330 26 336 51" fill="none" stroke="#9AA3AD" stroke-width="1.4" marker-end="url(#daLoop)"/>
-          <path d="M336 81 Q330 106 252 111" fill="none" stroke="#9AA3AD" stroke-width="1.4" marker-end="url(#daLoop)"/>
-          <path d="M150 111 Q70 106 64 81" fill="none" stroke="#9AA3AD" stroke-width="1.4" marker-end="url(#daLoop)"/>
-          <path d="M64 51 Q70 26 148 21" fill="none" stroke="#9AA3AD" stroke-width="1.4" marker-end="url(#daLoop)"/>
-        </svg>
+        <div data-fig="system"></div>
         <p>Three things make the loop run on its own:</p>
         <ul>
           <li><strong>KPIs for user success</strong> (time per task, error rates, satisfaction), watched continuously, so drift shows up as a number before it shows up as churn.</li>

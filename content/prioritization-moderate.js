@@ -115,28 +115,28 @@ window.CONTENT_OVERRIDES["prioritization-moderate"] = {
     {
       id: 3,
       title: "Lesson 3: Validate the Estimate",
+      figures: {
+        "validate": {
+          "type": "decision",
+          "title": "Validate the estimate before you commit",
+          "start": "Estimate: a metric and a size",
+          "question": "Does a cheap test hold it up?",
+          "yes": {
+            "label": "Holds up",
+            "title": "Commit",
+            "tone": "teal"
+          },
+          "no": {
+            "label": "Doesn't",
+            "title": "Drop it, or rethink",
+            "tone": "coral"
+          },
+          "back": "Cheap tests: an A/B test, a prototype, a pilot"
+        }
+      },
       body: `
         <p>A metric-backed value estimate is still an estimate. Before committing heavily to a high-effort item, check the guess cheaply.</p>
-        <svg viewBox="0 0 400 120" style="width:100%; height:auto; margin:4px 0 2px;">
-          <defs>
-            <marker id="prArrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
-              <path d="M0 0 L10 5 L0 10 z" fill="#9AA3AD"/>
-            </marker>
-          </defs>
-          <rect x="14" y="46" width="96" height="34" rx="9" fill="#EEF3FA" stroke="#1A4584" stroke-width="1.3"/>
-          <text x="62" y="60" text-anchor="middle" font-family="'Space Grotesk',sans-serif" font-size="9" font-weight="700" fill="#12305e">estimate</text>
-          <text x="62" y="73" text-anchor="middle" font-family="sans-serif" font-size="8" fill="#4B5768">metric + size</text>
-          <rect x="152" y="46" width="96" height="34" rx="9" fill="#E7F7FC" stroke="#35C2E8" stroke-width="1.3"/>
-          <text x="200" y="60" text-anchor="middle" font-family="'Space Grotesk',sans-serif" font-size="9" font-weight="700" fill="#12305e">cheap test</text>
-          <text x="200" y="73" text-anchor="middle" font-family="sans-serif" font-size="8" fill="#4B5768">A/B, prototype, pilot</text>
-          <rect x="290" y="26" width="96" height="30" rx="9" fill="#EEF9F1" stroke="#2E8B57" stroke-width="1.3"/>
-          <text x="338" y="45" text-anchor="middle" font-family="'Space Grotesk',sans-serif" font-size="9" font-weight="700" fill="#12305e">commit</text>
-          <rect x="290" y="70" width="96" height="30" rx="9" fill="#FCEFE9" stroke="#C0622A" stroke-width="1.3"/>
-          <text x="338" y="89" text-anchor="middle" font-family="'Space Grotesk',sans-serif" font-size="9" font-weight="700" fill="#12305e">drop / rethink</text>
-          <line x1="110" y1="63" x2="150" y2="63" stroke="#9AA3AD" stroke-width="1.5" marker-end="url(#prArrow)"/>
-          <line x1="248" y1="58" x2="288" y2="43" stroke="#9AA3AD" stroke-width="1.5" marker-end="url(#prArrow)"/>
-          <line x1="248" y1="68" x2="288" y2="83" stroke="#9AA3AD" stroke-width="1.5" marker-end="url(#prArrow)"/>
-        </svg>
+        <div data-fig="validate"></div>
         <p>A controlled <strong>A/B test</strong>, a prototype in front of a few users, or a small pilot tells you whether the metric actually moves in the direction and roughly the size you predicted. If it does, commit with confidence. If it doesn't, you've spent a little to avoid a large mistake. Also cross-check the value against market signal: if the feedback driving it is one loud segment and no broader trend, the value estimate may be local.</p>
       `,
       checks: [

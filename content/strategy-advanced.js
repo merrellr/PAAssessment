@@ -69,32 +69,42 @@ window.CONTENT_OVERRIDES["strategy-advanced"] = {
     {
       id: 2,
       title: "Lesson 2: Ground the Agent in Product Reality",
+      figures: {
+        "grounding": {
+          "type": "cards",
+          "title": "Ground the agent in product reality",
+          "cols": 2,
+          "items": [
+            {
+              "icon": "target",
+              "title": "Product truths",
+              "text": "The real problem you solve; primary and secondary users; what success means today",
+              "tone": "teal"
+            },
+            {
+              "icon": "shield",
+              "title": "Strategic constraints",
+              "text": "Business-model realities; regulatory and compliance limits; engineering and architecture limits",
+              "tone": "navy"
+            },
+            {
+              "icon": "chat",
+              "title": "Customer signals",
+              "text": "Common objections; why deals are lost; patterns from support and research",
+              "tone": "amber"
+            },
+            {
+              "icon": "compass",
+              "title": "Product philosophy",
+              "text": "Speed vs quality bias; opinionated vs flexible; long-term vision vs short-term",
+              "tone": "violet"
+            }
+          ]
+        }
+      },
       body: `
         <p>LLMs have broad knowledge but no inherent understanding of your product. High-performing product agents are grounded in four categories of context, and that context should be <strong>persistently available</strong>, not re-introduced in every interaction.</p>
-        <svg viewBox="0 0 400 190" style="width:100%; height:auto; margin:4px 0 2px;">
-          <line x1="200" y1="10" x2="200" y2="180" stroke="#E3E9F0" stroke-width="1"/>
-          <line x1="14" y1="95" x2="386" y2="95" stroke="#E3E9F0" stroke-width="1"/>
-          <g font-family="'Space Grotesk',sans-serif" font-size="10.5" font-weight="700" fill="#12305e">
-            <text x="24" y="30">Product truths</text>
-            <text x="214" y="30">Strategic constraints</text>
-            <text x="24" y="118">Customer signals</text>
-            <text x="214" y="118">Product philosophy</text>
-          </g>
-          <g font-family="sans-serif" font-size="9" fill="#4B5768">
-            <text x="24" y="46">the real problem you solve</text>
-            <text x="24" y="60">primary and secondary users</text>
-            <text x="24" y="74">what success means today</text>
-            <text x="214" y="46">business-model realities</text>
-            <text x="214" y="60">regulatory / compliance limits</text>
-            <text x="214" y="74">engineering / architecture limits</text>
-            <text x="24" y="134">common objections</text>
-            <text x="24" y="148">why deals are lost</text>
-            <text x="24" y="162">patterns from support + research</text>
-            <text x="214" y="134">speed vs. quality bias</text>
-            <text x="214" y="148">opinionated vs. flexible stance</text>
-            <text x="214" y="162">long-term vision vs. short-term</text>
-          </g>
-        </svg>
+        <div data-fig="grounding"></div>
         <p>The difference this makes: an agent that has to be told your regulatory boundaries every time will eventually be asked something without them and answer confidently anyway. Standing context is what keeps its judgment inside your actual constraints.</p>
       `,
       checks: [
@@ -159,42 +169,38 @@ window.CONTENT_OVERRIDES["strategy-advanced"] = {
     {
       id: 4,
       title: "Lesson 4: Embed the Agent in Real Product Moments",
+      figures: {
+        "moments": {
+          "type": "steps",
+          "title": "The same agent at every product moment",
+          "sub": "Same agent, same skeptic's role, at every stage.",
+          "foot": "Assign it a role at each point. Don't wait for a single stage to ask it for answers.",
+          "items": [
+            {
+              "title": "Discovery"
+            },
+            {
+              "title": "PRDs",
+              "tone": "mint"
+            },
+            {
+              "title": "Roadmap",
+              "tone": "sky"
+            },
+            {
+              "title": "Launch",
+              "tone": "amber"
+            },
+            {
+              "title": "Post-launch",
+              "tone": "violet"
+            }
+          ]
+        }
+      },
       body: `
         <p>Agents fail when they exist outside the product lifecycle. They succeed when they're embedded into the moments where judgment matters most. Instead of asking the agent for answers, assign it a role in each moment.</p>
-        <svg viewBox="0 0 400 118" style="width:100%; height:auto; margin:4px 0 2px;" xmlns="http://www.w3.org/2000/svg">
-          <defs>
-            <marker id="saLife" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
-              <path d="M0,0 L10,5 L0,10 z" fill="#9AA3AD"/>
-            </marker>
-          </defs>
-          <g font-family="'Space Grotesk',sans-serif" font-size="7.5" font-weight="700" fill="#12305e" text-anchor="middle">
-            <rect x="6" y="12" width="70" height="30" rx="4" fill="#EEF3FA" stroke="#1A4584" stroke-width="1"/>
-            <rect x="88" y="12" width="70" height="30" rx="4" fill="#EEF3FA" stroke="#1A4584" stroke-width="1"/>
-            <rect x="170" y="12" width="70" height="30" rx="4" fill="#EEF3FA" stroke="#1A4584" stroke-width="1"/>
-            <rect x="252" y="12" width="70" height="30" rx="4" fill="#EEF3FA" stroke="#1A4584" stroke-width="1"/>
-            <rect x="334" y="12" width="60" height="30" rx="4" fill="#EEF3FA" stroke="#1A4584" stroke-width="1"/>
-            <text x="41" y="30">Discovery</text>
-            <text x="123" y="30">PRDs</text>
-            <text x="205" y="30">Roadmap</text>
-            <text x="287" y="30">Launch</text>
-            <text x="364" y="27">Post-</text>
-            <text x="364" y="37">launch</text>
-          </g>
-          <line x1="76" y1="27" x2="87" y2="27" stroke="#9AA3AD" stroke-width="1" marker-end="url(#saLife)"/>
-          <line x1="158" y1="27" x2="169" y2="27" stroke="#9AA3AD" stroke-width="1" marker-end="url(#saLife)"/>
-          <line x1="240" y1="27" x2="251" y2="27" stroke="#9AA3AD" stroke-width="1" marker-end="url(#saLife)"/>
-          <line x1="322" y1="27" x2="333" y2="27" stroke="#9AA3AD" stroke-width="1" marker-end="url(#saLife)"/>
-          <rect x="6" y="58" width="388" height="26" rx="5" fill="#E7F7FC" stroke="#35C2E8" stroke-width="1.2"/>
-          <text x="200" y="75" text-anchor="middle" font-family="'Space Grotesk',sans-serif" font-size="8" font-weight="700" fill="#12305e">Same agent, same skeptic's role, at every stage</text>
-          <g stroke="#35C2E8" stroke-width="1" stroke-dasharray="2 2">
-            <line x1="41" y1="42" x2="41" y2="58"/>
-            <line x1="123" y1="42" x2="123" y2="58"/>
-            <line x1="205" y1="42" x2="205" y2="58"/>
-            <line x1="287" y1="42" x2="287" y2="58"/>
-            <line x1="364" y1="42" x2="364" y2="58"/>
-          </g>
-          <text x="200" y="104" text-anchor="middle" font-family="sans-serif" font-size="8" fill="#4B5768">Assign it a role at each point &#8212; don't wait for a single stage to ask it for answers.</text>
-        </svg>
+        <div data-fig="moments"></div>
       `,
       steps: [
         { title: "Discovery and problem framing", detail: "\"Pressure-test this problem statement. What assumptions is it resting on? Whose perspective is missing?\" The agent widens the frame before the team narrows on a solution." },

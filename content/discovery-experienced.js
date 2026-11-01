@@ -33,8 +33,38 @@ window.CONTENT_OVERRIDES["discovery-experienced"] = {
         correct: 1,
         explanation: "Keep this in mind as you read: the lesson below is built around exactly this gap."
       },
-      image: { src: "images/workflow-fit.png", alt: "Two workflow diagrams: Founder's Vision shows a product disconnected above the real workflow chain; Real Workflow shows the same product integrated inline within Intake, Care, Docs, and Billing" },
+      figures: {
+        "fit": {
+          "type": "compare",
+          "title": "Build around the workflow, not the vision",
+          "columns": [
+            {
+              "label": "Founder's vision",
+              "title": "The product sits outside the process",
+              "tone": "coral",
+              "mark": "x",
+              "items": [
+                "Intake, care, documentation, billing run as before",
+                "The product is one more place to go"
+              ],
+              "foot": "Extra step, extra friction: easy for a busy team to ignore"
+            },
+            {
+              "label": "Real workflow",
+              "title": "The product is part of the process",
+              "tone": "teal",
+              "mark": "check",
+              "items": [
+                "It sits inline, between care and documentation",
+                "Work flows through it, not around it"
+              ],
+              "foot": "Feels like the job, not an add-on: nothing new to remember"
+            }
+          ]
+        }
+      },
       body: `
+        <div data-fig="fit"></div>
         <p>Healthcare professionals operate in highly structured environments, with established processes, compliance demands, and severe time constraints. A product that seems valuable in theory can create real friction in practice if it asks clinicians, administrators, or billing staff to change too much too quickly.</p>
         <p>Startups often mistake interest during interviews for true product fit, only to discover later that the solution doesn't integrate naturally into the daily rhythm of care delivery or operations. Avoiding this takes more than a few discovery calls. It means direct exposure to real workflows and real constraints: talking to end users, economic buyers, technical stakeholders, and compliance leaders, not relying on one champion to represent everyone.</p>
       `,
@@ -95,42 +125,38 @@ window.CONTENT_OVERRIDES["discovery-experienced"] = {
     {
       id: 3,
       title: "Lesson 3: Integration and Compliance Aren't Later-Stage Problems",
+      figures: {
+        "integration": {
+          "type": "compare",
+          "title": "Who absorbs the integration work, and when",
+          "foot": "Same product, same integration work. The difference is who absorbs it, and when.",
+          "columns": [
+            {
+              "label": "Integration deferred",
+              "tone": "coral",
+              "items": [
+                "Ship standalone",
+                "Traction appears",
+                "The customer carries the integration burden"
+              ],
+              "foot": "Deal risk"
+            },
+            {
+              "label": "In the strategy from day one",
+              "tone": "teal",
+              "items": [
+                "Connects to the systems already in place",
+                "Switching cost stays low",
+                "Adoption"
+              ],
+              "foot": "Growth"
+            }
+          ]
+        }
+      },
       body: `
         <p>Standalone healthcare software often struggles to gain traction. Providers and health systems already run on EHRs, billing tools, scheduling systems, and internal reporting. If a new product can't connect to that environment, the integration burden shifts to the customer, and that burden can become a deal breaker. Integration needs to be part of the product strategy from day one, not a "later stage" technical problem.</p>
-        <svg viewBox="0 0 400 180" style="width:100%; height:auto; margin:4px 0 2px;" xmlns="http://www.w3.org/2000/svg">
-          <defs>
-            <marker id="deArrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-              <path d="M0,0 L10,5 L0,10 z" fill="#9AA3AD"/>
-            </marker>
-          </defs>
-          <text x="8" y="18" font-family="'Space Grotesk',sans-serif" font-size="10" font-weight="700" fill="#C0622A">Integration deferred</text>
-          <rect x="8" y="26" width="90" height="34" rx="5" fill="#FBF0E9" stroke="#C0622A" stroke-width="1.2"/>
-          <rect x="124" y="26" width="84" height="34" rx="5" fill="#FBF0E9" stroke="#C0622A" stroke-width="1.2"/>
-          <rect x="234" y="26" width="158" height="34" rx="5" fill="#F7DCD0" stroke="#C0622A" stroke-width="1.4"/>
-          <g font-family="'IBM Plex Sans',sans-serif" font-size="8" fill="#7a3d18" text-anchor="middle">
-            <text x="53" y="46">Ship standalone</text>
-            <text x="166" y="42">Traction</text>
-            <text x="166" y="52">appears</text>
-            <text x="313" y="42">Customer carries the integration</text>
-            <text x="313" y="52">burden &#8594; deal risk</text>
-          </g>
-          <line x1="100" y1="43" x2="122" y2="43" stroke="#9AA3AD" stroke-width="1.2" marker-end="url(#deArrow)"/>
-          <line x1="210" y1="43" x2="232" y2="43" stroke="#9AA3AD" stroke-width="1.2" marker-end="url(#deArrow)"/>
-          <text x="8" y="102" font-family="'Space Grotesk',sans-serif" font-size="10" font-weight="700" fill="#12305e">Integration in the strategy from day one</text>
-          <rect x="8" y="110" width="112" height="34" rx="5" fill="#E7F7FC" stroke="#35C2E8" stroke-width="1.2"/>
-          <rect x="150" y="110" width="108" height="34" rx="5" fill="#E7F7FC" stroke="#35C2E8" stroke-width="1.2"/>
-          <rect x="288" y="110" width="104" height="34" rx="5" fill="#EEF3FA" stroke="#1A4584" stroke-width="1.4"/>
-          <g font-family="'IBM Plex Sans',sans-serif" font-size="8" fill="#12305e" text-anchor="middle">
-            <text x="64" y="124">Connects to the</text>
-            <text x="64" y="134">systems in place</text>
-            <text x="204" y="124">Switching cost</text>
-            <text x="204" y="134">stays low</text>
-            <text x="340" y="130">Adoption</text>
-          </g>
-          <line x1="122" y1="127" x2="148" y2="127" stroke="#9AA3AD" stroke-width="1.2" marker-end="url(#deArrow)"/>
-          <line x1="260" y1="127" x2="286" y2="127" stroke="#9AA3AD" stroke-width="1.2" marker-end="url(#deArrow)"/>
-          <text x="200" y="170" text-anchor="middle" font-family="'IBM Plex Sans',sans-serif" font-size="8.5" fill="#4B5768">Same product, same integration work &#8212; the difference is who absorbs it, and when.</text>
-        </svg>
+        <div data-fig="integration"></div>
         <p>The same is true of security and compliance. Some early teams assume they can address HIPAA, data governance, and security controls once traction appears. That's risky. In healthcare, trust isn't a finishing layer added after the product works. It's part of the product itself. Buyers want to know how data is stored and who can access it long before the conversation reaches pricing.</p>
       `,
       checks: [
@@ -159,8 +185,50 @@ window.CONTENT_OVERRIDES["discovery-experienced"] = {
     {
       id: 4,
       title: "Lesson 4: The Buyer Is Not Always the User",
-      image: { src: "images/stakeholder-map.png", alt: "A hub-and-spoke map with Purchase Decision at the center, connected to End user (clinician), Economic buyer, IT, Legal / compliance, Department leadership, and Technical stakeholders" },
+      figures: {
+        "buyers": {
+          "type": "hub",
+          "title": "The buyer is not always the user",
+          "sub": "Everyone with a say in the purchase decision.",
+          "center": {
+            "title": "Purchase decision"
+          },
+          "items": [
+            {
+              "title": "End user",
+              "text": "The clinician",
+              "tone": "teal"
+            },
+            {
+              "title": "Economic buyer",
+              "text": "Owns the budget",
+              "tone": "amber"
+            },
+            {
+              "title": "IT",
+              "text": "Integration and security",
+              "tone": "sky"
+            },
+            {
+              "title": "Legal and compliance",
+              "text": "Risk and contracts",
+              "tone": "coral"
+            },
+            {
+              "title": "Department leadership",
+              "text": "Priorities and change",
+              "tone": "violet"
+            },
+            {
+              "title": "Technical stakeholders",
+              "text": "Architecture fit",
+              "tone": "navy"
+            }
+          ]
+        }
+      },
       body: `
+        <div data-fig="buyers"></div>
         <p>In healthcare organizations, the person who loves a product is often not the one who approves the budget, signs the contract, or clears procurement. A clinician may strongly support a tool that improves their workflow, but the final decision can depend on department leadership, finance, IT, legal, or compliance. Startups that build based only on user enthusiasm can end up with a product people want but organizations still won't buy.</p>
         <p>Successful teams map the full buying journey early: who benefits, who influences the decision, who owns the budget, and what objections each stakeholder is likely to raise. That shapes not just the product, but implementation plans, ROI messaging, and security documentation too. In healthcare SaaS, product development and go-to-market are tightly linked.</p>
       `,

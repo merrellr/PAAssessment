@@ -34,32 +34,46 @@ window.CONTENT_OVERRIDES["stakeholder-experienced"] = {
         correct: 1,
         explanation: "Keep this in mind as you read: it's the foundation the rest of this lesson builds on."
       },
+      figures: {
+        "vision": {
+          "type": "hub",
+          "title": "A shared vision is the starting point",
+          "foot": "Involve each function while the vision is forming, not after it's decided.",
+          "center": {
+            "title": "Shared vision"
+          },
+          "items": [
+            {
+              "title": "Engineering"
+            },
+            {
+              "title": "Marketing",
+              "tone": "coral"
+            },
+            {
+              "title": "Compliance",
+              "tone": "navy"
+            },
+            {
+              "title": "Design",
+              "tone": "amber"
+            },
+            {
+              "title": "Sales",
+              "tone": "violet"
+            },
+            {
+              "title": "Support",
+              "tone": "sky"
+            }
+          ]
+        }
+      },
       body: `
         <p>Success in product work hinges on collective collaboration between engineering, design, marketing, sales, compliance, and support. That collaboration isn't automatic. It requires an intentional approach to align teams toward a shared mission, especially given how different each function's priorities and incentives naturally are.</p>
         <p>A shared vision acts as the guiding light for all of these teams. It clarifies why the product exists and what it's trying to achieve. Building it starts with involving key stakeholders early (engineers, compliance officers, technical experts) so all voices are genuinely heard rather than informed after the fact, and ensuring that vision reflects real user needs, not just what's easiest to build.</p>
         <p>None of this works without real communication channels. Regular cross-functional syncs and shared tools that create a single source of truth are what keep a vision from quietly drifting apart as each team interprets it their own way.</p>
-        <svg viewBox="0 0 400 168" style="width:100%; height:auto; margin:4px 0 2px;" xmlns="http://www.w3.org/2000/svg">
-          <circle cx="200" cy="84" r="34" fill="#EEF3FA" stroke="#1A4584" stroke-width="1.5"/>
-          <text x="200" y="81" text-anchor="middle" font-family="'Space Grotesk',sans-serif" font-size="9" font-weight="700" fill="#12305e">Shared</text>
-          <text x="200" y="93" text-anchor="middle" font-family="'Space Grotesk',sans-serif" font-size="9" font-weight="700" fill="#12305e">vision</text>
-          <g font-family="sans-serif" font-size="8" fill="#12305e" text-anchor="middle">
-            <rect x="8" y="16" width="86" height="22" rx="4" fill="#E7F7FC" stroke="#35C2E8" stroke-width="1"/><text x="51" y="31">Engineering</text>
-            <rect x="8" y="73" width="86" height="22" rx="4" fill="#E7F7FC" stroke="#35C2E8" stroke-width="1"/><text x="51" y="88">Marketing</text>
-            <rect x="8" y="130" width="86" height="22" rx="4" fill="#E7F7FC" stroke="#35C2E8" stroke-width="1"/><text x="51" y="145">Compliance</text>
-            <rect x="306" y="16" width="86" height="22" rx="4" fill="#E7F7FC" stroke="#35C2E8" stroke-width="1"/><text x="349" y="31">Design</text>
-            <rect x="306" y="73" width="86" height="22" rx="4" fill="#E7F7FC" stroke="#35C2E8" stroke-width="1"/><text x="349" y="88">Sales</text>
-            <rect x="306" y="130" width="86" height="22" rx="4" fill="#E7F7FC" stroke="#35C2E8" stroke-width="1"/><text x="349" y="145">Support</text>
-          </g>
-          <g stroke="#9AA3AD" stroke-width="1.2">
-            <line x1="94" y1="27" x2="172" y2="66"/>
-            <line x1="94" y1="84" x2="166" y2="84"/>
-            <line x1="94" y1="141" x2="172" y2="102"/>
-            <line x1="306" y1="27" x2="228" y2="66"/>
-            <line x1="306" y1="84" x2="234" y2="84"/>
-            <line x1="306" y1="141" x2="228" y2="102"/>
-          </g>
-          <text x="200" y="164" text-anchor="middle" font-family="sans-serif" font-size="7.5" fill="#4B5768">Involve each function while the vision is forming &#8212; not after it's decided.</text>
-        </svg>
+        <div data-fig="vision"></div>
       `,
       checks: [
         {
@@ -108,33 +122,37 @@ window.CONTENT_OVERRIDES["stakeholder-experienced"] = {
     {
       id: 3,
       title: "Lesson 3: Bridging Product and Risk, Legal, or Compliance",
+      figures: {
+        "compliance": {
+          "type": "compare",
+          "title": "Bridging product and compliance",
+          "foot": "Same requirements, absorbed as design inputs instead of a last-minute gate.",
+          "columns": [
+            {
+              "label": "Bolted on at the end",
+              "tone": "coral",
+              "items": [
+                "Build",
+                "Review",
+                "Rework"
+              ],
+              "foot": "The timeline slips"
+            },
+            {
+              "label": "Embedded in the roadmap",
+              "tone": "teal",
+              "items": [
+                "Build, with compliance checks along the way"
+              ],
+              "foot": "Ships on time"
+            }
+          ]
+        }
+      },
       body: `
         <p>In any regulated or risk-sensitive space, product managers have to navigate a complex landscape of rules and standards, and that means collaborating closely with legal, security, or compliance functions rather than treating them as a late-stage checkpoint.</p>
         <p>Engage these functions early in the development cycle. Waiting until a feature is nearly finished to ask "is this okay?" is exactly what creates expensive last-minute rework and blown timelines. Run workshops to educate the broader team on the regulations or standards that actually apply, and embed compliance-related tasks directly into the roadmap so they get proper prioritization instead of being squeezed in at the end.</p>
-        <svg viewBox="0 0 400 124" style="width:100%; height:auto; margin:4px 0 2px;" xmlns="http://www.w3.org/2000/svg">
-          <defs>
-            <marker id="seRe" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-              <path d="M0,0 L10,5 L0,10 z" fill="#C0622A"/>
-            </marker>
-          </defs>
-          <text x="8" y="13" font-family="'Space Grotesk',sans-serif" font-size="8" font-weight="700" fill="#C0622A">Bolted on at the end</text>
-          <rect x="8" y="18" width="300" height="18" fill="#EEF3FA" stroke="#1A4584" stroke-width="1"/>
-          <text x="158" y="31" text-anchor="middle" font-family="sans-serif" font-size="7.5" fill="#4B5768">build</text>
-          <rect x="312" y="18" width="60" height="18" fill="#FBF0E9" stroke="#C0622A" stroke-width="1.2"/>
-          <text x="342" y="31" text-anchor="middle" font-family="sans-serif" font-size="7" fill="#7a3d18">review</text>
-          <path d="M372 36 C390 58, 130 56, 122 38" fill="none" stroke="#C0622A" stroke-width="1.2" stroke-dasharray="4 3" marker-end="url(#seRe)"/>
-          <text x="248" y="54" text-anchor="middle" font-family="sans-serif" font-size="7.5" fill="#C0622A">rework, timeline slips</text>
-          <text x="8" y="80" font-family="'Space Grotesk',sans-serif" font-size="8" font-weight="700" fill="#12305e">Embedded in the roadmap</text>
-          <rect x="8" y="85" width="364" height="18" fill="#EEF3FA" stroke="#1A4584" stroke-width="1"/>
-          <g fill="#35C2E8">
-            <rect x="74" y="85" width="6" height="18"/>
-            <rect x="158" y="85" width="6" height="18"/>
-            <rect x="242" y="85" width="6" height="18"/>
-            <rect x="326" y="85" width="6" height="18"/>
-          </g>
-          <text x="190" y="98" text-anchor="middle" font-family="sans-serif" font-size="7.5" fill="#4B5768">build, with compliance checks along the way</text>
-          <text x="8" y="119" font-family="sans-serif" font-size="7.5" fill="#4B5768">Same requirements &#8212; absorbed as design inputs instead of a last-minute gate.</text>
-        </svg>
+        <div data-fig="compliance"></div>
         <p>The real reframe here: seek compliance as an enabler, not a barrier. The goal isn't choosing between innovation and safety. It's finding creative ways to innovate that still meet the standards that actually matter, and validating those innovations thoroughly before they ship.</p>
       `,
       checks: [

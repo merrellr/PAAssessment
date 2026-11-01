@@ -33,8 +33,41 @@ window.CONTENT_OVERRIDES["execution-moderate"] = {
         correct: 1,
         explanation: "See if the lesson below matches this."
       },
-      image: { src: "images/accessibility-before-after.png", alt: "A before-and-after comparison: without AI shows manual captioning, static screen readers, and one-size-fits-all content tagged compliance-driven and bolt-on; with AI shows real-time captions, computer vision, and adaptive tools tagged inclusion-driven and built-in by default" },
+      figures: {
+        "before-after": {
+          "type": "compare",
+          "title": "Accessibility, without and with AI",
+          "arrow": true,
+          "columns": [
+            {
+              "label": "Without AI",
+              "tone": "coral",
+              "mark": "x",
+              "items": [
+                "Manual captioning: slow, error-prone, often unavailable",
+                "Static screen readers with limited context",
+                "One-size-fits-all content, no cognitive adaptation",
+                "Specialized devices, separate from mainstream tech"
+              ],
+              "foot": "Compliance-driven, bolted on, manual"
+            },
+            {
+              "label": "With AI",
+              "tone": "teal",
+              "mark": "check",
+              "items": [
+                "Real-time captions in meetings and video, widely available",
+                "Computer vision describes scenes, objects and text",
+                "Adaptive tools personalize pace, format and complexity",
+                "Built into everyday phones, laptops and workplace apps"
+              ],
+              "foot": "Inclusion-driven, built in by default, automated"
+            }
+          ]
+        }
+      },
       body: `
+        <div data-fig="before-after"></div>
         <p>For years, digital accessibility was treated as a compliance checkbox or a technical afterthought. AI is helping shift that mindset, creating experiences that are more inclusive, more adaptive, and more human-centered from the start.</p>
         <p>This isn't a niche feature set. When products are designed to meet people where they are, they become easier to use for <em>everyone</em>, not just the users a feature was originally built for. The biggest opportunity for product leaders is to approach accessibility as innovation, not obligation.</p>
       `,
@@ -54,8 +87,41 @@ window.CONTENT_OVERRIDES["execution-moderate"] = {
     {
       id: 2,
       title: "Lesson 2: Where AI Is Already Changing Accessibility",
-      image: { src: "images/accessibility-categories.png", alt: "Four categories of AI accessibility tools: Voice interfaces (dictation, voice assistants, smart device control), Visual assistance (scene description, object ID, navigation guidance), Captioning and transcription (live captions, meeting transcripts, AI summaries), and Adaptive learning (plain language, document summaries, read aloud)" },
+      figures: {
+        "categories": {
+          "type": "cards",
+          "title": "Four categories of AI accessibility tools",
+          "cols": 2,
+          "items": [
+            {
+              "icon": "mic",
+              "title": "Voice interfaces",
+              "text": "Dictation, voice assistants, smart device control",
+              "tone": "teal"
+            },
+            {
+              "icon": "eye",
+              "title": "Visual assistance",
+              "text": "Scene description, object identification, navigation guidance",
+              "tone": "violet"
+            },
+            {
+              "icon": "caption",
+              "title": "Captioning and transcription",
+              "text": "Live captions, meeting transcripts, AI summaries",
+              "tone": "amber"
+            },
+            {
+              "icon": "book",
+              "title": "Adaptive learning",
+              "text": "Plain language, document summaries, read aloud",
+              "tone": "coral"
+            }
+          ]
+        }
+      },
       body: `
+        <div data-fig="categories"></div>
         <p>Four categories cover most of what's changing right now. <strong>Voice interfaces</strong> let people with mobility or dexterity challenges complete tasks through natural conversation instead of typing or tapping. <strong>Visual assistance</strong> turns a smartphone camera into a real-time guide for people who are blind or have low vision: identifying objects, reading text aloud, and describing scenes.</p>
         <p><strong>Captioning and transcription</strong> have become dramatically more accurate for people who are deaf or hard of hearing. Live captions and transcripts are now widely available in meetings and video, not just specialized settings. <strong>Adaptive learning and cognitive support</strong> personalize how information is presented, simplifying language and reading content aloud for people with dyslexia, ADHD, or memory differences.</p>
         <p>What makes this moment different: these capabilities are increasingly built into mainstream products, not siloed into specialized devices. That matters because accessibility scales when it's part of everyday technology, not a separate category.</p>
@@ -106,31 +172,41 @@ window.CONTENT_OVERRIDES["execution-moderate"] = {
     {
       id: 4,
       title: "Lesson 4: The Rollout Playbook",
+      figures: {
+        "playbook": {
+          "type": "steps",
+          "title": "The rollout playbook",
+          "foot": "Start from user friction, not the technology, and only widen once a case earns it.",
+          "items": [
+            {
+              "title": "Find friction"
+            },
+            {
+              "title": "Pick one or two cases",
+              "tone": "mint"
+            },
+            {
+              "title": "Bring the right people",
+              "tone": "sky"
+            },
+            {
+              "title": "Set success metrics",
+              "tone": "amber"
+            },
+            {
+              "title": "Pilot and refine",
+              "tone": "violet"
+            },
+            {
+              "title": "Expand",
+              "tone": "navy"
+            }
+          ]
+        }
+      },
       body: `
         <p>For teams wondering how to get started, the best approach begins with real user needs, not the technology itself. Step through the six-stage path from there.</p>
-        <svg viewBox="0 0 400 118" style="width:100%; height:auto; margin:4px 0 2px;" xmlns="http://www.w3.org/2000/svg">
-          <defs>
-            <marker id="emStep" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-              <path d="M0,0 L10,5 L0,10 z" fill="#9AA3AD"/>
-            </marker>
-          </defs>
-          <g text-anchor="middle" font-family="'Space Grotesk',sans-serif" font-size="7.5" font-weight="700" fill="#12305e">
-            <rect x="8" y="14" width="112" height="26" rx="5" fill="#EEF3FA" stroke="#1A4584" stroke-width="1"/><text x="64" y="30">1 &#183; Find friction</text>
-            <rect x="144" y="14" width="112" height="26" rx="5" fill="#EEF3FA" stroke="#1A4584" stroke-width="1"/><text x="200" y="30">2 &#183; Pick 1&#8211;2 cases</text>
-            <rect x="280" y="14" width="112" height="26" rx="5" fill="#EEF3FA" stroke="#1A4584" stroke-width="1"/><text x="336" y="30">3 &#183; Right people</text>
-            <rect x="8" y="70" width="112" height="26" rx="5" fill="#E7F7FC" stroke="#35C2E8" stroke-width="1"/><text x="64" y="86">4 &#183; Success metrics</text>
-            <rect x="144" y="70" width="112" height="26" rx="5" fill="#E7F7FC" stroke="#35C2E8" stroke-width="1"/><text x="200" y="86">5 &#183; Pilot &amp; refine</text>
-            <rect x="280" y="70" width="112" height="26" rx="5" fill="#EEF9F1" stroke="#2E8B57" stroke-width="1"/><text x="336" y="86">6 &#183; Expand</text>
-          </g>
-          <g stroke="#9AA3AD" stroke-width="1.1">
-            <line x1="120" y1="27" x2="142" y2="27" marker-end="url(#emStep)"/>
-            <line x1="256" y1="27" x2="278" y2="27" marker-end="url(#emStep)"/>
-            <path d="M336 40 C336 56, 64 54, 64 68" fill="none" stroke-dasharray="4 3" marker-end="url(#emStep)"/>
-            <line x1="120" y1="83" x2="142" y2="83" marker-end="url(#emStep)"/>
-            <line x1="256" y1="83" x2="278" y2="83" marker-end="url(#emStep)"/>
-          </g>
-          <text x="200" y="112" text-anchor="middle" font-family="sans-serif" font-size="7.5" fill="#4B5768">Start from user friction, not the technology &#8212; and only widen once a case earns it.</text>
-        </svg>
+        <div data-fig="playbook"></div>
       `,
       steps: [
         { title: "1. Identify friction", detail: "Look at where users struggle to read, hear, navigate, respond, or understand information. Accessibility gaps often become clear when you observe how people actually use a product in the real world." },

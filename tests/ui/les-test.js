@@ -107,6 +107,25 @@ async function lessonFlow(store){
   }
 }
 
+// The article-style figures (lesson-figures.js): every slot in the lesson becomes a drawn figure.
+async function figTests(){
+  const figs = all('#lessonBody figure.pf');
+  t('every figure slot in the lesson is drawn, none left empty', figs.length >= 1 && all('#lessonBody [data-fig]').length === 0, figs.length + ' figures');
+  const title = figs[0] && figs[0].querySelector('.pf-title');
+  t('a figure has a visible serif title, like the articles', !!title && title.offsetHeight > 0 && /Fraunces/.test(getComputedStyle(title).fontFamily), title && getComputedStyle(title).fontFamily);
+  t('a figure sits on the cream card in light mode', getComputedStyle(figs[0]).backgroundColor === 'rgb(244, 242, 238)', getComputedStyle(figs[0]).backgroundColor);
+  t('figures are text, not pictures: their words are in the page for readers and screen readers', figs.every(f => f.textContent.trim().length > 20));
+  const course = new URLSearchParams(location.search).get('course');
+  if (course === 'aiOrg-experienced'){
+    t('the copilot metrics: four number tiles and eight weeks of columns', all('.pf-stat', figs[0]).length === 4 && all('.pf-colbar', figs[0]).length === 8 && /68%/.test(figs[0].textContent));
+  }
+  if (course === 'prioritization-novice'){
+    t('the matrix: four labelled quadrants with the five example items plotted', all('.pf-quad').length === 4 && all('.pf-pt').length === 5 && /Money pits/.test($('lessonBody').textContent));
+  }
+  document.documentElement.setAttribute('data-theme', 'dark'); await sleep(50);
+  t('in dark mode the figure turns dark too', getComputedStyle(figs[0]).backgroundColor === 'rgb(27, 33, 48)', getComputedStyle(figs[0]).backgroundColor);
+}
+
 (async function(){
   try {
     await sleep(2500);
@@ -119,6 +138,7 @@ async function lessonFlow(store){
       return;
     }
     if (window.__scn === 'blocks') await blockTests();
+    else if (window.__scn === 'figs') await figTests();
     else await lessonFlow(store);
   } catch (e) { out.push('FAIL crashed: ' + (e && e.stack ? e.stack.split('\n').slice(0, 2).join(' / ') : e)); }
   (window.__errs || []).forEach(e => out.push('PAGE-ERROR [' + window.__scn + '] ' + e));
