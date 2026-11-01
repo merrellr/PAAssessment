@@ -91,28 +91,36 @@ window.CONTENT_OVERRIDES["prioritization-experienced"] = {
     {
       id: 2,
       title: "Lesson 2: Outcome → Evidence → Minimum",
+      figures: {
+        "oem": {
+          "type": "steps",
+          "title": "Outcome, evidence, minimum",
+          "foot": "Measure the path, then scale or kill.",
+          "items": [
+            {
+              "badge": "O",
+              "title": "Outcome",
+              "text": "An observable end state",
+              "tone": "teal"
+            },
+            {
+              "badge": "E",
+              "title": "Evidence",
+              "text": "A falsifiable hypothesis",
+              "tone": "amber"
+            },
+            {
+              "badge": "M",
+              "title": "Minimum",
+              "text": "The smallest intervention",
+              "tone": "violet"
+            }
+          ]
+        }
+      },
       body: `
         <p>Here's a simple loop that travels well across domains. Think <strong>OEM</strong>.</p>
-        <svg viewBox="0 0 400 172" style="width:100%; height:auto; margin:4px 0 2px;">
-          <defs>
-            <marker id="oemArrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
-              <path d="M0 0 L10 5 L0 10 z" fill="#9AA3AD"/>
-            </marker>
-          </defs>
-          <rect x="14" y="60" width="104" height="52" rx="10" fill="#EEF3FA" stroke="#1A4584" stroke-width="1.5"/>
-          <text x="66" y="82" text-anchor="middle" font-family="'Space Grotesk',sans-serif" font-size="12" font-weight="700" fill="#12305e">Outcome</text>
-          <text x="66" y="99" text-anchor="middle" font-family="sans-serif" font-size="9.5" fill="#4B5768">observable end state</text>
-          <rect x="148" y="60" width="104" height="52" rx="10" fill="#E7F7FC" stroke="#35C2E8" stroke-width="1.5"/>
-          <text x="200" y="82" text-anchor="middle" font-family="'Space Grotesk',sans-serif" font-size="12" font-weight="700" fill="#12305e">Evidence</text>
-          <text x="200" y="99" text-anchor="middle" font-family="sans-serif" font-size="9.5" fill="#4B5768">falsifiable hypothesis</text>
-          <rect x="282" y="60" width="104" height="52" rx="10" fill="#EEF3FA" stroke="#1A4584" stroke-width="1.5"/>
-          <text x="334" y="82" text-anchor="middle" font-family="'Space Grotesk',sans-serif" font-size="12" font-weight="700" fill="#12305e">Minimum</text>
-          <text x="334" y="99" text-anchor="middle" font-family="sans-serif" font-size="9.5" fill="#4B5768">smallest intervention</text>
-          <line x1="120" y1="86" x2="146" y2="86" stroke="#9AA3AD" stroke-width="1.6" marker-end="url(#oemArrow)"/>
-          <line x1="254" y1="86" x2="280" y2="86" stroke="#9AA3AD" stroke-width="1.6" marker-end="url(#oemArrow)"/>
-          <path d="M334 116 C334 150, 66 150, 66 116" fill="none" stroke="#9AA3AD" stroke-width="1.6" stroke-dasharray="4 3" marker-end="url(#oemArrow)"/>
-          <text x="200" y="147" text-anchor="middle" font-family="sans-serif" font-size="9.5" fill="#9AA3AD">measure the path, then scale or kill</text>
-        </svg>
+        <div data-fig="oem"></div>
         <p><strong>Outcome-first.</strong> Define the end state in observable terms: "reduce median prescription time from 4:30 to 2:00." Not "improve the orders experience."</p>
         <p><strong>Evidence-backed.</strong> Tie the bet to a falsifiable hypothesis and a minimum viable measurement plan. If nothing could prove you wrong, it's not a bet. It's a wish.</p>
         <p><strong>Minimally sufficient.</strong> Ship the smallest intervention that can move the outcome for a narrow segment. Then scale.</p>
@@ -143,6 +151,37 @@ window.CONTENT_OVERRIDES["prioritization-experienced"] = {
     {
       id: 3,
       title: "Lesson 3: From Roadmaps to Bet Maps",
+      figures: {
+        "bet": {
+          "type": "record",
+          "title": "A bet, written down",
+          "heading": "Bet: auto-attach patient context for charge nurses at shift change",
+          "rows": [
+            [
+              "Belief",
+              "Cuts median Orders time from 3:10 to 1:45"
+            ],
+            [
+              "Confidence",
+              "Medium: the replay data is clear, the sample is small"
+            ],
+            [
+              "Leading indicator",
+              "Step-3 (code search) drop-off rate",
+              "teal"
+            ],
+            [
+              "Kill criteria",
+              "Drop-off not down 10 points in 3 weeks, so stop",
+              "coral"
+            ],
+            [
+              "Review",
+              "Monthly: kill or double down on the signal"
+            ]
+          ]
+        }
+      },
       body: `
         <p>A roadmap says "we will build these things." A <strong>bet map</strong> says "we believe doing X for Y segment will drive Z outcome," and then holds itself accountable.</p>
         <p>Each entry on a bet map carries four things a feature list never does:</p>
@@ -152,23 +191,7 @@ window.CONTENT_OVERRIDES["prioritization-experienced"] = {
           <li><strong>Kill criteria.</strong> Written in advance: "if we don't see the leading indicator move by X after Y weeks, we stop." Decided before you're emotionally invested.</li>
           <li><strong>A review cadence.</strong> Monthly. Kill or double down based on signal, not on who argues hardest in the room.</li>
         </ul>
-        <svg viewBox="0 0 400 158" style="width:100%; height:auto; margin:4px 0 2px;" xmlns="http://www.w3.org/2000/svg">
-          <rect x="6" y="6" width="388" height="146" rx="8" fill="#F7FAFD" stroke="#1A4584" stroke-width="1.3"/>
-          <path d="M14 6 h372 a8 8 0 0 1 8 8 v12 h-388 v-12 a8 8 0 0 1 8 -8 z" fill="#EEF3FA"/>
-          <text x="16" y="23" font-family="'Space Grotesk',sans-serif" font-size="8.5" font-weight="700" fill="#12305e">Bet: auto-attach patient context for charge nurses at shift change</text>
-          <g font-family="sans-serif" font-size="8" fill="#16213E">
-            <text x="16" y="48" font-weight="700" fill="#12305e">Belief</text>
-            <text x="96" y="48">cuts median Orders time 3:10 &#8594; 1:45</text>
-            <text x="16" y="70" font-weight="700" fill="#12305e">Confidence</text>
-            <text x="96" y="70">Medium &#8212; replay data is clear, sample is small</text>
-            <text x="16" y="92" font-weight="700" fill="#12305e">Leading indicator</text>
-            <text x="132" y="92">step-3 (code search) drop-off rate</text>
-            <text x="16" y="114" font-weight="700" fill="#C0622A">Kill criteria</text>
-            <text x="112" y="114" fill="#7a3d18">drop-off not down 10 pts in 3 weeks &#8594; stop</text>
-            <text x="16" y="136" font-weight="700" fill="#12305e">Review</text>
-            <text x="96" y="136">monthly &#8212; kill or double down on the signal</text>
-          </g>
-        </svg>
+        <div data-fig="bet"></div>
         <p>The point of writing kill criteria before you start is that you can't negotiate with a number you set when you were still objective.</p>
       `,
       checks: [

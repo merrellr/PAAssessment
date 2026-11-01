@@ -79,28 +79,43 @@ window.CONTENT_OVERRIDES["aiIndividual-moderate"] = {
     {
       id: 2,
       title: "Lesson 2: Backlog Grooming, Before and After",
+      figures: {
+        "grooming": {
+          "type": "compare",
+          "title": "Backlog grooming, before and after",
+          "arrow": true,
+          "columns": [
+            {
+              "label": "Before",
+              "tone": "coral",
+              "mark": "x",
+              "items": [
+                "Collect tickets, Slack threads and requests",
+                "De-duplicate and clarify by hand",
+                "Rewrite titles for engineering",
+                "Re-prioritize on gut feel"
+              ],
+              "foot": "Slow, noisy, inconsistent"
+            },
+            {
+              "label": "After",
+              "tone": "teal",
+              "mark": "check",
+              "items": [
+                "Agent clusters incoming items by theme",
+                "Agent flags duplicates",
+                "Agent drafts problem statements",
+                "Agent proposes priority from your rules",
+                "You review, adjust and approve"
+              ],
+              "foot": "Time shifts to trade-offs and the \"why\""
+            }
+          ]
+        }
+      },
       body: `
         <p>Grooming is the classic ritual to hand a first pass to an agent.</p>
-        <svg viewBox="0 0 400 190" style="width:100%; height:auto; margin:4px 0 2px;">
-          <text x="100" y="18" text-anchor="middle" font-family="'Space Grotesk',sans-serif" font-size="11" font-weight="700" fill="#9AA3AD">BEFORE</text>
-          <text x="300" y="18" text-anchor="middle" font-family="'Space Grotesk',sans-serif" font-size="11" font-weight="700" fill="#1A4584">AFTER</text>
-          <line x1="200" y1="26" x2="200" y2="180" stroke="#E3E9F0" stroke-width="1"/>
-          <g font-family="sans-serif" font-size="9.5" fill="#4B5768">
-            <text x="16" y="44">Collect tickets, Slack, requests</text>
-            <text x="16" y="66">De-duplicate and clarify by hand</text>
-            <text x="16" y="88">Rewrite titles for engineering</text>
-            <text x="16" y="110">Re-prioritize on gut feel</text>
-            <text x="16" y="140" fill="#9AA3AD">slow, noisy, inconsistent</text>
-          </g>
-          <g font-family="sans-serif" font-size="9.5" fill="#4B5768">
-            <text x="214" y="44">Agent clusters incoming items by theme</text>
-            <text x="214" y="66">Agent flags duplicates</text>
-            <text x="214" y="88">Agent drafts problem statements</text>
-            <text x="214" y="110">Agent proposes priority from your rules</text>
-            <text x="214" y="132" fill="#12305e" font-weight="700">You review, adjust, approve</text>
-            <text x="214" y="150" fill="#9AA3AD">time shifts to trade-offs and the "why"</text>
-          </g>
-        </svg>
+        <div data-fig="grooming"></div>
         <p>Your new grooming ritual: review the agent's proposed clusters and priorities, adjust for strategy and context, approve or merge or close with one click. Your time moves from rewriting and sorting to making trade-offs and explaining priorities.</p>
         <p><strong>What still needs you:</strong> connecting work to strategy and OKRs, partnering with engineering on feasibility and sequencing, and saying "no" with a clear narrative.</p>
       `,
@@ -130,29 +145,40 @@ window.CONTENT_OVERRIDES["aiIndividual-moderate"] = {
     {
       id: 3,
       title: "Lesson 3: Research and Experiments as Always-On Engines",
+      figures: {
+        "engine": {
+          "type": "steps",
+          "title": "Research as an always-on engine",
+          "foot": "The agent collects and summarizes. The \"so what?\" call stays yours.",
+          "items": [
+            {
+              "title": "Agent watches",
+              "text": "Continuously, in the background",
+              "tone": "sky"
+            },
+            {
+              "title": "Weekly digest",
+              "text": "What changed, in one place",
+              "tone": "sky"
+            },
+            {
+              "title": "Your 30 minutes",
+              "text": "Ask \"so what?\"",
+              "tone": "teal"
+            },
+            {
+              "title": "React, watch or ignore",
+              "text": "A decision, not a pile of notes",
+              "tone": "teal"
+            }
+          ]
+        }
+      },
       body: `
         <p>Two more rituals follow the same shape: the agent runs continuously in the background, you turn its output into decisions.</p>
         <p><strong>Market research.</strong> Instead of scrambling when a competitor appears or leadership asks about a space, an "Insights" agent tracks competitor release notes, pricing pages, job postings, and analyst reports, and produces a weekly digest. Your ritual becomes a 30-minute session where you annotate implications and write "so what does this mean for our strategy?"</p>
         <p><strong>Experiment design.</strong> An "Experiment Designer" agent generates ideas from feedback and prior tests, turns them into clear hypotheses and success metrics, proposes sample size and duration, and writes consistent briefs. Your ritual becomes idea-harvesting on a cadence, a weekly review to choose which experiments to run, and a simple debrief after each one.</p>
-        <svg viewBox="0 0 400 104" style="width:100%; height:auto; margin:4px 0 2px;" xmlns="http://www.w3.org/2000/svg">
-          <defs>
-            <marker id="aiMEng" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-              <path d="M0,0 L10,5 L0,10 z" fill="#9AA3AD"/>
-            </marker>
-          </defs>
-          <g text-anchor="middle" font-family="'Space Grotesk',sans-serif" font-size="7.5" font-weight="700" fill="#12305e">
-            <rect x="6" y="30" width="92" height="30" rx="5" fill="#E7F7FC" stroke="#35C2E8" stroke-width="1.2"/><text x="52" y="42">Agent watches</text><text x="52" y="52">continuously</text>
-            <rect x="112" y="30" width="80" height="30" rx="5" fill="#E7F7FC" stroke="#35C2E8" stroke-width="1.2"/><text x="152" y="48">Weekly digest</text>
-            <rect x="206" y="30" width="96" height="30" rx="5" fill="#EEF3FA" stroke="#1A4584" stroke-width="1.2"/><text x="254" y="42">Your 30 min:</text><text x="254" y="52">"so what?"</text>
-            <rect x="316" y="30" width="78" height="30" rx="5" fill="#EEF9F1" stroke="#2E8B57" stroke-width="1.1"/><text x="355" y="42">React / watch</text><text x="355" y="52">/ ignore</text>
-          </g>
-          <g stroke="#9AA3AD" stroke-width="1.2">
-            <line x1="98" y1="45" x2="110" y2="45" marker-end="url(#aiMEng)"/>
-            <line x1="192" y1="45" x2="204" y2="45" marker-end="url(#aiMEng)"/>
-            <line x1="302" y1="45" x2="314" y2="45" marker-end="url(#aiMEng)"/>
-          </g>
-          <text x="200" y="86" text-anchor="middle" font-family="sans-serif" font-size="7.5" fill="#4B5768">The agent collects and summarizes; the "so what?" call stays yours.</text>
-        </svg>
+        <div data-fig="engine"></div>
         <p>In both cases the agent collects and summarizes. You do the part it can't: telling weak signal from hype, deciding whether to react, watch, or ignore, and owning the learning agenda across quarters.</p>
       `,
       checks: [

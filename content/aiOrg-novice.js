@@ -69,30 +69,39 @@ window.CONTENT_OVERRIDES["aiOrg-novice"] = {
     {
       id: 2,
       title: "Lesson 2: Design Agents Like Roles on a Team",
+      figures: {
+        "squad": {
+          "type": "steps",
+          "title": "Agents designed like roles on a team",
+          "foot": "Outputs become inputs: a repeatable system, not four disconnected tools.",
+          "items": [
+            {
+              "title": "Researcher",
+              "text": "Themes and evidence",
+              "tone": "sky"
+            },
+            {
+              "title": "Analyst",
+              "text": "Impact and segments",
+              "tone": "mint"
+            },
+            {
+              "title": "Experiment designer",
+              "text": "How to test it",
+              "tone": "amber"
+            },
+            {
+              "title": "Copywriter",
+              "text": "The messaging",
+              "tone": "violet"
+            }
+          ]
+        }
+      },
       body: `
         <p>Instead of "an AI," think "a squad." Each agent has a role description, a clear scope and boundaries, specific inputs it can use, outputs it's expected to produce, and evaluation metrics tied to that role.</p>
         <p>A practical starting squad for product teams:</p>
-        <svg viewBox="0 0 400 150" style="width:100%; height:auto; margin:4px 0 2px;">
-          <defs>
-            <marker id="sqArrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
-              <path d="M0 0 L10 5 L0 10 z" fill="#9AA3AD"/>
-            </marker>
-          </defs>
-          <g font-family="'Space Grotesk',sans-serif" font-size="10" font-weight="700" fill="#12305e" text-anchor="middle">
-            <rect x="6" y="50" width="86" height="40" rx="9" fill="#EEF3FA" stroke="#1A4584" stroke-width="1.3"/>
-            <text x="49" y="68">Researcher</text><text x="49" y="82" font-size="8" font-weight="400" fill="#4B5768">themes + evidence</text>
-            <rect x="104" y="50" width="86" height="40" rx="9" fill="#E7F7FC" stroke="#35C2E8" stroke-width="1.3"/>
-            <text x="147" y="68">Analyst</text><text x="147" y="82" font-size="8" font-weight="400" fill="#4B5768">impact + segments</text>
-            <rect x="202" y="50" width="94" height="40" rx="9" fill="#EEF3FA" stroke="#1A4584" stroke-width="1.3"/>
-            <text x="249" y="65">Experiment</text><text x="249" y="76">Designer</text><text x="249" y="86" font-size="8" font-weight="400" fill="#4B5768">how to test it</text>
-            <rect x="308" y="50" width="86" height="40" rx="9" fill="#E7F7FC" stroke="#35C2E8" stroke-width="1.3"/>
-            <text x="351" y="68">Copywriter</text><text x="351" y="82" font-size="8" font-weight="400" fill="#4B5768">the messaging</text>
-          </g>
-          <line x1="92" y1="70" x2="102" y2="70" stroke="#9AA3AD" stroke-width="1.5" marker-end="url(#sqArrow)"/>
-          <line x1="190" y1="70" x2="200" y2="70" stroke="#9AA3AD" stroke-width="1.5" marker-end="url(#sqArrow)"/>
-          <line x1="296" y1="70" x2="306" y2="70" stroke="#9AA3AD" stroke-width="1.5" marker-end="url(#sqArrow)"/>
-          <text x="200" y="118" text-anchor="middle" font-family="sans-serif" font-size="9" fill="#9AA3AD">outputs become inputs — a repeatable system, not four disconnected tools</text>
-        </svg>
+        <div data-fig="squad"></div>
         <p>Each agent gets real boundaries too. The Researcher doesn't make product decisions or invent sources, and it flags uncertainty clearly. The Analyst doesn't declare causality without experimental support. The Copywriter doesn't make up capabilities and calls out where legal review is needed. The Experiment Designer proposes options and trade-offs, not a single answer.</p>
       `,
       checks: [
@@ -121,33 +130,34 @@ window.CONTENT_OVERRIDES["aiOrg-novice"] = {
     {
       id: 3,
       title: "Lesson 3: Start With Workflows, Not Models",
+      figures: {
+        "workflow": {
+          "type": "cards",
+          "title": "Start with a workflow, not a model",
+          "sub": "Take one costly, recurring ritual and ask three questions. Each answer becomes one agent's responsibility.",
+          "items": [
+            {
+              "icon": "clock",
+              "title": "Where do we lose time?",
+              "tone": "amber"
+            },
+            {
+              "icon": "warning",
+              "title": "Where do mistakes happen?",
+              "tone": "coral"
+            },
+            {
+              "icon": "scale",
+              "title": "Where do we lack consistency?",
+              "tone": "violet"
+            }
+          ]
+        }
+      },
       body: `
         <p>The biggest mistake is starting with the technology. Start with a <strong>workflow</strong> you want to improve: a recurring product ritual that's expensive in time and attention, such as weekly backlog grooming, monthly insights review, quarterly planning, or experiment review and write-ups.</p>
         <p>Then ask three questions about it: where do we lose time, where do mistakes happen, and where do we lack consistency? Those pain points become your first agent responsibilities.</p>
-        <svg viewBox="0 0 400 124" style="width:100%; height:auto; margin:4px 0 2px;" xmlns="http://www.w3.org/2000/svg">
-          <defs>
-            <marker id="aoWf" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-              <path d="M0,0 L10,5 L0,10 z" fill="#9AA3AD"/>
-            </marker>
-          </defs>
-          <rect x="8" y="46" width="96" height="32" rx="6" fill="#EEF3FA" stroke="#1A4584" stroke-width="1.3"/>
-          <text x="56" y="60" text-anchor="middle" font-family="'Space Grotesk',sans-serif" font-size="8" font-weight="700" fill="#12305e">A costly</text>
-          <text x="56" y="71" text-anchor="middle" font-family="'Space Grotesk',sans-serif" font-size="8" font-weight="700" fill="#12305e">recurring ritual</text>
-          <g font-family="sans-serif" font-size="7.5" fill="#4B5768" text-anchor="middle">
-            <rect x="150" y="10" width="150" height="26" rx="5" fill="#E7F7FC" stroke="#35C2E8" stroke-width="1"/><text x="225" y="26">Where do we lose time?</text>
-            <rect x="150" y="49" width="150" height="26" rx="5" fill="#E7F7FC" stroke="#35C2E8" stroke-width="1"/><text x="225" y="65">Where do mistakes happen?</text>
-            <rect x="150" y="88" width="150" height="26" rx="5" fill="#E7F7FC" stroke="#35C2E8" stroke-width="1"/><text x="225" y="104">Where do we lack consistency?</text>
-          </g>
-          <g stroke="#9AA3AD" stroke-width="1.1">
-            <line x1="104" y1="56" x2="148" y2="24" marker-end="url(#aoWf)"/>
-            <line x1="104" y1="62" x2="148" y2="62" marker-end="url(#aoWf)"/>
-            <line x1="104" y1="68" x2="148" y2="100" marker-end="url(#aoWf)"/>
-          </g>
-          <text x="325" y="49" text-anchor="middle" font-family="sans-serif" font-size="7.5" font-weight="700" fill="#2E8B57">each &#8594;</text>
-          <text x="325" y="60" text-anchor="middle" font-family="sans-serif" font-size="7.5" fill="#4B5768">one agent's</text>
-          <text x="325" y="70" text-anchor="middle" font-family="sans-serif" font-size="7.5" fill="#4B5768">responsibility</text>
-          <line x1="300" y1="62" x2="308" y2="62" stroke="#9AA3AD" stroke-width="1.1" marker-end="url(#aoWf)"/>
-        </svg>
+        <div data-fig="workflow"></div>
         <p>Take discovery and validation for a new initiative. Common pain points: feedback scattered across tools, outdated competitive research, insights that aren't consistently synthesized, hypotheses and experiments that vary in quality, and messaging rushed at launch. Every one of those is a job you can hand to a specific agent, which is exactly why that workflow is a good place for a squad.</p>
       `,
       checks: [

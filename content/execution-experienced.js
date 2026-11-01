@@ -69,22 +69,40 @@ window.CONTENT_OVERRIDES["execution-experienced"] = {
     {
       id: 2,
       title: "Lesson 2: Design for Failure",
+      figures: {
+        "failover": {
+          "type": "cards",
+          "title": "Design for failure",
+          "sub": "Traffic goes through a load balancer to several nodes. One goes down; the service stays up.",
+          "items": [
+            {
+              "icon": "check",
+              "label": "Node A",
+              "title": "Up",
+              "text": "Takes a share of the load",
+              "tone": "teal"
+            },
+            {
+              "icon": "check",
+              "label": "Node B",
+              "title": "Up",
+              "text": "Takes a share of the load",
+              "tone": "teal"
+            },
+            {
+              "icon": "warning",
+              "label": "Node C",
+              "title": "Down",
+              "text": "The balancer routes around it",
+              "tone": "coral"
+            }
+          ],
+          "foot": "The service is still up."
+        }
+      },
       body: `
         <p>A reliable system assumes its own components will fail and keeps working anyway.</p>
-        <svg viewBox="0 0 400 130" style="width:100%; height:auto; margin:4px 0 2px;">
-          <rect x="24" y="50" width="70" height="30" rx="6" fill="#EEF3FA" stroke="#1A4584" stroke-width="1.2"/>
-          <text x="59" y="69" text-anchor="middle" font-family="'Space Grotesk',sans-serif" font-size="9" font-weight="700" fill="#12305e">traffic</text>
-          <path d="M94 65 L134 65" stroke="#9AA3AD" stroke-width="1.5"/>
-          <rect x="134" y="50" width="70" height="30" rx="6" fill="#E7F7FC" stroke="#35C2E8" stroke-width="1.2"/>
-          <text x="169" y="69" text-anchor="middle" font-family="'Space Grotesk',sans-serif" font-size="9" font-weight="700" fill="#12305e">balancer</text>
-          <path d="M204 60 L250 30" stroke="#9AA3AD" stroke-width="1.5"/>
-          <path d="M204 65 L250 65" stroke="#9AA3AD" stroke-width="1.5"/>
-          <path d="M204 70 L250 100" stroke="#9AA3AD" stroke-width="1.5"/>
-          <rect x="250" y="16" width="60" height="26" rx="5" fill="#F7F9FC" stroke="#1A4584" stroke-width="1"/><text x="280" y="33" text-anchor="middle" font-family="sans-serif" font-size="8.5" fill="#4B5768">node A</text>
-          <rect x="250" y="52" width="60" height="26" rx="5" fill="#F7F9FC" stroke="#1A4584" stroke-width="1"/><text x="280" y="69" text-anchor="middle" font-family="sans-serif" font-size="8.5" fill="#4B5768">node B</text>
-          <rect x="250" y="88" width="60" height="26" rx="5" fill="#F7F9FC" stroke="#9AA3AD" stroke-width="1" stroke-dasharray="3 2"/><text x="280" y="105" text-anchor="middle" font-family="sans-serif" font-size="8.5" fill="#9AA3AD">node C down</text>
-          <text x="340" y="69" font-family="sans-serif" font-size="8" fill="#9AA3AD" text-anchor="middle">still up</text>
-        </svg>
+        <div data-fig="failover"></div>
         <p>The building blocks: <strong>redundancy and load balancing</strong> so one failed component doesn't take the product down; <strong>proactive monitoring and alerting</strong> so you detect a degradation before users report it; and an <strong>incident response plan written before you need it</strong> (who's on call, how you communicate, how you roll back), so a 2 a.m. outage runs on a script instead of improvisation.</p>
       `,
       checks: [
@@ -113,22 +131,83 @@ window.CONTENT_OVERRIDES["execution-experienced"] = {
     {
       id: 3,
       title: "Lesson 3: Rehearse the Peak",
+      figures: {
+        "load": {
+          "type": "line",
+          "title": "Rehearse the peak",
+          "sub": "Push load up until something gives, and note where.",
+          "x": "Load",
+          "y": "Response time",
+          "xmin": 0,
+          "xmax": 4,
+          "ymin": 0,
+          "ymax": 5.5,
+          "series": [
+            {
+              "label": "Response time",
+              "tone": "coral",
+              "points": [
+                [
+                  0.2,
+                  1
+                ],
+                [
+                  1,
+                  1.05
+                ],
+                [
+                  1.5,
+                  1.1
+                ],
+                [
+                  2,
+                  1.2
+                ],
+                [
+                  2.5,
+                  1.45
+                ],
+                [
+                  3,
+                  1.9
+                ],
+                [
+                  3.4,
+                  2.9
+                ],
+                [
+                  3.8,
+                  4.6
+                ]
+              ]
+            }
+          ],
+          "marks": [
+            {
+              "x": 3,
+              "label": "~3x = known ceiling"
+            }
+          ],
+          "notes": [
+            {
+              "x": 1.4,
+              "y": 1.1,
+              "text": "Flat and fine"
+            },
+            {
+              "x": 3.4,
+              "y": 2.9,
+              "text": "Degraded past here",
+              "left": true
+            }
+          ],
+          "foot": "The first bottleneck: the report query."
+        }
+      },
       body: `
         <p>The failures that hurt most are the ones that only appear under load: a launch spike, a seasonal surge, a big new customer going live. Hoping the system holds is not a plan; rehearsing is.</p>
         <p><strong>Performance testing and load simulation</strong> mean deliberately pushing the system to and past its expected peak in a controlled setting, so you find the bottleneck (the query that falls over, the queue that backs up, the memory that leaks) before real traffic finds it for you.</p>
-        <svg viewBox="0 0 400 150" style="width:100%; height:auto; margin:4px 0 2px;" xmlns="http://www.w3.org/2000/svg">
-          <line x1="40" y1="16" x2="40" y2="120" stroke="#9AA3AD" stroke-width="1.2"/>
-          <line x1="40" y1="120" x2="384" y2="120" stroke="#9AA3AD" stroke-width="1.2"/>
-          <text x="18" y="112" text-anchor="start" font-family="sans-serif" font-size="8" fill="#4B5768" transform="rotate(-90 18 112)">response time</text>
-          <text x="212" y="140" text-anchor="middle" font-family="sans-serif" font-size="8" fill="#4B5768">load &#8594;</text>
-          <path d="M40 108 L150 104 L230 96 L286 80 L320 44 L340 20" fill="none" stroke="#1A4584" stroke-width="1.8"/>
-          <line x1="286" y1="16" x2="286" y2="120" stroke="#35C2E8" stroke-width="1.2" stroke-dasharray="4 3"/>
-          <text x="286" y="12" text-anchor="middle" font-family="'Space Grotesk',sans-serif" font-size="7.5" font-weight="700" fill="#12305e">~3x = known ceiling</text>
-          <circle cx="286" cy="80" r="4" fill="#C0622A"/>
-          <text x="278" y="66" text-anchor="end" font-family="sans-serif" font-size="7.5" fill="#C0622A">first bottleneck &#8212; the report query</text>
-          <text x="120" y="100" font-family="sans-serif" font-size="7.5" fill="#4B5768">flat and fine</text>
-          <text x="380" y="112" text-anchor="end" font-family="sans-serif" font-size="7.5" fill="#9AA3AD">degraded past here</text>
-        </svg>
+        <div data-fig="load"></div>
         <p>The output isn't just "it passed." It's a known ceiling ("we're solid to 3x current load, degraded past that") and a list of the specific things that break first, which becomes your pre-launch fix list and your scaling roadmap.</p>
       `,
       checks: [

@@ -72,23 +72,42 @@ window.CONTENT_OVERRIDES["execution-novice"] = {
     {
       id: 2,
       title: "Lesson 2: Work in Increments, Get Feedback Early",
+      figures: {
+        "batch": {
+          "type": "compare",
+          "title": "Big batch vs increments",
+          "sub": "Where the first test lands decides when surprises show up.",
+          "columns": [
+            {
+              "label": "Big batch",
+              "tone": "coral",
+              "mark": "x",
+              "items": [
+                "Build",
+                "Build",
+                "Build",
+                "First test, with no time left"
+              ],
+              "foot": "Surprises arrive at the end"
+            },
+            {
+              "label": "Increments",
+              "tone": "teal",
+              "mark": "check",
+              "items": [
+                "Build a slice, test it",
+                "Build a slice, test it",
+                "Build a slice, test it",
+                "Tested at every step"
+              ],
+              "foot": "Surprises arrive while they're cheap"
+            }
+          ]
+        }
+      },
       body: `
         <p>The core practice is delivering value <strong>incrementally and iteratively</strong> instead of all at once.</p>
-        <svg viewBox="0 0 400 140" style="width:100%; height:auto; margin:4px 0 2px;">
-          <text x="70" y="18" text-anchor="middle" font-family="'Space Grotesk',sans-serif" font-size="10" font-weight="700" fill="#9AA3AD">BIG BATCH</text>
-          <rect x="24" y="28" width="92" height="30" rx="4" fill="#F7F9FC" stroke="#9AA3AD" stroke-width="1.2"/>
-          <text x="70" y="47" text-anchor="middle" font-family="sans-serif" font-size="8" fill="#4B5768">build build build</text>
-          <circle cx="128" cy="43" r="6" fill="#C0622A"/>
-          <text x="128" y="70" text-anchor="middle" font-family="sans-serif" font-size="7.5" fill="#9AA3AD">first test, no time left</text>
-          <text x="70" y="96" text-anchor="middle" font-family="'Space Grotesk',sans-serif" font-size="10" font-weight="700" fill="#1A4584">INCREMENTS</text>
-          <g>
-            <rect x="24" y="104" width="26" height="20" rx="3" fill="#EEF3FA" stroke="#1A4584" stroke-width="1"/><circle cx="54" cy="114" r="4" fill="#2E8B57"/>
-            <rect x="66" y="104" width="26" height="20" rx="3" fill="#EEF3FA" stroke="#1A4584" stroke-width="1"/><circle cx="96" cy="114" r="4" fill="#2E8B57"/>
-            <rect x="108" y="104" width="26" height="20" rx="3" fill="#EEF3FA" stroke="#1A4584" stroke-width="1"/><circle cx="138" cy="114" r="4" fill="#2E8B57"/>
-            <rect x="150" y="104" width="26" height="20" rx="3" fill="#EEF3FA" stroke="#1A4584" stroke-width="1"/><circle cx="180" cy="114" r="4" fill="#2E8B57"/>
-          </g>
-          <text x="230" y="118" font-family="sans-serif" font-size="7.5" fill="#9AA3AD">tested every step</text>
-        </svg>
+        <div data-fig="batch"></div>
         <p>Three habits make this concrete: <strong>define a small MVP scope</strong> (the essential features that address the core need, without overextending); <strong>adopt an agile cadence</strong> (Scrum or Kanban) so you iterate, gather feedback, and adjust on a rhythm; and <strong>run a beta</strong>, releasing early to a select group of users to measure performance and find rough edges before a full launch.</p>
       `,
       checks: [
@@ -117,26 +136,35 @@ window.CONTENT_OVERRIDES["execution-novice"] = {
     {
       id: 3,
       title: "Lesson 3: Automate the Checks",
+      figures: {
+        "pipeline": {
+          "type": "steps",
+          "title": "Automate the checks",
+          "foot": "A break stops here, in isolation, the day it's introduced.",
+          "items": [
+            {
+              "title": "Commit",
+              "tone": "navy"
+            },
+            {
+              "title": "Automated tests",
+              "text": "A break stops here",
+              "tone": "coral"
+            },
+            {
+              "title": "CI/CD build",
+              "tone": "sky"
+            },
+            {
+              "title": "Deploy",
+              "tone": "teal"
+            }
+          ]
+        }
+      },
       body: `
         <p>Increments only give you early signal if something is actually checking each one. Manual testing at the end of a project is exactly the late-signal problem again.</p>
-        <svg viewBox="0 0 400 108" style="width:100%; height:auto; margin:4px 0 2px;" xmlns="http://www.w3.org/2000/svg">
-          <defs>
-            <marker id="enPipe" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-              <path d="M0,0 L10,5 L0,10 z" fill="#9AA3AD"/>
-            </marker>
-          </defs>
-          <g text-anchor="middle" font-family="'Space Grotesk',sans-serif" font-size="8" font-weight="700" fill="#12305e">
-            <rect x="8" y="34" width="74" height="28" rx="5" fill="#EEF3FA" stroke="#1A4584" stroke-width="1.1"/><text x="45" y="52">commit</text>
-            <rect x="110" y="34" width="90" height="28" rx="5" fill="#E7F7FC" stroke="#35C2E8" stroke-width="1.3"/><text x="155" y="49">automated</text><text x="155" y="58" font-size="7" font-weight="400" fill="#4B5768">tests</text>
-            <rect x="228" y="34" width="74" height="28" rx="5" fill="#EEF3FA" stroke="#1A4584" stroke-width="1.1"/><text x="265" y="52">CI/CD build</text>
-            <rect x="330" y="34" width="62" height="28" rx="5" fill="#EEF9F1" stroke="#2E8B57" stroke-width="1.1"/><text x="361" y="52">deploy</text>
-          </g>
-          <line x1="82" y1="48" x2="108" y2="48" stroke="#9AA3AD" stroke-width="1.2" marker-end="url(#enPipe)"/>
-          <line x1="200" y1="48" x2="226" y2="48" stroke="#9AA3AD" stroke-width="1.2" marker-end="url(#enPipe)"/>
-          <line x1="302" y1="48" x2="328" y2="48" stroke="#9AA3AD" stroke-width="1.2" marker-end="url(#enPipe)"/>
-          <line x1="155" y1="62" x2="155" y2="78" stroke="#C0622A" stroke-width="1.2"/>
-          <text x="155" y="90" text-anchor="middle" font-family="sans-serif" font-size="7.5" fill="#C0622A">a break stops here, in isolation &#8212; the day it's introduced</text>
-        </svg>
+        <div data-fig="pipeline"></div>
         <ul>
           <li><strong>Automated tests</strong> (regression, functional, and security) run on every change, so a break is caught the day it's introduced by whoever introduced it, not weeks later by a user.</li>
           <li><strong>Continuous integration / continuous deployment (CI/CD)</strong> automates the build-and-release path. It removes the manual steps where human error creeps in and slows delivery, and it makes shipping a small change routine instead of an event.</li>

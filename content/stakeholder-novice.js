@@ -78,23 +78,36 @@ window.CONTENT_OVERRIDES["stakeholder-novice"] = {
     {
       id: 2,
       title: "Lesson 2: Build a Rhythm",
+      figures: {
+        "rhythm": {
+          "type": "timeline",
+          "title": "Build a rhythm",
+          "items": [
+            {
+              "when": "Daily",
+              "title": "Standup"
+            },
+            {
+              "when": "Weekly",
+              "title": "Team sync",
+              "tone": "mint"
+            },
+            {
+              "when": "Per sprint",
+              "title": "Review and retro",
+              "tone": "amber"
+            },
+            {
+              "when": "Quarterly",
+              "title": "Roadmap review",
+              "tone": "violet"
+            }
+          ]
+        }
+      },
       body: `
         <p>Proactive communication runs on <strong>cadence</strong>: a set of recurring touchpoints so predictable that people stop needing to ask.</p>
-        <svg viewBox="0 0 400 120" style="width:100%; height:auto; margin:4px 0 2px;">
-          <line x1="20" y1="60" x2="380" y2="60" stroke="#E3E9F0" stroke-width="2"/>
-          <g font-family="'Space Grotesk',sans-serif" font-size="9" font-weight="700" fill="#12305e" text-anchor="middle">
-            <circle cx="70" cy="60" r="5" fill="#1A4584"/><text x="70" y="42">Daily</text>
-            <circle cx="170" cy="60" r="5" fill="#35C2E8"/><text x="170" y="42">Weekly</text>
-            <circle cx="270" cy="60" r="5" fill="#1A4584"/><text x="270" y="42">Per sprint</text>
-            <circle cx="360" cy="60" r="5" fill="#35C2E8"/><text x="360" y="42">Quarterly</text>
-          </g>
-          <g font-family="sans-serif" font-size="8" fill="#4B5768" text-anchor="middle">
-            <text x="70" y="82">standup</text>
-            <text x="170" y="82">team sync</text>
-            <text x="270" y="82">review + retro</text>
-            <text x="356" y="82">roadmap review</text>
-          </g>
-        </svg>
+        <div data-fig="rhythm"></div>
         <p>The exact structure matters less than the predictability. Regular <strong>standups</strong> keep the team aligned day to day. A weekly <strong>sync</strong> aligns on deliverables and timelines. <strong>Sprint reviews and retrospectives</strong> give stakeholders a scheduled window into progress and a place to raise concerns. Once these exist, most "quick questions" stop happening, because the answer was already delivered.</p>
       `,
       checks: [
@@ -123,27 +136,34 @@ window.CONTENT_OVERRIDES["stakeholder-novice"] = {
     {
       id: 3,
       title: "Lesson 3: Set Up the Channels",
+      figures: {
+        "channels": {
+          "type": "cards",
+          "title": "Set up the channels",
+          "sub": "The default state: informed.",
+          "foot": "Staying uninformed should take effort, not the other way around.",
+          "items": [
+            {
+              "icon": "layers",
+              "title": "A shared board",
+              "tone": "teal"
+            },
+            {
+              "icon": "chat",
+              "title": "An open channel",
+              "tone": "amber"
+            },
+            {
+              "icon": "doc",
+              "title": "Collaborative docs",
+              "tone": "violet"
+            }
+          ]
+        }
+      },
       body: `
         <p>A cadence needs somewhere for the information to live between meetings. Three basics:</p>
-        <svg viewBox="0 0 400 128" style="width:100%; height:auto; margin:4px 0 2px;" xmlns="http://www.w3.org/2000/svg">
-          <defs>
-            <marker id="snCh" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-              <path d="M0,0 L10,5 L0,10 z" fill="#9AA3AD"/>
-            </marker>
-          </defs>
-          <g text-anchor="middle" font-family="'Space Grotesk',sans-serif" font-size="8" font-weight="700" fill="#12305e">
-            <rect x="10" y="10" width="150" height="26" rx="5" fill="#EEF3FA" stroke="#1A4584" stroke-width="1"/><text x="85" y="27">Shared board</text>
-            <rect x="10" y="50" width="150" height="26" rx="5" fill="#EEF3FA" stroke="#1A4584" stroke-width="1"/><text x="85" y="67">Open channel</text>
-            <rect x="10" y="90" width="150" height="26" rx="5" fill="#EEF3FA" stroke="#1A4584" stroke-width="1"/><text x="85" y="107">Collaborative docs</text>
-            <rect x="248" y="46" width="142" height="36" rx="8" fill="#EEF9F1" stroke="#2E8B57" stroke-width="1.3"/><text x="319" y="62">Default state:</text><text x="319" y="74">informed</text>
-          </g>
-          <g stroke="#9AA3AD" stroke-width="1.2">
-            <line x1="160" y1="23" x2="246" y2="56" marker-end="url(#snCh)"/>
-            <line x1="160" y1="63" x2="246" y2="63" marker-end="url(#snCh)"/>
-            <line x1="160" y1="103" x2="246" y2="72" marker-end="url(#snCh)"/>
-          </g>
-          <text x="200" y="126" text-anchor="middle" font-family="sans-serif" font-size="7.5" fill="#4B5768">Staying uninformed should take effort, not the other way around.</text>
-        </svg>
+        <div data-fig="channels"></div>
         <ul>
           <li><strong>A shared project tool</strong> (Jira, Linear, Trello, whatever your team uses) where progress is visible without anyone reporting it. If a stakeholder can open the board and see status, that's a question you never have to answer.</li>
           <li><strong>An open communication channel</strong> (Slack, Teams) that breaks down silos, so updates and decisions are visible to everyone who needs them, not trapped in DMs.</li>

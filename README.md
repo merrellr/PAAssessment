@@ -465,6 +465,14 @@ Fonts are Lato for text and Comfortaa for the logo. Font sizes are in `rem`, so 
   - quote.
 - The words in blocks go into search and "Ask AI" (`LessonBlocks.text`, used by `tools/build-search-index.mjs`).
   Rebuild the indexes after editing a course.
+- **Figures.** A lesson's diagrams are drawn by `lesson-figures.js` (styles in `lesson-figures.css`), in the style of
+  the articles on www.productadvisory.co: a cream card, a serif title, and large readable pieces. The lesson lists
+  them as data in `figures: { name: { type, title, sub, foot, ... } }` and places each one in its `body` with
+  `<div data-fig="name"></div>`. Types: cards, steps, loop, compare, hub, quadrant, bars, timeline, equation, record,
+  split, line, venn, decision, stats and columns; each is described at the top of the file. Figures are HTML, not
+  pictures: they reflow on phones, follow light and dark, are read by screen readers, and their words go into
+  "Ask AI" (`PAFig.text`). `tests/lesson-figures.test.mjs` checks that every figure in every course is placed and draws.
+  Don't add inline `<svg>` diagrams or PNGs to lessons; add a figure instead.
 - **The flagship course** is `content/discovery-novice.js` (Customer & Market Discovery, Limited Experience): one story
   across five lessons, with every block type in use. The company and people in the story, and the numbers from their
   pilot, are fictional and marked so on the page. Every other figure names its source.

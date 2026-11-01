@@ -68,25 +68,33 @@ window.CONTENT_OVERRIDES["execution-advanced"] = {
     {
       id: 2,
       title: "Lesson 2: Delivery Rhythms Worth Copying",
+      figures: {
+        "rhythm": {
+          "type": "loop",
+          "title": "A delivery rhythm worth copying",
+          "center": "Small increments, every cycle",
+          "items": [
+            {
+              "title": "Plan the increment"
+            },
+            {
+              "title": "Build and auto-test",
+              "tone": "mint"
+            },
+            {
+              "title": "Ship via CI/CD",
+              "tone": "violet"
+            },
+            {
+              "title": "Read the metrics",
+              "tone": "amber"
+            }
+          ]
+        }
+      },
       body: `
         <p>A delivery system other teams adopt is a small set of rhythms and defaults, documented well enough to lift wholesale.</p>
-        <svg viewBox="0 0 400 150" style="width:100%; height:auto; margin:4px 0 2px;">
-          <defs>
-            <marker id="exLoop" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
-              <path d="M0 0 L10 5 L0 10 z" fill="#9AA3AD"/>
-            </marker>
-          </defs>
-          <g font-family="'Space Grotesk',sans-serif" font-size="9" font-weight="700" fill="#12305e" text-anchor="middle">
-            <rect x="150" y="10" width="100" height="26" rx="8" fill="#EEF3FA" stroke="#1A4584" stroke-width="1.2"/><text x="200" y="27">plan increment</text>
-            <rect x="288" y="62" width="100" height="26" rx="8" fill="#E7F7FC" stroke="#35C2E8" stroke-width="1.2"/><text x="338" y="79">build + auto-test</text>
-            <rect x="150" y="114" width="100" height="26" rx="8" fill="#EEF3FA" stroke="#1A4584" stroke-width="1.2"/><text x="200" y="131">ship via CI/CD</text>
-            <rect x="12" y="62" width="100" height="26" rx="8" fill="#E7F7FC" stroke="#35C2E8" stroke-width="1.2"/><text x="62" y="79">read the metrics</text>
-          </g>
-          <path d="M250 23 Q330 30 338 60" fill="none" stroke="#9AA3AD" stroke-width="1.4" marker-end="url(#exLoop)"/>
-          <path d="M338 90 Q330 120 252 127" fill="none" stroke="#9AA3AD" stroke-width="1.4" marker-end="url(#exLoop)"/>
-          <path d="M150 127 Q70 120 62 90" fill="none" stroke="#9AA3AD" stroke-width="1.4" marker-end="url(#exLoop)"/>
-          <path d="M62 60 Q70 30 150 23" fill="none" stroke="#9AA3AD" stroke-width="1.4" marker-end="url(#exLoop)"/>
-        </svg>
+        <div data-fig="rhythm"></div>
         <p>The pieces worth standardizing: an <strong>iterative roadmap</strong> format that flexes between fixes, enhancements, and new work; <strong>CI/CD and automated testing as the default</strong>, not a per-team choice; a shared <strong>quality-metrics view</strong> (defect rate, downtime, cycle time) every team reads the same way; and a fixed <strong>review cadence</strong>. When these are the house standard, a new team is productive and reliable in weeks, not quarters.</p>
       `,
       checks: [

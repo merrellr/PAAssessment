@@ -49,8 +49,31 @@ window.CONTENT_OVERRIDES["aiOrg-moderate"] = {
         correct: 1,
         explanation: "That's exactly the fragility this lesson is about. Keep that prediction in mind as you read."
       },
-      image: { src: "images/enablement-stages.png", alt: "Three stages of growth: Novice just breaking the surface, Individual enablement with shallow contained roots, Organizational enablement with a wide shared root system" },
+      figures: {
+        "stages": {
+          "type": "steps",
+          "title": "Three stages of growth",
+          "items": [
+            {
+              "title": "Novice",
+              "text": "Just breaking the surface",
+              "tone": "sand"
+            },
+            {
+              "title": "Individual enablement",
+              "text": "Shallow, contained roots",
+              "tone": "mint"
+            },
+            {
+              "title": "Organizational enablement",
+              "text": "A wide, shared root system",
+              "tone": "teal"
+            }
+          ]
+        }
+      },
       body: `
+        <div data-fig="stages"></div>
         <p>Most organizations sit in one of three stages. In the first, <strong>novice</strong>, AI adoption hasn't really started yet; it's just breaking the surface. In the second, <strong>individual enablement</strong>, a handful of curious employees have taught themselves to use AI tools well: clever prompts, real time saved, but contained to that one person.</p>
         <p>This second stage is where the majority of companies are stuck right now. It feels like progress: someone on the team is clearly getting value. But look closely at the roots: they're shallow and contained. If that person leaves, the knowledge leaves with them. If a new hire joins, they start from zero.</p>
         <p>The third stage, <strong>organizational enablement</strong>, has a wide, shared root system instead. The organization itself, not just a few power users, has durable capability that survives turnover and gets inherited by every new hire on day one.</p>
@@ -81,8 +104,37 @@ window.CONTENT_OVERRIDES["aiOrg-moderate"] = {
     {
       id: 2,
       title: "Lesson 2: Contained Growth vs. Compounding Growth",
-      image: { src: "images/individual-vs-organizational.png", alt: "Building for the individual shown as a single contained potted plant; building for the organization shown as three connected trees sharing a root system" },
+      figures: {
+        "roots": {
+          "type": "compare",
+          "title": "Contained growth vs compounding growth",
+          "arrow": true,
+          "columns": [
+            {
+              "label": "Building for the individual",
+              "title": "One potted plant",
+              "tone": "sand",
+              "items": [
+                "One person's setup",
+                "Nothing shared",
+                "Grows only as far as its pot"
+              ]
+            },
+            {
+              "label": "Building for the organization",
+              "title": "Trees on shared roots",
+              "tone": "teal",
+              "items": [
+                "Shared data, prompts and owners",
+                "Each new agent starts stronger",
+                "Growth compounds"
+              ]
+            }
+          ]
+        }
+      },
       body: `
+        <div data-fig="roots"></div>
         <p>When you build an AI habit or workflow for one person, you're optimizing that person's time. That's real value, but it's <strong>contained and isolated</strong>, like a plant in a pot. It scales only as far as their workload and only as long as they keep using it.</p>
         <p>When you build for a process instead, the value becomes <strong>connected and compounding</strong>. Drag the slider below to see how the gap between the two grows over time.</p>
       `,
@@ -161,8 +213,35 @@ window.CONTENT_OVERRIDES["aiOrg-moderate"] = {
         correct: 1,
         explanation: "See if the five steps below confirm this."
       },
-      image: { src: "images/five-steps.png", alt: "Five growth stages labeled: Start narrow, Map the process, Ground in real data, Test with real users, Assign an owner" },
+      figures: {
+        "path": {
+          "type": "steps",
+          "title": "A practical five-step path",
+          "items": [
+            {
+              "title": "Start narrow"
+            },
+            {
+              "title": "Map the process",
+              "tone": "mint"
+            },
+            {
+              "title": "Ground it in real data",
+              "tone": "sky"
+            },
+            {
+              "title": "Test with real users",
+              "tone": "amber"
+            },
+            {
+              "title": "Assign an owner",
+              "tone": "navy"
+            }
+          ]
+        }
+      },
       body: `
+        <div data-fig="path"></div>
         <p>You don't need a full transformation program to make this shift. You need one real process, one working tool, and proof that it works. Step through the five steps below.</p>
       `,
       steps: [
@@ -198,8 +277,41 @@ window.CONTENT_OVERRIDES["aiOrg-moderate"] = {
     {
       id: 5,
       title: "Lesson 5: The Bigger Picture",
-      image: { src: "images/one-agent-seeds-many.png", alt: "One proven tree at the center with dashed outlines of future trees around it, connected by shared roots, captioned: one proven agent seeds the ones that follow" },
+      figures: {
+        "seeds": {
+          "type": "hub",
+          "title": "One proven agent seeds the ones that follow",
+          "sub": "Shared roots: the data, prompts and ownership the first one proved.",
+          "center": {
+            "title": "One proven agent",
+            "text": "Working in production"
+          },
+          "items": [
+            {
+              "title": "The next agent",
+              "text": "Starts from what's proven",
+              "tone": "mint"
+            },
+            {
+              "title": "Another team",
+              "text": "Reuses the pattern",
+              "tone": "sky"
+            },
+            {
+              "title": "A new workflow",
+              "text": "Same guardrails",
+              "tone": "amber"
+            },
+            {
+              "title": "Shared data",
+              "text": "Grounded once, used again",
+              "tone": "violet"
+            }
+          ]
+        }
+      },
       body: `
+        <div data-fig="seeds"></div>
         <p>Treat your first success as a proof point, not the finish line. The real payoff isn't the single automation. It's what that first win teaches your organization about what's possible, and the credibility it builds for the next one.</p>
         <p>The organizations that separate themselves over the next few years won't be the ones with the most individual AI enthusiasts. They'll be the ones that turned individual enthusiasm into organizational capability: governed, durable, and built on real business processes rather than good intentions.</p>
         <p>If your company is still stuck in the individual stage, the good news is that the jump doesn't require a massive program. It requires picking one real process, building one real solution, and proving it out. Everything else follows from there.</p>

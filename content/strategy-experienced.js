@@ -36,6 +36,33 @@ window.CONTENT_OVERRIDES["strategy-experienced"] = {
         correct: 1,
         explanation: "See whether the lesson agrees. A good roadmap communicated badly still fails."
       },
+      figures: {
+        "audiences": {
+          "type": "cards",
+          "title": "One roadmap, three audiences",
+          "sub": "Each reads it for a different question.",
+          "items": [
+            {
+              "icon": "gear",
+              "title": "Engineers",
+              "quote": "What am I building, and when?",
+              "tone": "teal"
+            },
+            {
+              "icon": "chart",
+              "title": "Executives",
+              "quote": "Right bet? What could derail it?",
+              "tone": "navy"
+            },
+            {
+              "icon": "users",
+              "title": "Customers",
+              "quote": "What's in it for me, roughly when?",
+              "tone": "amber"
+            }
+          ]
+        }
+      },
       body: `
         <p>A roadmap is only as effective as the communication plan around it. The same underlying roadmap has to be presented differently to different audiences, because they're each trying to answer a different question.</p>
         <ul>
@@ -43,33 +70,7 @@ window.CONTENT_OVERRIDES["strategy-experienced"] = {
           <li><strong>Executives</strong> need the high-level view: themes, how each aligns to business goals, and the key risks with mitigations. Their question is "is this the right bet and what could derail it?"</li>
           <li><strong>Customers</strong> need the improvements view: what's coming that addresses their pain points or streamlines their workflow. Their question is "what's in it for me and roughly when?"</li>
         </ul>
-        <svg viewBox="0 0 400 150" style="width:100%; height:auto; margin:4px 0 2px;" xmlns="http://www.w3.org/2000/svg">
-          <defs>
-            <marker id="seCut" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-              <path d="M0,0 L10,5 L0,10 z" fill="#9AA3AD"/>
-            </marker>
-          </defs>
-          <rect x="10" y="56" width="96" height="38" rx="6" fill="#EEF3FA" stroke="#1A4584" stroke-width="1.3"/>
-          <text x="58" y="79" text-anchor="middle" font-family="'Space Grotesk',sans-serif" font-size="9" font-weight="700" fill="#12305e">One roadmap</text>
-          <line x1="106" y1="66" x2="150" y2="28" stroke="#9AA3AD" stroke-width="1.2" marker-end="url(#seCut)"/>
-          <line x1="106" y1="75" x2="150" y2="75" stroke="#9AA3AD" stroke-width="1.2" marker-end="url(#seCut)"/>
-          <line x1="106" y1="84" x2="150" y2="122" stroke="#9AA3AD" stroke-width="1.2" marker-end="url(#seCut)"/>
-          <g>
-            <rect x="152" y="10" width="238" height="34" rx="5" fill="#E7F7FC" stroke="#35C2E8" stroke-width="1.1"/>
-            <rect x="152" y="58" width="238" height="34" rx="5" fill="#E7F7FC" stroke="#35C2E8" stroke-width="1.1"/>
-            <rect x="152" y="106" width="238" height="34" rx="5" fill="#E7F7FC" stroke="#35C2E8" stroke-width="1.1"/>
-          </g>
-          <g font-family="'Space Grotesk',sans-serif" font-size="8.5" font-weight="700" fill="#12305e">
-            <text x="162" y="26">Engineers</text>
-            <text x="162" y="74">Executives</text>
-            <text x="162" y="122">Customers</text>
-          </g>
-          <g font-family="sans-serif" font-size="8" fill="#4B5768">
-            <text x="162" y="38">"what am I building, and when?"</text>
-            <text x="162" y="86">"right bet? what could derail it?"</text>
-            <text x="162" y="134">"what's in it for me, roughly when?"</text>
-          </g>
-        </svg>
+        <div data-fig="audiences"></div>
         <p>One roadmap, three presentations. Skipping the translation is how a solid roadmap still leaves everyone confused.</p>
       `,
       checks: [
@@ -133,22 +134,23 @@ window.CONTENT_OVERRIDES["strategy-experienced"] = {
     {
       id: 3,
       title: "Lesson 3: Holding Short-Term and Long-Term Together",
+      figures: {
+        "arc": {
+          "type": "line",
+          "title": "Holding short-term and long-term together",
+          "sub": "Quarterly increments deliver now; each is checked against the long-term arc.",
+          "x": "Time",
+          "y": "Progress",
+          "xmin": 0,
+          "xmax": 8,
+          "ymin": 0,
+          "ymax": 10,
+          "series": [{"label": "The long-term arc", "tone": "navy", "dashed": true, "points": [[0.0, 1.0], [0.5, 2.02], [1.0, 2.72], [1.5, 3.34], [2.0, 3.9], [2.5, 4.43], [3.0, 4.93], [3.5, 5.41], [4.0, 5.88], [4.5, 6.33], [5.0, 6.76], [5.5, 7.19], [6.0, 7.61], [6.5, 8.02], [7.0, 8.42], [7.5, 8.81], [8.0, 9.2]]}, {"label": "Quarterly increments", "tone": "teal", "points": [[0, 1], [1, 1], [1, 2.72], [1, 2.72], [2, 2.72], [2, 3.9], [2, 3.9], [3, 3.9], [3, 4.93], [3, 4.93], [4, 4.93], [4, 5.88], [4, 5.88], [5, 5.88], [5, 6.76], [5, 6.76], [6, 6.76], [6, 7.61], [6, 7.61], [7, 7.61], [7, 8.42], [7, 8.42], [8, 8.42], [8, 9.2]]}]
+        }
+      },
       body: `
         <p>The hardest part of managing a roadmap is balancing immediate demands (urgent user needs, a competitor move, a compliance deadline) against long-term strategic initiatives that only pay off later.</p>
-        <svg viewBox="0 0 400 150" style="width:100%; height:auto; margin:4px 0 2px;">
-          <path d="M20 118 Q200 20 380 40" fill="none" stroke="#1A4584" stroke-width="2"/>
-          <text x="332" y="34" font-family="'Space Grotesk',sans-serif" font-size="9" font-weight="700" fill="#12305e">long-term arc</text>
-          <g fill="#35C2E8">
-            <rect x="40" y="104" width="26" height="20" rx="3"/>
-            <rect x="96" y="96" width="26" height="28" rx="3"/>
-            <rect x="152" y="90" width="26" height="34" rx="3"/>
-            <rect x="208" y="84" width="26" height="40" rx="3"/>
-            <rect x="264" y="76" width="26" height="48" rx="3"/>
-            <rect x="320" y="66" width="26" height="58" rx="3"/>
-          </g>
-          <text x="60" y="140" font-family="sans-serif" font-size="8.5" fill="#4B5768">quarterly increments deliver now…</text>
-          <text x="235" y="140" font-family="sans-serif" font-size="8.5" fill="#4B5768">…each checked against the arc</text>
-        </svg>
+        <div data-fig="arc"></div>
         <p>Two mechanisms keep the two in balance:</p>
         <ul>
           <li><strong>Time-box long-term planning.</strong> Dedicated quarterly sessions to revisit long-term objectives and check whether the last quarter's short-term work actually moved toward them.</li>

@@ -68,25 +68,45 @@ window.CONTENT_OVERRIDES["stakeholder-advanced"] = {
     {
       id: 2,
       title: "Lesson 2: Building an Aligned Cross-Functional Culture",
+      figures: {
+        "hub": {
+          "type": "hub",
+          "title": "An aligned cross-functional culture",
+          "sub": "Every function works from the same shared vision.",
+          "center": {
+            "title": "Product",
+            "text": "The shared vision"
+          },
+          "items": [
+            {
+              "title": "Engineering"
+            },
+            {
+              "title": "Design",
+              "tone": "amber"
+            },
+            {
+              "title": "Sales",
+              "tone": "violet"
+            },
+            {
+              "title": "Marketing",
+              "tone": "coral"
+            },
+            {
+              "title": "Support",
+              "tone": "sky"
+            },
+            {
+              "title": "Risk",
+              "tone": "navy"
+            }
+          ]
+        }
+      },
       body: `
         <p>Aligning an organization is deliberate work with a few load-bearing pieces.</p>
-        <svg viewBox="0 0 400 170" style="width:100%; height:auto; margin:4px 0 2px;">
-          <circle cx="200" cy="85" r="26" fill="#EEF3FA" stroke="#1A4584" stroke-width="1.5"/>
-          <text x="200" y="82" text-anchor="middle" font-family="'Space Grotesk',sans-serif" font-size="9" font-weight="700" fill="#12305e">Product</text>
-          <text x="200" y="94" text-anchor="middle" font-family="sans-serif" font-size="7" fill="#4B5768">shared vision</text>
-          <g font-family="'Space Grotesk',sans-serif" font-size="8.5" font-weight="700" fill="#12305e" text-anchor="middle">
-            <circle cx="200" cy="22" r="16" fill="#E7F7FC" stroke="#35C2E8" stroke-width="1.2"/><text x="200" y="25">Eng</text>
-            <circle cx="330" cy="55" r="16" fill="#E7F7FC" stroke="#35C2E8" stroke-width="1.2"/><text x="330" y="58">Design</text>
-            <circle cx="340" cy="120" r="16" fill="#E7F7FC" stroke="#35C2E8" stroke-width="1.2"/><text x="340" y="123">Sales</text>
-            <circle cx="200" cy="150" r="16" fill="#E7F7FC" stroke="#35C2E8" stroke-width="1.2"/><text x="200" y="153">Mktg</text>
-            <circle cx="60" cy="120" r="16" fill="#E7F7FC" stroke="#35C2E8" stroke-width="1.2"/><text x="60" y="123">Support</text>
-            <circle cx="70" cy="55" r="16" fill="#E7F7FC" stroke="#35C2E8" stroke-width="1.2"/><text x="70" y="58">Risk</text>
-          </g>
-          <g stroke="#9AA3AD" stroke-width="1">
-            <line x1="200" y1="59" x2="200" y2="38"/><line x1="223" y1="72" x2="315" y2="60"/><line x1="224" y1="96" x2="325" y2="112"/>
-            <line x1="200" y1="111" x2="200" y2="134"/><line x1="177" y1="96" x2="75" y2="112"/><line x1="178" y1="72" x2="85" y2="60"/>
-          </g>
-        </svg>
+        <div data-fig="hub"></div>
         <p><strong>A shared vision</strong>, set with key stakeholders involved early, so every function can see why the product exists and what it's for. <strong>Org-wide communication channels</strong> (regular cross-functional syncs and a genuine single source of truth, like a shared board or wiki) established as institutions, not favors you do. When those exist, alignment stops being something you personally broker at every turn.</p>
       `,
       checks: [
@@ -115,6 +135,28 @@ window.CONTENT_OVERRIDES["stakeholder-advanced"] = {
     {
       id: 3,
       title: "Lesson 3: Product, Marketing, and Sales as One Motion",
+      figures: {
+        "motion": {
+          "type": "steps",
+          "title": "Product, marketing and sales as one motion",
+          "sub": "One shared set of personas, value propositions and claims.",
+          "foot": "The customer's experience stays consistent from first touch to the product itself.",
+          "items": [
+            {
+              "title": "Marketing touch",
+              "tone": "coral"
+            },
+            {
+              "title": "Sales conversation",
+              "tone": "violet"
+            },
+            {
+              "title": "The product",
+              "tone": "teal"
+            }
+          ]
+        }
+      },
       body: `
         <p>Advanced cross-functional work means the go-to-market functions operate as one motion with product, not a handoff.</p>
         <ul>
@@ -122,23 +164,7 @@ window.CONTENT_OVERRIDES["stakeholder-advanced"] = {
           <li><strong>Align messaging to real value propositions.</strong> Marketing's claims and the product's actual differentiators should be the same list. Gaps there show up as churn when reality doesn't match the pitch.</li>
           <li><strong>Equip sales properly.</strong> Sales is often the customer's first contact. Give them playbooks, demo scripts, and objection-handling guides, and keep them trained as the product changes, so they can articulate value accurately.</li>
         </ul>
-        <svg viewBox="0 0 400 106" style="width:100%; height:auto; margin:4px 0 2px;" xmlns="http://www.w3.org/2000/svg">
-          <defs>
-            <marker id="saMotion" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-              <path d="M0,0 L10,5 L0,10 z" fill="#9AA3AD"/>
-            </marker>
-          </defs>
-          <g text-anchor="middle" font-family="'Space Grotesk',sans-serif" font-size="8" font-weight="700" fill="#12305e">
-            <rect x="8" y="12" width="112" height="26" rx="5" fill="#E7F7FC" stroke="#35C2E8" stroke-width="1.1"/><text x="64" y="28">Marketing touch</text>
-            <rect x="144" y="12" width="112" height="26" rx="5" fill="#E7F7FC" stroke="#35C2E8" stroke-width="1.1"/><text x="200" y="28">Sales conversation</text>
-            <rect x="280" y="12" width="112" height="26" rx="5" fill="#EEF3FA" stroke="#1A4584" stroke-width="1.1"/><text x="336" y="28">The product</text>
-          </g>
-          <line x1="120" y1="25" x2="142" y2="25" stroke="#9AA3AD" stroke-width="1.2" marker-end="url(#saMotion)"/>
-          <line x1="256" y1="25" x2="278" y2="25" stroke="#9AA3AD" stroke-width="1.2" marker-end="url(#saMotion)"/>
-          <rect x="8" y="52" width="384" height="22" rx="5" fill="#EEF9F1" stroke="#2E8B57" stroke-width="1.2"/>
-          <text x="200" y="66" text-anchor="middle" font-family="sans-serif" font-size="8" fill="#256b45">one shared set: personas &#183; value propositions &#183; claims</text>
-          <text x="200" y="92" text-anchor="middle" font-family="sans-serif" font-size="7.5" fill="#4B5768">The customer's experience stays consistent from first touch to the product itself.</text>
-        </svg>
+        <div data-fig="motion"></div>
         <p>When this works, a customer's experience is consistent from the first marketing touch through the sales conversation to the product itself.</p>
       `,
       checks: [

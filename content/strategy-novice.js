@@ -81,18 +81,35 @@ window.CONTENT_OVERRIDES["strategy-novice"] = {
     {
       id: 2,
       title: "Lesson 2: Strategic vs. Tactical",
+      figures: {
+        "levels": {
+          "type": "steps",
+          "title": "Strategic vs tactical",
+          "sub": "The roadmap lives at the top level; the detail lives below it.",
+          "items": [
+            {
+              "tag": "Strategic",
+              "title": "Themes and milestones",
+              "text": "The roadmap",
+              "tone": "navy"
+            },
+            {
+              "title": "Epics and features",
+              "text": "The plan",
+              "tone": "teal"
+            },
+            {
+              "tag": "Tactical",
+              "title": "Tasks",
+              "text": "The backlog",
+              "tone": "sand"
+            }
+          ]
+        }
+      },
       body: `
         <p>Roadmap work operates on two levels, and confusing them is where a lot of roadmaps go wrong.</p>
-        <svg viewBox="0 0 400 160" style="width:100%; height:auto; margin:4px 0 2px;">
-          <polygon points="200,14 320,58 80,58" fill="#EEF3FA" stroke="#1A4584" stroke-width="1.3"/>
-          <polygon points="80,62 320,62 350,106 50,106" fill="#E7F7FC" stroke="#35C2E8" stroke-width="1.3"/>
-          <polygon points="50,110 350,110 380,150 20,150" fill="#F7F9FC" stroke="#9AA3AD" stroke-width="1.3"/>
-          <g font-family="'Space Grotesk',sans-serif" text-anchor="middle" fill="#12305e">
-            <text x="200" y="46" font-size="11" font-weight="700">Themes / milestones</text>
-            <text x="200" y="90" font-size="11" font-weight="700">Epics / features</text>
-            <text x="200" y="134" font-size="11" font-weight="700">Tasks</text>
-          </g>
-        </svg>
+        <div data-fig="levels"></div>
         <p><strong>Strategic planning</strong> defines the high-level themes and milestones that support the vision, like "improve onboarding completion," "reach enterprise readiness," "cut time-to-value in half." That's what belongs on the roadmap.</p>
         <p><strong>Tactical planning</strong> breaks those themes into epics, features, and tasks for the development team. That's what belongs in the backlog and sprint plan.</p>
         <p>A roadmap crowded with individual tasks has stopped being strategic. A roadmap of themes with no tactical breakdown underneath is untethered. You need both levels, kept in their own places.</p>
@@ -123,37 +140,34 @@ window.CONTENT_OVERRIDES["strategy-novice"] = {
     {
       id: 3,
       title: "Lesson 3: Link Every Theme to a Business Objective",
+      figures: {
+        "links": {
+          "type": "record",
+          "title": "Link every theme to a business objective",
+          "heading": "Theme → business objective",
+          "foot": "If a theme's arrow lands on \"?\", it belongs in the backlog, not the roadmap.",
+          "rows": [
+            [
+              "Cut onboarding drop-off",
+              "Retention",
+              "teal"
+            ],
+            [
+              "Ship SSO and audit log",
+              "Enterprise expansion",
+              "teal"
+            ],
+            [
+              "Refresh the settings screen",
+              "? No objective: back to the backlog",
+              "coral"
+            ]
+          ]
+        }
+      },
       body: `
         <p>A roadmap that reflects strategy is one where each theme maps to a specific business goal: revenue growth, market expansion, retention, or adoption. If you can't draw that line for a theme, it probably shouldn't be a theme.</p>
-        <svg viewBox="0 0 400 156" style="width:100%; height:auto; margin:4px 0 2px;" xmlns="http://www.w3.org/2000/svg">
-          <defs>
-            <marker id="snMap" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-              <path d="M0,0 L10,5 L0,10 z" fill="#9AA3AD"/>
-            </marker>
-          </defs>
-          <g font-family="'Space Grotesk',sans-serif" font-size="8" font-weight="700" text-anchor="middle" fill="#12305e">
-            <text x="86" y="12">Theme</text>
-            <text x="314" y="12">Business objective</text>
-          </g>
-          <rect x="10" y="20" width="152" height="30" rx="5" fill="#EEF3FA" stroke="#1A4584" stroke-width="1.1"/>
-          <rect x="10" y="62" width="152" height="30" rx="5" fill="#EEF3FA" stroke="#1A4584" stroke-width="1.1"/>
-          <rect x="10" y="104" width="152" height="30" rx="5" fill="#F7F9FC" stroke="#9AA3AD" stroke-width="1.1" stroke-dasharray="3 2"/>
-          <rect x="238" y="20" width="152" height="30" rx="5" fill="#E7F7FC" stroke="#35C2E8" stroke-width="1.1"/>
-          <rect x="238" y="62" width="152" height="30" rx="5" fill="#E7F7FC" stroke="#35C2E8" stroke-width="1.1"/>
-          <rect x="238" y="104" width="152" height="30" rx="5" fill="#FBF0E9" stroke="#C0622A" stroke-width="1.1"/>
-          <g font-family="sans-serif" font-size="8" text-anchor="middle">
-            <text x="86" y="39" fill="#12305e">Cut onboarding drop-off</text>
-            <text x="86" y="81" fill="#12305e">Ship SSO + audit log</text>
-            <text x="86" y="123" fill="#6b7480">Refresh the settings screen</text>
-            <text x="314" y="39" fill="#12305e">Retention</text>
-            <text x="314" y="81" fill="#12305e">Enterprise expansion</text>
-            <text x="314" y="123" fill="#7a3d18">? &#8212; no objective</text>
-          </g>
-          <line x1="164" y1="35" x2="236" y2="35" stroke="#9AA3AD" stroke-width="1.2" marker-end="url(#snMap)"/>
-          <line x1="164" y1="77" x2="236" y2="77" stroke="#9AA3AD" stroke-width="1.2" marker-end="url(#snMap)"/>
-          <line x1="164" y1="119" x2="236" y2="119" stroke="#C0622A" stroke-width="1.2" stroke-dasharray="3 2" marker-end="url(#snMap)"/>
-          <text x="200" y="150" text-anchor="middle" font-family="sans-serif" font-size="8.5" fill="#4B5768">If a theme's arrow lands on "?", it belongs in the backlog, not the roadmap.</text>
-        </svg>
+        <div data-fig="links"></div>
         <p>Two moves make this real:</p>
         <ul>
           <li><strong>Map themes to objectives explicitly.</strong> Not "improve the dashboard" but "improve the dashboard <em>to reduce the support volume that's capping our margin.</em>" The objective is part of the theme's definition.</li>

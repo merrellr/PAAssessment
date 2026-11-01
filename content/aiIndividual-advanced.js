@@ -33,8 +33,40 @@ window.CONTENT_OVERRIDES["aiIndividual-advanced"] = {
         correct: 1,
         explanation: "Keep this prediction in mind as you walk through Jordan's day, and watch for whether the lesson content actually confirms it."
       },
-      image: { src: "images/day-map-header.png", alt: "A day mapped as a curved timeline from 7 AM to 6 PM, with colored dots marking key moments across the day" },
+      figures: {
+        "split": {
+          "type": "compare",
+          "title": "Who does what in Jordan's day",
+          "sub": "The agents take the watching. Jordan keeps the judgment calls.",
+          "arrow": true,
+          "columns": [
+            {
+              "label": "The agents",
+              "title": "Surface the facts",
+              "tone": "sky",
+              "icon": "eye",
+              "items": [
+                "Read every email",
+                "Scan every dashboard",
+                "Track every ticket"
+              ]
+            },
+            {
+              "label": "Jordan",
+              "title": "Decides what they mean",
+              "tone": "teal",
+              "icon": "user",
+              "items": [
+                "Steps in only where judgment is needed",
+                "Chooses what to act on",
+                "Owns the call"
+              ]
+            }
+          ]
+        }
+      },
       body: `
+        <div data-fig="split"></div>
         <p>Jordan's alarm goes off at 6:45. By the time coffee is brewing, the first decision of the day has already been made without them, and that's exactly the point of this lesson.</p>
         <p>This isn't a story about AI replacing a product manager. It's a story about what happens to a PM's day once a handful of specialized agents take over the <strong>watching</strong>: reading every email, scanning every dashboard, tracking every ticket, so a person only has to step in for the moments that actually need a human judgment call.</p>
         <p>Over the next few lessons, we'll walk through Jordan's day hour by hour. Watch for the pattern: the agents surface facts. Jordan decides what the facts mean.</p>
@@ -65,8 +97,56 @@ window.CONTENT_OVERRIDES["aiIndividual-advanced"] = {
     {
       id: 2,
       title: "Lesson 2: Morning, With Agents Doing the Watching",
-      image: { src: "images/day-timeline-full.png", alt: "Timeline titled Jordan's Day, Mapped Against the Agents Doing the Watching, showing 7:10 AM Inbox digest, 8:05 AM Meeting brief, and later touchpoints through 5:45 PM" },
+      figures: {
+        "day": {
+          "type": "timeline",
+          "title": "Jordan's day, mapped against the agents doing the watching",
+          "foot": "The agents did the watching. Jordan did the deciding.",
+          "items": [
+            {
+              "when": "7:10 AM",
+              "title": "Inbox digest",
+              "text": "62 emails, one real decision"
+            },
+            {
+              "when": "8:05 AM",
+              "title": "Meeting brief",
+              "text": "A blocked ticket surfaces quietly",
+              "tone": "amber"
+            },
+            {
+              "when": "11:00 AM",
+              "title": "Account context",
+              "text": "A churn risk nobody flagged",
+              "tone": "navy"
+            },
+            {
+              "when": "1:00 PM",
+              "title": "Analytics watch",
+              "text": "A pattern across several accounts"
+            },
+            {
+              "when": "2:30 PM",
+              "title": "First draft",
+              "text": "A rough PRD, then real editing",
+              "tone": "amber"
+            },
+            {
+              "when": "4:00 PM",
+              "title": "Backlog reorder",
+              "text": "Approved, with one override",
+              "tone": "navy"
+            },
+            {
+              "when": "5:45 PM",
+              "title": "Day summary",
+              "text": "Honest about what it missed"
+            }
+          ]
+        }
+      },
       body: `
+        <div data-fig="day"></div>
         <p>Five years ago, opening an inbox with 62 new emails meant forty minutes of scrolling before the real workday even started. Step through what Jordan's morning looks like instead.</p>
       `,
       steps: [
@@ -172,27 +252,43 @@ window.CONTENT_OVERRIDES["aiIndividual-advanced"] = {
     {
       id: 5,
       title: "Lesson 5: What's Actually Different",
+      figures: {
+        "moved": {
+          "type": "compare",
+          "title": "What moved, and what stayed",
+          "sub": "The vigilance moved to agents. The meaning stayed with you.",
+          "columns": [
+            {
+              "label": "Moved to agents",
+              "tone": "sky",
+              "icon": "refresh",
+              "items": [
+                "Reading the inbox and threads",
+                "Summarizing status",
+                "Watching dashboards",
+                "The first-draft PRD",
+                "Constant low-grade vigilance"
+              ]
+            },
+            {
+              "label": "Stayed with you",
+              "tone": "teal",
+              "icon": "user",
+              "items": [
+                "What a silence means",
+                "Whether a drop is churn",
+                "The framing of the problem",
+                "The backlog override",
+                "What to escalate, and when"
+              ]
+            }
+          ]
+        }
+      },
       body: `
         <p>By 5:45, an end-of-day digest arrives before Jordan even closes the laptop: what happened, what's still open, three things flagged for tomorrow, and an honest note about what it couldn't confirm, since one conversation from standup happened outside any tool it can see.</p>
         <p>None of this is about agents making decisions instead of Jordan. Every meaningful call that day (the account risk worth escalating, the PRD framing, the backlog override) came from a person weighing context an agent didn't have. What changed is everything sitting underneath those decisions: the reading, the summarizing, the watching, the first draft. The constant low-grade vigilance that used to eat most of a PM's day now happens quietly in the background.</p>
-        <svg viewBox="0 0 400 132" style="width:100%; height:auto; margin:4px 0 2px;" xmlns="http://www.w3.org/2000/svg">
-          <rect x="6" y="10" width="188" height="112" rx="6" fill="#E7F7FC" stroke="#35C2E8" stroke-width="1.1"/>
-          <rect x="206" y="10" width="188" height="112" rx="6" fill="#EEF3FA" stroke="#1A4584" stroke-width="1.1"/>
-          <text x="100" y="26" text-anchor="middle" font-family="'Space Grotesk',sans-serif" font-size="8.5" font-weight="700" fill="#12305e">Moved to agents</text>
-          <text x="300" y="26" text-anchor="middle" font-family="'Space Grotesk',sans-serif" font-size="8.5" font-weight="700" fill="#12305e">Stayed with you</text>
-          <g font-family="sans-serif" font-size="8" fill="#4B5768">
-            <text x="16" y="44">reading the inbox and threads</text>
-            <text x="16" y="62">summarizing status</text>
-            <text x="16" y="80">watching dashboards</text>
-            <text x="16" y="98">the first-draft PRD</text>
-            <text x="16" y="116">constant low-grade vigilance</text>
-            <text x="216" y="44">what a silence means</text>
-            <text x="216" y="62">whether a drop is churn</text>
-            <text x="216" y="80">the framing of the problem</text>
-            <text x="216" y="98">the backlog override</text>
-            <text x="216" y="116">what to escalate, and when</text>
-          </g>
-        </svg>
+        <div data-fig="moved"></div>
         <p>The job hasn't gotten smaller. It's gotten more concentrated.</p>
       `,
       checks: [
