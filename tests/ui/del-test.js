@@ -296,6 +296,15 @@ async function twoStepTests(store){
     else {
       $('deleteConfirmText').value = 'DELETE';
       $('deletePassword').value = 'secret';
+      if (window.__scn === 'member'){
+        // the last "are you sure?": Cancel deletes nothing
+        let asked = '';
+        window.confirm = (m) => { asked = m; return false; };
+        $('deleteBtn').click();
+        await sleep(300);
+        t('Delete asks "are you sure?" first, naming what goes, and Cancel deletes nothing', /Delete your account for good\?/.test(asked) && /can't be undone/.test(asked) && window.__deleted !== true && !!store['progress/uDel'] && /Nothing was deleted/.test($('deleteError').textContent) && !$('deleteBtn').disabled, asked);
+      }
+      window.confirm = () => true;
       $('deleteBtn').click();
       await sleep(1500);
       const log = window.__writeLog.map(w => w.op + ':' + w.path);
