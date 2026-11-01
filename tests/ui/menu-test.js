@@ -64,14 +64,16 @@ const key = (k) => document.dispatchEvent(new KeyboardEvent('keydown', { key: k,
       const L = labels();
       if (scn === 'noname') t('with no display name, the part of the email before the @ is used', name === 'pat.jones' && email === 'pat.jones@x.com', name + ' / ' + email);
       else t('it shows who is signed in', name.length > 0 && /@x\.com$/.test(email), name + ' / ' + email);
-      t('everyone gets the dashboard, profile, My toolkit, Request tools, feedback and website links, then Log out last', L[0] === 'My Learning' && L[1] === 'My Profile' && L[2] === 'My Badges' && L[3] === 'My toolkit' && L.indexOf('Toolkits ↗') === -1 && L.indexOf('Request tools') > -1 && L.indexOf('Send feedback') > -1 && L.some(x => /Visit Product Advisory/.test(x)) && L[L.length - 1] === 'Log out', L.join(' | '));
+      t('everyone gets their profile and badges, then My Learning, My Toolkit and Request tools, then the website, and Log out last', L[0] === 'My Profile' && L[1] === 'My Badges' && L[2] === 'My Learning' && L[3] === 'My Toolkit' && L[4] === 'Request tools' && L[L.length - 2] === 'Visit Product Advisory ↗' && L[L.length - 1] === 'Log out', L.join(' | '));
       t('the links go to the right pages', document.querySelector('#paAccountMenu a[href="/lms-dashboard"]') && document.querySelector('#paAccountMenu a[href="/profile"]') && document.querySelector('#paAccountMenu a[href="/tool-requests#suggest"]') && document.querySelector('#paAccountMenu a[href="/my-tools"]:not([target])') && !document.querySelector('#paAccountMenu a[href="https://www.productadvisory.co/toolkits"]'));
-      t('"Send feedback" opens the feedback form, not an email', (() => { const a = Array.prototype.slice.call(document.querySelectorAll('#paAccountMenu a')).filter(x => x.textContent.trim() === 'Send feedback')[0]; return !!a && a.getAttribute('href') === '/feedback' && !document.querySelector('#paAccountMenu a[href^="mailto:"]'); })());
+      t('help, feedback and cookie settings are not in the menu (they are under Help and on My Profile)', L.indexOf('Send feedback') === -1 && L.indexOf('Cookie settings') === -1 && !$('paAccountCookies') && !/Your progress|Replay/.test($('paAccountMenu').textContent));
+      const face = $('paAccountMenu').querySelector('.pa-acct-head .pa-face');
+      t('the top of the menu has their picture: initials until a photo is set', !!face && /^[A-Z?]{1,2}$/.test(face.textContent) && face.getAttribute('aria-hidden') === 'true', face && face.textContent);
       const site = Array.prototype.slice.call(document.querySelectorAll('#paAccountMenu a')).filter(a => /^https:\/\/www\.productadvisory\.co/.test(a.href))[0];
       t('the website link opens in a new tab safely', site.target === '_blank' && /noopener/.test(site.rel));
       const heads = Array.prototype.slice.call(document.querySelectorAll('#paAccountMenu .pa-acct-label')).map(x => x.textContent);
-      t('the menu is in labelled sections, Log out alone at the bottom', heads.indexOf('My Learning') === 0 && heads.indexOf('Product Advisory') > -1 && heads.indexOf('Help') === heads.length - 1 &&
-        $('paAccountLogout').previousElementSibling.className === 'pa-acct-rule' && L.indexOf('Request tools') < L.indexOf('Visit Product Advisory ↗') && L.indexOf('Visit Product Advisory ↗') < L.indexOf('Send feedback'), heads.join(' | '));
+      t('the menu is in labelled sections (Account, Learning), the website and Log out together at the bottom', heads[0] === 'Account' && heads[1] === 'Learning' && heads.indexOf('Help') === -1 && heads.indexOf('My Learning') === -1 && heads.indexOf('Product Advisory') === -1 &&
+        $('paAccountLogout').previousElementSibling.previousElementSibling.className === 'pa-acct-rule', heads.join(' | '));
       const role = $('paAccountRole').textContent;
       if (scn === 'owner') t('the owner is badged Super admin', role === 'Super admin' && $('paAccountRole').classList.contains('is-super') && heads.indexOf('Manage') > -1, role);
       else if (scn === 'admin') t('a company admin is badged with their company', /^Company admin/.test(role) && heads.indexOf('My company') > -1, role);

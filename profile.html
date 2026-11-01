@@ -28,6 +28,16 @@
   .back-link{ font-size: 0.8125rem; color: var(--gray); text-decoration:none; display:inline-block; margin-bottom: 16px; }
   .back-link:hover{ color: var(--navy); }
 
+  /* the section menu at the top: pills that stay in view under the site header, the current section lit */
+  .profile-nav{ position: sticky; top: 64px; z-index: 15; display:flex; gap: 6px; overflow-x:auto; scrollbar-width: none; padding: 10px 0 12px; margin: 0 0 14px; background: var(--bg); border-bottom: 1px solid var(--line); }
+  .profile-nav::-webkit-scrollbar{ display:none; }
+  .profile-nav a{ flex: none; font-size: 0.8125rem; font-weight: 600; color: var(--ink-soft); text-decoration:none; border: 1.5px solid var(--line); background: var(--surface); border-radius: 999px; padding: 6px 12px; white-space: nowrap; }
+  .profile-nav a:hover{ border-color: var(--cyan); color: var(--navy); }
+  .profile-nav a[aria-current="true"]{ background: var(--navy); border-color: var(--navy); color: var(--btn-ink); }
+  .profile-nav a:focus-visible{ outline: 2px solid var(--cyan); outline-offset: 2px; }
+  .wrap > .card[id]{ scroll-margin-top: 136px; }
+  .btn.btn-outline{ background: var(--surface); color: var(--navy); border: 1.5px solid var(--line); }
+  .btn.btn-outline:hover{ border-color: var(--cyan); }
   .card{ background: var(--surface); border-radius: 16px; border: 1px solid var(--line); padding: 28px; box-shadow: 0 1px 2px rgba(22,33,62,0.04), 0 12px 32px rgba(22,33,62,0.06); margin-bottom: 22px; }
   h1{ font-family:var(--display); font-size: 1.25rem; margin: 0 0 4px; color: var(--navy-deep); }
   h2{ font-family:var(--display); font-size: 0.9375rem; margin: 0 0 4px; color: var(--navy-deep); }
@@ -189,10 +199,18 @@
     </div>
   </a>
   <div class="brand-accent-bar"></div>
-  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-    <a class="back-link" href="/lms-dashboard" style="margin-bottom:0;">← Back to My Learning</a>
-    <a href="https://www.productadvisory.co/" target="_blank" rel="noopener" style="font-size:0.8125rem; color:var(--navy); text-decoration:underline;">Visit Product Advisory ↗</a>
-  </div>
+  <a class="back-link" href="/lms-dashboard" style="margin-bottom:8px;">← Back to My Learning</a>
+
+  <!-- On this page: a menu of the sections, kept in view while scrolling -->
+  <nav class="profile-nav" id="profileNav" aria-label="On this page">
+    <a href="#details">Your details</a>
+    <a href="#badges">My Badges</a>
+    <a href="#assessments">My assessments</a>
+    <a href="#goals">Goals and emails</a>
+    <a href="#signin">Sign-in and security</a>
+    <a href="#privacy">Privacy and cookies</a>
+    <a href="#deleteCard">Delete account</a>
+  </nav>
 
   <div class="card" id="details" tabindex="-1">
     <div class="avatar-row">
@@ -410,7 +428,17 @@
     <a class="btn-link" href="/owner">Open the owner console →</a>
   </div>
 
-  <div class="card" id="deleteCard" style="border-color:var(--warn);">
+  <div class="card" id="privacy" tabindex="-1">
+    <h2>Privacy and cookies</h2>
+    <p>Choose whether we use analytics cookies to see which pages are used, so we can improve the courses and tools. We never use them for advertising, and your choice applies on this browser.</p>
+    <div class="btn-row" style="display:flex; flex-wrap:wrap; gap:10px; align-items:center;">
+      <button type="button" class="btn btn-outline" data-cookie-settings>Cookie settings</button>
+      <a href="https://www.productadvisory.co/privacy-policy" target="_blank" rel="noopener" style="font-size:0.8438rem;">Privacy Policy ↗</a>
+      <a href="https://www.productadvisory.co/terms-of-use" target="_blank" rel="noopener" style="font-size:0.8438rem;">Terms of Use ↗</a>
+    </div>
+  </div>
+
+  <div class="card" id="deleteCard" tabindex="-1" style="border-color:var(--warn);">
     <h2 style="color:var(--warn);">Delete account</h2>
     <p>This permanently deletes your sign-in, your course progress and assessment results, your saved tools, and the records we keep about you in our results spreadsheet. It can't be undone. You're welcome to take the assessment again later with a new account.</p>
     <input class="text-input" type="password" id="deletePassword" placeholder="Current password" style="display:none;" autocomplete="current-password">
@@ -1234,7 +1262,26 @@ function showBadges(data, user){
   if (location.hash === '#badges') $id('badges').focus();
   return fresh;
 }
-window.addEventListener('hashchange', () => { if (/^#(badges|goals|signin|details)$/.test(location.hash)) $id(location.hash.slice(1)).focus(); });
+window.addEventListener('hashchange', () => { if (/^#(badges|goals|signin|details|assessments|privacy|deleteCard)$/.test(location.hash)) $id(location.hash.slice(1)).focus({ preventScroll: true }); });
+
+/* The section menu lights the section on screen, and keeps that pill in view on narrow screens. */
+(function(){
+  const nav = $id('profileNav');
+  if (!nav || !window.IntersectionObserver) return;
+  const links = Array.prototype.slice.call(nav.querySelectorAll('a'));
+  const light = (id) => links.forEach(a => {
+    const on = a.getAttribute('href') === '#' + id;
+    if (on && a.getAttribute('aria-current') !== 'true' && nav.scrollWidth > nav.clientWidth) nav.scrollLeft = a.offsetLeft - (nav.clientWidth - a.offsetWidth) / 2;
+    if (on) a.setAttribute('aria-current', 'true'); else a.removeAttribute('aria-current');
+  });
+  const seen = new Map();
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(e => seen.set(e.target.id, e.isIntersecting));
+    const first = links.map(a => a.getAttribute('href').slice(1)).filter(id => seen.get(id))[0];
+    if (first) light(first);
+  }, { rootMargin: '-140px 0px -55% 0px' });
+  links.forEach(a => { const c = $id(a.getAttribute('href').slice(1)); if (c) io.observe(c); });
+})();
 
 /* ------------------------------------------------------------ profile photo */
 // The photo is resized in the browser to a 160 x 160 JPEG (about 10 KB) and kept on the person's own
@@ -1503,6 +1550,7 @@ window.handleDeleteAccount = async function(){
 
   try { localStorage.removeItem('pa_cid'); } catch (e){ /* storage unavailable */ }
   document.querySelectorAll('.wrap > .card').forEach(card => { card.style.display = 'none'; });
+  $id('profileNav').hidden = true;
   document.getElementById('deletedNotice').style.display = 'block';
   window.scrollTo(0, 0);
 };

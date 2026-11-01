@@ -44,7 +44,7 @@ const banner = () => $('paCookieBanner');
     } else if (scn === 'signedin'){
       t('someone who is signed in is not shown the notice', !banner());
       t('and counts as having accepted, recorded as accepted on this device', stored() === 'accepted' && PAAnalytics.state().consent === 'accepted');
-      t('their Profile menu has "Cookie settings", which opens the notice again', (() => { const b = $('paAccountBtn'); b.click(); const c = $('paAccountCookies'); if (!c) return false; c.click(); return !!banner() && $('paAccountMenu').hidden === true; })());
+      t('"Cookie settings" (on My Profile) opens the notice again', (() => { const a = document.createElement('button'); a.type = 'button'; a.setAttribute('data-cookie-settings', ''); document.body.appendChild(a); a.click(); return !!banner(); })());
       $('paCookieDecline').click(); await sleep(30);
       t('they can still decline from there', stored() === 'declined' && !banner());
     } else if (scn === 'signedin_declined'){

@@ -73,13 +73,16 @@
   .profile-avatar-btn:hover{ background: var(--primary-strong); }
   .profile-avatar-btn:hover{ background: var(--primary-strong); }
   .profile-dropdown{ position:absolute; right:0; top:44px; width:250px; background:var(--surface); border:1px solid var(--line); border-radius:12px; box-shadow: 0 8px 24px rgba(22,33,62,0.12); padding:14px; z-index:10; }
+  .profile-dropdown-head{ display:flex; gap: 11px; align-items:flex-start; }
+  .profile-dropdown-who{ min-width: 0; flex: 1; }
+  .pa-face{ flex:none; display:grid; place-items:center; width:42px; height:42px; border-radius:50%; overflow:hidden; background: linear-gradient(135deg, var(--navy), var(--cyan)); color:#fff; font: 700 15px var(--display); letter-spacing: .02em; }
+  .pa-face img{ width:100%; height:100%; object-fit:cover; display:block; }
+  .profile-dropdown-item[aria-current="page"]{ font-weight: 700; color: var(--navy); }
   .profile-dropdown-name{ font-family:var(--display); font-weight:600; font-size: 0.9062rem; color: var(--ink); }
   .profile-dropdown-email{ font-size:0.7812rem; color: var(--ink-soft); word-break:break-all; }
   .profile-dropdown-verified{ font-size:0.7188rem; color: var(--gray); margin-top:2px; }
   .profile-dropdown-divider{ height:1px; background:var(--line); margin:10px 0; }
-  .profile-progress-summary{ font-size:0.7812rem; }
   .profile-progress-label{ font-size:0.6875rem; font-weight:600; color: var(--cyan); text-transform:uppercase; letter-spacing:0.04em; margin-bottom: 6px; }
-  .profile-progress-line{ color: var(--ink-soft); margin-bottom: 3px; }
   .profile-dropdown-item{ display:block; padding:8px 4px; font-size:0.8438rem; color: var(--ink); text-decoration:none; cursor:pointer; border-radius:6px; }
   .profile-dropdown-item:hover{ background:var(--bg); }
   .profile-dropdown .profile-progress-label{ margin: 2px 4px 2px; }
@@ -267,25 +270,28 @@
       </button>
       <div class="profile-dropdown" id="profileDropdown" style="display:none;">
 
-        <div class="profile-dropdown-name" id="profileDropdownName"></div>
-        <div class="profile-dropdown-email" id="profileDropdownEmail"></div>
-        <div class="profile-dropdown-verified" id="profileDropdownVerified"></div>
-        <span class="profile-role-badge" id="profileRoleBadge">Learner</span>
-
-        <div class="profile-dropdown-divider"></div>
-
-        <div class="profile-progress-summary">
-          <div class="profile-progress-label">Your progress</div>
-          <div id="profileAssessedLevel" class="profile-progress-line"></div>
-          <div id="profileCoursesCompleted" class="profile-progress-line"></div>
+        <!-- who is signed in: their photo (account-menu.js puts it in .pa-face) or initials -->
+        <div class="profile-dropdown-head">
+          <span class="pa-face" id="profileFace" aria-hidden="true"></span>
+          <div class="profile-dropdown-who">
+            <div class="profile-dropdown-name" id="profileDropdownName"></div>
+            <div class="profile-dropdown-email" id="profileDropdownEmail"></div>
+            <div class="profile-dropdown-verified" id="profileDropdownVerified"></div>
+            <span class="profile-role-badge" id="profileRoleBadge">Learner</span>
+          </div>
         </div>
 
         <div class="profile-dropdown-divider"></div>
-        <div class="profile-progress-label">My Learning</div>
+        <div class="profile-progress-label">Account</div>
         <a class="profile-dropdown-item" href="/profile">My Profile</a>
         <a class="profile-dropdown-item" href="/profile#badges" id="badgesMenuItem">My Badges</a>
         <a class="profile-dropdown-item" id="changePasswordMenuItem" onclick="openChangePassword()">Change password</a>
-        <a class="profile-dropdown-item" onclick="replayDashboardTour()">Replay the tour</a>
+
+        <div class="profile-dropdown-divider"></div>
+        <div class="profile-progress-label">Learning</div>
+        <a class="profile-dropdown-item" href="/lms-dashboard" aria-current="page">My Learning</a>
+        <a class="profile-dropdown-item" href="/my-tools">My Toolkit</a>
+        <a class="profile-dropdown-item" href="/tool-requests#suggest">Request tools</a>
 
         <div id="manageMenuGroup" style="display:none;">
           <div class="profile-dropdown-divider"></div>
@@ -295,18 +301,9 @@
           <a class="profile-dropdown-item" id="reportsMenuItem" href="/reports" style="display:none;">Reports</a>
         </div>
 
+        <!-- Help, feedback and the tour are under Help at the top of the page; cookie settings are on My Profile. -->
         <div class="profile-dropdown-divider"></div>
-        <div class="profile-progress-label">Product Advisory</div>
-        <a class="profile-dropdown-item" href="/my-tools">My toolkit</a>
-        <a class="profile-dropdown-item" href="/tool-requests#suggest">Request tools</a>
         <a class="profile-dropdown-item" href="https://www.productadvisory.co/" target="_blank" rel="noopener">Visit Product Advisory ↗</a>
-
-        <div class="profile-dropdown-divider"></div>
-        <div class="profile-progress-label">Help</div>
-        <a class="profile-dropdown-item" href="/feedback">Send feedback</a>
-        <a class="profile-dropdown-item" href="#" data-cookie-settings>Cookie settings</a>
-
-        <div class="profile-dropdown-divider"></div>
         <a class="profile-dropdown-item profile-logout" onclick="handleSignOut()">Log out</a>
       </div>
     </div>
@@ -934,6 +931,8 @@ onAuthStateChanged(auth, async (user) => {
     syncOrgShare(db, user).catch(() => { /* never blocks the dashboard */ });
     document.getElementById('dashboardSkeleton').style.display = 'none';
     document.getElementById('dashboardContent').style.display = 'block';
+    // "Replay the tour" in Help, from another page
+    if (new URLSearchParams(location.search).get('tour') === '1'){ history.replaceState(null, '', location.pathname); setTimeout(startDashboardTour, 300); }
 
     startActiveTimeTracking(user);
   } else {
@@ -1057,30 +1056,17 @@ function populateProfileMenu(user){
   document.getElementById('profileDropdownName').textContent = user.displayName || 'Add your name';
   document.getElementById('profileDropdownEmail').textContent = user.email;
   document.getElementById('profileDropdownVerified').textContent = user.emailVerified ? '' : 'Email not verified';
+  // initials until (or unless) account-menu.js puts the profile photo in
+  const face = document.getElementById('profileFace');
+  const parts = String(user.displayName || user.email || '?').trim().split(/[\s@._-]+/).filter(Boolean);
+  const ini = ((parts[0] || '?').charAt(0) + (parts.length > 1 && user.displayName ? parts[parts.length - 1].charAt(0) : '')).toUpperCase();
+  face.setAttribute('data-initials', ini);
+  if (!face.querySelector('img')) face.textContent = ini;
 
   // Only show "Change password" for accounts that actually have a password —
   // Google-only accounts have nothing to change here.
   const hasPasswordProvider = user.providerData.some(p => p.providerId === 'password');
   document.getElementById('changePasswordMenuItem').style.display = hasPasswordProvider ? 'block' : 'none';
-}
-
-/* Fills in the "Your progress" summary once loadDashboard has computed
-   the person's assessment result and course completion data. */
-function populateProfileProgressSummary(progress, assessmentResult){
-  const levelEl = document.getElementById('profileAssessedLevel');
-  const completedEl = document.getElementById('profileCoursesCompleted');
-
-  levelEl.textContent = assessmentResult ? ('Assessed level: ' + assessmentResult.tier) : 'Take the assessment to see your level';
-
-  let completedCount = 0;
-  const totalCourses = Object.keys(DOMAINS).length * TIERS.length;
-  Object.keys(DOMAINS).forEach(domainKey => {
-    TIERS.forEach(tier => {
-      const courseId = domainKey + '-' + tier.slug;
-      if (isCourseComplete(progress, courseId)) completedCount++;
-    });
-  });
-  completedEl.textContent = 'Courses completed: ' + completedCount + ' of ' + totalCourses;
 }
 
 window.toggleProfileMenu = function(){
@@ -1251,7 +1237,7 @@ function startDashboardTour(){
   goto();
 }
 
-/* Replayable from the profile menu. Closes the menu first so the
+/* Replayable from Help (pa-shell.js). Closes the Profile menu first so the
    popover isn't hidden behind it. */
 window.replayDashboardTour = function(){
   document.getElementById('profileDropdown').style.display = 'none';
@@ -1304,7 +1290,6 @@ async function loadDashboard(user){
   renderProfilePrompt(progress);
   const recommended = assessmentResult ? renderRecommendations(assessmentResult, progress, await fetchCompanyFocus(user)) : [];
   renderHome(user, progress, assessmentResult, recommended, assessmentUrl);
-  populateProfileProgressSummary(progress, assessmentResult);
   renderAssignedStat(progress, assessmentResult);
   renderWeekGoal(progress);
   renderBadges(user, progress, assessmentResult);
@@ -2399,7 +2384,7 @@ function renderHome(user, progress, assessmentResult, recommended, assessmentUrl
 async function renderHomeTools(user){
   const box = document.getElementById('homeTools'), T = window.SavedToolsCore, H = window.LearningHomeCore;
   const esc = (t) => String(t).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
-  const head = '<span class="eyebrow">Your toolkit</span><h2>My toolkit</h2>';
+  const head = '<span class="eyebrow">Your toolkit</span><h2>My Toolkit</h2>';
   box.innerHTML = head + '<p>Loading…</p>';
   let list = null;
   try {
@@ -2407,12 +2392,12 @@ async function renderHomeTools(user){
     list = snap.docs.map(d => Object.assign({ id: d.id }, d.data()));
   } catch (err){ console.error('Could not load saved tools:', err); }
   if (list === null){
-    box.innerHTML = head + '<p>Your scorecards, decision matrices and impact scores.</p><div class="home-go"><a class="more" href="/my-tools">Open My toolkit →</a></div>';
+    box.innerHTML = head + '<p>Your scorecards, decision matrices and impact scores.</p><div class="home-go"><a class="more" href="/my-tools">Open My Toolkit →</a></div>';
     return;
   }
   if (!list.length){
     box.innerHTML = head + '<p>Prioritize features, rank AI use cases, decide build, buy or partner, or score your roadmap. Your work saves here as you go.</p>' +
-      '<div class="home-go"><a class="home-out" href="/my-tools">Open My toolkit</a></div>';
+      '<div class="home-go"><a class="home-out" href="/my-tools">Open My Toolkit</a></div>';
     return;
   }
   const items = H.recentSaved(list, 3).map(d => {

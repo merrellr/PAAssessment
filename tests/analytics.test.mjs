@@ -113,10 +113,10 @@ console.log('--- the notice is wired into the pages ---');
 {
   const read = (f) => fs.readFileSync(path.join(root, f), 'utf8');
   ['index', 'lesson', 'profile', 'tool-requests', 'my-tools'].forEach(p => t(p + '.html has a "Cookie settings" link in its footer', /data-cookie-settings[^>]*>Cookie settings<\/a>/.test(read(p + '.html'))));
-  t('the dashboard\'s Profile menu has "Cookie settings"', /profile-dropdown-item" href="#" data-cookie-settings>Cookie settings<\/a>/.test(read('lms-dashboard.html')));
+  t('"Cookie settings" is on My Profile, under Privacy and cookies', /id="privacy"[\s\S]*?data-cookie-settings>Cookie settings<\/button>/.test(read('profile.html')));
   const menu = read('account-menu.js');
   t('signing in counts as accepting (account-menu.js calls acceptFromAccount for every signed-in person, with or without the menu)', /PAAnalytics\.acceptFromAccount\(\)/.test(menu) && menu.indexOf('acceptFromAccount') < menu.indexOf('if (!MENU) return;'));
-  t('the Profile menu has a "Cookie settings" button that reopens the notice', /Cookie settings/.test(menu) && /PAAnalytics\.reopen\(\)/.test(menu));
+  t('the Profile menus no longer carry it (one place: My Profile)', !/Cookie settings/.test(menu) && !/Cookie settings/.test(read('lms-dashboard.html').split('id="profileDropdown"')[1].split('</div>\n    </div>')[0]));
   const an = read('analytics.js');
   t('no Google script is added except inside start()', (an.match(/googletagmanager/g) || []).length === 1 && /function start\(env\)[\s\S]*googletagmanager/.test(an));
   t('the notice links to the Privacy Policy used elsewhere on the site', an.indexOf('https://www.productadvisory.co/privacy-policy') > -1);

@@ -38,7 +38,11 @@ if (window.self === window.top) {
     '.pa-acct-btn:focus-visible,.pa-acct-item:focus-visible{outline:3px solid var(--cyan,#35C2E8);outline-offset:2px;}',
     '.pa-acct-menu{position:absolute;right:0;top:42px;width:250px;max-width:calc(100vw - 32px);background:var(--surface,#fff);border:1px solid var(--line,#DCE3EE);border-radius:12px;box-shadow:0 8px 24px rgba(22,33,62,0.12);padding:14px;}',
     '.pa-acct-menu[hidden]{display:none;}',
-    '.pa-acct-name{font-weight:600;font-size:14.5px;color:var(--ink,#16213E);}',
+    '.pa-acct-head{display:flex;gap:11px;align-items:flex-start;}',
+    '.pa-acct-who{min-width:0;flex:1;}',
+    '.pa-face{flex:none;display:grid;place-items:center;width:42px;height:42px;border-radius:50%;overflow:hidden;background:linear-gradient(135deg,var(--navy,#1A4584),var(--cyan,#35C2E8));color:#fff;font:700 15px "Space Grotesk","IBM Plex Sans",system-ui,sans-serif;letter-spacing:.02em;}',
+    '.pa-face img{width:100%;height:100%;object-fit:cover;display:block;}',
+    '.pa-acct-name{font-weight:600;font-size:14.5px;color:var(--ink,#16213E);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}',
     '.pa-acct-email{font:400 12.5px "IBM Plex Sans",system-ui,sans-serif;color:var(--ink-soft,#4A5568);word-break:break-all;}',
     '.pa-acct-rule{height:1px;background:var(--line,#DCE3EE);margin:10px 0;}',
     '.pa-acct-item{display:block;width:100%;box-sizing:border-box;text-align:left;padding:8px 4px;font:400 13.5px "IBM Plex Sans",system-ui,sans-serif;color:var(--ink,#16213E);text-decoration:none;cursor:pointer;border:none;background:none;border-radius:6px;}',
@@ -81,6 +85,20 @@ if (window.self === window.top) {
     return b;
   }
 
+  // The round picture at the top of the menu: the profile photo, else the person's initials.
+  function initials(name){
+    const parts = String(name || '').trim().split(/[\s@._-]+/).filter(Boolean);
+    return ((parts[0] || '?').charAt(0) + (parts.length > 1 ? parts[parts.length - 1].charAt(0) : '')).toUpperCase();
+  }
+  function face(name){
+    const f = el('span', 'pa-face');
+    f.setAttribute('aria-hidden', 'true');
+    f.setAttribute('data-initials', initials(name));
+    if (photoUrl){ const i = document.createElement('img'); i.alt = ''; i.src = photoUrl; f.appendChild(i); }
+    else f.textContent = initials(name);
+    return f;
+  }
+
   function remove(){
     if (wrap){ wrap.remove(); wrap = null; }
     if (placer){ window.removeEventListener('resize', placer); window.removeEventListener('load', placer); placer = null; }
@@ -116,16 +134,24 @@ if (window.self === window.top) {
     const menu = el('div', 'pa-acct-menu');
     menu.id = 'paAccountMenu';
     menu.hidden = true;
-    menu.appendChild(el('div', 'pa-acct-name', user.displayName || (user.email || '').split('@')[0] || 'Your account'));
-    menu.appendChild(el('div', 'pa-acct-email', user.email || ''));
-    menu.appendChild(roleBadge(flags));
+    // Who is signed in: their photo (or initials), name, email and role.
+    const name = user.displayName || (user.email || '').split('@')[0] || 'Your account';
+    const head = el('div', 'pa-acct-head'), who = el('div', 'pa-acct-who');
+    head.appendChild(face(name));
+    who.appendChild(el('div', 'pa-acct-name', name));
+    who.appendChild(el('div', 'pa-acct-email', user.email || ''));
+    who.appendChild(roleBadge(flags));
+    head.appendChild(who);
+    menu.appendChild(head);
     const section = (label) => { menu.appendChild(el('div', 'pa-acct-rule')); if (label) menu.appendChild(el('div', 'pa-acct-label', label)); };
 
-    section('My Learning');
-    menu.appendChild(link('My Learning', '/lms-dashboard', page === 'lms-dashboard.html'));
+    section('Account');
     menu.appendChild(link('My Profile', '/profile', page === 'profile.html'));
     menu.appendChild(link('My Badges', '/profile#badges', false));
-    menu.appendChild(link('My toolkit', '/my-tools', page === 'my-tools.html'));
+    section('Learning');
+    menu.appendChild(link('My Learning', '/lms-dashboard', page === 'lms-dashboard.html'));
+    menu.appendChild(link('My Toolkit', '/my-tools', page === 'my-tools.html'));
+    menu.appendChild(link('Request tools', '/tool-requests#suggest', page === 'tool-requests.html'));
     if (flags.companyAdmin || flags.owner){
       section(flags.owner ? 'Manage' : 'My company');
       if (flags.companyAdmin) menu.appendChild(link('Company dashboard', '/company', page === 'company.html'));
@@ -134,19 +160,9 @@ if (window.self === window.top) {
         menu.appendChild(link('Reports', '/reports', page === 'reports.html'));
       }
     }
-    section('Product Advisory');
-    menu.appendChild(link('Request tools', '/tool-requests#suggest', page === 'tool-requests.html'));
-    menu.appendChild(link('Visit Product Advisory ↗', 'https://www.productadvisory.co/', false, true));
-    section('Help');
-    menu.appendChild(link('Send feedback', '/feedback', page === 'feedback.html'));
-    if (window.PAAnalytics && window.PAAnalytics.reopen){
-      const cookies = el('button', 'pa-acct-item', 'Cookie settings');
-      cookies.type = 'button';
-      cookies.id = 'paAccountCookies';
-      cookies.addEventListener('click', () => { close(false); window.PAAnalytics.reopen(); });
-      menu.appendChild(cookies);
-    }
+    // Help, feedback and the tour are under Help at the top of the page; cookie settings are on My Profile.
     section('');
+    menu.appendChild(link('Visit Product Advisory ↗', 'https://www.productadvisory.co/', false, true));
     const out = el('button', 'pa-acct-item pa-acct-out', 'Log out');
     out.type = 'button';
     out.id = 'paAccountLogout';
@@ -270,6 +286,12 @@ if (window.self === window.top) {
   const PHOTO = /^data:image\/jpeg;base64,[A-Za-z0-9+/=]+$/;
   let photoUid = '', photoUrl = '';
   function paintAvatar(){
+    // the picture at the top of the menu (this one's and the dashboard's)
+    document.querySelectorAll('.pa-face').forEach(f => {
+      const img = f.querySelector('img');
+      if (photoUrl){ if (img) img.src = photoUrl; else { f.textContent = ''; const i = document.createElement('img'); i.alt = ''; i.src = photoUrl; f.appendChild(i); } }
+      else if (img){ f.textContent = f.getAttribute('data-initials') || ''; }
+    });
     ['.pa-acct-btn', '#profileAvatarBtn'].forEach(sel => {
       const b = document.querySelector(sel);
       if (!b) return;
