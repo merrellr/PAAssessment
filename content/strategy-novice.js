@@ -83,28 +83,29 @@ window.CONTENT_OVERRIDES["strategy-novice"] = {
       title: "Lesson 2: Strategic vs. Tactical",
       figures: {
         "levels": {
-          "type": "steps",
+          "type": "pyramid",
           "title": "Strategic vs tactical",
-          "sub": "The roadmap lives at the top level; the detail lives below it.",
-          "items": [
+          "sub": "Two levels of planning, each kept in its own place.",
+          "top": "Strategic: on the roadmap",
+          "bottom": "Tactical: in the backlog",
+          "levels": [
             {
-              "tag": "Strategic",
               "title": "Themes and milestones",
-              "text": "The roadmap",
+              "text": "e.g. \"improve onboarding completion\"",
               "tone": "navy"
             },
             {
               "title": "Epics and features",
-              "text": "The plan",
+              "text": "What delivers each theme",
               "tone": "teal"
             },
             {
-              "tag": "Tactical",
               "title": "Tasks",
-              "text": "The backlog",
+              "text": "The backlog and sprint plan",
               "tone": "sand"
             }
-          ]
+          ],
+          "foot": "A roadmap crowded with tasks has stopped being strategic. Themes with nothing underneath are untethered."
         }
       },
       body: `

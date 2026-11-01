@@ -80,29 +80,40 @@ window.CONTENT_OVERRIDES["stakeholder-novice"] = {
       title: "Lesson 2: Build a Rhythm",
       figures: {
         "rhythm": {
-          "type": "timeline",
+          "type": "cadence",
           "title": "Build a rhythm",
-          "items": [
+          "sub": "One quarter of touchpoints. Predictable enough that people stop needing to ask.",
+          "span": "One quarter, about 13 weeks",
+          "rows": [
             {
-              "when": "Daily",
-              "title": "Standup"
+              "label": "Daily",
+              "title": "Standup",
+              "text": "Aligned day to day",
+              "count": 65
             },
             {
-              "when": "Weekly",
+              "label": "Weekly",
               "title": "Team sync",
+              "text": "Deliverables and timelines",
+              "count": 13,
               "tone": "mint"
             },
             {
-              "when": "Per sprint",
+              "label": "Per sprint",
               "title": "Review and retro",
+              "text": "Progress, and a place to raise concerns",
+              "count": 6,
               "tone": "amber"
             },
             {
-              "when": "Quarterly",
+              "label": "Quarterly",
               "title": "Roadmap review",
+              "text": "The direction itself",
+              "count": 1,
               "tone": "violet"
             }
-          ]
+          ],
+          "foot": "The exact structure matters less than the predictability."
         }
       },
       body: `

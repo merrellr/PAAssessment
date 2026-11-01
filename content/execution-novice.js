@@ -74,33 +74,86 @@ window.CONTENT_OVERRIDES["execution-novice"] = {
       title: "Lesson 2: Work in Increments, Get Feedback Early",
       figures: {
         "batch": {
-          "type": "compare",
+          "type": "track",
           "title": "Big batch vs increments",
-          "sub": "Where the first test lands decides when surprises show up.",
-          "columns": [
+          "sub": "The same work. What changes is when you find out something is wrong.",
+          "x": "Time →",
+          "kinds": {
+            "build": "Building",
+            "test": "Testing",
+            "risk": "Fixing surprises"
+          },
+          "rows": [
             {
               "label": "Big batch",
               "tone": "coral",
-              "mark": "x",
-              "items": [
-                "Build",
-                "Build",
-                "Build",
-                "First test, with no time left"
+              "segments": [
+                {
+                  "len": 8,
+                  "kind": "build",
+                  "label": "Build everything"
+                },
+                {
+                  "len": 2,
+                  "kind": "test",
+                  "label": "First test"
+                },
+                {
+                  "len": 2,
+                  "kind": "risk",
+                  "label": "No time left"
+                }
               ],
-              "foot": "Surprises arrive at the end"
+              "result": "Surprises arrive at the end, when they cost the most",
+              "mark": "x"
             },
             {
               "label": "Increments",
               "tone": "teal",
-              "mark": "check",
-              "items": [
-                "Build a slice, test it",
-                "Build a slice, test it",
-                "Build a slice, test it",
-                "Tested at every step"
+              "segments": [
+                {
+                  "len": 2,
+                  "kind": "build",
+                  "label": "Build"
+                },
+                {
+                  "len": 1,
+                  "kind": "test",
+                  "label": "Test"
+                },
+                {
+                  "len": 2,
+                  "kind": "build",
+                  "label": "Build"
+                },
+                {
+                  "len": 1,
+                  "kind": "test",
+                  "label": "Test"
+                },
+                {
+                  "len": 2,
+                  "kind": "build",
+                  "label": "Build"
+                },
+                {
+                  "len": 1,
+                  "kind": "test",
+                  "label": "Test"
+                },
+                {
+                  "len": 2,
+                  "kind": "build",
+                  "label": "Build"
+                },
+                {
+                  "len": 1,
+                  "kind": "test",
+                  "label": "Test"
+                }
               ],
-              "foot": "Surprises arrive while they're cheap"
+              "result": "Surprises arrive early, while they're cheap",
+              "mark": "check"
             }
           ]
         }
@@ -138,28 +191,35 @@ window.CONTENT_OVERRIDES["execution-novice"] = {
       title: "Lesson 3: Automate the Checks",
       figures: {
         "pipeline": {
-          "type": "steps",
+          "type": "chain",
           "title": "Automate the checks",
-          "foot": "A break stops here, in isolation, the day it's introduced.",
-          "items": [
+          "sub": "Every change takes the same path to production.",
+          "lanes": [
             {
-              "title": "Commit",
-              "tone": "navy"
-            },
-            {
-              "title": "Automated tests",
-              "text": "A break stops here",
-              "tone": "coral"
-            },
-            {
-              "title": "CI/CD build",
-              "tone": "sky"
-            },
-            {
-              "title": "Deploy",
-              "tone": "teal"
+              "tone": "teal",
+              "nodes": [
+                {
+                  "title": "Commit",
+                  "icon": "doc"
+                },
+                {
+                  "title": "Automated tests",
+                  "text": "A break stops here",
+                  "icon": "shield",
+                  "state": "hl"
+                },
+                {
+                  "title": "CI/CD build",
+                  "icon": "box"
+                },
+                {
+                  "title": "Deploy",
+                  "icon": "rocket"
+                }
+              ]
             }
-          ]
+          ],
+          "foot": "A break stops here, in isolation, the day it's introduced."
         }
       },
       body: `

@@ -81,6 +81,7 @@ window.CONTENT_OVERRIDES["aiIndividual-moderate"] = {
       title: "Lesson 2: Backlog Grooming, Before and After",
       figures: {
         "grooming": {
+          "reveal": "Before you look: what changes when agents do the sorting?",
           "type": "compare",
           "title": "Backlog grooming, before and after",
           "arrow": true,
@@ -147,31 +148,42 @@ window.CONTENT_OVERRIDES["aiIndividual-moderate"] = {
       title: "Lesson 3: Research and Experiments as Always-On Engines",
       figures: {
         "engine": {
-          "type": "steps",
+          "type": "chain",
           "title": "Research as an always-on engine",
-          "foot": "The agent collects and summarizes. The \"so what?\" call stays yours.",
-          "items": [
+          "lanes": [
             {
-              "title": "Agent watches",
-              "text": "Continuously, in the background",
-              "tone": "sky"
-            },
-            {
-              "title": "Weekly digest",
-              "text": "What changed, in one place",
-              "tone": "sky"
-            },
-            {
-              "title": "Your 30 minutes",
-              "text": "Ask \"so what?\"",
-              "tone": "teal"
-            },
-            {
-              "title": "React, watch or ignore",
-              "text": "A decision, not a pile of notes",
-              "tone": "teal"
+              "tone": "teal",
+              "nodes": [
+                {
+                  "tag": "Agent",
+                  "title": "Watches",
+                  "text": "Continuously",
+                  "icon": "eye",
+                  "tone": "sky"
+                },
+                {
+                  "tag": "Agent",
+                  "title": "Weekly digest",
+                  "text": "What changed",
+                  "icon": "inbox",
+                  "tone": "sky"
+                },
+                {
+                  "tag": "You",
+                  "title": "Your 30 minutes",
+                  "text": "Ask \"so what?\"",
+                  "icon": "clock",
+                  "state": "hl"
+                },
+                {
+                  "tag": "You",
+                  "title": "React, watch or ignore",
+                  "icon": "check"
+                }
+              ]
             }
-          ]
+          ],
+          "foot": "The agent collects and summarizes. The \"so what?\" call stays yours."
         }
       },
       body: `

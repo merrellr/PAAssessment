@@ -157,6 +157,8 @@ try {
   foreach ($s in '1', '2', '3', '4', '5') { $results += Run-Page "lesson blocks: lesson $s" "$base/les-test.html?scn=blocks&course=discovery-novice&lesson=$s" 30000 }
   $results += Run-Page "lesson figures: metrics and a column chart" "$base/les-test.html?scn=figs&course=aiOrg-experienced&lesson=6" 30000
   $results += Run-Page "lesson figures: a value-vs-effort matrix and a scoring equation" "$base/les-test.html?scn=figs&course=prioritization-novice&lesson=2" 30000
+  $results += Run-Page "lesson figures: a workflow drawn as a chain, lined up with the text" "$base/les-test.html?scn=figs&course=discovery-experienced&lesson=1" 30000
+  $results += Run-Page "lesson figures: think first, then reveal the after" "$base/les-test.html?scn=figs&course=aiIndividual-moderate&lesson=2" 30000
   foreach ($s in 'admin', 'empty', 'archived', 'nocopy', 'auditdenied', 'owner', 'ownernoorg', 'plain', 'member', 'removedadmin', 'denied', 'sharesdenied', 'signedout', 'history', 'snapshotsdenied', 'snapfail', 'noplatform', 'smallplatform') {
     $org = if ($s -eq 'owner') { '&org=orgA' } else { '' }
     $results += Run-Page "company dashboard: $s" "$base/company-test.html?scn=$s$org" 40000

@@ -71,23 +71,44 @@ window.CONTENT_OVERRIDES["prioritization-advanced"] = {
       title: "Lesson 2: A Shared, Legible Method",
       figures: {
         "method": {
-          "type": "steps",
+          "type": "chain",
           "title": "A shared, legible method",
-          "items": [
+          "sub": "Three teams, three backlogs, one way of ranking them.",
+          "lanes": [
             {
-              "title": "Teams A, B and C",
-              "text": "Each with its own backlog",
-              "tone": "sand"
-            },
-            {
-              "title": "One method",
-              "text": "Shared definitions and data",
-              "tone": "teal"
-            },
-            {
-              "title": "Ranked and comparable",
-              "text": "Across every team",
-              "tone": "navy"
+              "tone": "teal",
+              "nodes": [
+                {
+                  "stack": [
+                    {
+                      "title": "Team A",
+                      "text": "Its own backlog",
+                      "icon": "layers"
+                    },
+                    {
+                      "title": "Team B",
+                      "text": "Its own backlog",
+                      "icon": "layers"
+                    },
+                    {
+                      "title": "Team C",
+                      "text": "Its own backlog",
+                      "icon": "layers"
+                    }
+                  ]
+                },
+                {
+                  "title": "One method",
+                  "text": "Shared definitions and data",
+                  "icon": "scale",
+                  "state": "hl"
+                },
+                {
+                  "title": "Ranked and comparable",
+                  "text": "Across every team",
+                  "icon": "chart"
+                }
+              ]
             }
           ]
         }

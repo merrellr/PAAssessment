@@ -35,6 +35,7 @@ window.CONTENT_OVERRIDES["execution-moderate"] = {
       },
       figures: {
         "before-after": {
+          "reveal": "Picture it with AI built in. What changes?",
           "type": "compare",
           "title": "Accessibility, without and with AI",
           "arrow": true,

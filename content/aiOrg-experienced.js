@@ -36,6 +36,7 @@ window.CONTENT_OVERRIDES["aiOrg-experienced"] = {
       },
       figures: {
         "rigor": {
+          "reveal": "What would treating it like a product change?",
           "type": "compare",
           "title": "An internal copilot is still a product",
           "sub": "Internal stakeholders are users too.",

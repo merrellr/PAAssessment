@@ -77,68 +77,50 @@ window.CONTENT_OVERRIDES["discovery-advanced"] = {
       title: "Lesson 2: Empathy Maps and Living Personas",
       figures: {
         "map": {
-          "type": "cards",
+          "type": "empathy",
           "title": "The four quadrants of an empathy map",
-          "cols": 2,
-          "items": [
-            {
-              "icon": "chat",
-              "label": "Says",
-              "title": "In interviews and support tickets",
-              "tone": "teal"
-            },
-            {
-              "icon": "spark",
-              "label": "Thinks",
-              "title": "But doesn't voice",
-              "tone": "violet"
-            },
-            {
-              "icon": "hand",
-              "label": "Does",
-              "title": "The actual, observed workflow",
-              "tone": "amber"
-            },
-            {
-              "icon": "heart",
-              "label": "Feels",
-              "title": "The emotion underneath it",
-              "tone": "coral"
-            }
-          ]
+          "sub": "Fill it from what you observe, not only from what you are told.",
+          "center": {
+            "title": "One real user"
+          },
+          "says": {
+            "title": "In interviews and support tickets"
+          },
+          "thinks": {
+            "title": "But doesn't voice"
+          },
+          "does": {
+            "title": "The actual, observed workflow"
+          },
+          "feels": {
+            "title": "The emotion underneath it"
+          }
         },
         "map-filled": {
-          "type": "cards",
+          "type": "empathy",
           "title": "A filled-in empathy map",
-          "sub": "Says \"fine\", but does a weekly workaround and feels resentful.",
-          "foot": "That gap, not the stated feedback, is the churn risk.",
-          "cols": 2,
-          "items": [
-            {
-              "icon": "chat",
-              "label": "Says",
-              "title": "\"The reports are fine. We just export to a sheet.\"",
-              "tone": "teal"
-            },
-            {
-              "icon": "spark",
-              "label": "Thinks",
-              "title": "\"This wasn't built for a team our size.\"",
-              "tone": "violet"
-            },
-            {
-              "icon": "hand",
-              "label": "Does",
-              "title": "Exports every Monday and rebuilds the same pivot by hand",
-              "tone": "amber"
-            },
-            {
-              "icon": "heart",
-              "label": "Feels",
-              "title": "Quietly resentful; would not champion the renewal",
-              "tone": "coral"
-            }
-          ]
+          "sub": "Read across the quadrants, not down them.",
+          "center": {
+            "title": "The customer"
+          },
+          "hl": [
+            "says",
+            "does",
+            "feels"
+          ],
+          "says": {
+            "title": "\"The reports are fine. We just export to a sheet.\""
+          },
+          "thinks": {
+            "title": "\"This wasn't built for a team our size.\""
+          },
+          "does": {
+            "title": "Exports every Monday and rebuilds the same pivot by hand"
+          },
+          "feels": {
+            "title": "Quietly resentful; would not champion the renewal"
+          },
+          "gap": "Says \"fine\", but does a weekly workaround and feels resentful. That gap, not the stated feedback, is the churn risk."
         }
       },
       body: `

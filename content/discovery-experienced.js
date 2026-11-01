@@ -35,32 +35,72 @@ window.CONTENT_OVERRIDES["discovery-experienced"] = {
       },
       figures: {
         "fit": {
-          "type": "compare",
+          "type": "chain",
           "title": "Build around the workflow, not the vision",
-          "columns": [
+          "sub": "Same product, same team. The only difference is where it sits in the working day.",
+          "lanes": [
             {
               "label": "Founder's vision",
-              "title": "The product sits outside the process",
               "tone": "coral",
-              "mark": "x",
-              "items": [
-                "Intake, care, documentation, billing run as before",
-                "The product is one more place to go"
+              "nodes": [
+                {
+                  "title": "Intake",
+                  "icon": "doc"
+                },
+                {
+                  "title": "Care",
+                  "icon": "heart"
+                },
+                {
+                  "title": "Documentation",
+                  "icon": "book"
+                },
+                {
+                  "title": "Billing",
+                  "icon": "dollar"
+                }
               ],
-              "foot": "Extra step, extra friction: easy for a busy team to ignore"
+              "detour": {
+                "at": 1,
+                "title": "The product",
+                "text": "One more place to go",
+                "icon": "box"
+              },
+              "result": "Extra step, extra friction: easy for a busy team to ignore",
+              "mark": "x"
             },
             {
               "label": "Real workflow",
-              "title": "The product is part of the process",
               "tone": "teal",
-              "mark": "check",
-              "items": [
-                "It sits inline, between care and documentation",
-                "Work flows through it, not around it"
+              "nodes": [
+                {
+                  "title": "Intake",
+                  "icon": "doc"
+                },
+                {
+                  "title": "Care",
+                  "icon": "heart"
+                },
+                {
+                  "title": "The product",
+                  "text": "Part of the step",
+                  "icon": "box",
+                  "state": "hl"
+                },
+                {
+                  "title": "Documentation",
+                  "icon": "book"
+                },
+                {
+                  "title": "Billing",
+                  "icon": "dollar"
+                }
               ],
-              "foot": "Feels like the job, not an add-on: nothing new to remember"
+              "result": "Feels like the job, not an add-on: nothing new to remember",
+              "mark": "check"
             }
-          ]
+          ],
+          "foot": "Interest in an interview is not fit. Fit is when the product disappears into work people already do."
         }
       },
       body: `
@@ -127,31 +167,64 @@ window.CONTENT_OVERRIDES["discovery-experienced"] = {
       title: "Lesson 3: Integration and Compliance Aren't Later-Stage Problems",
       figures: {
         "integration": {
-          "type": "compare",
+          "type": "track",
           "title": "Who absorbs the integration work, and when",
-          "foot": "Same product, same integration work. The difference is who absorbs it, and when.",
-          "columns": [
+          "sub": "Same product, same integration work.",
+          "x": "Time →",
+          "kinds": {
+            "build": "Product work",
+            "risk": "Integration left to the customer",
+            "good": "Integration built in"
+          },
+          "rows": [
             {
               "label": "Integration deferred",
               "tone": "coral",
-              "items": [
-                "Ship standalone",
-                "Traction appears",
-                "The customer carries the integration burden"
+              "segments": [
+                {
+                  "len": 3,
+                  "kind": "build",
+                  "label": "Ship standalone"
+                },
+                {
+                  "len": 2,
+                  "kind": "build",
+                  "label": "Traction"
+                },
+                {
+                  "len": 4,
+                  "kind": "risk",
+                  "label": "Customer carries it"
+                }
               ],
-              "foot": "Deal risk"
+              "result": "Deal risk: the burden lands on the customer, late",
+              "mark": "x"
             },
             {
               "label": "In the strategy from day one",
               "tone": "teal",
-              "items": [
-                "Connects to the systems already in place",
-                "Switching cost stays low",
-                "Adoption"
+              "segments": [
+                {
+                  "len": 3,
+                  "kind": "good",
+                  "label": "Connect to their systems"
+                },
+                {
+                  "len": 2,
+                  "kind": "build",
+                  "label": "Low switching cost"
+                },
+                {
+                  "len": 4,
+                  "kind": "build",
+                  "label": "Adoption"
+                }
               ],
-              "foot": "Growth"
+              "result": "The product fits the systems it has to live with",
+              "mark": "check"
             }
-          ]
+          ],
+          "foot": "The difference is who absorbs the integration work, and when."
         }
       },
       body: `

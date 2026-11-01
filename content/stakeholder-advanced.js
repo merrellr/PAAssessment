@@ -137,24 +137,31 @@ window.CONTENT_OVERRIDES["stakeholder-advanced"] = {
       title: "Lesson 3: Product, Marketing, and Sales as One Motion",
       figures: {
         "motion": {
-          "type": "steps",
+          "type": "chain",
           "title": "Product, marketing and sales as one motion",
-          "sub": "One shared set of personas, value propositions and claims.",
-          "foot": "The customer's experience stays consistent from first touch to the product itself.",
-          "items": [
+          "lanes": [
             {
-              "title": "Marketing touch",
-              "tone": "coral"
-            },
-            {
-              "title": "Sales conversation",
-              "tone": "violet"
-            },
-            {
-              "title": "The product",
-              "tone": "teal"
+              "nodes": [
+                {
+                  "title": "Marketing touch",
+                  "icon": "spark",
+                  "tone": "coral"
+                },
+                {
+                  "title": "Sales conversation",
+                  "icon": "chat",
+                  "tone": "violet"
+                },
+                {
+                  "title": "The product",
+                  "icon": "box",
+                  "tone": "teal"
+                }
+              ],
+              "base": "One shared set: personas · value propositions · claims"
             }
-          ]
+          ],
+          "foot": "The customer's experience stays consistent from first touch to the product itself."
         }
       },
       body: `

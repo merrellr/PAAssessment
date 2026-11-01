@@ -97,6 +97,7 @@ window.CONTENT_OVERRIDES["strategy-moderate"] = {
       title: "Lesson 2: Value Propositions That Actually Land",
       figures: {
         "pitch": {
+          "reveal": "How would each buyer hear a pitch made for them?",
           "type": "compare",
           "title": "Value propositions that actually land",
           "arrow": true,

@@ -122,6 +122,20 @@ async function figTests(){
   if (course === 'prioritization-novice'){
     t('the matrix: four labelled quadrants with the five example items plotted', all('.pf-quad').length === 4 && all('.pf-pt').length === 5 && /Money pits/.test($('lessonBody').textContent));
   }
+  if (course === 'discovery-experienced'){
+    const fig = figs[0], para = all('#lessonBody > p')[0], check = $('checkContainer'), r = (el) => el.getBoundingClientRect();
+    t('the workflow is drawn: the product as a detour off one line, and as a step on the other', !!fig.querySelector('.pf-cl-detour .pf-detour') && !!fig.querySelector('.pf-cn-hl') && all('.pf-lane', fig).length === 2);
+    t('one reading column: the figure, the text and the quick checks share the same left and right edges',
+      Math.abs(r(fig).left - r(para).left) < 2 && Math.abs(r(fig).right - r(para).right) < 2 && Math.abs(r(check).left - r(para).left) < 2 && Math.abs(r(check).right - r(para).right) < 2,
+      [r(fig).left, r(fig).right, r(para).left, r(para).right, r(check).left, r(check).right].map(Math.round).join(','));
+    t('figure text keeps its own size, not the lesson paragraph size', getComputedStyle(fig.querySelector('.pf-foot')).fontSize !== getComputedStyle(para).fontSize);
+  }
+  if (course === 'aiIndividual-moderate'){
+    const col = document.querySelector('.pf-col.pf-veiled'), btn = col && col.querySelector('.pf-reveal-btn');
+    t('the "after" side waits behind a question, hidden from screen readers', !!btn && col.querySelector('.pf-veil').getAttribute('aria-hidden') === 'true' && /what changes/i.test(btn.textContent));
+    btn.click(); await sleep(30);
+    t('choosing Show me reveals it, for screen readers too, and moves focus there', !col.classList.contains('pf-veiled') && !col.querySelector('.pf-reveal-btn') && !col.querySelector('.pf-veil').hasAttribute('aria-hidden') && document.activeElement === col);
+  }
   document.documentElement.setAttribute('data-theme', 'dark'); await sleep(50);
   t('in dark mode the figure turns dark too', getComputedStyle(figs[0]).backgroundColor === 'rgb(27, 33, 48)', getComputedStyle(figs[0]).backgroundColor);
 }

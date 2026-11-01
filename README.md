@@ -469,7 +469,10 @@ Fonts are Lato for text and Comfortaa for the logo. Font sizes are in `rem`, so 
   the articles on www.productadvisory.co: a cream card, a serif title, and large readable pieces. The lesson lists
   them as data in `figures: { name: { type, title, sub, foot, ... } }` and places each one in its `body` with
   `<div data-fig="name"></div>`. Types: cards, steps, loop, compare, hub, quadrant, bars, timeline, equation, record,
-  split, line, venn, decision, stats and columns; each is described at the top of the file. Figures are HTML, not
+  split, line, venn, decision, stats, columns, chain (a process, with the product as a detour or a step), track
+  (work along time), cadence (how often), pyramid and empathy; each is described at the top of the file. A `foot` is shown
+  as the figure's key idea. A comparison with `reveal: "question"` hides its later side until the learner has thought
+  about it and chooses Show me. Pieces arrive in reading order as a figure scrolls in (not with reduced motion). Figures are HTML, not
   pictures: they reflow on phones, follow light and dark, are read by screen readers, and their words go into
   "Ask AI" (`PAFig.text`). `tests/lesson-figures.test.mjs` checks that every figure in every course is placed and draws.
   Don't add inline `<svg>` diagrams or PNGs to lessons; add a figure instead.
