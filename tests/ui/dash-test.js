@@ -144,12 +144,13 @@ const sleep = (ms) => new Promise(r => setTimeout(r, ms));
       t('their newest saved tools, opening in Learning, never someone else\'s', links.join() === '/my-tools?open=t2,/my-tools?open=t1' && /Untitled build, buy, or partner/.test(toolsCard.textContent) && !/Not mine/.test(toolsCard.textContent) && /All your work \(2\)/.test(toolsCard.textContent), links.join() + ' ' + toolsCard.textContent);
       t('the header links to My toolkit', !!document.querySelector('.pa-links a[href="/my-tools"]'));
     } else if (window.__scn === 'plain'){
-      t('nothing saved: it opens My toolkit, in Learning (never the public site)', /Open My toolkit/.test(toolsCard.textContent) && !!toolsCard.querySelector('a[href="/my-tools"]') && !toolsCard.querySelector('a[href*="productadvisory.co"]'), toolsCard.textContent);
+      t('nothing saved: it opens My Toolkit, in Learning (never the public site)', /Open My Toolkit/.test(toolsCard.textContent) && !!toolsCard.querySelector('a[href="/my-tools"]') && !toolsCard.querySelector('a[href*="productadvisory.co"]'), toolsCard.textContent);
     }
     const companyLink = document.getElementById('companyDashMenuItem');
     const roleBadge = document.getElementById('profileRoleBadge').textContent;
     t('the Profile menu shows a role badge', window.__scn === 'owner' ? roleBadge === 'Super admin' : window.__scn === 'admin' ? /^Company admin/.test(roleBadge) : roleBadge === 'Learner', roleBadge);
-    t('"Your details" is gone from the menu; "Your progress" stays', !/Your details/.test(document.getElementById('profileDropdown').textContent) && /Your progress/.test(document.getElementById('profileDropdown').textContent));
+    const dd = document.getElementById('profileDropdown');
+    t('the Profile menu: their picture and who they are at the top, then Account and Learning; no progress, tour, feedback or cookie settings', !/Your details|Your progress|Replay the tour|Send feedback|Cookie settings/.test(dd.textContent) && /^[A-Z?]{1,2}$/.test(document.getElementById('profileFace').textContent) && /^Account,Learning/.test(Array.prototype.map.call(dd.querySelectorAll('.profile-progress-label'), x => x.textContent).join()), dd.textContent.replace(/\s+/g, ' '));
     if (window.__scn === 'admin'){
       t('a company admin sees "Company dashboard" under Profile, pointing at the company dashboard', companyLink.style.display === 'block' && companyLink.getAttribute('href') === '/company');
       t('and still gets their own shared record like any member', !!share);

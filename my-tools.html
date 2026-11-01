@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>My toolkit — Product Advisory Learning</title>
+<title>My Toolkit — Product Advisory Learning</title>
 <link rel="icon" href="/images/icons/favicon.svg" type="image/svg+xml">
 <link rel="icon" href="/images/icons/favicon-32.png" sizes="32x32" type="image/png">
 <link rel="apple-touch-icon" href="/images/icons/apple-touch-icon.png">
@@ -165,7 +165,8 @@
   dialog.share::backdrop{ background: rgba(18,48,94,0.35); }
   .share-row{ display:flex; gap: 8px; margin: 14px 0 8px; }
   .share-row .text-input{ margin: 0; font-size: 0.8125rem; }
-  .share-more{ display:flex; flex-wrap:wrap; gap: 8px; margin-top: 14px; }
+  .share-by{ margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--line); }
+  .share-more{ display:flex; flex-wrap:wrap; gap: 8px; margin-top: 8px; }
   .share-x{ position:absolute; top: 14px; right: 14px; background:none; border:0; font-size: 1.4rem; line-height: 1; color: var(--gray); cursor:pointer; }
 </style>
 <link rel="stylesheet" href="pa-theme.css">
@@ -183,7 +184,7 @@
     <div class="hub-head">
       <div>
         <span class="eyebrow">Product Advisory Learning</span>
-        <h1 id="hubTitle">My toolkit</h1>
+        <h1 id="hubTitle">My Toolkit</h1>
         <p>Prioritize features, choose AI pilots, decide build, buy or partner, and score your roadmap. Your work saves to your account as you go, ready to pick up, copy or share.</p>
       </div>
       <div class="who" id="statusBar" hidden><span id="signedInAs"></span> · <button class="linklike" id="signOutBtn" type="button">Sign out</button></div>
@@ -243,7 +244,7 @@
   <!-- ================= the workspace: one tool, running here, saving as you go ================= -->
   <section id="ws" hidden aria-labelledby="wsTitle">
     <div class="ws-bar">
-      <a href="/my-tools" class="ws-back" id="wsBack"><span aria-hidden="true">←</span> My toolkit</a>
+      <a href="/my-tools" class="ws-back" id="wsBack"><span aria-hidden="true">←</span> My Toolkit</a>
       <div class="ws-id" id="wsId">
         <span class="mark" id="wsMark"></span>
         <div class="txt"><span class="kind" id="wsKind"></span><h1 id="wsTitle" tabindex="-1">Untitled</h1></div>
@@ -273,8 +274,14 @@
       <button class="btn btn-primary btn-small" type="button" id="shareCopy">Copy link</button>
     </div>
     <p class="small" id="shareStatus" role="status"></p>
-    <div class="share-more">
-      <a class="btn btn-ghost btn-small" id="shareEmail" href="#">Email it</a>
+    <div class="share-by">
+      <span class="small">Or send it with</span>
+      <div class="share-more" id="shareMore">
+        <a class="btn btn-ghost btn-small" id="shareGmail" href="#" target="_blank" rel="noopener">Gmail</a>
+        <a class="btn btn-ghost btn-small" id="shareOutlook" href="#" target="_blank" rel="noopener">Outlook</a>
+        <a class="btn btn-ghost btn-small" id="shareEmail" href="#">Email app</a>
+        <button class="btn btn-ghost btn-small" type="button" id="shareNative" hidden>More…</button>
+      </div>
     </div>
   </dialog>
 
@@ -592,7 +599,7 @@ function openWorkspace(r){
   let seen = false; try { seen = localStorage.getItem('pa_ws_tip') === '1'; } catch (e) { /* storage off */ }
   $('wsTip').hidden = seen;
   $('wsTipText').textContent = 'Everything you change saves to your toolkit automatically. Use Share to send a colleague their own copy.';
-  document.title = C.displayTitle(wsRecord()) + ' — My toolkit';
+  document.title = C.displayTitle(wsRecord()) + ' — My Toolkit';
   track('tool_workspace_open', tool);
   return true;
 }
@@ -600,7 +607,7 @@ $('wsTipX').addEventListener('click', () => { $('wsTip').hidden = true; try { lo
 
 function paintWsTitle(){
   $('wsTitle').textContent = C.displayTitle(wsRecord());
-  document.title = C.displayTitle(wsRecord()) + ' — My toolkit';
+  document.title = C.displayTitle(wsRecord()) + ' — My Toolkit';
 }
 function paintWsMenu(){
   const pop = $('wsMenu');
@@ -695,7 +702,7 @@ $('wsBack').addEventListener('click', linkTo('/my-tools'));
 function closeWorkspace(){
   if (frame){ frame.remove(); frame = null; }
   ws = null;
-  document.title = 'My toolkit — Product Advisory Learning';
+  document.title = 'My Toolkit — Product Advisory Learning';
 }
 
 /* ---------------------------------------------------------------- share */
@@ -707,8 +714,16 @@ function openShare(d){
   $('shareTitle').textContent = C.displayTitle(d);
   $('shareUrl').value = url;
   $('shareStatus').textContent = '';
+  // Email: Gmail and Outlook in the browser (they work without an email app set up on the computer), the
+  // computer's own email app, and on phones and some browsers the system's share sheet.
   const subject = C.displayTitle(d) + ' (' + C.TOOLS[d.tool].name + ')';
-  $('shareEmail').href = 'mailto:?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent('Here is a copy of my ' + C.TOOLS[d.tool].noun + ', made with Product Advisory\'s free ' + C.TOOLS[d.tool].name + '. Open it to see it and make it your own:\n\n' + url);
+  const lead = 'Here is a copy of my ' + C.TOOLS[d.tool].noun + ', made with Product Advisory\'s free ' + C.TOOLS[d.tool].name + '. Open it to see it and make it your own:';
+  const body = lead + '\n\n' + url, e = encodeURIComponent;
+  $('shareGmail').href = 'https://mail.google.com/mail/?view=cm&fs=1&su=' + e(subject) + '&body=' + e(body);
+  $('shareOutlook').href = 'https://outlook.office.com/mail/deeplink/compose?subject=' + e(subject) + '&body=' + e(body);
+  $('shareEmail').href = 'mailto:?subject=' + e(subject) + '&body=' + e(body);
+  $('shareNative').hidden = !navigator.share;
+  $('shareNative').onclick = () => { navigator.share({ title: subject, text: lead, url }).then(() => track('tool_share_native', d.tool), () => { /* cancelled */ }); };
   $('shareDlg').showModal();
   $('shareUrl').select();
   track('tool_share_open', d.tool);
@@ -725,7 +740,7 @@ $('shareCopy').addEventListener('click', () => {
   $('shareUrl').select();
   track('tool_share_copy', shareFor && shareFor.tool);
 });
-$('shareEmail').addEventListener('click', () => track('tool_share_email', shareFor && shareFor.tool));
+['shareGmail', 'shareOutlook', 'shareEmail'].forEach(id => $(id).addEventListener('click', () => track('tool_share_' + id.slice(5).toLowerCase(), shareFor && shareFor.tool)));
 $('shareX').addEventListener('click', () => $('shareDlg').close());
 $('shareDlg').addEventListener('click', (e) => { if (e.target === $('shareDlg')) $('shareDlg').close(); });
 

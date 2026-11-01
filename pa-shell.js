@@ -19,7 +19,7 @@
   // from www.productadvisory.co or the Profile menu, so the header stays this short.
   var LINKS = [
     ["/lms-dashboard", "My Learning"],
-    ["/my-tools", "My toolkit"]
+    ["/my-tools", "My Toolkit"]
   ];
 
   // This page's clean address (/lms-dashboard, / for the assessment), whether it was opened as /lms-dashboard or /lms-dashboard.html.
@@ -202,7 +202,7 @@
     ["Teams and companies", "My invitation link doesn't work", "Check that you copied the whole link from the email. If it still doesn't work, ask the person who invited you to send it again; links can expire or be replaced.", "invite invitation link join expired company"],
     ["Teams and companies", "Can my whole team take the assessment?", 'Yes. <a href="/request-info?who=org">Tell us about your team</a> and we will set up a company account with its own dashboard.', "team company organization pricing group"],
     ["Toolkits", "How do I request or vote for a toolkit?", 'On the <a href="/tool-requests">Toolkits Roadmap</a>: vote for up to three tools, or use <b>Request a tool</b> to suggest your own. Voting and requests need a free account with a verified email.', "tool toolkit request vote roadmap suggest"],
-    ["Toolkits", "Where are the free toolkits?", 'In <a href="/my-tools">My toolkit</a>: the Feature Prioritization Scorecard, AI Use Case Prioritization, Build, Buy, or Partner and the Organizational Impact Score, saved to your account as you work. Fillable PDFs and Google Sheets are on <a href="https://www.productadvisory.co/toolkits" target="_blank" rel="noopener">productadvisory.co/toolkits<span aria-hidden="true"> ↗</span>' + NEW_TAB + "</a>.", "toolkit tools download template pdf sheet free saved my toolkit scorecard"],
+    ["Toolkits", "Where are the free toolkits?", 'In <a href="/my-tools">My Toolkit</a>: the Feature Prioritization Scorecard, AI Use Case Prioritization, Build, Buy, or Partner and the Organizational Impact Score, saved to your account as you work. Fillable PDFs and Google Sheets are on <a href="https://www.productadvisory.co/toolkits" target="_blank" rel="noopener">productadvisory.co/toolkits<span aria-hidden="true"> ↗</span>' + NEW_TAB + "</a>.", "toolkit tools download template pdf sheet free saved my toolkit scorecard"],
     ["This site", "Can I change how the site looks?", "Yes. <b>Make it yours</b> (the sliders button at the top) sets light or dark, text size, style and accent colour. Your choice follows you to www.productadvisory.co on this browser.", "dark mode light theme text size font accent"]
   ];
   var help, helpQ, helpFocus;
@@ -221,6 +221,7 @@
       '<div class="pa-help-ask" hidden></div>' +
       '<div class="pa-help-list">' + list + '</div><p class="pa-help-none" hidden>No answer here yet. Ask the lessons, or send us a note below.</p>' +
       '<div class="pa-panel-foot pa-help-foot"><a class="pa-btn" href="/feedback">Send feedback</a>' +
+      '<button type="button" class="pa-btn ghost" data-pa="tour">Replay the tour</button>' +
       '<a class="pa-btn ghost" href="mailto:info@productadvisory.co?subject=' + encodeURIComponent("Help with Product Advisory Learning") + '">Email us</a>' +
       '<a class="pa-btn ghost" href="' + BOOK_CALL + '" target="_blank" rel="noopener">Book a call<span aria-hidden="true"> ↗</span>' + NEW_TAB + "</a></div></div>";
     document.body.appendChild(help);
@@ -229,6 +230,8 @@
       if (e.target === help) return closeHelp();
       var b = e.target.closest ? e.target.closest("[data-pa]") : null;
       if (b && b.getAttribute("data-pa") === "close") return closeHelp();
+      // the dashboard's guided tour: here if this is the dashboard, else it opens there and starts
+      if (b && b.getAttribute("data-pa") === "tour") { closeHelp(); if (window.replayDashboardTour) window.replayDashboardTour(); else location.href = "/lms-dashboard?tour=1"; return; }
       if (b && b.getAttribute("data-pa") === "ask") { var q = helpQ.value.trim(); closeHelp(); openPalette(); palInput.value = q; showAnswer(q); }
     });
     help.addEventListener("keydown", function (e) { if (e.key === "Escape") closeHelp(); });
