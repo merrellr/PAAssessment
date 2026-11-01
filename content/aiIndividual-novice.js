@@ -152,28 +152,34 @@ window.CONTENT_OVERRIDES["aiIndividual-novice"] = {
       title: "Lesson 4: How to Scale Once You Have Traction",
       figures: {
         "bridge": {
-          "type": "steps",
+          "type": "chain",
           "title": "How one win becomes a capability",
-          "foot": "The template is the bridge. Without it, the win stays stuck with one person.",
-          "items": [
+          "lanes": [
             {
-              "title": "One person's win",
-              "tone": "sand"
-            },
-            {
-              "title": "Documented as a template",
-              "text": "The bridge",
-              "tone": "amber"
-            },
-            {
-              "title": "Others pick it up",
-              "tone": "mint"
-            },
-            {
-              "title": "Org capability",
-              "tone": "navy"
+              "tone": "amber",
+              "nodes": [
+                {
+                  "title": "One person's win",
+                  "icon": "user"
+                },
+                {
+                  "title": "Documented as a template",
+                  "text": "The bridge",
+                  "icon": "doc",
+                  "state": "hl"
+                },
+                {
+                  "title": "Others pick it up",
+                  "icon": "users"
+                },
+                {
+                  "title": "Org capability",
+                  "icon": "layers"
+                }
+              ]
             }
-          ]
+          ],
+          "foot": "The template is the bridge. Without it, the win stays stuck with one person."
         }
       },
       body: `

@@ -71,33 +71,49 @@ window.CONTENT_OVERRIDES["execution-experienced"] = {
       title: "Lesson 2: Design for Failure",
       figures: {
         "failover": {
-          "type": "cards",
+          "type": "chain",
           "title": "Design for failure",
-          "sub": "Traffic goes through a load balancer to several nodes. One goes down; the service stays up.",
-          "items": [
+          "sub": "One node goes down. The people using the service never notice.",
+          "lanes": [
             {
-              "icon": "check",
-              "label": "Node A",
-              "title": "Up",
-              "text": "Takes a share of the load",
-              "tone": "teal"
-            },
-            {
-              "icon": "check",
-              "label": "Node B",
-              "title": "Up",
-              "text": "Takes a share of the load",
-              "tone": "teal"
-            },
-            {
-              "icon": "warning",
-              "label": "Node C",
-              "title": "Down",
-              "text": "The balancer routes around it",
-              "tone": "coral"
+              "tone": "teal",
+              "nodes": [
+                {
+                  "title": "Traffic",
+                  "icon": "users"
+                },
+                {
+                  "title": "Load balancer",
+                  "text": "Routes around failures",
+                  "icon": "branch",
+                  "state": "hl"
+                },
+                {
+                  "stack": [
+                    {
+                      "title": "Node A",
+                      "text": "Up",
+                      "icon": "check",
+                      "tone": "teal"
+                    },
+                    {
+                      "title": "Node B",
+                      "text": "Up",
+                      "icon": "check",
+                      "tone": "teal"
+                    },
+                    {
+                      "title": "Node C",
+                      "text": "Down: gets no traffic",
+                      "state": "down"
+                    }
+                  ]
+                }
+              ],
+              "result": "The service stays up",
+              "mark": "check"
             }
-          ],
-          "foot": "The service is still up."
+          ]
         }
       },
       body: `

@@ -75,7 +75,7 @@
   function frame(f, body, extra) {
     return '<figure class="pf pf--' + f.type + (extra ? ' ' + extra : '') + '">' +
       (has(f.title) ? '<figcaption class="pf-head"><span class="pf-title">' + esc(f.title) + '</span>' + (has(f.sub) ? '<span class="pf-sub">' + esc(f.sub) + '</span>' : '') + '</figcaption>' : '') +
-      body + (has(f.foot) ? '<p class="pf-foot">' + esc(f.foot) + '</p>' : '') + '</figure>';
+      body + (has(f.foot) ? '<p class="pf-foot"><span class="pf-foot-k">Key idea</span>' + esc(f.foot) + '</p>' : '') + '</figure>';
   }
 
   const T = {};
@@ -128,9 +128,10 @@
     const cols = f.columns;
     return frame(f, '<div class="pf-compare' + (f.arrow ? ' pf-has-arrow' : '') + '" style="--cols:' + cols.length + '">' + cols.map((c, i) =>
       (f.arrow && i ? arrow() : '') +
-      '<div class="pf-col ' + tone(c.tone, i) + '">' + (has(c.icon) ? icon(c.icon) : '') + '<span class="pf-label">' + esc(c.label) + '</span>' +
+      '<div class="pf-col ' + tone(c.tone, i) + (f.reveal && i ? ' pf-veiled' : '') + '">' + (f.reveal && i ? '<button type="button" class="pf-reveal-btn"><span>' + esc(f.reveal) + '</span><b>Show me</b></button><div class="pf-veil" aria-hidden="true">' : '') +
+      (has(c.icon) ? icon(c.icon) : '') + '<span class="pf-label">' + esc(c.label) + '</span>' +
       (has(c.title) ? '<b class="pf-card-t">' + esc(c.title) + '</b>' : '') +
-      '<ul' + (c.mark ? ' class="pf-marks pf-mark-' + c.mark + '"' : '') + '>' + (c.items || []).map(x => '<li>' + (c.mark ? MARK[c.mark] : '') + esc(x) + '</li>').join('') + '</ul>' + (has(c.foot) ? '<i class="pf-tag">' + esc(c.foot) + '</i>' : '') + '</div>').join('') + '</div>');
+      '<ul' + (c.mark ? ' class="pf-marks pf-mark-' + c.mark + '"' : '') + '>' + (c.items || []).map(x => '<li>' + (c.mark ? MARK[c.mark] : '') + esc(x) + '</li>').join('') + '</ul>' + (has(c.foot) ? '<i class="pf-tag">' + esc(c.foot) + '</i>' : '') + (f.reveal && i ? '</div>' : '') + '</div>').join('') + '</div>');
   };
 
   T.hub = (f) => {
@@ -214,22 +215,123 @@
     return f.inner ? '<div class="pf-cols-wrap">' + body + '</div>' : frame(f, body);
   };
 
+  // A process drawn as a line of steps. A lane can show the product as a detour off the line (one more place to go)
+  // or as a highlighted step on it; a { stack } fans out into parallel steps; `base` is a band shared under the line.
+  // lanes [{ label, tone, nodes: [{ title, text, icon, tag, tone, state: 'hl' | 'down' | 'muted' } | { stack: [...] }],
+  //          detour: { at, title, text, icon }, base, result, mark: 'check' | 'x' }]
+  T.chain = (f) => {
+    const node = (n, i, lane) => {
+      const t = n.tone || (n.state === 'hl' ? lane.tone || 'teal' : n.state === 'down' ? 'coral' : 'navy');
+      return '<div class="pf-cn ' + tone(t) + (n.state ? ' pf-cn-' + n.state : '') + '"><span class="pf-cn-dot">' + (n.state === 'down' ? MARK.x : icon(n.icon || 'target')) + '</span>' +
+        '<span class="pf-cn-tx">' + (has(n.tag) ? '<span class="pf-cn-tag">' + esc(n.tag) + '</span>' : '') + '<b>' + esc(n.title) + '</b>' + (has(n.text) ? '<small>' + esc(n.text) + '</small>' : '') + '</span></div>';
+    };
+    const lanes = f.lanes.map((lane, li) => {
+      const nodes = lane.nodes, d = lane.detour;
+      let row = '';
+      nodes.forEach((n, i) => {
+        if (i) {
+          if (d && d.at === i - 1) row += '<span class="pf-cl pf-cl-detour ' + tone(d.tone || lane.tone || 'coral') + '"><span class="pf-detour">' + icon(d.icon) + '<b>' + esc(d.title) + '</b>' + (has(d.text) ? '<small>' + esc(d.text) + '</small>' : '') + '</span></span>';
+          else row += '<span class="pf-cl"></span>';
+        }
+        row += n.stack ? '<div class="pf-cstack' + (i ? ' pf-in-l' : '') + (i < nodes.length - 1 ? ' pf-in-r' : '') + '">' + n.stack.map(x => node(x, i, lane)).join('') + '</div>' : node(n, i, lane);
+      });
+      return '<div class="pf-lane ' + tone(lane.tone || 'navy', li) + '">' + (has(lane.label) ? '<span class="pf-label">' + esc(lane.label) + '</span>' : '') +
+        '<div class="pf-chain-row' + (d ? ' pf-has-detour' : '') + '">' + row + '</div>' + (has(lane.base) ? '<div class="pf-base">' + esc(lane.base) + '</div>' : '') +
+        (has(lane.result) ? '<p class="pf-result' + (lane.mark ? ' pf-marks pf-mark-' + lane.mark : '') + '">' + (lane.mark ? MARK[lane.mark] : '') + esc(lane.result) + '</p>' : '') + '</div>';
+    }).join('');
+    return frame(f, '<div class="pf-chain">' + lanes + '</div>');
+  };
+
+  // Work laid out along time: rows of segments sized by how long they take.
+  // rows [{ label, tone, segments: [{ len, kind, label }], result, mark }], kinds { kind: 'name in the key' }, x
+  const KIND = { build: 'navy', test: 'teal', risk: 'coral', good: 'mint', wait: 'sand' };
+  T.track = (f) => {
+    const kinds = f.kinds || {};
+    const rows = f.rows.map((r, ri) => {
+      const total = r.segments.reduce((a, g) => a + g.len, 0);
+      return '<div class="pf-trow ' + tone(r.tone || 'navy', ri) + (r.segments.length > 5 ? ' pf-many' : '') + '"><span class="pf-label">' + esc(r.label) + '</span><div class="pf-tbar">' + r.segments.map(g =>
+        '<span class="pf-seg pf-seg-' + g.kind + ' ' + tone(KIND[g.kind] || 'sand') + '" style="flex:' + g.len + '" title="' + esc(g.label || kinds[g.kind] || '') + '"><i>' + esc(g.label || '') + '</i></span>').join('') + '</div>' +
+        (has(r.result) ? '<p class="pf-result' + (r.mark ? ' pf-marks pf-mark-' + r.mark : '') + '">' + (r.mark ? MARK[r.mark] : '') + esc(r.result) + '</p>' : '') + '<span hidden>' + total + '</span></div>';
+    }).join('');
+    const key = Object.keys(kinds).length ? '<ul class="pf-key">' + Object.keys(kinds).map(k => '<li class="' + tone(KIND[k] || 'sand') + ' pf-key-seg"><i></i>' + esc(kinds[k]) + '</li>').join('') + '</ul>' : '';
+    return frame(f, '<div class="pf-track">' + rows + (has(f.x) ? '<span class="pf-taxis">' + esc(f.x) + '</span>' : '') + '</div>' + key);
+  };
+
+  // How often each touchpoint happens over one span of time: one dot per occurrence.
+  // rows [{ label, title, count, text, tone }], span
+  T.cadence = (f) => frame(f, '<div class="pf-cadence">' + (has(f.span) ? '<span class="pf-cad-span">' + esc(f.span) + '</span>' : '') + f.rows.map((r, i) => {
+    let dots = '';
+    for (let k = 0; k < r.count; k++) dots += '<i style="left:' + ((k + 0.5) / r.count * 100).toFixed(2) + '%"></i>';
+    return '<div class="pf-cad ' + tone(r.tone || f.tone || 'teal', i) + (r.count > 30 ? ' pf-dense' : '') + '"><span class="pf-cad-l"><span class="pf-label">' + esc(r.label) + '</span><b>' + esc(r.title) + '</b>' + (has(r.text) ? '<small>' + esc(r.text) + '</small>' : '') + '</span>' +
+      '<span class="pf-cad-dots" aria-hidden="true">' + dots + '</span><span class="pf-cad-n">' + r.count + '×</span></div>';
+  }).join('') + '</div>');
+
+  // Levels from the few at the top to the many at the bottom. levels [{ title, text, tone }], top, bottom
+  T.pyramid = (f) => {
+    const n = f.levels.length;
+    return frame(f, '<div class="pf-pyr">' + (has(f.top) || has(f.bottom) ? '<span class="pf-pyr-axis"><span>' + esc(f.top || '') + '</span><span>' + esc(f.bottom || '') + '</span></span>' : '') +
+      '<div class="pf-pyr-levels">' + f.levels.map((l, i) => '<div class="pf-lvl ' + tone(l.tone, i) + '" style="width:' + (n > 1 ? 46 + 54 * i / (n - 1) : 100).toFixed(1) + '%"><b>' + esc(l.title) + '</b>' + (has(l.text) ? '<small>' + esc(l.text) + '</small>' : '') + '</div>').join('') + '</div></div>');
+  };
+
+  // An empathy map: what a person says, thinks, does and feels, around them. hl: quadrants to highlight; gap: the point.
+  const EMP = [['says', 'Says', 'chat', 'teal'], ['thinks', 'Thinks', 'spark', 'violet'], ['does', 'Does', 'hand', 'amber'], ['feels', 'Feels', 'heart', 'coral']];
+  T.empathy = (f) => {
+    const hl = f.hl || [];
+    return frame(f, '<div class="pf-emp">' + EMP.map(([k, label, ic, t]) => {
+      const q = f[k] || {};
+      return '<div class="pf-emq pf-emq-' + k + ' ' + tone(t) + (hl.indexOf(k) > -1 ? ' pf-emq-hl' : '') + (hl.length && hl.indexOf(k) === -1 ? ' pf-emq-dim' : '') + '">' + icon(ic) + '<span class="pf-label">' + label + '</span><b>' + esc(q.title || '') + '</b>' + (has(q.text) ? '<small>' + esc(q.text) + '</small>' : '') + '</div>';
+    }).join('') + '<div class="pf-emc">' + icon('user') + '<b>' + esc((f.center || {}).title || 'The user') + '</b>' + (has((f.center || {}).text) ? '<small>' + esc(f.center.text) + '</small>' : '') + '</div></div>' +
+      (has(f.gap) ? '<p class="pf-gap">' + icon('warning') + '<span>' + esc(f.gap) + '</span></p>' : ''));
+  };
+
   function html(f) { return T[f.type] ? T[f.type](f) : ''; }
+
+  // Replace each <div data-fig="name"> in `rootEl` with its figure from `figures`.
+  const SEQ = '.pf-step, .pf-node, .pf-spoke, .pf-card, .pf-col, .pf-cn, .pf-cl, .pf-seg, .pf-cad, .pf-lvl, .pf-emq, .pf-bar, .pf-timeline li, .pf-term, .pf-stat, .pf-colbar, .pf-quad';
+  let watcher = null;
+  function animate(fig) {
+    const calm = root.matchMedia && root.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (calm || !root.IntersectionObserver) return;
+    // the pieces arrive in reading order, once, as the figure scrolls into view
+    fig.querySelectorAll(SEQ).forEach((el, i) => el.style.setProperty('--i', Math.min(i, 14)));
+    fig.classList.add('pf-anim');
+    if (!watcher) watcher = new root.IntersectionObserver((es) => es.forEach(e => { if (e.isIntersecting) { e.target.classList.add('pf-in'); watcher.unobserve(e.target); } }), { threshold: 0.2 });
+    watcher.observe(fig);
+  }
 
   // Replace each <div data-fig="name"> in `rootEl` with its figure from `figures`.
   function mount(rootEl, figures) {
     if (!rootEl || !figures) return;
     rootEl.querySelectorAll('[data-fig]').forEach(slot => {
       const f = figures[slot.getAttribute('data-fig')];
-      if (f && T[f.type]) slot.outerHTML = html(f);
+      if (!f || !T[f.type]) return;
+      const box = slot.ownerDocument.createElement('div');
+      box.innerHTML = html(f);
+      const fig = box.firstChild;
+      slot.parentNode.replaceChild(fig, slot);
+      animate(fig);
     });
+    if (!rootEl.__pfReveal && rootEl.addEventListener) {
+      rootEl.__pfReveal = true;
+      // "Think first, then look": the later side of a before/after comparison opens when asked
+      rootEl.addEventListener('click', (e) => {
+        const btn = e.target.closest && e.target.closest('.pf-reveal-btn');
+        if (!btn) return;
+        const col = btn.parentNode;
+        col.classList.remove('pf-veiled');
+        col.querySelector('.pf-veil').removeAttribute('aria-hidden');
+        btn.remove();
+        col.setAttribute('tabindex', '-1');
+        col.focus({ preventScroll: true });
+      });
+    }
   }
 
   // The words in a figure, for search and Ask.
   function text(f) {
     const out = [];
     const walk = (v, k) => {
-      if (/^(type|tone|icon|cols|badge|mark)$/.test(k || '')) return;
+      if (/^(type|tone|icon|cols|badge|mark|state|hl|at|len|kind|count|reveal)$/.test(k || '')) return;
       if (typeof v === 'string') out.push(v.replace(/<[^>]+>/g, ''));
       else if (Array.isArray(v)) v.forEach(x => walk(x));
       else if (v && typeof v === 'object') Object.keys(v).forEach(key => walk(v[key], key));

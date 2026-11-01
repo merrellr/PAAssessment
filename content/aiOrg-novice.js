@@ -71,31 +71,41 @@ window.CONTENT_OVERRIDES["aiOrg-novice"] = {
       title: "Lesson 2: Design Agents Like Roles on a Team",
       figures: {
         "squad": {
-          "type": "steps",
+          "type": "chain",
           "title": "Agents designed like roles on a team",
-          "foot": "Outputs become inputs: a repeatable system, not four disconnected tools.",
-          "items": [
+          "sub": "Each agent's output is the next one's input.",
+          "lanes": [
             {
-              "title": "Researcher",
-              "text": "Themes and evidence",
-              "tone": "sky"
-            },
-            {
-              "title": "Analyst",
-              "text": "Impact and segments",
-              "tone": "mint"
-            },
-            {
-              "title": "Experiment designer",
-              "text": "How to test it",
-              "tone": "amber"
-            },
-            {
-              "title": "Copywriter",
-              "text": "The messaging",
-              "tone": "violet"
+              "tone": "teal",
+              "nodes": [
+                {
+                  "title": "Researcher",
+                  "text": "Themes and evidence",
+                  "icon": "search",
+                  "tone": "sky"
+                },
+                {
+                  "title": "Analyst",
+                  "text": "Impact and segments",
+                  "icon": "chart",
+                  "tone": "mint"
+                },
+                {
+                  "title": "Experiment designer",
+                  "text": "How to test it",
+                  "icon": "branch",
+                  "tone": "amber"
+                },
+                {
+                  "title": "Copywriter",
+                  "text": "The messaging",
+                  "icon": "chat",
+                  "tone": "violet"
+                }
+              ]
             }
-          ]
+          ],
+          "foot": "Outputs become inputs: a repeatable system, not four disconnected tools."
         }
       },
       body: `

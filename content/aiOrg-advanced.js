@@ -129,28 +129,43 @@ window.CONTENT_OVERRIDES["aiOrg-advanced"] = {
       title: "Lesson 3: Engineering the Quick Win",
       figures: {
         "quick-win": {
-          "type": "steps",
+          "type": "chain",
           "title": "Engineering the quick win",
-          "foot": "AI does the legwork. The person delivers the part that creates loyalty.",
-          "items": [
+          "sub": "AI does the legwork; a person delivers the moment.",
+          "lanes": [
             {
-              "title": "AI watches",
-              "text": "Usage and sentiment",
-              "tone": "sky"
-            },
-            {
-              "title": "Spots the moment",
-              "tone": "sky"
-            },
-            {
-              "title": "Routes to the right person",
-              "tone": "sky"
-            },
-            {
-              "title": "A person delivers the quick win",
-              "tone": "teal"
+              "tone": "teal",
+              "nodes": [
+                {
+                  "tag": "AI",
+                  "title": "Watches",
+                  "text": "Usage and sentiment",
+                  "icon": "eye",
+                  "tone": "sky"
+                },
+                {
+                  "tag": "AI",
+                  "title": "Spots the moment",
+                  "icon": "target",
+                  "tone": "sky"
+                },
+                {
+                  "tag": "AI",
+                  "title": "Routes it",
+                  "text": "To the right person",
+                  "icon": "branch",
+                  "tone": "sky"
+                },
+                {
+                  "tag": "Person",
+                  "title": "Delivers the quick win",
+                  "icon": "heart",
+                  "state": "hl"
+                }
+              ]
             }
-          ]
+          ],
+          "foot": "AI does the legwork. The person delivers the part that creates loyalty."
         }
       },
       body: `
