@@ -111,6 +111,7 @@ const sleep = (ms) => new Promise(r => setTimeout(r, ms));
       if (q && opts.length){
         opts[q.correct].click(); await sleep(60);
         t('choosing the right answer marks it correct and explains why', opts[q.correct].classList.contains('correct') && /Correct\./.test(document.querySelector('#spacedReviewCheckContainer .check-feedback').textContent));
+        t('the right answer shows a green tick, in the answer and in the feedback', !!opts[q.correct].querySelector('.check-mark svg') && !!document.querySelector('#spacedReviewCheckContainer .check-verdict.ok .check-mark') && /correct answer/.test(opts[q.correct].textContent));
       }
       /* saved notes show the question they answer */
       const last = lessonsOf('discovery-moderate').find(l => l.id === 5);

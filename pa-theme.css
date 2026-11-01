@@ -733,3 +733,23 @@ html.pa-shell .icon-btn { background: var(--pa-card); }
 .pa-more > .pa-more-body { padding-top: 6px; }
 
 @media print { .pa-nav, .pa-panel-back, .palette-backdrop { display: none !important; } }
+
+/* Quiz answers (lessons, the dashboard's review question): a ring before each option. Once answered, the right answer
+   gets a green tick and a wrong pick a red cross, so the result reads at a glance, not only by colour. */
+:root { --pa-bad: #c93636; --pa-bad-bg: #fdeeee; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --pa-bad: #f07a7a; --pa-bad-bg: #2e1616; } }
+:root[data-theme="dark"] { --pa-bad: #f07a7a; --pa-bad-bg: #2e1616; }
+.check-option.has-mark { display: flex; align-items: flex-start; gap: 11px; }
+.check-mark { flex: none; display: grid; place-items: center; width: 22px; height: 22px; margin-top: -1px; border-radius: 50%; border: 2px solid var(--line, #dce3ee); background: var(--surface, #fff); transition: background .15s, border-color .15s; }
+.check-mark svg { width: 13px; height: 13px; stroke: #fff; stroke-width: 3.2; fill: none; stroke-linecap: round; stroke-linejoin: round; opacity: 0; }
+.check-option.correct .check-mark { background: var(--pa-ok); border-color: var(--pa-ok); }
+.check-option.incorrect { border-color: var(--pa-bad) !important; background: var(--pa-bad-bg) !important; }
+.check-option.incorrect .check-mark { background: var(--pa-bad); border-color: var(--pa-bad); }
+.check-option.correct .check-mark svg, .check-option.incorrect .check-mark svg { opacity: 1; }
+.check-option:disabled { cursor: default; opacity: 1; color: var(--ink, inherit); }
+.check-option.has-mark:disabled:not(.correct):not(.incorrect) { opacity: .6; }
+.check-verdict { display: inline-flex; align-items: center; gap: 6px; font-weight: 700; margin-right: 4px; }
+.check-verdict .check-mark { width: 20px; height: 20px; margin: 0; }
+.check-verdict.ok { color: var(--pa-ok-ink, var(--pa-ok)); } .check-verdict.ok .check-mark { background: var(--pa-ok); border-color: var(--pa-ok); }
+.check-verdict.bad { color: var(--pa-bad); } .check-verdict.bad .check-mark { background: var(--pa-bad); border-color: var(--pa-bad); }
+.check-verdict .check-mark svg { opacity: 1; }
