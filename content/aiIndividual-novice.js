@@ -12,9 +12,9 @@ window.CONTENT_OVERRIDES = window.CONTENT_OVERRIDES || {};
 window.CONTENT_OVERRIDES["aiIndividual-novice"] = {
   sourceUrl: "https://www.linkedin.com/pulse/ai-project-its-practice-heres-how-build-one-robert-merrell-4skoc",
   recap: [
-    "Nobody is ready — waiting for 'ready' is deciding not to go; you start anyway and adjust.",
-    "Adoption moves through stages — you, then one use case, then team traction, then org capability — each building evidence for the next.",
-    "Get started with four moves: use it yourself first, automate one repetitive task, lower the bar for a 'win', give your team permission to experiment.",
+    "Nobody is ready. Waiting for \"ready\" is deciding not to go, so you start anyway and adjust.",
+    "Adoption moves through stages (you, then one use case, then team traction, then org capability), each building evidence for the next.",
+    "Get started with four moves: use it yourself first, automate one repetitive task, lower the bar for a \"win,\" and give your team permission to experiment.",
     "Scale by sharing what works, standardizing the wins into templates, and connecting AI to outcomes people already care about.",
     "The whole playbook: one use case, one experiment, one person willing to share what they learned."
   ],
@@ -23,7 +23,7 @@ window.CONTENT_OVERRIDES["aiIndividual-novice"] = {
       id: 1,
       title: "Lesson 1: Nobody Is Ready, and That's Okay",
       preCheck: {
-        label: "Before you read on — predict",
+        label: "Before you read on, predict",
         question: "Which is closer to how AI adoption actually tends to go for most people and teams?",
         options: [
           "Build a full strategy and get everything figured out before touching a tool",
@@ -39,7 +39,7 @@ window.CONTENT_OVERRIDES["aiIndividual-novice"] = {
       `,
       checks: [
         {
-          question: "What's the article's core objection to the 'we need a full strategy first' mindset?",
+          question: "What's the core objection to the \"we need a full strategy first\" mindset?",
           options: [
             "Strategies are inherently a waste of time",
             "It treats AI adoption like a construction project you plan perfectly in advance, when it's really more like a skill you build by starting and adjusting",
@@ -56,7 +56,7 @@ window.CONTENT_OVERRIDES["aiIndividual-novice"] = {
             "They hired outside consultants to run the rollout"
           ],
           correct: 1,
-          explanation: "This is the thread running through the whole article: momentum comes from small, real starts, not from waiting for a perfect plan."
+          explanation: "This is the thread running through the whole course: momentum comes from small, real starts, not from waiting for a perfect plan."
         }
       ]
     },
@@ -85,34 +85,34 @@ window.CONTENT_OVERRIDES["aiIndividual-novice"] = {
       id: 3,
       title: "Lesson 3: How to Actually Get Started",
       body: `
-        <p>Four concrete moves to make, step by step. None of them require permission from anyone but you, until the fourth one.</p>
+        <p>Four concrete moves to make, step by step. None of them requires permission from anyone but you, until the fourth.</p>
       `,
       steps: [
         { title: "Start with your own curiosity", detail: "Before rolling AI out to a team, spend a few weeks just using it yourself. Draft emails, summarize a report you've been putting off, think through a problem out loud. Firsthand experience is worth more than any briefing document." },
         { title: "Automate one painful, repetitive task", detail: "Every team has one: the weekly status report, the meeting notes nobody has time to write, the proposal draft that always starts blank. Pick one. Measure the time you get back. That single proof point builds more momentum than any presentation." },
-        { title: "Lower the bar for what counts as a win", detail: "A lot of people try AI once, get an imperfect result, and give up. That's like trying a new recipe once without reading the instructions and swearing off cooking. Be specific, give context, iterate, treat it as a conversation, not a one-shot test." },
-        { title: "Give your team permission to experiment", detail: "Not a formal program with KPIs and quarterly reviews. Just permission. Tell people you want to hear what they're trying. Celebrate the experiments that didn't work as much as the ones that did, that's where the real learning is." }
+        { title: "Lower the bar for what counts as a win", detail: "A lot of people try AI once, get an imperfect result, and give up. That's like trying a new recipe once without reading the instructions and swearing off cooking. Be specific, give context, and iterate. Treat it as a conversation, not a one-shot test." },
+        { title: "Give your team permission to experiment", detail: "Not a formal program with KPIs and quarterly reviews. Just permission. Tell people you want to hear what they're trying. Celebrate the experiments that didn't work as much as the ones that did. That's where the real learning is." }
       ],
       checks: [
         {
-          question: "Someone tries AI once, gets a mediocre first result, and concludes 'it doesn't work for what I do.' What does this lesson say about that conclusion?",
+          question: "Someone tries AI once, gets a mediocre first result, and concludes \"it doesn't work for what I do.\" What does this lesson say about that conclusion?",
           options: [
-            "It's a fair conclusion, if it doesn't work the first time it's not worth pursuing",
-            "It's premature, these tools respond to how you interact with them, and one attempt isn't enough to judge",
+            "It's a fair conclusion: if it doesn't work the first time, it's not worth pursuing",
+            "It's premature: these tools respond to how you interact with them, and one attempt isn't enough to judge",
             "It only applies to certain job types"
           ],
           correct: 1,
           explanation: "Step 3 addresses this directly: treat interactions as a conversation you refine, not a single test with a pass/fail verdict."
         },
         {
-          question: "What does 'giving your team permission to experiment' actually mean here?",
+          question: "What does \"giving your team permission to experiment\" actually mean here?",
           options: [
             "Launching a formal program with tracked KPIs and quarterly reviews",
-            "Simply telling people it's okay to try things and want to hear about it, celebrating failed experiments as much as successful ones",
+            "Simply telling people it's okay to try things and that you want to hear about it, celebrating failed experiments as much as successful ones",
             "Requiring every team member to complete AI training before touching any tool"
           ],
           correct: 1,
-          explanation: "The article is explicit that this isn't a formal program, it's permission and genuine curiosity about what people are trying, including what didn't work."
+          explanation: "The lesson is explicit that this isn't a formal program. It's permission, and genuine curiosity about what people are trying, including what didn't work."
         }
       ]
     },
@@ -120,7 +120,7 @@ window.CONTENT_OVERRIDES["aiIndividual-novice"] = {
       id: 4,
       title: "Lesson 4: How to Scale Once You Have Traction",
       body: `
-        <p>Once you have a few small wins, scaling gets a lot less scary, you're building on evidence instead of theory. Three things that actually move the needle:</p>
+        <p>Once you have a few small wins, scaling gets a lot less scary: you're building on evidence instead of theory. Three things that actually move the needle:</p>
         <svg viewBox="0 0 400 92" style="width:100%; height:auto; margin:4px 0 2px;" xmlns="http://www.w3.org/2000/svg">
           <defs>
             <marker id="aiNScale" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
@@ -141,9 +141,9 @@ window.CONTENT_OVERRIDES["aiIndividual-novice"] = {
           <text x="200" y="80" text-anchor="middle" font-family="sans-serif" font-size="7.5" fill="#4B5768">The template is the bridge &#8212; without it the win stays stuck with one person.</text>
         </svg>
         <ul>
-          <li><strong>Share what's working.</strong> A Slack thread, a monthly email, wherever people gather, have team members share prompts, use cases, and results. Peer learning spreads faster and sticks better than formal training.</li>
+          <li><strong>Share what's working.</strong> In a Slack thread, a monthly email, or wherever people gather, have team members share prompts, use cases, and results. Peer learning spreads faster and sticks better than formal training.</li>
           <li><strong>Standardize the wins.</strong> When someone finds a great way to use AI for a specific task, document it. Turn it into a template others can pick up without starting from zero. That's how individual experimentation becomes organizational capability.</li>
-          <li><strong>Connect AI to outcomes you already care about.</strong> Successful teams don't talk about "AI adoption," they talk about reducing time to first draft, improving response times, cutting repetitive work. Tied to goals people already have, it stops being a tech initiative and becomes a business tool.</li>
+          <li><strong>Connect AI to outcomes you already care about.</strong> Successful teams don't talk about "AI adoption." They talk about reducing time to first draft, improving response times, and cutting repetitive work. Tied to goals people already have, it stops being a tech initiative and becomes a business tool.</li>
         </ul>
       `,
       checks: [
@@ -155,7 +155,7 @@ window.CONTENT_OVERRIDES["aiIndividual-novice"] = {
             "Because it makes the rollout mandatory instead of optional"
           ],
           correct: 1,
-          explanation: "This is the shift the article is pointing at: nobody resists a business outcome they already wanted, framing AI as the tool that gets them there removes the resistance a standalone 'AI initiative' tends to create."
+          explanation: "This is the shift the lesson is pointing at: nobody resists a business outcome they already wanted. Framing AI as the tool that gets them there removes the resistance a standalone \"AI initiative\" tends to create."
         },
         {
           question: "What turns individual experimentation into organizational capability, according to this lesson?",
@@ -165,7 +165,7 @@ window.CONTENT_OVERRIDES["aiIndividual-novice"] = {
             "Waiting for individual habits to spread on their own without any documentation"
           ],
           correct: 1,
-          explanation: "Standardizing the wins is the specific mechanism, capturing what worked so it doesn't stay locked in one person's head."
+          explanation: "Standardizing the wins is the specific mechanism: capturing what worked so it doesn't stay locked in one person's head."
         }
       ]
     },
@@ -182,12 +182,12 @@ window.CONTENT_OVERRIDES["aiIndividual-novice"] = {
           label: "Bringing it together",
           question: "Someone on your team automates their weekly status report with AI and mentions it worked well in a team chat. Based on the full journey in this course, what's the most valuable next move?",
           options: [
-            "Nothing needed, one person's success is the end goal",
+            "Nothing. One person's success is the end goal",
             "Document how they did it as a reusable template, and connect it to a goal the team already cares about, so it can spread as peer learning rather than staying with one person",
             "Immediately mandate the same approach for the entire department"
           ],
           correct: 1,
-          explanation: "This connects Lesson 2's journey (one use case → team traction) with Lesson 4's scaling advice (share what's working, standardize it, tie it to outcomes) — a single win only becomes capability if it's deliberately shared and documented, not mandated top-down."
+          explanation: "This connects Lesson 2's journey (one use case → team traction) with Lesson 4's scaling advice (share what's working, standardize it, tie it to outcomes). A single win only becomes capability if it's deliberately shared and documented, not mandated top-down."
         }
       ],
       reflection: {

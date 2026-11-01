@@ -17,18 +17,18 @@ window.CONTENT_OVERRIDES = window.CONTENT_OVERRIDES || {};
 window.CONTENT_OVERRIDES["prioritization-advanced"] = {
   sourceUrl: "",
   recap: [
-    "Advanced prioritization is designing a method other teams adopt and resolving cross-team priority conflicts — not ordering your own backlog.",
+    "Advanced prioritization is designing a method other teams adopt and resolving cross-team priority conflicts, not ordering your own backlog.",
     "A method teams will adopt has three properties: shared criteria and definitions, a common data source, and outputs traceable to their inputs.",
     "Tie the ranking to P&L data so trade-offs are expressed in the language leadership actually decides in.",
     "Think portfolio: classify products by stage, set stage-appropriate goals, allocate capacity across products before each team prioritizes within its slice.",
-    "When two teams collide, run the shared method and show the work — don't pick a side — and grow other facilitators so it doesn't depend on you."
+    "When two teams collide, run the shared method and show the work rather than picking a side, and grow other facilitators so it doesn't depend on you."
   ],
   lessons: [
     {
       id: 1,
       title: "Lesson 1: From Your Backlog to the System",
       preCheck: {
-        label: "Before you read on — predict",
+        label: "Before you read on, predict",
         question: "You prioritize your own product's backlog well and consistently. What's the advanced move beyond that?",
         options: [
           "Prioritize a larger backlog",
@@ -39,20 +39,20 @@ window.CONTENT_OVERRIDES["prioritization-advanced"] = {
         explanation: "See whether the lesson agrees. Advanced prioritization is about the method and the org, not one backlog."
       },
       body: `
-        <p>At earlier levels, prioritization skill is about ordering your own work well. At an advanced level, the deliverable changes: you <strong>design prioritization systems that other teams adopt</strong>, and you <strong>navigate prioritization conflicts at an organizational level</strong>, the ones where two teams' top priorities compete for the same capacity or the same customers.</p>
+        <p>At earlier levels, prioritization skill is about ordering your own work well. At an advanced level, the deliverable changes: you <strong>design prioritization systems that other teams adopt</strong>, and you <strong>navigate prioritization conflicts at an organizational level</strong>: the ones where two teams' top priorities compete for the same capacity or the same customers.</p>
         <p>The test: other teams run the prioritization method you designed, using shared definitions and a shared data source, and when their priorities collide, the resolution comes from the method rather than from whoever escalates hardest.</p>
-        <p>Two things make that possible: a method that's <strong>legible</strong> across teams, and a common language, financial impact, that leadership can actually decide in.</p>
+        <p>Two things make that possible: a method that's <strong>legible</strong> across teams, and a common language (financial impact) that leadership can actually decide in.</p>
       `,
       checks: [
         {
           question: "You already order your own backlog cleanly every cycle. Two peer teams keep colliding over shared engineering capacity, and it always resolves in favor of whoever escalates to a VP first. What's the advanced move?",
           options: [
             "Order a bigger backlog spanning both teams' work yourself",
-            "Design a prioritization method both teams adopt — shared definitions and data — and resolve their collisions through it rather than by escalation",
+            "Design a prioritization method both teams adopt (shared definitions and data) and resolve their collisions through it rather than by escalation",
             "Ask leadership to permanently assign the shared capacity to one team"
           ],
           correct: 1,
-          explanation: "The output is a shared system and conflict resolution at the org level — not another well-ordered single backlog."
+          explanation: "The output is a shared system and conflict resolution at the org level, not another well-ordered single backlog."
         },
         {
           question: "What's the \"test\" for whether you've made the shift?",
@@ -84,14 +84,14 @@ window.CONTENT_OVERRIDES["prioritization-advanced"] = {
             <line x1="270" y1="75" x2="320" y2="75"/>
           </g>
         </svg>
-        <p><strong>Shared criteria and definitions</strong>, so "impact" and "value" mean the same thing on Team A and Team C. <strong>A common data source</strong>, one place everyone pulls the metrics from, so nobody's arguing from a different number. And <strong>defensible outputs</strong>, each item's rank traceable to its inputs, so the order survives scrutiny from any direction. When all three hold, two teams' priority lists are actually comparable, which is the precondition for resolving a conflict between them.</p>
+        <p><strong>Shared criteria and definitions</strong>, so "impact" and "value" mean the same thing on Team A and Team C. <strong>A common data source</strong>: one place everyone pulls the metrics from, so nobody's arguing from a different number. And <strong>defensible outputs</strong>: each item's rank traceable to its inputs, so the order survives scrutiny from any direction. When all three hold, two teams' priority lists are actually comparable, which is the precondition for resolving a conflict between them.</p>
       `,
       checks: [
         {
           question: "Why does a cross-team prioritization method need a single common data source?",
           options: [
             "To reduce the cost of analytics tooling",
-            "So teams aren't arguing from different numbers — a shared source is what makes their priority lists actually comparable",
+            "So teams aren't arguing from different numbers. A shared source is what makes their priority lists actually comparable",
             "So leadership can audit each team's usage"
           ],
           correct: 1,
@@ -130,14 +130,14 @@ window.CONTENT_OVERRIDES["prioritization-advanced"] = {
         compute: (v) => ((v.gain - v.cost) / v.cost) * 100,
         resultLabel: "Expected ROI",
         format: (n) => Math.round(n) + "%",
-        note: "(Value − Cost) ÷ Cost. This is the same number leadership uses to weigh every other investment — which is exactly the point."
+        note: "(Value − Cost) ÷ Cost. This is the same number leadership uses to weigh every other investment, which is exactly the point."
       },
       checks: [
         {
           question: "Why connect the prioritization system to P&L data at the organizational level?",
           options: [
             "Finance requires it for budgeting",
-            "Financial impact is the language leadership decides in — expressing trade-offs that way lets a prioritization call be weighed against every other company investment",
+            "Financial impact is the language leadership decides in. Expressing trade-offs that way lets a prioritization call be weighed against every other company investment",
             "It makes the rankings harder to challenge"
           ],
           correct: 1,
@@ -159,7 +159,7 @@ window.CONTENT_OVERRIDES["prioritization-advanced"] = {
       id: 4,
       title: "Lesson 4: Portfolio Thinking",
       body: `
-        <p>With multiple products or teams, prioritization isn't only <em>within</em> a backlog, it's allocating capacity <em>across</em> them. That's portfolio management.</p>
+        <p>With multiple products or teams, prioritization isn't only <em>within</em> a backlog. It's allocating capacity <em>across</em> them. That's portfolio management.</p>
         <svg viewBox="0 0 400 118" style="width:100%; height:auto; margin:4px 0 2px;" xmlns="http://www.w3.org/2000/svg">
           <text x="8" y="16" font-family="'Space Grotesk',sans-serif" font-size="8.5" font-weight="700" fill="#12305e">Total product + engineering capacity</text>
           <rect x="8" y="24" width="176" height="30" fill="#EEF3FA" stroke="#1A4584" stroke-width="1.1"/>
@@ -177,7 +177,7 @@ window.CONTENT_OVERRIDES["prioritization-advanced"] = {
       `,
       steps: [
         { title: "Classify products by stage", detail: "Growth-stage products that need investment to capture a market, and mature products that generate cash but need less. The right prioritization pressure is different for each." },
-        { title: "Set stage-appropriate goals", detail: "Growth products get milestones that balance investment against returns; mature products get profitability targets. A growth product judged on this quarter's margin gets starved; a mature one given a blank cheque gets wasteful." },
+        { title: "Set stage-appropriate goals", detail: "Growth products get milestones that balance investment against returns; mature products get profitability targets. A growth product judged on this quarter's margin gets starved; a mature one given a blank check gets wasteful." },
         { title: "Allocate capacity at the portfolio level", detail: "Decide how much total engineering and product capacity goes to each product before each team prioritizes within its slice. Otherwise the loudest team, not the strategy, sets the split." },
         { title: "Rebalance on a cadence", detail: "As products move between stages and markets shift, the allocation should move too. A portfolio split set once and frozen drifts out of line with where the opportunity actually is." }
       ],
@@ -186,11 +186,11 @@ window.CONTENT_OVERRIDES["prioritization-advanced"] = {
           question: "Why judge a growth-stage product and a mature product by different goals?",
           options: [
             "Mature products are more important to the company",
-            "A growth product judged on near-term margin gets starved of the investment it needs; a mature one given unlimited investment gets wasteful — the right pressure differs by stage",
+            "A growth product judged on near-term margin gets starved of the investment it needs; a mature one given unlimited investment gets wasteful. The right pressure differs by stage",
             "Growth products are harder to measure"
           ],
           correct: 1,
-          explanation: "Applying one standard across stages mis-allocates. Growth needs investment room; mature needs profitability discipline."
+          explanation: "Applying one standard across stages misallocates. Growth needs investment room; mature needs profitability discipline."
         },
         {
           question: "Why allocate capacity across products at the portfolio level before each team prioritizes within its own backlog?",
@@ -209,7 +209,7 @@ window.CONTENT_OVERRIDES["prioritization-advanced"] = {
       title: "Lesson 5: Navigating the Conflict",
       body: `
         <p>The moment the whole system exists to handle: two teams' top priorities collide, competing for the same capacity, the same customers, or the same launch window.</p>
-        <p>Without a shared method, this resolves by escalation, whoever gets to the executive first, or argues most forcefully, wins. With one, the conversation changes: both items are scored against the same criteria, from the same data, in the same financial terms. The question becomes "which scores higher against what we agreed matters?", and the answer is inspectable by everyone in the room.</p>
+        <p>Without a shared method, this resolves by escalation: whoever gets to the executive first, or argues most forcefully, wins. With one, the conversation changes: both items are scored against the same criteria, from the same data, in the same financial terms. The question becomes "which scores higher against what we agreed matters?" and the answer is inspectable by everyone in the room.</p>
         <p>Your job in that moment is to <strong>run the method, not pick a side</strong>, and to make the reasoning visible so the losing team can see it wasn't political. And the longer-term job is <strong>mentoring</strong>: growing other people who can facilitate that conversation, so cross-team prioritization doesn't depend on you being in every room.</p>
         <p>Put the course together: a legible shared method, tied to the P&L, applied across a portfolio, used to resolve conflicts by criteria rather than volume, and taught to others. That's prioritization as something the organization runs on, not something one PM does well.</p>
       `,
@@ -218,7 +218,7 @@ window.CONTENT_OVERRIDES["prioritization-advanced"] = {
           question: "When two teams' priorities collide, what's the PM's role in an advanced prioritization system?",
           options: [
             "Decide which team's priority wins, based on their own judgment",
-            "Run the shared method — same criteria, same data, same financial terms — and make the reasoning visible, rather than picking a side",
+            "Run the shared method (same criteria, same data, same financial terms) and make the reasoning visible, rather than picking a side",
             "Escalate the conflict to an executive to settle"
           ],
           correct: 1,
@@ -229,7 +229,7 @@ window.CONTENT_OVERRIDES["prioritization-advanced"] = {
           question: "You're the most senior product person across three teams that constantly clash over roadmap priority. Based on this course, what's the highest-leverage move?",
           options: [
             "Personally arbitrate each conflict as it comes up",
-            "Stand up one legible method — shared criteria and data, ROI-linked, portfolio-level capacity allocation — use it to resolve conflicts by score, and train facilitators on each team so it runs without you",
+            "Stand up one legible method (shared criteria and data, ROI-linked, portfolio-level capacity allocation), use it to resolve conflicts by score, and train facilitators on each team so it runs without you",
             "Give each team a fixed roadmap for the year so there's nothing to clash over"
           ],
           correct: 1,

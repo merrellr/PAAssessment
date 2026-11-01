@@ -13,20 +13,20 @@ window.CONTENT_OVERRIDES["aiOrg-novice"] = {
   sourceUrl: "https://www.linkedin.com/pulse/your-first-ai-product-team-designing-squad-agents-just-robert-merrell-vudmc",
   recap: [
     "One general-purpose chatbot doing every job produces context overload, mixed quality, and no clear ownership.",
-    "Design agents like roles on a team — a starting squad of Researcher, Analyst, Experiment Designer, Copywriter, with handoffs so outputs become inputs.",
+    "Design agents like roles on a team: a starting squad of Researcher, Analyst, Experiment Designer and Copywriter, with handoffs so outputs become inputs.",
     "Start from a costly recurring workflow, not a model; its pain points become the agents' responsibilities.",
-    "Scope an MVP squad (useful weekly, small, evaluable) and prioritize which agent to build first on frequency, time cost, risk, and leverage.",
-    "Plug it into the tools your team already uses and evaluate each agent like a product — if you can't evaluate it, it will drift."
+    "Scope an MVP squad (useful weekly, small, easy to evaluate) and prioritize which agent to build first on frequency, time cost, risk, and leverage.",
+    "Plug it into the tools your team already uses and evaluate each agent like a product. If you can't evaluate it, it will drift."
   ],
   lessons: [
     {
       id: 1,
       title: "Lesson 1: Why One Chatbot Fails at Real Product Work",
       preCheck: {
-        label: "Before you read on — predict",
+        label: "Before you read on, predict",
         question: "A team's first AI move is one general-purpose assistant everyone asks to do everything. What tends to go wrong?",
         options: [
-          "Nothing — a single assistant is the simplest place to start and scales fine",
+          "Nothing. A single assistant is the simplest place to start and scales fine",
           "Inconsistent quality, unclear ownership, and a product experience that demos well but is unreliable in daily work",
           "It works, but only if you pay for the most expensive model"
         ],
@@ -34,14 +34,14 @@ window.CONTENT_OVERRIDES["aiOrg-novice"] = {
         explanation: "Hold that prediction. This lesson is about why one assistant doing many jobs breaks down."
       },
       body: `
-        <p>Most teams start their AI journey by adding a chatbot. Natural first step, common trap: treating AI as a single general-purpose assistant you ask to do everything.</p>
+        <p>Most teams start their AI journey by adding a chatbot. It's a natural first step, and a common trap: treating AI as a single general-purpose assistant you ask to do everything.</p>
         <p>One assistant gets asked to research a market, summarize feedback, propose features, draft PRDs, write launch messaging, analyze experiments, and answer stakeholder questions. Each of those needs different context, different tools, different tone, and different evaluation. When it all goes through one assistant, you get:</p>
         <ul>
           <li><strong>Context overload.</strong> The assistant doesn't know which sources to trust or which priorities matter today.</li>
           <li><strong>Mixed quality.</strong> A response can be strong in one area and weak in another, and nobody knows why.</li>
           <li><strong>No clear ownership.</strong> When something's wrong, it's unclear which part of the system failed or how to fix it.</li>
         </ul>
-        <p>The fix is the same one a growing team reaches for: <strong>specialization</strong>. Design an "AI product team" — a virtual squad of specialized agents with clear roles, clear inputs, and clear success criteria.</p>
+        <p>The fix is the same one a growing team reaches for: <strong>specialization</strong>. Design an "AI product team": a virtual squad of specialized agents with clear roles, clear inputs, and clear success criteria.</p>
       `,
       checks: [
         {
@@ -93,14 +93,14 @@ window.CONTENT_OVERRIDES["aiOrg-novice"] = {
           <line x1="296" y1="70" x2="306" y2="70" stroke="#9AA3AD" stroke-width="1.5" marker-end="url(#sqArrow)"/>
           <text x="200" y="118" text-anchor="middle" font-family="sans-serif" font-size="9" fill="#9AA3AD">outputs become inputs — a repeatable system, not four disconnected tools</text>
         </svg>
-        <p>Each agent gets real boundaries too. The Researcher doesn't make product decisions or invent sources and flags uncertainty clearly. The Analyst doesn't declare causality without experimental support. The Copywriter doesn't make up capabilities and calls out where legal review is needed. The Experiment Designer proposes options and trade-offs, not a single answer.</p>
+        <p>Each agent gets real boundaries too. The Researcher doesn't make product decisions or invent sources, and it flags uncertainty clearly. The Analyst doesn't declare causality without experimental support. The Copywriter doesn't make up capabilities and calls out where legal review is needed. The Experiment Designer proposes options and trade-offs, not a single answer.</p>
       `,
       checks: [
         {
           question: "What turns four separate agents into an actual \"squad\"?",
           options: [
             "Running them all on the same AI model",
-            "Designing handoffs so one agent's output becomes the next agent's input — Researcher → Analyst → Experiment Designer → Copywriter",
+            "Designing handoffs so one agent's output becomes the next agent's input (Researcher → Analyst → Experiment Designer → Copywriter)",
             "Having them all report their results into the same Slack channel"
           ],
           correct: 1,
@@ -110,7 +110,7 @@ window.CONTENT_OVERRIDES["aiOrg-novice"] = {
           question: "The Analyst Agent's boundaries say it \"does not declare causality without experimental support.\" Why build in a boundary like that?",
           options: [
             "To slow the agent down so humans stay in the loop",
-            "Because a defined boundary is what keeps a specialized agent trustworthy — it separates observation from hypothesis instead of overreaching",
+            "Because a defined boundary is what keeps a specialized agent trustworthy: it separates observation from hypothesis instead of overreaching",
             "Because analysts aren't allowed to discuss causes at all"
           ],
           correct: 1,
@@ -122,7 +122,7 @@ window.CONTENT_OVERRIDES["aiOrg-novice"] = {
       id: 3,
       title: "Lesson 3: Start With Workflows, Not Models",
       body: `
-        <p>The biggest mistake is starting with the technology. Start with a <strong>workflow</strong> you want to improve, a recurring product ritual that's expensive in time and attention: weekly backlog grooming, monthly insights review, quarterly planning, experiment review and writeups.</p>
+        <p>The biggest mistake is starting with the technology. Start with a <strong>workflow</strong> you want to improve: a recurring product ritual that's expensive in time and attention, such as weekly backlog grooming, monthly insights review, quarterly planning, or experiment review and write-ups.</p>
         <p>Then ask three questions about it: where do we lose time, where do mistakes happen, and where do we lack consistency? Those pain points become your first agent responsibilities.</p>
         <svg viewBox="0 0 400 124" style="width:100%; height:auto; margin:4px 0 2px;" xmlns="http://www.w3.org/2000/svg">
           <defs>
@@ -148,7 +148,7 @@ window.CONTENT_OVERRIDES["aiOrg-novice"] = {
           <text x="325" y="70" text-anchor="middle" font-family="sans-serif" font-size="7.5" fill="#4B5768">responsibility</text>
           <line x1="300" y1="62" x2="308" y2="62" stroke="#9AA3AD" stroke-width="1.1" marker-end="url(#aoWf)"/>
         </svg>
-        <p>Take discovery and validation for a new initiative. Common pain points: feedback scattered across tools, competitive research outdated, insights not consistently synthesized, hypotheses and experiments varying in quality, messaging rushed at launch. Every one of those is a job you can hand to a specific agent, which is exactly why that workflow is a good place for a squad.</p>
+        <p>Take discovery and validation for a new initiative. Common pain points: feedback scattered across tools, outdated competitive research, insights that aren't consistently synthesized, hypotheses and experiments that vary in quality, and messaging rushed at launch. Every one of those is a job you can hand to a specific agent, which is exactly why that workflow is a good place for a squad.</p>
       `,
       checks: [
         {
@@ -159,13 +159,13 @@ window.CONTENT_OVERRIDES["aiOrg-novice"] = {
             "The workflow your leadership is most curious about"
           ],
           correct: 1,
-          explanation: "\"Start with a workflow, not a model.\" The recurring, costly ritual is where an agent earns its keep, and its pain points define what the agent should do."
+          explanation: "Start with a workflow, not a model. The recurring, costly ritual is where an agent earns its keep, and its pain points define what the agent should do."
         },
         {
           question: "How do a workflow's pain points map to agent design?",
           options: [
             "They're logged as risks and reviewed later",
-            "Each pain point — lost time, common mistakes, inconsistency — becomes a specific responsibility you assign to an agent",
+            "Each pain point (lost time, common mistakes, inconsistency) becomes a specific responsibility you assign to an agent",
             "They're averaged into a single \"automation score\" for the workflow"
           ],
           correct: 1,
@@ -177,11 +177,11 @@ window.CONTENT_OVERRIDES["aiOrg-novice"] = {
       id: 4,
       title: "Lesson 4: Scope a Minimum Squad, Then Prioritize It",
       body: `
-        <p>You don't need to automate everything. Design an MVP squad that's useful weekly, small enough to maintain, and easy to evaluate. For example: a Researcher that produces a weekly top-5 customer pain points with source links, an Analyst that writes a weekly KPI narrative for 3 to 5 core metrics, an Experiment Designer that fills in a one-page brief template, a Copywriter that gives three microcopy options per feature.</p>
+        <p>You don't need to automate everything. Design an MVP squad that's useful weekly, small enough to maintain, and easy to evaluate. For example: a Researcher that produces a weekly top-5 customer pain points with source links, an Analyst that writes a weekly KPI narrative for 3 to 5 core metrics, an Experiment Designer that fills in a one-page brief template, and a Copywriter that gives three microcopy options per feature.</p>
         <p>To decide which agent to build first, score each candidate on four factors:</p>
       `,
       steps: [
-        { title: "Frequency", detail: "How often does this workflow actually happen? Weekly beats quarterly for a first agent — you get feedback fast and the time savings compound." },
+        { title: "Frequency", detail: "How often does this workflow actually happen? Weekly beats quarterly for a first agent: you get feedback fast and the time savings compound." },
         { title: "Time cost", detail: "How much PM and team time does it consume today? A Copywriter agent might score high here if your team ships weekly." },
         { title: "Risk", detail: "What's the downside if it goes wrong? An Experiment Designer agent might score high on risk reduction by catching missing instrumentation before launch." },
         { title: "Leverage", detail: "Does it unblock multiple teams or create compounding improvements? An Analyst agent often scores high on both frequency and leverage." },
@@ -196,14 +196,14 @@ window.CONTENT_OVERRIDES["aiOrg-novice"] = {
             "Cheap to run, owned by engineering, and invisible to users"
           ],
           correct: 1,
-          explanation: "Weekly usefulness gives you a feedback loop; small scope keeps it maintainable; evaluability is what stops it drifting."
+          explanation: "Weekly usefulness gives you a feedback loop; small scope keeps it maintainable; being easy to evaluate is what stops it drifting."
         },
         {
           question: "Two candidate agents look useful. One supports a weekly ritual, the other a quarterly one. All else equal, which do you build first, and why?",
           options: [
-            "The quarterly one — quarterly rituals are higher stakes",
-            "The weekly one — higher frequency means faster feedback and time savings that compound sooner",
-            "Neither — build both at once so the squad is complete"
+            "The quarterly one, because quarterly rituals are higher stakes",
+            "The weekly one, because higher frequency means faster feedback and time savings that compound sooner",
+            "Neither. Build both at once so the squad is complete"
           ],
           correct: 1,
           explanation: "Frequency is the first scoring factor for a reason. A weekly agent teaches you more, sooner, and its value adds up while you're still learning."
@@ -214,7 +214,7 @@ window.CONTENT_OVERRIDES["aiOrg-novice"] = {
       id: 5,
       title: "Lesson 5: Plug It In, and Evaluate It Like a Product",
       body: `
-        <p>The squad should fit the tools and rituals your team already uses, Slack or Teams for digests, Jira or Linear for turning insights into tickets, Notion or Google Docs for living briefs, your analytics platform for KPI monitoring. The pattern: agents produce outputs on a cadence, humans review in a short ritual, approved outputs become artifacts and actions in your normal tools. The goal isn't "another tool," it's less friction inside the system your team already lives in.</p>
+        <p>The squad should fit the tools and rituals your team already uses: Slack or Teams for digests, Jira or Linear for turning insights into tickets, Notion or Google Docs for living briefs, and your analytics platform for KPI monitoring. The pattern: agents produce outputs on a cadence, humans review them in a short ritual, and approved outputs become artifacts and actions in your normal tools. The goal isn't "another tool." It's less friction inside the system your team already lives in.</p>
         <p>Then treat each agent like a mini product with its own success metrics. The Researcher: coverage, traceability back to sources, whether people cite it in decisions. The Analyst: accuracy, time saved in KPI reviews, decisions triggered. The Experiment Designer: brief consistency, fewer failed launches from missing instrumentation. The Copywriter: fewer editing cycles, alignment to voice and compliance. If you can't evaluate it, it will drift.</p>
         <p>What changes for the PM: you're defining roles, not writing prompts; designing workflows and handoffs, not asking for one-off answers; managing quality through evaluation, not vibes.</p>
       `,
@@ -223,7 +223,7 @@ window.CONTENT_OVERRIDES["aiOrg-novice"] = {
           question: "Why does the lesson insist on evaluation metrics for each agent?",
           options: [
             "To justify the cost of the agents to finance",
-            "\"If you cannot evaluate it, it will drift\" — without a success measure, quality slowly degrades and nobody notices",
+            "If you can't evaluate it, it will drift: without a success measure, quality slowly degrades and nobody notices",
             "Because evaluation metrics are required before you can deploy to Slack"
           ],
           correct: 1,

@@ -16,18 +16,18 @@ window.CONTENT_OVERRIDES = window.CONTENT_OVERRIDES || {};
 window.CONTENT_OVERRIDES["execution-advanced"] = {
   sourceUrl: "",
   recap: [
-    "Advanced execution is building a delivery system other teams adopt and coaching others through high-stakes launches — not shipping bigger projects yourself.",
+    "Advanced execution is building a delivery system other teams adopt and coaching others through high-stakes launches, not shipping bigger projects yourself.",
     "Standardize a small set of rhythms: an iterative roadmap format, CI/CD and automated testing as default, a shared quality-metrics view, a fixed review cadence.",
     "Coach a team through a hard launch with a pre-mortem, a readiness review they run, a non-negotiable staged rollout and tested rollback, and a lesson-focused debrief.",
     "Make data-driven optimization a standard practice built into every team's loop, not a special project someone champions.",
-    "Make it durable — a continuous-improvement culture, shared playbooks, and more than one person who can coach a launch."
+    "Make it durable: a continuous-improvement culture, shared playbooks, and more than one person who can coach a launch."
   ],
   lessons: [
     {
       id: 1,
       title: "Lesson 1: From Running Launches to Building the Machine",
       preCheck: {
-        label: "Before you read on — predict",
+        label: "Before you read on, predict",
         question: "You personally run complex launches reliably. What's the advanced move beyond that?",
         options: [
           "Run even bigger launches personally",
@@ -51,7 +51,7 @@ window.CONTENT_OVERRIDES["execution-advanced"] = {
             "A detailed runbook for your own projects"
           ],
           correct: 1,
-          explanation: "The output is a repeatable capability other teams use — not another well-run project with your name on it."
+          explanation: "The output is a repeatable capability other teams use, not another well-run project with your name on it."
         },
         {
           question: "What's the \"test\" the lesson offers for whether you've made the shift?",
@@ -119,10 +119,10 @@ window.CONTENT_OVERRIDES["execution-advanced"] = {
         <p>The other half of the advanced role is walking a less experienced team through a launch that matters, in a way that builds their capability rather than just getting this one out the door.</p>
       `,
       steps: [
-        { title: "Run a pre-mortem with them", detail: "Before the launch, have the team imagine it has failed and work backward through why. You're teaching them to surface risks proactively — and the exercise itself catches things their plan missed." },
+        { title: "Run a pre-mortem with them", detail: "Before the launch, have the team imagine it has failed and work backward through why. You're teaching them to surface risks proactively, and the exercise itself catches things their plan missed." },
         { title: "Walk the launch-readiness review", detail: "Go through readiness together against a checklist: monitoring in place, rollback tested, support briefed, comms drafted, load headroom confirmed. Let them run it; you ask the questions a veteran would ask." },
         { title: "Insist on a staged rollout and a tested rollback", detail: "Not because you'd do it differently, but because these are the habits that make high-stakes launches survivable. Make them non-negotiable and explain why each time until the team asks for them unprompted." },
-        { title: "Debrief for the lesson, not the blame", detail: "After the launch, run the retro focused on what the team learned about launching — what they'd do earlier, what they'd check, what surprised them. That's the capability transferring." }
+        { title: "Debrief for the lesson, not the blame", detail: "After the launch, run the retro focused on what the team learned about launching: what they'd do earlier, what they'd check, what surprised them. That's the capability transferring." }
       ],
       checks: [
         {
@@ -139,7 +139,7 @@ window.CONTENT_OVERRIDES["execution-advanced"] = {
           question: "When coaching, why let the less experienced team run the launch-readiness review while you ask questions?",
           options: [
             "It saves you time",
-            "They build the capability by doing it, with you modelling the questions a veteran asks — versus you running it and them watching",
+            "They build the capability by doing it, with you modeling the questions a veteran asks, rather than you running it while they watch",
             "It spreads responsibility if something is missed"
           ],
           correct: 1,
@@ -154,17 +154,17 @@ window.CONTENT_OVERRIDES["execution-advanced"] = {
         <p>At earlier levels, "look at the data after a release" is a good habit. At an advanced level, it's a <strong>standard practice</strong> every team runs by default, not a special project someone champions.</p>
         <p>That means, as a normal part of the delivery loop:</p>
         <ul>
-          <li><strong>Analyze user behaviour</strong> after each meaningful release, feature adoption, engagement, where people drop off.</li>
-          <li><strong>Track whether the product is still landing</strong> — retention, satisfaction, the core outcome metric — so a slow decline is noticed early.</li>
+          <li><strong>Analyze user behavior</strong> after each meaningful release: feature adoption, engagement, where people drop off.</li>
+          <li><strong>Track whether the product is still landing</strong> (retention, satisfaction, the core outcome metric) so a slow decline is noticed early.</li>
           <li><strong>Feed the findings into the next round of prioritization</strong>, so the roadmap is continuously adjusted from evidence rather than re-argued from opinion.</li>
         </ul>
         <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(210px, 1fr)); gap:12px; margin:2px 0 14px;">
           <div style="border-top:3px solid #C0622A; background:#FBF3EF; border-radius:6px; padding:10px 12px;">
-            <strong style="font-size:12px; color:#7a3d18;">Habit &mdash; champion-dependent</strong>
+            <strong style="font-size:12px; color:#7a3d18;">Habit: depends on a champion</strong>
             <p style="margin:6px 0 0; font-size:13px;">One PM checks post-release data when they remember. The other two teams ship and move on.</p>
           </div>
           <div style="border-top:3px solid #2E8B57; background:#EEF7F1; border-radius:6px; padding:10px 12px;">
-            <strong style="font-size:12px; color:#256b45;">Standard practice &mdash; built in</strong>
+            <strong style="font-size:12px; color:#256b45;">Standard practice: built in</strong>
             <p style="margin:6px 0 0; font-size:13px;">Every team's cadence includes a post-release review; the roadmap step that follows expects its findings.</p>
           </div>
         </div>
@@ -175,11 +175,11 @@ window.CONTENT_OVERRIDES["execution-advanced"] = {
           question: "Across the last three releases, only the one PM who cares about analytics reviewed the post-release data; the other two teams shipped and moved on. What does making this a \"standard practice\" actually require?",
           options: [
             "Ask that PM to review the data for all three teams",
-            "Put the post-release review in every team's cadence, with the next roadmap step expecting its findings — so it happens without a champion",
+            "Put the post-release review in every team's cadence, with the next roadmap step expecting its findings, so it happens without a champion",
             "Add a better analytics dashboard and trust teams to use it"
           ],
           correct: 1,
-          explanation: "The advanced move is making it structural — tooling, cadence, expectation — so it happens whether or not a particular person pushes for it."
+          explanation: "The advanced move is making it structural (tooling, cadence, expectation) so it happens whether or not a particular person pushes for it."
         },
         {
           question: "Why feed post-release findings directly into the next prioritization round?",
@@ -210,7 +210,7 @@ window.CONTENT_OVERRIDES["execution-advanced"] = {
           question: "What's the sign that a delivery system is genuinely durable?",
           options: [
             "It's documented in a comprehensive wiki",
-            "It survives you leaving — improved by a continuous-improvement culture, taught through shared playbooks, and coachable by more than one person",
+            "It survives you leaving: improved by a continuous-improvement culture, taught through shared playbooks, and coachable by more than one person",
             "It has never had a failed launch"
           ],
           correct: 1,
@@ -229,7 +229,7 @@ window.CONTENT_OVERRIDES["execution-advanced"] = {
         }
       ],
       reflection: {
-        prompt: "Name one part of how your team delivers that only works because you're there — a launch review you always run, a judgment call teams bring to you. What would it take to make it a documented default other teams could adopt, and to have someone else able to coach it?"
+        prompt: "Name one part of how your team delivers that only works because you're there, like a launch review you always run or a judgment call teams bring to you. What would it take to make it a documented default other teams could adopt, and to have someone else able to coach it?"
       }
     }
   ]

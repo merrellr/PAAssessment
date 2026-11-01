@@ -17,9 +17,9 @@ window.CONTENT_OVERRIDES["execution-novice"] = {
   sourceUrl: "",
   recap: [
     "End-of-project surprises are a structure problem: one large batch means the first real test comes when there's no time to react.",
-    "Work in tested increments — a focused MVP scope, an agile cadence, a beta to a select group — so problem signals arrive continuously.",
+    "Work in tested increments (a focused MVP scope, an agile cadence, a beta to a select group) so problem signals arrive continuously.",
     "Automate the checks: tests on every change catch a break in isolation the day it's introduced; CI/CD removes the manual steps where error and delay creep in.",
-    "Track a few quality numbers — defect rate, downtime, cycle time — reviewed every sprint so a bad trend is caught while it's small.",
+    "Track a few quality numbers (defect rate, downtime, cycle time), reviewed every sprint so a bad trend is caught while it's small.",
     "Small scope, cadence, automated checks, and metrics all move the moment you learn about a problem earlier; that's what makes timelines predictable."
   ],
   lessons: [
@@ -27,18 +27,18 @@ window.CONTENT_OVERRIDES["execution-novice"] = {
       id: 1,
       title: "Lesson 1: Why Surprises Show Up Late",
       preCheck: {
-        label: "Before you read on — predict",
+        label: "Before you read on, predict",
         question: "Your projects tend to look fine until the last week, then problems appear all at once. What's the most common structural cause?",
         options: [
           "The team isn't working hard enough in the early weeks",
-          "Work is done in one large batch, so there's no early signal — the first real test of whether it works comes at the end",
+          "Work is done in one large batch, so there's no early signal. The first real test of whether it works comes at the end",
           "Estimates are always too optimistic and can't be fixed"
         ],
         correct: 1,
         explanation: "Hold that thought. This lesson is about why late surprises happen and how the shape of the work causes them."
       },
       body: `
-        <p>Unpredictable timelines and end-of-project surprises usually aren't a discipline problem. They're a <strong>structure</strong> problem. When a piece of work is built as one large batch and only integrated and tested near the end, the first honest signal about whether it works, whether it fits together, whether the estimate held, arrives when there's no time left to react.</p>
+        <p>Unpredictable timelines and end-of-project surprises usually aren't a discipline problem. They're a <strong>structure</strong> problem. When a piece of work is built as one large batch and only integrated and tested near the end, the first honest signal about whether it works, whether it fits together, and whether the estimate held arrives when there's no time left to react.</p>
         <p>The fix isn't working harder early. It's changing the shape of the work so that signal arrives continuously:</p>
         <ul>
           <li>Smaller increments that each get integrated and tested.</li>
@@ -61,7 +61,7 @@ window.CONTENT_OVERRIDES["execution-novice"] = {
           question: "What's the proposed fix?",
           options: [
             "Add a buffer week to every estimate",
-            "Change the shape of the work — smaller integrated-and-tested increments, a feedback cadence, automated checks — so problem signals arrive continuously",
+            "Change the shape of the work (smaller integrated-and-tested increments, a feedback cadence, automated checks) so problem signals arrive continuously",
             "Freeze scope at the start and refuse all changes"
           ],
           correct: 1,
@@ -89,7 +89,7 @@ window.CONTENT_OVERRIDES["execution-novice"] = {
           </g>
           <text x="230" y="118" font-family="sans-serif" font-size="7.5" fill="#9AA3AD">tested every step</text>
         </svg>
-        <p>Three habits make this concrete: <strong>define a small MVP scope</strong>, the essential features that address the core need without overextending; <strong>adopt an agile cadence</strong> (Scrum or Kanban) so you iterate, gather feedback, and adjust on a rhythm; and <strong>run a beta</strong>, release early to a select group of users to measure performance and find rough edges before a full launch.</p>
+        <p>Three habits make this concrete: <strong>define a small MVP scope</strong> (the essential features that address the core need, without overextending); <strong>adopt an agile cadence</strong> (Scrum or Kanban) so you iterate, gather feedback, and adjust on a rhythm; and <strong>run a beta</strong>, releasing early to a select group of users to measure performance and find rough edges before a full launch.</p>
       `,
       checks: [
         {
@@ -138,7 +138,7 @@ window.CONTENT_OVERRIDES["execution-novice"] = {
           <text x="155" y="90" text-anchor="middle" font-family="sans-serif" font-size="7.5" fill="#C0622A">a break stops here, in isolation &#8212; the day it's introduced</text>
         </svg>
         <ul>
-          <li><strong>Automated tests</strong>, regression, functional, and security, run on every change, so a break is caught the day it's introduced by whoever introduced it, not weeks later by a user.</li>
+          <li><strong>Automated tests</strong> (regression, functional, and security) run on every change, so a break is caught the day it's introduced by whoever introduced it, not weeks later by a user.</li>
           <li><strong>Continuous integration / continuous deployment (CI/CD)</strong> automates the build-and-release path. It removes the manual steps where human error creeps in and slows delivery, and it makes shipping a small change routine instead of an event.</li>
         </ul>
         <p>The combined effect: problems surface immediately and in isolation (this change broke this test), which is the opposite of a pile of unexplained failures in the final week.</p>
@@ -147,8 +147,8 @@ window.CONTENT_OVERRIDES["execution-novice"] = {
         {
           question: "A developer merges a change on Monday that quietly breaks an unrelated report. The team runs automated tests on every change; a second team tests manually in the final week before launch. Who has the easier fix, and why?",
           options: [
-            "The manual team — they see all the failures together and can triage them in one pass",
-            "The automated team — the break surfaces Monday, tied to one change, instead of as one of many unexplained failures weeks later",
+            "The manual team, because they see all the failures together and can triage them in one pass",
+            "The automated team, because the break surfaces Monday, tied to one change, instead of as one of many unexplained failures weeks later",
             "No difference; the bug takes the same effort to fix either way"
           ],
           correct: 1,
@@ -162,7 +162,7 @@ window.CONTENT_OVERRIDES["execution-novice"] = {
             "It guarantees zero bugs in production"
           ],
           correct: 1,
-          explanation: "When releasing is automated and low-drama, small increments can ship continuously — which is what keeps the feedback loop tight."
+          explanation: "When releasing is automated and low-drama, small increments can ship continuously, which is what keeps the feedback loop tight."
         }
       ]
     },
@@ -171,7 +171,7 @@ window.CONTENT_OVERRIDES["execution-novice"] = {
       title: "Lesson 4: Track a Few Quality Numbers",
       body: `
         <p>You can't tell whether execution is actually improving without measuring it. Pick a small set of quality metrics and watch them.</p>
-        <p>Here's the same defect-rate metric under the two structures from this course, drag the slider across six releases:</p>
+        <p>Here's the same defect-rate metric under the two structures from this course. Drag the slider across six releases:</p>
       `,
       chart: {
         unit: "Release",
@@ -185,7 +185,7 @@ window.CONTENT_OVERRIDES["execution-novice"] = {
       steps: [
         { title: "Defect rate", detail: "How many bugs are found per release, or per feature. A rising defect rate as you add scope is an early warning that quality is slipping under the pace." },
         { title: "Downtime / reliability", detail: "How often the product is unavailable or degraded. This is the metric users feel most directly, and the one that turns into an angry escalation if you're not watching it." },
-        { title: "Cycle time", detail: "How long a change takes to go from started to shipped. Lengthening cycle time means the delivery path is getting clogged — worth catching before it becomes \"why is everything late?\"" },
+        { title: "Cycle time", detail: "How long a change takes to go from started to shipped. Lengthening cycle time means the delivery path is getting clogged, which is worth catching before it becomes \"why is everything late?\"" },
         { title: "Review the numbers on a cadence", detail: "Look at these every sprint or every release, not once a quarter. The point is to see a trend turning bad while it's still small." }
       ],
       checks: [
@@ -193,7 +193,7 @@ window.CONTENT_OVERRIDES["execution-novice"] = {
           question: "Why watch defect rate as you add scope to a product?",
           options: [
             "To decide who to blame for bugs",
-            "A rising defect rate is an early warning that quality is slipping under the delivery pace — before it turns into a visible failure",
+            "A rising defect rate is an early warning that quality is slipping under the delivery pace, before it turns into a visible failure",
             "Because low defect counts look good in reports"
           ],
           correct: 1,
@@ -203,7 +203,7 @@ window.CONTENT_OVERRIDES["execution-novice"] = {
           question: "What does lengthening cycle time usually indicate?",
           options: [
             "The team is being more careful, which is good",
-            "The delivery path is getting clogged — a signal to catch before it becomes \"why is everything late?\"",
+            "The delivery path is getting clogged: a signal to catch before it becomes \"why is everything late?\"",
             "Nothing actionable; cycle time naturally drifts"
           ],
           correct: 1,
@@ -216,14 +216,14 @@ window.CONTENT_OVERRIDES["execution-novice"] = {
       title: "Lesson 5: Predictability Is the Goal",
       body: `
         <p>Put the pieces together and the picture is simple: <strong>small scope</strong>, an <strong>agile cadence</strong>, <strong>automated checks</strong> on every change, and a <strong>few quality metrics</strong> reviewed regularly. Each one moves the moment you learn about a problem earlier.</p>
-        <p>That's the whole difference between execution that "happens" with unpredictable timelines and execution you can forecast. You're not eliminating surprises, you're arranging the work so surprises are small and early instead of large and late.</p>
+        <p>That's the whole difference between execution that "happens" with unpredictable timelines and execution you can forecast. You're not eliminating surprises. You're arranging the work so surprises are small and early instead of large and late.</p>
       `,
       checks: [
         {
           question: "What's the unifying idea across all four practices in this course?",
           options: [
             "They make the team work faster",
-            "Each one moves the moment you learn about a problem earlier — so surprises are small and early rather than large and late",
+            "Each one moves the moment you learn about a problem earlier, so surprises are small and early rather than large and late",
             "They reduce the amount of documentation required"
           ],
           correct: 1,
@@ -234,7 +234,7 @@ window.CONTENT_OVERRIDES["execution-novice"] = {
           question: "A teammate proposes: \"Let's build the whole feature over six weeks, then spend the last week testing and fixing.\" Based on this course, what's the concern?",
           options: [
             "Six weeks is too long for any feature",
-            "The plan concentrates all the risk into one late testing week — no early signal, so any integration or scope problem is discovered when it's hardest to fix",
+            "The plan concentrates all the risk into one late testing week: no early signal, so any integration or scope problem is discovered when it's hardest to fix",
             "The team should test for two weeks, not one"
           ],
           correct: 1,
@@ -242,7 +242,7 @@ window.CONTENT_OVERRIDES["execution-novice"] = {
         }
       ],
       reflection: {
-        prompt: "Think about your last project that ran late. Where was the first real signal that it would? Which of the four practices — smaller increments, feedback cadence, automated checks, quality metrics — would have surfaced that signal sooner?"
+        prompt: "Think about your last project that ran late. Where was the first real signal that it would? Which of the four practices (smaller increments, feedback cadence, automated checks, quality metrics) would have surfaced that signal sooner?"
       }
     }
   ]

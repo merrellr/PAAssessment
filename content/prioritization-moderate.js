@@ -18,48 +18,48 @@ window.CONTENT_OVERRIDES = window.CONTENT_OVERRIDES || {};
 window.CONTENT_OVERRIDES["prioritization-moderate"] = {
   sourceUrl: "",
   recap: [
-    "A value-vs-effort framework slips because the inputs are soft — 'value' is a guess that shifts with the room.",
-    "Ground 'value' in a named metric and a rough size of the change, so it can be debated with evidence instead of vibes.",
-    "Validate the big estimates cheaply — an A/B test or small pilot — before committing high effort, and check the demand shows up beyond one loud segment.",
+    "A value-vs-effort framework slips because the inputs are soft: \"value\" is a guess that shifts with the room.",
+    "Ground \"value\" in a named metric and a rough size of the change, so it can be debated with evidence instead of vibes.",
+    "Validate the big estimates cheaply (an A/B test or small pilot) before committing high effort, and check the demand shows up beyond one loud segment.",
     "Apply the same rubric the same way every time, on a cadence, with the criteria and their definitions written down.",
-    "Close the loop — compare the result to the baseline you predicted; a consistent miss is a bias to calibrate out next round."
+    "Close the loop: compare the result to the baseline you predicted; a consistent miss is a bias to calibrate out next round."
   ],
   lessons: [
     {
       id: 1,
       title: "Lesson 1: Why the Framework Slips",
       preCheck: {
-        label: "Before you read on — predict",
+        label: "Before you read on, predict",
         question: "You have a value-vs-effort framework, but you apply it inconsistently and the results feel arbitrary. What's usually the real problem?",
         options: [
           "The framework itself is flawed and needs replacing",
-          "The inputs — especially \"value\" — are guesses that shift with who's in the room, so the same item scores differently each time",
+          "The inputs, especially \"value,\" are guesses that shift with who's in the room, so the same item scores differently each time",
           "You're not using enough factors in the score"
         ],
         correct: 1,
         explanation: "See whether the lesson agrees. The framework is rarely the issue."
       },
       body: `
-        <p>At this level you already have a prioritization framework, a value-vs-effort view, maybe a scoring rubric. The problem is it doesn't hold up: the same feature scores "high value" in one meeting and "medium" in the next, and the rankings feel like they could have gone either way.</p>
-        <p>The framework isn't broken. The <strong>inputs</strong> are soft. "Value" is being estimated by feel, so it moves with the mood of the room, the last customer call, who's advocating. A framework built on gut-feel inputs produces gut-feel outputs with a spreadsheet wrapped around them.</p>
-        <p>Making it consistent means grounding the inputs, especially "value", in something that doesn't change between Tuesday and Thursday: <strong>data</strong>.</p>
+        <p>At this level you already have a prioritization framework: a value-vs-effort view, maybe a scoring rubric. The problem is it doesn't hold up: the same feature scores "high value" in one meeting and "medium" in the next, and the rankings feel like they could have gone either way.</p>
+        <p>The framework isn't broken. The <strong>inputs</strong> are soft. "Value" is being estimated by feel, so it moves with the mood of the room, the last customer call, and who's advocating. A framework built on gut-feel inputs produces gut-feel outputs with a spreadsheet wrapped around them.</p>
+        <p>Making it consistent means grounding the inputs, especially "value," in something that doesn't change between Tuesday and Thursday: <strong>data</strong>.</p>
       `,
       checks: [
         {
           question: "The same feature scored \"high value\" in Tuesday's planning meeting and \"medium\" in Thursday's, with no new information in between. What does this lesson blame?",
           options: [
-            "The framework itself — value-vs-effort is the wrong tool",
+            "The framework itself. Value-vs-effort is the wrong tool",
             "The \"value\" input is estimated by feel, so it shifts with the room; soft inputs produce soft outputs",
             "The effort estimates from engineering changed between the two meetings"
           ],
           correct: 1,
-          explanation: "\"A framework built on gut-feel inputs produces gut-feel outputs with a spreadsheet wrapped around them.\" The fix is grounding the inputs, not changing the framework."
+          explanation: "A framework built on gut-feel inputs produces gut-feel outputs with a spreadsheet wrapped around them. The fix is grounding the inputs, not changing the framework."
         },
         {
           question: "What's the proposed way to make the framework consistent?",
           options: [
             "Add more scoring factors so small errors average out",
-            "Ground the inputs — especially \"value\" — in data, so the same item gets the same estimate regardless of who's in the room",
+            "Ground the inputs, especially \"value,\" in data, so the same item gets the same estimate regardless of who's in the room",
             "Have a more senior person make the final call"
           ],
           correct: 1,
@@ -75,7 +75,7 @@ window.CONTENT_OVERRIDES["prioritization-moderate"] = {
         <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(210px, 1fr)); gap:12px; margin:2px 0 14px;">
           <div style="border-top:3px solid #C0622A; background:#FBF3EF; border-radius:6px; padding:10px 12px;">
             <strong style="font-size:12px; color:#7a3d18;">Shifts with the room</strong>
-            <p style="margin:6px 0 0; font-size:13px;">"This improves onboarding." <span style="color:#7a3d18;">&#8594; how much? for whom? says who?</span></p>
+            <p style="margin:6px 0 0; font-size:13px;">"This improves onboarding." <span style="color:#7a3d18;">&#8594; How much? For whom? Says who?</span></p>
           </div>
           <div style="border-top:3px solid #2E8B57; background:#EEF7F1; border-radius:6px; padding:10px 12px;">
             <strong style="font-size:12px; color:#256b45;">Debatable with evidence</strong>
@@ -104,7 +104,7 @@ window.CONTENT_OVERRIDES["prioritization-moderate"] = {
           question: "You can't name a metric a candidate would move, or the mechanism by which it would. What does the lesson say that indicates?",
           options: [
             "The metric tracking isn't set up yet",
-            "The value may be imagined — an inability to name the number or the mechanism is a signal the case is weak",
+            "The value may be imagined. An inability to name the number or the mechanism is a signal the case is weak",
             "It should still be prioritized on the strength of the idea"
           ],
           correct: 1,
@@ -137,7 +137,7 @@ window.CONTENT_OVERRIDES["prioritization-moderate"] = {
           <line x1="248" y1="58" x2="288" y2="43" stroke="#9AA3AD" stroke-width="1.5" marker-end="url(#prArrow)"/>
           <line x1="248" y1="68" x2="288" y2="83" stroke="#9AA3AD" stroke-width="1.5" marker-end="url(#prArrow)"/>
         </svg>
-        <p>A controlled <strong>A/B test</strong>, a prototype in front of a few users, or a small pilot tells you whether the metric actually moves in the direction and roughly the size you predicted. If it does, commit with confidence. If it doesn't, you've spent a little to avoid a large mistake. Also cross-check the value against market signal, if the feedback driving it is one loud segment and no broader trend, the value estimate may be local.</p>
+        <p>A controlled <strong>A/B test</strong>, a prototype in front of a few users, or a small pilot tells you whether the metric actually moves in the direction and roughly the size you predicted. If it does, commit with confidence. If it doesn't, you've spent a little to avoid a large mistake. Also cross-check the value against market signal: if the feedback driving it is one loud segment and no broader trend, the value estimate may be local.</p>
       `,
       checks: [
         {
@@ -153,8 +153,8 @@ window.CONTENT_OVERRIDES["prioritization-moderate"] = {
         {
           question: "The feedback behind a high-value candidate comes from one vocal customer segment with no broader market trend. What does the lesson suggest?",
           options: [
-            "That's enough signal — vocal customers represent the market",
-            "The value estimate may be local — cross-check against market data before treating it as a broad win",
+            "That's enough signal. Vocal customers represent the market",
+            "The value estimate may be local. Cross-check against market data before treating it as a broad win",
             "Ignore it entirely; single-segment feedback is worthless"
           ],
           correct: 1,
@@ -166,12 +166,12 @@ window.CONTENT_OVERRIDES["prioritization-moderate"] = {
       id: 4,
       title: "Lesson 4: Same Rubric, Every Time",
       body: `
-        <p>The last source of inconsistency is applying the method differently from one decision to the next, different factors, different weightings, different people's interpretation of "impact." Fixing that is about discipline, not sophistication.</p>
+        <p>The last source of inconsistency is applying the method differently from one decision to the next: different factors, different weightings, different people's interpretation of "impact." Fixing that is about discipline, not sophistication.</p>
       `,
       steps: [
         { title: "Write down the criteria and what each means", detail: "One page: the factors you score on, and a sentence defining each (\"impact = estimated effect on the item's named metric\"). Shared definitions are what stop two people scoring the same thing differently." },
-        { title: "Score every candidate the same way", detail: "Same factors, same scale, same evidence bar — for the small requests and the big bets alike. Exceptions are where consistency leaks out." },
-        { title: "Run prioritization on a set cadence", detail: "A regular session — monthly, or per planning cycle — where the whole set is re-scored with current data, rather than items being slotted in ad hoc between sessions." },
+        { title: "Score every candidate the same way", detail: "Same factors, same scale, same evidence bar, for the small requests and the big bets alike. Exceptions are where consistency leaks out." },
+        { title: "Run prioritization on a set cadence", detail: "A regular session (monthly, or per planning cycle) where the whole set is re-scored with current data, rather than items being slotted in ad hoc between sessions." },
         { title: "Keep the scores visible", detail: "A shared board with each item's score and the metric behind it. When the inputs are in the open, a bad estimate gets challenged early instead of silently skewing the order." }
       ],
       checks: [
@@ -179,7 +179,7 @@ window.CONTENT_OVERRIDES["prioritization-moderate"] = {
           question: "Why write down a one-page definition of each scoring criterion?",
           options: [
             "For onboarding documentation",
-            "Shared definitions stop two people scoring the same item differently — that ambiguity is a main source of inconsistency",
+            "Shared definitions stop two people scoring the same item differently, and that ambiguity is a main source of inconsistency",
             "To make the framework look more rigorous"
           ],
           correct: 1,
@@ -203,7 +203,7 @@ window.CONTENT_OVERRIDES["prioritization-moderate"] = {
       body: `
         <p>The thing that makes a prioritization framework <em>trustworthy</em> over time is checking whether it was right.</p>
         <p>After a prioritized item ships, compare the result against the value estimate you made: did onboarding completion actually go from 58% to 68%, or did it barely move? Compare to the baseline you recorded before, not to a vague memory.</p>
-        <p>A wrong estimate isn't a failure, it's <strong>calibration data</strong>. If your team consistently overestimates the value of UI polish and underestimates the value of reliability work, that's a bias you can correct in the next round of scoring. Over a few cycles, a framework with a feedback loop gets noticeably better at predicting value, which is exactly what makes people stop second-guessing it.</p>
+        <p>A wrong estimate isn't a failure. It's <strong>calibration data</strong>. If your team consistently overestimates the value of UI polish and underestimates the value of reliability work, that's a bias you can correct in the next round of scoring. Over a few cycles, a framework with a feedback loop gets noticeably better at predicting value, which is exactly what makes people stop second-guessing it.</p>
         <p>Put the course together: ground "value" in a named metric, validate the estimate cheaply, apply the same rubric every time on a cadence, and check the outcomes to calibrate. That's the difference between having a framework and having one that actually holds.</p>
       `,
       checks: [
@@ -211,11 +211,11 @@ window.CONTENT_OVERRIDES["prioritization-moderate"] = {
           question: "How should you treat a value estimate that turned out to be badly wrong after the item shipped?",
           options: [
             "As a failure to account for in the retrospective",
-            "As calibration data — a signal about a systematic bias in your estimates that you can correct next round",
+            "As calibration data: a signal about a systematic bias in your estimates that you can correct next round",
             "As a reason to stop making estimates"
           ],
           correct: 1,
-          explanation: "Individual misses are expected. The pattern in the misses — always over on X, always under on Y — is what you use to make the next round of scoring more accurate."
+          explanation: "Individual misses are expected. The pattern in the misses (always over on X, always under on Y) is what you use to make the next round of scoring more accurate."
         },
         {
           label: "Bringing it together",
@@ -226,11 +226,11 @@ window.CONTENT_OVERRIDES["prioritization-moderate"] = {
             "Give the PM final say so the arguments stop"
           ],
           correct: 1,
-          explanation: "The framework isn't the problem — the soft inputs and inconsistent application are. Grounding, validating, standardizing, and calibrating is what stops the re-arguing."
+          explanation: "The framework isn't the problem. The soft inputs and inconsistent application are. Grounding, validating, standardizing, and calibrating is what stops the re-arguing."
         }
       ],
       reflection: {
-        prompt: "Pick one item you prioritized and shipped in the last quarter. What metric did you expect it to move, and by how much? Do you know the actual number — and if not, what would it take to check?"
+        prompt: "Pick one item you prioritized and shipped in the last quarter. What metric did you expect it to move, and by how much? Do you know the actual number? If not, what would it take to check?"
       }
     }
   ]

@@ -31,7 +31,26 @@
     .lesson-layout:has(.lesson-rail:empty) .lesson-nav{ display:flex; }
   }
   .rail-card{ background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 18px; }
+  .rail-head{ display:flex; align-items:flex-start; justify-content:space-between; gap: 8px; }
   .rail-course{ font-family: var(--display); font-weight: 700; font-size: 0.9375rem; line-height: 1.35; color: var(--navy-deep); margin: 0 0 12px; }
+  .rail-toggle{ flex: none; display:grid; place-items:center; width: 30px; height: 30px; border-radius: 8px; border: 1px solid var(--line); background: var(--surface); color: var(--ink-soft); cursor:pointer; padding: 0; }
+  .rail-toggle:hover{ border-color: var(--cyan); color: var(--navy); }
+  .rail-toggle:focus-visible, .mini-list a:focus-visible{ outline: 2px solid var(--cyan); outline-offset: 2px; }
+  /* Collapsed (wide screens): a slim strip with the course progress and a dot per lesson, so the lesson gets the room */
+  .rail-mini{ display:none; }
+  @media (min-width: 1080px){
+    .lesson-layout.rail-collapsed{ grid-template-columns: 52px minmax(0, 1fr); }
+    .lesson-layout.rail-collapsed .rail-card{ display:none; }
+    .lesson-layout.rail-collapsed .rail-mini{ display:flex; }
+  }
+  .rail-mini{ flex-direction: column; align-items:center; gap: 10px; background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 10px 0 12px; }
+  .mini-bar{ width: 6px; height: 72px; border-radius: 99px; background: var(--line); overflow:hidden; display:flex; align-items:flex-start; }
+  .mini-bar span{ display:block; width: 100%; border-radius: 99px; background: linear-gradient(180deg, var(--cyan), var(--navy)); transition: height .5s; }
+  .mini-count{ font-size: 0.6875rem; font-weight: 800; color: var(--ink-soft); }
+  .mini-list{ list-style:none; margin: 0; padding: 8px 0 0; border-top: 1px solid var(--line); display:flex; flex-direction:column; gap: 6px; }
+  .mini-list a{ display:grid; place-items:center; width: 26px; height: 26px; border-radius: 50%; border: 1.5px solid var(--line); font-size: 0.7188rem; font-weight: 800; color: var(--gray); text-decoration:none; background: var(--surface); }
+  .mini-list a.done{ background: var(--cyan); border-color: var(--cyan); color: #0a1526; }
+  .mini-list a[aria-current="page"]{ border-color: var(--navy); color: var(--navy); box-shadow: 0 0 0 2px var(--tint); }
   .rail-progress{ display:flex; align-items:center; gap: 12px; margin-bottom: 14px; font-size: 0.8125rem; color: var(--ink-soft); }
   .rail-progress b{ display:block; color: var(--ink); font-size: 0.9375rem; }
   .rail-ring .track{ stroke: var(--line); } .rail-ring .fill{ stroke: var(--cyan); transition: stroke-dashoffset .5s; }
@@ -172,7 +191,7 @@
   <a class="back-link" href="/lms-dashboard">← Back to My Learning</a>
   <div class="read-progress" aria-hidden="true"><span id="readProgress"></span></div>
 
-  <div class="lesson-layout">
+  <div class="lesson-layout" id="lessonLayout">
   <aside class="lesson-rail" id="lessonRail" aria-label="Course outline"></aside>
   <div class="card lesson-main">
     <span class="eyebrow" id="courseTitle">Loading…</span>
@@ -553,11 +572,34 @@ function renderRail(lesson){
       '<span class="rail-n" aria-hidden="true">' + (isDone ? '✓' : l.id) + '</span><span>' + escapeText(lessonName(l)) + '<small>' + lessonMinutes(l) + ' min' + (isDone ? ' · done' : '') + '</small></span></a></li>';
   }).join('');
   const recap = (course.recap || []).length ? '<details class="rail-recap"><summary>Key takeaways</summary><ul>' + course.recap.map(r => '<li>' + escapeText(r) + '</li>').join('') + '</ul></details>' : '';
-  document.getElementById('lessonRail').innerHTML = '<div class="rail-card"><p class="rail-course">' + escapeText(course.title) + '</p>' +
+  const chev = (d) => '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="' + (d < 0 ? 'M15 6l-6 6 6 6' : 'M9 6l6 6-6 6') + '"/></svg>';
+  const mini = '<div class="rail-mini">' +
+    '<button type="button" class="rail-toggle" data-rail="open" aria-expanded="false" aria-controls="lessonRail" aria-label="Show the course outline" title="Show the course outline">' + chev(1) + '</button>' +
+    '<div class="mini-bar" role="img" aria-label="' + done + ' of ' + course.lessons.length + ' lessons done"><span style="height:' + Math.round(pct * 100) + '%"></span></div>' +
+    '<span class="mini-count" aria-hidden="true">' + done + '/' + course.lessons.length + '</span>' +
+    '<ol class="mini-list">' + course.lessons.map(l => {
+      const isDone = completedLessons.includes(l.id), here = l.id === lesson.id;
+      return '<li><a href="/lesson?course=' + encodeURIComponent(courseId) + '&lesson=' + l.id + '"' + (isDone ? ' class="done"' : '') + (here ? ' aria-current="page"' : '') +
+        ' title="' + escapeText(lessonName(l)) + '" aria-label="Lesson ' + l.id + ': ' + escapeText(lessonName(l)) + (isDone ? ', done' : '') + '">' + (isDone ? '✓' : l.id) + '</a></li>';
+    }).join('') + '</ol></div>';
+  document.getElementById('lessonRail').innerHTML = mini + '<div class="rail-card"><div class="rail-head"><p class="rail-course">' + escapeText(course.title) + '</p>' +
+    '<button type="button" class="rail-toggle" data-rail="close" aria-expanded="true" aria-controls="lessonRail" aria-label="Hide the course outline" title="Hide the course outline">' + chev(-1) + '</button></div>' +
     '<div class="rail-progress"><svg class="rail-ring" width="42" height="42" viewBox="0 0 42 42" aria-hidden="true"><circle class="track" cx="21" cy="21" r="17" fill="none" stroke-width="4"/><circle class="fill" cx="21" cy="21" r="17" fill="none" stroke-width="4" stroke-linecap="round" transform="rotate(-90 21 21)" stroke-dasharray="' + C.toFixed(2) + '" stroke-dashoffset="' + (C * (1 - pct)).toFixed(2) + '"/></svg>' +
     '<span><b>' + done + ' of ' + course.lessons.length + ' lessons</b>' + (done === course.lessons.length ? 'Course complete' : 'done') + '</span></div>' +
     '<ol class="rail-list">' + items + '</ol>' + recap + '</div>';
 }
+// Hide or show the course outline (wide screens); the choice is kept on this browser for every course.
+const RAIL_KEY = 'pa_rail_collapsed';
+function setRailCollapsed(on, focus){
+  document.getElementById('lessonLayout').classList.toggle('rail-collapsed', on);
+  try { if (on) localStorage.setItem(RAIL_KEY, '1'); else localStorage.removeItem(RAIL_KEY); } catch (e) { /* storage off */ }
+  if (focus){ const b = document.querySelector('#lessonRail [data-rail="' + (on ? 'open' : 'close') + '"]'); if (b) b.focus(); }
+}
+try { if (localStorage.getItem(RAIL_KEY) === '1') document.getElementById('lessonLayout').classList.add('rail-collapsed'); } catch (e) { /* storage off */ }
+document.getElementById('lessonRail').addEventListener('click', (e) => {
+  const b = e.target.closest('[data-rail]');
+  if (b) setRailCollapsed(b.getAttribute('data-rail') === 'close', true);
+});
 function escapeText(s){ return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
 (function readingBar(){
   const bar = document.getElementById('readProgress');

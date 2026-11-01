@@ -10,6 +10,15 @@ async function blockTests(){
   const types = all('#lessonBody [data-block]').map(b => b.dataset.block);
   const rail = $('lessonRail');
   t('the course outline lists every lesson, with this one marked', all('.rail-list a', rail).length === 5 && rail.querySelector('[aria-current="page"]').getAttribute('href').endsWith('&lesson=' + lesson));
+  if (lesson === 1){
+    const layout = $('lessonLayout'), close = rail.querySelector('[data-rail="close"]');
+    try { localStorage.removeItem('pa_rail_collapsed'); } catch (e) {}
+    close.click(); await sleep(30);
+    const mini = rail.querySelector('.rail-mini');
+    t('the outline collapses to a slim strip: progress, and a dot per lesson linking to it', layout.classList.contains('rail-collapsed') && localStorage.getItem('pa_rail_collapsed') === '1' && all('.mini-list a', mini).length === 5 && /\/5$/.test(mini.querySelector('.mini-count').textContent) && mini.querySelector('[aria-current="page"]') && document.activeElement === rail.querySelector('[data-rail="open"]'));
+    rail.querySelector('[data-rail="open"]').click(); await sleep(30);
+    t('and opens again (remembered on this browser)', !layout.classList.contains('rail-collapsed') && localStorage.getItem('pa_rail_collapsed') === null && document.activeElement === rail.querySelector('[data-rail="close"]'));
+  }
   t('the lesson line says where you are and how long it takes', new RegExp('Lesson ' + lesson + ' of 5').test($('lessonMeta').textContent) && /About \d+ min/.test($('lessonMeta').textContent), $('lessonMeta').textContent);
   t('the course name uses the dashboard\'s level names', /Limited Experience/.test($('courseTitle').textContent), $('courseTitle').textContent);
   t('every lesson opens with its story', types[0] === 'story');

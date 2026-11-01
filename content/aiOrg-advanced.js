@@ -12,48 +12,48 @@ window.CONTENT_OVERRIDES = window.CONTENT_OVERRIDES || {};
 window.CONTENT_OVERRIDES["aiOrg-advanced"] = {
   sourceUrl: "https://www.linkedin.com/pulse/beyond-automation-win-customers-life-robert-merrell-bxltc",
   recap: [
-    "Where you point mature AI capability — out of the customer relationship or into freeing people for it — is a strategic choice, not a tooling one.",
-    "Be honest about the division of labor: AI handles the 'what' (24/7, personalization, summarizing); people deliver the 'how' (empathy, judgment, rapport).",
-    "Engineer the quick win — AI spots the moment, a person delivers the outreach or the escalation.",
-    "Going the extra mile: clearing volume off the team buys the time to genuinely understand a customer's world — loyalty a competitor can't easily break.",
-    "AI's direction is set by strategy — make the human-plus-AI operating model explicit and consistent across teams."
+    "Where you point mature AI capability (out of the customer relationship, or into freeing people for it) is a strategic choice, not a tooling one.",
+    "Be honest about the division of labor: AI handles the \"what\" (24/7 coverage, personalization, summarizing); people deliver the \"how\" (empathy, judgment, rapport).",
+    "Engineer the quick win: AI spots the moment, and a person delivers the outreach or the escalation.",
+    "Going the extra mile: clearing volume off the team buys the time to genuinely understand a customer's world, which builds loyalty a competitor can't easily break.",
+    "AI's direction is set by strategy. Make the human-plus-AI operating model explicit and consistent across teams."
   ],
   lessons: [
     {
       id: 1,
       title: "Lesson 1: Beyond Automation",
       preCheck: {
-        label: "Before you read on — predict",
+        label: "Before you read on, predict",
         question: "An organization with mature AI capability is deciding where to point it next. Which use is more likely to build durable competitive advantage?",
         options: [
           "Automating as many customer interactions end to end as possible",
           "Using AI to clear volume so people have time for the high-empathy, high-judgment moments",
-          "Both are equivalent — it's just a cost decision"
+          "Both are equivalent. It's just a cost decision"
         ],
         correct: 1,
         explanation: "Keep that in mind. This lesson is about what the race to automate quietly gives away."
       },
       body: `
-        <p>The business world is buzzing about AI as the ultimate driver of efficiency, personalization, and growth. That's true, and many organizations are still missing the point. In the race to automate, they risk sacrificing the one thing that builds lasting loyalty: the human factor.</p>
+        <p>The business world is buzzing about AI as the ultimate driver of efficiency, personalization, and growth. That's true, and yet many organizations are missing the point. In the race to automate, they risk sacrificing the one thing that builds lasting loyalty: the human factor.</p>
         <p>Technology on its own is cold. It can be efficient without being empathetic, and personal without being personable. The real edge shows up when AI isn't a replacement but an <strong>amplifier</strong> for your team, enabling the small, quick wins that build a customer relationship for life.</p>
-        <p>At an advanced level, this is a strategic choice about your operating model, not a tooling decision. Where you point mature AI capability, toward removing humans from the relationship or toward freeing them for the parts of it that matter most, is what separates a cost story from a loyalty story.</p>
+        <p>At an advanced level, this is a strategic choice about your operating model, not a tooling decision. Where you point mature AI capability (toward removing humans from the relationship, or toward freeing them for the parts of it that matter most) is what separates a cost story from a loyalty story.</p>
       `,
       checks: [
         {
           question: "What's the risk the lesson associates with \"the race to automate\"?",
           options: [
             "Models becoming too expensive to run at scale",
-            "Sacrificing the human factor — the empathy and relationship work that actually drives lasting loyalty",
+            "Sacrificing the human factor: the empathy and relationship work that actually drives lasting loyalty",
             "Customers noticing that responses are AI-generated"
           ],
           correct: 1,
-          explanation: "Efficiency without empathy is the failure mode. The article's frame is AI as amplifier of people, not replacement for them."
+          explanation: "Efficiency without empathy is the failure mode. The lesson's frame is AI as an amplifier of people, not a replacement for them."
         },
         {
           question: "Why does the lesson call this a strategic choice rather than a tooling decision?",
           options: [
             "Because AI tools are expensive and need executive sign-off",
-            "Because where you aim mature AI capability — out of the customer relationship or into freeing people for it — determines whether you get a cost story or a loyalty story",
+            "Because where you aim mature AI capability (out of the customer relationship, or into freeing people for it) determines whether you get a cost story or a loyalty story",
             "Because strategy teams, not product teams, own AI budgets"
           ],
           correct: 1,
@@ -115,9 +115,9 @@ window.CONTENT_OVERRIDES["aiOrg-advanced"] = {
       id: 3,
       title: "Lesson 3: Engineering the Quick Win",
       body: `
-        <p>The forward-thinking model isn't AI <em>or</em> people, it's <strong>collaborative intelligence</strong>: AI as a co-pilot that identifies the perfect moment for a human to step in and deliver a "quick win" that builds loyalty.</p>
-        <p><strong>Proactive, personal outreach.</strong> AI flags an account that keeps failing to use a new feature correctly. Instead of firing off a generic help article, it alerts a specialist, who sends a short personal note: "I noticed you were working with the new dashboard, would a quick five-minute walkthrough help? How about tomorrow at 10?" The customer feels seen, learns the feature, and gets more invested in the product.</p>
-        <p><strong>Empathetic escalation.</strong> Sentiment analysis detects a frustrated tone in a chat and hands it to a senior agent with the note "high frustration detected." The agent opens with "I'm sorry you're having a hard time, I've read the history and I'm taking personal ownership of this." A negative moment becomes a trust-building one.</p>
+        <p>The forward-thinking model isn't AI <em>or</em> people. It's <strong>collaborative intelligence</strong>: AI as a co-pilot that identifies the perfect moment for a human to step in and deliver a "quick win" that builds loyalty.</p>
+        <p><strong>Proactive, personal outreach.</strong> AI flags an account that keeps failing to use a new feature correctly. Instead of firing off a generic help article, it alerts a specialist, who sends a short personal note: "I noticed you were working with the new dashboard. Would a quick five-minute walkthrough help? How about tomorrow at 10?" The customer feels seen, learns the feature, and gets more invested in the product.</p>
+        <p><strong>Empathetic escalation.</strong> Sentiment analysis detects a frustrated tone in a chat and hands it to a senior agent with the note "high frustration detected." The agent opens with "I'm sorry you're having a hard time. I've read the history and I'm taking personal ownership of this." A negative moment becomes a trust-building one.</p>
         <svg viewBox="0 0 400 108" style="width:100%; height:auto; margin:4px 0 2px;" xmlns="http://www.w3.org/2000/svg">
           <defs>
             <marker id="aoaQw" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
@@ -137,14 +137,14 @@ window.CONTENT_OVERRIDES["aiOrg-advanced"] = {
           </g>
           <text x="200" y="84" text-anchor="middle" font-family="sans-serif" font-size="7.5" fill="#4B5768">AI does the legwork; the human delivers the part that creates loyalty.</text>
         </svg>
-        <p>In both cases the AI does the legwork, watching for the moment. The human delivers the part that creates loyalty.</p>
+        <p>In both cases the AI does the legwork: watching for the moment. The human delivers the part that creates loyalty.</p>
       `,
       checks: [
         {
           question: "In \"collaborative intelligence,\" what is the AI's specific job in the quick-win examples?",
           options: [
             "To send the personalized outreach message itself",
-            "To do the legwork — spot the moment (a failed feature attempt, a frustrated tone) and route it to the right person",
+            "To do the legwork: spot the moment (a failed feature attempt, a frustrated tone) and route it to the right person",
             "To decide whether the customer deserves special treatment"
           ],
           correct: 1,
@@ -167,16 +167,16 @@ window.CONTENT_OVERRIDES["aiOrg-advanced"] = {
       title: "Lesson 4: Going the Extra Mile",
       body: `
         <p>Beyond quick wins, clearing volume off your team frees the most valuable resource of all: time to genuinely understand a customer's world.</p>
-        <p>A customer in a specialized field, say renewable-energy logistics, is struggling to adapt a standard project-management tool to their needs. An AI logs the ticket. A human agent could hand over a standard workaround and close it.</p>
-        <p>The empowered agent goes further. They spend an hour learning the customer's domain, compliance standards, supply-chain complexity for turbine parts, regulatory reporting, then reconnect: "I looked into your issue, and I also took time to understand how energy projects usually run. Here's a way to configure the tool to track your milestones, and a custom report template for your quarterly compliance filings."</p>
-        <p>That transforms a support request into a consulting engagement. The customer isn't just satisfied, they're astonished that a partner invested time to understand their business. That single act builds loyalty no competitor can easily break.</p>
+        <p>A customer in a specialized field (say, renewable-energy logistics) is struggling to adapt a standard project-management tool to their needs. An AI logs the ticket. A human agent could hand over a standard workaround and close it.</p>
+        <p>The empowered agent goes further. They spend an hour learning the customer's domain (compliance standards, supply-chain complexity for turbine parts, regulatory reporting), then reconnect: "I looked into your issue, and I also took time to understand how energy projects usually run. Here's a way to configure the tool to track your milestones, and a custom report template for your quarterly compliance filings."</p>
+        <p>That transforms a support request into a consulting engagement. The customer isn't just satisfied. They're astonished that a partner invested time to understand their business. That single act builds loyalty no competitor can easily break.</p>
       `,
       checks: [
         {
           question: "What makes the \"extra mile\" possible in the renewable-energy example?",
           options: [
             "A more powerful AI model that already knew the domain",
-            "AI handling the high-volume, low-complexity work gave the agent the time to research the customer's world",
+            "AI handling the high-volume, low-complexity work, which gave the agent the time to research the customer's world",
             "The customer paying for a premium support tier"
           ],
           correct: 1,
@@ -198,16 +198,16 @@ window.CONTENT_OVERRIDES["aiOrg-advanced"] = {
       id: 5,
       title: "Lesson 5: The Direction Is Set by Strategy",
       body: `
-        <p>AI is a powerful force, but its direction is guided by your strategy. Two organizations can deploy the same capability and get opposite results, one hollows out its customer relationships, the other deepens them.</p>
-        <p>The advanced organizational skill is making that direction explicit and consistent across teams: defining where AI absorbs volume, where humans are deliberately inserted, and how reclaimed time gets reinvested rather than simply cut. By focusing AI on empowering your team, you're not just investing in technology, you're investing in better human relationships at scale.</p>
-        <p>Don't let the "artificial" in AI fool you. Its greatest potential is helping your organization be more consistently and genuinely human, delivering the moments that create customers for life.</p>
+        <p>AI is a powerful force, but its direction is guided by your strategy. Two organizations can deploy the same capability and get opposite results: one hollows out its customer relationships, the other deepens them.</p>
+        <p>The advanced organizational skill is making that direction explicit and consistent across teams: defining where AI absorbs volume, where humans are deliberately inserted, and how reclaimed time gets reinvested rather than simply cut. By focusing AI on empowering your team, you're not just investing in technology. You're investing in better human relationships at scale.</p>
+        <p>Don't let the "artificial" in AI fool you. Its greatest potential is helping your organization be more consistently and genuinely human, and deliver the moments that create customers for life.</p>
       `,
       checks: [
         {
           question: "The lesson says two organizations can deploy \"the same capability and get opposite results.\" What determines which result you get?",
           options: [
             "The size of the AI budget",
-            "The strategy that sets AI's direction — whether it's aimed at removing people from relationships or freeing them for the parts that matter",
+            "The strategy that sets AI's direction: whether it's aimed at removing people from relationships or freeing them for the parts that matter",
             "How advanced the underlying models are"
           ],
           correct: 1,
@@ -218,7 +218,7 @@ window.CONTENT_OVERRIDES["aiOrg-advanced"] = {
           question: "Your organization has mature AI capability across support and success teams. Using this course, what's the advanced move?",
           options: [
             "Push automation coverage as high as possible and measure success by deflection rate",
-            "Make an explicit, cross-team operating model: AI absorbs volume, humans are deliberately placed at the high-empathy and high-judgment moments, and reclaimed time is reinvested in understanding customers — not cut",
+            "Make an explicit, cross-team operating model: AI absorbs volume, humans are deliberately placed at the high-empathy and high-judgment moments, and reclaimed time is reinvested in understanding customers, not cut",
             "Let each team decide independently how much to automate"
           ],
           correct: 1,
@@ -226,7 +226,7 @@ window.CONTENT_OVERRIDES["aiOrg-advanced"] = {
         }
       ],
       reflection: {
-        prompt: "In your organization, name one customer-facing moment where AI currently removes a person from the loop. If you instead used AI to surface that moment for a person, what \"quick win\" could they deliver — and what would you have to stop cutting to give them the time?"
+        prompt: "In your organization, name one customer-facing moment where AI currently removes a person from the loop. If you instead used AI to surface that moment for a person, what \"quick win\" could they deliver, and what would you have to stop cutting to give them the time?"
       }
     }
   ]

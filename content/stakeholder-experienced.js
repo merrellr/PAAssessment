@@ -17,7 +17,7 @@ window.CONTENT_OVERRIDES["stakeholder-experienced"] = {
   recap: [
     "A shared vision, set with stakeholders involved early, is the starting point for cross-functional alignment.",
     "Working well with engineering and design means respecting technical constraints and enabling bi-directional feedback.",
-    "Bring risk, legal, and compliance in early — as collaborators who shape the design, not a gate at the end.",
+    "Bring risk, legal, and compliance in early, as collaborators who shape the design, not a gate at the end.",
     "Build a customer-centric culture across teams with standing feedback loops and shared sentiment metrics."
   ],
   lessons: [
@@ -25,18 +25,18 @@ window.CONTENT_OVERRIDES["stakeholder-experienced"] = {
       id: 1,
       title: "Lesson 1: A Shared Vision Is the Starting Point",
       preCheck: {
-        label: "Before you read on — predict",
+        label: "Before you read on, predict",
         question: "When engineering, design, and compliance all seem to want different things from a project, what's usually the root cause?",
         options: [
           "One team is simply wrong and needs to be overruled",
           "There's often no genuinely shared vision that all teams were actually involved in shaping"
         ],
         correct: 1,
-        explanation: "Keep this in mind as you read, it's the foundation the rest of this lesson builds from."
+        explanation: "Keep this in mind as you read: it's the foundation the rest of this lesson builds on."
       },
       body: `
-        <p>Success in product work hinges on collective collaboration between engineering, design, marketing, sales, compliance, and support. That collaboration isn't automatic, it requires an intentional approach to align teams toward a shared mission, especially given how different each function's priorities and incentives naturally are.</p>
-        <p>A shared vision acts as the guiding light for all of these teams. It clarifies why the product exists and what it's trying to achieve. Building it starts with involving key stakeholders early, engineers, compliance officers, technical experts, so all voices are genuinely heard rather than informed after the fact, and ensuring that vision reflects real user needs, not just what's easiest to build.</p>
+        <p>Success in product work hinges on collective collaboration between engineering, design, marketing, sales, compliance, and support. That collaboration isn't automatic. It requires an intentional approach to align teams toward a shared mission, especially given how different each function's priorities and incentives naturally are.</p>
+        <p>A shared vision acts as the guiding light for all of these teams. It clarifies why the product exists and what it's trying to achieve. Building it starts with involving key stakeholders early (engineers, compliance officers, technical experts) so all voices are genuinely heard rather than informed after the fact, and ensuring that vision reflects real user needs, not just what's easiest to build.</p>
         <p>None of this works without real communication channels. Regular cross-functional syncs and shared tools that create a single source of truth are what keep a vision from quietly drifting apart as each team interprets it their own way.</p>
         <svg viewBox="0 0 400 168" style="width:100%; height:auto; margin:4px 0 2px;" xmlns="http://www.w3.org/2000/svg">
           <circle cx="200" cy="84" r="34" fill="#EEF3FA" stroke="#1A4584" stroke-width="1.5"/>
@@ -65,12 +65,12 @@ window.CONTENT_OVERRIDES["stakeholder-experienced"] = {
         {
           question: "Why does involving stakeholders early in vision-setting matter more than just informing them once a plan is decided?",
           options: [
-            "It doesn't really matter, informing people later is just as effective",
+            "It doesn't really matter. Informing people later is just as effective",
             "Early involvement means the vision reflects what different functions actually need and can commit to, rather than being handed a plan they had no hand in shaping",
             "It's mainly a courtesy with no real effect on outcomes"
           ],
           correct: 1,
-          explanation: "This is the difference between genuine alignment and simply being told what was already decided, only the former tends to hold up under pressure."
+          explanation: "This is the difference between genuine alignment and simply being told what was already decided. Only the former tends to hold up under pressure."
         }
       ]
     },
@@ -80,21 +80,21 @@ window.CONTENT_OVERRIDES["stakeholder-experienced"] = {
       body: `
         <p>Maintaining strong relationships with engineering and design is critical to turning vision into reality, and each requires a different kind of care.</p>
         <p>With engineering, act as a liaison between user needs and technical capability. Respect the real technical constraints your engineers are navigating, especially around sensitive data or complex integrations, and create room for genuine bi-directional feedback, where engineers can push back on an idea or suggest a better approach based on what they know that you don't.</p>
-        <p>With design, remember that good design is more than aesthetics, it's about reducing cognitive load and fitting how people actually work. Share user personas, interview notes, and workflow context directly with designers rather than just a list of requirements, and make accessibility a real priority, not an afterthought, since it directly determines who can actually use what you build.</p>
+        <p>With design, remember that good design is more than aesthetics. It's about reducing cognitive load and fitting how people actually work. Share user personas, interview notes, and workflow context directly with designers rather than just a list of requirements, and make accessibility a real priority, not an afterthought, since it directly determines who can actually use what you build.</p>
       `,
       checks: [
         {
           question: "An engineer tells you a planned integration will take roughly three times the scoped effort because of how the partner's API handles auth. In a relationship with real bi-directional feedback, what happens next?",
           options: [
             "You hold the plan and ask them to find a way to hit the original estimate",
-            "That input feeds back into the plan itself — scope, sequencing, or approach may change, not just the estimate",
+            "That input feeds back into the plan itself: scope, sequencing, or approach may change, not just the estimate",
             "You note the new estimate and move on; the plan was already decided"
           ],
           correct: 1,
           explanation: "This is a real two-way relationship: technical expertise feeding back into product decisions, not just decisions flowing one direction into implementation."
         },
         {
-          question: "Why does this lesson say design is 'more than aesthetics'?",
+          question: "Why does this lesson say design is \"more than aesthetics\"?",
           options: [
             "Because visual polish doesn't matter at all",
             "Because good design also reduces cognitive load and fits real workflows, which requires real context from the product team, not just a features list",
@@ -135,28 +135,28 @@ window.CONTENT_OVERRIDES["stakeholder-experienced"] = {
           <text x="190" y="98" text-anchor="middle" font-family="sans-serif" font-size="7.5" fill="#4B5768">build, with compliance checks along the way</text>
           <text x="8" y="119" font-family="sans-serif" font-size="7.5" fill="#4B5768">Same requirements &#8212; absorbed as design inputs instead of a last-minute gate.</text>
         </svg>
-        <p>The real reframe here: seek compliance as an enabler, not a barrier. The goal isn't choosing between innovation and safety, it's finding creative ways to innovate that still meet the standards that actually matter, and validating those innovations thoroughly before they ship.</p>
+        <p>The real reframe here: seek compliance as an enabler, not a barrier. The goal isn't choosing between innovation and safety. It's finding creative ways to innovate that still meet the standards that actually matter, and validating those innovations thoroughly before they ship.</p>
       `,
       checks: [
         {
           question: "Why does engaging compliance or legal early in development matter more than involving them right before launch?",
           options: [
             "It doesn't matter when they're involved, as long as it happens eventually",
-            "Late involvement tends to surface problems only after significant work is already done, creating expensive rework, early involvement catches issues while they're still cheap to fix",
+            "Late involvement tends to surface problems only after significant work is already done, creating expensive rework. Early involvement catches issues while they're still cheap to fix",
             "Compliance teams prefer to be involved as late as possible"
           ],
           correct: 1,
-          explanation: "The cost of a compliance issue found in week one versus week twelve is completely different, this is the practical reason early engagement matters."
+          explanation: "The cost of a compliance issue found in week one versus week twelve is completely different. That's the practical reason early engagement matters."
         },
         {
-          question: "What does it mean to treat compliance as 'an enabler, not a barrier'?",
+          question: "What does it mean to treat compliance as \"an enabler, not a barrier\"?",
           options: [
             "Ignoring compliance requirements in favor of speed",
             "Looking for ways to innovate that still genuinely meet required standards, rather than treating compliance and innovation as always opposed",
             "Letting compliance teams make all final product decisions"
           ],
           correct: 1,
-          explanation: "This reframe doesn't lower the bar, it changes the posture: working with compliance to find a path that satisfies both innovation and the real requirements, rather than assuming they're incompatible."
+          explanation: "This reframe doesn't lower the bar. It changes the posture: working with compliance to find a path that satisfies both innovation and the real requirements, rather than assuming they're incompatible."
         }
       ]
     },
@@ -164,7 +164,7 @@ window.CONTENT_OVERRIDES["stakeholder-experienced"] = {
       id: 4,
       title: "Lesson 4: Building a Customer-Centric Culture Across Teams",
       body: `
-        <p>Product success doesn't depend only on internal teams working well together, it also depends on building a genuinely customer-centric culture that continuously incorporates real feedback.</p>
+        <p>Product success doesn't depend only on internal teams working well together. It also depends on building a genuinely customer-centric culture that continuously incorporates real feedback.</p>
         <p>Establish real feedback loops: customer advisory groups with key users, and user testing or beta programs that validate new features before a full rollout. Collecting feedback is only half the job, though. Use metrics like Net Promoter Score and Customer Satisfaction Score to track sentiment over time, and build real action plans around recurring themes, then actually communicate those plans back to both internal teams and customers.</p>
       `,
       checks: [
@@ -176,7 +176,7 @@ window.CONTENT_OVERRIDES["stakeholder-experienced"] = {
             "Customers are legally entitled to updates on every feature request"
           ],
           correct: 1,
-          explanation: "A feedback loop that only takes input and never shows what happened with it tends to quietly dry up, people stop bothering once it feels like shouting into a void."
+          explanation: "A feedback loop that only takes input and never shows what happened with it tends to quietly dry up. People stop bothering once it feels like shouting into a void."
         },
         {
           label: "Bringing it together",

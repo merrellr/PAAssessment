@@ -17,10 +17,10 @@ window.CONTENT_OVERRIDES = window.CONTENT_OVERRIDES || {};
 window.CONTENT_OVERRIDES["discovery-advanced"] = {
   sourceUrl: "",
   recap: [
-    "Empathy is immersing in the user's context — their day, constraints, and emotions — not just recording their stated opinions.",
+    "Empathy is immersing yourself in the user's context (their day, constraints, and emotions), not just recording their stated opinions.",
     "Use empathy maps (says / thinks / does / feels) and personas that stay alive, updated as you learn rather than a one-time slide.",
     "Advanced discovery is a continuous system: KPIs for user success, learning from failures as much as wins, small validated changes.",
-    "Make user understanding an org-wide habit — real user stories in meetings, cross-functional research, recognizing empathy-driven work.",
+    "Make user understanding an org-wide habit: real user stories in meetings, cross-functional research, and recognition for empathy-driven work.",
     "In high-stakes work, discovery also de-risks: controlled pilots, continuous expert validation, an ethical check before shipping."
   ],
   lessons: [
@@ -28,11 +28,11 @@ window.CONTENT_OVERRIDES["discovery-advanced"] = {
       id: 1,
       title: "Lesson 1: Empathy Beyond Feedback",
       preCheck: {
-        label: "Before you read on — predict",
+        label: "Before you read on, predict",
         question: "At an advanced level, what separates real user understanding from a well-run feedback program?",
         options: [
           "Collecting feedback more frequently and from more people",
-          "Immersing in the user's actual context — their day, their constraints, their emotions — not just their reported opinions",
+          "Immersing yourself in the user's actual context (their day, their constraints, their emotions), not just their reported opinions",
           "Using a more sophisticated survey tool"
         ],
         correct: 1,
@@ -54,7 +54,7 @@ window.CONTENT_OVERRIDES["discovery-advanced"] = {
           question: "How does the lesson distinguish empathy from ordinary user feedback?",
           options: [
             "Empathy is just feedback collected more politely",
-            "Empathy means immersing in the user's context — their day, emotions, and constraints — rather than only recording their stated opinions",
+            "Empathy means immersing yourself in the user's context (their day, emotions, and constraints) rather than only recording their stated opinions",
             "Empathy replaces the need for interviews and analytics"
           ],
           correct: 1,
@@ -76,7 +76,7 @@ window.CONTENT_OVERRIDES["discovery-advanced"] = {
       id: 2,
       title: "Lesson 2: Empathy Maps and Living Personas",
       body: `
-        <p>An <strong>empathy map</strong> organizes what you learn into four quadrants: what the user <em>says</em>, <em>thinks</em>, <em>does</em>, and <em>feels</em>. The gaps between quadrants are often the most revealing part — what someone says versus what they actually do, or what they do versus how they feel about it.</p>
+        <p>An <strong>empathy map</strong> organizes what you learn into four quadrants: what the user <em>says</em>, <em>thinks</em>, <em>does</em>, and <em>feels</em>. The gaps between quadrants are often the most revealing part: what someone says versus what they actually do, or what they do versus how they feel about it.</p>
         <svg viewBox="0 0 400 170" style="width:100%; height:auto; margin:4px 0 2px;">
           <line x1="200" y1="12" x2="200" y2="158" stroke="#E3E9F0" stroke-width="1"/>
           <line x1="14" y1="85" x2="386" y2="85" stroke="#E3E9F0" stroke-width="1"/>
@@ -93,7 +93,7 @@ window.CONTENT_OVERRIDES["discovery-advanced"] = {
             <text x="293" y="138">the emotion underneath it</text>
           </g>
         </svg>
-        <p>Here's one filled in for a real person — an operations manager at a mid-market customer:</p>
+        <p>Here's one filled in for a real person, an operations manager at a mid-market customer:</p>
         <svg viewBox="0 0 400 214" style="width:100%; height:auto; margin:4px 0 2px;">
           <line x1="200" y1="10" x2="200" y2="176" stroke="#E3E9F0" stroke-width="1"/>
           <line x1="12" y1="93" x2="388" y2="93" stroke="#E3E9F0" stroke-width="1"/>
@@ -116,10 +116,10 @@ window.CONTENT_OVERRIDES["discovery-advanced"] = {
       `,
       checks: [
         {
-          question: "A customer tells you the reports are \"fine\", but you've watched them rebuild the same pivot by hand every week and they seem quietly frustrated. What does the empathy map tell you to act on?",
+          question: "A customer tells you the reports are \"fine,\" but you've watched them rebuild the same pivot by hand every week and they seem quietly frustrated. What does the empathy map tell you to act on?",
           options: [
-            "Take the stated feedback at face value — the reports are fine, move on",
-            "The gap between what they say, do, and feel — the weekly workaround and the frustration are a churn signal the words are hiding",
+            "Take the stated feedback at face value: the reports are fine, so move on",
+            "The gap between what they say, do, and feel: the weekly workaround and the frustration are a churn signal the words are hiding",
             "Nothing yet; wait until they file a formal complaint"
           ],
           correct: 1,
@@ -161,9 +161,9 @@ window.CONTENT_OVERRIDES["discovery-advanced"] = {
         </svg>
         <p>Three things make the loop run on its own:</p>
         <ul>
-          <li><strong>KPIs for user success</strong> — time per task, error rates, satisfaction — watched continuously, so drift shows up as a number before it shows up as churn.</li>
-          <li><strong>Learning from both wins and failures</strong> — study the cases where users hit their goal <em>and</em> the ones where they didn't, and treat the gap as the backlog.</li>
-          <li><strong>Small, validated changes</strong> — incremental adjustments checked with A/B tests or quick feedback sessions, rather than big rewrites justified by intuition.</li>
+          <li><strong>KPIs for user success</strong> (time per task, error rates, satisfaction), watched continuously, so drift shows up as a number before it shows up as churn.</li>
+          <li><strong>Learning from both wins and failures.</strong> Study the cases where users hit their goal <em>and</em> the ones where they didn't, and treat the gap as the backlog.</li>
+          <li><strong>Small, validated changes:</strong> incremental adjustments checked with A/B tests or quick feedback sessions, rather than big rewrites justified by intuition.</li>
         </ul>
       `,
       checks: [
@@ -196,10 +196,10 @@ window.CONTENT_OVERRIDES["discovery-advanced"] = {
         <p>The advanced move is getting an entire organization to operate with user understanding by default, so discovery isn't one person's job title. Practical ways to build that culture:</p>
       `,
       steps: [
-        { title: "Open meetings with a real user story", detail: "Start team meetings with an actual account of a user's experience — good or bad. It keeps the human impact of the work in the room, not abstracted into a ticket." },
+        { title: "Open meetings with a real user story", detail: "Start team meetings with an actual account of a user's experience, good or bad. It keeps the human impact of the work in the room, not abstracted into a ticket." },
         { title: "Make discovery cross-functional", detail: "Pull product, design, engineering, and domain experts into the same research and synthesis sessions. Empathy that only lives in the PM's head doesn't change what gets built." },
         { title: "Recognize empathy-driven work", detail: "When someone proposes a strong solution rooted in deep user understanding, name it and reward it. What gets recognized gets repeated." },
-        { title: "Treat discovery as a competitive advantage", detail: "Frame it internally as an edge, not a checkbox. Teams that consistently understand users better than competitors ship the right things more often — and that compounds." }
+        { title: "Treat discovery as a competitive advantage", detail: "Frame it internally as an edge, not a checkbox. Teams that consistently understand users better than competitors ship the right things more often, and that compounds." }
       ],
       checks: [
         {
@@ -216,7 +216,7 @@ window.CONTENT_OVERRIDES["discovery-advanced"] = {
           question: "What does \"treat discovery as a competitive advantage\" mean in practice here?",
           options: [
             "Keep your research findings secret from competitors",
-            "Frame discovery internally as an edge worth investing in — because consistently understanding users better than competitors means shipping the right things more often",
+            "Frame discovery internally as an edge worth investing in, because consistently understanding users better than competitors means shipping the right things more often",
             "Do discovery faster than competitors do"
           ],
           correct: 1,
@@ -226,9 +226,9 @@ window.CONTENT_OVERRIDES["discovery-advanced"] = {
     },
     {
       id: 5,
-      title: "Lesson 5: Responsible Discovery at Stakes",
+      title: "Lesson 5: Responsible Discovery When the Stakes Are High",
       body: `
-        <p>In high-stakes domains, discovery also has to <strong>de-risk</strong>. When a feature touches decisions, safety, money, or compliance, understanding the user isn't enough on its own — you validate carefully before it ships.</p>
+        <p>In high-stakes domains, discovery also has to <strong>de-risk</strong>. When a feature touches decisions, safety, money, or compliance, understanding the user isn't enough on its own. You validate carefully before it ships.</p>
         <ul>
           <li><strong>Pilot in controlled environments.</strong> Introduce new capability incrementally, to a small representative group, so a wrong assumption fails small.</li>
           <li><strong>Validate continuously with domain experts.</strong> Involve the people who know the real-world consequences throughout design and build, not just at the end.</li>
@@ -241,7 +241,7 @@ window.CONTENT_OVERRIDES["discovery-advanced"] = {
           question: "In a high-stakes domain, what extra job does discovery take on?",
           options: [
             "Producing more documentation for auditors",
-            "De-risking — validating carefully before a consequential feature ships, so a wrong assumption fails small",
+            "De-risking: validating carefully before a consequential feature ships, so a wrong assumption fails small",
             "Slowing the team down to reduce mistakes"
           ],
           correct: 1,
@@ -252,15 +252,15 @@ window.CONTENT_OVERRIDES["discovery-advanced"] = {
           question: "You're the most senior product person on a team that already runs solid user interviews. Based on this course, where's the highest-leverage improvement?",
           options: [
             "Increase the number of interviews per month",
-            "Turn discovery into a standing system — continuous KPIs, org-wide user-centric habits, and validation guardrails — so understanding users doesn't depend on any one person doing interviews",
+            "Turn discovery into a standing system (continuous KPIs, org-wide user-centric habits, and validation guardrails) so understanding users doesn't depend on any one person doing interviews",
             "Switch from interviews to a large quarterly survey"
           ],
           correct: 1,
-          explanation: "More interviews is a linear gain. Making discovery a system the whole org runs on — and that de-risks high-stakes work — is what compounds and what the advanced level is about."
+          explanation: "More interviews is a linear gain. Making discovery a system the whole org runs on, one that also de-risks high-stakes work, is what compounds and what the advanced level is about."
         }
       ],
       reflection: {
-        prompt: "Name one user-understanding practice on your team that lives only in one person's head. What would it take to turn it into a system — a KPI, a recurring cross-functional session, a ritual — that runs without them?"
+        prompt: "Name one user-understanding practice on your team that lives only in one person's head. What would it take to turn it into a system (a KPI, a recurring cross-functional session, a ritual) that runs without them?"
       }
     }
   ]

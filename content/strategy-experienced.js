@@ -16,7 +16,7 @@ window.CONTENT_OVERRIDES["strategy-experienced"] = {
   sourceUrl: "",
   recap: [
     "A roadmap is only as good as its communication: engineers need epics and timing, executives need themes and risks, customers need the improvements that affect them.",
-    "Transparency builds trust — share changes proactively and always explain the 'why' behind a deprioritization.",
+    "Transparency builds trust. Share changes proactively and always explain the \"why\" behind a deprioritization.",
     "Hold short-term and long-term together with a quarterly cadence that checks whether the quarter's work actually advanced the strategy.",
     "Build resilience in: scenario-plan the likely disruptions, keep prioritization flexible, and re-anchor to the same goal when the path changes.",
     "Measure the roadmap (time-to-market, satisfaction change, revenue impact) and iterate from evidence, not from re-argued opinion."
@@ -26,10 +26,10 @@ window.CONTENT_OVERRIDES["strategy-experienced"] = {
       id: 1,
       title: "Lesson 1: The Roadmap Is Only as Good as Its Communication",
       preCheck: {
-        label: "Before you read on — predict",
+        label: "Before you read on, predict",
         question: "You have a well-built, strategy-linked roadmap. You present the same version of it to engineers, executives, and customers. What's likely to go wrong?",
         options: [
-          "Nothing — one clear roadmap should serve everyone",
+          "Nothing. One clear roadmap should serve everyone",
           "Each audience needs a different cut: engineers want epics and timing, executives want themes and risks, customers want the improvements that affect them",
           "Customers shouldn't see the roadmap at all"
         ],
@@ -81,13 +81,13 @@ window.CONTENT_OVERRIDES["strategy-experienced"] = {
             "A demo of each upcoming feature"
           ],
           correct: 1,
-          explanation: "Executives are evaluating the bet and its risks. Task-level detail buries that; themes-plus-risks surfaces it."
+          explanation: "Executives are evaluating the bet and its risks. Task-level detail buries that; themes plus risks surface it."
         },
         {
           question: "Why tailor the roadmap presentation per audience instead of sharing one version?",
           options: [
             "To keep sensitive details from some groups",
-            "Each audience is answering a different question — what am I building, is this the right bet, what's in it for me — and one format can't serve all three well",
+            "Each audience is answering a different question (what am I building, is this the right bet, what's in it for me), and one format can't serve all three well",
             "Because different tools are used by different teams"
           ],
           correct: 1,
@@ -112,7 +112,7 @@ window.CONTENT_OVERRIDES["strategy-experienced"] = {
           question: "A feature three enterprise customers had asked about disappears from the public roadmap with no note. What does this lesson predict?",
           options: [
             "Customers assume it's still coming and wait patiently",
-            "Trust in the roadmap erodes — a silent disappearance reads as evasion; the fix is stating what changed and what it made room for",
+            "Trust in the roadmap erodes. A silent disappearance reads as evasion; the fix is stating what changed and what it made room for",
             "Nothing, as long as it's mentioned at the next quarterly review if someone asks"
           ],
           correct: 1,
@@ -134,7 +134,7 @@ window.CONTENT_OVERRIDES["strategy-experienced"] = {
       id: 3,
       title: "Lesson 3: Holding Short-Term and Long-Term Together",
       body: `
-        <p>The hardest part of managing a roadmap is balancing immediate demands, urgent user needs, a competitor move, a compliance deadline, against long-term strategic initiatives that only pay off later.</p>
+        <p>The hardest part of managing a roadmap is balancing immediate demands (urgent user needs, a competitor move, a compliance deadline) against long-term strategic initiatives that only pay off later.</p>
         <svg viewBox="0 0 400 150" style="width:100%; height:auto; margin:4px 0 2px;">
           <path d="M20 118 Q200 20 380 40" fill="none" stroke="#1A4584" stroke-width="2"/>
           <text x="332" y="34" font-family="'Space Grotesk',sans-serif" font-size="9" font-weight="700" fill="#12305e">long-term arc</text>
@@ -174,7 +174,7 @@ window.CONTENT_OVERRIDES["strategy-experienced"] = {
             "It lets the team pause delivery for a week each quarter"
           ],
           correct: 1,
-          explanation: "The dedicated session is where you notice \"we shipped a lot but didn't advance the strategy\" — while there's still time to correct."
+          explanation: "The dedicated session is where you notice \"we shipped a lot but didn't advance the strategy,\" while there's still time to correct."
         }
       ]
     },
@@ -182,10 +182,10 @@ window.CONTENT_OVERRIDES["strategy-experienced"] = {
       id: 4,
       title: "Lesson 4: Building Resilience In",
       body: `
-        <p>An experienced roadmap owner assumes the landscape will shift, regulations, competitors, technology, priorities, and builds the roadmap so it can absorb that without being torn up. This is what "adapting without losing the thread" looks like in practice.</p>
+        <p>An experienced roadmap owner assumes the landscape will shift (regulations, competitors, technology, priorities) and builds the roadmap so it can absorb that without being torn up. This is what "adapting without losing the thread" looks like in practice.</p>
       `,
       steps: [
-        { title: "Scenario planning", detail: "Develop a few concrete scenarios for likely disruptions — a new regulation, a competitor launch, a platform change — and rough out how the roadmap would respond to each. When one happens, you're adjusting a plan, not inventing one under pressure." },
+        { title: "Scenario planning", detail: "Develop a few concrete scenarios for likely disruptions (a new regulation, a competitor launch, a platform change) and rough out how the roadmap would respond to each. When one happens, you're adjusting a plan, not inventing one under pressure." },
         { title: "Keep prioritization flexible", detail: "Structure the roadmap so you can shift focus quickly when something unexpected arrives, without the whole plan collapsing. Themes tied to objectives (not a rigid feature sequence) are what make this possible." },
         { title: "Protect the through-line", detail: "When you do adjust, re-anchor to the long-term objectives out loud. The change is \"we're taking a different path to the same goal,\" not \"the goal changed.\" That's how the roadmap stays coherent through turbulence." }
       ],
@@ -204,7 +204,7 @@ window.CONTENT_OVERRIDES["strategy-experienced"] = {
           question: "\"Adapting without losing the thread\" means what, per this lesson?",
           options: [
             "Never changing the roadmap once it's set",
-            "When you change the path, re-anchoring to the same long-term objectives — the route changed, not the destination",
+            "When you change the path, re-anchoring to the same long-term objectives: the route changed, not the destination",
             "Changing the goals whenever the market shifts"
           ],
           correct: 1,
@@ -216,15 +216,15 @@ window.CONTENT_OVERRIDES["strategy-experienced"] = {
       id: 5,
       title: "Lesson 5: Measure and Iterate",
       body: `
-        <p>A roadmap isn't static, it evolves based on feedback, market shifts, and outcomes. To iterate it well, you need to actually measure whether it's working.</p>
+        <p>A roadmap isn't static. It evolves based on feedback, market shifts, and outcomes. To iterate it well, you need to actually measure whether it's working.</p>
         <p><strong>Roadmap KPIs</strong> that tell you something:</p>
         <ul>
-          <li><strong>Time-to-market</strong> — how fast a theme moves from conception to release.</li>
-          <li><strong>User satisfaction</strong> — the change in satisfaction after a significant roadmap initiative ships.</li>
-          <li><strong>Revenue or cost impact</strong> — how a theme actually contributed to the financial goal it was mapped to.</li>
+          <li><strong>Time-to-market:</strong> how fast a theme moves from conception to release.</li>
+          <li><strong>User satisfaction:</strong> the change in satisfaction after a significant roadmap initiative ships.</li>
+          <li><strong>Revenue or cost impact:</strong> how a theme actually contributed to the financial goal it was mapped to.</li>
         </ul>
         <p>Then close the loop: <strong>quarterly roadmap reviews</strong> to reassess priorities against progress, and <strong>retrospectives after major releases</strong> to capture what worked and what to change. A roadmap you measure and revise on a cadence is one you can adapt credibly, because the adjustments are evidence-based, not reactive.</p>
-        <p>Time-to-market is a good example of a KPI that responds to that cadence, or doesn't, drag the slider across four quarters:</p>
+        <p>Time-to-market is a good example of a KPI that responds to that cadence (or doesn't). Drag the slider across four quarters:</p>
       `,
       chart: {
         unit: "Quarter",
@@ -240,7 +240,7 @@ window.CONTENT_OVERRIDES["strategy-experienced"] = {
           question: "Why measure something like \"user satisfaction change after a major initiative ships\"?",
           options: [
             "It's a vanity metric for stakeholder decks",
-            "It tells you whether the theme actually delivered the outcome it was mapped to — which is the input to iterating the roadmap",
+            "It tells you whether the theme actually delivered the outcome it was mapped to, which is the input to iterating the roadmap",
             "It's the only KPI that matters for a roadmap"
           ],
           correct: 1,
@@ -255,11 +255,11 @@ window.CONTENT_OVERRIDES["strategy-experienced"] = {
             "Hold the roadmap steady until the quarterly review so it doesn't look reactive"
           ],
           correct: 1,
-          explanation: "Credible adaptation = evidence-based re-ranking + transparent, audience-specific communication + re-anchoring to the through-line. That's every lesson in this course applied at once."
+          explanation: "Credible adaptation is evidence-based re-ranking, plus transparent, audience-specific communication, plus re-anchoring to the through-line. That's every lesson in this course applied at once."
         }
       ],
       reflection: {
-        prompt: "Pick one theme you shipped in the last two quarters. What KPI would have told you whether it worked? Do you have that number — and if not, what would it take to get it next time?"
+        prompt: "Pick one theme you shipped in the last two quarters. What KPI would have told you whether it worked? Do you have that number? If not, what would it take to get it next time?"
       }
     }
   ]
