@@ -13,29 +13,29 @@ window.CONTENT_OVERRIDES = window.CONTENT_OVERRIDES || {};
 window.CONTENT_OVERRIDES["prioritization-experienced"] = {
   sourceUrl: "https://www.linkedin.com/pulse/feature-fallacy-why-shipping-more-isnt-helping-your-do-merrell-mism-ozcbc",
   recap: [
-    "Shipping volume is a misleading scoreboard; optimize for value density — outcome created divided by effort required.",
+    "Shipping volume is a misleading scoreboard; optimize for value density: outcome created divided by effort required.",
     "Run the OEM loop: define the outcome in observable terms, back it with a falsifiable hypothesis, ship the minimally sufficient intervention.",
-    "Replace roadmaps with bet maps — belief, confidence, leading indicators, and kill criteria written in advance.",
+    "Replace roadmaps with bet maps: belief, confidence, leading indicators, and kill criteria written in advance.",
     "Five quarterly moves: segment before you scale, default to workflow not widgets, measure the path not the page, design for reversibility, run a weekly Outcomes Review.",
-    "Work the denominator too — a quarterly decommission list; removing friction on the existing path often beats adding capability."
+    "Work the denominator too, with a quarterly decommission list; removing friction on the existing path often beats adding capability."
   ],
   lessons: [
     {
       id: 1,
       title: "Lesson 1: The Feature Fallacy",
       preCheck: {
-        label: "Before you read on — predict",
+        label: "Before you read on, predict",
         question: "Two teams ship for a year. Team A ships 40 features; Team B ships 9. Which is more likely to have grown the business?",
         options: [
-          "Team A — more features means more value delivered",
-          "Team B — fewer, but each on the shortest path to a real outcome",
+          "Team A. More features means more value delivered",
+          "Team B. Fewer, but each on the shortest path to a real outcome",
           "It's impossible to say anything from shipping counts"
         ],
         correct: 1,
         explanation: "Hold that thought. The lesson below is about why raw shipping volume is a misleading scoreboard."
       },
       body: `
-        <p>If you measure progress by how many features ship, you'll eventually ship yourself into irrelevance. The teams that win aren't the ones with the longest release notes, they're the ones with the shortest path to a meaningful outcome.</p>
+        <p>If you measure progress by how many features ship, you'll eventually ship yourself into irrelevance. The teams that win aren't the ones with the longest release notes. They're the ones with the shortest path to a meaningful outcome.</p>
         <p>This isn't anti-shipping. It's pro <strong>value density</strong>: the ratio of outcome created to effort required. When value density goes up, adoption, retention, and trust follow. When it goes down, your backlog grows faster than your business.</p>
         <p>Every feature you add quietly charges three taxes:</p>
         <ul>
@@ -49,16 +49,16 @@ window.CONTENT_OVERRIDES["prioritization-experienced"] = {
         unit: "Quarter",
         maxX: 4,
         series: [
-          { label: "Team A — features shipped", color: "#9AA3AD", at: (q) => q * 10 },
-          { label: "Team B — outcome moved", color: "#1A4584", at: (q) => Math.round(q * q * 3.2) }
+          { label: "Team A: features shipped", color: "#9AA3AD", at: (q) => q * 10 },
+          { label: "Team B: outcome moved", color: "#1A4584", at: (q) => Math.round(q * q * 3.2) }
         ],
-        caption: "Illustrative — value density compounds even when shipped count stays modest"
+        caption: "Illustrative: value density compounds even when the shipped count stays modest"
       },
       calculator: {
         title: "Value density estimator",
         inputs: [
-          { key: "outcome", label: "Outcome created (1-10)", min: 1, max: 10, step: 1, default: 5 },
-          { key: "effort", label: "Effort required (1-10)", min: 1, max: 10, step: 1, default: 5 }
+          { key: "outcome", label: "Outcome created (1 to 10)", min: 1, max: 10, step: 1, default: 5 },
+          { key: "effort", label: "Effort required (1 to 10)", min: 1, max: 10, step: 1, default: 5 }
         ],
         compute: (v) => v.outcome / v.effort,
         resultLabel: "Value density",
@@ -114,7 +114,7 @@ window.CONTENT_OVERRIDES["prioritization-experienced"] = {
           <text x="200" y="147" text-anchor="middle" font-family="sans-serif" font-size="9.5" fill="#9AA3AD">measure the path, then scale or kill</text>
         </svg>
         <p><strong>Outcome-first.</strong> Define the end state in observable terms: "reduce median prescription time from 4:30 to 2:00." Not "improve the orders experience."</p>
-        <p><strong>Evidence-backed.</strong> Tie the bet to a falsifiable hypothesis and a minimum viable measurement plan. If nothing could prove you wrong, it's not a bet, it's a wish.</p>
+        <p><strong>Evidence-backed.</strong> Tie the bet to a falsifiable hypothesis and a minimum viable measurement plan. If nothing could prove you wrong, it's not a bet. It's a wish.</p>
         <p><strong>Minimally sufficient.</strong> Ship the smallest intervention that can move the outcome for a narrow segment. Then scale.</p>
       `,
       checks: [
@@ -147,7 +147,7 @@ window.CONTENT_OVERRIDES["prioritization-experienced"] = {
         <p>A roadmap says "we will build these things." A <strong>bet map</strong> says "we believe doing X for Y segment will drive Z outcome," and then holds itself accountable.</p>
         <p>Each entry on a bet map carries four things a feature list never does:</p>
         <ul>
-          <li><strong>A confidence level.</strong> How sure are we, and why? Low confidence isn't a reason not to bet, it's a reason to keep the bet small.</li>
+          <li><strong>A confidence level.</strong> How sure are we, and why? Low confidence isn't a reason not to bet. It's a reason to keep the bet small.</li>
           <li><strong>Leading indicators.</strong> What will move first if this is working, well before the outcome metric does?</li>
           <li><strong>Kill criteria.</strong> Written in advance: "if we don't see the leading indicator move by X after Y weeks, we stop." Decided before you're emotionally invested.</li>
           <li><strong>A review cadence.</strong> Monthly. Kill or double down based on signal, not on who argues hardest in the room.</li>
@@ -176,7 +176,7 @@ window.CONTENT_OVERRIDES["prioritization-experienced"] = {
           question: "Why does a bet map insist on writing kill criteria before the work starts?",
           options: [
             "To create a paper trail for leadership",
-            "Because once the team is invested, it's very hard to set an honest bar for walking away — so you set it while you're still objective",
+            "Because once the team is invested, it's very hard to set an honest bar for walking away, so you set it while you're still objective",
             "Because kill criteria are required by most planning tools"
           ],
           correct: 1,
@@ -195,8 +195,8 @@ window.CONTENT_OVERRIDES["prioritization-experienced"] = {
         {
           question: "Three weeks in, the leading indicator hasn't moved and the pre-written kill criteria were met at the last review. The team is confident results are \"about to land.\" What does the bet map say?",
           options: [
-            "Extend the timeline — conviction from the people closest to the work is a strong signal",
-            "Honor the criteria: stop, or make an explicit, visible re-decision — the number was set precisely so it couldn't be argued away later",
+            "Extend the timeline. Conviction from the people closest to the work is a strong signal",
+            "Honor the criteria: stop, or make an explicit, visible re-decision. The number was set precisely so it couldn't be argued away later",
             "Quietly drop the kill criteria and keep the bet running until the next review"
           ],
           correct: 1,
@@ -211,7 +211,7 @@ window.CONTENT_OVERRIDES["prioritization-experienced"] = {
         <p>Concrete ways to raise value density on a real critical path. Step through them.</p>
       `,
       steps: [
-        { title: "Segment before you scale", detail: "Design for one high-value workflow first — \"charge nurse during shift change,\" not \"all clinicians.\" Optimize locally, then generalize. You get cleaner UX and a much clearer causal signal about what actually worked." },
+        { title: "Segment before you scale", detail: "Design for one high-value workflow first (\"charge nurse during shift change,\" not \"all clinicians\"). Optimize locally, then generalize. You get cleaner UX and a much clearer causal signal about what actually worked." },
         { title: "Default to workflow, not widgets", detail: "Ask \"what steps disappear?\" not \"what screens can we add?\" Inline actions, automation hooks, and smart defaults usually beat net-new features on value density." },
         { title: "Measure the path, not the page", detail: "Instrument end to end: start rate, completion rate, time-to-complete, drop-offs. Report \"time-to-outcome\" the way you report uptime. The latency that matters is the user's time-to-value." },
         { title: "Design for reversibility", detail: "Feature flags, shadow modes, opt-in cohorts. Make wrong bets cheap and reversible; make irreversible bets rare and deliberate." },
@@ -232,7 +232,7 @@ window.CONTENT_OVERRIDES["prioritization-experienced"] = {
           question: "Why optimize a single narrow segment before generalizing?",
           options: [
             "It's the only way to keep the project small enough to staff",
-            "You get cleaner UX and a clearer causal signal — you can actually tell what moved the outcome — then you extend from evidence",
+            "You get cleaner UX and a clearer causal signal (you can actually tell what moved the outcome), then you extend from evidence",
             "Narrow segments are the only ones worth serving"
           ],
           correct: 1,
@@ -244,9 +244,9 @@ window.CONTENT_OVERRIDES["prioritization-experienced"] = {
       id: 5,
       title: "Lesson 5: The Courage to Delete",
       body: `
-        <p>Value density has a numerator and a denominator. Everything so far has been about the numerator, the outcome. Deletion is how you work the denominator.</p>
+        <p>Value density has a numerator and a denominator. Everything so far has been about the numerator: the outcome. Deletion is how you work the denominator.</p>
         <p>Create a quarterly <strong>decommission list</strong>. Remove underused features, consolidate patterns, redesign flows that require explanation. Celebrate deletion with the same fanfare as launches, because a flow that no longer needs a support script is a real win.</p>
-        <p>A quick example, healthcare but universal. Clinicians were abandoning an Orders flow at 38% completion. The instinct was to build "Orders 2.0" with templates and bulk actions.</p>
+        <p>A quick example, from healthcare but universal: Clinicians were abandoning an Orders flow at 38% completion. The instinct was to build "Orders 2.0" with templates and bulk actions.</p>
         <p>The OEM approach instead:</p>
         <ul>
           <li><strong>Outcome:</strong> raise completion to 70%, cut median time from 3:10 to 1:45.</li>
@@ -260,7 +260,7 @@ window.CONTENT_OVERRIDES["prioritization-experienced"] = {
           question: "The Orders example moved completion from 38% to 74% with \"zero net-new features.\" What does that illustrate about prioritization?",
           options: [
             "Rebuilds are usually the fastest path to a better number",
-            "The highest-value move is often removing friction on the existing path, not adding capability — and it's found by looking at evidence, not by guessing at a redesign",
+            "The highest-value move is often removing friction on the existing path, not adding capability, and it's found by looking at evidence, not by guessing at a redesign",
             "Completion rate is a vanity metric that shouldn't drive decisions"
           ],
           correct: 1,
@@ -271,7 +271,7 @@ window.CONTENT_OVERRIDES["prioritization-experienced"] = {
           question: "You inherit a backlog of 30 requested features and a flat retention curve. Using this course, what's the strongest first move?",
           options: [
             "Rank all 30 by estimated effort and start with the quick wins",
-            "Pick one critical path, define its outcome in observable terms, gather minimal evidence on where it breaks, ship the smallest intervention, measure the path — and add a decommission candidate while you're in there",
+            "Pick one critical path, define its outcome in observable terms, gather minimal evidence on where it breaks, ship the smallest intervention, measure the path, and add a decommission candidate while you're in there",
             "Ship the top 10 by stakeholder request count to build goodwill, then reassess"
           ],
           correct: 1,

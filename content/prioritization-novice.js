@@ -18,31 +18,31 @@ window.CONTENT_OVERRIDES["prioritization-novice"] = {
   sourceUrl: "",
   template: {
     title: "Score sheet",
-    intro: "Run one real backlog item through the framework from this course — use the ICE calculator above for the score.",
+    intro: "Run one real backlog item through the framework from this course. Use the ICE calculator above for the score.",
     fields: [
       { key: "item", label: "Candidate item", type: "text", placeholder: "e.g. Inline validation on signup" },
-      { key: "nonNegotiable", label: "Non-negotiable? (yes/no, and why)", type: "text", placeholder: "No — this is discretionary" },
+      { key: "nonNegotiable", label: "Non-negotiable? (yes/no, and why)", type: "text", placeholder: "No, this is discretionary" },
       { key: "score", label: "ICE score", type: "text", placeholder: "e.g. 2.50" },
       { key: "decision", label: "Decision", type: "text", placeholder: "Do now / plan later / decline" }
     ]
   },
   recap: [
-    "Reactive 'loudest voice' prioritization optimizes for advocacy, not value, and leaves an order you can't defend.",
-    "A value-vs-effort view forces the two questions that matter onto the table — quick wins, big bets, fill-ins, money pits.",
+    "Reactive \"loudest voice\" prioritization optimizes for advocacy, not value, and leaves an order you can't defend.",
+    "A value-vs-effort view forces the two questions that matter onto the table: quick wins, big bets, fill-ins, money pits.",
     "Score instead of argue: rate impact, reach, confidence, and effort on a simple scale; when a result feels wrong, fix a bad input, not the ranking.",
-    "Non-negotiables (compliance, security, contractual) go on top unscored — their downside isn't lost value, it's fines and breaches.",
-    "The point of the structure is being able to say 'no' with a reason the requester can inspect."
+    "Non-negotiables (compliance, security, contractual) go on top, unscored. Their downside isn't lost value; it's fines and breaches.",
+    "The point of the structure is being able to say \"no\" with a reason the requester can inspect."
   ],
   lessons: [
     {
       id: 1,
       title: "Lesson 1: The Loudest-Voice Problem",
       preCheck: {
-        label: "Before you read on — predict",
+        label: "Before you read on, predict",
         question: "Your backlog order mostly reflects who asked most recently and most insistently. What's the main risk of leaving it that way?",
         options: [
-          "None — responsiveness to stakeholders is a good thing",
-          "The work that gets done is whatever was best advocated for, not whatever creates the most value — and you can't defend the order",
+          "None. Responsiveness to stakeholders is a good thing",
+          "The work that gets done is whatever was best advocated for, not whatever creates the most value, and you can't defend the order",
           "You'll run out of requests to work on"
         ],
         correct: 1,
@@ -62,7 +62,7 @@ window.CONTENT_OVERRIDES["prioritization-novice"] = {
           question: "What does reactive, \"loudest voice\" prioritization actually optimize for?",
           options: [
             "The value delivered to users",
-            "How well a request was advocated for — which is largely unrelated to its value",
+            "How well a request was advocated for, which is largely unrelated to its value",
             "The lowest-effort items"
           ],
           correct: 1,
@@ -72,7 +72,7 @@ window.CONTENT_OVERRIDES["prioritization-novice"] = {
           question: "Why is \"you can't defend the order\" a real cost, not just an inconvenience?",
           options: [
             "It looks unprofessional in reviews",
-            "An order with no rationale invites endless renegotiation — every stakeholder can re-litigate their item because there's no principle to point to",
+            "An order with no rationale invites endless renegotiation: every stakeholder can re-litigate their item because there's no principle to point to",
             "It slows down the standup"
           ],
           correct: 1,
@@ -106,14 +106,14 @@ window.CONTENT_OVERRIDES["prioritization-novice"] = {
             <circle cx="312" cy="126" r="3.5" fill="#1A4584"/><text x="238" y="120">rebuild legacy report</text>
           </g>
         </svg>
-        <p>Four rough zones fall out of it: <strong>quick wins</strong> (high value, low effort, do these now), <strong>big bets</strong> (high value, high effort, plan them deliberately), <strong>fill-ins</strong> (low value, low effort, only when there's slack), and <strong>money pits</strong> (low value, high effort, decline these). Plotting a handful of real candidates, as above, makes the trades visible: "rebuild legacy report" and "SSO" cost about the same, but only one is worth it. The plot doesn't decide for you, but it forces the two questions that matter onto the table.</p>
+        <p>Four rough zones fall out of it: <strong>quick wins</strong> (high value, low effort: do these now), <strong>big bets</strong> (high value, high effort: plan them deliberately), <strong>fill-ins</strong> (low value, low effort: only when there's slack), and <strong>money pits</strong> (low value, high effort: decline these). Plotting a handful of real candidates, as above, makes the trades visible: "rebuild legacy report" and "SSO" cost about the same, but only one is worth it. The plot doesn't decide for you, but it forces the two questions that matter onto the table.</p>
       `,
       checks: [
         {
           question: "In a value-vs-effort view, what should you do with a \"money pit\" (low value, high effort)?",
           options: [
             "Schedule it for next quarter",
-            "Decline it — it's the worst trade of value for effort on the board",
+            "Decline it. It's the worst trade of value for effort on the board",
             "Break it into smaller pieces and do it gradually"
           ],
           correct: 1,
@@ -123,7 +123,7 @@ window.CONTENT_OVERRIDES["prioritization-novice"] = {
           question: "What does the value-vs-effort plot actually do for you?",
           options: [
             "It produces the final backlog order automatically",
-            "It forces the two questions that matter — how much value, how much effort — onto the table for every candidate, instead of letting advocacy decide",
+            "It forces the two questions that matter (how much value, how much effort) onto the table for every candidate, instead of letting advocacy decide",
             "It removes the need to talk to stakeholders"
           ],
           correct: 1,
@@ -162,21 +162,21 @@ window.CONTENT_OVERRIDES["prioritization-novice"] = {
         compute: (v) => (v.impact + v.reach + v.confidence) / v.effort,
         resultLabel: "Score",
         format: (n) => n.toFixed(2),
-        note: "(Impact + Reach + Confidence) ÷ Effort. Drop confidence to 1 and watch the score fall — that's the discount doing its job."
+        note: "(Impact + Reach + Confidence) ÷ Effort. Drop confidence to 1 and watch the score fall. That's the discount doing its job."
       },
       steps: [
-        { title: "Impact", detail: "If this works, how much does it move the thing we care about — a lot, some, a little? Rate 1-3." },
-        { title: "Reach", detail: "How many users does it affect — most of them, a segment, a handful? Rate 1-3." },
-        { title: "Confidence", detail: "How sure are we about the impact and reach estimates — high, medium, low? Rate 1-3. Low confidence pulls the score down, which is correct: an uncertain bet should be smaller." },
-        { title: "Effort", detail: "Rough size — small, medium, large. Rate 1-3, and divide the combined impact/reach/confidence by this." },
-        { title: "Rank by the number, then sanity-check", detail: "Sort by score. Then look at the top and bottom and ask \"does this feel wrong?\" If it does, usually one of your inputs was off — fix the input, not the ranking." }
+        { title: "Impact", detail: "If this works, how much does it move the thing we care about: a lot, some, or a little? Rate it 1 to 3." },
+        { title: "Reach", detail: "How many users does it affect: most of them, a segment, or a handful? Rate it 1 to 3." },
+        { title: "Confidence", detail: "How sure are we about the impact and reach estimates: high, medium, or low? Rate it 1 to 3. Low confidence pulls the score down, which is correct: an uncertain bet should be smaller." },
+        { title: "Effort", detail: "Rough size: small, medium, or large. Rate it 1 to 3, and divide the combined impact/reach/confidence by this." },
+        { title: "Rank by the number, then sanity-check", detail: "Sort by score. Then look at the top and bottom and ask \"does this feel wrong?\" If it does, usually one of your inputs was off. Fix the input, not the ranking." }
       ],
       checks: [
         {
           question: "Why does low confidence pull an item's score down in this rubric?",
           options: [
             "To punish the person who proposed it",
-            "An uncertain bet should be smaller or later — discounting for confidence keeps you from committing heavily to a guess",
+            "An uncertain bet should be smaller or later. Discounting for confidence keeps you from committing heavily to a guess",
             "Confidence has no effect on value"
           ],
           correct: 1,
@@ -186,7 +186,7 @@ window.CONTENT_OVERRIDES["prioritization-novice"] = {
           question: "You sort by score and the result \"feels wrong.\" What does the lesson say to do?",
           options: [
             "Override the score with your gut",
-            "Look for the input that was off — usually a bad impact, reach, or confidence estimate — and fix that, rather than fixing the ranking directly",
+            "Look for the input that was off (usually a bad impact, reach, or confidence estimate) and fix that, rather than fixing the ranking directly",
             "Re-run the scoring with different factors"
           ],
           correct: 1,
@@ -199,15 +199,15 @@ window.CONTENT_OVERRIDES["prioritization-novice"] = {
       title: "Lesson 4: Non-Negotiables Come First",
       body: `
         <p>A scoring rubric is for the things you have a genuine choice about. Some work isn't a choice, and trying to score it just produces a weird-looking ranking.</p>
-        <p><strong>Non-negotiables go straight to the top, unscored:</strong> regulatory or legal requirements, security fixes, contractual commitments, anything where <em>not</em> doing it carries a severe, non-linear cost. You're not comparing these on value-vs-effort, because the downside of skipping them isn't measured in lost value, it's measured in fines, breaches, or broken contracts.</p>
-        <p>Everything <em>after</em> the non-negotiables is where the rubric earns its keep. The two-tier structure, mandatory first, then ranked-by-score, is most of what a working prioritization process needs at this level.</p>
+        <p><strong>Non-negotiables go straight to the top, unscored:</strong> regulatory or legal requirements, security fixes, contractual commitments, anything where <em>not</em> doing it carries a severe, non-linear cost. You're not comparing these on value-vs-effort, because the downside of skipping them isn't measured in lost value. It's measured in fines, breaches, or broken contracts.</p>
+        <p>Everything <em>after</em> the non-negotiables is where the rubric earns its keep. The two-tier structure (mandatory first, then ranked by score) is most of what a working prioritization process needs at this level.</p>
       `,
       checks: [
         {
           question: "A regulator publishes a new data-retention rule with a hard compliance deadline in 90 days. Where does that work go in the two-tier structure, and do you score it?",
           options: [
             "Score it like anything else; if it ranks high, it gets done in time",
-            "Straight to the top, unscored — the downside of missing the deadline is fines, not lost value, so the rubric doesn't apply",
+            "Straight to the top, unscored. The downside of missing the deadline is fines, not lost value, so the rubric doesn't apply",
             "Leave it in the backlog until closer to the deadline so it doesn't crowd out value work"
           ],
           correct: 1,
@@ -229,8 +229,8 @@ window.CONTENT_OVERRIDES["prioritization-novice"] = {
       id: 5,
       title: "Lesson 5: Saying No With a Reason",
       body: `
-        <p>The point of all this structure isn't the ranking, it's the ability to say <strong>no</strong> without damaging the relationship.</p>
-        <p>Reactive prioritization makes every "no" feel personal, because there's no principle behind it, just "we're not doing yours." A scored, defensible order changes the conversation: "here's where your request landed, it scored lower on impact and reach than the items ahead of it, and here's what would move it up." The requester may not love it, but they can see it wasn't arbitrary.</p>
+        <p>The point of all this structure isn't the ranking. It's the ability to say <strong>no</strong> without damaging the relationship.</p>
+        <p>Reactive prioritization makes every "no" feel personal, because there's no principle behind it, just "we're not doing yours." A scored, defensible order changes the conversation: "here's where your request landed: it scored lower on impact and reach than the items ahead of it, and here's what would move it up." The requester may not love it, but they can see it wasn't arbitrary.</p>
         <p>Put the course together: recognize reactive prioritization, make the comparison explicit with value-vs-effort, score with a simple rubric, put non-negotiables on top, and let the framework carry your "no." That's the shift from "whoever asked loudest" to a process you can stand behind.</p>
       `,
       checks: [
@@ -238,7 +238,7 @@ window.CONTENT_OVERRIDES["prioritization-novice"] = {
           question: "How does a scored, defensible order change a \"no\" to a stakeholder?",
           options: [
             "It makes the no final and non-negotiable",
-            "It moves the conversation from \"we're not doing yours\" to \"here's where it ranked and why, and here's what would move it up\" — visibly not arbitrary",
+            "It moves the conversation from \"we're not doing yours\" to \"here's where it ranked and why, and here's what would move it up.\" It's visibly not arbitrary",
             "It lets you avoid saying no directly"
           ],
           correct: 1,
@@ -248,16 +248,16 @@ window.CONTENT_OVERRIDES["prioritization-novice"] = {
           label: "Bringing it together",
           question: "A senior stakeholder pushes hard for their feature to jump the queue. Based on this course, what's the strongest response?",
           options: [
-            "Move it up — senior stakeholders' requests should carry more weight",
-            "Score it against the same rubric as everything else, show where it lands and why, and name what would raise its score — so the decision rests on the criteria, not the seniority",
+            "Move it up. Senior stakeholders' requests should carry more weight",
+            "Score it against the same rubric as everything else, show where it lands and why, and name what would raise its score, so the decision rests on the criteria, not the seniority",
             "Refuse to discuss the order at all"
           ],
           correct: 1,
-          explanation: "The whole course is about replacing advocacy with a consistent, explicit method. Applying it evenly — even to a senior push — is what makes it hold."
+          explanation: "The whole course is about replacing advocacy with a consistent, explicit method. Applying it evenly, even to a senior push, is what makes it hold."
         }
       ],
       reflection: {
-        prompt: "Take the last five things your team worked on. For each, why was it prioritized — a score, a metric, or someone asking? If it's mostly the third, pick one upcoming decision and run it through impact / reach / confidence / effort instead."
+        prompt: "Take the last five things your team worked on. For each, why was it prioritized: a score, a metric, or someone asking? If it's mostly the third, pick one upcoming decision and run it through impact / reach / confidence / effort instead."
       }
     }
   ]

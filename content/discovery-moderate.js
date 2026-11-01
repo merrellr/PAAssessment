@@ -17,9 +17,9 @@ window.CONTENT_OVERRIDES["discovery-moderate"] = {
   sourceUrl: "",
   recap: [
     "Make feedback systematic: reach every stakeholder group, keep regular touchpoints, and shadow real work when you can.",
-    "Blend quantitative and qualitative — surveys for 'what and how many', interviews for 'why', and the support team as a free always-on channel.",
-    "Close the loop: be transparent about decisions (including a 'no' and its reason), keep a visible roadmap, run pilot groups.",
-    "Not all feedback is a market signal — segment it by role, region, or size; a theme across segments is a signal, one confined to a segment is a data point.",
+    "Blend quantitative and qualitative: surveys for \"what and how many,\" interviews for \"why,\" and the support team as a free, always-on channel.",
+    "Close the loop: be transparent about decisions (including a \"no\" and its reason), keep a visible roadmap, run pilot groups.",
+    "Not all feedback is a market signal. Segment it by role, region, or size: a theme across segments is a signal, one confined to a segment is a data point.",
     "Discovery is a cycle, not a phase: small increments, a short review each iteration, and findings that are allowed to change the roadmap."
   ],
   lessons: [
@@ -27,11 +27,11 @@ window.CONTENT_OVERRIDES["discovery-moderate"] = {
       id: 1,
       title: "Lesson 1: Feedback Isn't a Box to Check",
       preCheck: {
-        label: "Before you read on — predict",
+        label: "Before you read on, predict",
         question: "You gather user feedback regularly, but it happens informally and often after a solution's already in motion. What's the main thing that needs to change?",
         options: [
           "Collect more feedback, from more people",
-          "Make feedback a structured input to decisions — from the right stakeholders, on a cadence, before direction is set",
+          "Make feedback a structured input to decisions: from the right stakeholders, on a cadence, before direction is set",
           "Replace interviews with larger surveys"
         ],
         correct: 1,
@@ -42,7 +42,7 @@ window.CONTENT_OVERRIDES["discovery-moderate"] = {
         <p>Three habits make feedback systematic instead of incidental:</p>
         <ul>
           <li><strong>Create personas per stakeholder group</strong> so you know whose feedback you're missing.</li>
-          <li><strong>Establish regular touchpoints</strong> — recurring check-ins or an advisory group — instead of only talking to users when something's on fire.</li>
+          <li><strong>Establish regular touchpoints</strong>, like recurring check-ins or an advisory group, instead of only talking to users when something's on fire.</li>
           <li><strong>Shadow real users</strong> when you can. Watching someone work reveals friction they'd never think to report.</li>
         </ul>
       `,
@@ -51,7 +51,7 @@ window.CONTENT_OVERRIDES["discovery-moderate"] = {
           question: "The lesson says feedback should come from more than the end user. Who else?",
           options: [
             "Only the end user matters; other groups are a distraction",
-            "The people who administer the product, pay for it, and approve it — each has a different perspective and set of needs",
+            "The people who administer the product, pay for it, and approve it. Each has a different perspective and set of needs",
             "Just the product team's own opinions"
           ],
           correct: 1,
@@ -76,8 +76,8 @@ window.CONTENT_OVERRIDES["discovery-moderate"] = {
         <p>Data alone doesn't tell the whole story; anecdotes alone give a skewed one. Good feedback collection blends the two.</p>
         <ul>
           <li><strong>Surveys and polls</strong> quantify sentiment, but only if the questions are tailored to each stakeholder group and specific enough to act on. A vague question yields a vague answer.</li>
-          <li><strong>One-on-one interviews</strong> capture the "why" behind a behaviour. This is where you learn what a number can't tell you.</li>
-          <li><strong>Support and success teams</strong> are often the first to hear complaints and feature requests. That channel is free and continuous — use it.</li>
+          <li><strong>One-on-one interviews</strong> capture the "why" behind a behavior. This is where you learn what a number can't tell you.</li>
+          <li><strong>Support and success teams</strong> are often the first to hear complaints and feature requests. That channel is free and continuous, so use it.</li>
         </ul>
         <p>The pattern:</p>
         <svg viewBox="0 0 400 96" style="width:100%; height:auto; margin:4px 0 2px;">
@@ -98,7 +98,7 @@ window.CONTENT_OVERRIDES["discovery-moderate"] = {
           question: "What's the role of a one-on-one interview in this mix?",
           options: [
             "To quantify how many users feel a certain way",
-            "To capture the \"why\" behind user behaviour — the reasoning a survey number can't reveal",
+            "To capture the \"why\" behind user behavior: the reasoning a survey number can't reveal",
             "To replace the need for analytics"
           ],
           correct: 1,
@@ -108,7 +108,7 @@ window.CONTENT_OVERRIDES["discovery-moderate"] = {
           question: "Why does the lesson call out feedback from support and success teams specifically?",
           options: [
             "Because their feedback is more reliable than users' own",
-            "Because they hear complaints and requests first and continuously — a free, always-on feedback channel teams often ignore",
+            "Because they hear complaints and requests first and continuously: a free, always-on feedback channel teams often ignore",
             "Because they should own the product roadmap"
           ],
           correct: 1,
@@ -138,13 +138,13 @@ window.CONTENT_OVERRIDES["discovery-moderate"] = {
           <line x1="250" y1="118" x2="152" y2="118" stroke="#9AA3AD" stroke-width="1.5" marker-end="url(#flArrow)"/>
           <line x1="90" y1="100" x2="90" y2="50" stroke="#9AA3AD" stroke-width="1.5" marker-end="url(#flArrow)"/>
         </svg>
-        <p>Three practices that close it: <strong>be transparent about decisions</strong> — including when feedback can't be acted on and why; <strong>keep a roadmap visible</strong> to key stakeholders so they can see their input in the plan; and <strong>run pilot groups</strong> so users test changes before wide release and feel part of the process.</p>
+        <p>Three practices that close it: <strong>be transparent about decisions</strong>, including when feedback can't be acted on and why; <strong>keep a roadmap visible</strong> to key stakeholders so they can see their input in the plan; and <strong>run pilot groups</strong> so users test changes before wide release and feel part of the process.</p>
       `,
       checks: [
         {
           question: "What happens if a team collects feedback but never closes the loop?",
           options: [
-            "Nothing — the feedback was still recorded and useful",
+            "Nothing. The feedback was still recorded and useful",
             "Users stop giving feedback, because they've seen it go nowhere",
             "The roadmap becomes more accurate over time anyway"
           ],
@@ -159,7 +159,7 @@ window.CONTENT_OVERRIDES["discovery-moderate"] = {
             "Promise to revisit it next quarter regardless"
           ],
           correct: 1,
-          explanation: "\"Heard and declined, here's why\" keeps trust. \"Heard and ignored\" breaks it. Transparency is part of closing the loop, not just shipping is."
+          explanation: "\"Heard and declined, here's why\" keeps trust. \"Heard and ignored\" breaks it. Closing the loop takes transparency, not just shipping."
         }
       ]
     },
@@ -190,7 +190,7 @@ window.CONTENT_OVERRIDES["discovery-moderate"] = {
           question: "How does the lesson suggest telling an individual pain point from a real market signal?",
           options: [
             "Whichever the loudest customer is asking for",
-            "Segment the feedback by role, region, or size — a theme across multiple segments is a signal; one confined to a single segment is just a data point",
+            "Segment the feedback by role, region, or size: a theme across multiple segments is a signal; one confined to a single segment is just a data point",
             "Wait until at least ten customers ask for the same thing"
           ],
           correct: 1,
@@ -199,8 +199,8 @@ window.CONTENT_OVERRIDES["discovery-moderate"] = {
         {
           question: "Feature A is requested loudly by your three largest enterprise accounts and nobody else. Feature B is requested moderately across SMB, mid-market, and enterprise. Which does this course lean toward?",
           options: [
-            "Feature A — the biggest accounts carry the most weight",
-            "Feature B — a theme that shows up across segments is a market signal, where A's is confined to one",
+            "Feature A, because the biggest accounts carry the most weight",
+            "Feature B, because a theme that shows up across segments is a market signal, while A's is confined to one",
             "Whichever is lower effort to build"
           ],
           correct: 1,
@@ -215,7 +215,7 @@ window.CONTENT_OVERRIDES["discovery-moderate"] = {
         <p>The reason discovery slips to "after the solution's already moving" is that it's treated as a phase you pass through once. The fix is to make it a <strong>cycle</strong> that runs continuously alongside delivery.</p>
       `,
       steps: [
-        { title: "Break work into smaller increments", detail: "Large initiatives split into small pieces give you more chances to gather feedback and adjust — before a wrong assumption is baked into three months of build." },
+        { title: "Break work into smaller increments", detail: "Large initiatives split into small pieces give you more chances to gather feedback and adjust before a wrong assumption is baked into three months of build." },
         { title: "Run a short review every iteration", detail: "End-of-sprint demos, a standing feedback session, a monthly stakeholder check-in. The cadence is what keeps discovery from falling off the calendar." },
         { title: "Feed what you learn back into direction", detail: "Discovery output isn't just minor feature tweaks. It should be allowed to change the roadmap and, occasionally, the strategy. If it never does, it's decoration." }
       ],
@@ -235,7 +235,7 @@ window.CONTENT_OVERRIDES["discovery-moderate"] = {
           question: "Your discovery consistently produces small UI tweaks but never changes the roadmap. Based on this course, what does that suggest?",
           options: [
             "The discovery process is working well and staying focused",
-            "It's probably running too late or too shallow — real discovery should sometimes reshape direction, not just polish what's already decided",
+            "It's probably running too late or too shallow. Real discovery should sometimes reshape direction, not just polish what's already decided",
             "The roadmap is simply very accurate"
           ],
           correct: 1,
@@ -243,7 +243,7 @@ window.CONTENT_OVERRIDES["discovery-moderate"] = {
         }
       ],
       reflection: {
-        prompt: "Look at your last two months of user feedback. Pick one theme. Was it an individual pain point or did it show up across segments? And did anything about your roadmap change because of it?"
+        prompt: "Look at your last two months of user feedback. Pick one theme. Was it an individual pain point, or did it show up across segments? And did anything about your roadmap change because of it?"
       }
     }
   ]

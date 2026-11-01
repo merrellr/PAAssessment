@@ -14,7 +14,7 @@ window.CONTENT_OVERRIDES = window.CONTENT_OVERRIDES || {};
 window.CONTENT_OVERRIDES["stakeholder-moderate"] = {
   sourceUrl: "",
   recap: [
-    "Each role on a product team (PM, PO, design, engineering, QA) needs something different from you — know what.",
+    "Each role on a product team (PM, PO, design, engineering, QA) needs something different from you. Know what each needs.",
     "Collaboration doesn't happen by accident: agile ceremonies, shared tools, and deliberate communication channels.",
     "Empower people with real autonomy and trust, not just direction.",
     "Recognize contributions and invest in continuous learning to keep a team high-performing."
@@ -24,7 +24,7 @@ window.CONTENT_OVERRIDES["stakeholder-moderate"] = {
       id: 1,
       title: "Lesson 1: The Roles on a Product Team, and Why Each One Matters",
       preCheck: {
-        label: "Before you read on — predict",
+        label: "Before you read on, predict",
         question: "On a well-functioning product team, whose job is it to prioritize and groom the backlog day to day?",
         options: [
           "The Product Manager, since they own the overall strategy",
@@ -34,7 +34,7 @@ window.CONTENT_OVERRIDES["stakeholder-moderate"] = {
         explanation: "See if the breakdown below matches this."
       },
       body: `
-        <p>Creating an impactful product isn't just about the product itself, it's about the team behind it. A well-rounded product team requires a diverse set of skills and clearly understood roles. Step through the core roles you'll typically find on a strong product team.</p>
+        <p>Creating an impactful product isn't just about the product itself. It's about the team behind it. A well-rounded product team requires a diverse set of skills and clearly understood roles. Step through the core roles you'll typically find on a strong product team.</p>
         <svg viewBox="0 0 400 156" style="width:100%; height:auto; margin:4px 0 2px;" xmlns="http://www.w3.org/2000/svg">
           <text x="8" y="14" font-family="'Space Grotesk',sans-serif" font-size="8.5" font-weight="700" fill="#12305e">What each role needs from you (the PM)</text>
           <g font-family="'Space Grotesk',sans-serif" font-size="8" font-weight="700" fill="#12305e" text-anchor="middle">
@@ -62,7 +62,7 @@ window.CONTENT_OVERRIDES["stakeholder-moderate"] = {
         {
           question: "What's the key difference between a Product Manager and a Product Owner, as described here?",
           options: [
-            "There's no real difference, the titles are interchangeable",
+            "There's no real difference. The titles are interchangeable",
             "The PM typically sets strategic direction and aligns with business goals; the PO typically manages the backlog and day-to-day implementation details",
             "The Product Owner outranks the Product Manager"
           ],
@@ -85,7 +85,7 @@ window.CONTENT_OVERRIDES["stakeholder-moderate"] = {
       id: 2,
       title: "Lesson 2: Collaboration Doesn't Happen by Accident",
       body: `
-        <p>Building a high-performing product team isn't just about assigning the right roles, it's about fostering effective collaboration between them. Agile methodologies like Scrum or Kanban provide the structure needed for iterative development and cross-functional alignment: regular sprint planning, stand-ups, and retrospectives, plus a shared tool for transparent progress tracking.</p>
+        <p>Building a high-performing product team isn't just about assigning the right roles. It's about fostering effective collaboration between them. Agile methodologies like Scrum or Kanban provide the structure needed for iterative development and cross-functional alignment: regular sprint planning, stand-ups, and retrospectives, plus a shared tool for transparent progress tracking.</p>
         <p>Structure alone isn't enough, though. Cross-functional collaboration also requires genuinely open communication. Weekly touchpoints and collaborative tools help break down silos, but the real work is cultural: setting up regular syncs on key deliverables, encouraging real-time updates in shared documents, and maintaining a culture where all team members actually feel heard, not just invited to the meeting.</p>
       `,
       checks: [
@@ -93,7 +93,7 @@ window.CONTENT_OVERRIDES["stakeholder-moderate"] = {
           question: "A team runs every Scrum ceremony on schedule, but retros raise the same complaints month after month and the quieter members never really speak up. What does this lesson say is missing?",
           options: [
             "A stricter facilitator to enforce the Scrum rules",
-            "The communication culture underneath the rituals — the meetings exist, but people don't yet feel genuinely heard in them",
+            "The communication culture underneath the rituals: the meetings exist, but people don't yet feel genuinely heard in them",
             "A switch from Scrum to Kanban"
           ],
           correct: 1,
@@ -105,7 +105,7 @@ window.CONTENT_OVERRIDES["stakeholder-moderate"] = {
       id: 3,
       title: "Lesson 3: Empowerment, Not Just Direction",
       body: `
-        <p>High-performing teams need more than the right skills, they need motivation, autonomy, and support. As a product leader, your role is to provide clear direction while cultivating a culture of ownership.</p>
+        <p>High-performing teams need more than the right skills. They need motivation, autonomy, and support. As a product leader, your role is to provide clear direction while cultivating a culture of ownership.</p>
         <p>Start with clarity: use a framework like OKRs (Objectives and Key Results) to define quarterly objectives and the metrics that track progress against them. From there, empower your team members by giving them real autonomy in their roles, and trusting their expertise enough to let engineers, designers, and product owners experiment with new ideas and make real decisions, not just execute someone else's.</p>
       `,
       checks: [
@@ -113,7 +113,7 @@ window.CONTENT_OVERRIDES["stakeholder-moderate"] = {
           question: "You give your team full autonomy but never set clear objectives for the quarter. Decisions start stalling and people keep bringing choices back to you to arbitrate. What does this lesson say went wrong?",
           options: [
             "You gave away too much autonomy and should take decisions back",
-            "Autonomy needs clear goals to aim at — without the direction OKRs provide, freedom to decide has no reference point",
+            "Autonomy needs clear goals to aim at. Without the direction OKRs provide, freedom to decide has no reference point",
             "The team isn't experienced enough to self-direct"
           ],
           correct: 1,
@@ -125,7 +125,7 @@ window.CONTENT_OVERRIDES["stakeholder-moderate"] = {
       id: 4,
       title: "Lesson 4: Recognition and Continuous Learning",
       body: `
-        <p>Celebrate wins, both big and small, and recognize team members who go above and beyond. This isn't just a nice gesture, it's what fosters a positive team culture and keeps people motivated over the long run: publicly acknowledging contributions in meetings, offering real incentives for exceptional work, and encouraging peer-to-peer recognition.</p>
+        <p>Celebrate wins, both big and small, and recognize team members who go above and beyond. This isn't just a nice gesture. It's what fosters a positive team culture and keeps people motivated over the long run: publicly acknowledging contributions in meetings, offering real incentives for exceptional work, and encouraging peer-to-peer recognition.</p>
         <p>The work doesn't stop once a team is performing well, either. Product development is an ever-evolving field, and your team needs to keep learning to stay ahead: invest in training and development, encourage knowledge sharing through things like lunch-and-learns or mentorship, and promote a genuine growth mindset where experimenting and learning from failure gets celebrated instead of punished.</p>
       `,
       checks: [
@@ -137,7 +137,7 @@ window.CONTENT_OVERRIDES["stakeholder-moderate"] = {
             "Because recognition is only meaningful when tied to a monetary bonus"
           ],
           correct: 1,
-          explanation: "Recognition isn't framed as decoration here, it's described as a direct driver of the culture and motivation a high-performing team depends on."
+          explanation: "Recognition isn't framed as decoration here. It's described as a direct driver of the culture and motivation a high-performing team depends on."
         },
         {
           label: "Bringing it together",

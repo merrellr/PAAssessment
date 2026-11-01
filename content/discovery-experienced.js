@@ -12,11 +12,11 @@ window.CONTENT_OVERRIDES = window.CONTENT_OVERRIDES || {};
 window.CONTENT_OVERRIDES["discovery-experienced"] = {
   sourceUrl: "https://www.linkedin.com/pulse/overcoming-common-pitfalls-early-stage-product-saas-robert-merrell-eshlc",
   recap: [
-    "Build around the customer's actual workflow, not the founding vision — the workflow is where adoption is won or lost.",
-    "Narrow focus is a strategic advantage: solve one painful problem for one clearly-defined group before expanding.",
-    "Integration and compliance are discovery inputs, not later-stage cleanup — surface them while the design is still cheap to change.",
+    "Build around the customer's actual workflow, not the founding vision. The workflow is where adoption is won or lost.",
+    "Narrow focus is a strategic advantage: solve one painful problem for one clearly defined group before expanding.",
+    "Integration and compliance are discovery inputs, not later-stage cleanup. Surface them while the design is still cheap to change.",
     "The buyer is often not the user; you have to understand and sell to both, with different messages.",
-    "Design pilots and implementations with discipline — clear success criteria, a representative cohort, a defined end.",
+    "Design pilots and implementations with discipline: clear success criteria, a representative cohort, a defined end.",
     "Credibility is earned through depth on a real problem, not presented in a pitch."
   ],
   lessons: [
@@ -24,19 +24,19 @@ window.CONTENT_OVERRIDES["discovery-experienced"] = {
       id: 1,
       title: "Lesson 1: Build Around the Workflow, Not the Vision",
       preCheck: {
-        label: "Before you read on — predict",
+        label: "Before you read on, predict",
         question: "A clinician gets excited about a new tool idea in a discovery interview. Is that excitement itself reliable evidence of real product-market fit?",
         options: [
-          "Yes, enthusiasm from a real user is the strongest signal you can get",
-          "Not on its own, enthusiasm in an interview doesn't guarantee the tool fits how work actually gets done day to day"
+          "Yes. Enthusiasm from a real user is the strongest signal you can get",
+          "Not on its own. Enthusiasm in an interview doesn't guarantee the tool fits how work actually gets done day to day"
         ],
         correct: 1,
-        explanation: "Keep this in mind as you read, the lesson below is built around exactly this gap."
+        explanation: "Keep this in mind as you read: the lesson below is built around exactly this gap."
       },
       image: { src: "images/workflow-fit.png", alt: "Two workflow diagrams: Founder's Vision shows a product disconnected above the real workflow chain; Real Workflow shows the same product integrated inline within Intake, Care, Docs, and Billing" },
       body: `
-        <p>Healthcare professionals operate in highly structured environments: established processes, compliance demands, severe time constraints. A product that seems valuable in theory can create real friction in practice if it asks clinicians, administrators, or billing staff to change too much too quickly.</p>
-        <p>Startups often mistake interest during interviews for true product fit, only to discover later that the solution doesn't integrate naturally into the daily rhythm of care delivery or operations. Avoiding this takes more than a few discovery calls. It means direct exposure to real workflows and real constraints, talking to end users, economic buyers, technical stakeholders, and compliance leaders, not relying on one champion to represent everyone.</p>
+        <p>Healthcare professionals operate in highly structured environments, with established processes, compliance demands, and severe time constraints. A product that seems valuable in theory can create real friction in practice if it asks clinicians, administrators, or billing staff to change too much too quickly.</p>
+        <p>Startups often mistake interest during interviews for true product fit, only to discover later that the solution doesn't integrate naturally into the daily rhythm of care delivery or operations. Avoiding this takes more than a few discovery calls. It means direct exposure to real workflows and real constraints: talking to end users, economic buyers, technical stakeholders, and compliance leaders, not relying on one champion to represent everyone.</p>
       `,
       checks: [
         {
@@ -47,10 +47,10 @@ window.CONTENT_OVERRIDES["discovery-experienced"] = {
             "Interviews are an unreliable research method in general"
           ],
           correct: 1,
-          explanation: "The pitfall isn't talking to users, it's stopping at one enthusiastic voice instead of exposure to the real range of workflows and stakeholders involved."
+          explanation: "The pitfall isn't talking to users. It's stopping at one enthusiastic voice instead of seeking out the real range of workflows and stakeholders involved."
         },
         {
-          question: "What does 'building around the founder's vision instead of the user's workflow' actually look like in practice?",
+          question: "What does \"building around the founder's vision instead of the user's workflow\" actually look like in practice?",
           options: [
             "Asking clinicians or billing staff to change too much about their existing process to fit the new tool",
             "Spending too much time on user interviews before building anything",
@@ -67,7 +67,7 @@ window.CONTENT_OVERRIDES["discovery-experienced"] = {
       body: `
         <p>Healthcare startups often feel pressure to appear enterprise-ready from day one, building bloated products packed with features for every use case a prospect mentions. The result is usually complicated, expensive to maintain, and unclear in its core value.</p>
         <p>The strongest healthcare SaaS products begin by solving one painful problem for one clearly defined user group, establishing credibility through depth before expanding through breadth. A narrow scope also eases implementation and gives cleaner signals about what the market actually values.</p>
-        <p>This connects directly to another common failure: not proving measurable value quickly enough. Broad promises like "improving care quality" or "enhancing patient engagement" aren't enough, they need to translate into outcomes a buyer can track and defend internally: reduced administrative time, faster patient throughput, lower no-show rates, higher collections.</p>
+        <p>This connects directly to another common failure: not proving measurable value quickly enough. Broad promises like "improving care quality" or "enhancing patient engagement" aren't enough. They need to translate into outcomes a buyer can track and defend internally: reduced administrative time, faster patient throughput, lower no-show rates, higher collections.</p>
       `,
       checks: [
         {
@@ -75,15 +75,15 @@ window.CONTENT_OVERRIDES["discovery-experienced"] = {
           options: [
             "Team B, since covering more use cases lowers the buyer's risk",
             "Team A, because depth in one place lowers the buyer's implementation risk and gives a cleaner read on what the market actually values",
-            "Neither, the decision comes down to price"
+            "Neither. The decision comes down to price"
           ],
           correct: 1,
-          explanation: "Focus isn't just an engineering shortcut, it's a strategic bet: prove deep value in one place before spreading thin across many."
+          explanation: "Focus isn't just an engineering shortcut. It's a strategic bet: prove deep value in one place before spreading thin across many."
         },
         {
-          question: "A founder says their product 'improves care quality.' What's missing, according to this lesson?",
+          question: "A founder says their product \"improves care quality.\" What's missing, according to this lesson?",
           options: [
-            "Nothing, that's a sufficient value proposition on its own",
+            "Nothing. That's a sufficient value proposition on its own",
             "A specific, trackable outcome, like reduced administrative time or lower no-show rates, that a buyer can measure and defend internally",
             "A broader claim covering even more use cases"
           ],
@@ -131,7 +131,7 @@ window.CONTENT_OVERRIDES["discovery-experienced"] = {
           <line x1="260" y1="127" x2="286" y2="127" stroke="#9AA3AD" stroke-width="1.2" marker-end="url(#deArrow)"/>
           <text x="200" y="170" text-anchor="middle" font-family="'IBM Plex Sans',sans-serif" font-size="8.5" fill="#4B5768">Same product, same integration work &#8212; the difference is who absorbs it, and when.</text>
         </svg>
-        <p>The same is true of security and compliance. Some early teams assume they can address HIPAA, data governance, and security controls once traction appears. That's risky. In healthcare, trust isn't a finishing layer added after the product works, it's part of the product itself. Buyers want to know how data is stored and who can access it long before the conversation reaches pricing.</p>
+        <p>The same is true of security and compliance. Some early teams assume they can address HIPAA, data governance, and security controls once traction appears. That's risky. In healthcare, trust isn't a finishing layer added after the product works. It's part of the product itself. Buyers want to know how data is stored and who can access it long before the conversation reaches pricing.</p>
       `,
       checks: [
         {
@@ -145,14 +145,14 @@ window.CONTENT_OVERRIDES["discovery-experienced"] = {
           explanation: "This is why the lesson treats integration as a product strategy question from day one: it directly affects adoption, not just engineering scope."
         },
         {
-          question: "What does 'trust is part of the product itself' mean in the security and compliance context?",
+          question: "What does \"trust is part of the product itself\" mean in the security and compliance context?",
           options: [
             "Every startup needs full HIPAA certification before writing their first line of code",
             "Compliance-aware habits, like access controls and clear data handling, need to be built in from the start rather than bolted on once traction appears",
             "Security only matters once a company reaches enterprise scale"
           ],
           correct: 1,
-          explanation: "The lesson is explicit that this doesn't mean overengineering every policy upfront, it means building with compliance-aware habits early, not treating trust as a finishing touch."
+          explanation: "The lesson is explicit that this doesn't mean over-engineering every policy up front. It means building with compliance-aware habits early, not treating trust as a finishing touch."
         }
       ]
     },
@@ -176,14 +176,14 @@ window.CONTENT_OVERRIDES["discovery-experienced"] = {
           explanation: "This is the exact failure mode the lesson describes: a real user's love for the product doesn't guarantee the organization's buying process will clear it."
         },
         {
-          question: "Why does the article say product development and go-to-market are 'tightly linked' in healthcare SaaS specifically?",
+          question: "Why does the lesson say product development and go-to-market are \"tightly linked\" in healthcare SaaS specifically?",
           options: [
             "Because marketing budgets are unusually large in healthcare",
             "Because understanding the full buying journey shapes real product decisions, like what security documentation or ROI messaging needs to exist, not just how to sell what's already built",
             "Because healthcare buyers only care about price"
           ],
           correct: 1,
-          explanation: "Mapping the buying journey isn't a separate sales activity here, it directly feeds back into what the product and its supporting materials actually need to include."
+          explanation: "Mapping the buying journey isn't a separate sales activity here. It feeds directly back into what the product and its supporting materials actually need to include."
         }
       ]
     },
@@ -191,7 +191,7 @@ window.CONTENT_OVERRIDES["discovery-experienced"] = {
       id: 5,
       title: "Lesson 5: Design Pilots and Implementation With Discipline",
       body: `
-        <p>Many healthcare SaaS startups treat pilots as loosely defined trial periods rather than structured validation opportunities. Without clear success criteria, ownership, and timelines, pilots often drag on without producing a real decision, continued engagement gets mistaken for progress. Step through what a disciplined pilot actually requires.</p>
+        <p>Many healthcare SaaS startups treat pilots as loosely defined trial periods rather than structured validation opportunities. Without clear success criteria, ownership, and timelines, pilots often drag on without producing a real decision, and continued engagement gets mistaken for progress. Step through what a disciplined pilot actually requires.</p>
       `,
       steps: [
         { title: "Agree on goals upfront", detail: "Before the pilot starts, agree on what question it's actually meant to answer. A pilot without a defined goal can run indefinitely without ever producing a real decision." },
@@ -209,7 +209,7 @@ window.CONTENT_OVERRIDES["discovery-experienced"] = {
             "Four months is a normal and healthy pilot length"
           ],
           correct: 1,
-          explanation: "An undefined pilot can drift indefinitely. Discipline, goals, duration, metrics, decision points, is what turns a pilot into an actual answer rather than an open-ended trial."
+          explanation: "An undefined pilot can drift indefinitely. Discipline (goals, duration, metrics, decision points) is what turns a pilot into an actual answer rather than an open-ended trial."
         }
       ]
     },
@@ -217,25 +217,25 @@ window.CONTENT_OVERRIDES["discovery-experienced"] = {
       id: 6,
       title: "Lesson 6: Credibility Is Earned, Not Presented",
       body: `
-        <p>Some startups chase credibility signals instead of actual readiness, polished branding, broad feature sets, large vision statements, while neglecting the harder work of validating demand and delivering repeatable results. In healthcare, credibility does matter, but it's earned through trust, consistency, and evidence rather than presentation alone.</p>
+        <p>Some startups chase credibility signals instead of actual readiness (polished branding, broad feature sets, large vision statements) while neglecting the harder work of validating demand and delivering repeatable results. In healthcare, credibility does matter, but it's earned through trust, consistency, and evidence rather than presentation alone.</p>
         <p>The most resilient healthcare SaaS companies grow from a strong operational foundation. They understand a specific user deeply, solve a painful problem clearly, build trust into the product, and create a path to measurable value. They don't assume healthcare will adapt to the product. They shape the product to fit healthcare as it actually works.</p>
       `,
       checks: [
         {
-          question: "What's the difference between 'looking established' and actual readiness, according to this closing lesson?",
+          question: "What's the difference between \"looking established\" and actual readiness, according to this closing lesson?",
           options: [
-            "There's no real difference, polish is what earns trust in healthcare",
+            "There's no real difference. Polish is what earns trust in healthcare",
             "Looking established relies on presentation (branding, broad features, vision statements), while real readiness comes from validated demand and repeatable, evidenced results",
             "Actual readiness only matters for companies past their Series A"
           ],
           correct: 1,
-          explanation: "This closes the loop on the whole course: credibility built on presentation alone is fragile, credibility built on evidence and consistency is durable."
+          explanation: "This closes the loop on the whole course: credibility built on presentation alone is fragile; credibility built on evidence and consistency is durable."
         },
         {
           label: "Bringing it together",
-          question: "A healthcare startup has: a broad feature set, polished branding, one enthusiastic clinician champion, and an open-ended pilot with no clear metrics. Based on this whole course, what's the most likely underlying problem?",
+          question: "A healthcare startup has a broad feature set, polished branding, one enthusiastic clinician champion, and an open-ended pilot with no clear metrics. Based on this whole course, what's the most likely underlying problem?",
           options: [
-            "Nothing is wrong, this is a strong go-to-market position",
+            "Nothing is wrong. This is a strong go-to-market position",
             "Several pitfalls are compounding: unfocused scope (Lesson 2), a stakeholder gap beyond the one champion (Lesson 4), and an undisciplined pilot (Lesson 5), all wrapped in presentation rather than evidence (this lesson)",
             "The branding needs to be even more polished to close the deal"
           ],

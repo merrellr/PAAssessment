@@ -53,7 +53,7 @@ window.CONTENT_OVERRIDES = window.CONTENT_OVERRIDES || {};
         id: 1,
         title: "Lesson 1: Start With a Problem Statement",
         preCheck: {
-          label: "Before you read on — predict",
+          label: "Before you read on, predict",
           question: "Your CEO asks for a redesign of a screen customers call \"clunky\". What's the most useful first thing to write down?",
           options: [
             "A list of the screens and controls the redesign will need",

@@ -12,18 +12,18 @@ window.CONTENT_OVERRIDES = window.CONTENT_OVERRIDES || {};
 window.CONTENT_OVERRIDES["strategy-advanced"] = {
   sourceUrl: "https://www.linkedin.com/pulse/how-build-product-focused-ai-agents-actually-make-merrell-mism-rmu8c",
   recap: [
-    "Treat a product agent as a decision participant, not a tool — define the decisions it influences, the context it holds, and the trade-offs it weighs in one sentence.",
+    "Treat a product agent as a decision participant, not a tool. Define the decisions it influences, the context it holds, and the trade-offs it weighs in one sentence.",
     "Ground it persistently in four context categories: product truths, strategic constraints, customer signals, product philosophy.",
-    "Make it usefully opinionated — bake in strategy-aligned bias; the goal is aligned judgment, not neutrality.",
+    "Make it usefully opinionated: bake in strategy-aligned bias; the goal is aligned judgment, not neutrality.",
     "Embed it at each lifecycle decision point (discovery, PRDs, roadmapping, launch readiness, post-launch) by assigning it a role, not asking it for answers.",
-    "Maintain it as a living system — refresh context quarterly; the payoff is consistent senior-level judgment applied everywhere."
+    "Maintain it as a living system. Refresh context quarterly; the payoff is consistent senior-level judgment applied everywhere."
   ],
   lessons: [
     {
       id: 1,
       title: "Lesson 1: Agents as Decision Participants",
       preCheck: {
-        label: "Before you read on — predict",
+        label: "Before you read on, predict",
         question: "A team wants AI to improve its product decisions. Which starting question leads somewhere useful?",
         options: [
           "\"How do we add an agent to our workflow?\"",
@@ -49,7 +49,7 @@ window.CONTENT_OVERRIDES["strategy-advanced"] = {
           options: [
             "Team A, since keeping it flexible avoids over-constraining the model",
             "Team B, because a scoped role with defined influence, context, and priorities is what makes the agent's contribution reliable",
-            "Neither, an agent is just a tool either way"
+            "Neither. An agent is just a tool either way"
           ],
           correct: 1,
           explanation: "A tool responds to requests. A decision participant is scoped like a teammate: clear influence, clear context, clear priorities. That's what makes its contribution reliable."
@@ -58,7 +58,7 @@ window.CONTENT_OVERRIDES["strategy-advanced"] = {
           question: "Why write a one-sentence role definition before any prompt or workflow design?",
           options: [
             "It's required by most agent-building platforms",
-            "If you can't state the agent's purpose clearly in one sentence, it won't deliver consistent value — the role is what focuses everything downstream",
+            "If you can't state the agent's purpose clearly in one sentence, it won't deliver consistent value. The role is what focuses everything downstream",
             "It replaces the need to give the agent product context"
           ],
           correct: 1,
@@ -106,13 +106,13 @@ window.CONTENT_OVERRIDES["strategy-advanced"] = {
             "Strategic constraints"
           ],
           correct: 1,
-          explanation: "Customer signals cover objections, lost-deal reasons, and patterns from support and research — the accumulated evidence of how customers actually react to the product."
+          explanation: "Customer signals cover objections, lost-deal reasons, and patterns from support and research: the accumulated evidence of how customers actually react to the product."
         },
         {
           question: "Why does the lesson insist grounding context be \"persistently available\" rather than pasted into each prompt?",
           options: [
             "To reduce the number of tokens each request uses",
-            "Because context that has to be re-supplied will eventually be left out — and the agent will answer confidently outside your real constraints",
+            "Because context that has to be re-supplied will eventually be left out, and the agent will answer confidently outside your real constraints",
             "Because prompts have a strict length limit"
           ],
           correct: 1,
@@ -131,14 +131,14 @@ window.CONTENT_OVERRIDES["strategy-advanced"] = {
           <li>Surface second-order effects before recommending solutions.</li>
           <li>Prioritize long-term customer trust over short-term engagement.</li>
         </ul>
-        <p>The goal is not neutrality. The goal is <strong>aligned judgment</strong>. When an agent's bias reflects your product strategy, it becomes an advantage rather than a risk, the agent starts catching the things your best product leader would catch, consistently, on every review.</p>
+        <p>The goal is not neutrality. The goal is <strong>aligned judgment</strong>. When an agent's bias reflects your product strategy, it becomes an advantage rather than a risk: the agent starts catching the things your best product leader would catch, consistently, on every review.</p>
       `,
       checks: [
         {
           question: "The lesson argues a product agent should be opinionated, not neutral. What's the reasoning?",
           options: [
             "Opinionated agents are faster and cheaper to run",
-            "A neutral agent gives generic output; one whose bias reflects your strategy delivers aligned judgment — it flags what your strongest product leader would flag",
+            "A neutral agent gives generic output; one whose bias reflects your strategy delivers aligned judgment. It flags what your strongest product leader would flag",
             "Neutrality isn't technically possible with current models"
           ],
           correct: 1,
@@ -208,7 +208,7 @@ window.CONTENT_OVERRIDES["strategy-advanced"] = {
           question: "The lesson says to \"assign it a role\" rather than \"ask it for answers.\" What's the difference in a PRD review?",
           options: [
             "Asking for a role produces a longer response",
-            "\"Review this as a skeptical product leader and find assumptions, risks, and gaps\" improves the quality of a decision you own — versus \"write me a PRD,\" which just generates a draft",
+            "\"Review this as a skeptical product leader and find assumptions, risks, and gaps\" improves the quality of a decision you own, unlike \"write me a PRD,\" which just generates a draft",
             "A role prompt lets the agent approve the PRD on your behalf"
           ],
           correct: 1,
@@ -218,7 +218,7 @@ window.CONTENT_OVERRIDES["strategy-advanced"] = {
           question: "Why embed the agent across discovery, PRDs, roadmapping, launch, and post-launch rather than at a single stage?",
           options: [
             "More touchpoints justify the cost of building the agent",
-            "Judgment matters at every one of those moments — a consistent skeptic at each stage catches assumptions and second-order effects the team would otherwise carry forward",
+            "Judgment matters at every one of those moments. A consistent skeptic at each stage catches assumptions and second-order effects the team would otherwise carry forward",
             "The agent needs the full lifecycle as context to function at all"
           ],
           correct: 1,
@@ -230,20 +230,20 @@ window.CONTENT_OVERRIDES["strategy-advanced"] = {
       id: 5,
       title: "Lesson 5: Maintain It as a Living System",
       body: `
-        <p>Products evolve, and agents must evolve with them. Strong teams refresh agent context quarterly: remove outdated assumptions, add new customer insights, adjust the built-in bias as strategy changes. An outdated agent quietly reinforces old thinking and introduces risk, it's a confident voice arguing from last year's constraints.</p>
+        <p>Products evolve, and agents must evolve with them. Strong teams refresh agent context quarterly: remove outdated assumptions, add new customer insights, adjust the built-in bias as strategy changes. An outdated agent quietly reinforces old thinking and introduces risk: it's a confident voice arguing from last year's constraints.</p>
         <p>The real advantage isn't automation. It's <strong>better product judgment at scale</strong>. Well-designed agents reduce cognitive load on senior leaders, increase consistency in decision quality, surface blind spots early, and enable speed without sacrificing thinking.</p>
-        <p>AI agents don't replace product leadership, they amplify it. The teams succeeding with agents aren't focused on automation. They're focused on improving judgment, which has always been the core of great product management. The future of product isn't just AI-powered. It's judgment-driven.</p>
+        <p>AI agents don't replace product leadership. They amplify it. The teams succeeding with agents aren't focused on automation. They're focused on improving judgment, which has always been the core of great product management. The future of product isn't just AI-powered. It's judgment-driven.</p>
       `,
       checks: [
         {
-          question: "Why does the lesson call an un-maintained agent a source of risk?",
+          question: "Why does the lesson call an unmaintained agent a source of risk?",
           options: [
             "It slows down as its context file grows",
             "It keeps arguing confidently from outdated assumptions and old constraints, reinforcing thinking the strategy has already moved past",
             "It gradually forgets its role definition"
           ],
           correct: 1,
-          explanation: "\"An outdated agent reinforces old thinking and introduces risk.\" If continuous learning matters for your team, it has to matter for your agents — hence the quarterly refresh."
+          explanation: "An outdated agent quietly reinforces old thinking and introduces risk. If continuous learning matters for your team, it has to matter for your agents. Hence the quarterly refresh."
         },
         {
           label: "Bringing it together",

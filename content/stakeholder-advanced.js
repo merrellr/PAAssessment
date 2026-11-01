@@ -16,29 +16,29 @@ window.CONTENT_OVERRIDES = window.CONTENT_OVERRIDES || {};
 window.CONTENT_OVERRIDES["stakeholder-advanced"] = {
   sourceUrl: "",
   recap: [
-    "Advanced stakeholder work is shifting from managing your own relationships to designing how the whole org aligns — and mentoring others to run it.",
+    "Advanced stakeholder work is shifting from managing your own relationships to designing how the whole org aligns, and mentoring others to run it.",
     "Build an aligned cross-functional culture: a shared vision, org-wide comms channels, and syncs that are institutions with owners, not favors.",
-    "Run product, marketing, and sales as one motion — joint buyer personas, messaging aligned to real value props, sales enablement kept current.",
-    "Mentor stakeholder skill deliberately — knowledge sharing, modeling empowerment and recognition, coaching through real situations, designing yourself out of the critical path.",
-    "Make the system durable and measurable — feedback loops as standing institutions, action plans communicated org-wide, watching whether decisions get made without escalation."
+    "Run product, marketing, and sales as one motion: joint buyer personas, messaging aligned to real value props, sales enablement kept current.",
+    "Mentor stakeholder skill deliberately: knowledge sharing, modeling empowerment and recognition, coaching through real situations, designing yourself out of the critical path.",
+    "Make the system durable and measurable: feedback loops as standing institutions, action plans communicated org-wide, watching whether decisions get made without escalation."
   ],
   lessons: [
     {
       id: 1,
       title: "Lesson 1: From Managing Relationships to Shaping the System",
       preCheck: {
-        label: "Before you read on — predict",
+        label: "Before you read on, predict",
         question: "You're already excellent at cross-functional relationships personally. What's the next level?",
         options: [
           "Have those strong relationships with even more people",
-          "Design how the whole organization aligns and collaborates — so it doesn't depend on your personal relationships — and teach others to do the same",
+          "Design how the whole organization aligns and collaborates, so it doesn't depend on your personal relationships, and teach others to do the same",
           "Move into a formal management role"
         ],
         correct: 1,
         explanation: "See whether the lesson agrees. Advanced stakeholder work is a shift in scope."
       },
       body: `
-        <p>At earlier levels, stakeholder skill is personal: you build trust with engineering, you keep your sponsor informed, you navigate a disagreement well. At an advanced level, the job changes. You're now responsible for <strong>how the organization communicates and collaborates cross-functionally</strong>, as a system, and for <strong>mentoring other people</strong> to operate it.</p>
+        <p>At earlier levels, stakeholder skill is personal: you build trust with engineering, you keep your sponsor informed, you navigate a disagreement well. At an advanced level, the job changes. You're now responsible for <strong>how the organization communicates and collaborates cross-functionally</strong> as a system, and for <strong>mentoring other people</strong> to operate it.</p>
         <p>The tell that you've made this shift: cross-functional alignment keeps working when you're on vacation. It's built into the rhythms, the shared artifacts, and the people you've coached, not held together by your individual relationships.</p>
         <p>A strong product culture isn't built overnight. It takes an intentional approach to align teams toward a shared mission, and that intentional design is the work.</p>
       `,
@@ -47,7 +47,7 @@ window.CONTENT_OVERRIDES["stakeholder-advanced"] = {
           question: "What distinguishes advanced stakeholder work from earlier levels, per this lesson?",
           options: [
             "Having strong relationships with a larger number of people",
-            "Shifting from managing your own cross-functional relationships to designing how the whole organization aligns — and mentoring others to run it",
+            "Shifting from managing your own cross-functional relationships to designing how the whole organization aligns, and mentoring others to run it",
             "Getting formal authority over the other functions"
           ],
           correct: 1,
@@ -87,14 +87,14 @@ window.CONTENT_OVERRIDES["stakeholder-advanced"] = {
             <line x1="200" y1="111" x2="200" y2="134"/><line x1="177" y1="96" x2="75" y2="112"/><line x1="178" y1="72" x2="85" y2="60"/>
           </g>
         </svg>
-        <p><strong>A shared vision</strong>, set with key stakeholders involved early, so every function can see why the product exists and what it's for. <strong>Org-wide communication channels</strong> — regular cross-functional syncs and a genuine single source of truth (a shared board, a shared wiki) — established as institutions, not favors you do. When those exist, alignment stops being something you personally broker at every turn.</p>
+        <p><strong>A shared vision</strong>, set with key stakeholders involved early, so every function can see why the product exists and what it's for. <strong>Org-wide communication channels</strong> (regular cross-functional syncs and a genuine single source of truth, like a shared board or wiki) established as institutions, not favors you do. When those exist, alignment stops being something you personally broker at every turn.</p>
       `,
       checks: [
         {
           question: "Why involve key stakeholders early in setting the shared vision?",
           options: [
             "To slow the process down for thoroughness",
-            "So every function can see why the product exists and what it's for — which is what lets them align without constant brokering",
+            "So every function can see why the product exists and what it's for, which is what lets them align without constant brokering",
             "Because vision statements need many authors to sound credible"
           ],
           correct: 1,
@@ -104,7 +104,7 @@ window.CONTENT_OVERRIDES["stakeholder-advanced"] = {
           question: "What does it mean to establish cross-functional syncs \"as institutions, not favors\"?",
           options: [
             "Making attendance mandatory with HR enforcement",
-            "They're standing, expected parts of how the org runs — not something that happens because you personally organize it each time",
+            "They're standing, expected parts of how the org runs, not something that happens because you personally organize it each time",
             "Holding them in a dedicated room"
           ],
           correct: 1,
@@ -146,7 +146,7 @@ window.CONTENT_OVERRIDES["stakeholder-advanced"] = {
           question: "Marketing built its buyer personas from campaign data; product built different ones from user interviews. Six months on, the roadmap and the ad targeting are aimed at noticeably different people. What does this lesson say went wrong?",
           options: [
             "Product should have deferred to marketing's personas",
-            "Separate persona work drifts — the fix is one shared body of research both functions build from",
+            "Separate persona work drifts. The fix is one shared body of research both functions build from",
             "The personas were revisited too often and lost coherence"
           ],
           correct: 1,
@@ -173,7 +173,7 @@ window.CONTENT_OVERRIDES["stakeholder-advanced"] = {
       steps: [
         { title: "Make knowledge sharing routine", detail: "Lunch-and-learns, internal write-ups, mentorship pairings. The cross-functional patterns that work should be documented and taught, not rediscovered by each new PM." },
         { title: "Model empowerment and recognition", detail: "Give people real autonomy in their stakeholder relationships and trust their judgment. Recognize good cross-functional work publicly. What you reward, others repeat." },
-        { title: "Coach through real situations", detail: "When a less experienced PM hits a hard stakeholder moment — a tense engineering disagreement, a sponsor pushing an off-strategy request — walk through it with them rather than taking it over. The judgment transfers by doing." },
+        { title: "Coach through real situations", detail: "When a less experienced PM hits a hard stakeholder moment (a tense engineering disagreement, a sponsor pushing an off-strategy request), walk through it with them rather than taking it over. The judgment transfers by doing." },
         { title: "Design yourself out of the critical path", detail: "The goal is that alignment holds without you brokering it. If every cross-functional decision still routes through you, the mentoring hasn't landed yet." }
       ],
       checks: [
@@ -181,7 +181,7 @@ window.CONTENT_OVERRIDES["stakeholder-advanced"] = {
           question: "When a less experienced PM hits a hard stakeholder moment, what does this lesson recommend?",
           options: [
             "Step in and handle it yourself so it's resolved cleanly",
-            "Walk through it with them so the judgment transfers — coaching, not taking over",
+            "Walk through it with them so the judgment transfers: coaching, not taking over",
             "Send them the relevant chapter to read"
           ],
           correct: 1,
@@ -229,11 +229,11 @@ window.CONTENT_OVERRIDES["stakeholder-advanced"] = {
             "Your successor has a strong personal network across the functions"
           ],
           correct: 1,
-          explanation: "A contact list and a well-connected successor both re-personalize the system. Durable alignment lives in owned institutions and coached people — that's what a transition tests."
+          explanation: "A contact list and a well-connected successor both re-personalize the system. Durable alignment lives in owned institutions and coached people. That's what a transition tests."
         }
       ],
       reflection: {
-        prompt: "Name one piece of cross-functional alignment on your team that currently depends on you personally. What would it take — a standing ritual with an owner, a shared artifact, a coached teammate — to make it hold without you?"
+        prompt: "Name one piece of cross-functional alignment on your team that currently depends on you personally. What would it take (a standing ritual with an owner, a shared artifact, a coached teammate) to make it hold without you?"
       }
     }
   ]

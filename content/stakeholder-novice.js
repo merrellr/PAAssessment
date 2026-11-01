@@ -26,10 +26,10 @@ window.CONTENT_OVERRIDES["stakeholder-novice"] = {
     ]
   },
   recap: [
-    "Reactive communication only reaches the people who chase you; every 'quick question' is a preventable interruption.",
-    "Build a predictable cadence — standups, a weekly sync, sprint reviews — so people stop needing to ask for status.",
+    "Reactive communication only reaches the people who chase you; every \"quick question\" is a preventable interruption.",
+    "Build a predictable cadence (standups, a weekly sync, sprint reviews) so people stop needing to ask for status.",
     "Set up visible channels: a shared board where progress is self-serve, an open channel instead of DMs, collaborative docs as a single source of truth.",
-    "Tailor the update per audience — delivery detail for the team, on-track/risk/decision for a sponsor, impact and timing for customer-facing teams — and always explain the 'why' of a change.",
+    "Tailor the update per audience (delivery detail for the team, on-track/risk/decision for a sponsor, impact and timing for customer-facing teams), and always explain the \"why\" of a change.",
     "Make transparency the default, including about setbacks; a stakeholder who only hears good news stops trusting the channel."
   ],
   lessons: [
@@ -37,11 +37,11 @@ window.CONTENT_OVERRIDES["stakeholder-novice"] = {
       id: 1,
       title: "Lesson 1: Stop Waiting to Be Asked",
       preCheck: {
-        label: "Before you read on — predict",
+        label: "Before you read on, predict",
         question: "Your stakeholders get updates from you whenever they come and ask. Is that a communication style that scales?",
         options: [
-          "Yes — answering questions as they arrive is efficient",
-          "No — it means people only know what's happening if they chase you, and the ones who don't ask are left in the dark",
+          "Yes. Answering questions as they arrive is efficient",
+          "No. It means people only know what's happening if they chase you, and the ones who don't ask are left in the dark",
           "It depends entirely on how many stakeholders there are"
         ],
         correct: 1,
@@ -49,7 +49,7 @@ window.CONTENT_OVERRIDES["stakeholder-novice"] = {
       },
       body: `
         <p>The most common early-career communication pattern is <strong>reactive</strong>: you share information when someone asks for it. It feels responsive, but it has two quiet failures. People who don't know to ask stay uninformed. And every "quick question" is an interruption that could have been prevented by an update nobody had to request.</p>
-        <p><strong>Proactive</strong> communication flips that: you share status, decisions, and changes on a predictable rhythm, before anyone has to come looking. The test is simple, can a stakeholder answer "what's the state of this project?" without messaging you? If not, you're still reactive.</p>
+        <p><strong>Proactive</strong> communication flips that: you share status, decisions, and changes on a predictable rhythm, before anyone has to come looking. The test is simple: can a stakeholder answer "what's the state of this project?" without messaging you? If not, you're still reactive.</p>
         <p>Communication breakdowns lead to misaligned expectations and, often, product failures. Getting ahead of them is one of the highest-leverage habits an early product person can build.</p>
       `,
       checks: [
@@ -71,7 +71,7 @@ window.CONTENT_OVERRIDES["stakeholder-novice"] = {
             "Whether you send a weekly email"
           ],
           correct: 1,
-          explanation: "If people still have to come to you for status, the information isn't reaching them on its own yet — that's the line between reactive and proactive."
+          explanation: "If people still have to come to you for status, the information isn't reaching them on its own yet. That's the line between reactive and proactive."
         }
       ]
     },
@@ -79,7 +79,7 @@ window.CONTENT_OVERRIDES["stakeholder-novice"] = {
       id: 2,
       title: "Lesson 2: Build a Rhythm",
       body: `
-        <p>Proactive communication runs on <strong>cadence</strong>, a set of recurring touchpoints so predictable that people stop needing to ask.</p>
+        <p>Proactive communication runs on <strong>cadence</strong>: a set of recurring touchpoints so predictable that people stop needing to ask.</p>
         <svg viewBox="0 0 400 120" style="width:100%; height:auto; margin:4px 0 2px;">
           <line x1="20" y1="60" x2="380" y2="60" stroke="#E3E9F0" stroke-width="2"/>
           <g font-family="'Space Grotesk',sans-serif" font-size="9" font-weight="700" fill="#12305e" text-anchor="middle">
@@ -95,14 +95,14 @@ window.CONTENT_OVERRIDES["stakeholder-novice"] = {
             <text x="356" y="82">roadmap review</text>
           </g>
         </svg>
-        <p>The exact structure matters less than the predictability. Regular <strong>standups</strong> keep the team aligned day to day. A weekly <strong>sync</strong> aligns on deliverables and timelines. <strong>Sprint reviews and retrospectives</strong> give stakeholders a scheduled window into progress and a place to raise concerns. Once these exist, most "quick questions" stop happening, the answer was already delivered.</p>
+        <p>The exact structure matters less than the predictability. Regular <strong>standups</strong> keep the team aligned day to day. A weekly <strong>sync</strong> aligns on deliverables and timelines. <strong>Sprint reviews and retrospectives</strong> give stakeholders a scheduled window into progress and a place to raise concerns. Once these exist, most "quick questions" stop happening, because the answer was already delivered.</p>
       `,
       checks: [
         {
           question: "According to this lesson, what makes a communication cadence work?",
           options: [
             "Using the exact ceremonies from the Scrum guide",
-            "Predictability — recurring touchpoints reliable enough that people stop needing to ask for status",
+            "Predictability: recurring touchpoints reliable enough that people stop needing to ask for status",
             "Keeping every meeting under fifteen minutes"
           ],
           correct: 1,
@@ -116,7 +116,7 @@ window.CONTENT_OVERRIDES["stakeholder-novice"] = {
             "It increases them, because people are more engaged"
           ],
           correct: 1,
-          explanation: "A reliable rhythm pre-empts the interruptions. The question doesn't get asked because the person already has the answer."
+          explanation: "A reliable rhythm preempts the interruptions. The question doesn't get asked because the person already has the answer."
         }
       ]
     },
@@ -147,7 +147,7 @@ window.CONTENT_OVERRIDES["stakeholder-novice"] = {
         <ul>
           <li><strong>A shared project tool</strong> (Jira, Linear, Trello, whatever your team uses) where progress is visible without anyone reporting it. If a stakeholder can open the board and see status, that's a question you never have to answer.</li>
           <li><strong>An open communication channel</strong> (Slack, Teams) that breaks down silos, so updates and decisions are visible to everyone who needs them, not trapped in DMs.</li>
-          <li><strong>Collaborative documents</strong> for real-time updates and feedback, a single source of truth people can check and comment on.</li>
+          <li><strong>Collaborative documents</strong> for real-time updates and feedback: a single source of truth people can check and comment on.</li>
         </ul>
         <p>The goal is a setup where the default state is "informed," and staying uninformed takes effort.</p>
       `,
@@ -160,7 +160,7 @@ window.CONTENT_OVERRIDES["stakeholder-novice"] = {
             "Because it's required for agile certification"
           ],
           correct: 1,
-          explanation: "Visible-by-default progress turns status updates into self-service. The tool answers the question so you don't have to."
+          explanation: "Progress that's visible by default turns status updates into self-service. The tool answers the question so you don't have to."
         },
         {
           question: "What's the problem with important updates and decisions living in direct messages?",
@@ -188,20 +188,20 @@ window.CONTENT_OVERRIDES["stakeholder-novice"] = {
       ],
       checks: [
         {
-          question: "You forward your sponsor the same task-by-task update you send the delivery team. They reply: \"Just tell me — are we hitting the date, and is there anything you need from me?\" What does this course say you got wrong?",
+          question: "You forward your sponsor the same task-by-task update you send the delivery team. They reply: \"Just tell me: are we hitting the date, and is there anything you need from me?\" What does this course say you got wrong?",
           options: [
             "Nothing; the sponsor should read the detail you provided",
-            "Wrong altitude — a sponsor needs on-track / main-risk / decision-needed, not the task-level view",
+            "Wrong altitude. A sponsor needs on-track, main risk and decision needed, not the task-level view",
             "You should have sent it as a live demo instead of a written update"
           ],
           correct: 1,
-          explanation: "Executives are tracking the bet, not the tasks. On-track / main-risk / decision-needed is the right altitude for them."
+          explanation: "Executives are tracking the bet, not the tasks. On-track, main risk and decision needed is the right altitude for them."
         },
         {
           question: "Why explain the reasoning whenever a plan changes?",
           options: [
             "To create a record for performance reviews",
-            "A change without a reason breeds confusion and frustration; \"we moved X for Y because Z\" pre-empts both",
+            "A change without a reason breeds confusion and frustration; \"we moved X for Y because Z\" preempts both",
             "Because stakeholders will otherwise assume the worst about the team"
           ],
           correct: 1,
@@ -222,7 +222,7 @@ window.CONTENT_OVERRIDES["stakeholder-novice"] = {
           question: "Why is it a mistake to only communicate wins and go quiet during setbacks?",
           options: [
             "Setbacks aren't interesting to stakeholders",
-            "A stakeholder who only hears good news stops trusting the channel and starts asking around — undoing the proactive communication",
+            "A stakeholder who only hears good news stops trusting the channel and starts asking around, undoing the proactive communication",
             "It makes the retrospective harder to write"
           ],
           correct: 1,
@@ -232,12 +232,12 @@ window.CONTENT_OVERRIDES["stakeholder-novice"] = {
           label: "Bringing it together",
           question: "A stakeholder pings you: \"Hey, what's the status on the export feature? Haven't heard anything in weeks.\" Based on this course, what does that message tell you?",
           options: [
-            "Nothing — occasional status questions are normal",
+            "Nothing. Occasional status questions are normal",
             "Your communication is still reactive for this person: there's no cadence or visible channel giving them the answer, so they had to come ask",
             "The stakeholder is being needlessly demanding"
           ],
           correct: 1,
-          explanation: "The question is the signal. If someone has to ask for status, the proactive setup — rhythm, visible progress, tailored updates — isn't reaching them yet."
+          explanation: "The question is the signal. If someone has to ask for status, the proactive setup (rhythm, visible progress, tailored updates) isn't reaching them yet."
         }
       ],
       reflection: {

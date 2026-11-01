@@ -19,8 +19,8 @@ window.CONTENT_OVERRIDES["execution-experienced"] = {
   recap: [
     "Reliable complex delivery comes from building contingency for the unexpected, not hoping it won't happen.",
     "Design for failure: redundancy and load balancing, proactive monitoring that beats your users to the problem, an incident plan written before you need it.",
-    "Rehearse the peak — load-test past expected traffic to find the specific bottlenecks while it's cheap to fix them.",
-    "Build compliance and quality checkpoints into the process — involve constrained partners at planning time, not the pre-launch review.",
+    "Rehearse the peak: load-test past expected traffic to find the specific bottlenecks while it's cheap to fix them.",
+    "Build compliance and quality checkpoints into the process. Involve constrained partners at planning time, not the pre-launch review.",
     "Handle changing requirements with a standing change-management framework: named assessors, an impact process, update protocols, risk categorization."
   ],
   lessons: [
@@ -28,7 +28,7 @@ window.CONTENT_OVERRIDES["execution-experienced"] = {
       id: 1,
       title: "Lesson 1: Contingency vs. Hope",
       preCheck: {
-        label: "Before you read on — predict",
+        label: "Before you read on, predict",
         question: "Two teams run complex, cross-team launches. One consistently delivers reliably; one gets burned by \"unforeseeable\" problems. What most often separates them?",
         options: [
           "The reliable team has more talented engineers",
@@ -39,8 +39,8 @@ window.CONTENT_OVERRIDES["execution-experienced"] = {
         explanation: "See whether the lesson agrees. This is about the difference between planning for failure and hoping it doesn't happen."
       },
       body: `
-        <p>At an experienced level, the job is delivering complex, cross-team initiatives <strong>reliably</strong>. The thing that makes delivery reliable isn't better luck, it's building in contingency for the unexpected rather than hoping nothing goes wrong.</p>
-        <p>"Hope" as an execution strategy looks like: a single path with no fallback, monitoring that tells you a system is down after users do, a launch plan with no rollback, a regulatory or security requirement discovered late. Every one of those is a place where a normal, expectable problem turns into a crisis.</p>
+        <p>At an experienced level, the job is delivering complex, cross-team initiatives <strong>reliably</strong>. The thing that makes delivery reliable isn't better luck. It's building in contingency for the unexpected rather than hoping nothing goes wrong.</p>
+        <p>"Hope" as an execution strategy looks like a single path with no fallback, monitoring that tells you a system is down after users do, a launch plan with no rollback, a regulatory or security requirement discovered late. Every one of those is a place where a normal, predictable problem turns into a crisis.</p>
         <p>Contingency is the practice of assuming those problems <em>will</em> occur and deciding in advance how the system and the plan absorb them. This course is four applications of that idea.</p>
       `,
       checks: [
@@ -48,11 +48,11 @@ window.CONTENT_OVERRIDES["execution-experienced"] = {
           question: "What does the lesson mean by \"hope as an execution strategy\"?",
           options: [
             "Being optimistic in team communications",
-            "A single path with no fallback, monitoring that lags users, launches with no rollback, requirements found late — normal problems left to become crises",
+            "A single path with no fallback, monitoring that lags users, launches with no rollback, requirements found late: normal problems left to become crises",
             "Not tracking project risks in a document"
           ],
           correct: 1,
-          explanation: "Hope is when an expectable failure has no planned absorption. Contingency is deciding in advance how the system and plan handle it."
+          explanation: "Hope is when a predictable failure has no plan for absorbing it. Contingency is deciding in advance how the system and plan handle it."
         },
         {
           question: "What actually makes complex delivery reliable, according to this lesson?",
@@ -85,14 +85,14 @@ window.CONTENT_OVERRIDES["execution-experienced"] = {
           <rect x="250" y="88" width="60" height="26" rx="5" fill="#F7F9FC" stroke="#9AA3AD" stroke-width="1" stroke-dasharray="3 2"/><text x="280" y="105" text-anchor="middle" font-family="sans-serif" font-size="8.5" fill="#9AA3AD">node C down</text>
           <text x="340" y="69" font-family="sans-serif" font-size="8" fill="#9AA3AD" text-anchor="middle">still up</text>
         </svg>
-        <p>The building blocks: <strong>redundancy and load balancing</strong> so one failed component doesn't take the product down; <strong>proactive monitoring and alerting</strong> so you detect a degradation before users report it; and an <strong>incident response plan written before you need it</strong>, who's on call, how you communicate, how you roll back, so a 2 a.m. outage runs on a script instead of improvisation.</p>
+        <p>The building blocks: <strong>redundancy and load balancing</strong> so one failed component doesn't take the product down; <strong>proactive monitoring and alerting</strong> so you detect a degradation before users report it; and an <strong>incident response plan written before you need it</strong> (who's on call, how you communicate, how you roll back), so a 2 a.m. outage runs on a script instead of improvisation.</p>
       `,
       checks: [
         {
           question: "Why is \"proactive monitoring and alerting\" a contingency measure and not just an ops nicety?",
           options: [
             "It produces dashboards for status meetings",
-            "It's the difference between detecting a degradation yourself and finding out from an angry user — which determines how much time you have to respond",
+            "It's the difference between detecting a degradation yourself and finding out from an angry user, which determines how much time you have to respond",
             "It replaces the need for redundancy"
           ],
           correct: 1,
@@ -102,7 +102,7 @@ window.CONTENT_OVERRIDES["execution-experienced"] = {
           question: "What's the value of writing the incident response plan before an incident?",
           options: [
             "It's required for compliance audits",
-            "A 2 a.m. outage then runs on a prepared script — who's on call, how to communicate, how to roll back — instead of being improvised under pressure",
+            "A 2 a.m. outage then runs on a prepared script (who's on call, how to communicate, how to roll back) instead of being improvised under pressure",
             "It lets you skip the post-mortem"
           ],
           correct: 1,
@@ -114,8 +114,8 @@ window.CONTENT_OVERRIDES["execution-experienced"] = {
       id: 3,
       title: "Lesson 3: Rehearse the Peak",
       body: `
-        <p>The failures that hurt most are the ones that only appear under load, a launch spike, a seasonal surge, a big new customer going live. Hoping the system holds is not a plan; rehearsing is.</p>
-        <p><strong>Performance testing and load simulation</strong> mean deliberately pushing the system to and past its expected peak in a controlled setting, so you find the bottleneck, the query that falls over, the queue that backs up, the memory that leaks, before real traffic finds it for you.</p>
+        <p>The failures that hurt most are the ones that only appear under load: a launch spike, a seasonal surge, a big new customer going live. Hoping the system holds is not a plan; rehearsing is.</p>
+        <p><strong>Performance testing and load simulation</strong> mean deliberately pushing the system to and past its expected peak in a controlled setting, so you find the bottleneck (the query that falls over, the queue that backs up, the memory that leaks) before real traffic finds it for you.</p>
         <svg viewBox="0 0 400 150" style="width:100%; height:auto; margin:4px 0 2px;" xmlns="http://www.w3.org/2000/svg">
           <line x1="40" y1="16" x2="40" y2="120" stroke="#9AA3AD" stroke-width="1.2"/>
           <line x1="40" y1="120" x2="384" y2="120" stroke="#9AA3AD" stroke-width="1.2"/>
@@ -136,7 +136,7 @@ window.CONTENT_OVERRIDES["execution-experienced"] = {
           question: "What's the goal of deliberately load-testing past your expected peak?",
           options: [
             "To prove the system can handle anything",
-            "To find the specific bottlenecks that break first — under controlled conditions, before real traffic finds them",
+            "To find the specific bottlenecks that break first, under controlled conditions, before real traffic finds them",
             "To generate a performance benchmark for marketing"
           ],
           correct: 1,
@@ -146,7 +146,7 @@ window.CONTENT_OVERRIDES["execution-experienced"] = {
           question: "Beyond \"it passed,\" what should load testing produce?",
           options: [
             "A single throughput number",
-            "A known ceiling (solid to X, degraded past that) and a ranked list of what breaks first — feeding the pre-launch fix list and the scaling roadmap",
+            "A known ceiling (solid to X, degraded past that) and a ranked list of what breaks first, feeding the pre-launch fix list and the scaling roadmap",
             "A recommendation to buy more servers"
           ],
           correct: 1,
@@ -158,12 +158,12 @@ window.CONTENT_OVERRIDES["execution-experienced"] = {
       id: 4,
       title: "Lesson 4: Build Checkpoints Into the Process",
       body: `
-        <p>The other source of late crises is a constraint discovered late, a security requirement, a legal review, a compliance rule that should have shaped the design and instead forces a rebuild. The fix is structural: put the checkpoints in the process, not at the end of it.</p>
+        <p>The other source of late crises is a constraint discovered late: a security requirement, a legal review, or a compliance rule that should have shaped the design and instead forces a rebuild. The fix is structural: put the checkpoints in the process, not at the end of it.</p>
       `,
       steps: [
         { title: "Involve constrained partners at planning time", detail: "Bring security, legal, and compliance into the planning phase of a new initiative, not the review before launch. They identify the requirements that shape the design while the design is still cheap to change." },
-        { title: "Set checkpoints at key stages", detail: "Define explicit review points in the development process — after design, before build, before release — where adherence to the relevant requirements is checked. A gate you pass through beats a surprise you hit." },
-        { title: "Document the checks", detail: "Keep records of the risk assessments, reviews, and decisions. When a question comes up later — internal or external — the answer is a document, not a scramble." },
+        { title: "Set checkpoints at key stages", detail: "Define explicit review points in the development process (after design, before build, before release) where adherence to the relevant requirements is checked. A gate you pass through beats a surprise you hit." },
+        { title: "Document the checks", detail: "Keep records of the risk assessments, reviews, and decisions. When a question comes up later, internal or external, the answer is a document, not a scramble." },
         { title: "Treat the constraint as an input, not a blocker", detail: "The teams that do this well collaborate with the constrained function to find a compliant way to do the thing, rather than treating the requirement as the enemy of shipping." }
       ],
       checks: [
@@ -181,11 +181,11 @@ window.CONTENT_OVERRIDES["execution-experienced"] = {
           question: "What's the purpose of documenting risk assessments and reviews as you go?",
           options: [
             "To create busywork that slows the team down",
-            "So that when a question comes up later — internal or external — the answer is an existing record rather than a scramble to reconstruct it",
+            "So that when a question comes up later, internal or external, the answer is an existing record rather than a scramble to reconstruct it",
             "To satisfy the project management tool's fields"
           ],
           correct: 1,
-          explanation: "Documented-as-you-go is itself a contingency: it means a future audit or incident review is a lookup, not an emergency archaeology project."
+          explanation: "Documenting as you go is itself a contingency: it means a future audit or incident review is a lookup, not an emergency archaeology project."
         }
       ]
     },
@@ -193,22 +193,22 @@ window.CONTENT_OVERRIDES["execution-experienced"] = {
       id: 5,
       title: "Lesson 5: A Framework for Change",
       body: `
-        <p>The last unexpected thing to plan for is the requirements changing mid-flight, a new regulation, a platform policy shift, a contractual obligation. Experienced teams handle this with a standing <strong>change management framework</strong> rather than treating each change as a one-off fire.</p>
+        <p>The last unexpected thing to plan for is the requirements changing mid-flight: a new regulation, a platform policy shift, a contractual obligation. Experienced teams handle this with a standing <strong>change management framework</strong> rather than treating each change as a one-off fire.</p>
         <p>The framework defines, in advance:</p>
         <ul>
-          <li><strong>Who assesses a change</strong> — the named people (product, engineering, and whichever constrained function applies) who evaluate it.</li>
-          <li><strong>An impact assessment process</strong> — a repeatable way to work out what a change affects: which features, which workflows, which commitments.</li>
-          <li><strong>Update protocols</strong> — how a change gets rolled out, including testing and user communication.</li>
-          <li><strong>Risk categorization</strong> — high / medium / low, with high-risk changes folded into the next roadmap planning cycle rather than bolted on.</li>
+          <li><strong>Who assesses a change:</strong> the named people (product, engineering, and whichever constrained function applies) who evaluate it.</li>
+          <li><strong>An impact assessment process:</strong> a repeatable way to work out what a change affects: which features, which workflows, which commitments.</li>
+          <li><strong>Update protocols:</strong> how a change gets rolled out, including testing and user communication.</li>
+          <li><strong>Risk categorization:</strong> high, medium or low, with high-risk changes folded into the next roadmap planning cycle rather than bolted on.</li>
         </ul>
-        <p>Put together with the earlier lessons: design for failure, rehearse the peak, checkpoint the constraints, and framework the changes. That's contingency instead of hope, across the whole delivery.</p>
+        <p>Put together with the earlier lessons: design for failure, rehearse the peak, checkpoint the constraints, and put a framework around changes. That's contingency instead of hope, across the whole delivery.</p>
       `,
       checks: [
         {
           question: "What does a change management framework give you that handling each change ad hoc doesn't?",
           options: [
             "A way to reject changes you don't want to make",
-            "A predefined process — who assesses, how impact is measured, how it rolls out, how it's prioritized — so a mid-flight requirement change is absorbed rather than becoming a fire drill",
+            "A predefined process (who assesses, how impact is measured, how it rolls out, how it's prioritized) so a mid-flight requirement change is absorbed rather than becoming a fire drill",
             "Fewer changes overall"
           ],
           correct: 1,
@@ -227,7 +227,7 @@ window.CONTENT_OVERRIDES["execution-experienced"] = {
         }
       ],
       reflection: {
-        prompt: "Take a launch or delivery you're responsible for. For each of the four — component failure, load spike, a late-discovered constraint, a mid-flight requirement change — write down what currently happens if it occurs. Which one has no plan at all?"
+        prompt: "Take a launch or delivery you're responsible for. For each of the four (component failure, load spike, a late-discovered constraint, a mid-flight requirement change), write down what currently happens if it occurs. Which one has no plan at all?"
       }
     }
   ]

@@ -12,18 +12,18 @@ window.CONTENT_OVERRIDES = window.CONTENT_OVERRIDES || {};
 window.CONTENT_OVERRIDES["aiIndividual-moderate"] = {
   sourceUrl: "https://www.linkedin.com/pulse/from-roadmaps-rituals-how-agentic-ai-rewriting-job-merrell-mism-r8pnc",
   recap: [
-    "Stop asking 'what can I prompt for' and start asking 'which recurring ritual can an agent support or partly own'.",
-    "Hand the first pass of backlog grooming to an agent — clustering, dedup, draft problem statements — and spend your time on trade-offs and the 'why'.",
+    "Stop asking \"what can I prompt for?\" and start asking \"which recurring ritual can an agent support or partly own?\"",
+    "Hand the first pass of backlog grooming to an agent (clustering, removing duplicates, drafting problem statements) and spend your time on trade-offs and the \"why.\"",
     "Run research and experiments as always-on engines: the agent collects and summarizes; you tell weak signal from hype and own the learning agenda.",
     "Turn KPI reviews from a reporting readout into a decision meeting by reading the agent's summary before the meeting.",
-    "Become a conductor — pick one ritual, define a 'good enough' first agent, and protect the recovered time for sense-making."
+    "Become a conductor: pick one ritual, define a \"good enough\" first agent, and protect the recovered time for sense-making."
   ],
   lessons: [
     {
       id: 1,
       title: "Lesson 1: From Tasks to Rituals",
       preCheck: {
-        label: "Before you read on — predict",
+        label: "Before you read on, predict",
         question: "You already use AI for the odd task. What's the higher-leverage question to start asking instead?",
         options: [
           "\"What's the single best prompt for this one-off request?\"",
@@ -36,13 +36,13 @@ window.CONTENT_OVERRIDES["aiIndividual-moderate"] = {
       body: `
         <p>Most product managers didn't sign up to be professional plate spinners, yet the days fill up with writing PRDs, chasing status, pulling data for reviews, and answering the same question in slightly different formats. The strategic work gets squeezed into the margins.</p>
         <p>The mindset shift that changes this: stop asking <em>"what can I ask an AI model for?"</em> and start asking <em>"which recurring ritual in my product practice can be supported or partly owned by an agent?"</em></p>
-        <p>A <strong>ritual</strong> is anything you do on a predictable cadence with a clear purpose, weekly grooming, monthly KPI reviews, quarterly strategy updates. Your work splits into two buckets:</p>
+        <p>A <strong>ritual</strong> is anything you do on a predictable cadence with a clear purpose, like weekly grooming, monthly KPI reviews or quarterly strategy updates. Your work splits into two buckets:</p>
         <ul>
           <li><strong>High volume, repeatable tasks.</strong> Agents are very good at these.</li>
-          <li><strong>High judgment, high context decisions.</strong> Used well, agents amplify you here, they don't replace you.</li>
+          <li><strong>High judgment, high context decisions.</strong> Used well, agents amplify you here. They don't replace you.</li>
         </ul>
         <p>The goal isn't a smarter autocomplete. It's moving from <strong>task execution</strong> to <strong>orchestration and sense-making</strong>.</p>
-        <p>Here's roughly how that split shifts over eight weeks as rituals get agent support, drag the slider:</p>
+        <p>Here's roughly how that split shifts over eight weeks as rituals get agent support. Drag the slider to see it:</p>
       `,
       chart: {
         unit: "Week",
@@ -58,7 +58,7 @@ window.CONTENT_OVERRIDES["aiIndividual-moderate"] = {
           question: "What distinguishes a \"ritual\" from a one-off task in this lesson?",
           options: [
             "A ritual is any task that takes more than an hour",
-            "A ritual happens on a predictable cadence with a clear purpose — which is exactly what makes it a good place to embed an agent",
+            "A ritual happens on a predictable cadence with a clear purpose, which is exactly what makes it a good place to embed an agent",
             "A ritual is any task a PM dislikes doing"
           ],
           correct: 1,
@@ -164,7 +164,7 @@ window.CONTENT_OVERRIDES["aiIndividual-moderate"] = {
             "Formatting the weekly digest for the leadership deck"
           ],
           correct: 1,
-          explanation: "\"The agent collects and summarizes. You turn noise into narrative.\" Judgment about what a signal means, and what to do about it, is the part that stays yours."
+          explanation: "The agent collects and summarizes; you turn noise into narrative. Judgment about what a signal means, and what to do about it, is the part that stays yours."
         },
         {
           question: "With an Experiment Designer agent in place, what does the PM still own?",
@@ -180,7 +180,7 @@ window.CONTENT_OVERRIDES["aiIndividual-moderate"] = {
     },
     {
       id: 4,
-      title: "Lesson 4: KPI Reviews — From Reporting Meeting to Decision Meeting",
+      title: "Lesson 4: Turn KPI Reviews Into Decision Meetings",
       body: `
         <p>Most PMs have too many dashboards and too little insight. KPI reviews turn into a meeting where everyone reads numbers out loud.</p>
         <p>A "Metrics" agent monitors your core metrics, alerts you to anomalies, writes a weekly or monthly "state of the product" summary, highlights cohorts or flows that changed meaningfully, and suggests follow-up questions and possible root causes.</p>
@@ -225,11 +225,11 @@ window.CONTENT_OVERRIDES["aiIndividual-moderate"] = {
           <li>Less energy chasing status, more energy shaping strategy.</li>
           <li>Fewer one-off tasks, more reusable systems and playbooks.</li>
         </ul>
-        <p>Your calendar shifts toward regular review rituals with AI-prepared inputs, deep-dive sessions with design, engineering, and stakeholders, and protected focus time for thinking, writing, and deciding. You become less of a project manager and more of a <strong>conductor</strong>, not because you work less, but because more of your effort points at the parts of the job that are uniquely yours: framing problems, telling the story, making hard choices under uncertainty.</p>
+        <p>Your calendar shifts toward regular review rituals with AI-prepared inputs, deep-dive sessions with design, engineering, and stakeholders, and protected focus time for thinking, writing, and deciding. You become less of a project manager and more of a <strong>conductor</strong>. Not because you work less, but because more of your effort points at the parts of the job that are uniquely yours: framing problems, telling the story, making hard choices under uncertainty.</p>
         <p>You don't need an "AI transformation" to get there. Three practical steps:</p>
       `,
       steps: [
-        { title: "Pick one ritual", detail: "Choose a single workflow that already happens on a regular cadence — weekly backlog grooming, monthly KPI reviews. One is enough to start." },
+        { title: "Pick one ritual", detail: "Choose a single workflow that already happens on a regular cadence, like weekly backlog grooming or monthly KPI reviews. One is enough to start." },
         { title: "Define a \"good enough\" first agent", detail: "Be explicit about what it should do: gather inputs, summarize, group, or propose options. Accept that version one will be imperfect and improve it through your feedback, the same way you'd coach a new team member." },
         { title: "Protect your judgment time", detail: "Use the hours you get back to deepen your strategic work. Don't immediately fill the gap with more meetings or busywork. Treat that recovered time as a protected sense-making block." }
       ],
@@ -238,21 +238,21 @@ window.CONTENT_OVERRIDES["aiIndividual-moderate"] = {
           question: "The lesson calls the shift \"from project manager to conductor.\" What does that mean in practice?",
           options: [
             "The PM stops doing hands-on work and only reviews others' output",
-            "More of the PM's effort points at the uniquely human parts — framing problems, telling the story, hard choices — while agents absorb the repeatable production work",
+            "More of the PM's effort points at the uniquely human parts (framing problems, telling the story, making hard choices) while agents absorb the repeatable production work",
             "The PM manages the AI agents the way they used to manage engineers"
           ],
           correct: 1,
-          explanation: "\"Not because you work less, but because more of your effort is directed at the uniquely human parts of product management.\" The volume work moves to agents; the judgment and alignment work stays, and grows."
+          explanation: "Not because you work less, but because more of your effort points at the uniquely human parts of the job. The volume work moves to agents; the judgment and alignment work stays, and grows."
         },
         {
           question: "Why does the lesson say to accept that \"version one will be imperfect\" for a first agent?",
           options: [
             "Because AI output can't be improved once it's set up",
-            "Because you improve it through feedback over time — treating it like coaching a new team member, not like buying a finished tool",
+            "Because you improve it through feedback over time, the way you'd coach a new team member, not like buying a finished tool",
             "Because imperfect agents are cheaper to run"
           ],
           correct: 1,
-          explanation: "\"Treat agents as team members and invest in training them.\" A rough first version you refine beats waiting for a perfect one that never ships."
+          explanation: "Treat a new agent like a new team member and invest in coaching it. A rough first version you refine beats waiting for a perfect one that never ships."
         },
         {
           label: "Bringing it together",
@@ -260,14 +260,14 @@ window.CONTENT_OVERRIDES["aiIndividual-moderate"] = {
           options: [
             "Take on two more product areas, since capacity opened up",
             "Fill it with the standing meetings you'd been declining",
-            "Protect it as sense-making time — strategy, stakeholder alignment, the framing and hard-choice work agents can't do"
+            "Protect it as sense-making time: strategy, stakeholder alignment, and the framing and hard-choice work agents can't do"
           ],
           correct: 2,
-          explanation: "The entire point of moving from roadmaps to rituals is to redirect effort toward the uniquely human parts of the job. Refilling the time with volume defeats the purpose. The real question isn't \"will AI take my job?\" — it's \"how quickly can I redesign my job around the things only I can do?\""
+          explanation: "The entire point of moving from roadmaps to rituals is to redirect effort toward the uniquely human parts of the job. Refilling the time with volume defeats the purpose. The real question isn't \"will AI take my job?\" It's \"how quickly can I redesign my job around the things only I can do?\""
         }
       ],
       reflection: {
-        prompt: "Pick one ritual you run on a cadence (grooming, insights review, KPI review). Describe the \"good enough\" first agent you'd build for it — what it gathers or summarizes — and the judgment call you'd keep for yourself."
+        prompt: "Pick one ritual you run on a cadence (grooming, insights review, KPI review). Describe the \"good enough\" first agent you'd build for it (what it gathers or summarizes) and the judgment call you'd keep for yourself."
       }
     }
   ]
