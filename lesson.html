@@ -800,6 +800,8 @@ function renderStepper(steps){
    feedback. Purely for reinforcement — never blocks progress,
    people can continue whether they get it right or not. Accepts
    an array so a lesson can ask more than one question. */
+const CHECK_TICK = '<svg viewBox="0 0 24 24"><path d="M5 12.5l4.2 4.2L19 7"/></svg>';
+const CHECK_CROSS = '<svg viewBox="0 0 24 24"><path d="M7 7l10 10M17 7L7 17"/></svg>';
 function renderChecksInto(containerId, checks){
   const container = document.getElementById(containerId);
   container.innerHTML = '';
@@ -821,19 +823,25 @@ function renderChecksInto(containerId, checks){
     check.options.forEach((optText, i) => {
       const btn = document.createElement('button');
       btn.type = 'button';
-      btn.className = 'check-option';
-      btn.textContent = optText;
+      btn.className = 'check-option has-mark';
+      // a ring now; a green tick on the right answer and a red cross on a wrong pick once answered (pa-theme.css)
+      btn.innerHTML = '<span class="check-mark" aria-hidden="true">' + CHECK_TICK + '</span><span class="check-text"></span><span class="sr-only check-said"></span>';
+      btn.querySelector('.check-text').textContent = optText;
       btn.onclick = () => {
         const allButtons = optionsWrap.querySelectorAll('.check-option');
         allButtons.forEach(b => b.disabled = true);
-        if (i === check.correct){
-          btn.classList.add('correct');
-        } else {
+        const right = allButtons[check.correct];
+        right.classList.add('correct');
+        right.querySelector('.check-said').textContent = ' (correct answer)';
+        if (i !== check.correct){
           btn.classList.add('incorrect');
-          allButtons[check.correct].classList.add('correct');
+          btn.querySelector('.check-mark').innerHTML = CHECK_CROSS;
+          btn.querySelector('.check-said').textContent = ' (your answer, incorrect)';
         }
         feedback.classList.add('show');
-        feedback.innerHTML = (i === check.correct ? '<strong>Correct.</strong> ' : '<strong>Not quite.</strong> ') + check.explanation;
+        feedback.innerHTML = (i === check.correct
+          ? '<span class="check-verdict ok"><span class="check-mark" aria-hidden="true">' + CHECK_TICK + '</span>Correct.</span> '
+          : '<span class="check-verdict bad"><span class="check-mark" aria-hidden="true">' + CHECK_CROSS + '</span>Not quite.</span> ') + check.explanation;
       };
       optionsWrap.appendChild(btn);
     });

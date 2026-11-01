@@ -10,6 +10,16 @@ async function blockTests(){
   const types = all('#lessonBody [data-block]').map(b => b.dataset.block);
   const rail = $('lessonRail');
   t('the course outline lists every lesson, with this one marked', all('.rail-list a', rail).length === 5 && rail.querySelector('[aria-current="page"]').getAttribute('href').endsWith('&lesson=' + lesson));
+  if (lesson === 2){
+    // the quick check: a wrong pick gets a red cross, the right answer a green tick
+    const box = $('checkContainer').querySelector('.check-box');
+    const opts = all('.check-option', box);
+    t('quick-check answers start with an empty ring', opts.length > 1 && opts.every(o => o.querySelector('.check-mark') && !o.classList.contains('correct')));
+    const right = opts.findIndex((o, i) => i === (window.CONTENT_OVERRIDES['discovery-novice'].lessons[1].checks || [window.CONTENT_OVERRIDES['discovery-novice'].lessons[1].check])[0].correct);
+    const wrong = opts.findIndex((o, i) => i !== right);
+    opts[wrong].click(); await sleep(30);
+    t('a wrong pick shows a red cross, the right answer a green tick, and the feedback says "Not quite"', opts[wrong].classList.contains('incorrect') && /M7 7l10 10/.test(opts[wrong].querySelector('.check-mark').innerHTML) && opts[right].classList.contains('correct') && !!box.querySelector('.check-verdict.bad') && /Not quite/.test(box.querySelector('.check-feedback').textContent) && /your answer, incorrect/.test(opts[wrong].textContent));
+  }
   if (lesson === 1){
     const layout = $('lessonLayout'), close = rail.querySelector('[data-rail="close"]');
     try { localStorage.removeItem('pa_rail_collapsed'); } catch (e) {}
