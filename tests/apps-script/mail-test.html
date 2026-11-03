@@ -66,8 +66,8 @@ try {
   t('subject names the company', m.subject === "You're invited to join Acme & Sons on Product Advisory Learning", m.subject);
   t('reply-to is the person who sent the invite', m.replyTo === 'rob@owner.com');
   t('sender name is Product Advisory Learning', m.name === 'Product Advisory Learning');
-  t('plain-text body has the greeting, the company, the inviter and the link', /^Hi Jane,/.test(m.body) && /Acme & Sons/.test(m.body) && /rob@owner\.com/.test(m.body) && m.body.indexOf('https://assessment.productadvisory.co/join.html?token=' + TOK) > -1);
-  t('the link always uses the real site address', /href="https:\/\/assessment\.productadvisory\.co\/join\.html\?token=0123456789abcdef0123456789abcdef"/.test(m.htmlBody));
+  t('plain-text body has the greeting, the company, the inviter and the link', /^Hi Jane,/.test(m.body) && /Acme & Sons/.test(m.body) && /rob@owner\.com/.test(m.body) && m.body.indexOf('https://assessment.productadvisory.co/join?token=' + TOK) > -1);
+  t('the link always uses the real site address', /href="https:\/\/assessment\.productadvisory\.co\/join\?token=0123456789abcdef0123456789abcdef"/.test(m.htmlBody));
   t('role wording: member', /as a member/.test(m.body));
   t('expiry date is shown', /expires on [A-Z][a-z]+ \d{1,2}, \d{4}/.test(m.body));
   t('the company name is HTML-escaped', m.htmlBody.indexOf('Acme &amp; Sons') > -1 && m.htmlBody.indexOf('Acme & Sons') === -1);
