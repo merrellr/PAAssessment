@@ -748,6 +748,15 @@ function deleteRowsByEmail_(sheet, emailIndex, email) {
   return removed;
 }
 
+// The "already sent" claims for one account (section 16), removed with the account.
+function deleteNotifyClaims_(uid) {
+  var n = 0;
+  try {
+    fsWhere_(NOTIFY_CLAIMS_, 'uid', uid).forEach(function (d) { fsCall_('delete', fsBase_() + '/' + NOTIFY_CLAIMS_ + '/' + encodeURIComponent(d.id)); n++; });
+  } catch (err) { /* no service account yet, or Firestore unavailable: the claims hold no email and expire in use */ }
+  return n;
+}
+
 function deleteAccountData_(idToken) {
   var who = null;
   try { who = verifyFirebaseIdToken_(idToken); } catch (err) { who = null; }
@@ -769,7 +778,8 @@ function deleteAccountData_(idToken) {
         welcomes: deleteRowsByEmail_(ss.getSheetByName(WELCOME_SHEET_NAME_), 2, who.email) +
           deleteRowsByEmail_(ss.getSheetByName(ADMIN_WELCOME_SHEET_NAME_), 3, who.email) +
           deleteRowsByEmail_(ss.getSheetByName(TOOL_LAUNCH_SHEET_NAME_), 2, who.email),
-        notifications: deleteRowsByEmail_(ss.getSheetByName(NOTIFY_SHEET_NAME_), 2, who.email)
+        notifications: deleteRowsByEmail_(ss.getSheetByName(NOTIFY_SHEET_NAME_), 2, who.email),
+        sendClaims: deleteNotifyClaims_(who.uid)
       }
     };
   } catch (err) {
@@ -1702,7 +1712,19 @@ function sendWeeklyReport() {
   var r = rpBuild_(rpLoad_(), Date.now(), 7, rpLabel_);
   var mail = rpWeeklyEmail_(r, SITE_BASE_URL_ + 'reports.html');
   if (MailApp.getRemainingDailyQuota() < 1) return;
-  sendMail_({ to: LEAD_NOTIFY_EMAIL_, subject: mail.subject, body: mail.text, htmlBody: mail.html, name: 'Product Advisory Learning' }, 'noreply');
+  // Once a week however many copies of this script run it (see notifyClaim_ in section 16). Without the
+  // Firestore key the claim cannot be made, and the report goes out as before.
+  var now = Date.now(), claimId = '';
+  try {
+    claimId = notifyClaimId_('leadReport', 'weekly', now, notifyOffsetMin_(now));
+    if (notifyClaim_(claimId, '') === 'taken') { Logger.log('Another copy of this script already sent this week\'s report.'); return; }
+  } catch (err) { claimId = ''; }
+  try {
+    sendMail_({ to: LEAD_NOTIFY_EMAIL_, subject: mail.subject, body: mail.text, htmlBody: mail.html, name: 'Product Advisory Learning' }, 'noreply');
+  } catch (err) {
+    if (claimId) notifyUnclaim_(claimId);
+    throw err;
+  }
 }
 
 // Run these once from the editor's function menu. The first run asks you to approve the
@@ -2734,13 +2756,39 @@ function notifyOrgData_(orgId) {
   return { org: org, rows: rows, invites: invites, snapshots: snaps };
 }
 
+/* ---------- one send per email per period, across every copy of this script ---------- */
+// The Notifications tab only knows what THIS copy sent. If the script is ever copied (a second spreadsheet with its own
+// hourly schedule), both copies would think the same email is due. So before sending, a run claims the email for this
+// period in Firestore, which every copy shares. Creating a document that already exists fails, so only one claim wins,
+// even if two copies run at the same moment. Returns 'ok' (send it), 'taken' (another copy already did) or throws.
+var NOTIFY_CLAIMS_ = 'notifySends';
+function notifyClaimId_(key, freq, nowMs, offset) {
+  return String(key).replace(/[^A-Za-z0-9_-]/g, '_') + '_' + freq + '_' + NotifyCore.dateKey(NotifyCore.periodStart(freq, nowMs, offset), offset);
+}
+function notifyClaim_(id, uid) {
+  var by = '';
+  try { by = ScriptApp.getScriptId(); } catch (e) { by = ''; }
+  try {
+    fsCall_('post', fsBase_() + '/' + NOTIFY_CLAIMS_ + '?documentId=' + encodeURIComponent(id),
+      { fields: { uid: { stringValue: String(uid || '') }, at: { timestampValue: new Date().toISOString() }, script: { stringValue: by } } });
+    return 'ok';
+  } catch (err) {
+    if (String(err && err.message) === 'firestore_409') return 'taken';
+    throw err;
+  }
+}
+// A send that failed gives its claim back, so the next hourly run can try again.
+function notifyUnclaim_(id) {
+  try { fsCall_('delete', fsBase_() + '/' + NOTIFY_CLAIMS_ + '/' + encodeURIComponent(id)); } catch (e) { /* it expires with the period anyway */ }
+}
+
 /* ---------- the run ---------- */
 // opts: { dryRun: true } counts what is due without sending; { only: email } limits the run to one person.
 function notifyRun_(nowMs, opts) {
   opts = opts || {};
   var started = Date.now();
   var offset = notifyOffsetMin_(nowMs);
-  var out = { checkinsDue: 0, reportsDue: 0, sent: 0, failed: 0, stopped: '' };
+  var out = { checkinsDue: 0, reportsDue: 0, sent: 0, failed: 0, skipped: 0, stopped: '' };
   if (!opts.dryRun && NotifyCore.localParts(nowMs, offset).hour < NotifyCore.SEND_HOUR) { out.stopped = 'before_8am'; return out; }
 
   var sheet = notifySheet_();
@@ -2777,7 +2825,7 @@ function notifyRun_(nowMs, opts) {
     var q = queue[i], u = q.user;
     if (Date.now() - started > NOTIFY_TIME_BUDGET_MS_) { out.stopped = 'time'; break; }
     if (MailApp.getRemainingDailyQuota() <= NOTIFY_MAIL_RESERVE_) { out.stopped = 'daily_limit'; break; }
-    var key, mail, company = '';
+    var key, mail, company = '', claimId = '', claimed = false, mailed = false;
     try {
       if (q.kind === 'checkin') {
         key = 'checkin:' + u.uid;
@@ -2795,11 +2843,21 @@ function notifyRun_(nowMs, opts) {
         mail = NotifyCore.orgEmail(NotifyCore.orgReport({ org: od.org, rows: od.rows, invites: od.invites, snapshots: od.snapshots, platform: platform,
           freq: q.freq, nowMs: nowMs, offsetMin: offset, adminName: u.name, links: notifyLinks_(u.uid, 'orgReport') }));
       }
+      claimId = notifyClaimId_(key, q.freq, nowMs, offset);
+      if (notifyClaim_(claimId, u.uid) === 'taken') {
+        // Another copy of this script already sent it this period: note it here too, so this copy stops asking.
+        notifyRecord_(sheet, state, key, [u.uid, u.email, q.kind === 'checkin' ? 'Check-in' : 'Company report', company, q.freq, new Date(nowMs), 'Skipped: already sent by another copy']);
+        out.skipped++;
+        continue;
+      }
+      claimed = true;
       sendMail_({ to: u.email, subject: mail.subject, body: mail.text, htmlBody: mail.html, name: 'Product Advisory Learning' }, 'assessment');
+      mailed = true;
       notifyRecord_(sheet, state, key, [u.uid, u.email, q.kind === 'checkin' ? 'Check-in' : 'Company report', company, q.freq, new Date(nowMs), 'Sent']);
       out.sent++;
     } catch (err) {
       out.failed++;
+      if (claimed && !mailed) notifyUnclaim_(claimId);   // only an email that did not go out is tried again
       // Recorded as tried, so one broken account cannot block the queue every hour.
       notifyRecord_(sheet, state, key || (q.kind + ':' + u.uid), [u.uid, u.email, q.kind === 'checkin' ? 'Check-in' : 'Company report', company, q.freq, new Date(nowMs), 'Failed: ' + String(err && err.message || err).slice(0, 120)]);
     }
