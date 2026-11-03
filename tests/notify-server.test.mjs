@@ -22,10 +22,11 @@ const TS = (iso) => ({ __ts: iso });
 
 /* ------------------------------------------------ an in-memory Firestore */
 let store, users, sheets, props, sentMail, quota, fetchLog, tokenFetches, failPaths;
+let mailFails = 0, scriptId = 'copy-A';
 function reset(){
   props = { FIREBASE_SERVICE_ACCOUNT: JSON.stringify({ client_email: 'sa@x.iam.gserviceaccount.com', private_key: 'KEY' }) };
   sheets = { Responses: [['Timestamp'], [new Date(MON - 50 * DAY), 'Old', 'old@x.com', '', '', '', '', 40, 'Moderate Experience', 30, 60, 80, 45, 70, 20, 55]] };
-  sentMail = []; quota = 1400; fetchLog = []; tokenFetches = 0; failPaths = [];
+  sentMail = []; quota = 1400; fetchLog = []; tokenFetches = 0; failPaths = []; mailFails = 0; scriptId = 'copy-A';
   const old = String(MON - 90 * DAY);
   users = [
     { localId: 'learner1', email: 'Jane@Acme.com', displayName: 'Jane Doe', emailVerified: true, createdAt: old },
@@ -88,6 +89,16 @@ function firestore(url, opts){
     store[p].notify = Object.assign({}, store[p].notify, { [kind]: fields[kind].stringValue });
     return res(200, docOut(p));
   }
+  if (method === 'post' && /(^|&)documentId=/.test(qs || '')){
+    // create only: fails when the document is already there
+    const dp = p + '/' + decodeURIComponent(/documentId=([^&]+)/.exec(qs)[1]);
+    if (store[dp]) return res(409, {});
+    const f = JSON.parse(opts.payload).fields, plain = {};
+    Object.keys(f).forEach(k => { plain[k] = f[k].stringValue !== undefined ? f[k].stringValue : f[k].timestampValue; });
+    store[dp] = plain;
+    return res(200, docOut(dp));
+  }
+  if (method === 'delete'){ delete store[p]; return res(200, {}); }
   if (p.split('/').length % 2 === 1) return res(200, { documents: children(p).map(docOut) });
   return store[p] ? res(200, docOut(p)) : res(404, {});
 }
@@ -121,9 +132,9 @@ const sandbox = {
     deleteProperty: (k) => { delete props[k]; }, getKeys: () => Object.keys(props) }) },
   CacheService: { getScriptCache: () => ({ get: () => null, put() {} }) },
   LockService: { getScriptLock: () => ({ tryLock: () => true, releaseLock() {}, waitLock() {} }) },
-  MailApp: { getRemainingDailyQuota: () => quota, sendEmail: (m) => { sentMail.push(m); quota--; } },
+  MailApp: { getRemainingDailyQuota: () => quota, sendEmail: (m) => { if (mailFails > 0) { mailFails--; throw new Error('mail down'); } sentMail.push(m); quota--; } },
   GmailApp: { getAliases: () => [], sendEmail(){} },
-  ScriptApp: { getProjectTriggers: () => [], newTrigger(){ return { timeBased(){ return { everyHours(){ return { create(){} }; } }; } }; }, deleteTrigger(){} },
+  ScriptApp: { getScriptId: () => scriptId, getProjectTriggers: () => [], newTrigger(){ return { timeBased(){ return { everyHours(){ return { create(){} }; } }; } }; }, deleteTrigger(){} },
   SpreadsheetApp: { getActiveSpreadsheet: () => ({
     getSheetByName: (n) => (sheets[n] ? mkSheet(n) : null),
     insertSheet: (n) => { sheets[n] = []; return mkSheet(n); } }) },
@@ -235,6 +246,40 @@ reset();
   t('and it is not retried every hour', G('notifyRun_')(MON + 3600000).reportsDue === 0);
 }
 
+console.log('--- two copies of the script ---');
+reset();
+{
+  const a = G('notifyRun_')(MON);
+  t('the first copy sends, and claims each email for the week in Firestore', a.sent === 3 && Object.keys(store).filter(k => k.indexOf('notifySends/') === 0).length === 3 && store['notifySends/checkin_learner1_weekly_2026-10-19'] && store['notifySends/checkin_learner1_weekly_2026-10-19'].script === 'copy-A', Object.keys(store).filter(k => k.indexOf('notifySends/') === 0).join());
+  // a second copy: its own spreadsheet (no Notifications tab yet), the same Firestore
+  delete sheets.Notifications; scriptId = 'copy-B';
+  const b = G('notifyRun_')(MON + 14 * 60000);
+  t('a second copy running later sends nothing: every email was already claimed', b.sent === 0 && b.skipped === 3 && sentMail.length === 3, JSON.stringify(b));
+  t('it notes them as sent by another copy, so it stops asking', sheets.Notifications.slice(1).every(row => row[7] === 'Skipped: already sent by another copy') && G('notifyRun_')(MON + 3600000, { dryRun: true }).checkinsDue === 0);
+  const next = G('notifyRun_')(MON + 7 * DAY);
+  t('next week the claims are new, so one copy sends again', next.sent === 4, JSON.stringify(next));
+}
+reset();
+{
+  mailFails = 1;
+  const r = G('notifyRun_')(MON);
+  t('a send that fails gives its claim back', r.failed === 1 && r.sent === 2 && Object.keys(store).filter(k => k.indexOf('notifySends/') === 0).length === 2, JSON.stringify(r));
+}
+reset();
+{
+  failPaths = ['notifySends'];
+  const r = G('notifyRun_')(MON);
+  t('if the claim cannot be made, nothing is sent (it is tried again next run)', r.sent === 0 && r.failed === 3 && sentMail.length === 0, JSON.stringify(r));
+}
+reset();
+{
+  G('sendWeeklyReport')();
+  const first = sentMail.length;
+  scriptId = 'copy-B';
+  G('sendWeeklyReport')();
+  t('the Monday lead report goes out once, whichever copy runs it', first === 1 && sentMail.length === 1 && Object.keys(store).some(k => k.indexOf('notifySends/leadReport_weekly_') === 0), Object.keys(store).filter(k => k.indexOf('notifySends/') === 0).join());
+}
+
 console.log('--- the email settings page ---');
 reset();
 {
@@ -266,7 +311,7 @@ reset();
   G('notifyRun_')(MON);
   const before = sheets.Notifications.length;
   const del = G('deleteAccountData_')('learner1-token');
-  t('deleting an account removes its Notifications rows', del.ok && del.removed.notifications === 1 && sheets.Notifications.length === before - 1, JSON.stringify(del));
+  t('deleting an account removes its Notifications rows and its send claims', del.ok && del.removed.notifications === 1 && sheets.Notifications.length === before - 1 && del.removed.sendClaims === 1 && !Object.keys(store).some(k => k.indexOf('notifySends/checkin_learner1') === 0), JSON.stringify(del));
 }
 
 console.log('\n' + pass + ' passed, ' + fail + ' failed');
