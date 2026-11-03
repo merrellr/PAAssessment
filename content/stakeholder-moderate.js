@@ -35,34 +35,32 @@ window.CONTENT_OVERRIDES["stakeholder-moderate"] = {
       },
       figures: {
         "roles": {
-          "type": "cards",
+          "type": "hub",
           "title": "What each role needs from you",
           "sub": "The PM is the connective tissue.",
-          "cols": 2,
+          "center": {
+            "title": "You, the PM"
+          },
           "items": [
             {
-              "icon": "flag",
               "title": "Product owner",
               "text": "Priorities clear enough to turn into stories",
               "tone": "teal"
             },
             {
-              "icon": "eye",
               "title": "UX and UI design",
               "text": "The user problem and success criteria, early",
               "tone": "amber"
             },
             {
-              "icon": "gear",
-              "title": "Engineering",
-              "text": "Stable scope, the \"why\", and room to shape the how",
-              "tone": "violet"
-            },
-            {
-              "icon": "shield",
               "title": "Quality assurance",
               "text": "Acceptance criteria and a shared definition of done",
               "tone": "coral"
+            },
+            {
+              "title": "Engineering",
+              "text": "Stable scope, the \"why\", room to shape the how",
+              "tone": "violet"
             }
           ]
         }

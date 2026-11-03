@@ -38,29 +38,44 @@ window.CONTENT_OVERRIDES["strategy-experienced"] = {
       },
       figures: {
         "audiences": {
-          "type": "cards",
+          "type": "chain",
           "title": "One roadmap, three audiences",
-          "sub": "Each reads it for a different question.",
-          "items": [
+          "sub": "Each reader comes with a different question.",
+          "lanes": [
             {
-              "icon": "gear",
-              "title": "Engineers",
-              "quote": "What am I building, and when?",
-              "tone": "teal"
-            },
-            {
-              "icon": "chart",
-              "title": "Executives",
-              "quote": "Right bet? What could derail it?",
-              "tone": "navy"
-            },
-            {
-              "icon": "users",
-              "title": "Customers",
-              "quote": "What's in it for me, roughly when?",
-              "tone": "amber"
+              "tone": "navy",
+              "nodes": [
+                {
+                  "title": "One roadmap",
+                  "icon": "map",
+                  "state": "hl"
+                },
+                {
+                  "stack": [
+                    {
+                      "title": "Engineers",
+                      "text": "\"What am I building, and when?\"",
+                      "icon": "gear",
+                      "tone": "teal"
+                    },
+                    {
+                      "title": "Executives",
+                      "text": "\"Right bet? What could derail it?\"",
+                      "icon": "chart",
+                      "tone": "navy"
+                    },
+                    {
+                      "title": "Customers",
+                      "text": "\"What's in it for me, roughly when?\"",
+                      "icon": "users",
+                      "tone": "amber"
+                    }
+                  ]
+                }
+              ]
             }
-          ]
+          ],
+          "foot": "One roadmap, three presentations. Skip the translation and a solid roadmap still leaves everyone confused."
         }
       },
       body: `

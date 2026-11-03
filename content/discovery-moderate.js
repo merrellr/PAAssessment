@@ -74,30 +74,30 @@ window.CONTENT_OVERRIDES["discovery-moderate"] = {
       title: "Lesson 2: Collecting Feedback That's Actually Actionable",
       figures: {
         "mix": {
-          "type": "compare",
+          "type": "equation",
           "title": "Two kinds of feedback, two questions",
-          "columns": [
+          "ops": [
+            "+",
+            "="
+          ],
+          "parts": [
             {
-              "label": "Quantitative",
-              "title": "What, and how widely",
-              "tone": "sky",
-              "icon": "chart",
-              "items": [
-                "Surveys",
-                "Analytics"
-              ]
+              "title": "Quantitative",
+              "text": "Surveys, analytics: what, and how widely",
+              "tone": "sky"
             },
             {
-              "label": "Qualitative",
-              "title": "Why",
-              "tone": "teal",
-              "icon": "chat",
-              "items": [
-                "Interviews",
-                "Support calls"
-              ]
+              "title": "Qualitative",
+              "text": "Interviews, support calls: why",
+              "tone": "teal"
+            },
+            {
+              "title": "The full picture",
+              "text": "What is happening, and why",
+              "tone": "navy"
             }
-          ]
+          ],
+          "foot": "Numbers tell you what is happening. Conversations tell you why."
         }
       },
       body: `

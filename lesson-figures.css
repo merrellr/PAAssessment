@@ -308,6 +308,35 @@
   .pf-chain-row:hover .pf-cn:not(:hover), .pf-cards:hover .pf-card:not(:hover) { opacity: .45; transition: opacity .2s; transition-delay: 0s; }
 }
 
+/* pairs: a change, row by row */
+.pf-pairs { position: relative; display: grid; grid-template-columns: minmax(0, 1fr) 30px minmax(0, 1fr); gap: 8px 0; align-items: stretch; }
+.pf-pairs.pf-pr-keyed { grid-template-columns: minmax(70px, auto) minmax(0, 1fr) 30px minmax(0, 1fr); column-gap: 0; }
+.pf-pr-h { display: flex; align-items: center; gap: 8px; padding: 0 2px 2px; }
+.pf-pr-h .pf-ic { margin: 0; width: 20px; height: 20px; }
+.pf-pr-h .pf-label { margin: 0; }
+.pf-pr-c { background: var(--pf-card); border-radius: 12px; padding: 11px 14px; border-left: 4px solid var(--c); font-size: .93rem; line-height: 1.4; display: flex; align-items: center; }
+.pf-pr-a { color: var(--pf-soft); }
+.pf-pr-b.pf-pr-c { background: var(--tint); color: var(--pf-ink); font-weight: 600; }
+.pf-pr-arrow { display: flex; align-items: center; justify-content: center; color: var(--pf-mute); font-size: 1.1rem; }
+.pf-pr-k { display: flex; align-items: center; padding-right: 12px; font-size: .74rem; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: var(--pf-mute); }
+.pf-pr-f { margin: 2px 0 0 4px; }
+.pf-pr-hid { filter: blur(6px); opacity: .35; user-select: none; }
+.pf-pr-btn { position: relative; inset: auto; z-index: 2; border-radius: 12px; background: color-mix(in srgb, var(--pf-card) 55%, transparent); border: 1.5px dashed var(--c); }
+
+/* swimlane: who does each step */
+.pf-swim { position: relative; display: grid; grid-template-rows: repeat(var(--rows), minmax(96px, auto)); background: var(--pf-card); border-radius: 14px; padding: 12px 14px 12px 0; overflow: hidden; }
+.pf-sl-lane { grid-column: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 4px; padding: 0 14px; text-align: center; font-size: .78rem; color: var(--c); border-right: 2px solid var(--pf-rule); }
+.pf-sl-lane .pf-ic { margin: 0; width: 22px; height: 22px; }
+.pf-sl-lane b { font-weight: 700; letter-spacing: .04em; text-transform: uppercase; font-size: .7rem; }
+.pf-sl-band { grid-column: 2 / -1; margin: 4px 0; border-radius: 0 10px 10px 0; background: var(--tint); opacity: .45; }
+.pf-sl-step { position: relative; z-index: 1; align-self: center; margin: 8px 0; padding: 10px 12px; border-radius: 12px; background: var(--pf-card); border: 1.5px solid var(--c); box-shadow: 0 1px 3px rgba(21, 27, 43, .06); }
+.pf-sl-step .pf-num { min-width: 22px; height: 22px; font-size: .72rem; margin-bottom: 6px; }
+.pf-sl-step b { display: block; font-size: .86rem; line-height: 1.25; }
+.pf-sl-step small { font-size: .76rem; }
+.pf-sl-who { display: none; }
+.pf-sl-link { width: 100%; height: 100%; overflow: visible; }
+.pf-sl-link path { fill: none; stroke: var(--pf-line); stroke-width: 2; vector-effect: non-scaling-stroke; }
+
 /* dark: the site's own switch, else the system setting */
 :root[data-theme="dark"] .pf { --pf-bg: #1b2130; --pf-card: #232b3b; --pf-ink: #e8ebf2; --pf-navy: #e8ebf2; --pf-soft: #b5bdcc; --pf-mute: #8f98a9; --pf-line: #3b4558;
     --pf-on: #151b2b; --pf-deep: #31405e; --pf-dq: #232b3b; --pf-arrowhead: #8f98a9; --pf-rule: #31394a; --pf-blend: normal;
@@ -323,6 +352,17 @@
   .pf { padding: 20px 16px 18px; margin: 22px -4px; }
   .pf-title { font-size: 1.25rem; }
   .pf-cards, .pf-stepgrid, .pf-compare { grid-template-columns: 1fr; }
+  .pf-pairs, .pf-pairs.pf-pr-keyed { display: flex; flex-direction: column; gap: 0; }
+  .pf-pairs > * { grid-row: auto !important; grid-column: auto !important; }
+  .pf-pr-h { display: none; }
+  .pf-pr-k { padding: 12px 0 4px; }
+  .pf-pr-c.pf-pr-a { margin-top: 10px; }
+  .pf-pr-arrow { transform: rotate(90deg); height: 22px; }
+  .pf-pairs .pf-pr-btn { order: 99; margin-top: 12px; min-height: 120px; }
+  .pf-swim { display: flex; flex-direction: column; gap: 8px; padding: 12px; }
+  .pf-sl-lane, .pf-sl-band, .pf-sl-link { display: none; }
+  .pf-sl-step { margin: 0; align-self: stretch; }
+  .pf-sl-who { display: inline-block; margin-top: 6px; padding: 1px 8px; border-radius: 99px; background: var(--tint); color: var(--c); font-size: .64rem; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; }
   .pf-chain-row, .pf-chain-row.pf-has-detour { flex-direction: column; align-items: stretch; padding-top: 0; }
   .pf-cn, .pf-cstack .pf-cn { flex: 0 0 auto; flex-direction: row; align-items: flex-start; gap: 12px; text-align: left; width: auto; }
   .pf-cn-dot { margin: 0; width: 42px; height: 42px; }

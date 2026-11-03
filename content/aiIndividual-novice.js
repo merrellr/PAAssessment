@@ -65,31 +65,40 @@ window.CONTENT_OVERRIDES["aiIndividual-novice"] = {
       title: "Lesson 2: The Shape of the Journey",
       figures: {
         "journey": {
-          "type": "steps",
+          "type": "chain",
           "title": "The AI adoption journey",
           "sub": "Nobody waits until they're \"ready\". They start small and build evidence.",
-          "items": [
+          "lanes": [
             {
-              "tag": "Start here",
-              "title": "You",
-              "text": "Personal curiosity and exploration",
-              "tone": "sand"
-            },
-            {
-              "title": "One use case",
-              "text": "One repetitive task, automated",
-              "tone": "sky"
-            },
-            {
-              "title": "Team traction",
-              "text": "Share wins; peer learning spreads",
-              "tone": "mint"
-            },
-            {
-              "tag": "Scale here",
-              "title": "Org capability",
-              "text": "Standardized, tied to business goals",
-              "tone": "navy"
+              "tone": "navy",
+              "nodes": [
+                {
+                  "tag": "Start here",
+                  "title": "You",
+                  "text": "Personal curiosity",
+                  "icon": "user",
+                  "tone": "sand"
+                },
+                {
+                  "title": "One use case",
+                  "text": "One repetitive task, automated",
+                  "icon": "bolt",
+                  "tone": "sky"
+                },
+                {
+                  "title": "Team traction",
+                  "text": "Wins shared, peers learn",
+                  "icon": "users",
+                  "tone": "mint"
+                },
+                {
+                  "tag": "Scale here",
+                  "title": "Org capability",
+                  "text": "Standard, tied to business goals",
+                  "icon": "layers",
+                  "state": "hl"
+                }
+              ]
             }
           ]
         }

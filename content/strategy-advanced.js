@@ -71,33 +71,53 @@ window.CONTENT_OVERRIDES["strategy-advanced"] = {
       title: "Lesson 2: Ground the Agent in Product Reality",
       figures: {
         "grounding": {
-          "type": "cards",
+          "type": "chain",
           "title": "Ground the agent in product reality",
-          "cols": 2,
-          "items": [
+          "sub": "Four kinds of context go in. Grounded, opinionated answers come out.",
+          "lanes": [
             {
-              "icon": "target",
-              "title": "Product truths",
-              "text": "The real problem you solve; primary and secondary users; what success means today",
-              "tone": "teal"
-            },
-            {
-              "icon": "shield",
-              "title": "Strategic constraints",
-              "text": "Business-model realities; regulatory and compliance limits; engineering and architecture limits",
-              "tone": "navy"
-            },
-            {
-              "icon": "chat",
-              "title": "Customer signals",
-              "text": "Common objections; why deals are lost; patterns from support and research",
-              "tone": "amber"
-            },
-            {
-              "icon": "compass",
-              "title": "Product philosophy",
-              "text": "Speed vs quality bias; opinionated vs flexible; long-term vision vs short-term",
-              "tone": "violet"
+              "tone": "teal",
+              "nodes": [
+                {
+                  "stack": [
+                    {
+                      "title": "Product truths",
+                      "text": "The real problem, the users, what success means",
+                      "icon": "target",
+                      "tone": "teal"
+                    },
+                    {
+                      "title": "Strategic constraints",
+                      "text": "Business model, regulation, architecture",
+                      "icon": "shield",
+                      "tone": "navy"
+                    },
+                    {
+                      "title": "Customer signals",
+                      "text": "Objections, lost deals, support patterns",
+                      "icon": "chat",
+                      "tone": "amber"
+                    },
+                    {
+                      "title": "Product philosophy",
+                      "text": "Speed vs quality, opinionated vs flexible",
+                      "icon": "compass",
+                      "tone": "violet"
+                    }
+                  ]
+                },
+                {
+                  "title": "The agent",
+                  "text": "Reasons from your context",
+                  "icon": "spark",
+                  "state": "hl"
+                },
+                {
+                  "title": "Grounded answers",
+                  "text": "Not generic advice",
+                  "icon": "check"
+                }
+              ]
             }
           ]
         }
@@ -171,31 +191,37 @@ window.CONTENT_OVERRIDES["strategy-advanced"] = {
       title: "Lesson 4: Embed the Agent in Real Product Moments",
       figures: {
         "moments": {
-          "type": "steps",
+          "type": "chain",
           "title": "The same agent at every product moment",
-          "sub": "Same agent, same skeptic's role, at every stage.",
-          "foot": "Assign it a role at each point. Don't wait for a single stage to ask it for answers.",
-          "items": [
+          "lanes": [
             {
-              "title": "Discovery"
-            },
-            {
-              "title": "PRDs",
-              "tone": "mint"
-            },
-            {
-              "title": "Roadmap",
-              "tone": "sky"
-            },
-            {
-              "title": "Launch",
-              "tone": "amber"
-            },
-            {
-              "title": "Post-launch",
-              "tone": "violet"
+              "tone": "violet",
+              "nodes": [
+                {
+                  "title": "Discovery",
+                  "icon": "search"
+                },
+                {
+                  "title": "PRDs",
+                  "icon": "doc"
+                },
+                {
+                  "title": "Roadmap",
+                  "icon": "map"
+                },
+                {
+                  "title": "Launch",
+                  "icon": "rocket"
+                },
+                {
+                  "title": "Post-launch",
+                  "icon": "trend"
+                }
+              ],
+              "base": "Same agent, same skeptic's role, at every stage"
             }
-          ]
+          ],
+          "foot": "Assign it a role at each point. Don't wait for a single stage to ask it for answers."
         }
       },
       body: `

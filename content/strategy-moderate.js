@@ -97,32 +97,35 @@ window.CONTENT_OVERRIDES["strategy-moderate"] = {
       title: "Lesson 2: Value Propositions That Actually Land",
       figures: {
         "pitch": {
-          "reveal": "How would each buyer hear a pitch made for them?",
-          "type": "compare",
+          "type": "pairs",
           "title": "Value propositions that actually land",
-          "arrow": true,
-          "columns": [
+          "sub": "One pitch, \"the most powerful platform on the market\", lands with no one.",
+          "reveal": "How would each buyer hear a pitch made for them?",
+          "left": {
+            "label": "They hear the generic pitch",
+            "tone": "coral",
+            "foot": "Specific to no one"
+          },
+          "right": {
+            "label": "A pitch made for them",
+            "tone": "teal",
+            "foot": "Each hears their own problem"
+          },
+          "rows": [
             {
-              "label": "One pitch for everyone",
-              "title": "\"The most powerful platform on the market\"",
-              "tone": "coral",
-              "items": [
-                "End user: \"So what?\"",
-                "Buyer: \"The ROI?\"",
-                "Tech evaluator: \"Fits our stack?\""
-              ],
-              "foot": "Specific to no one"
+              "k": "End user",
+              "a": "\"So what?\"",
+              "b": "\"Less busywork\""
             },
             {
-              "label": "A pitch per buyer",
-              "title": "Each hears their own problem",
-              "tone": "teal",
-              "items": [
-                "End user: \"Less busywork\"",
-                "Economic buyer: \"Lower cost, tracked ROI\"",
-                "Tech evaluator: \"Fits, and safe to trust\""
-              ],
-              "foot": "Specific to each one"
+              "k": "Economic buyer",
+              "a": "\"The ROI?\"",
+              "b": "\"Lower cost, tracked ROI\""
+            },
+            {
+              "k": "Tech evaluator",
+              "a": "\"Fits our stack?\"",
+              "b": "\"Fits, and safe to trust\""
             }
           ]
         }

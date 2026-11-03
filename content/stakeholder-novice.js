@@ -149,27 +149,41 @@ window.CONTENT_OVERRIDES["stakeholder-novice"] = {
       title: "Lesson 3: Set Up the Channels",
       figures: {
         "channels": {
-          "type": "cards",
+          "type": "chain",
           "title": "Set up the channels",
-          "sub": "The default state: informed.",
-          "foot": "Staying uninformed should take effort, not the other way around.",
-          "items": [
+          "lanes": [
             {
-              "icon": "layers",
-              "title": "A shared board",
-              "tone": "teal"
-            },
-            {
-              "icon": "chat",
-              "title": "An open channel",
-              "tone": "amber"
-            },
-            {
-              "icon": "doc",
-              "title": "Collaborative docs",
-              "tone": "violet"
+              "tone": "teal",
+              "nodes": [
+                {
+                  "stack": [
+                    {
+                      "title": "A shared board",
+                      "icon": "layers",
+                      "tone": "teal"
+                    },
+                    {
+                      "title": "An open channel",
+                      "icon": "chat",
+                      "tone": "amber"
+                    },
+                    {
+                      "title": "Collaborative docs",
+                      "icon": "doc",
+                      "tone": "violet"
+                    }
+                  ]
+                },
+                {
+                  "title": "Informed by default",
+                  "text": "Nobody has to ask",
+                  "icon": "check",
+                  "state": "hl"
+                }
+              ]
             }
-          ]
+          ],
+          "foot": "Staying uninformed should take effort, not the other way around."
         }
       },
       body: `

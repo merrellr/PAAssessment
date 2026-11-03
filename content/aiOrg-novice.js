@@ -142,24 +142,45 @@ window.CONTENT_OVERRIDES["aiOrg-novice"] = {
       title: "Lesson 3: Start With Workflows, Not Models",
       figures: {
         "workflow": {
-          "type": "cards",
+          "type": "chain",
           "title": "Start with a workflow, not a model",
-          "sub": "Take one costly, recurring ritual and ask three questions. Each answer becomes one agent's responsibility.",
-          "items": [
+          "sub": "Take one costly, recurring ritual and ask three questions.",
+          "lanes": [
             {
-              "icon": "clock",
-              "title": "Where do we lose time?",
-              "tone": "amber"
-            },
-            {
-              "icon": "warning",
-              "title": "Where do mistakes happen?",
-              "tone": "coral"
-            },
-            {
-              "icon": "scale",
-              "title": "Where do we lack consistency?",
-              "tone": "violet"
+              "tone": "teal",
+              "nodes": [
+                {
+                  "title": "One costly ritual",
+                  "text": "That recurs",
+                  "icon": "refresh",
+                  "tone": "navy"
+                },
+                {
+                  "stack": [
+                    {
+                      "title": "Where do we lose time?",
+                      "icon": "clock",
+                      "tone": "amber"
+                    },
+                    {
+                      "title": "Where do mistakes happen?",
+                      "icon": "warning",
+                      "tone": "coral"
+                    },
+                    {
+                      "title": "Where do we lack consistency?",
+                      "icon": "scale",
+                      "tone": "violet"
+                    }
+                  ]
+                },
+                {
+                  "title": "One agent per answer",
+                  "text": "Each owns one responsibility",
+                  "icon": "users",
+                  "state": "hl"
+                }
+              ]
             }
           ]
         }

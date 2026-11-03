@@ -93,27 +93,35 @@ window.CONTENT_OVERRIDES["prioritization-experienced"] = {
       title: "Lesson 2: Outcome → Evidence → Minimum",
       figures: {
         "oem": {
-          "type": "steps",
+          "type": "chain",
           "title": "Outcome, evidence, minimum",
-          "foot": "Measure the path, then scale or kill.",
-          "items": [
+          "lanes": [
             {
-              "badge": "O",
-              "title": "Outcome",
-              "text": "An observable end state",
-              "tone": "teal"
-            },
-            {
-              "badge": "E",
-              "title": "Evidence",
-              "text": "A falsifiable hypothesis",
-              "tone": "amber"
-            },
-            {
-              "badge": "M",
-              "title": "Minimum",
-              "text": "The smallest intervention",
-              "tone": "violet"
+              "tone": "teal",
+              "nodes": [
+                {
+                  "tag": "O",
+                  "title": "Outcome",
+                  "text": "An observable end state",
+                  "icon": "target",
+                  "tone": "teal"
+                },
+                {
+                  "tag": "E",
+                  "title": "Evidence",
+                  "text": "A falsifiable hypothesis",
+                  "icon": "search",
+                  "tone": "amber"
+                },
+                {
+                  "tag": "M",
+                  "title": "Minimum",
+                  "text": "The smallest intervention",
+                  "icon": "box",
+                  "tone": "violet"
+                }
+              ],
+              "result": "Measure the path, then scale or kill"
             }
           ]
         }

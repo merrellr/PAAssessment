@@ -35,34 +35,35 @@ window.CONTENT_OVERRIDES["execution-moderate"] = {
       },
       figures: {
         "before-after": {
-          "reveal": "Picture it with AI built in. What changes?",
-          "type": "compare",
+          "type": "pairs",
           "title": "Accessibility, without and with AI",
-          "arrow": true,
-          "columns": [
+          "reveal": "Picture it with AI built in. What changes?",
+          "left": {
+            "label": "Without AI",
+            "tone": "coral",
+            "foot": "Compliance-driven, bolted on, manual"
+          },
+          "right": {
+            "label": "With AI",
+            "tone": "teal",
+            "foot": "Inclusion-driven, built in by default"
+          },
+          "rows": [
             {
-              "label": "Without AI",
-              "tone": "coral",
-              "mark": "x",
-              "items": [
-                "Manual captioning: slow, error-prone, often unavailable",
-                "Static screen readers with limited context",
-                "One-size-fits-all content, no cognitive adaptation",
-                "Specialized devices, separate from mainstream tech"
-              ],
-              "foot": "Compliance-driven, bolted on, manual"
+              "a": "Manual captioning: slow, error-prone, often unavailable",
+              "b": "Real-time captions in meetings and video"
             },
             {
-              "label": "With AI",
-              "tone": "teal",
-              "mark": "check",
-              "items": [
-                "Real-time captions in meetings and video, widely available",
-                "Computer vision describes scenes, objects and text",
-                "Adaptive tools personalize pace, format and complexity",
-                "Built into everyday phones, laptops and workplace apps"
-              ],
-              "foot": "Inclusion-driven, built in by default, automated"
+              "a": "Static screen readers with limited context",
+              "b": "Computer vision describes scenes, objects and text"
+            },
+            {
+              "a": "One-size-fits-all content",
+              "b": "Adaptive tools personalize pace, format and complexity"
+            },
+            {
+              "a": "Specialized devices, separate from mainstream tech",
+              "b": "Built into everyday phones, laptops and workplace apps"
             }
           ]
         }
@@ -175,34 +176,41 @@ window.CONTENT_OVERRIDES["execution-moderate"] = {
       title: "Lesson 4: The Rollout Playbook",
       figures: {
         "playbook": {
-          "type": "steps",
+          "type": "chain",
           "title": "The rollout playbook",
-          "foot": "Start from user friction, not the technology, and only widen once a case earns it.",
-          "items": [
+          "lanes": [
             {
-              "title": "Find friction"
-            },
-            {
-              "title": "Pick one or two cases",
-              "tone": "mint"
-            },
-            {
-              "title": "Bring the right people",
-              "tone": "sky"
-            },
-            {
-              "title": "Set success metrics",
-              "tone": "amber"
-            },
-            {
-              "title": "Pilot and refine",
-              "tone": "violet"
-            },
-            {
-              "title": "Expand",
-              "tone": "navy"
+              "tone": "teal",
+              "nodes": [
+                {
+                  "title": "Find friction",
+                  "icon": "search",
+                  "state": "hl"
+                },
+                {
+                  "title": "Pick 1 or 2 cases",
+                  "icon": "target"
+                },
+                {
+                  "title": "Right people",
+                  "icon": "users"
+                },
+                {
+                  "title": "Success metrics",
+                  "icon": "chart"
+                },
+                {
+                  "title": "Pilot and refine",
+                  "icon": "refresh"
+                },
+                {
+                  "title": "Expand",
+                  "icon": "rocket"
+                }
+              ]
             }
-          ]
+          ],
+          "foot": "Start from user friction, not the technology, and only widen once a case earns it."
         }
       },
       body: `
