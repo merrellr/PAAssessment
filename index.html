@@ -1159,6 +1159,7 @@ async function finishAssessment(scores){
   lastScores = scores;
   currentAssessmentId = newAssessmentId();
   window.__assessmentResultObj = buildResultObj(scores);
+  if (window.PAAnalytics) PAAnalytics.event('assessment_complete', { tier: window.__assessmentResultObj.tier || '', signed_in: !!(window.getAccountLead && window.getAccountLead()) });
 
   const acctLead = window.getAccountLead && window.getAccountLead();
   if (acctLead && acctLead.email){

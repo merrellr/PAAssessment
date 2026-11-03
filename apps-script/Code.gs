@@ -962,7 +962,7 @@ function sendInviteEmail_(token, idToken) {
 
     if (MailApp.getRemainingDailyQuota() < 1) return { ok: false, error: 'quota' };
 
-    var mail = buildInviteEmail_(inv, who.email, SITE_BASE_URL_ + 'join.html?token=' + token);
+    var mail = buildInviteEmail_(inv, who.email, SITE_BASE_URL_ + 'join?token=' + token);
     try {
       sendMail_({
         to: inv.email,
@@ -1234,7 +1234,7 @@ function leadBuildAck_(lead) {
   var first = lead.name.split(' ')[0] || 'there';
   var wantsBooking = lead.who === 'leader' || lead.who === 'org' || lead.contactPref === 'call';
   var interests = lead.interests.map(function (c) { return LEAD_OPTIONS_.interests[c]; }).join(', ');
-  var assessUrl = SITE_BASE_URL_ + 'index.html';
+  var assessUrl = SITE_BASE_URL_;
   var recap = [
     ['You are', LEAD_OPTIONS_.who[lead.who]],
     ['You are interested in', interests],
@@ -1710,7 +1710,7 @@ function rpWeeklyEmail_(r, reportsUrl) {
 // Run by the Monday trigger (and handy to run by hand to see one now).
 function sendWeeklyReport() {
   var r = rpBuild_(rpLoad_(), Date.now(), 7, rpLabel_);
-  var mail = rpWeeklyEmail_(r, SITE_BASE_URL_ + 'reports.html');
+  var mail = rpWeeklyEmail_(r, SITE_BASE_URL_ + 'reports');
   if (MailApp.getRemainingDailyQuota() < 1) return;
   // Once a week however many copies of this script run it (see notifyClaim_ in section 16). Without the
   // Firestore key the claim cannot be made, and the report goes out as before.
@@ -1828,7 +1828,7 @@ var WELCOME_MAX_AGE_MS_ = 3 * 86400000;      // only accounts created in the las
 function welcomeBuild_(who) {
   var first = String(who.name || '').trim().split(/\s+/)[0] || '';
   var greeting = first ? 'Hi ' + first + ',' : 'Hi there,';
-  var dash = SITE_BASE_URL_ + 'lms-dashboard.html', assess = SITE_BASE_URL_ + 'index.html';
+  var dash = SITE_BASE_URL_ + 'lms-dashboard', assess = SITE_BASE_URL_;
   var text = greeting + '\n\n' +
     'Welcome to Product Advisory Learning. Your account is ready.\n\n' +
     'The quickest way to get started:\n' +
@@ -2054,7 +2054,7 @@ function adminWelcomeBuild_(who, orgName) {
   var first = String(who.name || '').trim().split(/\s+/)[0] || '';
   var greeting = first ? 'Hi ' + first + ',' : 'Hi there,';
   var org = String(orgName || 'your company');
-  var dash = SITE_BASE_URL_ + 'company.html';
+  var dash = SITE_BASE_URL_ + 'company';
   var text = greeting + '\n\n' +
     'You are now an admin of ' + org + ' on Product Advisory Learning. Here is how to get your team going.\n\n' +
     '1. Open your company dashboard: ' + dash + '\n' +
@@ -2147,7 +2147,7 @@ function adminWelcomeEndpoint_(idToken, orgId) {
     // A short notice for Rob: a pilot's admin has arrived. Best effort.
     try {
       if (MailApp.getRemainingDailyQuota() >= 5) {
-        var note = who.email + ' has joined ' + m.orgName + ' as an admin and has been sent the admin welcome.\nOpen the pilot tracker: ' + SITE_BASE_URL_ + 'owner-pilot.html?org=' + orgId + '\n';
+        var note = who.email + ' has joined ' + m.orgName + ' as an admin and has been sent the admin welcome.\nOpen the pilot tracker: ' + SITE_BASE_URL_ + 'owner-pilot?org=' + orgId + '\n';
         sendMail_({ to: LEAD_NOTIFY_EMAIL_, subject: 'Admin joined: ' + m.orgName, body: note, name: 'Product Advisory Learning' }, 'noreply');
       }
     } catch (noteErr) { /* the welcome itself already went out */ }
@@ -2185,7 +2185,7 @@ function toolLaunchBuild_(tool) {
   var title = String(tool.title || 'Your toolkit');
   var link = String(tool.launchUrl);
   var desc = String(tool.description || '').trim();
-  var vote = SITE_BASE_URL_ + 'tool-requests.html';
+  var vote = SITE_BASE_URL_ + 'tool-requests';
   var text = 'Hi,\n\n' +
     'You asked us to tell you when ' + title + ' launched. It is ready.\n\n' +
     (desc ? desc + '\n\n' : '') +
