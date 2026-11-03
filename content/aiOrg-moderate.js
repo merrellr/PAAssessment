@@ -51,23 +51,31 @@ window.CONTENT_OVERRIDES["aiOrg-moderate"] = {
       },
       figures: {
         "stages": {
-          "type": "steps",
+          "type": "chain",
           "title": "Three stages of growth",
-          "items": [
+          "lanes": [
             {
-              "title": "Novice",
-              "text": "Just breaking the surface",
-              "tone": "sand"
-            },
-            {
-              "title": "Individual enablement",
-              "text": "Shallow, contained roots",
-              "tone": "mint"
-            },
-            {
-              "title": "Organizational enablement",
-              "text": "A wide, shared root system",
-              "tone": "teal"
+              "tone": "teal",
+              "nodes": [
+                {
+                  "title": "Novice",
+                  "text": "Just breaking the surface",
+                  "icon": "spark",
+                  "tone": "sand"
+                },
+                {
+                  "title": "Individual enablement",
+                  "text": "Shallow, contained roots",
+                  "icon": "user",
+                  "tone": "mint"
+                },
+                {
+                  "title": "Organizational enablement",
+                  "text": "A wide, shared root system",
+                  "icon": "users",
+                  "state": "hl"
+                }
+              ]
             }
           ]
         }
@@ -106,31 +114,33 @@ window.CONTENT_OVERRIDES["aiOrg-moderate"] = {
       title: "Lesson 2: Contained Growth vs. Compounding Growth",
       figures: {
         "roots": {
-          "type": "compare",
+          "type": "pairs",
           "title": "Contained growth vs compounding growth",
-          "arrow": true,
-          "columns": [
+          "left": {
+            "label": "Building for the individual",
+            "tone": "sand",
+            "icon": "user"
+          },
+          "right": {
+            "label": "Building for the organization",
+            "tone": "teal",
+            "icon": "users"
+          },
+          "rows": [
             {
-              "label": "Building for the individual",
-              "title": "One potted plant",
-              "tone": "sand",
-              "items": [
-                "One person's setup",
-                "Nothing shared",
-                "Grows only as far as its pot"
-              ]
+              "a": "One person's setup",
+              "b": "Shared data, prompts and owners"
             },
             {
-              "label": "Building for the organization",
-              "title": "Trees on shared roots",
-              "tone": "teal",
-              "items": [
-                "Shared data, prompts and owners",
-                "Each new agent starts stronger",
-                "Growth compounds"
-              ]
+              "a": "Nothing shared",
+              "b": "Each new agent starts stronger"
+            },
+            {
+              "a": "Grows only as far as its pot",
+              "b": "Growth compounds"
             }
-          ]
+          ],
+          "foot": "Built for one person, value scales only as far as their workload. Built for a process, it compounds."
         }
       },
       body: `
@@ -215,29 +225,37 @@ window.CONTENT_OVERRIDES["aiOrg-moderate"] = {
       },
       figures: {
         "path": {
-          "type": "steps",
+          "type": "chain",
           "title": "A practical five-step path",
-          "items": [
+          "lanes": [
             {
-              "title": "Start narrow"
-            },
-            {
-              "title": "Map the process",
-              "tone": "mint"
-            },
-            {
-              "title": "Ground it in real data",
-              "tone": "sky"
-            },
-            {
-              "title": "Test with real users",
-              "tone": "amber"
-            },
-            {
-              "title": "Assign an owner",
-              "tone": "navy"
+              "tone": "teal",
+              "nodes": [
+                {
+                  "title": "Start narrow",
+                  "icon": "target"
+                },
+                {
+                  "title": "Map the process",
+                  "icon": "map"
+                },
+                {
+                  "title": "Ground it in real data",
+                  "icon": "layers"
+                },
+                {
+                  "title": "Test with real users",
+                  "icon": "users"
+                },
+                {
+                  "title": "Assign an owner",
+                  "icon": "user",
+                  "state": "hl"
+                }
+              ]
             }
-          ]
+          ],
+          "foot": "One real process, one working tool, and proof that it works."
         }
       },
       body: `

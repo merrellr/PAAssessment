@@ -66,34 +66,44 @@ window.CONTENT_OVERRIDES["aiOrg-advanced"] = {
       title: "Lesson 2: What AI Does Well, What Only People Do",
       figures: {
         "what-how": {
-          "type": "compare",
+          "type": "swimlane",
           "title": "What AI does well, what only people do",
-          "columns": [
+          "sub": "One support moment, handed from AI to a person at the point it matters.",
+          "lanes": [
             {
-              "label": "AI handles the \"what\"",
+              "label": "AI: the \"what\"",
               "tone": "sky",
-              "icon": "bolt",
-              "items": [
-                "24/7 availability on common issues",
-                "Data-driven personalization",
-                "Routing and summarizing history",
-                "Scaled, instant, consistent"
-              ],
-              "foot": "Efficient, not empathetic"
+              "icon": "bolt"
             },
             {
-              "label": "People deliver the \"how\"",
+              "label": "People: the \"how\"",
               "tone": "teal",
-              "icon": "heart",
-              "items": [
-                "Empathy for charged moments",
-                "Creative, off-script problem-solving",
-                "Bending rules when it's right",
-                "Building rapport and trust"
-              ],
-              "foot": "Turns satisfied into loyal"
+              "icon": "heart"
             }
-          ]
+          ],
+          "steps": [
+            {
+              "lane": 0,
+              "title": "Answers common issues",
+              "text": "24/7, instant, consistent"
+            },
+            {
+              "lane": 0,
+              "title": "Routes and summarizes",
+              "text": "History and context, personalized"
+            },
+            {
+              "lane": 1,
+              "title": "Handles the charged moment",
+              "text": "Empathy, off-script problem-solving"
+            },
+            {
+              "lane": 1,
+              "title": "Builds rapport and trust",
+              "text": "Bends a rule when it's right"
+            }
+          ],
+          "foot": "AI is efficient, not empathetic. People turn satisfied customers into loyal ones."
         }
       },
       body: `

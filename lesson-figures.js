@@ -284,10 +284,49 @@
       (has(f.gap) ? '<p class="pf-gap">' + icon('warning') + '<span>' + esc(f.gap) + '</span></p>' : ''));
   };
 
+  // A change, row by row: each thing on the left becomes the thing on the right. Rows: [{ k (row label), a, b, tone }].
+  // reveal: a question shown over the right side until the learner chooses Show me.
+  T.pairs = (f) => {
+    const L = f.left || {}, R = f.right || {}, n = f.rows.length, rk = f.rows.some(r => has(r.k)), o = rk ? 1 : 0;
+    // every cell has its own place in the grid, so the "Show me" panel can sit over the right-hand column
+    const at = (row, col) => ' style="grid-row:' + row + ';grid-column:' + (col + o) + '"';
+    const hid = f.reveal ? ' pf-pr-hid" aria-hidden="true' : '';
+    const head = (side, cls, col, def) => '<div class="pf-pr-h ' + cls + ' ' + tone(side.tone || def) + '"' + at(1, col) + '>' + icon(side.icon) + '<span class="pf-label">' + esc(side.label || '') + '</span></div>';
+    let cells = head(L, 'pf-pr-a', 1, 'sand') + head(R, 'pf-pr-b', 3, 'teal');
+    f.rows.forEach((r, i) => {
+      if (rk) cells += '<span class="pf-pr-k" style="grid-row:' + (i + 2) + ';grid-column:1">' + esc(r.k || '') + '</span>';
+      cells += '<div class="pf-pr-c pf-pr-a ' + tone(L.tone || 'sand') + '"' + at(i + 2, 1) + '>' + esc(r.a) + '</div>' +
+        '<span class="pf-pr-arrow" aria-hidden="true"' + at(i + 2, 2) + '>→</span>' +
+        '<div class="pf-pr-c pf-pr-b ' + tone(r.tone || R.tone || 'teal') + hid + '"' + at(i + 2, 3) + '>' + esc(r.b) + '</div>';
+    });
+    const hasFoot = has(L.foot) || has(R.foot);
+    if (hasFoot) cells += '<i class="pf-tag pf-pr-f ' + tone(L.tone || 'sand') + '"' + at(n + 2, 1) + '>' + esc(L.foot || '') + '</i>' +
+      '<i class="pf-tag pf-pr-f pf-pr-b ' + tone(R.tone || 'teal') + hid + '"' + at(n + 2, 3) + '>' + esc(R.foot || '') + '</i>';
+    const btn = f.reveal ? '<button type="button" class="pf-reveal-btn pf-pr-btn ' + tone(R.tone || 'teal') + '" style="grid-row:2 / span ' + (n + (hasFoot ? 1 : 0)) + ';grid-column:' + (3 + o) + '"><span>' + esc(f.reveal) + '</span><b>Show me</b></button>' : '';
+    return frame(f, '<div class="pf-pairs' + (rk ? ' pf-pr-keyed' : '') + (f.reveal ? ' pf-pr-veiled' : '') + '">' + cells + btn + '</div>');
+  };
+
+  // Who does each step, in order: lanes (an agent, a person) and steps that move between them.
+  // lanes [{ label, tone, icon }], steps [{ lane, title, text }]
+  T.swimlane = (f) => {
+    const nl = f.lanes.length, ns = f.steps.length;
+    let g = f.lanes.map((ln, li) => '<div class="pf-sl-lane ' + tone(ln.tone, li) + '" style="grid-row:' + (li + 1) + '">' + icon(ln.icon) + '<b>' + esc(ln.label) + '</b></div>' +
+      '<span class="pf-sl-band ' + tone(ln.tone, li) + '" style="grid-row:' + (li + 1) + '"></span>').join('');
+    f.steps.forEach((st, i) => {
+      const ln = f.lanes[st.lane] || {}, col = 2 + i * 2;
+      g += '<div class="pf-sl-step ' + tone(st.tone || ln.tone, st.lane) + '" style="grid-row:' + (st.lane + 1) + ';grid-column:' + col + '"><span class="pf-num">' + (i + 1) + '</span><b>' + esc(st.title) + '</b>' + (has(st.text) ? '<small>' + esc(st.text) + '</small>' : '') + '<span class="pf-sl-who">' + esc(ln.label || '') + '</span></div>';
+      if (i < ns - 1) {
+        const a = st.lane, b = f.steps[i + 1].lane, y = (k) => ((k + 0.5) / nl * 100).toFixed(1);
+        g += '<svg class="pf-sl-link" style="grid-column:' + (col + 1) + ';grid-row:1 / span ' + nl + '" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><path d="M0 ' + y(a) + ' C50 ' + y(a) + ' 50 ' + y(b) + ' 100 ' + y(b) + '"/></svg>';
+      }
+    });
+    return frame(f, '<div class="pf-swim" style="--rows:' + nl + ';grid-template-columns:auto repeat(' + (ns - 1) + ', minmax(0,1fr) 26px) minmax(0,1fr)">' + g + '</div>');
+  };
+
   function html(f) { return T[f.type] ? T[f.type](f) : ''; }
 
   // Replace each <div data-fig="name"> in `rootEl` with its figure from `figures`.
-  const SEQ = '.pf-step, .pf-node, .pf-spoke, .pf-card, .pf-col, .pf-cn, .pf-cl, .pf-seg, .pf-cad, .pf-lvl, .pf-emq, .pf-bar, .pf-timeline li, .pf-term, .pf-stat, .pf-colbar, .pf-quad';
+  const SEQ = '.pf-pr-c, .pf-sl-step, .pf-step, .pf-node, .pf-spoke, .pf-card, .pf-col, .pf-cn, .pf-cl, .pf-seg, .pf-cad, .pf-lvl, .pf-emq, .pf-bar, .pf-timeline li, .pf-term, .pf-stat, .pf-colbar, .pf-quad';
   let watcher = null;
   function animate(fig) {
     const calm = root.matchMedia && root.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -318,8 +357,13 @@
         const btn = e.target.closest && e.target.closest('.pf-reveal-btn');
         if (!btn) return;
         const col = btn.parentNode;
-        col.classList.remove('pf-veiled');
-        col.querySelector('.pf-veil').removeAttribute('aria-hidden');
+        if (col.classList.contains('pf-pairs')) {
+          col.classList.remove('pf-pr-veiled');
+          col.querySelectorAll('.pf-pr-hid').forEach(c => { c.classList.remove('pf-pr-hid'); c.removeAttribute('aria-hidden'); });
+        } else {
+          col.classList.remove('pf-veiled');
+          col.querySelector('.pf-veil').removeAttribute('aria-hidden');
+        }
         btn.remove();
         col.setAttribute('tabindex', '-1');
         col.focus({ preventScroll: true });

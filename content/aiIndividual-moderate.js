@@ -81,35 +81,35 @@ window.CONTENT_OVERRIDES["aiIndividual-moderate"] = {
       title: "Lesson 2: Backlog Grooming, Before and After",
       figures: {
         "grooming": {
-          "reveal": "Before you look: what changes when agents do the sorting?",
-          "type": "compare",
+          "type": "pairs",
           "title": "Backlog grooming, before and after",
-          "arrow": true,
-          "columns": [
+          "reveal": "Before you look: what changes when agents do the sorting?",
+          "left": {
+            "label": "Before",
+            "tone": "coral",
+            "foot": "Slow, noisy, inconsistent"
+          },
+          "right": {
+            "label": "After",
+            "tone": "teal",
+            "foot": "Time shifts to trade-offs and the \"why\""
+          },
+          "rows": [
             {
-              "label": "Before",
-              "tone": "coral",
-              "mark": "x",
-              "items": [
-                "Collect tickets, Slack threads and requests",
-                "De-duplicate and clarify by hand",
-                "Rewrite titles for engineering",
-                "Re-prioritize on gut feel"
-              ],
-              "foot": "Slow, noisy, inconsistent"
+              "a": "Collect tickets, Slack threads and requests by hand",
+              "b": "The agent clusters incoming items by theme"
             },
             {
-              "label": "After",
-              "tone": "teal",
-              "mark": "check",
-              "items": [
-                "Agent clusters incoming items by theme",
-                "Agent flags duplicates",
-                "Agent drafts problem statements",
-                "Agent proposes priority from your rules",
-                "You review, adjust and approve"
-              ],
-              "foot": "Time shifts to trade-offs and the \"why\""
+              "a": "De-duplicate and clarify by hand",
+              "b": "The agent flags duplicates"
+            },
+            {
+              "a": "Rewrite titles for engineering",
+              "b": "The agent drafts problem statements"
+            },
+            {
+              "a": "Re-prioritize on gut feel",
+              "b": "The agent proposes priority from your rules; you review and approve"
             }
           ]
         }

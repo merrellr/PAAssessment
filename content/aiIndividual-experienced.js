@@ -134,32 +134,31 @@ window.CONTENT_OVERRIDES["aiIndividual-experienced"] = {
       title: "Lesson 3: Use Agents to Synthesize, Not Interpret",
       figures: {
         "line": {
-          "type": "compare",
+          "type": "pairs",
           "title": "Where the line sits",
-          "sub": "The agent synthesizes. The human interprets.",
-          "arrow": true,
-          "columns": [
+          "sub": "For each thing the agent synthesizes, there is a call only a person should make.",
+          "left": {
+            "label": "Agent: synthesize",
+            "tone": "sky",
+            "icon": "layers"
+          },
+          "right": {
+            "label": "Human: interpret",
+            "tone": "teal",
+            "icon": "user"
+          },
+          "rows": [
             {
-              "label": "Agent",
-              "title": "Synthesize",
-              "tone": "sky",
-              "icon": "layers",
-              "items": [
-                "Group feedback by recurring theme",
-                "Surface the common phrases",
-                "Spot patterns across more data than a person could read"
-              ]
+              "a": "Group feedback by recurring theme",
+              "b": "Say what a cluster actually means"
             },
             {
-              "label": "Human",
-              "title": "Interpret",
-              "tone": "teal",
-              "icon": "user",
-              "items": [
-                "Say what a cluster actually means",
-                "Decide what's worth acting on",
-                "Rewrite labels in the customer's own words, not product taxonomy"
-              ]
+              "a": "Spot patterns across more data than a person could read",
+              "b": "Decide what's worth acting on"
+            },
+            {
+              "a": "Surface the common phrases",
+              "b": "Rewrite labels in the customer's own words, not product taxonomy"
             }
           ]
         }

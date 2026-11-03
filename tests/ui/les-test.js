@@ -131,10 +131,10 @@ async function figTests(){
     t('figure text keeps its own size, not the lesson paragraph size', getComputedStyle(fig.querySelector('.pf-foot')).fontSize !== getComputedStyle(para).fontSize);
   }
   if (course === 'aiIndividual-moderate'){
-    const col = document.querySelector('.pf-col.pf-veiled'), btn = col && col.querySelector('.pf-reveal-btn');
-    t('the "after" side waits behind a question, hidden from screen readers', !!btn && col.querySelector('.pf-veil').getAttribute('aria-hidden') === 'true' && /what changes/i.test(btn.textContent));
+    const btn = document.querySelector('#lessonBody .pf-reveal-btn'), box = btn && btn.parentNode, hidden = box ? all('.pf-pr-hid', box) : [];
+    t('the "after" side waits behind a question, hidden from screen readers', !!btn && hidden.length === 5 && hidden.every(c => c.getAttribute('aria-hidden') === 'true') && /what changes/i.test(btn.textContent));
     btn.click(); await sleep(30);
-    t('choosing Show me reveals it, for screen readers too, and moves focus there', !col.classList.contains('pf-veiled') && !col.querySelector('.pf-reveal-btn') && !col.querySelector('.pf-veil').hasAttribute('aria-hidden') && document.activeElement === col);
+    t('choosing Show me reveals every row, for screen readers too, and moves focus there', !box.querySelector('.pf-pr-hid') && !box.querySelector('.pf-reveal-btn') && !box.querySelector('[aria-hidden="true"]:not(.pf-pr-arrow):not(svg)') && document.activeElement === box);
   }
   document.documentElement.setAttribute('data-theme', 'dark'); await sleep(50);
   t('in dark mode the figure turns dark too', getComputedStyle(figs[0]).backgroundColor === 'rgb(27, 33, 48)', getComputedStyle(figs[0]).backgroundColor);

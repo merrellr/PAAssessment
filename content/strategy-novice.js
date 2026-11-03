@@ -143,27 +143,34 @@ window.CONTENT_OVERRIDES["strategy-novice"] = {
       title: "Lesson 3: Link Every Theme to a Business Objective",
       figures: {
         "links": {
-          "type": "record",
+          "type": "pairs",
           "title": "Link every theme to a business objective",
-          "heading": "Theme → business objective",
-          "foot": "If a theme's arrow lands on \"?\", it belongs in the backlog, not the roadmap.",
+          "left": {
+            "label": "Theme",
+            "tone": "navy",
+            "icon": "flag"
+          },
+          "right": {
+            "label": "Business objective",
+            "tone": "teal",
+            "icon": "target"
+          },
           "rows": [
-            [
-              "Cut onboarding drop-off",
-              "Retention",
-              "teal"
-            ],
-            [
-              "Ship SSO and audit log",
-              "Enterprise expansion",
-              "teal"
-            ],
-            [
-              "Refresh the settings screen",
-              "? No objective: back to the backlog",
-              "coral"
-            ]
-          ]
+            {
+              "a": "Cut onboarding drop-off",
+              "b": "Retention"
+            },
+            {
+              "a": "Ship SSO and audit log",
+              "b": "Enterprise expansion"
+            },
+            {
+              "a": "Refresh the settings screen",
+              "b": "? No objective",
+              "tone": "coral"
+            }
+          ],
+          "foot": "If a theme's arrow lands on \"?\", it belongs in the backlog, not the roadmap."
         }
       },
       body: `

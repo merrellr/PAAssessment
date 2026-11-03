@@ -35,34 +35,44 @@ window.CONTENT_OVERRIDES["aiIndividual-advanced"] = {
       },
       figures: {
         "split": {
-          "type": "compare",
+          "type": "swimlane",
           "title": "Who does what in Jordan's day",
-          "sub": "The agents take the watching. Jordan keeps the judgment calls.",
-          "arrow": true,
-          "columns": [
+          "sub": "The agents do the watching. Jordan steps in only where a judgment call is needed.",
+          "lanes": [
             {
               "label": "The agents",
-              "title": "Surface the facts",
               "tone": "sky",
-              "icon": "eye",
-              "items": [
-                "Read every email",
-                "Scan every dashboard",
-                "Track every ticket"
-              ]
+              "icon": "eye"
             },
             {
               "label": "Jordan",
-              "title": "Decides what they mean",
               "tone": "teal",
-              "icon": "user",
-              "items": [
-                "Steps in only where judgment is needed",
-                "Chooses what to act on",
-                "Owns the call"
-              ]
+              "icon": "user"
             }
-          ]
+          ],
+          "steps": [
+            {
+              "lane": 0,
+              "title": "Read every email",
+              "text": "and every thread"
+            },
+            {
+              "lane": 0,
+              "title": "Scan every dashboard",
+              "text": "and track every ticket"
+            },
+            {
+              "lane": 0,
+              "title": "Surface the facts",
+              "text": "What changed, in one place"
+            },
+            {
+              "lane": 1,
+              "title": "Decide what they mean",
+              "text": "and what to do about it"
+            }
+          ],
+          "foot": "The agents surface facts. Jordan decides what the facts mean."
         }
       },
       body: `
@@ -254,33 +264,39 @@ window.CONTENT_OVERRIDES["aiIndividual-advanced"] = {
       title: "Lesson 5: What's Actually Different",
       figures: {
         "moved": {
-          "type": "compare",
+          "type": "pairs",
           "title": "What moved, and what stayed",
           "sub": "The vigilance moved to agents. The meaning stayed with you.",
-          "columns": [
+          "left": {
+            "label": "Moved to agents",
+            "tone": "sky",
+            "icon": "refresh"
+          },
+          "right": {
+            "label": "Stayed with you",
+            "tone": "teal",
+            "icon": "user"
+          },
+          "rows": [
             {
-              "label": "Moved to agents",
-              "tone": "sky",
-              "icon": "refresh",
-              "items": [
-                "Reading the inbox and threads",
-                "Summarizing status",
-                "Watching dashboards",
-                "The first-draft PRD",
-                "Constant low-grade vigilance"
-              ]
+              "a": "Reading the inbox and threads",
+              "b": "What a silence means"
             },
             {
-              "label": "Stayed with you",
-              "tone": "teal",
-              "icon": "user",
-              "items": [
-                "What a silence means",
-                "Whether a drop is churn",
-                "The framing of the problem",
-                "The backlog override",
-                "What to escalate, and when"
-              ]
+              "a": "Watching dashboards",
+              "b": "Whether a drop is churn"
+            },
+            {
+              "a": "The first-draft PRD",
+              "b": "The framing of the problem"
+            },
+            {
+              "a": "Summarizing status",
+              "b": "The backlog override"
+            },
+            {
+              "a": "Constant low-grade vigilance",
+              "b": "What to escalate, and when"
             }
           ]
         }

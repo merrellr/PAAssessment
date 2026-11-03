@@ -124,29 +124,79 @@ window.CONTENT_OVERRIDES["stakeholder-experienced"] = {
       title: "Lesson 3: Bridging Product and Risk, Legal, or Compliance",
       figures: {
         "compliance": {
-          "type": "compare",
+          "type": "track",
           "title": "Bridging product and compliance",
-          "foot": "Same requirements, absorbed as design inputs instead of a last-minute gate.",
-          "columns": [
+          "sub": "Same requirements. What changes is when they arrive.",
+          "x": "Time →",
+          "kinds": {
+            "build": "Building",
+            "test": "Compliance checks",
+            "risk": "Rework"
+          },
+          "rows": [
             {
               "label": "Bolted on at the end",
               "tone": "coral",
-              "items": [
-                "Build",
-                "Review",
-                "Rework"
+              "segments": [
+                {
+                  "len": 7,
+                  "kind": "build",
+                  "label": "Build"
+                },
+                {
+                  "len": 2,
+                  "kind": "test",
+                  "label": "Review"
+                },
+                {
+                  "len": 3,
+                  "kind": "risk",
+                  "label": "Rework"
+                }
               ],
-              "foot": "The timeline slips"
+              "result": "The timeline slips",
+              "mark": "x"
             },
             {
               "label": "Embedded in the roadmap",
               "tone": "teal",
-              "items": [
-                "Build, with compliance checks along the way"
+              "segments": [
+                {
+                  "len": 2,
+                  "kind": "build",
+                  "label": "Build"
+                },
+                {
+                  "len": 0.6,
+                  "kind": "test",
+                  "label": "✓"
+                },
+                {
+                  "len": 2,
+                  "kind": "build",
+                  "label": "Build"
+                },
+                {
+                  "len": 0.6,
+                  "kind": "test",
+                  "label": "✓"
+                },
+                {
+                  "len": 2,
+                  "kind": "build",
+                  "label": "Build"
+                },
+                {
+                  "len": 0.6,
+                  "kind": "test",
+                  "label": "✓"
+                }
               ],
-              "foot": "Ships on time"
+              "result": "Ships on time, already compliant",
+              "mark": "check"
             }
-          ]
+          ],
+          "foot": "Compliance absorbed as design inputs, instead of a last-minute gate."
         }
       },
       body: `

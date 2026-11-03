@@ -49,6 +49,10 @@ const emp = F.html({ type: 'empathy', title: 'E', says: { title: 'fine' }, does:
 t('empathy map: four quadrants around the person, highlights and the gap', (emp.match(/class="pf-emq /g) || []).length === 4 && emp.includes('pf-emq-says pf-t-teal pf-emq-hl') && emp.includes('pf-emq-dim') && emp.includes('pf-gap'));
 const rv = F.html({ type: 'compare', reveal: 'Guess first', columns: [{ label: 'Before', items: ['a'] }, { label: 'After', items: ['b'] }] });
 t('predict, then reveal: the later side waits behind a question, hidden from screen readers until opened', rv.includes('pf-veiled') && rv.includes('<button type="button" class="pf-reveal-btn"><span>Guess first</span>') && rv.includes('class="pf-veil" aria-hidden="true"') && (rv.match(/pf-veiled/g) || []).length === 1);
+const pr = F.html({ type: 'pairs', title: 'P', reveal: 'Guess', left: { label: 'Before', foot: 'slow' }, right: { label: 'After', foot: 'fast' }, rows: [{ k: 'User', a: 'x', b: 'y' }, { a: 'm', b: 'n', tone: 'coral' }] });
+t('pairs: each row placed in the grid, the right side veiled until Show me, row labels in their own column', pr.includes('pf-pr-keyed') && (pr.match(/class="pf-pr-c pf-pr-b[^"]*pf-pr-hid" aria-hidden="true"/g) || []).length === 2 && pr.includes('grid-row:2 / span 3;grid-column:4') && pr.includes('pf-t-coral'));
+const sw = F.html({ type: 'swimlane', title: 'S', lanes: [{ label: 'Agent' }, { label: 'You' }], steps: [{ lane: 0, title: 'Watch' }, { lane: 0, title: 'Digest' }, { lane: 1, title: 'Decide' }] });
+t('swimlane: each step in its lane, in order, linked across lanes', (sw.match(/class="pf-sl-step /g) || []).length === 3 && sw.includes('grid-row:2;grid-column:6') && (sw.match(/pf-sl-link/g) || []).length === 2 && sw.includes('M0 25.0 C50 25.0 50 75.0 100 75.0'));
 t('the takeaway is signalled as the key idea', F.html({ type: 'cards', title: 'x', foot: 'The point', items: [{ title: 'a' }] }).includes('<p class="pf-foot"><span class="pf-foot-k">Key idea</span>The point</p>'));
 
 // Every course: each slot has a figure, each figure is used, renders, and has a title; no inline SVG or PNG left.

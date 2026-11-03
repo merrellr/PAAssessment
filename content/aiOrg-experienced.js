@@ -36,35 +36,36 @@ window.CONTENT_OVERRIDES["aiOrg-experienced"] = {
       },
       figures: {
         "rigor": {
-          "reveal": "What would treating it like a product change?",
-          "type": "compare",
+          "type": "pairs",
           "title": "An internal copilot is still a product",
           "sub": "Internal stakeholders are users too.",
-          "arrow": true,
-          "columns": [
+          "reveal": "What would treating it like a product change?",
+          "left": {
+            "label": "Treated like IT work",
+            "tone": "coral",
+            "foot": "Fails quietly: no collapse, just non-use"
+          },
+          "right": {
+            "label": "Treated like product work",
+            "tone": "teal",
+            "foot": "Becomes part of how the team works"
+          },
+          "rows": [
             {
-              "label": "Treated like IT work",
-              "tone": "coral",
-              "mark": "x",
-              "items": [
-                "Built in a sprint",
-                "Dropped in Slack",
-                "Nobody validated the problem",
-                "No way to learn and adjust"
-              ],
-              "foot": "Fails quietly: no collapse, just non-use"
+              "a": "Nobody validated the problem",
+              "b": "Validate the problem first"
             },
             {
-              "label": "Treated like product work",
-              "tone": "teal",
-              "mark": "check",
-              "items": [
-                "Validate the problem first",
-                "Involve the users early",
-                "Pilot, then widen",
-                "Build in a way to learn and adjust"
-              ],
-              "foot": "Becomes part of how the team works"
+              "a": "Built in a sprint",
+              "b": "Involve the users early"
+            },
+            {
+              "a": "Dropped in Slack",
+              "b": "Pilot with a small group, then widen"
+            },
+            {
+              "a": "No way to learn and adjust",
+              "b": "Build in a way to learn and adjust"
             }
           ]
         }
