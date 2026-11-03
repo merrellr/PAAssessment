@@ -162,7 +162,7 @@ try {
   t('the promise is worded the same on the page and in the email', LEAD_REPLY_WINDOW_ === LeadCore.REPLY_WINDOW);
   t('it recaps what they said, including their note', /You are interested in: AI fluency for my organization/.test(ack.body) && /Your note: We want to assess all 60/.test(ack.body));
   t('a team leader, organization or anyone who asked for a call is offered the booking page', /productadvisory\.co\/book/.test(ack.body) && ack.htmlBody.indexOf('productadvisory.co/book') > -1);
-  t('and everyone is offered the free assessment', /assessment\.productadvisory\.co\/index\.html/.test(ack.body));
+  t('and everyone is offered the free assessment', /assessment\.productadvisory\.co\/(\s|$)/.test(ack.body));
   t('the booking address is the same as the page\'s', LEAD_BOOKING_URL_ === LeadCore.BOOKING_URL);
   t('it says what to do if they did not make the request', /If you did not make this request, you can ignore this email/.test(ack.body));
   reset(); submit(good({ who: 'individual', size: '', role: '', contactPref: 'email', message: '' }));

@@ -122,5 +122,23 @@ console.log('--- the notice is wired into the pages ---');
   t('the notice links to the Privacy Policy used elsewhere on the site', an.indexOf('https://www.productadvisory.co/privacy-policy') > -1);
 }
 
+// Events: only when analytics is running, only well-formed names
+{
+  const sent = [];
+  const saved = { started: globalThis.__paStarted, gtag: globalThis.gtag };
+  globalThis.gtag = (...args) => sent.push(args);
+  globalThis.__paStarted = false;
+  A.event('assessment_complete', { tier: 'x' });
+  t('no event before analytics has started (no consent, privacy signal, or local)', sent.length === 0);
+  globalThis.__paStarted = true;
+  A.event('assessment_complete', { tier: 'Moderate Experience' });
+  A.event('Bad Name!');
+  A.event('tool_request');
+  t('events go to GA4 once it is running; a malformed name is dropped', sent.length === 2 && sent[0][0] === 'event' && sent[0][1] === 'assessment_complete' && sent[0][2].tier === 'Moderate Experience' && sent[1][1] === 'tool_request' && JSON.stringify(sent[1][2]) === '{}');
+  globalThis.__paStarted = saved.started; globalThis.gtag = saved.gtag;
+  const page = (f) => fs.readFileSync(path.join(root, f), 'utf8');
+  t('the assessment, a vote and a tool request each send their event', /PAAnalytics\.event\('assessment_complete'/.test(page('index.html')) && /PAAnalytics\.event\('tool_vote'/.test(page('tool-requests.html')) && /PAAnalytics\.event\('tool_request'\)/.test(page('tool-requests.html')));
+}
+
 console.log('\n' + pass + ' passed, ' + fail + ' failed');
 process.exit(fail ? 1 : 0);

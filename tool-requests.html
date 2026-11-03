@@ -465,6 +465,7 @@ async function vote(tool){
     await batch.commit();
     myVotes[tool.id] = { notify: false };
     tool.voteCount = (tool.voteCount || 0) + 1;
+    if (window.PAAnalytics) PAAnalytics.event('tool_vote', { tool: tool.id });
     $('notice').textContent = 'Thanks! Your vote for ' + tool.title + ' is in. Tick the box if you want an email when it launches.';
   } catch (err){
     showError(err, 'Something went wrong saving your vote. Please try again.');
@@ -559,6 +560,7 @@ $('suggestBtn').addEventListener('click', async () => {
     });
     $('suggestText').value = '';
     $('suggestStatus').textContent = 'Thank you! Your suggestion, "' + check.text + '", is waiting for review.';
+    if (window.PAAnalytics) PAAnalytics.event('tool_request');
     $('notice').textContent = 'Suggestion sent.';
   } catch (err){
     $('suggestError').textContent = err && err.code === 'permission-denied'

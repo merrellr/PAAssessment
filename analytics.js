@@ -182,6 +182,10 @@
     },
     // "Cookie settings": show the notice again so the choice can be changed.
     reopen: function () { if (privacySignal(root)) return; removeBanner(root.document); showBanner(root); },
+    // A GA4 event, when analytics is running on this page (otherwise nothing). Names: lowercase_with_underscores.
+    event: function (name, params) {
+      try { if (root.__paStarted && root.gtag && /^[a-z][a-z0-9_]{0,39}$/.test(name)) root.gtag('event', name, params || {}); } catch (e) { /* no analytics */ }
+    },
     state: function () { return { consent: readConsent(root), started: !!root.__paStarted, banner: !!root.document.getElementById('paCookieBanner') }; }
   };
   root.PAAnalytics = api;

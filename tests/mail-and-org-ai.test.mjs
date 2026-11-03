@@ -142,7 +142,7 @@ console.log('--- the welcome email ---');
   t('replies go to assessment@, and it is sent as Product Advisory Learning', m.replyTo === 'assessment@productadvisory.co' && m.name === 'Product Advisory Learning');
   t('the greeting uses the first name', /^Hi Nora,/.test(m.body) && /Hi Nora,/.test(m.htmlBody));
   t('it has the subject Welcome to Product Advisory Learning', m.subject === 'Welcome to Product Advisory Learning');
-  t('it links to the dashboard and the free assessment', m.body.indexOf('https://assessment.productadvisory.co/lms-dashboard.html') > -1 && m.body.indexOf('https://assessment.productadvisory.co/index.html') > -1 && /href="https:\/\/assessment\.productadvisory\.co\/lms-dashboard\.html"/.test(m.htmlBody));
+  t('it links to the dashboard and the free assessment', m.body.indexOf('https://assessment.productadvisory.co/lms-dashboard') > -1 && m.body.indexOf('https://assessment.productadvisory.co/') > -1 && !/\.html/.test(m.body) && /href="https:\/\/assessment\.productadvisory\.co\/lms-dashboard"/.test(m.htmlBody));
   t('it names the right mailboxes: assessment, feedback and legal', /assessment@productadvisory\.co/.test(m.body) && /feedback@productadvisory\.co/.test(m.body) && /legal@productadvisory\.co/.test(m.body));
   t('it explains how to get a password reset without promising a sender address', /Forgot password/.test(m.body) && !/noreply/.test(m.body));
   t('it recorded the account on the Welcomes tab (date, id, email)', sheets.Welcomes.length === 2 && sheets.Welcomes[0].join() === 'Sent,User ID,Email' && sheets.Welcomes[1][1] === 'uNew' && sheets.Welcomes[1][2] === 'new.person@example.com');
