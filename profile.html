@@ -177,6 +177,7 @@
 </style>
 <link rel="stylesheet" href="pa-theme.css">
 <link rel="stylesheet" href="badges.css">
+<link rel="stylesheet" href="roles.css">
 <script src="analytics.js"></script>
 <script src="company-core.js"></script>
 <script src="notify-core.js"></script>
@@ -184,6 +185,8 @@
 <script src="assessment-history.js"></script>
 <script src="merge-core.js"></script>
 <script src="badges-ui.js"></script>
+<script src="roles-core.js"></script>
+<script src="roles-ui.js"></script>
 </head>
 <body>
 <script src="pa-shell.js"></script>
@@ -205,6 +208,7 @@
   <nav class="profile-nav" id="profileNav" aria-label="On this page">
     <a href="#details">Your details</a>
     <a href="#badges">My Badges</a>
+    <a href="#targets">Role and targets</a>
     <a href="#assessments">My assessments</a>
     <a href="#goals">Goals and emails</a>
     <a href="#signin">Sign-in and security</a>
@@ -298,6 +302,12 @@
     <h2>My Badges</h2>
     <p style="margin-top:4px;">Earned by showing up, finishing lessons and courses, meeting your weekly goal and growing your skills. Once earned, a badge is yours to keep.</p>
     <div id="badgesBody"><p style="margin:0;">Loading your badges…</p></div>
+  </div>
+
+  <div class="card" id="targets" tabindex="-1">
+    <h2>My role and targets</h2>
+    <p style="margin-top:4px;">Your role sets a target level in each skill area. Raise any of them to stretch yourself; reaching and beating your targets earns the Role targets badges.</p>
+    <div id="targetsBody"><p style="margin:0;">Loading…</p></div>
   </div>
 
   <div class="card" id="assessments" tabindex="-1">
@@ -650,6 +660,7 @@ onAuthStateChanged(auth, async (user) => {
   document.getElementById('editCompanySize').value = profile.companySize || '';
   document.getElementById('editIndustry').value = profile.industry || '';
   showGoals(data);
+  showTargets(data, user);
   showBadges(data, user);
   showAssessments(data);
   // Company admins also choose how often their company's report comes.
@@ -1016,7 +1027,8 @@ async function mergeSignIn(how){
 // What an account holds, for the side-by-side cards (data is its progress document).
 function holdings(data, createdIso){
   const B = window.BadgesCore;
-  const st = B.stats({ progress: data, assessment: data.assessmentResult || null, nowMs: Date.now(), offsetMin: -new Date().getTimezoneOffset(), createdMs: Date.parse(createdIso || '') || undefined });
+  const st = B.stats({ progress: data, assessment: data.assessmentResult || null, nowMs: Date.now(), offsetMin: -new Date().getTimezoneOffset(), createdMs: Date.parse(createdIso || '') || undefined,
+    targets: window.RolesCore ? RolesCore.forProgress(data, data.assessmentResult || null) : null });
   return { lessons: st.lessons, courses: st.courses, badges: B.summary(B.evaluate(st, data.badges)).have };
 }
 async function accountSummary(database, user){
@@ -1246,12 +1258,32 @@ function showAssessments(data){
   body.appendChild(again);
 }
 
+/* ---------------------------------------------------------- My role and targets */
+// roles-core.js works out where the learner stands; roles-ui.js draws the editor. Saved as progress.targets.
+function showTargets(data, user){
+  if (!window.RolesUI) return;
+  const tg = data.targets || {};
+  RolesUI.editor($id('targetsBody'), {
+    roles: RolesCore.rolesFor(), roleId: tg.roleId || '', personal: tg.personal || {},
+    assessment: data.assessmentResult || null, courses: data.courses || {},
+    onSave: async (v) => {
+      const targets = { roleId: v.roleId || '', personal: v.personal, updatedAt: new Date().toISOString() };
+      // mergeFields replaces the whole targets map, so a target taken away is really gone
+      await setDoc(doc(db, 'progress', user.uid), { targets }, { mergeFields: ['targets'] });
+      data.targets = targets;
+      showBadges(data, user);
+    }
+  });
+  if (location.hash === '#targets') $id('targets').focus();
+}
+
 /* ---------------------------------------------------------------- My Badges */
 // Worked out by badges-core.js from the progress document and drawn by badges-ui.js. Badges seen
 // for the first time are stored in progress.badges with today's date, so "earned on" stays put.
 function showBadges(data, user){
   const B = window.BadgesCore;
-  const st = B.stats({ progress: data, assessment: data.assessmentResult || null, nowMs: Date.now(), offsetMin: -new Date().getTimezoneOffset() });
+  const st = B.stats({ progress: data, assessment: data.assessmentResult || null, nowMs: Date.now(), offsetMin: -new Date().getTimezoneOffset(),
+    targets: window.RolesCore ? RolesCore.forProgress(data, data.assessmentResult || null) : null });
   const list = B.evaluate(st, data.badges);
   const fresh = B.newlyEarned(list, Date.now());
   if (Object.keys(fresh).length){
@@ -1262,7 +1294,7 @@ function showBadges(data, user){
   if (location.hash === '#badges') $id('badges').focus();
   return fresh;
 }
-window.addEventListener('hashchange', () => { if (/^#(badges|goals|signin|details|assessments|privacy|deleteCard)$/.test(location.hash)) $id(location.hash.slice(1)).focus({ preventScroll: true }); });
+window.addEventListener('hashchange', () => { if (/^#(badges|targets|goals|signin|details|assessments|privacy|deleteCard)$/.test(location.hash)) $id(location.hash.slice(1)).focus({ preventScroll: true }); });
 
 /* The section menu lights the section on screen, and keeps that pill in view on narrow screens. */
 (function(){

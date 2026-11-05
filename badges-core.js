@@ -24,6 +24,7 @@
     ['start', 'Getting started', 'coin'],
     ['active', 'Showing up', 'hexagon'],
     ['goal', 'Weekly goal', 'shield'],
+    ['targets', 'Role targets', 'diamond'],
     ['lessons', 'Lessons', 'square'],
     ['courses', 'Courses', 'octagon'],
     ['mastery', 'Mastery', 'star']
@@ -49,6 +50,13 @@
     { id: 'goal4', group: 'goal', title: 'Habit forming', text: 'Met your weekly goal in 4 weeks', metric: 'goalWeeks', goal: 4, metal: 'silver', icon: 'target', hue: ['#6EE7B7', '#047857'], num: '4', unit: 'WEEKS' },
     { id: 'streak4', group: 'goal', title: 'On a roll', text: 'Met your weekly goal 4 weeks in a row', metric: 'goalStreak', goal: 4, metal: 'gold', icon: 'flame', hue: ['#FED7AA', '#EA580C'] },
     { id: 'goal12', group: 'goal', title: 'Quarter of practice', text: 'Met your weekly goal in 12 weeks', metric: 'goalWeeks', goal: 12, metal: 'platinum', icon: 'target', hue: ['#5EEAD4', '#115E59'], num: '12', unit: 'WEEKS' },
+
+    { id: 'target1', group: 'targets', title: 'On target', text: 'Reached your target level in a skill area', metric: 'targetsMet', goal: 1, metal: 'bronze', icon: 'target', hue: ['#A7F3D0', '#065F46'] },
+    { id: 'personal1', group: 'targets', title: 'Self-starter', text: 'Reached a target you set for yourself', metric: 'personalMet', goal: 1, metal: 'bronze', icon: 'pen', hue: ['#FBCFE8', '#9D174D'] },
+    { id: 'target4', group: 'targets', title: 'Four on target', text: 'Reached your target level in four skill areas', metric: 'targetsMet', goal: 4, metal: 'silver', icon: 'target', hue: ['#BFDBFE', '#1E40AF'], num: '4', unit: 'AREAS' },
+    { id: 'above1', group: 'targets', title: 'Above and beyond', text: 'Went past your target in a skill area', metric: 'targetsAbove', goal: 1, metal: 'silver', icon: 'spark', hue: ['#FDE68A', '#92400E'] },
+    { id: 'roleReady', group: 'targets', title: 'Role ready', text: 'Reached every target for your role', metric: 'roleReady', goal: 1, metal: 'gold', icon: 'flag', hue: ['#86EFAC', '#166534'] },
+    { id: 'above3', group: 'targets', title: 'Raising the bar', text: 'Went past your target in three skill areas', metric: 'targetsAbove', goal: 3, metal: 'platinum', icon: 'crown', hue: ['#C7D2FE', '#3730A3'], num: '3', unit: 'AREAS' },
 
     { id: 'lessons10', group: 'lessons', title: '10 lessons', text: 'Finished 10 lessons', metric: 'lessons', goal: 10, metal: 'bronze', icon: 'book', hue: ['#BAE6FD', '#0369A1'], num: '10', unit: 'LESSONS' },
     { id: 'lessons25', group: 'lessons', title: '25 lessons', text: 'Finished 25 lessons', metric: 'lessons', goal: 25, metal: 'silver', icon: 'book', hue: ['#93C5FD', '#1D4ED8'], num: '25', unit: 'LESSONS' },
@@ -87,7 +95,8 @@
   }
 
   /* The numbers the badges count.
-     input: { progress, assessment ({ categoryPct, overallPct, tier }) or null, createdMs, nowMs, offsetMin } */
+     input: { progress, assessment ({ categoryPct, overallPct, tier }) or null, createdMs, nowMs, offsetMin,
+              targets (RolesCore.forLearner(...), when the learner has a role or personal targets) } */
   function stats(input) {
     const p = input.progress || {};
     const courses = p.courses || {};
@@ -150,7 +159,11 @@
       areasDone: areasDone,
       planDone: planLessons > 0 && planDoneLessons >= planLessons ? 1 : 0,
       areasAdvanced: a ? areasAdvanced : 0,
-      advancedOverall: (overall !== null && C.tierSlugForPct(overall) === 'advanced') || /^advanced/i.test(String(a && a.tier || '')) ? 1 : 0
+      advancedOverall: (overall !== null && C.tierSlugForPct(overall) === 'advanced') || /^advanced/i.test(String(a && a.tier || '')) ? 1 : 0,
+      targetsMet: input.targets ? input.targets.met : 0,
+      targetsAbove: input.targets ? input.targets.above : 0,
+      roleReady: input.targets && input.targets.role && input.targets.roleMet ? 1 : 0,
+      personalMet: input.targets ? input.targets.personalMet : 0
     };
   }
 
@@ -234,6 +247,7 @@
   function shapePath(shape, r) {
     switch (shape) {
       case 'hexagon': return roundedPolygon(6, r, -Math.PI / 2, r * 0.22);
+      case 'diamond': return roundedPolygon(4, r * 1.06, -Math.PI / 2, r * 0.3);
       case 'octagon': return roundedPolygon(8, r, Math.PI / 8, r * 0.16);
       case 'square': return roundedPolygon(4, r * 1.22, Math.PI / 4, r * 0.5);
       case 'star': {

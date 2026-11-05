@@ -140,6 +140,12 @@ export async function setDoc(ref, data, opts){
   if (window.__failWrite && window.__failWrite.test(ref.path)) throw Object.assign(new Error('denied'), { code: 'permission-denied' });
   window.__writeLog.push({ op: 'set', path: ref.path });
   const r = resolve(data);
+  if (opts && opts.mergeFields){   // top-level fields named here are replaced whole; the rest of the document stays
+    const next = Object.assign({}, store[ref.path] || {}), clean = stripMarkers(r);
+    opts.mergeFields.forEach(f => { if (f in clean) next[f] = clean[f]; else delete next[f]; });
+    store[ref.path] = next;
+    return;
+  }
   store[ref.path] = opts && opts.merge ? applyUpdate(store[ref.path] || {}, r) : stripMarkers(r);
 }
 export async function updateDoc(ref, data){
