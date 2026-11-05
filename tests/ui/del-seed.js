@@ -60,6 +60,12 @@
       u.assessmentResult = { submittedAt: '2026-09-01T12:00:00.000Z', assessmentId: 'new', tier: 'Advanced Experience', overallPct: 82, categoryPct: { discovery: 90, strategy: 60, prioritization: 60, execution: 60, stakeholder: 60, aiIndividual: 60, aiOrg: 60 } };
       u.badges = { account: '2026-01-05T12:00:00.000Z', active7: '2026-02-01T12:00:00.000Z' };
     }
+    if (scn === 'targets'){
+      var v = store['progress/uDel'];
+      v.assessmentResult = { submittedAt: '2026-09-01T12:00:00.000Z', assessmentId: 'a1', tier: 'Lots of Experience', overallPct: 55, categoryPct: { discovery: 90, strategy: 30, prioritization: 60, execution: 60, stakeholder: 60, aiIndividual: 20, aiOrg: 40 } };
+      v.targets = { roleId: 'pm', personal: {} };
+      v.goals = { weeklyLessons: 2, focus: [] };
+    }
     if (scn !== 'nonmember' && scn !== 'mergeother'){
       store['memberships/uDel'] = { orgId: 'orgA', orgName: 'Acme', role: scn === 'goalsadmin' || scn === 'twostepadmin' ? 'admin' : 'member', status: 'active', inviteToken: 't', joinedAt: ts, endedAt: null, email: 'del@acme.com', displayName: 'Del User', phone: '555-0100' };
       var sh = function(){ return { identity: { name: 'Del User', email: 'del@acme.com' }, assessment: { tier: 'Lots of Experience', overallPct: 80 }, courses: {}, lastActiveAt: null, updatedAt: ts }; };

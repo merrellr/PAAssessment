@@ -41,6 +41,9 @@ Copy-Item "$repo\merge-core.js" $site
 Copy-Item "$repo\assessment-history.js" $site
 Copy-Item "$repo\badges-ui.js" $site
 Copy-Item "$repo\badges.css" $site
+Copy-Item "$repo\roles-core.js" $site
+Copy-Item "$repo\roles-ui.js" $site
+Copy-Item "$repo\roles.css" $site
 Copy-Item "$repo\lesson-blocks.js" $site
 Copy-Item "$repo\lesson-blocks.css" $site
 Copy-Item "$repo\lesson-figures.js" $site
@@ -152,7 +155,7 @@ try {
   foreach ($s in 'signin', 'nudge', 'owner', 'on', 'unverified', 'google', 'googleowner', 'ownernever', 'turnedoff', 'firstlogin', 'profilefirst', 'secondlogin') { $results += Run-Page "two-step on the dashboard: $s" "$base/twostep-test.html?scn=$s" 25000 }
   foreach ($s in 'member', 'nonmember', 'blocked', 'votefail') { $results += Run-Page "delete account: $s" "$base/del-test.html?scn=$s" 25000 }
   $results += Run-Page 'profile photo' "$base/del-test.html?scn=photo" 25000
-  foreach ($s in 'goals', 'goalsadmin', 'badges', 'signin', 'signingoogle', 'signinbrand', 'signinlink', 'mergekeep', 'mergeother', 'twostep', 'twostepauto', 'twostepunverified', 'twostepadmin', 'twostepgoogle', 'twostepgoogleblocked', 'twostepgooglenone', 'twostepcode') { $results += Run-Page "profile goals: $s" "$base/del-test.html?scn=$s" 25000 }
+  foreach ($s in 'goals', 'goalsadmin', 'badges', 'targets', 'signin', 'signingoogle', 'signinbrand', 'signinlink', 'mergekeep', 'mergeother', 'twostep', 'twostepauto', 'twostepunverified', 'twostepadmin', 'twostepgoogle', 'twostepgoogleblocked', 'twostepgooglenone', 'twostepcode') { $results += Run-Page "profile goals: $s" "$base/del-test.html?scn=$s" 25000 }
   foreach ($s in 'member', 'plain') { $results += Run-Page "last lesson: $s" "$base/les-test.html?scn=$s&course=discovery-novice&lesson=5" 30000 }
   foreach ($s in '1', '2', '3', '4', '5') { $results += Run-Page "lesson blocks: lesson $s" "$base/les-test.html?scn=blocks&course=discovery-novice&lesson=$s" 30000 }
   $results += Run-Page "lesson figures: metrics and a column chart" "$base/les-test.html?scn=figs&course=aiOrg-experienced&lesson=6" 30000

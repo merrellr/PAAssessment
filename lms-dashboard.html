@@ -245,6 +245,7 @@
 </style>
 <link rel="stylesheet" href="pa-theme.css">
 <link rel="stylesheet" href="badges.css">
+<link rel="stylesheet" href="roles.css">
 <script src="analytics.js"></script>
 <script src="learning-home-core.js"></script>
 <script src="saved-tools-core.js"></script>
@@ -510,6 +511,7 @@
     </div>
 
     <button type="button" class="card bd-tile" id="badgeTile" hidden aria-haspopup="dialog"></button>
+    <a class="card rt-tile" id="targetTile" href="/profile#targets" hidden></a>
 
     <div class="card" id="profilePromptCard" style="display:none; margin-bottom:22px; background:linear-gradient(135deg, var(--tint) 0%, var(--surface) 100%); border-color: var(--line);">
       <div style="display:flex; align-items:baseline; justify-content:space-between;">
@@ -644,6 +646,8 @@
 <script src="notify-core.js"></script>
 <script src="badges-core.js"></script>
 <script src="badges-ui.js"></script>
+<script src="roles-core.js"></script>
+<script src="roles-ui.js"></script>
 <script src="pa-icons.js"></script>
 <script type="module">
 /* ================================================================
@@ -1305,7 +1309,8 @@ function renderBadges(user, progress, assessmentResult){
     progress.activeLog = B.logActive(progress.activeLog, now, off);
     write.activeLog = progress.activeLog;
   }
-  const list = B.evaluate(B.stats({ progress: progress, assessment: assessmentResult || null, nowMs: now, offsetMin: off }), progress.badges);
+  const targets = window.RolesCore ? RolesCore.forProgress(progress, assessmentResult || null) : null;
+  const list = B.evaluate(B.stats({ progress: progress, assessment: assessmentResult || null, nowMs: now, offsetMin: off, targets: targets }), progress.badges);
   const fresh = B.newlyEarned(list, now);
   if (Object.keys(fresh).length){
     progress.badges = Object.assign({}, progress.badges, fresh);
@@ -1320,6 +1325,9 @@ function renderBadges(user, progress, assessmentResult){
   tile.innerHTML = BadgesUI.tile(list);
   tile.setAttribute('aria-label', 'My Badges: ' + sum.have + ' of ' + sum.total + ' earned. View all.');
   tile.hidden = false;
+  // Role targets: where the learner stands against their role (or an invitation to pick one).
+  const tt = document.getElementById('targetTile');
+  if (tt && window.RolesUI){ tt.innerHTML = RolesUI.tile(targets); tt.setAttribute('aria-label', targets ? 'Role targets: ' + targets.met + ' of ' + targets.total + ' on target. Edit on My Profile.' : 'Set your role targets on My Profile'); tt.hidden = false; }
 
   const won = list.filter(b => fresh[b.id]);
   if (won.length) showBadgeToast(won);

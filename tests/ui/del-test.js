@@ -283,6 +283,29 @@ async function twoStepTests(store){
   }
 }
 
+// Role targets on My Profile
+async function targetsTests(store){
+  const body = $('targetsBody'), role = () => body.querySelector('#rtRole');
+  t('the role list has the standard roles, grouped, with theirs chosen', role() && role().value === 'pm' && body.querySelectorAll('optgroup').length === 2 && role().querySelectorAll('option').length === window.RolesCore.ROLES.length + 1);
+  t('the summary counts targets reached and beaten', /6 of 7 on target, 2 above/.test(body.querySelector('.rt-sum').textContent), body.querySelector('.rt-sum').textContent);
+  const row = (k) => body.querySelector('.rt-pick[data-area="' + k + '"]').closest('.rt-row');
+  t('each area shows the role target, where they are, and a course when they are short', /Moderate Experience \(role\)/.test(row('strategy').textContent) && /On target/.test(row('strategy').textContent) && /Not there yet/.test(row('aiIndividual').textContent) && /lesson\?course=aiIndividual-experienced/.test(row('aiIndividual').innerHTML) && /Above target/.test(row('discovery').textContent));
+  t('a target cannot go below the role\'s', row('strategy').querySelector('option[value="1"]').disabled && !row('strategy').querySelector('option[value="3"]').disabled);
+  const pick = row('strategy').querySelector('select'); pick.value = '4'; pick.dispatchEvent(new Event('change')); await sleep(30);
+  t('raising one is marked as theirs and the count updates at once', /Raised by you/.test(row('strategy').textContent) && /5 of 7 on target/.test(body.querySelector('.rt-sum').textContent));
+  body.querySelector('#rtSave').click(); await sleep(150);
+  const tg = store['progress/uDel'].targets;
+  t('saved on their progress: the role and the raised target', tg && tg.roleId === 'pm' && tg.personal.strategy === 4 && Object.keys(tg.personal).length === 1, JSON.stringify(tg));
+  t('the rest of their progress is untouched', store['progress/uDel'].goals.weeklyLessons === 2 && !!store['progress/uDel'].assessmentResult);
+  const b = store['progress/uDel'].badges || {};
+  t('targets earn Role targets badges (role not yet ready)', !!b.target1 && !!b.target4 && !!b.above1 && !b.roleReady, JSON.stringify(b));
+  const p2 = row('strategy').querySelector('select'); p2.value = '2'; p2.dispatchEvent(new Event('change')); await sleep(30);
+  body.querySelector('#rtSave').click(); await sleep(150);
+  t('taking a raised target back really removes it', Object.keys(store['progress/uDel'].targets.personal).length === 0, JSON.stringify(store['progress/uDel'].targets));
+  role().value = ''; role().dispatchEvent(new Event('change')); await sleep(30);
+  t('with no role, every area can take a personal target or none', body.querySelectorAll('.rt-pick option[value="0"]').length === 7 && /Pick a role/.test(body.querySelector('.rt-sum').textContent));
+}
+
 (async function(){
   try {
     await sleep(1500);
@@ -290,6 +313,7 @@ async function twoStepTests(store){
     if (window.__scn === 'photo') await photoTests(store);
     else if (/^goals/.test(window.__scn)) await goalsTests(store);
     else if (window.__scn === 'badges') await badgesTests(store);
+    else if (window.__scn === 'targets') await targetsTests(store);
     else if (/^signin/.test(window.__scn)) await signinTests(store);
     else if (/^merge/.test(window.__scn)) await mergeTests(store);
     else if (/^twostep/.test(window.__scn)) await twoStepTests(store);
