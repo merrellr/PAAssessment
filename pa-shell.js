@@ -18,8 +18,9 @@
   // The assessment is reached from the dashboard (first launch, or Retake) and the Toolkits Roadmap
   // from www.productadvisory.co or the Profile menu, so the header stays this short.
   var LINKS = [
-    ["/lms-dashboard", "My Learning"],
-    ["/my-tools", "My Toolkit"]
+    ["/lms-dashboard", "Home"],
+    ["/my-learning", "My Learning"],
+    ["/my-tools", "My Toolkits"]
   ];
 
   // This page's clean address (/lms-dashboard, / for the assessment), whether it was opened as /lms-dashboard or /lms-dashboard.html.
@@ -202,7 +203,7 @@
     ["Teams and companies", "My invitation link doesn't work", "Check that you copied the whole link from the email. If it still doesn't work, ask the person who invited you to send it again; links can expire or be replaced.", "invite invitation link join expired company"],
     ["Teams and companies", "Can my whole team take the assessment?", 'Yes. <a href="/request-info?who=org">Tell us about your team</a> and we will set up a company account with its own dashboard.', "team company organization pricing group"],
     ["Toolkits", "How do I request or vote for a toolkit?", 'On the <a href="/tool-requests">Toolkits Roadmap</a>: vote for up to three tools, or use <b>Request a tool</b> to suggest your own. Voting and requests need a free account with a verified email.', "tool toolkit request vote roadmap suggest"],
-    ["Toolkits", "Where are the free toolkits?", 'In <a href="/my-tools">My Toolkit</a>: the Feature Prioritization Scorecard, AI Use Case Prioritization, Build, Buy, or Partner and the Organizational Impact Score, saved to your account as you work. Fillable PDFs and Google Sheets are on <a href="https://www.productadvisory.co/toolkits" target="_blank" rel="noopener">productadvisory.co/toolkits<span aria-hidden="true"> ↗</span>' + NEW_TAB + "</a>.", "toolkit tools download template pdf sheet free saved my toolkit scorecard"],
+    ["Toolkits", "Where are the free toolkits?", 'In <a href="/my-tools">My Toolkits</a>: the Feature Prioritization Scorecard, AI Use Case Prioritization, Build, Buy, or Partner and the Organizational Impact Score, saved to your account as you work. Fillable PDFs and Google Sheets are on <a href="https://www.productadvisory.co/toolkits" target="_blank" rel="noopener">productadvisory.co/toolkits<span aria-hidden="true"> ↗</span>' + NEW_TAB + "</a>.", "toolkit tools download template pdf sheet free saved my toolkit scorecard"],
     ["This site", "Can I change how the site looks?", "Yes. <b>Make it yours</b> (the sliders button at the top) sets light or dark, text size, style and accent colour. Your choice follows you to www.productadvisory.co on this browser.", "dark mode light theme text size font accent"]
   ];
   var help, helpQ, helpFocus;
@@ -275,7 +276,9 @@
 
   /* ---------------------------------------------------------------- search (⌘K) */
   var ACTIONS = [
-    { g: "Go to", t: "My Learning", i: "⌂", u: "/lms-dashboard" },
+    { g: "Go to", t: "Home", i: "⌂", u: "/lms-dashboard" },
+    { g: "Go to", t: "My Learning", i: "▤", u: "/my-learning" },
+    { g: "Go to", t: "My Toolkits", i: "◇", u: "/my-tools" },
     { g: "Go to", t: "The training framework", i: "◆", u: "/framework" },
     { g: "Go to", t: "My Profile", i: "☺", u: "/profile" },
     { g: "Go to", t: "My Badges", i: "★", u: "/profile#badges" },

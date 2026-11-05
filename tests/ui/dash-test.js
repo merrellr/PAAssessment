@@ -48,9 +48,7 @@ const sleep = (ms) => new Promise(r => setTimeout(r, ms));
       tile.click(); await sleep(40);
       t('the tile opens the window too', !win.hidden);
       win.querySelector('.bd-modal-head .bd-x').click(); await sleep(30);
-      const mi = document.getElementById('badgesMenuItem');
-      t('the dropdown has a My Badges item that opens the window here', /My Badges/.test(mi.textContent) && (mi.click(), !win.hidden));
-      win.querySelector('.bd-modal-head .bd-x').click();
+      t('My Badges is no longer in the Profile menu (the tile on Home opens it)', !document.getElementById('badgesMenuItem') && !/My Badges/.test(document.getElementById('profileDropdown').textContent));
       t('the header has a Help button', !!helpBtn);
       helpBtn.click(); await sleep(60);
       const panel = document.querySelector('.pa-help-back');
@@ -101,8 +99,8 @@ const sleep = (ms) => new Promise(r => setTimeout(r, ms));
     if (window.__scn === 'allfive'){
       const checks = []; lessonsOf('discovery-moderate').forEach(l => (l.checks || []).forEach(c => checks.push(c)));
       const shownQ = (document.querySelector('#spacedReviewCheckContainer .check-q') || {}).textContent;
-      t('a course finished over a week ago brings up the spaced-review card', reviewCard.style.display === 'block');
-      t('it names the course and how long ago', /Customer & Market Discovery — Moderate Experience — completed \d+ days ago/.test(document.getElementById('spacedReviewMeta').textContent), document.getElementById('spacedReviewMeta').textContent);
+      t('a course finished over a week ago brings up the Quick refresher, explained', reviewCard.style.display === 'block' && /Quick refresher/.test(reviewCard.textContent) && /helps it stick/.test(reviewCard.textContent));
+      t('it names the course and how long ago', /Customer & Market Discovery — Moderate Experience · finished \d+ days ago/.test(document.getElementById('spacedReviewMeta').textContent), document.getElementById('spacedReviewMeta').textContent);
       t('the question is a real one from that course\'s lessons', checks.length > 0 && checks.some(c => c.question === shownQ), String(shownQ));
       t('and it links back to the course', /^\/lesson\?course=discovery-moderate/.test(document.getElementById('spacedReviewLink').getAttribute('href')));
       const q = checks.find(c => c.question === shownQ);
@@ -112,6 +110,14 @@ const sleep = (ms) => new Promise(r => setTimeout(r, ms));
         opts[q.correct].click(); await sleep(60);
         t('choosing the right answer marks it correct and explains why', opts[q.correct].classList.contains('correct') && /Correct\./.test(document.querySelector('#spacedReviewCheckContainer .check-feedback').textContent));
         t('the right answer shows a green tick, in the answer and in the feedback', !!opts[q.correct].querySelector('.check-mark svg') && !!document.querySelector('#spacedReviewCheckContainer .check-verdict.ok .check-mark') && /correct answer/.test(opts[q.correct].textContent));
+        const more = document.getElementById('refresherMore');
+        t('after answering: another question, or done for today', !more.hidden && !document.getElementById('refresherNext').hidden && /more today/.test(more.textContent));
+        const before = document.querySelector('#spacedReviewCheckContainer .check-q').textContent;
+        document.getElementById('refresherNext').click(); await sleep(40);
+        t('"Another question" brings a fresh, unanswered one', more.hidden && !document.querySelector('#spacedReviewCheckContainer .check-option.correct') && (checks.length < 2 || document.querySelector('#spacedReviewCheckContainer .check-q').textContent !== before));
+        document.getElementById('refresherDone').click(); await sleep(20);
+        let doneSaved = false; try { doneSaved = Object.keys(localStorage).some(k => /^pa_refresher_done_/.test(k)); } catch (e) {}
+        t('"Done for today" puts it away until tomorrow', reviewCard.style.display === 'none' && doneSaved);
       }
       /* saved notes show the question they answer */
       const last = lessonsOf('discovery-moderate').find(l => l.id === 5);
@@ -167,7 +173,13 @@ const sleep = (ms) => new Promise(r => setTimeout(r, ms));
       t('someone who left more than 60 days ago is not shown the notice', banner.style.display !== 'block');
     }
     if (window.__scn === 'member' || window.__scn === 'admin'){
-      t('an active member\'s notice has no Dismiss link', document.getElementById('orgBannerDismiss').style.display === 'none');
+      const hide = document.getElementById('orgBannerDismiss'), forever = document.getElementById('orgBannerForeverBox');
+      t('an active member\'s notice can be hidden, with "Don\'t show again"', banner.style.display === 'block' && hide.style.display === 'inline' && hide.textContent === 'Hide' && !document.getElementById('orgBannerForever').hidden);
+      if (window.__scn === 'admin'){
+        forever.checked = true; hide.click(); await sleep(20);
+        let kept = false; try { kept = Object.keys(localStorage).some(k => /^pa_org_notice_hidden_/.test(k)); } catch (e) {}
+        t('ticking it and hiding keeps it away for good (this company)', banner.style.display === 'none' && kept);
+      }
     }
     if (window.__scn === 'removed'){
       t('a former member: nothing is written for their old company any more', !share);

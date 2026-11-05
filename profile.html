@@ -20,7 +20,7 @@
   }
   *{ box-sizing: border-box; }
   body{ margin:0; background: var(--bg); font-family:var(--sans); color: var(--ink); }
-  .wrap{ max-width: 820px; margin: 0 auto; padding: 24px 16px 48px; }
+  .wrap{ max-width: 1180px; margin: 0 auto; padding: 24px 16px 48px; }
   .field-pair{ display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 0 16px; }
   .brand-header{ display:flex; align-items:center; gap:9px; padding: 0 0 14px; }
   .brand-word{ font-family:var(--display); font-weight:700; font-size: 0.9375rem; color: var(--navy-deep); }
@@ -29,12 +29,40 @@
   .back-link:hover{ color: var(--navy); }
 
   /* the section menu at the top: pills that stay in view under the site header, the current section lit */
-  .profile-nav{ position: sticky; top: 64px; z-index: 15; display:flex; gap: 6px; overflow-x:auto; scrollbar-width: none; padding: 10px 0 12px; margin: 0 0 14px; background: var(--bg); border-bottom: 1px solid var(--line); }
-  .profile-nav::-webkit-scrollbar{ display:none; }
-  .profile-nav a{ flex: none; font-size: 0.8125rem; font-weight: 600; color: var(--ink-soft); text-decoration:none; border: 1.5px solid var(--line); background: var(--surface); border-radius: 999px; padding: 6px 12px; white-space: nowrap; }
-  .profile-nav a:hover{ border-color: var(--cyan); color: var(--navy); }
-  .profile-nav a[aria-current="true"]{ background: var(--navy); border-color: var(--navy); color: var(--btn-ink); }
+  .avatar-row{ position: relative; }
+  .pd-edit{ position:absolute; top:0; right:0; display:inline-flex; align-items:center; gap:6px; padding: 7px 12px; border:1.5px solid var(--line); border-radius: 999px; background: var(--surface); color: var(--navy); font: inherit; font-size: .8125rem; font-weight: 700; cursor:pointer; }
+  .pd-edit svg{ width:15px; height:15px; fill:none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .pd-edit:hover, .pd-edit[aria-expanded="true"]{ border-color: var(--cyan); background: var(--tint); }
+  .pd-view{ display:grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 14px 20px; margin: 18px 0 0; padding-top: 16px; border-top: 1px solid var(--line); }
+  .pd-view div{ min-width:0; }
+  .pd-view dt{ font-size: .6875rem; font-weight: 800; letter-spacing: .07em; text-transform: uppercase; color: var(--gray); margin-bottom: 3px; }
+  .pd-view dd{ margin:0; font-size: .9375rem; color: var(--ink); font-weight: 600; overflow-wrap:anywhere; }
+  .pd-view dd.empty{ color: var(--gray); font-weight: 400; font-style: italic; }
+  .pd-form{ margin-top: 18px; padding-top: 16px; border-top: 1px solid var(--line); }
+  .pd-actions{ display:flex; gap: 10px; flex-wrap: wrap; }
+  @media (max-width: 560px){ .pd-edit span{ display:none; } }
+  .profile-layout{ display:grid; grid-template-columns: 1fr; gap: 0 28px; }
+  .profile-main{ min-width: 0; }
+  .profile-main > .card{ margin-bottom: 18px; }
+  .profile-jump{ position: sticky; top: 64px; z-index: 15; background: var(--bg); padding: 8px 0 10px; margin: 0 0 8px; }
+  .profile-jump > summary{ list-style:none; cursor:pointer; display:inline-flex; align-items:center; gap:8px; padding: 8px 14px; border:1.5px solid var(--line); border-radius: 999px; background: var(--surface); font-size: .8438rem; font-weight: 700; color: var(--navy); }
+  .profile-jump > summary::-webkit-details-marker{ display:none; }
+  .profile-jump > summary::after{ content:'▾'; font-size:.75rem; }
+  .profile-jump[open] > summary::after{ content:'▴'; }
+  .profile-nav{ display:flex; flex-direction:column; gap: 2px; margin-top: 8px; padding: 8px; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; box-shadow: 0 10px 28px rgba(22,33,62,.08); }
+  .pn-group{ font-size: .6875rem; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: var(--gray); padding: 12px 10px 4px; }
+  .pn-group:first-child{ padding-top: 4px; }
+  .profile-nav a{ display:block; font-size: .875rem; font-weight: 600; color: var(--ink-soft); text-decoration:none; border-radius: 9px; padding: 7px 10px; border-left: 3px solid transparent; }
+  .profile-nav a:hover{ background: var(--bg); color: var(--navy); }
+  .profile-nav a[aria-current="true"]{ background: var(--tint); color: var(--navy-deep); border-left-color: var(--cyan); }
   .profile-nav a:focus-visible{ outline: 2px solid var(--cyan); outline-offset: 2px; }
+  @media (min-width: 960px){
+    .profile-layout{ grid-template-columns: 230px minmax(0, 1fr); }
+    .profile-side{ position: relative; }
+    .profile-jump{ top: 84px; padding: 0; background: none; }
+    .profile-jump > summary{ display:none; }
+    .profile-nav{ margin-top: 0; box-shadow: none; }
+  }
   .wrap > .card[id]{ scroll-margin-top: 136px; }
   .btn.btn-outline{ background: var(--surface); color: var(--navy); border: 1.5px solid var(--line); }
   .btn.btn-outline:hover{ border-color: var(--cyan); }
@@ -202,19 +230,28 @@
     </div>
   </a>
   <div class="brand-accent-bar"></div>
-  <a class="back-link" href="/lms-dashboard" style="margin-bottom:8px;">← Back to My Learning</a>
+  <a class="back-link" href="/lms-dashboard" style="margin-bottom:8px;">← Back to Home</a>
 
   <!-- On this page: a menu of the sections, kept in view while scrolling -->
-  <nav class="profile-nav" id="profileNav" aria-label="On this page">
-    <a href="#details">Your details</a>
-    <a href="#badges">My Badges</a>
-    <a href="#targets">Role and targets</a>
-    <a href="#assessments">My assessments</a>
-    <a href="#goals">Goals and emails</a>
-    <a href="#signin">Sign-in and security</a>
-    <a href="#privacy">Privacy and cookies</a>
-    <a href="#deleteCard">Delete account</a>
-  </nav>
+  <div class="profile-layout">
+  <aside class="profile-side">
+    <details class="profile-jump" id="profileJump">
+      <summary>On this page</summary>
+      <nav class="profile-nav" id="profileNav" aria-label="On this page">
+        <span class="pn-group">About you</span>
+        <a href="#details">Profile</a>
+        <a href="#targets">Role and targets</a>
+        <span class="pn-group">Learning</span>
+        <a href="#goals">Goals and emails</a>
+        <a href="#assessments">My assessments</a>
+        <span class="pn-group">Account</span>
+        <a href="#signin">Sign-in and security</a>
+        <a href="#privacy">Privacy and cookies</a>
+        <a href="#deleteCard">Delete account</a>
+      </nav>
+    </details>
+  </aside>
+  <div class="profile-main">
 
   <div class="card" id="details" tabindex="-1">
     <div class="avatar-row">
@@ -230,6 +267,7 @@
         </div>
         <div class="photo-msg" id="photoMsg" role="status"></div>
       </div>
+      <button type="button" class="pd-edit" id="detailsEditBtn" aria-expanded="false" aria-controls="detailsForm"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="m13.5 6.5 4 4"/></svg><span>Edit</span></button>
     </div>
 
     <!-- Size your photo: drag to position, zoom to fit the circle -->
@@ -249,6 +287,8 @@
       </div>
     </div>
 
+    <dl class="pd-view" id="detailsView" aria-label="Your details"></dl>
+    <div class="pd-form" id="detailsForm" hidden>
     <div class="field-pair">
       <div>
         <label class="profile-field-label">Display name</label>
@@ -293,16 +333,11 @@
     </div>
 
     <div class="field-error" id="editProfileError"></div>
+    <div class="pd-actions"><button class="btn btn-primary" onclick="handleSaveProfile()">Save profile</button><button type="button" class="btn btn-ghost" id="detailsCancelBtn">Cancel</button></div>
+    </div>
     <div class="field-error" id="editProfileSuccess" style="color:var(--ok);"></div>
-
-    <button class="btn btn-primary" onclick="handleSaveProfile()">Save profile</button>
   </div>
 
-  <div class="card" id="badges" tabindex="-1">
-    <h2>My Badges</h2>
-    <p style="margin-top:4px;">Earned by showing up, finishing lessons and courses, meeting your weekly goal and growing your skills. Once earned, a badge is yours to keep.</p>
-    <div id="badgesBody"><p style="margin:0;">Loading your badges…</p></div>
-  </div>
 
   <div class="card" id="targets" tabindex="-1">
     <h2>My role and targets</h2>
@@ -310,11 +345,6 @@
     <div id="targetsBody"><p style="margin:0;">Loading…</p></div>
   </div>
 
-  <div class="card" id="assessments" tabindex="-1">
-    <h2>My assessments</h2>
-    <p style="margin-top:4px;">Every assessment you've taken, newest first. Your plan uses the most recent one; the earlier ones are kept so you can see how you've grown.</p>
-    <div id="assessBody"><p style="margin:0;">Loading…</p></div>
-  </div>
 
   <div class="card" id="goals" tabindex="-1">
     <h2>Goals and check-in emails</h2>
@@ -353,6 +383,12 @@
     <div class="field-error" id="goalsError"></div>
     <div class="field-error" id="goalsSuccess" style="color:var(--ok);"></div>
     <button class="btn btn-primary" id="goalsSaveBtn" type="button">Save goals and emails</button>
+  </div>
+
+  <div class="card" id="assessments" tabindex="-1">
+    <h2>My assessments</h2>
+    <p style="margin-top:4px;">Every assessment you've taken, newest first. Your plan uses the most recent one; the earlier ones are kept so you can see how you've grown.</p>
+    <div id="assessBody"><p style="margin:0;">Loading…</p></div>
   </div>
 
   <div class="card" id="signin" tabindex="-1">
@@ -456,6 +492,9 @@
     <input class="text-input" type="text" id="deleteConfirmText" placeholder="DELETE" autocomplete="off">
     <div class="field-error" id="deleteError"></div>
     <button class="btn btn-danger" id="deleteBtn" onclick="handleDeleteAccount()">Delete my account</button>
+  </div>
+
+  </div>
   </div>
 
   <div class="card" id="deletedNotice" style="display:none;">
@@ -659,6 +698,7 @@ onAuthStateChanged(auth, async (user) => {
   document.getElementById('editJobTitle').value = profile.jobTitle || '';
   document.getElementById('editCompanySize').value = profile.companySize || '';
   document.getElementById('editIndustry').value = profile.industry || '';
+  if (window.paintDetailsView) paintDetailsView();
   showGoals(data);
   showTargets(data, user);
   showBadges(data, user);
@@ -1290,20 +1330,25 @@ function showBadges(data, user){
     setDoc(doc(db, 'progress', user.uid), { badges: Object.assign({}, data.badges, fresh) }, { merge: true }).catch(() => {});
     list.forEach(b => { if (fresh[b.id]) b.earnedAt = fresh[b.id]; });
   }
-  window.BadgesUI.render($id('badgesBody'), list);
-  if (location.hash === '#badges') $id('badges').focus();
+  if ($id('badgesBody') && window.BadgesUI) window.BadgesUI.render($id('badgesBody'), list);   // the collection itself is on Home
+  if (location.hash === '#badges') location.replace('/lms-dashboard#badges');
   return fresh;
 }
-window.addEventListener('hashchange', () => { if (/^#(badges|targets|goals|signin|details|assessments|privacy|deleteCard)$/.test(location.hash)) $id(location.hash.slice(1)).focus({ preventScroll: true }); });
+window.addEventListener('hashchange', () => { if (/^#(targets|goals|signin|details|assessments|privacy|deleteCard)$/.test(location.hash)) $id(location.hash.slice(1)).focus({ preventScroll: true }); });
 
 /* The section menu lights the section on screen, and keeps that pill in view on narrow screens. */
 (function(){
   const nav = $id('profileNav');
   if (!nav || !window.IntersectionObserver) return;
   const links = Array.prototype.slice.call(nav.querySelectorAll('a'));
+  const jump = $id('profileJump');
+  // wide screens: the menu is always open beside the page; phones: a compact "On this page" that closes after a jump
+  const wide = window.matchMedia('(min-width: 960px)');
+  const sync = () => { jump.open = wide.matches; };
+  sync(); if (wide.addEventListener) wide.addEventListener('change', sync);
+  links.forEach(a => a.addEventListener('click', () => { if (!wide.matches) jump.open = false; }));
   const light = (id) => links.forEach(a => {
     const on = a.getAttribute('href') === '#' + id;
-    if (on && a.getAttribute('aria-current') !== 'true' && nav.scrollWidth > nav.clientWidth) nav.scrollLeft = a.offsetLeft - (nav.clientWidth - a.offsetWidth) / 2;
     if (on) a.setAttribute('aria-current', 'true'); else a.removeAttribute('aria-current');
   });
   const seen = new Map();
@@ -1314,6 +1359,30 @@ window.addEventListener('hashchange', () => { if (/^#(badges|targets|goals|signi
   }, { rootMargin: '-140px 0px -55% 0px' });
   links.forEach(a => { const c = $id(a.getAttribute('href').slice(1)); if (c) io.observe(c); });
 })();
+
+/* ------------------------------------------------------------ your details: shown, edited behind the pencil */
+const DETAIL_FIELDS = [['editCompany', 'Company'], ['editJobTitle', 'Role / job title'], ['editPhone', 'Phone'], ['editCompanySize', 'Company size'], ['editIndustry', 'Industry']];
+function paintDetailsView(){
+  const view = $id('detailsView');
+  view.innerHTML = '';
+  DETAIL_FIELDS.forEach(([id, label]) => {
+    const input = $id(id), row = document.createElement('div');
+    const v = input.tagName === 'SELECT' ? (input.value ? input.options[input.selectedIndex].text : '') : input.value.trim();
+    const dt = document.createElement('dt'); dt.textContent = label;
+    const dd = document.createElement('dd'); dd.textContent = v || 'Not added'; if (!v) dd.className = 'empty';
+    row.append(dt, dd); view.appendChild(row);
+  });
+}
+function setDetailsEditing(on){
+  $id('detailsForm').hidden = !on; $id('detailsView').hidden = on;
+  $id('detailsEditBtn').setAttribute('aria-expanded', String(on));
+  $id('detailsEditBtn').querySelector('span').textContent = on ? 'Editing' : 'Edit';
+  if (on){ $id('editProfileSuccess').textContent = ''; $id('editDisplayName').focus(); }
+}
+window.paintDetailsView = paintDetailsView;
+$id('detailsEditBtn').addEventListener('click', () => setDetailsEditing($id('detailsForm').hidden));
+$id('detailsCancelBtn').addEventListener('click', () => { setDetailsEditing(false); $id('detailsEditBtn').focus(); });
+window.addEventListener('pa-profile-saved', () => { paintDetailsView(); setDetailsEditing(false); });
 
 /* ------------------------------------------------------------ profile photo */
 // The photo is resized in the browser to a 160 x 160 JPEG (about 10 KB) and kept on the person's own
@@ -1436,6 +1505,7 @@ window.handleSaveProfile = async function(){
 
     const won = showBadges(data, currentUser);
     successEl.textContent = won.profile ? 'Profile saved. You earned a badge: All about you!' : 'Profile saved.';
+    window.dispatchEvent(new Event('pa-profile-saved'));
   } catch (err){
     console.error('Could not save profile:', err);
     errorEl.textContent = 'Something went wrong saving your profile — please try again.';
@@ -1587,8 +1657,8 @@ window.handleDeleteAccount = async function(){
   }
 
   try { localStorage.removeItem('pa_cid'); } catch (e){ /* storage unavailable */ }
-  document.querySelectorAll('.wrap > .card').forEach(card => { card.style.display = 'none'; });
-  $id('profileNav').hidden = true;
+  document.querySelectorAll('.profile-main .card').forEach(card => { card.style.display = 'none'; });
+  document.querySelector('.profile-side').hidden = true;
   document.getElementById('deletedNotice').style.display = 'block';
   window.scrollTo(0, 0);
 };

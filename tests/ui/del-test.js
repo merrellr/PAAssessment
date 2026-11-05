@@ -73,7 +73,12 @@ async function goalsTests(store){
 
 // My badges: what they have, how many are left, what is next, and the dates kept on their record.
 async function badgesTests(store){
-  const card = $('badges'), items = card.querySelectorAll('.bd-item');
+  t('the badge collection is no longer on My Profile (it lives on Home) or in its menu', !$('badges') && !document.querySelector('#profileNav a[href="#badges"]'));
+  // the profile still works the badges out and saves new ones; the collection drawing (the same one Home opens) is checked here
+  const d = store['progress/uDel'];
+  const card = document.createElement('div'); card.id = 'badgesUnderTest'; document.body.appendChild(card);
+  window.BadgesUI.render(card, window.BadgesCore.evaluate(window.BadgesCore.stats({ progress: d, assessment: d.assessmentResult, nowMs: Date.now(), offsetMin: -new Date().getTimezoneOffset() }), d.badges));
+  const items = card.querySelectorAll('.bd-item');
   const on = Array.prototype.filter.call(items, li => li.classList.contains('is-on')).map(li => li.querySelector('.bd-title').textContent);
   const total = window.BadgesCore.BADGES.length;
   t('every badge is listed, in its group', items.length === total && card.querySelectorAll('.bd-group').length === window.BadgesCore.GROUPS.length);
@@ -103,7 +108,7 @@ async function badgesTests(store){
   t('a badge not yet earned shows how far along, in its own shape and number', !dlg.hidden && /5 of 50 · 45 to go/.test(dlg.textContent) && !!dlg.querySelector('.bd-shape-square'));
   dlg.click(); await sleep(30);
   t('clicking outside closes it', dlg.hidden);
-  t('the back link and the card use the same names as the menu', /Back to My Learning/.test(document.querySelector('.back-link').textContent) && /My Badges/.test(card.querySelector('h2').textContent));
+  t('the back link uses the same name as the menu (Home)', /Back to Home/.test(document.querySelector('.back-link').textContent));
   $('editCompany').value = 'Acme Hlth'; window.handleCompanyInput(); await sleep(900);
   const chip = $('companySuggest');
   t('a company suggestion is shown as plain text, so a booby-trapped name cannot run', chip.style.display !== 'none' && /Did you mean <img/.test(chip.textContent) && !chip.querySelector('img') && !window.__pwned, chip.innerHTML);
@@ -112,7 +117,7 @@ async function badgesTests(store){
   t('My assessments lists every assessment, newest first, with the newest open', rows.length === 2 && /Advanced Experience/.test(rows[0].querySelector('summary').textContent) && rows[0].open && !rows[1].open && /Latest/.test(rows[0].textContent), ab.textContent);
   t('it shows how much each one changed, overall and in each area', /\+22 points/.test(rows[0].querySelector('summary').textContent) && /Customer & Market Discovery90%\+20Product Strategy/.test(rows[0].querySelector('.as-areas').textContent) && /Since your first assessment \(.*\): \+22 points, from Moderate Experience to Advanced Experience/.test(ab.textContent), ab.textContent);
   t('and offers to take it again', !!ab.querySelector('a.btn[href="/"]'));
-  t('the Profile menu has a My Badges link', !!document.querySelector('.pa-acct-menu a[href="/profile#badges"]'));
+  t('the Profile menu has no My Badges link (the tile on Home opens them)', !document.querySelector('.pa-acct-menu a[href="/profile#badges"]'));
 }
 
 // Ways to sign in: add a Google account or another email to the same account, and remove one.
@@ -285,6 +290,13 @@ async function twoStepTests(store){
 
 // Role targets on My Profile
 async function targetsTests(store){
+  const view = $('detailsView'), form = $('detailsForm'), pen = $('detailsEditBtn');
+  t('your details show as text, with the form behind a pencil', !view.hidden && form.hidden && /Company/.test(view.textContent) && /Not added/.test(view.textContent) && pen.getAttribute('aria-expanded') === 'false');
+  pen.click(); await sleep(20);
+  t('the pencil opens the form in place of the summary', !form.hidden && view.hidden && pen.getAttribute('aria-expanded') === 'true' && document.activeElement === $('editDisplayName'));
+  $('editCompany').value = 'Acme Health'; await window.handleSaveProfile(); await sleep(80);
+  t('saving closes the form and shows the new details', form.hidden && !view.hidden && /Acme Health/.test(view.textContent) && store['progress/uDel'].profile.company === 'Acme Health', view.textContent);
+  t('the side menu groups the sections, with no badges', document.querySelectorAll('#profileNav .pn-group').length === 3 && !document.querySelector('#profileNav a[href="#badges"]'));
   const body = $('targetsBody'), role = () => body.querySelector('#rtRole');
   t('the role list has the standard roles, grouped, with theirs chosen', role() && role().value === 'pm' && body.querySelectorAll('optgroup').length === 2 && role().querySelectorAll('option').length === window.RolesCore.ROLES.length + 1);
   t('the summary counts targets reached and beaten', /6 of 7 on target, 2 above/.test(body.querySelector('.rt-sum').textContent), body.querySelector('.rt-sum').textContent);

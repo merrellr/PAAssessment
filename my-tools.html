@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>My Toolkit — Product Advisory Learning</title>
+<title>My Toolkits — Product Advisory Learning</title>
 <link rel="icon" href="/images/icons/favicon.svg" type="image/svg+xml">
 <link rel="icon" href="/images/icons/favicon-32.png" sizes="32x32" type="image/png">
 <link rel="apple-touch-icon" href="/images/icons/apple-touch-icon.png">
@@ -168,6 +168,16 @@
   .share-by{ margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--line); }
   .share-more{ display:flex; flex-wrap:wrap; gap: 8px; margin-top: 8px; }
   .share-x{ position:absolute; top: 14px; right: 14px; background:none; border:0; font-size: 1.4rem; line-height: 1; color: var(--gray); cursor:pointer; }
+  .hub-side{ display:flex; flex-direction:column; align-items:flex-end; gap:8px; }
+  .more-tools{ position:relative; }
+  .more-tools summary{ list-style:none; cursor:pointer; display:inline-flex; align-items:center; gap:6px; padding:8px 14px; border:1px solid var(--line); border-radius:99px; background:var(--surface); font-size:.8438rem; font-weight:600; color:var(--navy); }
+  .more-tools summary::-webkit-details-marker{ display:none; }
+  .more-tools summary::after{ content:'▾'; font-size:.75rem; }
+  .more-tools[open] summary::after{ content:'▴'; }
+  .more-tools-menu{ position:absolute; right:0; top:calc(100% + 6px); z-index:20; min-width:250px; display:grid; padding:6px; background:var(--surface); border:1px solid var(--line); border-radius:12px; box-shadow:0 12px 32px rgba(22,33,62,.14); }
+  .more-tools-menu a{ padding:9px 12px; border-radius:8px; font-size:.875rem; color:var(--ink); text-decoration:none; }
+  .more-tools-menu a:hover, .more-tools-menu a:focus-visible{ background:var(--bg); color:var(--navy); }
+  @media (max-width:640px){ .hub-side{ align-items:flex-start; } .more-tools-menu{ left:0; right:auto; } }
 </style>
 <link rel="stylesheet" href="pa-theme.css">
 <script src="saved-tools-core.js"></script>
@@ -184,10 +194,19 @@
     <div class="hub-head">
       <div>
         <span class="eyebrow">Product Advisory Learning</span>
-        <h1 id="hubTitle">My Toolkit</h1>
+        <h1 id="hubTitle">My Toolkits</h1>
         <p>Prioritize features, choose AI pilots, decide build, buy or partner, and score your roadmap. Your work saves to your account as you go, ready to pick up, copy or share.</p>
       </div>
+      <div class="hub-side">
+        <details class="more-tools" id="moreTools">
+          <summary>Want another toolkit?</summary>
+          <div class="more-tools-menu">
+            <a href="/tool-requests#suggest">Request a new toolkit</a>
+            <a href="/tool-requests">Vote on the Toolkits Roadmap</a>
+          </div>
+        </details>
       <div class="who" id="statusBar" hidden><span id="signedInAs"></span> · <button class="linklike" id="signOutBtn" type="button">Sign out</button></div>
+      </div>
     </div>
 
     <!-- Work handed over by a public tool's "Save to my account" button, waiting for the person to save it -->
@@ -244,7 +263,7 @@
   <!-- ================= the workspace: one tool, running here, saving as you go ================= -->
   <section id="ws" hidden aria-labelledby="wsTitle">
     <div class="ws-bar">
-      <a href="/my-tools" class="ws-back" id="wsBack"><span aria-hidden="true">←</span> My Toolkit</a>
+      <a href="/my-tools" class="ws-back" id="wsBack"><span aria-hidden="true">←</span> My Toolkits</a>
       <div class="ws-id" id="wsId">
         <span class="mark" id="wsMark"></span>
         <div class="txt"><span class="kind" id="wsKind"></span><h1 id="wsTitle" tabindex="-1">Untitled</h1></div>
@@ -599,7 +618,7 @@ function openWorkspace(r){
   let seen = false; try { seen = localStorage.getItem('pa_ws_tip') === '1'; } catch (e) { /* storage off */ }
   $('wsTip').hidden = seen;
   $('wsTipText').textContent = 'Everything you change saves to your toolkit automatically. Use Share to send a colleague their own copy.';
-  document.title = C.displayTitle(wsRecord()) + ' — My Toolkit';
+  document.title = C.displayTitle(wsRecord()) + ' — My Toolkits';
   track('tool_workspace_open', tool);
   return true;
 }
@@ -607,7 +626,7 @@ $('wsTipX').addEventListener('click', () => { $('wsTip').hidden = true; try { lo
 
 function paintWsTitle(){
   $('wsTitle').textContent = C.displayTitle(wsRecord());
-  document.title = C.displayTitle(wsRecord()) + ' — My Toolkit';
+  document.title = C.displayTitle(wsRecord()) + ' — My Toolkits';
 }
 function paintWsMenu(){
   const pop = $('wsMenu');
@@ -702,7 +721,7 @@ $('wsBack').addEventListener('click', linkTo('/my-tools'));
 function closeWorkspace(){
   if (frame){ frame.remove(); frame = null; }
   ws = null;
-  document.title = 'My Toolkit — Product Advisory Learning';
+  document.title = 'My Toolkits — Product Advisory Learning';
 }
 
 /* ---------------------------------------------------------------- share */
