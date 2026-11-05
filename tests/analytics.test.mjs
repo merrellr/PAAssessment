@@ -64,13 +64,15 @@ console.log('--- which pages have it ---');
 {
   const withIt = ['index', 'framework', 'request-info', 'tool-requests', 'lms-dashboard', 'lesson', 'profile', 'feedback', 'my-tools'];
   const without = ['owner', 'owner-tools', 'owner-pilot', 'reports', 'company', 'join', 'assessment-dashboard', 'email-settings'];
+  const forwards = ['my-learning'];   // only forwards to the dashboard (which counts the visit)
   const has = (p) => /<script src="analytics\.js"><\/script>/.test(fs.readFileSync(path.join(root, p + '.html'), 'utf8'));
   withIt.forEach(p => t(p + '.html has it', has(p)));
   without.forEach(p => t(p + '.html does not (private, admin or secret-link page)', !has(p)));
+  forwards.forEach(p => t(p + '.html does not (it only forwards to a page that does)', !has(p)));
   const inHead = (p) => { const h = fs.readFileSync(path.join(root, p + '.html'), 'utf8'); return h.indexOf('analytics.js') > -1 && h.indexOf('analytics.js') < h.indexOf('</head>'); };
   t('on each page it is in the head, so the page view is counted early', withIt.every(inHead));
   const all = fs.readdirSync(root).filter(f => f.endsWith('.html')).map(f => f.replace(/\.html$/, ''));
-  const unknown = all.filter(p => withIt.indexOf(p) === -1 && without.indexOf(p) === -1);
+  const unknown = all.filter(p => withIt.indexOf(p) === -1 && without.indexOf(p) === -1 && forwards.indexOf(p) === -1);
   t('every page in the site has been decided on (a new page must be added to one of the lists)', unknown.length === 0, unknown.join());
   t('the id appears only in analytics.js, never pasted into a page', all.every(p => fs.readFileSync(path.join(root, p + '.html'), 'utf8').indexOf('G-4XFS1QWS9H') === -1));
 }

@@ -242,6 +242,31 @@
 
     .tour-pop{ width: calc(100vw - 24px) !important; left: 12px !important; }
   }
+  /* Home and My Learning: one page, two views */
+  body[data-view="home"] [data-only="learning"], body[data-view="learning"] [data-only="home"]{ display:none !important; }
+  .home-top{ margin-top: 6px; display:grid; grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.7fr) minmax(220px, 0.8fr); gap: 16px; align-items: stretch; margin-bottom: 18px; }
+  .home-hi{ display:flex; flex-direction:column; justify-content:center; }
+  .home-hi .home-hello{ margin:0 0 4px; }
+  .home-top .home-hero{ margin:0; padding: 16px 18px; }
+  .home-top .home-hero .hero-row{ gap: 10px 16px !important; }
+  .home-top .home-hero .hero-actions{ flex-direction: row !important; flex-wrap: wrap; gap: 4px 12px !important; }
+  .home-top .home-hero .hero-stat{ padding: 0 12px !important; }
+  .home-top .bd-tile{ margin:0; flex-direction:column; align-items:flex-start; gap:10px; padding: 14px 16px; height:100%; }
+  .home-row2{ display:grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr); gap: 16px; align-items:start; margin: 18px 0 22px; }
+  .home-row2 .rt-tile{ margin:0; }
+  .home-row2 .refresher{ margin:0; }
+  .refresher-why{ font-size:.8125rem; color: var(--ink-soft); margin: 2px 0 10px; }
+  .refresher-more[hidden]{ display:none; }
+  .refresher-more{ display:flex; align-items:center; gap:14px; flex-wrap:wrap; margin-top:12px; }
+  .refresher-more #refresherCount{ font-size:.75rem; color: var(--gray); }
+  .linklike{ background:none; border:0; padding:0; font: inherit; font-size:.8125rem; color: var(--navy); text-decoration: underline; cursor:pointer; }
+  .learn-head{ margin: 4px 0 18px; } .learn-head h1{ margin: 2px 0 4px; } .learn-head p{ margin:0; color: var(--ink-soft); }
+  #skillsCard{ margin-bottom: 14px; } .skills-title{ font-family: var(--display); font-size: 1rem; color: var(--navy-deep); margin: 0 0 10px; }
+  #skillsCard #detailsFlex{ flex-direction: row !important; flex-wrap: wrap; justify-content: center; gap: 28px !important; }
+  .org-notice{ display:flex; align-items:center; gap: 12px; flex-wrap: wrap; }
+  .org-notice label{ display:inline-flex; align-items:center; gap:6px; font-size:.75rem; color: var(--ink-soft); cursor:pointer; }
+  @media (max-width: 1080px){ .home-top{ grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } .home-top .home-hi{ grid-column: 1 / -1; } }
+  @media (max-width: 720px){ .home-top, .home-row2{ grid-template-columns: 1fr; } }
 </style>
 <link rel="stylesheet" href="pa-theme.css">
 <link rel="stylesheet" href="badges.css">
@@ -286,14 +311,13 @@
         <div class="profile-dropdown-divider"></div>
         <div class="profile-progress-label">Account</div>
         <a class="profile-dropdown-item" href="/profile">My Profile</a>
-        <a class="profile-dropdown-item" href="/profile#badges" id="badgesMenuItem">My Badges</a>
         <a class="profile-dropdown-item" id="changePasswordMenuItem" onclick="openChangePassword()">Change password</a>
 
         <div class="profile-dropdown-divider"></div>
         <div class="profile-progress-label">Learning</div>
-        <a class="profile-dropdown-item" href="/lms-dashboard" aria-current="page">My Learning</a>
-        <a class="profile-dropdown-item" href="/my-tools">My Toolkit</a>
-        <a class="profile-dropdown-item" href="/tool-requests#suggest">Request tools</a>
+        <a class="profile-dropdown-item" href="/lms-dashboard" data-view-link="home">Home</a>
+        <a class="profile-dropdown-item" href="/my-learning" data-view-link="learning">My Learning</a>
+        <a class="profile-dropdown-item" href="/my-tools">My Toolkits</a>
 
         <div id="manageMenuGroup" style="display:none;">
           <div class="profile-dropdown-divider"></div>
@@ -420,6 +444,7 @@
     <div class="rec-banner" id="orgBanner" style="display:none; background:var(--tint); border-color:var(--tint-2);">
       <span style="font-size:0.8125rem; color:var(--ink-soft);" id="orgBannerText"></span>
       <a href="#" id="orgBannerDismiss" style="display:none; margin-left:10px; font-size:0.8125rem; color:var(--navy);">Dismiss</a>
+      <label id="orgBannerForever" hidden style="margin-left:12px; font-size:0.75rem; color:var(--ink-soft); cursor:pointer;"><input type="checkbox" id="orgBannerForeverBox"> Don't show again</label>
     </div>
 
     <div class="rec-banner" id="verifyBanner" style="display:none; background:var(--note-bg); border-color:var(--note-line);">
@@ -428,17 +453,8 @@
     </div>
 
     <!-- Pick up where you left off: the course in progress, what to learn next, and saved tools -->
-    <section class="home-band" id="homeBand" hidden aria-labelledby="homeHello">
-      <h1 class="home-hello" id="homeHello">Welcome back</h1>
-      <p class="home-sub" id="homeSub">Pick up where you left off.</p>
-      <div class="home-grid">
-        <div class="home-card lead" id="homeResume"></div>
-        <div class="home-card" id="homeNext"></div>
-        <div class="home-card" id="homeTools"></div>
-      </div>
-    </section>
 
-    <div class="card" id="welcomeCard" style="display:none; margin-bottom:22px; background:linear-gradient(135deg, var(--tint) 0%, var(--surface) 100%); border-color: var(--line);">
+    <div data-only="home" class="card" id="welcomeCard" style="display:none; margin-bottom:22px; background:linear-gradient(135deg, var(--tint) 0%, var(--surface) 100%); border-color: var(--line);">
       <span class="eyebrow">Welcome</span>
       <h1 style="font-size:1.1875rem;">You're in! Here's how to get the most out of this</h1>
       <p style="margin-bottom:14px;">Your courses are organized into seven skill areas, each with four experience levels. If you've taken the assessment, we've already highlighted where to start below. From here:</p>
@@ -450,9 +466,11 @@
       <button class="btn btn-primary btn-gradient" style="width:auto; padding:10px 22px;" onclick="dismissWelcome()">Get started →</button>
     </div>
 
-    <div id="tileRow" style="display:none;">
-
-      <div class="card" id="heroBand" style="margin-bottom:12px;">
+    <section class="home-band" id="homeBand" hidden aria-labelledby="homeHello" data-only="home">
+      <div class="home-top">
+        <div class="home-hi"><h1 class="home-hello" id="homeHello">Welcome back</h1>
+          <p class="home-sub" id="homeSub">Pick up where you left off.</p></div>
+      <div class="card home-hero" id="heroBand" style="display:none;">
         <div class="hero-row" style="display:flex; align-items:center; gap:20px; flex-wrap:wrap;">
           <svg id="summaryRingSvg" width="58" height="58" viewBox="0 0 36 36" style="flex-shrink:0;">
             <circle cx="18" cy="18" r="15" fill="none" stroke="var(--line)" stroke-width="4"/>
@@ -474,7 +492,7 @@
             <div style="font-size:0.6562rem; color:var(--gray);">growth since <span id="growthFirstTier"></span></div>
           </div>
           <div class="hero-actions" style="display:flex; flex-direction:column; gap:6px; white-space:nowrap;">
-            <a onclick="toggleSummaryDetails()" style="font-size:0.7812rem; color:var(--navy); cursor:pointer; text-decoration:underline;" id="detailsToggleLink">Hide details</a>
+            <a onclick="toggleSummaryDetails()" style="font-size:0.7812rem; color:var(--navy); cursor:pointer; text-decoration:underline;" id="detailsToggleLink">View details</a>
             <a onclick="handleRetakeAssessment()" style="font-size:0.7812rem; color:var(--ink-soft); cursor:pointer; text-decoration:underline;">Retake</a>
             <a href="/profile#assessments" style="font-size:0.7812rem; color:var(--ink-soft); text-decoration:underline;">All assessments</a>
           </div>
@@ -483,13 +501,45 @@
           <span id="staleAssessmentText"></span>
           <a onclick="handleRetakeAssessment()" style="color:var(--navy); cursor:pointer; text-decoration:underline; white-space:nowrap;">Retake it &rarr;</a>
         </div>
-        <div id="summaryDetailsPanel" style="display:none; margin-top:16px; padding-top:16px; border-top:1px solid var(--line);">
+      </div>
+        <button type="button" class="card bd-tile" id="badgeTile" hidden aria-haspopup="dialog"></button>
+      </div>
+      <div class="home-grid">
+        <div class="home-card lead" id="homeResume"></div>
+        <div class="home-card" id="homeNext"></div>
+        <div class="home-card" id="homeTools"></div>
+      </div>
+      <div class="home-row2">
+        <a class="card rt-tile" id="targetTile" href="/profile#targets" hidden></a>
+    <div class="card refresher" id="spacedReviewCard" style="display:none;">
+      <span class="eyebrow">Quick refresher</span>
+      <p class="refresher-why">One question from a course you finished a while ago. Recalling it now helps it stick.</p>
+      <div id="spacedReviewMeta" style="font-size:0.7812rem; color:var(--gray); margin-bottom:12px;"></div>
+      <div id="spacedReviewCheckContainer"></div>
+      <div class="refresher-more" id="refresherMore" hidden><button type="button" class="btn btn-primary btn-small" id="refresherNext">Another question</button><button type="button" class="linklike" id="refresherDone">Done for today</button><span id="refresherCount"></span></div>
+      <a id="spacedReviewLink" href="#" style="font-size:0.7812rem; color:var(--navy); text-decoration:underline; display:inline-block; margin-top:12px;">Revisit this course →</a>
+    </div>
+      </div>
+    </section>
+
+
+    <header class="learn-head" data-only="learning">
+      <span class="eyebrow">My Learning</span>
+      <h1>Your courses and skills</h1>
+      <p>Your plan, every course, and how your skills are growing since your assessment.</p>
+    </header>
+
+    <div class="card" id="skillsCard" data-only="learning" style="display:none;">
+      <h2 class="skills-title">Your skills</h2>
+        <div id="summaryDetailsPanel" style="display:block;">
           <div id="detailsFlex" style="display:flex; flex-direction:column; gap:16px; align-items:center;">
             <svg id="radarChartSvg" width="320" height="240" viewBox="-50 0 400 300" style="display:block; flex-shrink:0; max-width:100%; height:auto;"></svg>
             <div id="domainBarsContainer" style="width:100%; max-width:420px;"></div>
           </div>
         </div>
-      </div>
+    </div>
+
+    <div id="tileRow" data-only="learning" style="display:none;">
 
       <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:18px;">
         <div style="flex:1; min-width:220px; background:var(--ok-bg); border-radius:10px; padding:12px 14px; display:flex; align-items:flex-start; gap:10px;">
@@ -510,10 +560,8 @@
 
     </div>
 
-    <button type="button" class="card bd-tile" id="badgeTile" hidden aria-haspopup="dialog"></button>
-    <a class="card rt-tile" id="targetTile" href="/profile#targets" hidden></a>
 
-    <div class="card" id="profilePromptCard" style="display:none; margin-bottom:22px; background:linear-gradient(135deg, var(--tint) 0%, var(--surface) 100%); border-color: var(--line);">
+    <div data-only="home" class="card" id="profilePromptCard" style="display:none; margin-bottom:22px; background:linear-gradient(135deg, var(--tint) 0%, var(--surface) 100%); border-color: var(--line);">
       <div style="display:flex; align-items:baseline; justify-content:space-between;">
         <span class="eyebrow" style="font-size:0.6875rem; font-weight:600; letter-spacing:0.06em; text-transform:uppercase; color:var(--cyan);">One quick thing</span>
         <a onclick="dismissProfilePrompt()" style="font-size:0.7812rem; color:var(--ink-soft); cursor:pointer; text-decoration:underline;">Not now</a>
@@ -556,7 +604,7 @@
 
     <div id="progressToast" style="display:none; background:var(--ok-bg); border:1px solid var(--ok); border-radius:10px; padding:10px 14px; margin-bottom:14px; font-size:0.8438rem; color:var(--ok-ink); text-align:center;">Nice work! Updating your progress…</div>
 
-    <div class="card" id="assessmentPromptCard" style="display:none; margin-bottom:22px;">
+    <div data-only="home" class="card" id="assessmentPromptCard" style="display:none; margin-bottom:22px;">
       <span class="eyebrow">Get started</span>
       <h1 style="font-size:1.1875rem;">Find your starting point</h1>
       <p>Answer a few questions about your product and AI skills to unlock courses matched to your level, across all seven skill areas below.</p>
@@ -592,14 +640,8 @@
       </div>
     </div>
 
-    <div class="card" id="spacedReviewCard" style="display:none; margin-bottom:22px;">
-      <span class="eyebrow">Spaced review</span>
-      <div id="spacedReviewMeta" style="font-size:0.7812rem; color:var(--gray); margin-bottom:12px;"></div>
-      <div id="spacedReviewCheckContainer"></div>
-      <a id="spacedReviewLink" href="#" style="font-size:0.7812rem; color:var(--navy); text-decoration:underline; display:inline-block; margin-top:12px;">Revisit this course →</a>
-    </div>
 
-    <div style="display:flex; align-items:baseline; justify-content:space-between; gap:12px; flex-wrap:wrap; margin: 6px 0 14px;">
+    <div data-only="learning" style="display:flex; align-items:baseline; justify-content:space-between; gap:12px; flex-wrap:wrap; margin: 6px 0 14px;">
       <div style="display:flex; align-items:center; gap:14px; flex-wrap:wrap;">
         <h2 id="courses" tabindex="-1" style="font-family:var(--display); font-size:1rem; color:var(--navy-deep); margin:0;">Your Courses</h2>
         <a class="week-goal" id="weekGoal" href="/profile#goals" hidden title="Your weekly goal. Change it on My Profile."></a>
@@ -614,14 +656,14 @@
       </div>
     </div>
 
-    <div class="rec-banner" id="recBanner" style="display:none;">
+    <div class="rec-banner" id="recBanner" data-only="learning" style="display:none;">
       <span class="eyebrow">Recommended for you</span>
       <div id="recChips"></div>
     </div>
 
-    <div id="courseCatalog"></div>
+    <div id="courseCatalog" data-only="learning"></div>
 
-    <div class="card" id="myNotesCard" style="display:none; margin-top:22px;">
+    <div class="card" id="myNotesCard" data-only="learning" style="display:none; margin-top:22px;">
       <div style="display:flex; align-items:baseline; justify-content:space-between;">
         <span class="eyebrow" style="margin-bottom:0;">Your notes</span>
         <a id="notesToggleLink" onclick="toggleNotesPanel()" style="font-size:0.7812rem; color:var(--navy); cursor:pointer; text-decoration:underline;">Hide</a>
@@ -1035,6 +1077,7 @@ function showCompanyNoticeIfMember(user){
             "You're no longer a member of " + m.orgName + ". Your account, results and course access are still yours. " +
             m.orgName + " keeps what you had shared up to the day you left and receives nothing new.";
           const dismiss = document.getElementById('orgBannerDismiss');
+          dismiss.textContent = 'Dismiss';
           dismiss.style.display = 'inline';
           dismiss.onclick = (ev) => {
             ev.preventDefault();
@@ -1046,9 +1089,24 @@ function showCompanyNoticeIfMember(user){
         }
       }
       if (!m || m.status !== 'active'){ banner.style.display = 'none'; return; }
+      // "Hide" puts it away for this visit; with "Don't show again" ticked it stays away for this company.
+      const hideKey = 'pa_org_notice_hidden_' + user.uid + '_' + (m.orgId || '');
+      let hidden = false;
+      try { hidden = localStorage.getItem(hideKey) === '1' || sessionStorage.getItem(hideKey) === '1'; } catch (e){ /* storage off: show it */ }
+      if (hidden){ banner.style.display = 'none'; return; }
       document.getElementById('orgBannerText').textContent =
         "You're a member of " + m.orgName + ". Your assessment results, answers and course progress are shared with " +
         m.orgName + "'s admins while you're a member. Your account stays yours.";
+      const dismiss = document.getElementById('orgBannerDismiss');
+      dismiss.textContent = 'Hide';
+      dismiss.style.display = 'inline';
+      document.getElementById('orgBannerForever').hidden = false;
+      dismiss.onclick = (ev) => {
+        ev.preventDefault();
+        const forever = document.getElementById('orgBannerForeverBox').checked;
+        try { (forever ? localStorage : sessionStorage).setItem(hideKey, '1'); } catch (e){ /* ignore */ }
+        banner.style.display = 'none';
+      };
       banner.style.display = 'block';
     })
     .catch(() => { /* no membership or rules not published: show nothing */ });
@@ -1333,9 +1391,41 @@ function renderBadges(user, progress, assessmentResult){
   if (won.length) showBadgeToast(won);
 }
 let dashBadges = null;
+
+/* ------------------------------------------------------------ Home and My Learning */
+// One page, two views: Home (/lms-dashboard: at a glance) and My Learning (/my-learning: courses and skills).
+// Switching is instant; the address, the header, the menus and the browser's Back button follow along.
+function viewFromUrl(){ return /^\/my-learning/.test(location.pathname) || new URLSearchParams(location.search).get('view') === 'learning' ? 'learning' : 'home'; }
+window.showView = function(v, anchorId, push){
+  v = v === 'learning' ? 'learning' : 'home';
+  document.body.dataset.view = v;
+  const url = v === 'learning' ? '/my-learning' : '/lms-dashboard';
+  if (push !== false && location.pathname !== url) history.pushState({ view: v }, '', url + (anchorId ? '#' + anchorId : ''));
+  document.title = (v === 'learning' ? 'My Learning' : 'Home') + ' · Product Advisory Learning';
+  document.querySelectorAll('a[href="/lms-dashboard"], a[href="/my-learning"]').forEach(a => {
+    const mine = (a.getAttribute('href') === '/my-learning') === (v === 'learning');
+    if (a.closest('.pa-nav, .profile-dropdown, .pa-acct-menu')){ if (mine) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current'); }
+  });
+  const target = anchorId && document.getElementById(anchorId);
+  if (target){ target.scrollIntoView({ behavior: 'smooth', block: 'start' }); if (target.tabIndex < 0) target.setAttribute('tabindex', '-1'); target.focus({ preventScroll: true }); }
+  else window.scrollTo(0, 0);
+};
+document.addEventListener('click', (e) => {
+  const a = e.target.closest && e.target.closest('a[href="/my-learning"], a[href="/lms-dashboard"]');
+  if (!a || e.metaKey || e.ctrlKey || e.shiftKey || a.target === '_blank') return;
+  if (a.classList.contains('brand-header') || a.closest('.pa-brand')) { e.preventDefault(); showView('home'); return; }
+  e.preventDefault();
+  showView(a.getAttribute('href') === '/my-learning' ? 'learning' : 'home');
+  const dd = document.getElementById('profileDropdown'); if (dd) dd.style.display = 'none';
+});
+window.addEventListener('popstate', () => showView(viewFromUrl(), null, false));
+(function(){
+  const v = viewFromUrl();
+  if (v === 'learning' && location.pathname !== '/my-learning') history.replaceState({ view: v }, '', '/my-learning' + location.hash);
+  showView(v, null, false);
+})();
 function openBadges(opener){ if (dashBadges) BadgesUI.openModal(dashBadges, opener); }
 document.getElementById('badgeTile').addEventListener('click', (e) => openBadges(e.currentTarget));
-document.getElementById('badgesMenuItem').addEventListener('click', (e) => { if (!dashBadges) return; e.preventDefault(); openBadges(document.getElementById('badgeTile')); });
 function showBadgeToast(won){
   const B = window.BadgesCore;
   const esc = (t) => String(t).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
@@ -1395,8 +1485,9 @@ function animateCountUp(el, from, to, duration){
 
 function renderAssignedStat(progress, assessmentResult){
   const tileRow = document.getElementById('tileRow');
-  if (!assessmentResult){ tileRow.style.display = 'none'; return; }
-  tileRow.style.display = 'block';
+  const hero = document.getElementById('heroBand'), skills = document.getElementById('skillsCard');
+  if (!assessmentResult){ tileRow.style.display = 'none'; hero.style.display = 'none'; skills.style.display = 'none'; return; }
+  tileRow.style.display = 'block'; hero.style.display = 'block'; skills.style.display = 'block';
 
   // Defaults to expanded for anyone who hasn't set a preference yet, and
   // always expands right after an assessment (?justAssessed=1, set by the
@@ -1404,8 +1495,9 @@ function renderAssignedStat(progress, assessmentResult){
   // regardless of a saved collapsed state.
   const justAssessed = new URLSearchParams(window.location.search).get('justAssessed') === '1';
   const shouldBeExpanded = justAssessed || progress.resultCardExpanded !== false;
-  document.getElementById('summaryDetailsPanel').style.display = shouldBeExpanded ? 'block' : 'none';
-  document.getElementById('detailsToggleLink').textContent = shouldBeExpanded ? 'Hide details' : 'View details';
+  void shouldBeExpanded;   // the skill details now have their own place on My Learning, always open
+  document.getElementById('summaryDetailsPanel').style.display = 'block';
+  document.getElementById('detailsToggleLink').textContent = 'View details';
   if (justAssessed && !new URLSearchParams(window.location.search).get('justCompleted')){
     history.replaceState(null, '', window.location.pathname);
   }
@@ -1822,21 +1914,8 @@ function formatDuration(ms){
   return hours > 0 ? (hours + 'h ' + minutes + 'm') : (minutes + 'm');
 }
 
-window.toggleSummaryDetails = async function(){
-  const panel = document.getElementById('summaryDetailsPanel');
-  const isOpen = panel.style.display === 'block';
-  const nowOpen = !isOpen;
-  panel.style.display = nowOpen ? 'block' : 'none';
-  document.getElementById('detailsToggleLink').textContent = nowOpen ? 'Hide details' : 'View details';
-
-  if (!currentUser) return;
-  try {
-    const progressRef = doc(db, 'progress', currentUser.uid);
-    await setDoc(progressRef, { resultCardExpanded: nowOpen }, { merge: true });
-  } catch (err){
-    console.error('Could not save details-expanded state:', err);
-  }
-};
+// "View details" on Home: the skill breakdown on My Learning.
+window.toggleSummaryDetails = function(){ showView('learning', 'skillsCard'); };
 
 window.toggleExamplePreview = function(){
   const panel = document.getElementById('examplePreviewPanel');
@@ -2103,43 +2182,64 @@ function daysSince(isoStr){
   return Math.floor((Date.now() - then) / 86400000);
 }
 
-/* Resurfaces one quick-check question from a course completed at
-   least a week ago — spaced repetition for material that's likely
-   fading, without tracking any extra "reviewed" state. The course
-   (and the question within it) rotate daily via a date-based index,
-   so a refresh doesn't reshuffle it but tomorrow does. */
+/* Quick refresher: questions from courses finished at least a week ago, so what was learned is recalled
+   again before it fades (retrieval practice, spaced over time). One question shows; after answering, the
+   learner can take another (up to REFRESH_MAX a day, from up to three courses) or be done for today.
+   The starting point rotates daily, so a refresh doesn't reshuffle it but tomorrow does. */
+const REFRESH_MAX = 5;
+const refresher = { pool: [], at: 0, shown: 0 };
+function refresherDoneKey(){ return 'pa_refresher_done_' + (currentUser ? currentUser.uid : '') + '_' + new Date().toISOString().slice(0, 10); }
 async function renderSpacedReview(progress){
   const card = document.getElementById('spacedReviewCard');
   const courses = (progress && progress.courses) || {};
-
+  let done = false;
+  try { done = localStorage.getItem(refresherDoneKey()) === '1'; } catch (e){ /* storage off: show it */ }
   const eligible = Object.keys(courses)
     .filter(cid => CATALOG[cid] && isCourseComplete(progress, cid))
     .map(cid => ({ cid, days: daysSince(courses[cid].updatedAt) }))
     .filter(c => c.days >= 7)
     .sort((a, b) => a.cid.localeCompare(b.cid));
+  if (done || !eligible.length){ card.style.display = 'none'; return; }
 
-  if (!eligible.length){ card.style.display = 'none'; return; }
-
-  // The quiz questions live in the course's lesson text, fetched only for the
-  // course picked today. If it has none (or cannot be fetched), try the next one.
+  // The questions live in each course's lesson text, fetched only for the (up to three) courses used today.
   const dayIndex = Math.floor(Date.now() / 86400000);
+  const lists = [];
   for (let k = 0; k < Math.min(eligible.length, 3); k++){
     const pick = eligible[(dayIndex + k) % eligible.length];
     const content = await loadCourseContent(pick.cid);
-    const allChecks = [];
-    ((content && content.lessons) || []).forEach(l => (l.checks || []).forEach(c => allChecks.push(c)));
-    if (!allChecks.length) continue;
-    const check = allChecks[dayIndex % allChecks.length];
-
-    document.getElementById('spacedReviewMeta').textContent =
-      CATALOG[pick.cid].title + ' — completed ' + pick.days + (pick.days === 1 ? ' day' : ' days') + ' ago';
-    document.getElementById('spacedReviewLink').href = '/lesson?course=' + pick.cid + '&v=' + CONTENT_VERSION;
-    renderSpacedReviewCheck(check);
-    card.style.display = 'block';
-    return;
+    const checks = [];
+    ((content && content.lessons) || []).forEach(l => (l.checks || []).forEach(c => checks.push(c)));
+    if (checks.length) lists.push(checks.map((c, q) => ({ cid: pick.cid, days: pick.days, check: checks[(dayIndex + q) % checks.length] })));
   }
-  card.style.display = 'none';
+  // take turns between the courses rather than draining one first
+  const pool = [];
+  for (let r = 0; lists.some(l => r < l.length); r++) lists.forEach(l => { if (r < l.length) pool.push(l[r]); });
+  if (!pool.length){ card.style.display = 'none'; return; }
+  refresher.pool = pool; refresher.at = 0; refresher.shown = 0;
+  showRefresherQuestion();
+  card.style.display = 'block';
 }
+function showRefresherQuestion(){
+  const item = refresher.pool[refresher.at % refresher.pool.length];
+  refresher.shown++;
+  document.getElementById('spacedReviewMeta').textContent =
+    CATALOG[item.cid].title + ' · finished ' + item.days + (item.days === 1 ? ' day' : ' days') + ' ago';
+  document.getElementById('spacedReviewLink').href = '/lesson?course=' + item.cid + '&v=' + CONTENT_VERSION;
+  document.getElementById('refresherMore').hidden = true;
+  renderSpacedReviewCheck(item.check);
+}
+function refresherAnswered(){
+  const more = document.getElementById('refresherMore');
+  const left = Math.min(REFRESH_MAX, refresher.pool.length) - refresher.shown;
+  document.getElementById('refresherNext').hidden = left <= 0;
+  document.getElementById('refresherCount').textContent = left > 0 ? left + ' more today' : "That's today's set. Nice work.";
+  more.hidden = false;
+}
+document.getElementById('refresherNext').addEventListener('click', () => { refresher.at++; showRefresherQuestion(); document.getElementById('spacedReviewCheckContainer').querySelector('.check-option').focus(); });
+document.getElementById('refresherDone').addEventListener('click', () => {
+  try { localStorage.setItem(refresherDoneKey(), '1'); } catch (e){ /* ignore */ }
+  document.getElementById('spacedReviewCard').style.display = 'none';
+});
 
 /* The text of a lesson (its quiz questions and reflection prompts) lives in
    content/<course>.js, which the lesson page loads. The dashboard needs it for
@@ -2198,6 +2298,7 @@ function renderSpacedReviewCheck(check){
       feedback.innerHTML = (i === check.correct
         ? '<span class="check-verdict ok"><span class="check-mark" aria-hidden="true">' + CHECK_TICK + '</span>Correct.</span> '
         : '<span class="check-verdict bad"><span class="check-mark" aria-hidden="true">' + CHECK_CROSS + '</span>Not quite.</span> ') + check.explanation;
+      refresherAnswered();
     };
     optionsWrap.appendChild(btn);
   });
@@ -2365,7 +2466,7 @@ function renderHome(user, progress, assessmentResult, recommended, assessmentUrl
     b.innerHTML = '<span class="eyebrow">Explore</span><h2>Browse every course</h2><p>Seven skill areas, each at four levels, from limited to advanced experience. Pick any course to begin.</p>' +
       '<div class="home-go"><a class="home-out" href="#courses" id="homeBrowse">See the courses ↓</a></div>';
     const link = document.getElementById('homeBrowse');
-    link.addEventListener('click', (e) => { e.preventDefault(); if (assessmentResult) setCatalogView('all'); const h = document.getElementById('courses'); h.scrollIntoView({ behavior: 'smooth' }); h.focus({ preventScroll: true }); });
+    link.addEventListener('click', (e) => { e.preventDefault(); if (assessmentResult) setCatalogView('all'); showView('learning', 'courses'); });
   }
 
   renderHomeTools(user);
@@ -2375,7 +2476,7 @@ function renderHome(user, progress, assessmentResult, recommended, assessmentUrl
 async function renderHomeTools(user){
   const box = document.getElementById('homeTools'), T = window.SavedToolsCore, H = window.LearningHomeCore;
   const esc = (t) => String(t).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
-  const head = '<span class="eyebrow">Your toolkit</span><h2>My Toolkit</h2>';
+  const head = '<span class="eyebrow">Your toolkits</span><h2>My Toolkits</h2>';
   box.innerHTML = head + '<p>Loading…</p>';
   let list = null;
   try {
@@ -2383,12 +2484,12 @@ async function renderHomeTools(user){
     list = snap.docs.map(d => Object.assign({ id: d.id }, d.data()));
   } catch (err){ console.error('Could not load saved tools:', err); }
   if (list === null){
-    box.innerHTML = head + '<p>Your scorecards, decision matrices and impact scores.</p><div class="home-go"><a class="more" href="/my-tools">Open My Toolkit →</a></div>';
+    box.innerHTML = head + '<p>Your scorecards, decision matrices and impact scores.</p><div class="home-go"><a class="more" href="/my-tools">Open My Toolkits →</a></div>';
     return;
   }
   if (!list.length){
     box.innerHTML = head + '<p>Prioritize features, rank AI use cases, decide build, buy or partner, or score your roadmap. Your work saves here as you go.</p>' +
-      '<div class="home-go"><a class="home-out" href="/my-tools">Open My Toolkit</a></div>';
+      '<div class="home-go"><a class="home-out" href="/my-tools">Open My Toolkits</a></div>';
     return;
   }
   const items = H.recentSaved(list, 3).map(d => {
