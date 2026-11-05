@@ -104,8 +104,10 @@
   @keyframes skeletonPulse{ 0%, 100%{ opacity:1; } 50%{ opacity:0.5; } }
   .skeleton-block{ background: var(--line); border-radius:10px; animation: skeletonPulse 1.4s ease-in-out infinite; }
   .stat-box.pulse-success{ background:var(--ok-bg); border-color:var(--ok); }
-  #summaryTimeSince:not(:empty)::before{ content: " · "; }
-  #summaryActiveTime:not(:empty)::before{ content: " · "; }
+  /* a dot between the facts, never before the first one */
+  #summaryTimeSinceFirst:not(:empty) + #summaryTimeSince:not(:empty)::before,
+  #summaryTimeSinceFirst:not(:empty) ~ #summaryActiveTime:not(:empty)::before,
+  #summaryTimeSince:not(:empty) + #summaryActiveTime:not(:empty)::before{ content: " · "; }
   .stat-num{ font-family:var(--display); font-weight:700; font-size: 1.75rem; color: var(--navy); }
   .stat-label{ font-size: 0.75rem; color: var(--gray); margin-top: 4px; }
 
@@ -244,14 +246,23 @@
   }
   /* Home and My Learning: one page, two views */
   body[data-view="home"] [data-only="learning"], body[data-view="learning"] [data-only="home"]{ display:none !important; }
-  .home-top{ margin-top: 6px; display:grid; grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.7fr) minmax(220px, 0.8fr); gap: 16px; align-items: stretch; margin-bottom: 18px; }
-  .home-hi{ display:flex; flex-direction:column; justify-content:center; }
+  /* Home: the greeting on its own line, then (first visit) the welcome, then your result beside your badges */
+  .home-hi{ margin: 4px 0 18px; }
   .home-hi .home-hello{ margin:0 0 4px; }
+  .home-hi .home-sub{ margin:0; }
+  #welcomeCard{ padding: 20px 24px; }
+  #welcomeCard .eyebrow{ display:block; font-size:0.6875rem; font-weight:600; letter-spacing:0.06em; text-transform:uppercase; color: var(--cyan-ink, var(--cyan)); }
+  #welcomeCard h2{ font-family: var(--display); font-size:1.1875rem; color: var(--navy-deep); margin: 4px 0 10px; }
+  #welcomeCard .welcome-map{ font-size:0.875rem; color: var(--ink-soft); margin: 0 0 10px; padding-left: 20px; line-height:1.7; }
+  #welcomeCard p{ font-size:0.875rem; color: var(--ink-soft); margin: 0 0 14px; }
+  .home-top{ display:flex; gap: 16px; align-items: stretch; margin-bottom: 18px; }
+  .home-top > .home-hero{ flex: 1.5 1 0; min-width: 0; align-content: center; }
+  .home-top > .bd-tile{ flex: 1 1 0; min-width: 0; }
   .home-top .home-hero{ margin:0; padding: 16px 18px; }
   .home-top .home-hero .hero-row{ gap: 10px 16px !important; }
   .home-top .home-hero .hero-actions{ flex-direction: row !important; flex-wrap: wrap; gap: 4px 12px !important; }
   .home-top .home-hero .hero-stat{ padding: 0 12px !important; }
-  .home-top .bd-tile{ margin:0; flex-direction:column; align-items:flex-start; gap:10px; padding: 14px 16px; height:100%; }
+  .home-top .bd-tile{ margin:0; padding: 16px 20px; }
   .home-row2{ display:grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr); gap: 16px; align-items:start; margin: 18px 0 22px; }
   .home-row2 .rt-tile{ margin:0; }
   .home-row2 .refresher{ margin:0; }
@@ -263,10 +274,16 @@
   .learn-head{ margin: 4px 0 18px; } .learn-head h1{ margin: 2px 0 4px; } .learn-head p{ margin:0; color: var(--ink-soft); }
   #skillsCard{ margin-bottom: 14px; } .skills-title{ font-family: var(--display); font-size: 1rem; color: var(--navy-deep); margin: 0 0 10px; }
   #skillsCard #detailsFlex{ flex-direction: row !important; flex-wrap: wrap; justify-content: center; gap: 28px !important; }
-  .org-notice{ display:flex; align-items:center; gap: 12px; flex-wrap: wrap; }
-  .org-notice label{ display:inline-flex; align-items:center; gap:6px; font-size:.75rem; color: var(--ink-soft); cursor:pointer; }
-  @media (max-width: 1080px){ .home-top{ grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } .home-top .home-hi{ grid-column: 1 / -1; } }
-  @media (max-width: 720px){ .home-top, .home-row2{ grid-template-columns: 1fr; } }
+  /* Company notice: the text, then Hide and "Don't show again" together on one line */
+  #orgBanner{ padding: 12px 18px; }
+  .org-notice{ display:flex; align-items:center; gap: 8px 20px; flex-wrap: wrap; }
+  .org-notice-text{ flex: 1 1 420px; min-width: 0; font-size:0.8125rem; color: var(--ink-soft); line-height:1.5; }
+  .org-notice-actions{ display:inline-flex; align-items:center; gap: 16px; white-space: nowrap; flex-shrink: 0; }
+  .org-notice-actions a{ font-size:0.8125rem; color: var(--navy); }
+  .org-notice-actions label{ display:inline-flex; align-items:center; gap:6px; font-size:.75rem; color: var(--ink-soft); cursor:pointer; }
+  .org-notice-actions label[hidden]{ display:none; }
+  @media (max-width: 900px){ .home-top{ flex-direction: column; } .home-top > .home-hero, .home-top > .bd-tile{ flex: none; } }
+  @media (max-width: 720px){ .home-row2{ grid-template-columns: 1fr; } }
 </style>
 <link rel="stylesheet" href="pa-theme.css">
 <link rel="stylesheet" href="badges.css">
@@ -442,9 +459,13 @@
     <div id="dashboardContent" style="display:none;">
 
     <div class="rec-banner" id="orgBanner" style="display:none; background:var(--tint); border-color:var(--tint-2);">
-      <span style="font-size:0.8125rem; color:var(--ink-soft);" id="orgBannerText"></span>
-      <a href="#" id="orgBannerDismiss" style="display:none; margin-left:10px; font-size:0.8125rem; color:var(--navy);">Dismiss</a>
-      <label id="orgBannerForever" hidden style="margin-left:12px; font-size:0.75rem; color:var(--ink-soft); cursor:pointer;"><input type="checkbox" id="orgBannerForeverBox"> Don't show again</label>
+      <div class="org-notice">
+        <span class="org-notice-text" id="orgBannerText"></span>
+        <span class="org-notice-actions">
+          <a href="#" id="orgBannerDismiss" style="display:none;">Dismiss</a>
+          <label id="orgBannerForever" hidden><input type="checkbox" id="orgBannerForeverBox"> Don't show again</label>
+        </span>
+      </div>
     </div>
 
     <div class="rec-banner" id="verifyBanner" style="display:none; background:var(--note-bg); border-color:var(--note-line);">
@@ -454,22 +475,22 @@
 
     <!-- Pick up where you left off: the course in progress, what to learn next, and saved tools -->
 
-    <div data-only="home" class="card" id="welcomeCard" style="display:none; margin-bottom:22px; background:linear-gradient(135deg, var(--tint) 0%, var(--surface) 100%); border-color: var(--line);">
-      <span class="eyebrow">Welcome</span>
-      <h1 style="font-size:1.1875rem;">You're in! Here's how to get the most out of this</h1>
-      <p style="margin-bottom:14px;">Your courses are organized into seven skill areas, each with four experience levels. If you've taken the assessment, we've already highlighted where to start below. From here:</p>
-      <ul style="font-size:0.8438rem; color:var(--ink-soft); margin:0 0 18px; padding-left:20px; line-height:1.7;">
-        <li>Check <strong>Recommended for you</strong> for your best starting point</li>
-        <li>Click into any course tile to begin, your progress saves automatically</li>
-        <li>Come back anytime, you'll always resume right where you left off</li>
-      </ul>
-      <button class="btn btn-primary btn-gradient" style="width:auto; padding:10px 22px;" onclick="dismissWelcome()">Get started →</button>
-    </div>
 
     <section class="home-band" id="homeBand" hidden aria-labelledby="homeHello" data-only="home">
+      <div class="home-hi"><h1 class="home-hello" id="homeHello">Welcome back</h1>
+        <p class="home-sub" id="homeSub">Pick up where you left off.</p></div>
+      <div class="card" id="welcomeCard" style="display:none; margin-bottom:18px; background:linear-gradient(135deg, var(--tint) 0%, var(--surface) 100%); border-color: var(--line);">
+        <span class="eyebrow">Welcome</span>
+        <h2>You're in! Here's how to get around</h2>
+        <ul class="welcome-map">
+          <li><strong>Home</strong> (this page): pick up where you left off, see what to learn next, and track your badges and role targets.</li>
+          <li><strong>My Learning</strong>: your skill results, your plan and every course, across seven skill areas at four experience levels.</li>
+          <li><strong>My Toolkits</strong>: the tools you have saved and worked on.</li>
+        </ul>
+        <p>Your progress saves as you go, so you can always come back to where you left off.</p>
+        <button class="btn btn-primary btn-gradient" style="width:auto; padding:10px 22px;" onclick="dismissWelcome()">Get started →</button>
+      </div>
       <div class="home-top">
-        <div class="home-hi"><h1 class="home-hello" id="homeHello">Welcome back</h1>
-          <p class="home-sub" id="homeSub">Pick up where you left off.</p></div>
       <div class="card home-hero" id="heroBand" style="display:none;">
         <div class="hero-row" style="display:flex; align-items:center; gap:20px; flex-wrap:wrap;">
           <svg id="summaryRingSvg" width="58" height="58" viewBox="0 0 36 36" style="flex-shrink:0;">
