@@ -3235,3 +3235,152 @@ function benchmarkReport() {
   Logger.log(b.people + ' people (' + b.attempts + ' assessments). Average ' + b.overall.mean + '%. Strongest: ' + (b.areas[0] || {}).label + '. Weakest: ' + (b.areas[b.areas.length - 1] || {}).label
     + '. ' + (b.publishable ? 'Enough to publish.' : 'Not enough yet to publish (fewer than ' + BENCHMARK_MIN_PUBLISH_ + ' people).') + ' Full table on the Benchmark tab.');
 }
+
+
+/* ==================================================================
+   20. MONTHLY DATA CHECK (is any Sheet ready to move to Firestore?)
+   ------------------------------------------------------------------
+   On the 1st of each month, around 9am, this counts the rows in every
+   tab of this spreadsheet, and of any other spreadsheets you list, and
+   emails rob@ a short table: how big each tab is, how much it grew in
+   the month, and a flag when one is getting close to the point where
+   it should move to Firestore (docs/SCALING.md, "Sheets to a database"):
+     - Move now: a tab has 50,000 rows, or a file has used 80% of the
+       10 million cells Google allows per spreadsheet.
+     - Plan it: a tab has 25,000 rows, would reach 50,000 within six
+       months at last month's pace, or a file has used half its cells.
+   Nothing is changed in the sheets. The email goes out every month,
+   so you can see it is still running; the subject says when something
+   needs a look.
+
+   Setup (once):
+   1. Optional: in Project Settings > Script properties, add
+      GROWTH_WATCH_SHEETS with the addresses (or ids) of the other logs
+      to watch, separated by commas, e.g. the "Product Advisory site
+      log" and the "Portfolio Ask log". This spreadsheet is always
+      included.
+   2. Choose installMonthlyDataCheck and click Run (it asks to approve
+      running on a schedule and opening the other spreadsheets).
+   3. To see one now, run monthlyDataCheck.
+   ================================================================== */
+
+var GROWTH_ROWS_PLAN_ = 25000;
+var GROWTH_ROWS_MOVE_ = 50000;
+var GROWTH_CELL_LIMIT_ = 10000000;
+var GROWTH_PLAN_MONTHS_ = 6;
+var GROWTH_LAST_PROP_ = 'GROWTH_LAST';   // last month's row counts, so the email can show the change
+
+// The spreadsheet ids to check besides this one, from GROWTH_WATCH_SHEETS (addresses or bare ids).
+function growthWatchIds_(raw) {
+  var out = [];
+  String(raw || '').split(/[\s,]+/).forEach(function (s) {
+    var m = /\/d\/([A-Za-z0-9_-]{20,})/.exec(s) || /^([A-Za-z0-9_-]{20,})$/.exec(s);
+    if (m && out.indexOf(m[1]) < 0) out.push(m[1]);
+  });
+  return out;
+}
+
+/* The report, from the counts alone (no Google services, so it can be tested).
+   files: [{ id, name, cells, tabs: [{ name, rows }], error }]; last: { 'fileId|tab': rows } from a month ago.
+   Returns { flags, rows, subject, text, html, counts }. */
+function growthReport_(files, last, opts) {
+  opts = opts || {};
+  last = last || {};
+  var rows = [], counts = {};
+  files.forEach(function (f) {
+    if (f.error) { rows.push({ file: f.name || f.id, tab: '', rows: null, added: null, status: 'error', why: 'could not be opened: ' + f.error }); return; }
+    var cellShare = (f.cells || 0) / GROWTH_CELL_LIMIT_;
+    (f.tabs || []).forEach(function (t) {
+      var key = f.id + '|' + t.name, prev = Object.prototype.hasOwnProperty.call(last, key) ? Number(last[key]) : null;
+      var added = prev === null || !isFinite(prev) ? null : t.rows - prev;
+      counts[key] = t.rows;
+      var status = 'ok', why = '';
+      if (t.rows >= GROWTH_ROWS_MOVE_) { status = 'move'; why = t.rows.toLocaleString('en-US') + ' rows (the line is ' + GROWTH_ROWS_MOVE_.toLocaleString('en-US') + ')'; }
+      else if (t.rows >= GROWTH_ROWS_PLAN_) { status = 'plan'; why = 'past ' + GROWTH_ROWS_PLAN_.toLocaleString('en-US') + ' rows'; }
+      else if (added > 0 && (GROWTH_ROWS_MOVE_ - t.rows) / added <= GROWTH_PLAN_MONTHS_) {
+        status = 'plan'; why = 'at ' + added.toLocaleString('en-US') + ' new rows a month it reaches ' + GROWTH_ROWS_MOVE_.toLocaleString('en-US') + ' in about ' + Math.max(1, Math.ceil((GROWTH_ROWS_MOVE_ - t.rows) / added)) + ' months';
+      }
+      rows.push({ file: f.name, tab: t.name, rows: t.rows, added: added, status: status, why: why });
+    });
+    if (cellShare >= 0.5) {
+      rows.push({ file: f.name, tab: '(whole file)', rows: null, added: null, status: cellShare >= 0.8 ? 'move' : 'plan',
+        why: Math.round(cellShare * 100) + '% of the 10 million cells Google allows in one spreadsheet' });
+    }
+  });
+  var rank = { move: 0, error: 1, plan: 2, ok: 3 };
+  rows.sort(function (a, b) { return rank[a.status] - rank[b.status] || (b.rows || 0) - (a.rows || 0); });
+  var flags = rows.filter(function (r) { return r.status !== 'ok'; });
+  var label = { move: 'Move now', plan: 'Plan the move', error: 'Check', ok: 'Fine' };
+  var subject = flags.length ? 'Monthly data check: ' + flags.length + (flags.length === 1 ? ' thing' : ' things') + ' to look at' : 'Monthly data check: all clear';
+  var num = function (n) { return n === null ? '' : n.toLocaleString('en-US'); };
+  var change = function (r) { return r.added === null ? (r.rows === null ? '' : 'new') : (r.added >= 0 ? '+' : '') + r.added.toLocaleString('en-US'); };
+  var lead = flags.length
+    ? 'Something is getting big enough to move from Google Sheets to Firestore. Ask Claude to move it (docs/SCALING.md, "Sheets to a database").'
+    : 'Every log is well inside what Google Sheets handles. Nothing to do.';
+  var tabRows = rows.filter(function (r) { return r.rows !== null; });
+  var text = subject + '\n\n' + lead + '\n\n' +
+    (flags.length ? flags.map(function (r) { return '- ' + label[r.status] + ': ' + r.file + (r.tab ? ' > ' + r.tab : '') + ' (' + r.why + ')'; }).join('\n') + '\n\n' : '') +
+    tabRows.map(function (r) { return r.file + ' > ' + r.tab + ': ' + num(r.rows) + ' rows' + (change(r) ? ' (' + change(r) + ' this month)' : ''); }).join('\n') +
+    (opts.mailLeft !== undefined ? '\n\nEmail allowance left today: ' + opts.mailLeft + '.' : '');
+  var cell = 'padding:6px 10px;border-bottom:1px solid #E3E9F0;';
+  var html = '<div style="font-family:Arial,sans-serif;font-size:14px;color:#1d2a3a;max-width:640px;">' +
+    '<h2 style="margin:0 0 8px;font-size:18px;color:#12305e;">' + escapeHtml_(subject) + '</h2><p style="margin:0 0 14px;">' + escapeHtml_(lead) + '</p>' +
+    (flags.length ? '<ul style="margin:0 0 16px;padding-left:20px;">' + flags.map(function (r) {
+      return '<li style="margin-bottom:5px;"><b style="color:' + (r.status === 'plan' ? '#9a6a00' : '#C0622A') + ';">' + label[r.status] + ':</b> ' + escapeHtml_(r.file + (r.tab ? ' > ' + r.tab : '')) + ' (' + escapeHtml_(r.why) + ')</li>';
+    }).join('') + '</ul>' : '') +
+    '<table style="border-collapse:collapse;width:100%;font-size:13px;"><tr><th style="' + cell + 'text-align:left;">Log</th><th style="' + cell + 'text-align:right;">Rows</th><th style="' + cell + 'text-align:right;">This month</th></tr>' +
+    tabRows.map(function (r) {
+      return '<tr><td style="' + cell + '">' + escapeHtml_(r.file) + ' &rsaquo; ' + escapeHtml_(r.tab) + '</td><td style="' + cell + 'text-align:right;font-weight:bold;">' + num(r.rows) + '</td><td style="' + cell + 'text-align:right;color:#6B7686;">' + escapeHtml_(change(r)) + '</td></tr>';
+    }).join('') + '</table>' +
+    (opts.mailLeft !== undefined ? '<p style="margin:14px 0 0;color:#6B7686;font-size:12px;">Email allowance left today: ' + escapeHtml_(String(opts.mailLeft)) + '.</p>' : '') + '</div>';
+  return { flags: flags, rows: rows, subject: subject, text: text, html: html, counts: counts };
+}
+
+function growthFile_(ss) {
+  var cells = 0, tabs = [];
+  ss.getSheets().forEach(function (sh) {
+    cells += sh.getMaxRows() * sh.getMaxColumns();
+    tabs.push({ name: sh.getName(), rows: Math.max(0, sh.getLastRow() - 1) });   // the first row is the header
+  });
+  return { id: ss.getId(), name: ss.getName(), cells: cells, tabs: tabs };
+}
+
+// Run by the monthly trigger (and by hand to see one now).
+function monthlyDataCheck() {
+  var props = PropertiesService.getScriptProperties();
+  var files = [growthFile_(SpreadsheetApp.getActiveSpreadsheet())];
+  growthWatchIds_(props.getProperty('GROWTH_WATCH_SHEETS')).forEach(function (id) {
+    if (id === files[0].id) return;
+    try { files.push(growthFile_(SpreadsheetApp.openById(id))); }
+    catch (err) { files.push({ id: id, name: 'Spreadsheet ' + id.slice(0, 8) + '…', error: String(err && err.message || err).slice(0, 120) }); }
+  });
+  var last = {};
+  try { last = JSON.parse(props.getProperty(GROWTH_LAST_PROP_) || '{}') || {}; } catch (e) { last = {}; }
+  var r = growthReport_(files, last, { mailLeft: MailApp.getRemainingDailyQuota() });
+  Logger.log(r.text);
+  if (MailApp.getRemainingDailyQuota() < 1) return;
+  // Once a month however many copies of this script run it (see notifyClaim_ in section 16).
+  var now = Date.now(), claimId = '';
+  try {
+    claimId = notifyClaimId_('dataCheck', 'monthly', now, notifyOffsetMin_(now));
+    if (notifyClaim_(claimId, '') === 'taken') { Logger.log('Another copy of this script already sent this month\'s data check.'); return; }
+  } catch (err) { claimId = ''; }
+  try {
+    sendMail_({ to: LEAD_NOTIFY_EMAIL_, subject: r.subject, body: r.text, htmlBody: r.html, name: 'Product Advisory Learning' }, 'noreply');
+  } catch (err) {
+    if (claimId) notifyUnclaim_(claimId);
+    throw err;
+  }
+  props.setProperty(GROWTH_LAST_PROP_, JSON.stringify(r.counts));
+}
+
+function installMonthlyDataCheck() {
+  removeMonthlyDataCheck();
+  ScriptApp.newTrigger('monthlyDataCheck').timeBased().onMonthDay(1).atHour(9).create();
+  Logger.log('The data check will be emailed to ' + LEAD_NOTIFY_EMAIL_ + ' on the 1st of each month around 9am (' + Session.getScriptTimeZone() + '). Run monthlyDataCheck to see one now.');
+}
+
+function removeMonthlyDataCheck() {
+  ScriptApp.getProjectTriggers().forEach(function (t) { if (t.getHandlerFunction() === 'monthlyDataCheck') ScriptApp.deleteTrigger(t); });
+  Logger.log('The monthly data check is switched off.');
+}

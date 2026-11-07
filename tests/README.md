@@ -28,6 +28,7 @@ check named; open **Details** to read it. To run the page tests yourself on any 
 | The pilot tracker's logic (stages, run book, goals, baseline, health) | `pilot-core.test.mjs` | `node --experimental-default-type=module tests/pilot-core.test.mjs` |
 | Which address each email comes from, the welcome email, and the company "Explain with AI" (the server side) | `mail-and-org-ai.test.mjs` | `node --experimental-default-type=module tests/mail-and-org-ai.test.mjs` |
 | The admin welcome and the tool launch emails (who may send, limits, wording, no double sends) | `admin-welcome-and-launch.test.mjs` | `node --experimental-default-type=module tests/admin-welcome-and-launch.test.mjs` |
+| The monthly data check (row counts, growth, when a Sheet should move to Firestore, one email a month) | `growth-check.test.mjs` | `node --experimental-default-type=module tests/growth-check.test.mjs` |
 | Invite emails and the Gmail self-check | `apps-script/mail-test.html` | `msedge --headless --allow-file-access-from-files --virtual-time-budget=5000 --dump-dom file:///<path>/tests/apps-script/mail-test.html` and read the page title (PASS / FAIL lines) |
 
 ## How the page tests work

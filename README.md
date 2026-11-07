@@ -197,6 +197,16 @@ Each person counts once (latest attempt); the script owner, @productadvisory.co 
 property of emails or @domains, for test accounts) are left out; groups under 10 people are hidden; under 30 people it
 says the numbers aren't ready to publish. It writes the "Benchmark" tab and logs a summary. Tests: `tests/benchmark.test.mjs`.
 
+## Monthly data check
+
+`monthlyDataCheck` (section 20 of `Code.gs`) runs on the 1st of each month around 9am once `installMonthlyDataCheck` has
+been run from the editor. It counts the rows in every tab of the results spreadsheet and of the spreadsheets listed in
+the `GROWTH_WATCH_SHEETS` script property (addresses or ids, separated by commas: the www site log and the portfolio Ask
+log), and emails rob@ the sizes, the change since last month, and a flag when a tab should move to Firestore (see
+`docs/SCALING.md`): "Plan the move" at 25,000 rows, or when last month's pace reaches 50,000 within six months, or a file
+at half of Google's 10 million cells; "Move now" at 50,000 rows or 80% of the cells. The email goes out every month, so
+its arrival shows the check still runs. Tests: `tests/growth-check.test.mjs`.
+
 ## Closing an account
 
 `profile.html` has a "Delete account" card. It re-checks the person's
