@@ -83,6 +83,9 @@ t('a spreadsheet that cannot be opened is flagged, not skipped', r.flags.length 
 r = R([{ id: 'a', name: '<Results>', cells: 1, tabs: [{ name: 'Leads & <b>', rows: 52000 }] }]);
 t('names are escaped in the email', !/<b>/.test(r.html) && /&lt;b&gt;/.test(r.html));
 
+r = R([{ id: 'a', name: 'Results', cells: 1, tabs: [{ name: 'Leads', rows: 1 }] }]);
+t('one row reads "1 row"', /Leads: 1 row \(/.test(r.text), r.text);
+
 /* ---------------- the monthly run */
 reset();
 files.main = book('main', 'Product Advisory results', [['Leads', 40], ['Feedback', 5]]);

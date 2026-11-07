@@ -3320,7 +3320,7 @@ function growthReport_(files, last, opts) {
   var tabRows = rows.filter(function (r) { return r.rows !== null; });
   var text = subject + '\n\n' + lead + '\n\n' +
     (flags.length ? flags.map(function (r) { return '- ' + label[r.status] + ': ' + r.file + (r.tab ? ' > ' + r.tab : '') + ' (' + r.why + ')'; }).join('\n') + '\n\n' : '') +
-    tabRows.map(function (r) { return r.file + ' > ' + r.tab + ': ' + num(r.rows) + ' rows' + (change(r) ? ' (' + change(r) + ' this month)' : ''); }).join('\n') +
+    tabRows.map(function (r) { return r.file + ' > ' + r.tab + ': ' + num(r.rows) + (r.rows === 1 ? ' row' : ' rows') + (change(r) ? ' (' + change(r) + ' this month)' : ''); }).join('\n') +
     (opts.mailLeft !== undefined ? '\n\nEmail allowance left today: ' + opts.mailLeft + '.' : '');
   var cell = 'padding:6px 10px;border-bottom:1px solid #E3E9F0;';
   var html = '<div style="font-family:Arial,sans-serif;font-size:14px;color:#1d2a3a;max-width:640px;">' +
