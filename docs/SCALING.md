@@ -26,7 +26,7 @@ when a signal below fires, not before.
 | Google Workspace | rob@, info@, assessment@ email | Paid | | | About $7–14 per user per month |
 | Domains | productadvisory.co | Paid | | | About $15–40 a year each |
 | Email sending | Learning check-ins, receipts | Apps Script | About 1,500 emails a day | Close to 1,000 emails a day | Postmark or SendGrid, about $15/month |
-| Text messages (backlog) | Notifications by SMS | Not built | | When you build it | Twilio: about $20 one-time registration, then a few dollars a month plus about a cent per text |
+| Text messages (backlog) | Notifications by SMS | Not built (tabled, Nov 2026) | | When you build it | Twilio: about $20 one-time registration, then about $5–15 a month (number and 10DLC campaign) plus about a cent per text |
 | Payments (later) | Paid courses or tools | Not built | | First paid product | Stripe: about 2.9% + 30¢ per payment, no monthly fee |
 
 ## Sheets to a database
@@ -35,6 +35,8 @@ when a signal below fires, not before.
 every pull request. Postgres would mean a second database to run, pay for and secure:
 Cloud SQL from about $10–30/month even when idle; Supabase Pro about $25/month (the free tier pauses when idle);
 Neon about $19/month.
+
+A monthly email (the data check, section 20 of `apps-script/Code.gs`) watches the first two signals below for you.
 
 Move one sheet at a time, when any of these happens:
 - a tab passes about 50,000 rows, or Sheets gets slow;
