@@ -31,8 +31,9 @@ console.log('--- where it runs ---');
     t('does nothing on ' + u, A.start(e) === false && !e.dataLayer && e.appended.length === 0);
   });
   const e = env('https://assessment.productadvisory.co/index.html');
-  t('runs on the real site', A.start(e) === true && e.appended.length === 1);
-  t('it loads the Google script for this id, asynchronously', e.appended[0].src === 'https://www.googletagmanager.com/gtag/js?id=G-4XFS1QWS9H' && e.appended[0].async === true);
+  const gScripts = (x) => x.appended.filter(a => /googletagmanager/.test(a.src || ''));
+  t('runs on the real site', A.start(e) === true && gScripts(e).length === 1);
+  t('it loads the Google script for this id, asynchronously', gScripts(e)[0].src === 'https://www.googletagmanager.com/gtag/js?id=G-4XFS1QWS9H' && gScripts(e)[0].async === true);
   const calls = e.dataLayer.map(a => Array.prototype.slice.call(a));
   t('advertising is off before anything is sent, analytics storage is on', JSON.stringify(calls[0]) === JSON.stringify(['consent', 'default', { ad_storage: 'denied', ad_user_data: 'denied', ad_personalization: 'denied', analytics_storage: 'granted' }]));
   t('until someone accepts, visitors Google places in the EEA, UK or Switzerland get no analytics cookies', calls[1][0] === 'consent' && calls[1][1] === 'default' && calls[1][2].analytics_storage === 'denied' && calls[1][2].ad_storage === 'denied' && calls[1][2].region.indexOf('DE') > -1 && calls[1][2].region.indexOf('GB') > -1 && calls[1][2].region.indexOf('CH') > -1 && calls[1][2].region.indexOf('US') === -1);
@@ -106,7 +107,7 @@ console.log('--- the visitor\'s choice ---');
   t('Global Privacy Control: nothing, and no notice', A.decide(e(site, store({}), { globalPrivacyControl: true })) === 'none');
   t('a local test server still shows the notice (so it can be tested) but never starts Google', A.decide(Object.assign(e('http://localhost:8000/', store({})), { __paTimeZone: 'Europe/Berlin' })) === 'banner' && A.start(e('http://localhost:8000/', store({ pa_cookie_consent: 'accepted' }))) === false);
   const e2 = e(site, store({ pa_cookie_consent: 'accepted' }));
-  t('Google is started once per page, however many times it is asked', A.start(e2) === true && A.start(e2) === false && e2.appended.length === 1);
+  t('Google and PostHog are each started once per page, however many times it is asked', A.start(e2) === true && A.start(e2) === false && e2.appended.filter(a => /googletagmanager/.test(a.src || '')).length === 1 && e2.appended.filter(a => /posthog/.test(a.src || '')).length === (A.POSTHOG_KEY ? 1 : 0));
   t('Google is not started on the real site unless start is called (accepting is what calls it)', (() => { const x = e(site, store({})); return !x.dataLayer && x.appended.length === 0; })());
   t('the choice key is the one the pages and tests use', A.KEY === 'pa_cookie_consent');
 }
@@ -140,6 +141,44 @@ console.log('--- the notice is wired into the pages ---');
   globalThis.__paStarted = saved.started; globalThis.gtag = saved.gtag;
   const page = (f) => fs.readFileSync(path.join(root, f), 'utf8');
   t('the assessment, a vote and a tool request each send their event', /PAAnalytics\.event\('assessment_complete'/.test(page('index.html')) && /PAAnalytics\.event\('tool_vote'/.test(page('tool-requests.html')) && /PAAnalytics\.event\('tool_request'\)/.test(page('tool-requests.html')));
+}
+
+console.log('--- PostHog ---');
+{
+  const src = fs.readFileSync(path.join(root, 'analytics.js'), 'utf8');
+  t('it stays off until the project key is filled in', A.POSTHOG_KEY === '' || /^phc_[A-Za-z0-9]{20,}$/.test(A.POSTHOG_KEY));
+  if (!A.POSTHOG_KEY) {
+    const e = env('https://assessment.productadvisory.co/index.html');
+    t('with no key, starting analytics loads Google only', A.start(e) === true && e.appended.length === 1 && !e.posthog);
+  }
+  // The same file with a key, in its own sandbox.
+  const vm = await import('node:vm');
+  const box = { URL, URLSearchParams, console, Date, Intl };
+  box.globalThis = box;
+  vm.createContext(box);
+  vm.runInContext(src.replace(/var POSTHOG_KEY = '[^']*';/, "var POSTHOG_KEY = 'phc_testtesttesttesttesttest';"), box);
+  const B = box.PAAnalytics;
+  const e = env('https://assessment.productadvisory.co/lesson.html?course=discovery-novice&lesson=2');
+  t('with a key, starting analytics loads Google and PostHog', B.start(e) === true && e.appended.length === 2 && e.appended[1].src === 'https://us-assets.i.posthog.com/static/array.js' && e.appended[1].async === true);
+  const init = e.posthog._i[0], cfg = init[1];
+  t('PostHog is set up for this project, on the US cloud', init[0] === 'phc_testtesttesttesttesttest' && cfg.api_host === 'https://us.i.posthog.com' && cfg.ui_host === 'https://us.posthog.com');
+  t('profiles only for people who sign in', cfg.person_profiles === 'identified_only');
+  t('replays hide everything typed, and names, emails and personal details', cfg.session_recording.maskAllInputs === true && /\.pa-acct-who/.test(cfg.session_recording.maskTextSelector) && /#detailsView/.test(cfg.session_recording.maskTextSelector) && /\[data-ph-mask\]/.test(cfg.session_recording.maskTextSelector));
+  t('page errors are recorded; Do Not Track is respected by PostHog too', cfg.capture_exceptions === true && cfg.respect_dnt === true);
+  const ev = cfg.before_send({ event: '$pageview', properties: { $current_url: 'https://assessment.productadvisory.co/join.html?token=abc123abc123abc123&src=site', $referrer: 'https://assessment.productadvisory.co/company.html?org=orgA#people', $pathname: '/join.html' }, $set_once: { $initial_referrer: 'https://www.google.com/search?q=rob%40example.com' } });
+  t('an invitation token never reaches PostHog; harmless parameters are kept', ev.properties.$current_url === 'https://assessment.productadvisory.co/join.html?src=site');
+  t('nor a company id, nor the #part', ev.properties.$referrer === 'https://assessment.productadvisory.co/company.html');
+  t('another site\'s address is cut to its page (no search words)', ev.$set_once.$initial_referrer === 'https://www.google.com/search');
+  t('a lesson address keeps which course and lesson', B.phCleanUrl('https://assessment.productadvisory.co/lesson.html?course=aiOrg-novice&lesson=3&email=a%40b.com') === 'https://assessment.productadvisory.co/lesson.html?course=aiOrg-novice&lesson=3');
+  t('nothing on a local test server or with a privacy signal', B.start(env('http://localhost:8000/x.html')) === false && B.start(env('https://assessment.productadvisory.co/', { globalPrivacyControl: true })) === false);
+  box.__paPH = true; box.posthog = []; box.posthog.capture = function () { box.posthog.push(['capture'].concat([].slice.call(arguments))); };
+  box.posthog.identify = function (id) { box.posthog.push(['identify', id]); };
+  box.__paStarted = false;
+  B.event('lesson_complete', { course: 'x' });
+  B.identify('uid_abc123');
+  B.identify('not an id!');
+  t('events and the account id go to PostHog once it is running (never a malformed id)', box.posthog.length === 2 && box.posthog[0][1] === 'lesson_complete' && box.posthog[1][1] === 'uid_abc123');
+  t('the www and portfolio sites carry the same PostHog rules (one block, kept in step)', /var PH_MASK = /.test(src) && /function phCleanUrl\(u\)/.test(src));
 }
 
 console.log('\n' + pass + ' passed, ' + fail + ' failed');

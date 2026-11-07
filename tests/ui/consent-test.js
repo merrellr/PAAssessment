@@ -15,7 +15,7 @@ const banner = () => $('paCookieBanner');
 
     if (scn === 'new'){
       t('a first-time visitor sees the cookie notice', !!banner() && /Cookies and analytics/.test(banner().textContent));
-      t('it says what it is for, that it sets cookies, and that it is not for advertising', /Google Analytics/.test(banner().textContent) && /sets cookies/.test(banner().textContent) && /not use it for advertising/.test(banner().textContent));
+      t('it says what it is for (Google Analytics and PostHog), that they set cookies, that typing is hidden from recordings, and that it is not for advertising', /Google Analytics and PostHog/.test(banner().textContent) && /set cookies/.test(banner().textContent) && /anything you type hidden/.test(banner().textContent) && /not use them for advertising/.test(banner().textContent));
       t('it links to the Privacy Policy, opening in a new tab', (() => { const a = banner().querySelector('a'); return !!a && a.href === 'https://www.productadvisory.co/privacy-policy' && a.target === '_blank' && /noopener/.test(a.rel); })());
       t('Accept and Decline are both there, as equal buttons', !!$('paCookieAccept') && !!$('paCookieDecline') && $('paCookieAccept').className === $('paCookieDecline').className);
       t('it is announced as a region with a name, for screen readers', banner().getAttribute('role') === 'region' && /Cookies/.test(banner().getAttribute('aria-label')));
