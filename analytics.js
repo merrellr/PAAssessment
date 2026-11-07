@@ -1,4 +1,4 @@
-/* Google Analytics 4 for the public and learner pages, behind a cookie notice. Added with one line in each page's
+/* Google Analytics 4 and PostHog for the public and learner pages, behind a cookie notice. Added with one line in each page's
    <head>:   <script src="analytics.js"></script>
    It is left OFF the owner and admin pages (owner, owner-tools, owner-pilot, reports, company), the invitation
    page (its address holds a secret link) and the aggregate results page.
@@ -110,8 +110,85 @@
     s.async = true;
     s.src = 'https://www.googletagmanager.com/gtag/js?id=' + MEASUREMENT_ID;
     env.document.head.appendChild(s);
+    phStart(env);
     return true;
   }
+
+  /* ---------------------------------------------------------------- PostHog (product analytics)
+     The same block is in analytics.js (assessment.productadvisory.co) and in assets/js/consent.js on
+     www.productadvisory.co and portfolio.productadvisory.co: keep the three in step. It only ever starts when Google
+     Analytics may (the same consent rules), and only once POSTHOG_KEY is filled in.
+     - One project for all three sites, so a visit from the website into the assessment is one journey.
+     - Profiles only for people who sign in, and then only by their account id (never a name or email).
+     - Session replays hide everything typed (assessment answers, notes, forms) and anything marked data-ph-mask.
+     - Addresses are cleaned as for Google: only harmless parameters (course, lesson, tool, src...) are kept, and an
+       invitation token, a company id or an email in an address never leaves the browser.
+     - Errors in the page are recorded, so a broken page shows up before someone has to report it. */
+  var POSTHOG_KEY = '';                              // the project key from PostHog (starts phc_). Public by design. Empty: off.
+  var POSTHOG_HOST = 'https://us.i.posthog.com';     // the EU cloud is https://eu.i.posthog.com
+  var PH_KEEP = ['course', 'lesson', 'src', 'who', 'call', 'tool'];
+  // Text hidden in session replays: names, emails and personal details, wherever they appear.
+  var PH_MASK = '[data-ph-mask], .pa-acct-who, .home-hello, #profileName, #profileEmail, #detailsView, #signinList';
+  var PH_URL_PROPS = ['$current_url', '$referrer', '$initial_referrer', '$initial_current_url', '$session_entry_url', '$session_entry_referrer'];
+
+  // One address with only the allowed parameters kept; another site's address is cut to its page.
+  function phCleanUrl(u) {
+    var x;
+    try { x = new URL(String(u)); } catch (e) { return u; }
+    if (!/(^|\.)productadvisory\.co$/.test(x.hostname)) return x.origin + x.pathname;
+    var parts = [];
+    PH_KEEP.forEach(function (k) {
+      var v = x.searchParams.get(k);
+      if (v !== null && /^[A-Za-z0-9_-]{1,40}$/.test(v)) parts.push(k + '=' + v);
+    });
+    return x.origin + x.pathname + (parts.length ? '?' + parts.join('&') : '');
+  }
+  function phCleanProps(p) {
+    if (!p || typeof p !== 'object') return;
+    PH_URL_PROPS.forEach(function (k) { if (typeof p[k] === 'string' && /^https?:/.test(p[k])) p[k] = phCleanUrl(p[k]); });
+  }
+  function phCleanEvent(ev) {
+    if (!ev) return ev;
+    phCleanProps(ev.properties);
+    phCleanProps(ev.$set);
+    phCleanProps(ev.$set_once);
+    return ev;
+  }
+
+  // Loads PostHog the way its own snippet does: calls made before it arrives are queued and replayed.
+  function phStart(win) {
+    if (!POSTHOG_KEY || win.__paPH) return false;
+    win.__paPH = true;
+    var ph = win.posthog = win.posthog && win.posthog.__SV ? win.posthog : [];
+    if (!ph.__SV) {
+      ph._i = [];
+      'capture identify reset opt_in_capturing opt_out_capturing has_opted_out_capturing register unregister set_config captureException startSessionRecording stopSessionRecording'
+        .split(' ').forEach(function (m) { ph[m] = function () { ph.push([m].concat(Array.prototype.slice.call(arguments))); }; });
+      ph.__SV = 1;
+    }
+    ph._i.push([POSTHOG_KEY, {
+      api_host: POSTHOG_HOST,
+      ui_host: POSTHOG_HOST.replace('.i.posthog.com', '.posthog.com'),
+      person_profiles: 'identified_only',
+      capture_pageview: true,
+      capture_pageleave: true,
+      autocapture: true,
+      capture_exceptions: true,
+      respect_dnt: true,
+      disable_surveys: true,
+      session_recording: { maskAllInputs: true, maskTextSelector: PH_MASK },
+      before_send: phCleanEvent
+    }, 'posthog']);
+    var s = win.document.createElement('script');
+    s.type = 'text/javascript'; s.crossOrigin = 'anonymous'; s.async = true;
+    s.src = POSTHOG_HOST.replace('.i.posthog.com', '-assets.i.posthog.com') + '/static/array.js';
+    win.document.head.appendChild(s);
+    return true;
+  }
+  // After a yes: start it, or turn it back on if it was switched off.
+  function phGrant(win) { if (win.__paPH) { try { win.posthog.opt_in_capturing(); } catch (e) { /* not loaded */ } } else phStart(win); }
+  // After a no: stop recording on this page; it won't load next time.
+  function phDeny(win) { if (win.__paPH) { try { win.posthog.opt_out_capturing(); } catch (e) { /* not loaded */ } } }
 
   /* ---------------------------------------------------------------------- the notice */
   var STYLE = '.pa-cookie{position:fixed;left:0;right:0;bottom:0;z-index:1000;display:flex;justify-content:center;padding:12px;pointer-events:none;}' +
@@ -142,7 +219,7 @@
     var box = doc.createElement('div'); box.className = 'pa-cookie-box';
     var title = doc.createElement('strong'); title.textContent = 'Cookies and analytics';
     var p = doc.createElement('p');
-    p.appendChild(doc.createTextNode('We use Google Analytics to see which pages are used and where people get stuck, so we can improve the free assessment and the courses. It sets cookies on your device. We do not use it for advertising. '));
+    p.appendChild(doc.createTextNode('We use Google Analytics and PostHog to see which pages are used and where people get stuck, so we can improve the free assessment and the courses. They set cookies on your device, and PostHog may record how you use a page, with anything you type hidden. We do not use them for advertising. '));
     var a = doc.createElement('a'); a.href = PRIVACY_URL; a.target = '_blank'; a.rel = 'noopener'; a.textContent = 'Privacy Policy';
     p.appendChild(a); p.appendChild(doc.createTextNode('.'));
     var row = doc.createElement('div'); row.className = 'pa-cookie-row';
@@ -158,7 +235,7 @@
 
   // Start Google if it isn't running; if it is (started before a yes), turn analytics cookies on.
   function grant(env) {
-    if (env.__paStarted) { if (env.gtag) env.gtag('consent', 'update', { analytics_storage: 'granted' }); return; }
+    if (env.__paStarted) { if (env.gtag) env.gtag('consent', 'update', { analytics_storage: 'granted' }); phGrant(env); return; }
     start(env);
   }
 
@@ -170,7 +247,7 @@
     consent: function () { return readConsent(root); },
     accept: function () { writeConsent(root, 'accepted'); removeBanner(root.document); grant(root); },
     // Already running (outside Europe, not asked): switch cookies off for the rest of this page; it won't load next time.
-    decline: function () { writeConsent(root, 'declined'); removeBanner(root.document); if (root.__paStarted && root.gtag) root.gtag('consent', 'update', { analytics_storage: 'denied' }); },
+    decline: function () { writeConsent(root, 'declined'); removeBanner(root.document); if (root.__paStarted && root.gtag) root.gtag('consent', 'update', { analytics_storage: 'denied' }); phDeny(root); },
     // Signed-in people have agreed to the Privacy Policy by creating an account, so no question is needed.
     // An earlier "Decline" on this device is respected.
     acceptFromAccount: function () {
@@ -185,7 +262,15 @@
     // A GA4 event, when analytics is running on this page (otherwise nothing). Names: lowercase_with_underscores.
     event: function (name, params) {
       try { if (root.__paStarted && root.gtag && /^[a-z][a-z0-9_]{0,39}$/.test(name)) root.gtag('event', name, params || {}); } catch (e) { /* no analytics */ }
+      try { if (root.__paPH && root.posthog && /^[a-z][a-z0-9_]{0,39}$/.test(name)) root.posthog.capture(name, params || {}); } catch (e) { /* no PostHog */ }
     },
+    // A signed-in learner, by account id only, so their visits on different devices are one person in PostHog.
+    identify: function (uid) {
+      try { if (root.__paPH && root.posthog && /^[A-Za-z0-9_-]{6,128}$/.test(String(uid || ''))) root.posthog.identify(String(uid)); } catch (e) { /* no PostHog */ }
+    },
+    // Signed out: the next person on this device starts fresh.
+    resetUser: function () { try { if (root.__paPH && root.posthog) root.posthog.reset(); } catch (e) { /* no PostHog */ } },
+    POSTHOG_KEY: POSTHOG_KEY, POSTHOG_HOST: POSTHOG_HOST, phStart: phStart, phCleanUrl: phCleanUrl, phCleanEvent: phCleanEvent,
     state: function () { return { consent: readConsent(root), started: !!root.__paStarted, banner: !!root.document.getElementById('paCookieBanner') }; }
   };
   root.PAAnalytics = api;

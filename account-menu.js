@@ -400,7 +400,11 @@ if (window.self === window.top) {
       // Having an account means they agreed to the Privacy Policy, so the cookie notice is not shown again
       // (unless they had clicked Decline on this device, which is respected).
       if (window.PAAnalytics && window.PAAnalytics.acceptFromAccount) window.PAAnalytics.acceptFromAccount();
+      if (window.PAAnalytics && window.PAAnalytics.identify) window.PAAnalytics.identify(user.uid);
+    } else if (window.PAAnalytics && window.PAAnalytics.resetUser && window.__paWasSignedIn) {
+      window.PAAnalytics.resetUser();
     }
+    window.__paWasSignedIn = !!user;
     const flagsP = user ? lookUp(user) : null;
     if (user) flagsP.then(f => { if (auth.currentUser && auth.currentUser.uid === user.uid) twoStepNudge(user, f); });
     else { const n = document.getElementById('pa-2s-nudge'); if (n) n.remove(); }
