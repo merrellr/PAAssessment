@@ -3339,6 +3339,8 @@ function growthReport_(files, last, opts) {
 function growthFile_(ss) {
   var cells = 0, tabs = [];
   ss.getSheets().forEach(function (sh) {
+    // Chart sheets (a chart moved to its own tab) have no rows or cells to count.
+    try { if (sh.getType && SpreadsheetApp.SheetType && sh.getType() !== SpreadsheetApp.SheetType.GRID) return; } catch (e) { return; }
     cells += sh.getMaxRows() * sh.getMaxColumns();
     tabs.push({ name: sh.getName(), rows: Math.max(0, sh.getLastRow() - 1) });   // the first row is the header
   });

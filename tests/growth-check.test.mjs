@@ -16,7 +16,9 @@ function t(label, ok, extra){
 let props, mail, triggers, quota, claims, files;
 const book = (id, name, tabs) => ({
   getId: () => id, getName: () => name,
-  getSheets: () => tabs.map(([n, rows, cols]) => ({ getName: () => n, getLastRow: () => rows + 1, getMaxRows: () => rows + 1, getMaxColumns: () => cols || 10 }))
+  getSheets: () => tabs.map(([n, rows, cols, type]) => type === 'OBJECT'
+    ? { getName: () => n, getType: () => 'OBJECT', getLastRow: () => { throw new Error('The action is not supported for OBJECT sheet.'); }, getMaxRows: () => { throw new Error('The action is not supported for OBJECT sheet.'); }, getMaxColumns: () => { throw new Error('The action is not supported for OBJECT sheet.'); } }
+    : { getName: () => n, getType: () => 'GRID', getLastRow: () => rows + 1, getMaxRows: () => rows + 1, getMaxColumns: () => cols || 10 })
 });
 const sandbox = {
   console, Date, Math, JSON, Object, Array, String, Number, isFinite, parseInt, encodeURIComponent, RegExp, Set, Error,
@@ -26,6 +28,7 @@ const sandbox = {
   ContentService: { MimeType: {}, createTextOutput: (x) => ({ text: x, setMimeType() { return this; } }) },
   PropertiesService: { getScriptProperties: () => ({ getProperty: (k) => (k in props ? props[k] : null), setProperty: (k, v) => { props[k] = String(v); } }) },
   SpreadsheetApp: {
+    SheetType: { GRID: 'GRID', OBJECT: 'OBJECT' },
     getActiveSpreadsheet: () => files.main,
     openById: (id) => { if (!files[id]) throw new Error('You do not have permission'); return files[id]; }
   },
@@ -90,6 +93,11 @@ t('it emails rob@ once', mail.length === 1 && mail[0].to === 'rob@productadvisor
 t('it covers this spreadsheet and the other logs', /Product Advisory results > Leads/.test(mail[0].body) && /Product Advisory site log > Ask: 300 rows/.test(mail[0].body), mail[0].body);
 t('a log it cannot open is named in the email', /could not be opened/.test(mail[0].body) && mail[0].subject === 'Monthly data check: 1 thing to look at', mail[0].subject);
 t('the header row is not counted', /Leads: 40 rows/.test(mail[0].body));
+
+reset();
+files.main = book('main', 'Results', [['Leads', 40], ['Funnel chart', 0, 0, 'OBJECT'], ['Feedback', 5]]);
+ctx.monthlyDataCheck();
+t('a chart on its own tab is skipped, not an error (the live sheet has one)', mail.length === 1 && /Leads: 40 rows/.test(mail[0].body) && /Feedback: 5 rows/.test(mail[0].body) && !/Funnel chart/.test(mail[0].body), mail[0] && mail[0].body);
 t('this month\'s counts are saved for next month', JSON.parse(props.GROWTH_LAST)['main|Leads'] === 40);
 ctx.monthlyDataCheck();
 t('a second run in the same month (another copy of the script) sends nothing', mail.length === 1);
