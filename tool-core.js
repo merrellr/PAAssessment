@@ -56,6 +56,13 @@
       description: 'The accessibility features you can switch on today, and a short plan to find and fix the friction in your own product.' },
     { id: 'stakeholder-update-builder', title: 'Stakeholder Update Builder', category: 'Stakeholders', status: 'considering',
       description: 'Write the weekly or monthly update in a consistent shape: progress, decisions needed, risks and what is next, tailored to each audience.' },
+    // Already live on www: added as Released, with their links.
+    { id: 'build-buy-partner-decision-matrix', title: 'Build, Buy, or Partner Decision Matrix', category: 'Strategy', status: 'released',
+      launchUrl: 'https://www.productadvisory.co/build-buy-partner',
+      description: 'Score building, buying or partnering against ten criteria, compare the real three-year cost, and record the decision.' },
+    { id: 'organizational-impact-score', title: 'Organizational Impact Score', category: 'Prioritization', status: 'released',
+      launchUrl: 'https://www.productadvisory.co/impact-score',
+      description: 'Rate initiatives against the KPIs you already track, adjust for confidence, and get a next action for each.' },
     { id: 'pm-ai-workflow-audit', title: 'PM Workflow AI Audit', category: 'Prioritization', status: 'considering',
       description: 'List your recurring rituals, score each on frequency, time cost, risk and leverage, and find the first one worth automating.' }
   ];

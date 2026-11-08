@@ -405,7 +405,7 @@ $('starterBtn').addEventListener('click', async () => {
     const batch = writeBatch(db);
     missing.forEach(s => {
       const idx = TC.STARTER_TOOLS.indexOf(s);
-      batch.set(doc(db, 'tools', s.id), { title: s.title, description: s.description, category: s.category, status: s.status, order: idx * 10, voteCount: 0, createdAt: serverTimestamp(), updatedAt: serverTimestamp() });
+      batch.set(doc(db, 'tools', s.id), Object.assign({ title: s.title, description: s.description, category: s.category, status: s.status, order: idx * 10, voteCount: 0, createdAt: serverTimestamp(), updatedAt: serverTimestamp() }, s.launchUrl ? { launchUrl: s.launchUrl } : {}));
     });
     await batch.commit();
     $('notice').textContent = 'Added ' + plural(missing.length, 'starting tool') + '. They start with zero votes.';
