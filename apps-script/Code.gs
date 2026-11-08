@@ -2247,6 +2247,15 @@ function toolLaunchEndpoint_(idToken, toolId, preview) {
     return { ok: true, preview: true, to: auth.user.email, people: read.emails.length };
   }
 
+  return toolLaunchDeliver_(toolId, mail, read.emails);
+}
+
+// Sends the launch email to everyone on the list who hasn't had it (the ToolLaunchSent tab), at most
+// TOOL_LAUNCH_RUN_MAX_ per run and always leaving TOOL_LAUNCH_RESERVE_ of the daily allowance.
+// opts.claim: also claim each email in Firestore first (the daily job), so a second copy of this script never sends it again.
+function toolLaunchDeliver_(toolId, mail, emails, opts) {
+  opts = opts || {};
+  var read = { emails: emails };
   var lock = null, locked = false;
   try { lock = LockService.getScriptLock(); locked = lock.tryLock(15000); } catch (err) { /* carry on without it */ }
   try {
@@ -2269,9 +2278,16 @@ function toolLaunchEndpoint_(idToken, toolId, preview) {
     var batch = todo.slice(0, Math.min(room, TOOL_LAUNCH_RUN_MAX_));
     var sent = 0, failure = '';
     for (var i = 0; i < batch.length; i++) {
+      var claimId = '';
+      if (opts.claim) {
+        claimId = 'launch_' + String(toolId).replace(/[^A-Za-z0-9_-]/g, '_').slice(0, 60) + '_' + rpHash_(batch[i]);
+        var c = '';
+        try { c = notifyClaim_(claimId, ''); } catch (err) { claimId = ''; }   // no claim possible: the sheet still guards
+        if (c === 'taken') { sheet.appendRow([new Date(), toolId, batch[i]]); continue; }   // another copy sent it
+      }
       try {
         sendMail_({ to: batch[i], subject: mail.subject, body: mail.text, htmlBody: mail.html, name: TOOL_LAUNCH_FROM_NAME_, replyTo: MAIL_ADDR_.toolkit }, 'toolkit');
-      } catch (err) { failure = String(err && err.message || err).slice(0, 200); break; }
+      } catch (err) { if (claimId) notifyUnclaim_(claimId); failure = String(err && err.message || err).slice(0, 200); break; }
       sheet.appendRow([new Date(), toolId, batch[i]]);
       sent++;
     }
@@ -2283,6 +2299,49 @@ function toolLaunchEndpoint_(idToken, toolId, preview) {
   } finally {
     if (locked) lock.releaseLock();
   }
+}
+
+/* ---------- automatic launch emails (no button needed) ----------
+   Once a day (installToolLaunches), every tool marked Released with a link on the Tool Roadmap admin page has its
+   launch email sent to the people who asked to hear about it and haven't had it yet. It reads the tools and the
+   votes with the project's service account (FIREBASE_SERVICE_ACCOUNT, section 16), so nobody needs to be signed in.
+   Each person is emailed once per tool: the ToolLaunchSent tab, plus a claim in Firestore so a second copy of this
+   script can't send it again. Anyone left over (the daily allowance) is sent the next day. */
+function runToolLaunches() {
+  var lock = LockService.getScriptLock();
+  if (!lock.tryLock(1000)) return;
+  try { Logger.log(JSON.stringify(toolLaunchAuto_())); } finally { lock.releaseLock(); }
+}
+
+function toolLaunchAuto_() {
+  var out = { tools: 0, sent: 0, waiting: 0 };
+  fsList_('tools', ['title', 'description', 'status', 'launchUrl']).forEach(function (d) {
+    var tool = d.data || {};
+    if (tool.status !== 'released' || !/^https:\/\/[^\s]+$/.test(String(tool.launchUrl || ''))) return;
+    out.tools++;
+    var seen = {}, emails = [];
+    fsWhere_('toolVotes', 'toolId', d.id).forEach(function (v) {
+      var e = String(v.data && v.data.email || '').toLowerCase().trim();
+      if (v.data && v.data.notify === true && /^[^\s@,;]+@[^\s@,;]+\.[^\s@,;]+$/.test(e) && !seen[e]) { seen[e] = true; emails.push(e); }
+    });
+    if (!emails.length) return;
+    var res = toolLaunchDeliver_(d.id, toolLaunchBuild_(tool), emails, { claim: true });
+    out.sent += res.sent || 0;
+    out.waiting += res.remaining || 0;
+  });
+  return out;
+}
+
+// Run once from the editor: launch emails then go out by themselves every day around 10am.
+function installToolLaunches() {
+  removeToolLaunches();
+  ScriptApp.newTrigger('runToolLaunches').timeBased().everyDays(1).atHour(10).create();
+  Logger.log('Launch emails now go out by themselves each day around 10am (' + Session.getScriptTimeZone() + ') for any tool marked Released with a link.');
+}
+
+function removeToolLaunches() {
+  ScriptApp.getProjectTriggers().forEach(function (t) { if (t.getHandlerFunction() === 'runToolLaunches') ScriptApp.deleteTrigger(t); });
+  Logger.log('Automatic launch emails are off. The "Send launch emails" button still works.');
 }
 
 

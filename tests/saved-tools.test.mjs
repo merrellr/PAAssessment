@@ -18,6 +18,7 @@ t('an unknown version is ignored', C.parseHandoff(hand(Object.assign({}, good, {
 t('long titles and summaries are trimmed', C.parseHandoff(hand(Object.assign({}, good, { title: 'x'.repeat(300), summary: 'y'.repeat(300) }))).title.length === 100);
 t('the record has exactly the fields the rules allow (times added on save)', JSON.stringify(Object.keys(C.record('u1', h))) === '["uid","tool","title","summary","data"]');
 t('a saved tool opens back on its page, with its id', C.openUrl('bbp', 'abc', 'id9') === 'https://www.productadvisory.co/build-buy-partner#m=abc&doc=id9' && C.openUrl('scorecard', 'q', '') === 'https://www.productadvisory.co/scorecard#s=q' && C.openUrl('ai', 'q', 'x') === 'https://www.productadvisory.co/ai-use-cases#u=q&doc=x' && C.openUrl('impact', 'q', 'x') === 'https://www.productadvisory.co/impact-score#s=q&doc=x');
+t('the AI Readiness Checklist opens on its page with its own prefix', C.openUrl('ready', 'q', 'x') === 'https://www.productadvisory.co/ai-readiness#r=q&doc=x' && C.displayTitle({ tool: 'ready', title: '' }) === 'Untitled AI readiness' && C.displayTitle({ tool: 'ai', title: '' }) === 'Untitled AI use cases');
 t('titles: an untitled one says which tool, and copies say so', C.displayTitle({ tool: 'impact', title: '' }) === 'Untitled impact score' && C.copyTitle('Q3 roadmap') === 'Copy of Q3 roadmap');
 const ts = (n) => ({ toMillis: () => n });
 t('newest first; one still saving goes to the top', C.sortNewest([{ id: 'a', updatedAt: ts(1) }, { id: 'b', updatedAt: ts(5) }, { id: 'c' }]).map(d => d.id).join() === 'c,b,a');
@@ -33,7 +34,7 @@ t('list: newest first by default', ids(C.filterSort(L, {})) === 'b,d,a,c' && ids
 t('list: one tool, or all', ids(C.filterSort(L, { tool: 'impact' })) === 'a,c' && ids(C.filterSort(L, { tool: 'all' })) === 'b,d,a,c');
 t('list: search looks in the name, summary and tool name, every word, any case', ids(C.filterSort(L, { q: 'SSO' })) === 'a' && ids(C.filterSort(L, { q: 'untitled' })) === 'b' && ids(C.filterSort(L, { q: 'decision billing' })) === 'd' && ids(C.filterSort(L, { q: 'nothing like this' })) === '');
 t('list: oldest first, by name (A to Z, any case), by tool', ids(C.filterSort(L, { sort: 'oldest' })) === 'c,a,d,b' && ids(C.filterSort(L, { sort: 'name' })) === 'c,d,a,b' && ids(C.filterSort(L, { sort: 'tool' })) === 'b,d,a,c');
-t('list: counts per tool', JSON.stringify(C.countByTool(L)) === JSON.stringify({ all: 4, scorecard: 1, ai: 0, bbp: 1, impact: 2 }));
+t('list: counts per tool', JSON.stringify(C.countByTool(L)) === JSON.stringify({ all: 4, scorecard: 1, ai: 0, bbp: 1, impact: 2, ready: 0 }));
 t('list: the original is never reordered', ids(L) === 'a,b,c,d');
 
 t('download name: the saved name and the tool, safe for any computer', C.fileName({ tool: 'bbp', title: 'Q3: vendor/partner?' }) === 'Q3 vendor partner - Build, Buy, or Partner Decision Matrix.csv' && C.fileName({ tool: 'impact', title: '' }) === 'Untitled impact score - Organizational Impact Score.csv');

@@ -63,7 +63,7 @@ window.confirm = () => true;
       t('a card opens in the workspace, in Learning (never the public site)', cards()[1].querySelector('h3 a').getAttribute('href') === '/my-tools?open=d1' || /\?open=d1$/.test(cards()[1].querySelector('h3 a').getAttribute('href')));
       t('nothing on the page sends them to productadvisory.co except the footer\'s policies', Array.prototype.every.call(document.querySelectorAll('#hub a[href*="productadvisory.co"]'), a => /terms-of-use|privacy-policy/.test(a.href)));
       const starts = document.querySelectorAll('#startGrid .start');
-      t('four tools to start, new or from the example, here', starts.length === 4 && /\?new=scorecard$/.test(starts[0].querySelector('a.new').getAttribute('href')) && /\?new=scorecard&start=example$/.test(starts[0].querySelector('a.ex').getAttribute('href')));
+      t('five tools to start, new or from the example, here', starts.length === 5 && /\?new=scorecard$/.test(starts[0].querySelector('a.new').getAttribute('href')) && /\?new=scorecard&start=example$/.test(starts[0].querySelector('a.ex').getAttribute('href')));
       menuItem(cards()[1], 'Make a copy').click();
       await until(() => cards().length === 3);
       const copyKey = Object.keys(store()).filter(k => /savedTools\/auto/.test(k))[0];
@@ -171,7 +171,7 @@ window.confirm = () => true;
       t('and after logging in, it opens', shown('ws') && txt('wsTitle') === 'Roadmap', txt('errorLine'));
     }
 
-    if (scn === 'empty') t('nothing saved: it says how to start', /Nothing here yet/.test(txt('savedList')) && $('pendingCard').hidden && document.querySelectorAll('#startGrid .start').length === 4);
+    if (scn === 'empty') t('nothing saved: it says how to start', /Nothing here yet/.test(txt('savedList')) && $('pendingCard').hidden && document.querySelectorAll('#startGrid .start').length === 5);
     if (scn === 'bad') t('a # that is not a handoff is ignored', $('pendingCard').hidden);
   } catch (e) { out.push('FAIL crashed: ' + (e && e.stack ? e.stack.split('\n').slice(0, 2).join(' / ') : e)); }
   (window.__errs || []).forEach(e => out.push('PAGE-ERROR [' + scn + '] ' + e));

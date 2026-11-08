@@ -18,10 +18,10 @@
     --bg: #F5F8FB; --surface: #FFFFFF; --ink: #16213E; --ink-soft: #4B5768; --line: #E3E9F0;
     --warn: #C0622A; --ok: #2E8B57;
     /* one colour per tool: the icon, the card's edge and its tile */
-    --t-scorecard: #1A4584; --t-ai: #7051c9; --t-bbp: #12867a; --t-impact: #c26a12;
+    --t-scorecard: #1A4584; --t-ai: #7051c9; --t-bbp: #12867a; --t-impact: #c26a12; --t-ready: #2e7d32;
   }
-  @media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){ --t-scorecard: #6f9ff0; --t-ai: #a98bf2; --t-bbp: #4fc7b8; --t-impact: #f0a35a; } }
-  :root[data-theme="dark"]{ --t-scorecard: #6f9ff0; --t-ai: #a98bf2; --t-bbp: #4fc7b8; --t-impact: #f0a35a; }
+  @media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){ --t-scorecard: #6f9ff0; --t-ai: #a98bf2; --t-bbp: #4fc7b8; --t-impact: #f0a35a; --t-ready: #7fcf83; } }
+  :root[data-theme="dark"]{ --t-scorecard: #6f9ff0; --t-ai: #a98bf2; --t-bbp: #4fc7b8; --t-impact: #f0a35a; --t-ready: #7fcf83; }
   *{ box-sizing: border-box; }
   body{ margin:0; background: var(--bg); font-family:var(--sans); color: var(--ink); }
   .wrap{ max-width: 1180px; margin: 0 auto; padding: 24px 16px 56px; }
@@ -58,7 +58,7 @@
 
   /* the tool's mark: an icon on a tile in the tool's colour */
   [data-tool="scorecard"]{ --tc: var(--t-scorecard); } [data-tool="ai"]{ --tc: var(--t-ai); }
-  [data-tool="bbp"]{ --tc: var(--t-bbp); } [data-tool="impact"]{ --tc: var(--t-impact); }
+  [data-tool="bbp"]{ --tc: var(--t-bbp); } [data-tool="impact"]{ --tc: var(--t-impact); } [data-tool="ready"]{ --tc: var(--t-ready); }
   .mark{ flex: none; display:grid; place-items:center; width: 40px; height: 40px; border-radius: 11px; color: var(--tc); background: color-mix(in srgb, var(--tc) 13%, transparent); }
   .mark.sm{ width: 28px; height: 28px; border-radius: 8px; }
   .mark svg{ width: 22px; height: 22px; }
@@ -71,8 +71,9 @@
   .who{ font-size: 0.7812rem; color: var(--gray); text-align:right; }
   .section-title{ display:flex; align-items:baseline; justify-content:space-between; gap: 10px; margin: 0 0 12px; }
   .section-title h2{ margin: 0; }
-  .start-grid{ display:grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; margin-bottom: 30px; }
-  @media (max-width: 1000px){ .start-grid{ grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  .start-grid{ display:grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 14px; margin-bottom: 30px; }
+  @media (max-width: 1180px){ .start-grid{ grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+  @media (max-width: 760px){ .start-grid{ grid-template-columns: repeat(2, minmax(0, 1fr)); } }
   @media (max-width: 560px){ .start-grid{ grid-template-columns: 1fr; } }
   .start{ position:relative; background: var(--surface); border:1px solid var(--line); border-radius: 14px; padding: 16px; display:flex; flex-direction:column; gap: 8px; transition: border-color .15s, box-shadow .15s, transform .15s; }
   .start:hover{ border-color: var(--tc); box-shadow: 0 10px 24px rgba(22,33,62,0.08); transform: translateY(-1px); }
@@ -195,7 +196,7 @@
       <div>
         <span class="eyebrow">Product Advisory Learning</span>
         <h1 id="hubTitle">My Toolkits</h1>
-        <p>Prioritize features, choose AI pilots, decide build, buy or partner, and score your roadmap. Your work saves to your account as you go, ready to pick up, copy or share.</p>
+        <p>Prioritize features, choose AI pilots, check your AI readiness, decide build, buy or partner, and score your roadmap. Your work saves to your account as you go, ready to pick up, copy or share.</p>
       </div>
       <div class="hub-side">
         <details class="more-tools" id="moreTools">
@@ -361,7 +362,8 @@ const ICONS = {
   scorecard: '<path d="M5 20V11M11 20V5M17 20v-6M3 20h18"/>',
   ai: '<path d="M11 3l1.9 5.1L18 10l-5.1 1.9L11 17l-1.9-5.1L4 10l5.1-1.9z"/><path d="M18.5 14.5l.8 1.9 1.9.8-1.9.8-.8 1.9-.8-1.9-1.9-.8 1.9-.8z"/>',
   bbp: '<circle cx="6" cy="5" r="2.2"/><circle cx="6" cy="19" r="2.2"/><circle cx="18" cy="8" r="2.2"/><path d="M6 7.2v9.6M18 10.2c0 4-4 4.6-9.8 7.4"/>',
-  impact: '<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.4" fill="currentColor"/>'
+  impact: '<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.4" fill="currentColor"/>',
+  ready: '<path d="M4 6.5l1.6 1.6L8.5 5M4 12.5l1.6 1.6 2.9-3.1M4.5 18.5h3M11 7h9M11 13h9M11 19h6"/>'
 };
 const mark = (tool, cls) => el('span', { class: 'mark' + (cls ? ' ' + cls : ''), 'data-tool': tool, 'aria-hidden': 'true',
   html: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">' + (ICONS[tool] || '') + '</svg>' });
