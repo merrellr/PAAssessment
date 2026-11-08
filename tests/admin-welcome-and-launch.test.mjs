@@ -233,5 +233,45 @@ console.log('--- tool launch emails ---');
   t('markup in a tool name or description is escaped in the HTML', !/<script>x/.test(sentMail[0].htmlBody) && /&lt;script&gt;x&lt;\/script&gt; &amp; Co/.test(sentMail[0].htmlBody) && /&lt;b&gt;bold&lt;\/b&gt;/.test(sentMail[0].htmlBody));
 }
 
+console.log('--- launch emails by themselves (the daily job) ---');
+{
+  // The job reads with the service account: stand-ins for those reads, and for the claims in Firestore.
+  let claims;
+  const crypto = await import('node:crypto');
+  ctx.Utilities.DigestAlgorithm = { SHA_256: 'sha256' };
+  ctx.Utilities.computeDigest = (alg, str) => Array.from(crypto.createHash('sha256').update(String(str)).digest()).map(b => b > 127 ? b - 256 : b);
+  const stub = () => {
+    claims = new Set();
+    ctx.fsList_ = () => Object.keys(tools).map(id => ({ id, data: tools[id] }));
+    ctx.fsWhere_ = (col, field, value) => votes.filter(v => v[field] === value).map((v, i) => ({ id: 'v' + i, data: v }));
+    ctx.notifyClaim_ = (id) => { if (claims.has(id)) return 'taken'; claims.add(id); return 'ok'; };
+    ctx.notifyUnclaim_ = (id) => { claims.delete(id); };
+  };
+  reset(); stub();
+  let r = ctx.toolLaunchAuto_();
+  const to = sentMail.map(m => m.to).sort().join();
+  t('released tools with a link email the people who asked, once each, lower-cased; nobody who didn\'t ask', r.tools === 1 && r.sent === 2 && to === 'a@x.com,b@x.com', to + ' ' + JSON.stringify(r));
+  t('planned tools, and released ones without an https link, send nothing', !sentMail.some(m => /Roadmap Canvas|Metrics Map|Insecure/.test(m.subject)));
+  t('they are recorded on the ToolLaunchSent tab and claimed', sheets.ToolLaunchSent.length === 3 && claims.size === 2);
+  r = ctx.toolLaunchAuto_();
+  t('the next day nobody gets it twice', r.sent === 0 && sentMail.length === 2);
+  // Another copy of the script, with its own sheet, already sent them: the claims stop a second email.
+  sheets = {}; sentMail = [];
+  r = ctx.toolLaunchAuto_();
+  t('a second copy of the script sends nothing (the Firestore claim), and notes them on its own sheet', r.sent === 0 && sentMail.length === 0 && sheets.ToolLaunchSent.length === 3);
+  // More people than today's allowance: the rest go the next day, not never.
+  reset(); stub(); votes = []; for (let i = 0; i < 30; i++) votes.push({ toolId: 'tReleased', email: 'q' + i + '@x.com', notify: true }); quota = 25;
+  r = ctx.toolLaunchAuto_();
+  t('it keeps a reserve of the daily allowance and leaves the rest waiting', r.sent === 10 && r.waiting === 20, JSON.stringify(r));
+  quota = 100;
+  r = ctx.toolLaunchAuto_();
+  t('the people left over are sent the next day', r.sent === 20 && sentMail.length === 30 && new Set(sentMail.map(m => m.to)).size === 30);
+  // A send that fails gives the claim back, so it is tried again.
+  reset(); stub(); mailThrowsOn = 'a@x.com';
+  r = ctx.toolLaunchAuto_();
+  t('if Gmail refuses one, its claim is given back so it is tried again', !claims.has('launch_tReleased_' + ctx.rpHash_('a@x.com')) && !sheets.ToolLaunchSent.slice(1).some(row => row[2] === 'a@x.com'));
+  t('the button still works the same way (it shares the sending code)', typeof ctx.toolLaunchEndpoint_ === 'function' && typeof ctx.toolLaunchDeliver_ === 'function');
+}
+
 console.log('\n' + pass + ' passed, ' + fail + ' failed');
 process.exit(fail ? 1 : 0);
