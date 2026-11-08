@@ -48,6 +48,7 @@ const nudge = () => document.getElementById('pa-2s-nudge');
       never.click(); await sleep(80);
       t('it hides the card and remembers it on the account, for every device, and on this one', !nudge() && window.__store['progress/uTwo'].twoStepNudgeOff === true && localStorage.getItem('pa_2step_off_uTwo') === '1');
     }
+    if (scn === 'paused') t('while two-step verification is paused, nobody is asked to turn it on', !nudge());
     if (scn === 'turnedoff') t('turned off on another device: no card here either', !nudge());
     if (scn === 'on') t('with two-step already on, there is no card', !nudge());
     if (scn === 'google') t('a learner who signs in only with Google gets no card (Google already guards the sign-in)', !nudge());

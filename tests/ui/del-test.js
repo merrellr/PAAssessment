@@ -276,6 +276,13 @@ async function twoStepTests(store){
       t('and cancelling then leaves it on, with no error behind', !dlg() && $('twoStepError').textContent === '' && /^On\./.test($('twoStepStatus').textContent));
     }
   }
+  if (scn === 'twosteppaused'){
+    t('while two-step verification is paused, a password account is not offered the set-up', $('two-step').style.display === 'none');
+  }
+  if (scn === 'twosteppausedon'){
+    t('someone who already has it still sees it, can turn it off, and is not offered a new set-up', $('two-step').style.display !== 'none' && /^On\./.test($('twoStepStatus').textContent) && !$('twoStepOff').hidden && $('twoStepOn').hidden);
+    t('it says new set-ups are paused and theirs keeps working', !$('twoStepNote').hidden && /paused for new set-ups/.test($('twoStepNote').textContent), $('twoStepNote').textContent);
+  }
   if (scn === 'twostepcode'){
     $('twoStepOn').click(); await sleep(300);
     t('an error with no plain wording shows its code, so it can be traced', /Something went wrong.*\(auth\/odd-thing\)/.test($('twoStepError').textContent), $('twoStepError').textContent);
