@@ -6,7 +6,7 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
 import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
 import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
-import { hasTwoStep } from "./two-step.js";
+import { hasTwoStep, twoStepOffered } from "./two-step.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyAcECtS5c6WeOhKlwRK-LYFE47npbuq_eU",
@@ -336,6 +336,7 @@ if (window.self === window.top) {
   const TWO_STEP_SNOOZE_MS = 30 * 86400000, HOUR_MS = 3600000, DAY_MS = 86400000;
   async function twoStepNudge(user, flags){
     const page = location.pathname.replace(/\.html$/, '').split('/').pop();
+    if (!twoStepOffered()) return;   // paused while the project is on the free plan (two-step.js)
     if (document.getElementById('two-step') || page === 'join' || !user.emailVerified || hasTwoStep(user) || document.getElementById('pa-2s-nudge')) return;
     if (!(user.providerData || []).some(p => p.providerId === 'password')) return;
     const meta = user.metadata || {};

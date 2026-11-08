@@ -8,6 +8,10 @@
   if (scn === 'signingoogle' || scn === 'signinbrand' || scn === 'signinlink' || scn === 'mergeother') window.__fakeUser.providerData = [{ providerId: 'google.com', email: 'del@acme.com' }];
   // Two-step verification: twostepauto arrives from the "Set it up" card (?twostep=setup), with Firebase wanting a
   // recent sign-in first; twostepunverified has not confirmed its email yet.
+  // Two-step verification is paused (two-step.js). These scenarios test it as it works when switched back on; the
+  // twosteppaused ones check the profile while it is off.
+  if (!/^twosteppaused/.test(scn)) window.PA_TWO_STEP = true;
+  if (scn === 'twosteppausedon') window.__fakeUser.__factors = [{ uid: 'f1', factorId: 'totp', displayName: 'Authenticator app' }];
   if (scn === 'twostepunverified') window.__fakeUser.emailVerified = false;
   // twostepgoogle: a Google-only account that turned two-step on before it was offered only to password accounts;
   // turning it off, Firebase asks to confirm it's you (blocked: the browser blocks the Google window).

@@ -531,7 +531,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
 import { getFirestore, doc, getDoc, getDocs, setDoc, deleteDoc, collection, query, where, writeBatch, increment, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
 import { anonymizeOrgShares } from "./org-share.js";
-import { withTwoStep, hasTwoStep, setUpTwoStep, turnOffTwoStep, twoStepError } from "./two-step.js";
+import { withTwoStep, hasTwoStep, setUpTwoStep, turnOffTwoStep, twoStepError, twoStepOffered } from "./two-step.js";
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
@@ -725,6 +725,8 @@ function showTwoStep(){
   const pw = (u.providerData || []).some(p => p.providerId === 'password');
   // Once shown on this page (say it was just turned off), it stays, so the "it's off" message can be read.
   if (!pw && !on && !twoStepShown){ $id('two-step').style.display = 'none'; return; }
+  // Paused (two-step.js): only someone who already has it sees the setting, so they can turn it off.
+  if (!twoStepOffered() && !on && !twoStepShown){ $id('two-step').style.display = 'none'; return; }
   twoStepShown = true;
   $id('two-step').style.display = '';
   $id('twoStepStatus').innerHTML = on
@@ -733,9 +735,10 @@ function showTwoStep(){
   const note = $id('twoStepNote');
   note.textContent = !pw ? 'You sign in with Google, which has its own two-step check, so you don\'t need this here as well. You can turn it off.'
     : !u.emailVerified ? 'Confirm your email address first: open the link we emailed you. Then you can set this up.'
+    : !twoStepOffered() && on ? 'Two-step verification is paused for new set-ups. Yours keeps working; you can turn it off here.'
     : twoStepRole && !on ? 'Required for ' + (twoStepRole === 'owner' ? 'the platform owner' : 'company admins') + ', because you can see other people\'s results.' : '';
   note.hidden = !note.textContent || (!pw && !on);
-  $id('twoStepOn').hidden = on || !pw;
+  $id('twoStepOn').hidden = on || !pw || !twoStepOffered();
   $id('twoStepOn').disabled = !u.emailVerified;
   $id('twoStepOff').hidden = !on;
   if (pw && !on && u.emailVerified && !twoStepAutoOpened && new URLSearchParams(location.search).get('twostep') === 'setup'){

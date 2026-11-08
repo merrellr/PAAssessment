@@ -270,6 +270,11 @@ Open a company in the Owner Console and press **Pilot tracker**. The full playbo
 
 ## 12f. Two-step verification (a code from an authenticator app)
 
+> **Paused (November 2026).** The project is on the free Spark plan, and authenticator-app two-step verification
+> needs the paid Blaze plan. Nobody is offered the set-up or reminded to turn it on (`TWO_STEP_OFFERED = false` in
+> `two-step.js`). Anyone who already has it still signs in with their code and can turn it off on My Profile. To bring
+> it back: move to Blaze, switch it on as below, and set `TWO_STEP_OFFERED` to `true`.
+
 **What it is.** Besides their password or Google account, people can also enter a 6-digit code from an app on their
 phone (Google Authenticator, Microsoft Authenticator, 1Password and similar) when they sign in. A stolen password
 alone is then not enough. Text-message codes are **not** used: they cost money per message and are easier to abuse.

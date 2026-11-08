@@ -13,6 +13,9 @@
   addEventListener('unhandledrejection', function(e){ window.__errs.push('rejection: ' + (e.reason && e.reason.message || e.reason)); });
   var scn = new URLSearchParams(location.search).get('scn') || 'nudge';
   window.__scn = scn;
+  // Two-step verification is paused (two-step.js); these scenarios test it as it works when switched back on, except
+  // 'paused', which checks that nobody is asked while it is off.
+  if (scn !== 'paused') window.PA_TWO_STEP = true;
   try { localStorage.removeItem('pa_2step_snooze_uTwo'); localStorage.removeItem('pa_2step_off_uTwo'); } catch (e) {}
   window.__fakeUser = scn === 'signin' ? null : { uid: 'uTwo', email: 'two@acme.com', displayName: 'Two Step', emailVerified: scn !== 'unverified', providerData: [{ providerId: 'password', email: 'two@acme.com' }], getIdToken: async function(){ return 'tok'; } };
   if (scn === 'google' || scn === 'googleowner') window.__fakeUser.providerData = [{ providerId: 'google.com', email: 'two@acme.com' }];

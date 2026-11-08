@@ -19,6 +19,16 @@ import {
   reauthenticateWithCredential, reauthenticateWithPopup, EmailAuthProvider, GoogleAuthProvider
 } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
 
+/* Paused (November 2026): authenticator-app two-step verification needs Firebase's paid Blaze plan, and the project is
+   on the free Spark plan. While this is false, nobody is offered the set-up or reminded to turn it on. Anyone who
+   already has it still signs in with their code and can turn it off on My Profile. To bring it back: move the project
+   to Blaze, switch it on in Identity Platform (docs/OWNER-RUNBOOK.md, "Two-step verification"), and set this to true.
+   (window.PA_TWO_STEP = true does the same on one page, which the tests use.) */
+const TWO_STEP_OFFERED = false;
+export function twoStepOffered(){
+  return TWO_STEP_OFFERED || (typeof window !== 'undefined' && window.PA_TWO_STEP === true);
+}
+
 const ISSUER = 'Product Advisory';
 const LOGO = 'https://www.productadvisory.co/assets/img/favicon-192.png';   // shown by apps that read it (FreeOTP, 2FAS, Aegis)
 
