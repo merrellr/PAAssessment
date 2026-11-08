@@ -1,5 +1,5 @@
 /* My toolkit (my-tools.html): the parts with no Firebase in them, so they can be tested on their own
-   (tests/saved-tools.test.mjs). The four interactive tools are built on www.productadvisory.co. In Learning they run
+   (tests/saved-tools.test.mjs). The interactive tools are built on www.productadvisory.co. In Learning they run
    inside the toolkit's workspace (a frame on the tool's page with ?embed=1; see www's save.js), which saves each
    change to the person's account. On the public pages, "Save to my account" opens
    /my-tools#save=<base64url JSON { v, tool, doc, title, summary, data }>, where `data` is the tool's own share-link
@@ -18,7 +18,9 @@
     bbp: { name: 'Build, Buy, or Partner Decision Matrix', short: 'Build, buy, or partner', url: WWW + 'build-buy-partner', prefix: 'm', core: 'bbp-core.js', global: 'BBPCore',
       blurb: 'Compare build, buy and partner on weighted criteria and three-year cost.', noun: 'decision matrix' },
     impact: { name: 'Organizational Impact Score', short: 'Impact score', url: WWW + 'impact-score', prefix: 's', core: 'impact-core.js', global: 'ImpactCore',
-      blurb: 'Score initiatives against weighted KPIs and get a suggested action for each.', noun: 'impact score' }
+      blurb: 'Score initiatives against weighted KPIs and get a suggested action for each.', noun: 'impact score' },
+    ready: { name: 'AI Readiness Checklist', short: 'AI readiness', url: WWW + 'ai-readiness', prefix: 'r', core: 'ai-readiness-core.js', global: 'AIReadinessCore',
+      blurb: 'Check whether your team, data, tools and guardrails are ready for AI, and get your next three moves.', noun: 'AI readiness check' }
   };
   const CORE_BASE = WWW + 'assets/js/';
   const MAX_DATA = 20000;
@@ -89,7 +91,7 @@
     return new Date(ms).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' });
   }
 
-  function displayTitle(d) { return d.title || 'Untitled ' + (TOOLS[d.tool] ? TOOLS[d.tool].short.toLowerCase() : 'tool'); }
+  function displayTitle(d) { return d.title || 'Untitled ' + (TOOLS[d.tool] ? TOOLS[d.tool].short.toLowerCase().replace(/\bai\b/g, 'AI') : 'tool'); }
   function copyTitle(title) { return clean('Copy of ' + (title || 'untitled'), 100); }
 
   // Newest first. updatedAt is a Firestore Timestamp (or anything with toMillis), or missing while a write is pending.
