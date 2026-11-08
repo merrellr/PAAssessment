@@ -38,7 +38,7 @@ function done(){
     } else if (scn === 'notowner'){
       t('anyone but the owner is turned away and sees nothing', vis('stateNotOwner') && !vis('page'));
     } else if (scn === 'empty'){
-      t('with no tools yet, the page offers the ten starting tools', vis('page') && /Add the 10 starting tools/.test($('starterBtn').textContent) && /No tools yet/.test(txt('toolsWrap')));
+      t('with no tools yet, the page offers the starting tools', vis('page') && /Add the 20 starting tools/.test($('starterBtn').textContent) && /No tools yet/.test(txt('toolsWrap')));
     } else if (scn === 'launch'){
       const row = (id) => $('notifyWrap').querySelector('tr[data-notify="' + id + '"]');
       const sendBtn = (id) => $('notifyWrap').querySelector('button[data-send="' + id + '"]');
@@ -107,12 +107,12 @@ function done(){
       t('a count that matches the recorded votes is ticked; one that does not says what was recorded', /✓/.test(textOf(toolRow('tA'))) && /counted 3/.test(textOf(toolRow('tB'))), textOf(toolRow('tB')));
 
       /* the starting tools */
-      t('the starting-tools button offers all ten', /Add the missing starting tools \(10\)/.test($('starterBtn').textContent), $('starterBtn').textContent);
+      t('the starting-tools button offers all twenty', /Add the missing starting tools \(20\)/.test($('starterBtn').textContent), $('starterBtn').textContent);
       window.__writeLog.length = 0;
       $('starterBtn').click(); await until(() => toolKeys().length === 13); await sleep(100);
       const starter = store()['tools/feature-prioritization-scorecard'];
-      t('ten tools are added, each starting at zero votes, with the right status and order', toolKeys().length === 13 && !!starter && starter.voteCount === 0 && starter.status === 'planned' && starter.order === 0 && store()['tools/okr-builder'].status === 'considering' && store()['tools/okr-builder'].order === 90, JSON.stringify(starter));
-      t('they were saved in one step, and the button is gone', window.__writeLog.filter(w => w.op === 'set').length === 10 && !vis('starterBtn'));
+      t('twenty tools are added, each starting at zero votes, with the right status and order', toolKeys().length === 23 && !!starter && starter.voteCount === 0 && starter.status === 'planned' && starter.order === 0 && store()['tools/okr-builder'].status === 'considering' && store()['tools/okr-builder'].order === 90 && store()['tools/ai-agent-squad-planner'].status === 'planned' && store()['tools/pm-ai-workflow-audit'].order === 190, JSON.stringify(starter));
+      t('they were saved in one step, and the button is gone', window.__writeLog.filter(w => w.op === 'set').length === 20 && !vis('starterBtn'));
 
       /* adding a tool by hand */
       $('addToolBtn').click(); await sleep(50);

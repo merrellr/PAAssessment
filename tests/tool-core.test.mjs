@@ -13,8 +13,8 @@ const same = (a, b) => JSON.stringify(a) === JSON.stringify(b);
 console.log('--- the starting list ---');
 {
   const ids = T.STARTER_TOOLS.map(x => x.id);
-  t('ten tools, each with a different id', ids.length === 10 && new Set(ids).size === 10);
-  t('the three already-planned tools come first and are marked planned', same(T.STARTER_TOOLS.slice(0, 3).map(x => x.status), ['planned', 'planned', 'planned']) && T.STARTER_TOOLS.slice(3).every(x => x.status === 'considering'));
+  t('the three already-planned tools come first and are marked planned', same(T.STARTER_TOOLS.slice(0, 3).map(x => x.status), ['planned', 'planned', 'planned']) && T.STARTER_TOOLS.slice(3, 10).every(x => x.status === 'considering'));
+  t('the next ideas are planned or under consideration, never released, and no id repeats', T.STARTER_TOOLS.length === 20 && T.STARTER_TOOLS.slice(10).every(x => x.status === 'planned' || x.status === 'considering') && new Set(T.STARTER_TOOLS.map(x => x.id)).size === 20);
   t('every tool passes the same checks the owner form uses', T.STARTER_TOOLS.every(x => T.validateTool({ title: x.title, description: x.description, category: x.category, status: x.status, order: 0 }).ok));
   t('titles fit the rules (80) and descriptions (240)', T.STARTER_TOOLS.every(x => x.title.length <= 80 && x.description.length <= 240 && x.category.length <= 40));
   t('ids are web-safe and match what the title would give', T.STARTER_TOOLS.every(x => /^[a-z0-9-]+$/.test(x.id)) && T.slugify('Customer Interview Guide') === 'customer-interview-guide');

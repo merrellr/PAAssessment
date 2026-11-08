@@ -280,7 +280,7 @@ function renderAll(){
   renderNotify();
   const missing = TC.STARTER_TOOLS.filter(s => !tools.some(t => t.id === s.id));
   $('starterBtn').style.display = missing.length ? 'inline-block' : 'none';
-  $('starterBtn').textContent = tools.length ? 'Add the missing starting tools (' + missing.length + ')' : 'Add the 10 starting tools';
+  $('starterBtn').textContent = tools.length ? 'Add the missing starting tools (' + missing.length + ')' : 'Add the ' + TC.STARTER_TOOLS.length + ' starting tools';
 }
 
 function renderTiles(){
