@@ -14,8 +14,8 @@
   const VOTABLE = ['considering', 'planned', 'in_progress'];
   const STATUS_LABELS = { considering: 'Under consideration', planned: 'Planned', in_progress: 'In progress', released: 'Released' };
 
-  // The list the owner can add with one click. The first three are already
-  // planned; the other seven cover every area of the framework.
+  // The list the owner can add with one click (only the missing ones are added). The first ten are the original
+  // starting set; the rest are the next ideas.
   const STARTER_TOOLS = [
     { id: 'feature-prioritization-scorecard', title: 'Feature Prioritization Scorecard', category: 'Prioritization', status: 'planned',
       description: 'Score and rank features against criteria you choose, so trade-offs are visible and easy to defend.' },
@@ -36,7 +36,35 @@
     { id: 'ai-readiness-checklist', title: 'AI Readiness Checklist', category: 'AI Fluency', status: 'considering',
       description: 'Assess whether your team, data and processes are ready for AI work.' },
     { id: 'okr-builder', title: 'OKR Builder', category: 'Strategy', status: 'considering',
-      description: 'Draft objectives and measurable key results, and check them against common pitfalls.' }
+      description: 'Draft objectives and measurable key results, and check them against common pitfalls.' },
+    // Added November 2026: the next ideas, from the Product+ articles. "Add the missing starting tools" adds them.
+    { id: 'experiment-brief-builder', title: 'Experiment Brief Builder', category: 'Discovery', status: 'planned',
+      description: 'Turn a hypothesis into a one-page test plan: primary and guardrail metrics, variants, sample size and a pre-launch checklist.' },
+    { id: 'ai-agent-squad-planner', title: 'AI Agent Squad Planner', category: 'AI Fluency', status: 'planned',
+      description: 'Design a squad of AI agents for one workflow: each role, its inputs and outputs, the handoffs, and which agent to build first.' },
+    { id: 'ai-pilot-plan', title: 'AI Pilot Plan & Scorecard', category: 'AI Fluency', status: 'planned',
+      description: 'Scope a four-to-six-week AI pilot with one team and one number to judge it by, then decide: expand, fix or stop.' },
+    { id: 'discovery-synthesis-board', title: 'Discovery Synthesis Board', category: 'Discovery', status: 'considering',
+      description: 'Group interview notes and feedback into themes, keep the customer\'s own words, and rank problems by how often and how much they hurt.' },
+    { id: 'now-next-later-roadmap', title: 'Now, Next, Later Roadmap', category: 'Strategy', status: 'considering',
+      description: 'A theme-based roadmap tied to business objectives, without dates you can\'t keep, ready to share with stakeholders.' },
+    { id: 'pricing-packaging-worksheet', title: 'Pricing & Packaging Worksheet', category: 'Strategy', status: 'considering',
+      description: 'Work out tiers, value metrics and price points, and check them against what customers will actually pay for.' },
+    { id: 'one-page-prd', title: 'One-Page PRD', category: 'Execution', status: 'considering',
+      description: 'A short product requirements doc: the problem, who it is for, what success looks like, scope and open questions.' },
+    { id: 'accessibility-quick-wins', title: 'Accessibility Quick Wins Checklist', category: 'Execution', status: 'considering',
+      description: 'The accessibility features you can switch on today, and a short plan to find and fix the friction in your own product.' },
+    { id: 'stakeholder-update-builder', title: 'Stakeholder Update Builder', category: 'Stakeholders', status: 'considering',
+      description: 'Write the weekly or monthly update in a consistent shape: progress, decisions needed, risks and what is next, tailored to each audience.' },
+    // Already live on www: added as Released, with their links.
+    { id: 'build-buy-partner-decision-matrix', title: 'Build, Buy, or Partner Decision Matrix', category: 'Strategy', status: 'released',
+      launchUrl: 'https://www.productadvisory.co/build-buy-partner',
+      description: 'Score building, buying or partnering against ten criteria, compare the real three-year cost, and record the decision.' },
+    { id: 'organizational-impact-score', title: 'Organizational Impact Score', category: 'Prioritization', status: 'released',
+      launchUrl: 'https://www.productadvisory.co/impact-score',
+      description: 'Rate initiatives against the KPIs you already track, adjust for confidence, and get a next action for each.' },
+    { id: 'pm-ai-workflow-audit', title: 'PM Workflow AI Audit', category: 'Prioritization', status: 'considering',
+      description: 'List your recurring rituals, score each on frequency, time cost, risk and leverage, and find the first one worth automating.' }
   ];
 
   function voteId(uid, toolId) { return uid + '_' + toolId; }
