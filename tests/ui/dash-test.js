@@ -69,6 +69,25 @@ const sleep = (ms) => new Promise(r => setTimeout(r, ms));
       const writes = window.__writeLog.filter(w => w.path === 'orgs/orgA/members/uDash').length;
       t('exactly one write for the shared record on this visit', writes === 1, String(writes));
     }
+    {
+      const home = document.getElementById('assignedHome'), learn = document.getElementById('assignedLearning');
+      if (window.__scn === 'assigned'){
+        for (let i = 0; i < 100 && home.hidden; i++) await sleep(30);
+        const rows = Array.prototype.map.call(home.querySelectorAll('.assign-row'), r => r.textContent.replace(/\s+/g, ' ').trim());
+        t('a team member sees what their company assigned, at the top of Home and of My Learning', !home.hidden && /From your company/.test(home.textContent) && learn.innerHTML === home.innerHTML);
+        t('only real courses are listed, the one due soonest first', rows.length === 2 && /Discovery/i.test(rows[0]) && /Strateg/i.test(rows[1]), rows.join(' | '));
+        t('it counts what is left', /2 to go/.test(home.textContent));
+        t('progress and the due date are shown, with due-soon highlighted', /2 of 5 lessons done/.test(rows[0]) && /Due tomorrow/.test(rows[0]) && !!home.querySelector('.assign-due.soon'), rows[0]);
+        t('the company\'s note is shown as text, never as markup', /Before <b>planning<\/b>/.test(home.textContent) && !home.querySelector('.assign-note b'));
+        const go = home.querySelector('.assign-row a');
+        t('Continue opens the next lesson not done', go && /Continue/.test(go.textContent) && /course=discovery-novice&lesson=3/.test(go.getAttribute('href')), go && go.getAttribute('href'));
+        t('a course with no lessons done says Start', /Start/.test(home.querySelectorAll('.assign-row a')[1].textContent));
+      }
+      if (window.__scn === 'member' || window.__scn === 'removed' || window.__scn === 'plain'){
+        await sleep(100);
+        t('with nothing assigned, or no active company, there is no assignments card', home.hidden && learn.hidden);
+      }
+    }
     if (window.__scn === 'profilecard'){
       const card = document.getElementById('profilePromptCard');
       t('on a later visit, the "tell us about your team" card asks for their details, and says it earns a badge', card.style.display === 'block' && /earns you a badge/.test(card.textContent));

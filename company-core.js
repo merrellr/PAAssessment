@@ -438,7 +438,8 @@
   /* ------------------------------------------------------------ activity log */
   // What admins and the owner did, kept in orgs/{id}/audit (see firestore.rules).
   const AUDIT_ACTIONS = ['company.created', 'company.edited', 'company.archived', 'company.restored',
-    'invite.created', 'invite.revoked', 'invite.renewed', 'member.removed', 'focus.changed'];
+    'invite.created', 'invite.revoked', 'invite.renewed', 'member.removed', 'focus.changed',
+    'assignment.added', 'assignment.removed'];
 
   // The fields of one log entry. The page adds the server's time ("at").
   function buildAuditEntry(actor, action, targetEmail, detail) {
@@ -464,6 +465,8 @@
       case 'invite.renewed': return 'sent a new invitation to ' + who;
       case 'member.removed': return 'removed ' + who + ' from the company';
       case 'focus.changed': return 'changed the focus priorities' + (e.detail ? ': ' + e.detail : '');
+      case 'assignment.added': return 'assigned a course to the team' + (e.detail ? ': ' + e.detail : '');
+      case 'assignment.removed': return 'removed a team assignment' + (e.detail ? ': ' + e.detail : '');
       default: return e.action || 'did something';
     }
   }

@@ -110,6 +110,11 @@
     if (scn === 'noplatform') window.__platform = null;
     if (scn === 'smallplatform') window.__platform = { totalCompletions: 9, tierCounts: {}, categoryAverages: { discovery: 70 } };
     if (scn === 'auditdenied') window.__failList = /^orgs\/orgA\/audit$/;
+    // team assignments: one overdue course (Ben has done 2 of its 5 lessons, nobody has finished it)
+    if (scn === 'assign') store['orgAssignments/orgA'] = { items: [
+      { id: 'a1discovery', course: 'discovery-novice', due: ago(3).slice(0, 10), note: 'Before Q1 planning', assignedAt: ago(10).slice(0, 10) },
+      { id: 'a2junk', course: 'nope-course', due: 'soon' }], updatedAt: T(10) };
+    if (scn === 'assigndenied') window.__failGet = /^orgAssignments\//;
     if (scn === 'denied') window.__failList = /^memberships$/;
     if (scn === 'sharesdenied') window.__failList = /^orgs\/orgA\/members$/;
   };

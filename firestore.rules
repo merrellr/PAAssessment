@@ -294,6 +294,26 @@ service cloud.firestore {
       allow delete: if false;
     }
 
+    // ------------------------------------------------------- team assignments
+    // Courses a company's admins ask the whole team to finish, optionally by a date
+    // (assignments-core.js). One document per company: { items: [...], updatedAt }.
+    // Active members read it to see what they have been asked to do; only the
+    // company's admins (or the platform owner) write it, and only while the company
+    // is active. At most 20 items; each item's contents are checked by the app,
+    // which only ever shows known courses, valid dates and short notes.
+    match /orgAssignments/{orgId} {
+      allow get: if isPlatformOwner() || isActiveAdminOf(orgId) || isActiveMemberOf(orgId);
+
+      allow create, update: if (isPlatformOwner() || isActiveAdminOf(orgId))
+        && get(/databases/$(database)/documents/orgs/$(orgId)).data.status == 'active'
+        && request.resource.data.keys().hasOnly(['items', 'updatedAt'])
+        && request.resource.data.items is list
+        && request.resource.data.items.size() <= 20
+        && request.resource.data.updatedAt == request.time;
+
+      allow delete: if false;
+    }
+
     // ------------------------------------------------------------ activity log
     // A record of what the company's admins and the platform owner did: invites
     // created or withdrawn, people removed, priorities changed, details edited.
@@ -307,7 +327,8 @@ service cloud.firestore {
       allow create: if (isPlatformOwner() || isActiveAdminOf(orgId))
         && request.resource.data.keys().hasOnly(['action', 'actorUid', 'actorEmail', 'targetEmail', 'detail', 'at'])
         && request.resource.data.action in ['company.created', 'company.edited', 'company.archived', 'company.restored',
-            'invite.created', 'invite.revoked', 'invite.renewed', 'member.removed', 'focus.changed']
+            'invite.created', 'invite.revoked', 'invite.renewed', 'member.removed', 'focus.changed',
+            'assignment.added', 'assignment.removed']
         && request.resource.data.actorUid == request.auth.uid
         && request.resource.data.actorEmail == request.auth.token.email.lower()
         && request.resource.data.get('targetEmail', '') is string && request.resource.data.get('targetEmail', '').size() <= 254
