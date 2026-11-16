@@ -66,6 +66,25 @@
   .rail-recap summary{ cursor:pointer; font-size: 0.8125rem; font-weight: 700; color: var(--navy); }
   .rail-recap ul{ margin: 8px 0 0; padding-left: 18px; font-size: 0.8125rem; color: var(--ink-soft); line-height: 1.5; }
   .rail-recap li{ margin-bottom: 6px; }
+  .rail-listen ul{ list-style: none; padding-left: 0; }
+  .rail-listen a{ color: var(--navy); font-weight: 700; text-decoration: none; }
+  .rail-listen a:hover{ text-decoration: underline; }
+  .rail-listen small{ color: var(--gray); font-weight: 400; white-space: nowrap; }
+  .rail-listen-all{ display:inline-block; margin-top: 2px; font-size: 0.8125rem; }
+  .listen{ display:none; align-items:center; gap: 12px; margin: -4px 0 18px; padding: 10px 14px; border: 1px solid var(--pa-line); border-radius: 14px; background: var(--pa-band); }
+  .listen.ready{ display:flex; }
+  .listen-play{ flex:none; width: 44px; height: 44px; border-radius: 50%; border: 0; background: var(--pa-primary); color: var(--pa-btn-ink); cursor:pointer; display:grid; place-items:center; }
+  .listen-play:hover{ background: var(--pa-primary-strong); }
+  .listen-play svg{ width: 18px; height: 18px; fill: currentColor; }
+  .listen-play .i-pause, .listen.playing .listen-play .i-play{ display:none; }
+  .listen.playing .listen-play .i-pause{ display:block; }
+  .listen-mid{ flex: 1; min-width: 0; }
+  .listen-status{ font-size: 0.875rem; font-weight: 700; color: var(--pa-navy); }
+  @media (max-width: 480px){ .listen-long{ display:none; } }
+  .listen-seek{ width: 100%; margin: 4px 0 0; accent-color: var(--pa-primary); }
+  .listen-times{ display:flex; justify-content:space-between; font-size: 0.75rem; color: var(--pa-muted); font-variant-numeric: tabular-nums; }
+  .listen-speed{ flex:none; min-width: 52px; min-height: 36px; padding: 0 10px; border-radius: 18px; border: 1.5px solid var(--pa-line); background: var(--pa-bg); color: var(--pa-ink); font: 700 0.8125rem var(--pa-sans); cursor:pointer; }
+  .listen-play:focus-visible, .listen-speed:focus-visible{ outline: 3px solid var(--pa-cyan); outline-offset: 2px; }
   .lesson-meta{ display:flex; flex-wrap:wrap; gap: 6px 14px; font-size: 0.8125rem; color: var(--gray); margin: -10px 0 18px; }
   .read-progress{ position: fixed; left: 0; top: 0; height: 3px; width: 100%; z-index: 120; background: transparent; pointer-events:none; }
   .read-progress span{ display:block; height: 100%; width: 0; background: linear-gradient(90deg, var(--navy), var(--cyan)); }
@@ -199,6 +218,16 @@
     <span class="eyebrow" id="courseTitle">Loading…</span>
     <h1 id="lessonTitle"></h1>
     <div class="lesson-meta" id="lessonMeta"></div>
+    <div class="listen" id="lessonListen" aria-label="Listen to this lesson" role="region">
+      <audio preload="none"></audio>
+      <button type="button" class="listen-play" aria-label="Play the lesson"><svg class="i-play" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13a1 1 0 0 0 1.5.9l10.4-6.5a1 1 0 0 0 0-1.8L9.5 4.6A1 1 0 0 0 8 5.5z"/></svg><svg class="i-pause" viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></svg></button>
+      <div class="listen-mid">
+        <div class="listen-status">Listen to this lesson</div>
+        <input class="listen-seek" type="range" min="0" max="100" value="0" step="1" aria-label="Position in the audio">
+        <div class="listen-times"><span class="listen-at">0:00</span><span class="listen-len"></span></div>
+      </div>
+      <button type="button" class="listen-speed" aria-label="Playback speed">1x</button>
+    </div>
 
     <div class="lesson-nav" id="lessonNav"></div>
 
@@ -559,7 +588,54 @@ function renderLesson(){
 /* The course outline (wide screens), the "Lesson 2 of 5 · 8 min" line and the reading bar. */
 const lessonName = (l) => String(l.title || '').replace(/^Lesson\s+\d+\s*[:.\u2014-]\s*/i, '');
 const lessonMinutes = (l) => (window.LessonBlocks ? LessonBlocks.minutes(l) : 5);
-function renderRail(lesson){
+/* "Listen to this lesson": audio/lessons/<course>-<lesson>.mp3, made by tools/lesson-audio (index.json lists what exists).
+   The bar stays hidden for a lesson that has no audio yet. */
+let listenIndex = null;
+async function renderListen(lesson){
+  const box = document.getElementById('lessonListen');
+  const audio = box.querySelector('audio');
+  if (!audio.paused) audio.pause();
+  box.classList.remove('ready', 'playing');
+  if (listenIndex === null){
+    try { const r = await fetch('/audio/lessons/index.json', { cache: 'no-cache' }); listenIndex = r.ok ? await r.json() : {}; } catch (e) { listenIndex = {}; }
+  }
+  const key = courseId + '-' + lesson.id, meta = listenIndex[key];
+  if (!meta) return;
+  const clock = (s) => { s = Math.max(0, Math.round(s || 0)); return Math.floor(s / 60) + ':' + ('0' + s % 60).slice(-2); };
+  const status = box.querySelector('.listen-status'), seek = box.querySelector('.listen-seek'), at = box.querySelector('.listen-at');
+  const play = box.querySelector('.listen-play'), speed = box.querySelector('.listen-speed');
+  const label = 'Listen<span class="listen-long"> to this lesson</span> · ' + Math.max(1, Math.round(meta.duration / 60)) + ' min';
+  audio.src = '/audio/lessons/' + key + '.mp3';
+  seek.max = Math.floor(meta.duration); seek.value = 0; at.textContent = '0:00';
+  box.querySelector('.listen-len').textContent = clock(meta.duration);
+  status.innerHTML = label;
+  let rate = 1; try { rate = +localStorage.getItem('pa-listen-speed') || 1; } catch (e) {}
+  const setRate = (v) => { rate = v; audio.playbackRate = v; speed.textContent = v + 'x'; speed.setAttribute('aria-label', 'Playback speed: ' + v + 'x. Change it'); try { localStorage.setItem('pa-listen-speed', String(v)); } catch (e) {} };
+  setRate(rate);
+  let dragging = false;
+  if (!box.dataset.wired){
+    box.dataset.wired = '1';
+    play.addEventListener('click', () => { if (audio.paused) audio.play(); else audio.pause(); });
+    speed.addEventListener('click', () => { const R = [1, 1.25, 1.5, 2]; box._setRate(R[(R.indexOf(audio.playbackRate) + 1) % R.length]); });
+    seek.addEventListener('input', () => { dragging = true; at.textContent = clock(+seek.value); });
+    seek.addEventListener('change', () => { dragging = false; audio.currentTime = +seek.value; if (audio.paused) audio.play(); });
+    audio.addEventListener('timeupdate', () => { if (!dragging) seek.value = Math.floor(audio.currentTime); at.textContent = clock(audio.currentTime); });
+    audio.addEventListener('play', () => {
+      box.classList.add('playing'); play.setAttribute('aria-label', 'Pause');
+      box.querySelector('.listen-status').textContent = 'Playing';
+      audio.playbackRate = box._rate();
+      if (!box._started){ box._started = true; if (window.PAAnalytics) PAAnalytics.event('lesson_audio_play', { course: courseId, lesson: String(box._lesson) }); }
+    });
+    audio.addEventListener('pause', () => { box.classList.remove('playing'); play.setAttribute('aria-label', 'Play the lesson'); box.querySelector('.listen-status').textContent = 'Paused'; });
+    audio.addEventListener('ended', () => { box.querySelector('.listen-status').textContent = 'Finished. Try the practice on the page.'; });
+  }
+  box._setRate = setRate; box._rate = () => rate; box._lesson = lesson.id; box._started = false;
+  box.classList.add('ready');
+}
+
+function renderRail(lesson, complete){
+  if (complete){ const lb = document.getElementById('lessonListen'); lb.querySelector('audio').pause(); lb.classList.remove('ready', 'playing'); }
+  else renderListen(lesson);
   const idx = course.lessons.indexOf(lesson);
   const left = course.lessons.slice(idx).reduce((n, l) => n + lessonMinutes(l), 0);
   document.getElementById('lessonMeta').innerHTML = '<span>Lesson ' + (idx + 1) + ' of ' + course.lessons.length + '</span><span>About ' + lessonMinutes(lesson) + ' min</span>' +
@@ -586,7 +662,26 @@ function renderRail(lesson){
     '<button type="button" class="rail-toggle" data-rail="close" aria-expanded="true" aria-controls="lessonRail" aria-label="Hide the course outline" title="Hide the course outline">' + chev(-1) + '</button></div>' +
     '<div class="rail-progress"><svg class="rail-ring" width="42" height="42" viewBox="0 0 42 42" aria-hidden="true"><circle class="track" cx="21" cy="21" r="17" fill="none" stroke-width="4"/><circle class="fill" cx="21" cy="21" r="17" fill="none" stroke-width="4" stroke-linecap="round" transform="rotate(-90 21 21)" stroke-dasharray="' + C.toFixed(2) + '" stroke-dashoffset="' + (C * (1 - pct)).toFixed(2) + '"/></svg>' +
     '<span><b>' + done + ' of ' + course.lessons.length + ' lessons</b>' + (done === course.lessons.length ? 'Course complete' : 'done') + '</span></div>' +
-    '<ol class="rail-list">' + items + '</ol>' + recap + '</div>';
+    '<ol class="rail-list">' + items + '</ol>' + recap + '<div id="railListen"></div></div>';
+  renderRelatedListening();
+}
+/* "Related listening": Product+ Audio episodes on this course's skill area (the list is published with the articles,
+   see listen.html). Each opens on the Listen & watch page. */
+let episodesCache = null;
+async function renderRelatedListening(){
+  const areaKey = String(courseId || '').split('-')[0];
+  if (episodesCache === null){
+    try {
+      const r = await fetch(window.__episodesUrl || 'https://www.productadvisory.co/assets/audio/episodes.json', { cache: 'no-cache' });
+      episodesCache = r.ok ? ((await r.json()).episodes || []) : [];
+    } catch (e) { episodesCache = []; }
+  }
+  const box = document.getElementById('railListen');
+  const eps = episodesCache.filter(e => (e.areas || []).includes(areaKey)).slice(0, 4);
+  if (!box || !eps.length) return;
+  box.innerHTML = '<details class="rail-recap rail-listen"><summary>Related listening</summary><ul>' +
+    eps.map(e => '<li><a href="/listen#' + encodeURIComponent(e.slug) + '">' + escapeText(e.title) + '</a> <small>' + Math.max(1, Math.round(e.duration / 60)) + ' min</small></li>').join('') +
+    '</ul><a class="rail-listen-all" href="/listen">All episodes</a></details>';
 }
 // Hide or show the course outline (wide screens); the choice is kept on this browser for every course.
 const RAIL_KEY = 'pa_rail_collapsed';
@@ -1066,7 +1161,7 @@ function showCourseComplete(coursesMap){
   document.getElementById('statusMsg').textContent = '';
   document.getElementById('courseTitle').textContent = course.title;
   document.getElementById('lessonTitle').textContent = 'Course complete';
-  renderRail(course.lessons[course.lessons.length - 1]);
+  renderRail(course.lessons[course.lessons.length - 1], true);
   document.getElementById('lessonMeta').style.display = 'none';
 
   const recapItems = (course.recap && course.recap.length)

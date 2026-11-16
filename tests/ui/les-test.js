@@ -140,6 +140,33 @@ async function figTests(){
   t('in dark mode the figure turns dark too', getComputedStyle(figs[0]).backgroundColor === 'rgb(27, 33, 48)', getComputedStyle(figs[0]).backgroundColor);
 }
 
+// "Listen to this lesson": shown only for a lesson that has audio, with its length, the speed, and nothing on a lesson without.
+async function listenTests(){
+  const box = $('lessonListen'), audio = box.querySelector('audio');
+  if (window.__scn === 'noaudio'){
+    t('a lesson with no audio yet shows no Listen bar', !box.classList.contains('ready') && getComputedStyle(box).display === 'none');
+    t('and with no episodes on its area, no Related listening', $('railListen').innerHTML === '');
+    return;
+  }
+  t('a narrated lesson shows "Listen to this lesson" with its length', box.classList.contains('ready') && getComputedStyle(box).display !== 'none' && /Listen to this lesson · 2 min/.test(box.textContent) && /2:08/.test(box.textContent), box.textContent.replace(/\s+/g, ' '));
+  t('it plays this lesson\'s file', /\/audio\/lessons\/discovery-novice-2\.mp3$/.test(audio.src), audio.src);
+  t('the audio is only downloaded when someone presses play', audio.getAttribute('preload') === 'none');
+  t('the position slider spans the whole lesson', box.querySelector('.listen-seek').max === '128');
+  const sp = box.querySelector('.listen-speed');
+  try { localStorage.removeItem('pa-listen-speed'); } catch (e) {}
+  sp.click(); t('the speed button steps up: 1.25x', sp.textContent === '1.25x' && audio.playbackRate === 1.25);
+  sp.click(); sp.click(); sp.click(); t('and wraps back round to 1x', sp.textContent === '1x' && audio.playbackRate === 1);
+  sp.click(); t('the chosen speed is remembered', localStorage.getItem('pa-listen-speed') === '1.25');
+  t('the list of narrated lessons is fetched once', window.__fetched.length === 1, String(window.__fetched.length));
+  const next = all('.rail-list a', $('lessonRail')).find(a => /&lesson=3$/.test(a.getAttribute('href')));
+  t('the Listen bar sits under the lesson heading, before the lesson', box.compareDocumentPosition($('lessonBody')) & Node.DOCUMENT_POSITION_FOLLOWING);
+  t('every other lesson in the outline is still a link', !!next);
+  const rel = $('railListen');
+  const links = all('a', rel).map(a => a.getAttribute('href'));
+  t('the outline lists Product+ Audio episodes on this course\'s skill area (Discovery), and only those', links.join() === '/listen#feature-fallacy,/listen', links.join());
+  t('with their length', /The Feature Fallacy 6 min/.test(rel.textContent.replace(/\s+/g, ' ')), rel.textContent);
+}
+
 (async function(){
   try {
     await sleep(2500);
@@ -151,7 +178,8 @@ async function figTests(){
       window.markCompleteAndContinue();   // this one changes the page; the browser tool reads the result afterwards
       return;
     }
-    if (window.__scn === 'blocks') await blockTests();
+    if (window.__scn === 'listen' || window.__scn === 'noaudio') await listenTests();
+    else if (window.__scn === 'blocks') await blockTests();
     else if (window.__scn === 'figs') await figTests();
     else await lessonFlow(store);
   } catch (e) { out.push('FAIL crashed: ' + (e && e.stack ? e.stack.split('\n').slice(0, 2).join(' / ') : e)); }

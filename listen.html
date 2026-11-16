@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Listen &amp; watch — Product Advisory Learning</title>
+<meta name="description" content="Every Product+ article, read aloud, with chapters and videos. Listen on your commute, then go deeper in the courses.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://assessment.productadvisory.co/listen">
+<meta property="og:site_name" content="Product Advisory Learning">
+<meta property="og:title" content="Listen &amp; watch · Product Advisory Learning">
+<meta property="og:description" content="Every Product+ article, read aloud, with chapters and videos.">
+<meta property="og:image" content="https://assessment.productadvisory.co/images/og-assessment.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://assessment.productadvisory.co/images/og-assessment.jpg">
+<link rel="canonical" href="https://assessment.productadvisory.co/listen">
+<link rel="icon" href="/images/icons/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="/images/icons/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="/images/icons/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@600&family=Lato:ital,wght@0,300;0,400;0,700;0,900;1,400&display=swap" rel="stylesheet">
+<script src="pa-prefs.js"></script>
+<script src="analytics.js"></script>
+<style>
+  :root{
+    --navy: #1A4584; --navy-deep: #12305e; --gray: #9AA3AD; --cyan: #35C2E8;
+    --bg: #F5F8FB; --surface: #FFFFFF; --ink: #16213E; --ink-soft: #4B5768; --line: #E3E9F0;
+  }
+  *{ box-sizing: border-box; }
+  body{ margin:0; background: var(--bg); font-family:var(--sans); color: var(--ink); }
+  .wrap{ max-width: 1000px; margin: 0 auto; padding: 24px 16px 140px; }
+  [hidden]{ display:none !important; }
+  .eyebrow{ display:block; font-size:0.6875rem; font-weight:600; letter-spacing:0.06em; text-transform:uppercase; color: var(--cyan-ink, var(--cyan)); margin-bottom: 6px; }
+  h1{ font-family:var(--display); font-size: 1.625rem; margin: 0 0 8px; color: var(--navy-deep); line-height: 1.2; }
+  h2{ font-family:var(--display); font-size: 1.0625rem; margin: 0 0 4px; color: var(--navy-deep); line-height: 1.3; }
+  p{ line-height:1.55; color: var(--ink-soft); font-size: 0.9062rem; margin: 0 0 10px; }
+  a{ color: var(--navy); }
+  .sr-only{ position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); border:0; }
+  .lw-head{ display:flex; flex-wrap:wrap; gap: 16px; align-items:flex-end; justify-content:space-between; margin-bottom: 16px; }
+  .lw-head > div{ flex: 1 1 420px; }
+  .lw-note{ font-size: 0.8125rem; color: var(--ink-soft); background: var(--tint, #e9f0fa); border-radius: 12px; padding: 10px 14px; margin: 0 0 16px; }
+  .chips{ display:flex; flex-wrap:wrap; gap: 8px; margin: 0 0 18px; }
+  .chip{ min-height: 36px; padding: 0 14px; border-radius: 18px; border: 1.5px solid var(--line); background: var(--surface); color: var(--ink-soft); font: 700 0.8125rem var(--sans); cursor:pointer; }
+  .chip[aria-pressed="true"]{ background: var(--navy); border-color: var(--navy); color: var(--btn-ink, #fff); }
+  .ep{ background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 18px 20px; margin-bottom: 14px; display:grid; grid-template-columns: auto 1fr; gap: 4px 16px; scroll-margin-top: 90px; }
+  .ep.target{ border-color: var(--cyan); box-shadow: 0 0 0 3px color-mix(in srgb, var(--cyan) 30%, transparent); }
+  .ep.on{ border-color: var(--navy); }
+  .ep-play{ grid-row: span 3; width: 52px; height: 52px; border-radius: 50%; border: 0; background: var(--primary, var(--navy)); color: var(--btn-ink, #fff); cursor:pointer; display:grid; place-items:center; }
+  .ep-play:hover{ background: var(--primary-strong, var(--navy-deep)); }
+  .ep-play svg{ width: 20px; height: 20px; fill: currentColor; }
+  .ep-play .i-pause, .ep.playing .ep-play .i-play{ display:none; }
+  .ep.playing .ep-play .i-pause{ display:block; }
+  .ep-meta{ font-size: 0.75rem; color: var(--gray); margin: 0 0 6px; }
+  .ep-areas{ display:flex; flex-wrap:wrap; gap: 6px; margin: 4px 0 0; }
+  .ep-area{ font-size: 0.6875rem; font-weight: 700; padding: 2px 9px; border-radius: 20px; background: var(--tint, #e9f0fa); color: var(--navy); }
+  .ep-more{ grid-column: 2; display:flex; flex-wrap:wrap; gap: 4px 14px; align-items:center; margin-top: 6px; }
+  .ep-more details{ width: 100%; }
+  .ep-more summary, .ep-watch{ min-height: 40px; display:inline-flex; align-items:center; font: 700 0.8125rem var(--sans); color: var(--navy); cursor:pointer; background:none; border:0; padding: 0; }
+  .ep-ch{ list-style:none; margin: 4px 0 0; padding: 0; }
+  .ep-ch button{ display:flex; gap: 10px; width: 100%; min-height: 40px; align-items:center; padding: 0 8px; border: 0; border-radius: 9px; background: transparent; color: var(--ink); font: 400 0.875rem var(--sans); text-align:left; cursor:pointer; }
+  .ep-ch button:hover{ background: var(--tint, #e9f0fa); }
+  .ep-ch span:first-child{ width: 44px; flex: none; color: var(--gray); font-variant-numeric: tabular-nums; }
+  .ep-video{ grid-column: 1 / -1; position: relative; aspect-ratio: 16 / 9; margin-top: 10px; border-radius: 12px; overflow:hidden; background:#000; }
+  .ep-video iframe{ position:absolute; inset:0; width:100%; height:100%; border:0; }
+  .empty{ text-align:center; padding: 32px 16px; color: var(--ink-soft); }
+  /* the player that stays at the bottom while you browse */
+  .now{ position: fixed; left: 0; right: 0; bottom: 0; z-index: 30; background: var(--surface); border-top: 1px solid var(--line); box-shadow: 0 -8px 24px rgba(18,48,94,.08); }
+  .now-in{ max-width: 1000px; margin: 0 auto; padding: 10px 16px; display:flex; align-items:center; gap: 12px; }
+  .now-mid{ flex: 1; min-width: 0; }
+  .now-title{ font-weight: 700; font-size: 0.875rem; color: var(--navy-deep); white-space: nowrap; overflow:hidden; text-overflow: ellipsis; }
+  .now-ch{ font-size: 0.75rem; color: var(--gray); white-space: nowrap; overflow:hidden; text-overflow: ellipsis; }
+  .now-seek{ width: 100%; margin: 2px 0 0; accent-color: var(--primary, var(--navy)); }
+  .now-times{ display:flex; justify-content:space-between; font-size: 0.6875rem; color: var(--gray); font-variant-numeric: tabular-nums; }
+  .now .ep-play{ width: 44px; height: 44px; }
+  .now-speed{ flex:none; min-width: 52px; min-height: 36px; padding: 0 10px; border-radius: 18px; border: 1.5px solid var(--line); background: var(--surface); color: var(--ink); font: 700 0.8125rem var(--sans); cursor:pointer; }
+  .now.playing .ep-play .i-play{ display:none; } .now.playing .ep-play .i-pause{ display:block; }
+  .chip:focus-visible, .ep-play:focus-visible, .ep-ch button:focus-visible, .ep-more summary:focus-visible, .ep-watch:focus-visible, .now-speed:focus-visible{ outline: 2px solid var(--cyan); outline-offset: 2px; }
+  @media (max-width: 560px){ .ep{ padding: 14px; gap: 4px 12px; } .ep-play{ width: 44px; height: 44px; } }
+</style>
+<link rel="stylesheet" href="pa-theme.css">
+</head>
+<body>
+<script src="pa-shell.js"></script>
+<div class="wrap">
+  <div class="lw-head">
+    <div>
+      <span class="eyebrow">Product Advisory Learning</span>
+      <h1>Listen &amp; watch</h1>
+      <p>Every Product+ article, read aloud, with chapters. Listen on a walk or a commute, then go deeper in the courses. Some come with a video, too.</p>
+    </div>
+  </div>
+  <p class="lw-note">Every lesson has a <b>Listen</b> button as well, at the top of the lesson.</p>
+  <div class="chips" id="areaChips" role="group" aria-label="Show episodes about"></div>
+  <p class="sr-only" id="listStatus" role="status" aria-live="polite"></p>
+  <div id="episodes"><p class="empty">Loading the episodes…</p></div>
+
+  <div class="site-foot" style="margin-top:28px; padding:20px 0; border-top:1px solid var(--line); text-align:center; font-size:0.75rem; color:var(--gray);">
+    © <span id="footerYear"></span> Product Advisory, LLC. All rights reserved. &nbsp;·&nbsp;
+    <a href="https://www.productadvisory.co/privacy-policy" target="_blank" rel="noopener" style="color:var(--gray); text-decoration:underline;">Privacy Policy</a> &nbsp;·&nbsp;
+    <a href="https://www.productadvisory.co/terms-of-use" target="_blank" rel="noopener" style="color:var(--gray); text-decoration:underline;">Terms of Use</a> &nbsp;·&nbsp;
+    <a href="#" data-cookie-settings style="color:var(--gray); text-decoration:underline;">Cookie settings</a>
+  </div>
+</div>
+
+<div class="now" id="nowPlaying" role="region" aria-label="Now playing" hidden>
+  <div class="now-in">
+    <button type="button" class="ep-play" id="nowPlay" aria-label="Pause"><svg class="i-play" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13a1 1 0 0 0 1.5.9l10.4-6.5a1 1 0 0 0 0-1.8L9.5 4.6A1 1 0 0 0 8 5.5z"/></svg><svg class="i-pause" viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></svg></button>
+    <div class="now-mid">
+      <div class="now-title" id="nowTitle"></div>
+      <div class="now-ch" id="nowCh"></div>
+      <input class="now-seek" id="nowSeek" type="range" min="0" max="100" value="0" step="1" aria-label="Position in the episode">
+      <div class="now-times"><span id="nowAt">0:00</span><span id="nowLen"></span></div>
+    </div>
+    <button type="button" class="now-speed" id="nowSpeed" aria-label="Playback speed">1x</button>
+  </div>
+  <audio id="audio" preload="none"></audio>
+</div>
+
+<script>document.getElementById("footerYear").textContent = new Date().getFullYear();</script>
+<script>
+/* Product+ Audio in Learning. The episode list (and the audio) is published with the articles on productadvisory.co
+   (assets/audio/episodes.json, built by the site's generator), so a new article's episode appears here on its own. */
+(function(){
+  const EPISODES_URL = window.__episodesUrl || 'https://www.productadvisory.co/assets/audio/episodes.json';
+  const AREAS = { discovery: 'Customer & Market Discovery', strategy: 'Product Strategy & Roadmapping', prioritization: 'Prioritization & Trade-offs',
+    execution: 'Execution & Delivery', stakeholder: 'Stakeholder Communication & Influence', aiIndividual: 'AI Fluency — Individual', aiOrg: 'AI Fluency — Organizational' };
+  const $ = (id) => document.getElementById(id);
+  const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
+  const clock = (s) => { s = Math.max(0, Math.round(s || 0)); return Math.floor(s / 60) + ':' + ('0' + s % 60).slice(-2); };
+  const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  const dateLabel = (d) => { const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(d || ''); return m ? MONTHS[+m[2] - 1] + ' ' + (+m[3]) + ', ' + m[1] : ''; };
+  const event = (name, p) => { if (window.PAAnalytics) PAAnalytics.event(name, p || {}); };
+  const PLAY = '<svg class="i-play" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13a1 1 0 0 0 1.5.9l10.4-6.5a1 1 0 0 0 0-1.8L9.5 4.6A1 1 0 0 0 8 5.5z"/></svg><svg class="i-pause" viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></svg>';
+
+  const audio = $('audio');
+  let episodes = [], area = '', current = null, dragging = false;
+  let rate = 1; try { rate = +localStorage.getItem('pa-listen-speed') || 1; } catch (e) {}
+
+  function setRate(v){ rate = v; audio.playbackRate = v; $('nowSpeed').textContent = v + 'x'; $('nowSpeed').setAttribute('aria-label', 'Playback speed: ' + v + 'x. Change it'); try { localStorage.setItem('pa-listen-speed', String(v)); } catch (e) {} }
+
+  function chapterAt(ep, t){ let c = ep.chapters[0]; (ep.chapters || []).forEach(x => { if (t + 0.5 >= x[0]) c = x; }); return c ? c[1] : ''; }
+
+  function play(ep, at){
+    if (!current || current.slug !== ep.slug){
+      current = ep;
+      audio.src = ep.audio;
+      $('nowTitle').textContent = ep.title;
+      $('nowLen').textContent = clock(ep.duration);
+      $('nowSeek').max = Math.floor(ep.duration);
+      $('nowPlaying').hidden = false;
+      event('episode_play', { episode: ep.slug });
+    }
+    if (typeof at === 'number') audio.currentTime = at;
+    audio.playbackRate = rate;
+    audio.play().catch(() => {});
+  }
+
+  function sync(){
+    document.querySelectorAll('.ep').forEach(card => {
+      const mine = current && card.dataset.slug === current.slug;
+      card.classList.toggle('on', !!mine);
+      card.classList.toggle('playing', !!mine && !audio.paused);
+      card.querySelector('.ep-play').setAttribute('aria-label', (mine && !audio.paused ? 'Pause ' : 'Play ') + card.querySelector('h2').textContent);
+    });
+    $('nowPlaying').classList.toggle('playing', !audio.paused);
+    $('nowPlay').setAttribute('aria-label', audio.paused ? 'Play' : 'Pause');
+  }
+
+  function renderChips(){
+    const used = Object.keys(AREAS).filter(k => episodes.some(e => (e.areas || []).includes(k)));
+    const box = $('areaChips');
+    box.innerHTML = '';
+    [['', 'All']].concat(used.map(k => [k, AREAS[k]])).forEach(([k, label]) => {
+      const b = document.createElement('button');
+      b.type = 'button'; b.className = 'chip'; b.textContent = label; b.setAttribute('aria-pressed', String(area === k));
+      b.addEventListener('click', () => { area = k; renderChips(); renderList(); });
+      box.appendChild(b);
+    });
+  }
+
+  function renderList(){
+    const list = episodes.filter(e => !area || (e.areas || []).includes(area));
+    $('listStatus').textContent = list.length + (list.length === 1 ? ' episode' : ' episodes') + (area ? ' about ' + AREAS[area] : '');
+    const box = $('episodes');
+    if (!list.length){ box.innerHTML = '<p class="empty">No episodes here yet.</p>'; return; }
+    box.innerHTML = list.map(e => '<article class="ep" id="' + esc(e.slug) + '" data-slug="' + esc(e.slug) + '">' +
+      '<button type="button" class="ep-play" aria-label="Play ' + esc(e.title) + '">' + PLAY + '</button>' +
+      '<h2>' + esc(e.title) + '</h2>' +
+      '<p class="ep-meta">' + esc(e.topic) + ' · ' + esc(dateLabel(e.date)) + ' · ' + Math.max(1, Math.round(e.duration / 60)) + ' min</p>' +
+      '<div><p style="margin:0;">' + esc(e.dek) + '</p><div class="ep-areas">' + (e.areas || []).filter(k => AREAS[k]).map(k => '<span class="ep-area">' + esc(AREAS[k]) + '</span>').join('') + '</div></div>' +
+      '<div class="ep-more">' + (e.youtube ? '<button type="button" class="ep-watch">▶ Watch the video</button>' : '') +
+      '<details><summary>Chapters (' + (e.chapters || []).length + ')</summary><ol class="ep-ch">' +
+      (e.chapters || []).map(c => '<li><button type="button" data-t="' + c[0] + '"><span>' + clock(c[0]) + '</span><span>' + esc(c[1]) + '</span></button></li>').join('') +
+      '</ol></details></div></article>').join('');
+    box.querySelectorAll('.ep').forEach(card => {
+      const ep = episodes.find(x => x.slug === card.dataset.slug);
+      card.querySelector('.ep-play').addEventListener('click', () => {
+        if (current && current.slug === ep.slug && !audio.paused) audio.pause(); else play(ep);
+      });
+      card.querySelectorAll('.ep-ch button').forEach(b => b.addEventListener('click', () => play(ep, +b.dataset.t)));
+      const w = card.querySelector('.ep-watch');
+      if (w) w.addEventListener('click', () => {
+        if (card.querySelector('.ep-video')) return;
+        audio.pause();
+        const v = document.createElement('div'); v.className = 'ep-video';
+        v.innerHTML = '<iframe src="https://www.youtube-nocookie.com/embed/' + encodeURIComponent(ep.youtube) + '?autoplay=1" title="' + esc(ep.title) + ': the video" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" referrerpolicy="strict-origin-when-cross-origin"></iframe>';
+        card.appendChild(v); w.hidden = true;
+        event('episode_watch', { episode: ep.slug });
+      });
+    });
+    sync();
+    const hash = decodeURIComponent(location.hash.slice(1));
+    const target = hash && document.getElementById(hash);
+    if (target && target.classList.contains('ep')){ target.classList.add('target'); target.scrollIntoView({ block: 'center' }); target.querySelector('.ep-play').focus({ preventScroll: true }); }
+  }
+
+  $('nowPlay').addEventListener('click', () => { if (audio.paused) audio.play().catch(() => {}); else audio.pause(); });
+  $('nowSpeed').addEventListener('click', () => { const R = [1, 1.25, 1.5, 2]; setRate(R[(R.indexOf(rate) + 1) % R.length]); });
+  $('nowSeek').addEventListener('input', () => { dragging = true; $('nowAt').textContent = clock(+$('nowSeek').value); });
+  $('nowSeek').addEventListener('change', () => { dragging = false; audio.currentTime = +$('nowSeek').value; if (audio.paused) audio.play(); });
+  audio.addEventListener('timeupdate', () => {
+    if (!current) return;
+    if (!dragging) $('nowSeek').value = Math.floor(audio.currentTime);
+    $('nowAt').textContent = clock(audio.currentTime);
+    $('nowCh').textContent = chapterAt(current, audio.currentTime);
+  });
+  ['play', 'pause', 'ended'].forEach(ev => audio.addEventListener(ev, sync));
+  setRate(rate);
+
+  fetch(EPISODES_URL, { cache: 'no-cache' }).then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); }).then(d => {
+    episodes = (d && d.episodes) || [];
+    renderChips(); renderList();
+  }).catch(() => {
+    $('episodes').innerHTML = '<p class="empty">Couldn\'t load the episodes just now. Check your connection and refresh the page.</p>';
+  });
+})();
+</script>
+<script type="module" src="account-menu.js"></script>
+</body>
+</html>

@@ -1,0 +1,1679 @@
+{
+ "aiIndividual-advanced": {
+  "title": "AI Fluency — Individual — Advanced Experience",
+  "lessons": [
+   {
+    "n": 1,
+    "title": "Lesson 1: The Shift Nobody Announced",
+    "lines": [
+     "Who does what in Jordan's day The agents do the watching. Jordan steps in only where a judgment call is needed.",
+     "Key idea: The agents surface facts. Jordan decides what the facts mean.",
+     "Jordan's alarm goes off at 6:45. By the time coffee is brewing, the first decision of the day has already been made without them, and that's exactly the point of this lesson.",
+     "This isn't a story about AI replacing a product manager. It's a story about what happens to a PM's day once a handful of specialized agents take over the watching: reading every email, scanning every dashboard, tracking every ticket, so a person only has to step in for the moments that actually need a human judgment call.",
+     "Over the next few lessons, we'll walk through Jordan's day hour by hour. Watch for the pattern: the agents surface facts. Jordan decides what the facts mean."
+    ]
+   },
+   {
+    "n": 2,
+    "title": "Lesson 2: Morning, With Agents Doing the Watching",
+    "lines": [
+     "Jordan's day, mapped against the agents doing the watching",
+     "7:10 AM Inbox digest 62 emails, one real decision",
+     "8:05 AM Meeting brief A blocked ticket surfaces quietly",
+     "11:00 AM Account context A churn risk nobody flagged",
+     "1:00 PM Analytics watch A pattern across several accounts",
+     "2:30 PM First draft A rough PRD, then real editing",
+     "4:00 PM Backlog reorder Approved, with one override",
+     "5:45 PM Day summary Honest about what it missed",
+     "Key idea: The agents did the watching. Jordan did the deciding.",
+     "Five years ago, opening an inbox with 62 new emails meant forty minutes of scrolling before the real workday even started. Step through what Jordan's morning looks like instead."
+    ]
+   },
+   {
+    "n": 3,
+    "title": "Lesson 3: Midday, Catching What Would Have Slipped Through",
+    "lines": [
+     "The most valuable thing an agent can do isn't answering questions. It's noticing something a person wasn't even looking for.",
+     "Before an 11:00 AM renewal call, an account-context agent pulls together usage trends, support tickets, and repeat feature requests, then flags something easy to miss: usage of a core feature dropped sharply right after last month's release. That single flag changes the whole call. Instead of a routine check-in, Jordan opens by asking about the drop directly, and learns the account quietly worked around a broken workflow instead of filing a ticket: exactly the kind of silent churn risk that used to go undetected for months.",
+     "An hour later, an analytics agent flags something similar at a wider scale: a specific onboarding step is seeing completion rates drop across several accounts, not just the one from the morning's call. Not urgent enough for an alert, but a pattern worth attention. Jordan still has to decide if it's worth fixing now or noting for next quarter. That call is entirely theirs."
+    ]
+   },
+   {
+    "n": 4,
+    "title": "Lesson 4: Afternoon, Editing Instead of Authoring",
+    "lines": [
+     "At 2:30, Jordan talks through a rough PRD idea with a writing agent and gets back a first draft: problem statement, proposed approach, open questions. It's not right: the framing is too narrow, focused on the mechanics of the drop-off rather than the real user confusion behind it. Jordan rewrites the problem statement almost entirely, keeps most of the proposed approach, and tightens the open questions down to the two that matter. Twenty minutes of real editing turns a rough draft into something worth sharing, instead of two hours of staring at a blank page.",
+     "At 4:00, a task-management agent proposes a backlog reorder based on the week's signals (the account risk, the onboarding drop, engineering estimates that came in high) and explains its reasoning in plain language. Jordan agrees with most of it, but overrides one recommendation because of an upcoming exec review the agent has no way of knowing about. The team sees the reasoning behind the new order, not just the new order itself."
+    ]
+   },
+   {
+    "n": 5,
+    "title": "Lesson 5: What's Actually Different",
+    "lines": [
+     "By 5:45, an end-of-day digest arrives before Jordan even closes the laptop: what happened, what's still open, three things flagged for tomorrow, and an honest note about what it couldn't confirm, since one conversation from standup happened outside any tool it can see.",
+     "None of this is about agents making decisions instead of Jordan. Every meaningful call that day (the account risk worth escalating, the PRD framing, the backlog override) came from a person weighing context an agent didn't have. What changed is everything sitting underneath those decisions: the reading, the summarizing, the watching, the first draft. The constant low-grade vigilance that used to eat most of a PM's day now happens quietly in the background.",
+     "What moved, and what stayed The vigilance moved to agents. The meaning stayed with you.",
+     "The job hasn't gotten smaller. It's gotten more concentrated."
+    ]
+   }
+  ]
+ },
+ "aiIndividual-experienced": {
+  "title": "AI Fluency — Individual — Lots of Experience",
+  "lessons": [
+   {
+    "n": 1,
+    "title": "Lesson 1: AI Earned a Seat, Not the Head of the Table",
+    "lines": [
+     "AI has earned a real seat at the product discovery table. The problem is that many teams are letting it sit at the head. Discovery is faster now: interviews get summarized automatically and feedback gets analyzed at scale. All of that is true, and yet many teams are making worse decisions than before.",
+     "The issue isn't AI itself. It's where teams place it in the process. When AI becomes the proxy for customer understanding rather than the amplifier of it, discovery quietly breaks. You still get themes. You still get charts. What you lose is voice, emotion, and context, and those losses compound downstream.",
+     "The rule that matters most: humans talk to customers; agents synthesize and augment what humans heard. Once you anchor on that, everything else falls into place."
+    ]
+   },
+   {
+    "n": 2,
+    "title": "Lesson 2: Start With Human-Led Conversations",
+    "lines": [
+     "The discovery loop Human-led and agent-assisted stages take turns.",
+     "1Human ledCustomer conversations",
+     "2Agent assistedSynthesis and clustering",
+     "3Human ledSense makingHuman judgment",
+     "4Agent assistedHypothesis expansion",
+     "5Human ledValidation and testing",
+     "↻Humans own the insight. AI accelerates the loop.",
+     "No AI workflow can compensate for skipping real conversations. Product discovery still begins the way it always has: someone on the product team talks directly to a customer and listens without trying to sell, validate, or steer toward a predetermined outcome.",
+     "Customers rarely describe their problems cleanly. They circle around them, contradict themselves, and use language that doesn't map to your roadmap. They reveal priorities through frustration and workarounds rather than tidy feature requests. Those signals are easy to miss if discovery is reduced to text analysis alone. A transcript doesn't capture tone, a summary doesn't capture tension, and a cluster doesn't capture why something feels urgent.",
+     "This is why the people building the product need to hear customers themselves, not just through researchers or summaries. Direct exposure builds intuition, and intuition is still a core product skill. AI belongs later in the process, not here."
+    ]
+   },
+   {
+    "n": 3,
+    "title": "Lesson 3: Use Agents to Synthesize, Not Interpret",
+    "lines": [
+     "Once you have real conversations, this is where agents earn their keep. Most teams drown in qualitative data: interview notes, support tickets, and sales call notes scattered across half a dozen tools. AI agents are excellent at organizing that chaos: grouping feedback by recurring themes, surfacing common phrases, spotting patterns across more data than any human could reasonably process alone.",
+     "What they shouldn't do is interpret meaning on your behalf. When agents label clusters, those labels need to be reviewed, and often rewritten, by humans. Customers rarely talk in product taxonomy. They talk in lived experience, and preserving their actual language matters because it carries intent and emotion that a tidy label erases.",
+     "Where the line sits For each thing the agent synthesizes, there is a call only a person should make.",
+     "A good test: if a synthesized insight sounds like internal jargon rather than something a customer would actually say, that's your signal to intervene."
+    ]
+   },
+   {
+    "n": 4,
+    "title": "Lesson 4: Let Humans Do the Sense-Making",
+    "lines": [
+     "Synthesis is not the same thing as understanding, and this is where many teams blur the line. Once feedback has been organized, the hard work begins. Deciding what matters isn't a data problem. It's a judgment problem, one that requires context about company strategy, market dynamics, technical constraints, and long-term vision.",
+     "Humans are responsible for asking which problems are frequent versus which are consequential, which pain points customers have simply learned to live with versus which ones cause churn, and which insights align with where the business is actually going. AI can show you patterns. It cannot tell you which tradeoffs are worth making. That accountability belongs to the product team.",
+     "This step often feels slower than teams want. That slowness isn't inefficiency. It's thinking."
+    ]
+   },
+   {
+    "n": 5,
+    "title": "Lesson 5: Use AI to Generate and Challenge Hypotheses",
+    "lines": [
+     "This is one of the most underutilized, high-leverage uses of AI in discovery. Instead of asking agents what to build, ask them to help you think better. Step through how that actually works."
+    ]
+   },
+   {
+    "n": 6,
+    "title": "Lesson 6: Close the Loop, and Avoid the Most Common Failure",
+    "lines": [
+     "Discovery doesn't end when insights get written down. It ends when understanding is validated through further conversation. Take your hypotheses back to customers, share prototypes or problem statements, and watch how customers react, not just what they say. Watch for shifts in language. Listen for corrections. Those moments are often more informative than agreement. If a customer describes the problem differently than your synthesis suggested, trust them. Discovery is a loop, not a funnel.",
+     "The most common failure mode across all of this: replacing messy conversations with clean outputs. AI makes discovery feel professional and efficient: summaries look polished and themes feel authoritative. But clarity without contact is dangerous. If your insights feel generic, obvious, or interchangeable with a competitor's, you're likely missing the actual voice of the customer.",
+     "AI will not kill product discovery. Thoughtless use of it might. Humans earn the insight. Agents help us see it more clearly."
+    ]
+   }
+  ]
+ },
+ "aiIndividual-moderate": {
+  "title": "AI Fluency — Individual — Moderate Experience",
+  "lessons": [
+   {
+    "n": 1,
+    "title": "Lesson 1: From Tasks to Rituals",
+    "lines": [
+     "Most product managers didn't sign up to be professional plate spinners, yet the days fill up with writing PRDs, chasing status, pulling data for reviews, and answering the same question in slightly different formats. The strategic work gets squeezed into the margins.",
+     "The mindset shift that changes this: stop asking \"what can I ask an AI model for?\" and start asking \"which recurring ritual in my product practice can be supported or partly owned by an agent?\"",
+     "A ritual is anything you do on a predictable cadence with a clear purpose, like weekly grooming, monthly KPI reviews or quarterly strategy updates. Your work splits into two buckets:",
+     "High volume, repeatable tasks. Agents are very good at these.",
+     "High judgment, high context decisions. Used well, agents amplify you here. They don't replace you.",
+     "The goal isn't a smarter autocomplete. It's moving from task execution to orchestration and sense-making.",
+     "Here's roughly how that split shifts over eight weeks as rituals get agent support. Drag the slider to see it:"
+    ]
+   },
+   {
+    "n": 2,
+    "title": "Lesson 2: Backlog Grooming, Before and After",
+    "lines": [
+     "Grooming is the classic ritual to hand a first pass to an agent.",
+     "Backlog grooming, before and after",
+     "Your new grooming ritual: review the agent's proposed clusters and priorities, adjust for strategy and context, approve or merge or close with one click. Your time moves from rewriting and sorting to making trade-offs and explaining priorities.",
+     "What still needs you: connecting work to strategy and OKRs, partnering with engineering on feasibility and sequencing, and saying \"no\" with a clear narrative."
+    ]
+   },
+   {
+    "n": 3,
+    "title": "Lesson 3: Research and Experiments as Always-On Engines",
+    "lines": [
+     "Two more rituals follow the same shape: the agent runs continuously in the background, you turn its output into decisions.",
+     "Market research. Instead of scrambling when a competitor appears or leadership asks about a space, an \"Insights\" agent tracks competitor release notes, pricing pages, job postings, and analyst reports, and produces a weekly digest. Your ritual becomes a 30-minute session where you annotate implications and write \"so what does this mean for our strategy?\"",
+     "Experiment design. An \"Experiment Designer\" agent generates ideas from feedback and prior tests, turns them into clear hypotheses and success metrics, proposes sample size and duration, and writes consistent briefs. Your ritual becomes idea-harvesting on a cadence, a weekly review to choose which experiments to run, and a simple debrief after each one.",
+     "Research as an always-on engine",
+     "Key idea: The agent collects and summarizes. The \"so what?\" call stays yours.",
+     "In both cases the agent collects and summarizes. You do the part it can't: telling weak signal from hype, deciding whether to react, watch, or ignore, and owning the learning agenda across quarters."
+    ]
+   },
+   {
+    "n": 4,
+    "title": "Lesson 4: Turn KPI Reviews Into Decision Meetings",
+    "lines": [
+     "Most PMs have too many dashboards and too little insight. KPI reviews turn into a meeting where everyone reads numbers out loud.",
+     "A \"Metrics\" agent monitors your core metrics, alerts you to anomalies, writes a weekly or monthly \"state of the product\" summary, highlights cohorts or flows that changed meaningfully, and suggests follow-up questions and possible root causes.",
+     "Your KPI ritual becomes:",
+     "Read the agent's summary before the meeting.",
+     "Spend the meeting itself discussing implications and decisions.",
+     "Capture next steps so the agent can track their impact next time.",
+     "The agent describes what's happening. You choose which metrics truly matter versus noise, connect changes to product and business context, and make the call when two metrics move in opposite directions."
+    ]
+   },
+   {
+    "n": 5,
+    "title": "Lesson 5: The PM as Conductor",
+    "lines": [
+     "When these rituals have agents built into them, the job itself starts to look different:",
+     "Less time creating artifacts, more time aligning people.",
+     "Less energy chasing status, more energy shaping strategy.",
+     "Fewer one-off tasks, more reusable systems and playbooks.",
+     "Your calendar shifts toward regular review rituals with AI-prepared inputs, deep-dive sessions with design, engineering, and stakeholders, and protected focus time for thinking, writing, and deciding. You become less of a project manager and more of a conductor. Not because you work less, but because more of your effort points at the parts of the job that are uniquely yours: framing problems, telling the story, making hard choices under uncertainty.",
+     "You don't need an \"AI transformation\" to get there. Three practical steps:"
+    ]
+   }
+  ]
+ },
+ "aiIndividual-novice": {
+  "title": "AI Fluency — Individual — Limited Experience",
+  "lessons": [
+   {
+    "n": 1,
+    "title": "Lesson 1: Nobody Is Ready, and That's Okay",
+    "lines": [
+     "The same conversation happens constantly: someone brings up AI, heads nod, and then someone says, \"We're just not ready for that yet.\"",
+     "Here's the thing worth sitting with: waiting for \"ready\" is the same as deciding not to go. Nobody is ready. That's okay. You start anyway.",
+     "The biggest misconception is that adopting AI means building something, buying an enterprise platform, retraining everyone, and having a five-year strategy blessed by the board before anyone touches a thing. That framing makes AI feel like a construction project, when it's really more like learning to ride a bike. You don't read every book about cycling before you get on. You get on, you wobble, you adjust."
+    ]
+   },
+   {
+    "n": 2,
+    "title": "Lesson 2: The Shape of the Journey",
+    "lines": [
+     "The AI adoption journey Nobody waits until they're \"ready\". They start small and build evidence.",
+     "Before getting into the specific steps, it helps to see the whole shape of where this is going. Adoption doesn't jump straight from \"nobody's using this\" to \"the whole org runs on it.\" It moves through stages, and each one builds the evidence for the next.",
+     "Notice where it starts: with you, not a company initiative. Everything else on this path is built on that first stage actually happening."
+    ]
+   },
+   {
+    "n": 3,
+    "title": "Lesson 3: How to Actually Get Started",
+    "lines": [
+     "Four concrete moves to make, step by step. None of them requires permission from anyone but you, until the fourth."
+    ]
+   },
+   {
+    "n": 4,
+    "title": "Lesson 4: How to Scale Once You Have Traction",
+    "lines": [
+     "Once you have a few small wins, scaling gets a lot less scary: you're building on evidence instead of theory. Three things that actually move the needle:",
+     "How one win becomes a capability",
+     "Key idea: The template is the bridge. Without it, the win stays stuck with one person.",
+     "Share what's working. In a Slack thread, a monthly email, or wherever people gather, have team members share prompts, use cases, and results. Peer learning spreads faster and sticks better than formal training.",
+     "Standardize the wins. When someone finds a great way to use AI for a specific task, document it. Turn it into a template others can pick up without starting from zero. That's how individual experimentation becomes organizational capability.",
+     "Connect AI to outcomes you already care about. Successful teams don't talk about \"AI adoption.\" They talk about reducing time to first draft, improving response times, and cutting repetitive work. Tied to goals people already have, it stops being a tech initiative and becomes a business tool."
+    ]
+   },
+   {
+    "n": 5,
+    "title": "Lesson 5: The Whole Playbook",
+    "lines": [
+     "Here's the bottom line: you don't need a perfect strategy. You don't need executive buy-in on day one. You don't need to understand the technology inside and out before you try it.",
+     "You need one use case, one experiment, and one person willing to share what they learned. Everything else grows from there.",
+     "Start small. Stay curious. Share what you find. That's the whole playbook."
+    ]
+   }
+  ]
+ },
+ "aiOrg-advanced": {
+  "title": "AI Fluency — Organizational — Advanced Experience",
+  "lessons": [
+   {
+    "n": 1,
+    "title": "Lesson 1: Beyond Automation",
+    "lines": [
+     "The business world is buzzing about AI as the ultimate driver of efficiency, personalization, and growth. That's true, and yet many organizations are missing the point. In the race to automate, they risk sacrificing the one thing that builds lasting loyalty: the human factor.",
+     "Technology on its own is cold. It can be efficient without being empathetic, and personal without being personable. The real edge shows up when AI isn't a replacement but an amplifier for your team, enabling the small, quick wins that build a customer relationship for life.",
+     "At an advanced level, this is a strategic choice about your operating model, not a tooling decision. Where you point mature AI capability (toward removing humans from the relationship, or toward freeing them for the parts of it that matter most) is what separates a cost story from a loyalty story."
+    ]
+   },
+   {
+    "n": 2,
+    "title": "Lesson 2: What AI Does Well, What Only People Do",
+    "lines": [
+     "Blending the two starts with being honest about each one's strengths.",
+     "What AI does well, what only people do One support moment, handed from AI to a person at the point it matters.",
+     "KEY IDEA AI is efficient, not empathetic. People turn satisfied customers into loyal ones.",
+     "AI analyzes history and behavior to anticipate needs, automates routine inquiries around the clock, and summarizes long threads so an agent is up to speed in seconds. A person reads between the lines, responds to frustration or delight with genuine care, thinks creatively when a problem falls outside the script, and builds the trust that turns a satisfied customer into an advocate."
+    ]
+   },
+   {
+    "n": 3,
+    "title": "Lesson 3: Engineering the Quick Win",
+    "lines": [
+     "The forward-thinking model isn't AI or people. It's collaborative intelligence: AI as a co-pilot that identifies the perfect moment for a human to step in and deliver a \"quick win\" that builds loyalty.",
+     "Proactive, personal outreach. AI flags an account that keeps failing to use a new feature correctly. Instead of firing off a generic help article, it alerts a specialist, who sends a short personal note: \"I noticed you were working with the new dashboard. Would a quick five-minute walkthrough help? How about tomorrow at 10?\" The customer feels seen, learns the feature, and gets more invested in the product.",
+     "Empathetic escalation. Sentiment analysis detects a frustrated tone in a chat and hands it to a senior agent with the note \"high frustration detected.\" The agent opens with \"I'm sorry you're having a hard time. I've read the history and I'm taking personal ownership of this.\" A negative moment becomes a trust-building one.",
+     "Engineering the quick win AI does the legwork; a person delivers the moment.",
+     "KEY IDEA AI does the legwork. The person delivers the part that creates loyalty.",
+     "In both cases the AI does the legwork: watching for the moment. The human delivers the part that creates loyalty."
+    ]
+   },
+   {
+    "n": 4,
+    "title": "Lesson 4: Going the Extra Mile",
+    "lines": [
+     "Beyond quick wins, clearing volume off your team frees the most valuable resource of all: time to genuinely understand a customer's world.",
+     "A customer in a specialized field (say, renewable-energy logistics) is struggling to adapt a standard project-management tool to their needs. An AI logs the ticket. A human agent could hand over a standard workaround and close it.",
+     "The empowered agent goes further. They spend an hour learning the customer's domain (compliance standards, supply-chain complexity for turbine parts, regulatory reporting), then reconnect: \"I looked into your issue, and I also took time to understand how energy projects usually run. Here's a way to configure the tool to track your milestones, and a custom report template for your quarterly compliance filings.\"",
+     "That transforms a support request into a consulting engagement. The customer isn't just satisfied. They're astonished that a partner invested time to understand their business. That single act builds loyalty no competitor can easily break."
+    ]
+   },
+   {
+    "n": 5,
+    "title": "Lesson 5: The Direction Is Set by Strategy",
+    "lines": [
+     "AI is a powerful force, but its direction is guided by your strategy. Two organizations can deploy the same capability and get opposite results: one hollows out its customer relationships, the other deepens them.",
+     "The advanced organizational skill is making that direction explicit and consistent across teams: defining where AI absorbs volume, where humans are deliberately inserted, and how reclaimed time gets reinvested rather than simply cut. By focusing AI on empowering your team, you're not just investing in technology. You're investing in better human relationships at scale.",
+     "Don't let the \"artificial\" in AI fool you. Its greatest potential is helping your organization be more consistently and genuinely human, and deliver the moments that create customers for life."
+    ]
+   }
+  ]
+ },
+ "aiOrg-experienced": {
+  "title": "AI Fluency — Organizational — Lots of Experience",
+  "lessons": [
+   {
+    "n": 1,
+    "title": "Lesson 1: Product Rigor, Not IT Rigor",
+    "lines": [
+     "An internal copilot is still a product Internal stakeholders are users too.",
+     "Most agentic AI conversations point outward: agents for customers, AI features to compete on. But some of the highest-leverage AI work never touches a customer at all. It shows up inside the company, changing how sales reps prep for calls or how support triages tickets. Call these PM Copilots.",
+     "Here's the trap: building a copilot for your own team is still product work. It just gets treated like IT work, which is exactly why so many stall out after a promising demo. Someone builds it in a sprint, drops it in Slack, and everyone moves on. Nobody validated the problem, involved the users early, or built in a way to learn and adjust.",
+     "Internal stakeholders are still users. They have workflows, trust issues, and opinions about tools getting shoved into their day. Treat them as an afterthought and the project fails quietly: no dramatic collapse, just quiet non-use."
+    ]
+   },
+   {
+    "n": 2,
+    "title": "Lesson 2: Discovery, Finding the Work Worth Automating",
+    "lines": [
+     "The PM copilot product lifecycle",
+     "1DiscoveryShadow the team; find painful, high-volume work",
+     "2PilotSmall group, real low-stakes tasks",
+     "3FeedbackEvery correction is a signal",
+     "4IterationAdjust prompts, guardrails, handoffs",
+     "5AdoptionMeasure it like a product",
+     "↻Treat the internal agent like a product",
+     "This is the first of five stages you'll walk through in this course. The instinct with agentic AI is to reach for the most ambitious use case. A copilot that handles an entire renewal end to end sounds impressive in a slide. It's also a terrible place to start.",
+     "Good discovery here looks like good discovery anywhere else: sit in on real calls, read a week's worth of support tickets, shadow someone doing the task you assume is automatable. You're looking for work that's repetitive, high-volume, and low-risk if the agent gets something wrong early on. Drafting a first-pass follow-up email is a good candidate. Deciding whether to escalate a churn risk is not, at least not yet.",
+     "Ask the team what they'd actually want help with, not what leadership assumes they need. That gap is where most failed pilots come from."
+    ]
+   },
+   {
+    "n": 3,
+    "title": "Lesson 3: Pilot Small, Real, and Closely Watched",
+    "lines": [
+     "Once you've picked a use case, resist the urge to roll it out broadly. A pilot with five to ten people doing real work is worth more than a company-wide launch with a flashy announcement.",
+     "Pick people who represent a range of comfort with new tools, not just your most enthusiastic early adopters. Give them real tasks, not sandboxed test cases. People behave differently when the stakes are real. And watch what's actually happening, not just what people say afterward: session logs, transcripts, and time on task tell you more than a survey ever will.",
+     "This is also where you learn the difference between a demo and a product. A demo works when you control the inputs. A product has to survive a rep pasting in a half-finished email thread, or someone asking the copilot something it was never trained to answer."
+    ]
+   },
+   {
+    "n": 4,
+    "title": "Lesson 4: Feedback, Listening for Corrections Not Compliments",
+    "lines": [
+     "Feedback on an internal AI tool rarely shows up as a formal ticket. It shows up as someone quietly editing every draft the copilot produces, or going back to doing the task by hand because it's faster than fixing what the agent got wrong. If you're only listening for complaints in a feedback channel, you'll miss almost everything useful.",
+     "Step through the three signals worth watching for instead."
+    ]
+   },
+   {
+    "n": 5,
+    "title": "Lesson 5: Iteration, Earning the Next Stage of Rollout",
+    "lines": [
+     "Every round of pilot feedback should change something concrete: adjusting the prompt or guardrails, changing what the agent can do without a human checking its work, or narrowing scope because you tried to solve too much at once.",
+     "Earning the next stage of rollout",
+     "Fix the prompt, guardrails or scope",
+     "It has earned the next group",
+     "↺ Then check the corrections again",
+     "Here's the rule worth internalizing: don't expand the rollout until the current version has earned it. If a copilot is getting corrected on the same kind of task every week, more users won't fix that. They'll just multiply the frustration. Iteration is where you build the trust that adoption actually depends on."
+    ]
+   },
+   {
+    "n": 6,
+    "title": "Lesson 6: Adoption, Measured Like the Product It Is",
+    "lines": [
+     "Four numbers that tell you if the copilot is working",
+     "This is the stage most internal AI efforts skip entirely, and it's the one that determines whether the tool survives past its first quarter. If you can't point to numbers showing the copilot is actually helping, it gets quietly deprioritized the moment budget gets tight.",
+     "Weekly active users among the eligible group tells you whether the tool has staying power beyond initial curiosity. Task success rate (the share completed without a human stepping in) tells you if the agent is actually reliable. Time saved per task is the number your VP or CFO will care about most, so measure it honestly, not optimistically. And voluntary return rate (people coming back without being reminded) is maybe the most honest signal of all. People don't return to tools that waste their time."
+    ]
+   }
+  ]
+ },
+ "aiOrg-moderate": {
+  "title": "AI Fluency — Organizational — Moderate Experience",
+  "lessons": [
+   {
+    "n": 1,
+    "title": "Lesson 1: Where Your Organization Actually Stands",
+    "lines": [
+     "Three stages of growth",
+     "Most organizations sit in one of three stages. In the first, novice, AI adoption hasn't really started yet; it's just breaking the surface. In the second, individual enablement, a handful of curious employees have taught themselves to use AI tools well: clever prompts, real time saved, but contained to that one person.",
+     "This second stage is where the majority of companies are stuck right now. It feels like progress: someone on the team is clearly getting value. But look closely at the roots: they're shallow and contained. If that person leaves, the knowledge leaves with them. If a new hire joins, they start from zero.",
+     "The third stage, organizational enablement, has a wide, shared root system instead. The organization itself, not just a few power users, has durable capability that survives turnover and gets inherited by every new hire on day one."
+    ]
+   },
+   {
+    "n": 2,
+    "title": "Lesson 2: Contained Growth vs. Compounding Growth",
+    "lines": [
+     "Contained growth vs compounding growth",
+     "Key idea: Built for one person, value scales only as far as their workload. Built for a process, it compounds.",
+     "When you build an AI habit or workflow for one person, you're optimizing that person's time. That's real value, but it's contained and isolated, like a plant in a pot. It scales only as far as their workload and only as long as they keep using it.",
+     "When you build for a process instead, the value becomes connected and compounding. Drag the slider below to see how the gap between the two grows over time."
+    ]
+   },
+   {
+    "n": 3,
+    "title": "Lesson 3: The Governance and Change-Management Case",
+    "lines": [
+     "There's a governance angle that's easy to miss. Individual AI use is invisible to the organization: nobody knows what prompts are being run or what decisions are being informed by an ungoverned tool. Organizational tools live inside managed systems, where they can be monitored, versioned, and improved like any other piece of software.",
+     "There's also a change-management angle. When AI capability lives in individual habits, adoption is fragile and uneven. Some people embrace it, some ignore it, and leadership has little visibility into which is happening. When it lives in shared tools, adoption becomes something you can roll out, measure, and support, the same way you'd roll out any other piece of enterprise software.",
+     "None of this means individual enablement doesn't matter. People still need to build comfort with these tools, and that comfort often generates the ideas that eventually become organizational tools. But if individual enablement is where you stop, you're leaving most of the value on the table."
+    ]
+   },
+   {
+    "n": 4,
+    "title": "Lesson 4: A Practical Five-Step Path",
+    "lines": [
+     "A practical five-step path",
+     "Key idea: One real process, one working tool, and proof that it works.",
+     "You don't need a full transformation program to make this shift. You need one real process, one working tool, and proof that it works. Step through the five steps below."
+    ]
+   },
+   {
+    "n": 5,
+    "title": "Lesson 5: The Bigger Picture",
+    "lines": [
+     "One proven agent seeds the ones that follow Shared roots: the data, prompts and ownership the first one proved.",
+     "Treat your first success as a proof point, not the finish line. The real payoff isn't the single automation. It's what that first win teaches your organization about what's possible, and the credibility it builds for the next one.",
+     "The organizations that separate themselves over the next few years won't be the ones with the most individual AI enthusiasts. They'll be the ones that turned individual enthusiasm into organizational capability: governed, durable, and built on real business processes rather than good intentions.",
+     "If your company is still stuck in the individual stage, the good news is that the jump doesn't require a massive program. It requires picking one real process, building one real solution, and proving it out. Everything else follows from there."
+    ]
+   }
+  ]
+ },
+ "aiOrg-novice": {
+  "title": "AI Fluency — Organizational — Limited Experience",
+  "lessons": [
+   {
+    "n": 1,
+    "title": "Lesson 1: Why One Chatbot Fails at Real Product Work",
+    "lines": [
+     "Most teams start their AI journey by adding a chatbot. It's a natural first step, and a common trap: treating AI as a single general-purpose assistant you ask to do everything.",
+     "One assistant gets asked to research a market, summarize feedback, propose features, draft PRDs, write launch messaging, analyze experiments, and answer stakeholder questions. Each of those needs different context, different tools, different tone, and different evaluation. When it all goes through one assistant, you get:",
+     "Context overload. The assistant doesn't know which sources to trust or which priorities matter today.",
+     "Mixed quality. A response can be strong in one area and weak in another, and nobody knows why.",
+     "No clear ownership. When something's wrong, it's unclear which part of the system failed or how to fix it.",
+     "The fix is the same one a growing team reaches for: specialization. Design an \"AI product team\": a virtual squad of specialized agents with clear roles, clear inputs, and clear success criteria."
+    ]
+   },
+   {
+    "n": 2,
+    "title": "Lesson 2: Design Agents Like Roles on a Team",
+    "lines": [
+     "Instead of \"an AI,\" think \"a squad.\" Each agent has a role description, a clear scope and boundaries, specific inputs it can use, outputs it's expected to produce, and evaluation metrics tied to that role.",
+     "A practical starting squad for product teams:",
+     "Agents designed like roles on a team Each agent's output is the next one's input.",
+     "Key idea: Outputs become inputs: a repeatable system, not four disconnected tools.",
+     "Each agent gets real boundaries too. The Researcher doesn't make product decisions or invent sources, and it flags uncertainty clearly. The Analyst doesn't declare causality without experimental support. The Copywriter doesn't make up capabilities and calls out where legal review is needed. The Experiment Designer proposes options and trade-offs, not a single answer."
+    ]
+   },
+   {
+    "n": 3,
+    "title": "Lesson 3: Start With Workflows, Not Models",
+    "lines": [
+     "The biggest mistake is starting with the technology. Start with a workflow you want to improve: a recurring product ritual that's expensive in time and attention, such as weekly backlog grooming, monthly insights review, quarterly planning, or experiment review and write-ups.",
+     "Then ask three questions about it: where do we lose time, where do mistakes happen, and where do we lack consistency? Those pain points become your first agent responsibilities.",
+     "Start with a workflow, not a model Take one costly, recurring ritual and ask three questions.",
+     "Take discovery and validation for a new initiative. Common pain points: feedback scattered across tools, outdated competitive research, insights that aren't consistently synthesized, hypotheses and experiments that vary in quality, and messaging rushed at launch. Every one of those is a job you can hand to a specific agent, which is exactly why that workflow is a good place for a squad."
+    ]
+   },
+   {
+    "n": 4,
+    "title": "Lesson 4: Scope a Minimum Squad, Then Prioritize It",
+    "lines": [
+     "You don't need to automate everything. Design an MVP squad that's useful weekly, small enough to maintain, and easy to evaluate. For example: a Researcher that produces a weekly top-5 customer pain points with source links, an Analyst that writes a weekly KPI narrative for 3 to 5 core metrics, an Experiment Designer that fills in a one-page brief template, and a Copywriter that gives three microcopy options per feature.",
+     "To decide which agent to build first, score each candidate on four factors:"
+    ]
+   },
+   {
+    "n": 5,
+    "title": "Lesson 5: Plug It In, and Evaluate It Like a Product",
+    "lines": [
+     "The squad should fit the tools and rituals your team already uses: Slack or Teams for digests, Jira or Linear for turning insights into tickets, Notion or Google Docs for living briefs, and your analytics platform for KPI monitoring. The pattern: agents produce outputs on a cadence, humans review them in a short ritual, and approved outputs become artifacts and actions in your normal tools. The goal isn't \"another tool.\" It's less friction inside the system your team already lives in.",
+     "Then treat each agent like a mini product with its own success metrics. The Researcher: coverage, traceability back to sources, whether people cite it in decisions. The Analyst: accuracy, time saved in KPI reviews, decisions triggered. The Experiment Designer: brief consistency, fewer failed launches from missing instrumentation. The Copywriter: fewer editing cycles, alignment to voice and compliance. If you can't evaluate it, it will drift.",
+     "What changes for the PM: you're defining roles, not writing prompts; designing workflows and handoffs, not asking for one-off answers; managing quality through evaluation, not vibes."
+    ]
+   }
+  ]
+ },
+ "discovery-advanced": {
+  "title": "Customer & Market Discovery — Advanced Experience",
+  "lessons": [
+   {
+    "n": 1,
+    "title": "Lesson 1: Empathy Beyond Feedback",
+    "lines": [
+     "Empathy in product work means seeing the world through your users' eyes. It goes past collecting feedback: it's immersing yourself in someone's context to understand their daily experience, their frustrations, and what they're actually trying to achieve.",
+     "And \"the user\" is usually several people with conflicting realities. In a healthcare product, for instance:",
+     "A patient navigating fear, uncertainty, and too much information.",
+     "A clinician balancing time pressure, accuracy, and compassion.",
+     "An administrator managing workflow, compliance, and limited resources.",
+     "A payer focused on cost and risk.",
+     "The same pattern holds in any product with multiple stakeholders. Deep discovery means holding all of those realities at once, not averaging them into a single \"user.\""
+    ]
+   },
+   {
+    "n": 2,
+    "title": "Lesson 2: Empathy Maps and Living Personas",
+    "lines": [
+     "An empathy map organizes what you learn into four quadrants: what the user says, thinks, does, and feels. The gaps between quadrants are often the most revealing part: what someone says versus what they actually do, or what they do versus how they feel about it.",
+     "The four quadrants of an empathy map Fill it from what you observe, not only from what you are told.",
+     "Here's one filled in for a real person, an operations manager at a mid-market customer:",
+     "A filled-in empathy map Read across the quadrants, not down them.",
+     "Says \"fine\", but does a weekly workaround and feels resentful. That gap, not the stated feedback, is the churn risk.",
+     "Build empathy maps from interviews and direct observation, then turn them into personas that stay alive: not a one-time slide, but a living description of each group's daily experience, goals, pain points, and technical comfort, updated as you learn more."
+    ]
+   },
+   {
+    "n": 3,
+    "title": "Lesson 3: Discovery Systems, Not Discovery Sprints",
+    "lines": [
+     "At an advanced level, a user-centric product is never \"finished.\" The work shifts from running discovery projects to maintaining a continuous improvement loop that refines the product against evolving user needs, without anyone having to schedule it.",
+     "A discovery system runs all the time",
+     "1Watch the KPIs",
+     "2Study wins and fails",
+     "3Ship a small change",
+     "4Validate it",
+     "↻Not a sprint: a loop that keeps turning",
+     "Three things make the loop run on its own:",
+     "KPIs for user success (time per task, error rates, satisfaction), watched continuously, so drift shows up as a number before it shows up as churn.",
+     "Learning from both wins and failures. Study the cases where users hit their goal and the ones where they didn't, and treat the gap as the backlog.",
+     "Small, validated changes: incremental adjustments checked with A/B tests or quick feedback sessions, rather than big rewrites justified by intuition."
+    ]
+   },
+   {
+    "n": 4,
+    "title": "Lesson 4: Making Discovery the Org's Habit",
+    "lines": [
+     "The advanced move is getting an entire organization to operate with user understanding by default, so discovery isn't one person's job title. Practical ways to build that culture:"
+    ]
+   },
+   {
+    "n": 5,
+    "title": "Lesson 5: Responsible Discovery When the Stakes Are High",
+    "lines": [
+     "In high-stakes domains, discovery also has to de-risk. When a feature touches decisions, safety, money, or compliance, understanding the user isn't enough on its own. You validate carefully before it ships.",
+     "Pilot in controlled environments. Introduce new capability incrementally, to a small representative group, so a wrong assumption fails small.",
+     "Validate continuously with domain experts. Involve the people who know the real-world consequences throughout design and build, not just at the end.",
+     "Run an ethical check. Confirm the change prioritizes user well-being over convenience or engagement, especially where the two conflict.",
+     "This is what \"discovery as a system\" looks like at the top of the scale: not just knowing your users, but building the guardrails that let you move fast without breaking the things that matter."
+    ]
+   }
+  ]
+ },
+ "discovery-experienced": {
+  "title": "Customer & Market Discovery — Lots of Experience",
+  "lessons": [
+   {
+    "n": 1,
+    "title": "Lesson 1: Build Around the Workflow, Not the Vision",
+    "lines": [
+     "Build around the workflow, not the vision Same product, same team. The only difference is where it sits in the working day.",
+     "Extra step, extra friction: easy for a busy team to ignore",
+     "Feels like the job, not an add-on: nothing new to remember",
+     "Key idea: Interest in an interview is not fit. Fit is when the product disappears into work people already do.",
+     "Healthcare professionals operate in highly structured environments, with established processes, compliance demands, and severe time constraints. A product that seems valuable in theory can create real friction in practice if it asks clinicians, administrators, or billing staff to change too much too quickly.",
+     "Startups often mistake interest during interviews for true product fit, only to discover later that the solution doesn't integrate naturally into the daily rhythm of care delivery or operations. Avoiding this takes more than a few discovery calls. It means direct exposure to real workflows and real constraints: talking to end users, economic buyers, technical stakeholders, and compliance leaders, not relying on one champion to represent everyone."
+    ]
+   },
+   {
+    "n": 2,
+    "title": "Lesson 2: Focus Is a Strategic Advantage",
+    "lines": [
+     "Healthcare startups often feel pressure to appear enterprise-ready from day one, building bloated products packed with features for every use case a prospect mentions. The result is usually complicated, expensive to maintain, and unclear in its core value.",
+     "The strongest healthcare SaaS products begin by solving one painful problem for one clearly defined user group, establishing credibility through depth before expanding through breadth. A narrow scope also eases implementation and gives cleaner signals about what the market actually values.",
+     "This connects directly to another common failure: not proving measurable value quickly enough. Broad promises like \"improving care quality\" or \"enhancing patient engagement\" aren't enough. They need to translate into outcomes a buyer can track and defend internally: reduced administrative time, faster patient throughput, lower no-show rates, higher collections."
+    ]
+   },
+   {
+    "n": 3,
+    "title": "Lesson 3: Integration and Compliance Aren't Later-Stage Problems",
+    "lines": [
+     "Standalone healthcare software often struggles to gain traction. Providers and health systems already run on EHRs, billing tools, scheduling systems, and internal reporting. If a new product can't connect to that environment, the integration burden shifts to the customer, and that burden can become a deal breaker. Integration needs to be part of the product strategy from day one, not a \"later stage\" technical problem.",
+     "Who absorbs the integration work, and when Same product, same integration work.",
+     "Deal risk: the burden lands on the customer, late",
+     "The product fits the systems it has to live with",
+     "Product work",
+     "Integration left to the customer",
+     "Integration built in",
+     "Key idea: The difference is who absorbs the integration work, and when.",
+     "The same is true of security and compliance. Some early teams assume they can address HIPAA, data governance, and security controls once traction appears. That's risky. In healthcare, trust isn't a finishing layer added after the product works. It's part of the product itself. Buyers want to know how data is stored and who can access it long before the conversation reaches pricing."
+    ]
+   },
+   {
+    "n": 4,
+    "title": "Lesson 4: The Buyer Is Not Always the User",
+    "lines": [
+     "The buyer is not always the user Everyone with a say in the purchase decision.",
+     "In healthcare organizations, the person who loves a product is often not the one who approves the budget, signs the contract, or clears procurement. A clinician may strongly support a tool that improves their workflow, but the final decision can depend on department leadership, finance, IT, legal, or compliance. Startups that build based only on user enthusiasm can end up with a product people want but organizations still won't buy.",
+     "Successful teams map the full buying journey early: who benefits, who influences the decision, who owns the budget, and what objections each stakeholder is likely to raise. That shapes not just the product, but implementation plans, ROI messaging, and security documentation too. In healthcare SaaS, product development and go-to-market are tightly linked."
+    ]
+   },
+   {
+    "n": 5,
+    "title": "Lesson 5: Design Pilots and Implementation With Discipline",
+    "lines": [
+     "Many healthcare SaaS startups treat pilots as loosely defined trial periods rather than structured validation opportunities. Without clear success criteria, ownership, and timelines, pilots often drag on without producing a real decision, and continued engagement gets mistaken for progress. Step through what a disciplined pilot actually requires."
+    ]
+   },
+   {
+    "n": 6,
+    "title": "Lesson 6: Credibility Is Earned, Not Presented",
+    "lines": [
+     "Some startups chase credibility signals instead of actual readiness (polished branding, broad feature sets, large vision statements) while neglecting the harder work of validating demand and delivering repeatable results. In healthcare, credibility does matter, but it's earned through trust, consistency, and evidence rather than presentation alone.",
+     "The most resilient healthcare SaaS companies grow from a strong operational foundation. They understand a specific user deeply, solve a painful problem clearly, build trust into the product, and create a path to measurable value. They don't assume healthcare will adapt to the product. They shape the product to fit healthcare as it actually works."
+    ]
+   }
+  ]
+ },
+ "discovery-moderate": {
+  "title": "Customer & Market Discovery — Moderate Experience",
+  "lessons": [
+   {
+    "n": 1,
+    "title": "Lesson 1: Feedback Isn't a Box to Check",
+    "lines": [
+     "Feedback is a critical ingredient for user-centered products, not a formality. But gathering it well means reaching the right stakeholders, and in most products that's more than the end user: there are the people who use it, the people who administer it, the people who pay for it, and sometimes the people who have to approve it.",
+     "Three habits make feedback systematic instead of incidental:",
+     "Create personas per stakeholder group so you know whose feedback you're missing.",
+     "Establish regular touchpoints, like recurring check-ins or an advisory group, instead of only talking to users when something's on fire.",
+     "Shadow real users when you can. Watching someone work reveals friction they'd never think to report."
+    ]
+   },
+   {
+    "n": 2,
+    "title": "Lesson 2: Collecting Feedback That's Actually Actionable",
+    "lines": [
+     "Data alone doesn't tell the whole story; anecdotes alone give a skewed one. Good feedback collection blends the two.",
+     "Surveys and polls quantify sentiment, but only if the questions are tailored to each stakeholder group and specific enough to act on. A vague question yields a vague answer.",
+     "One-on-one interviews capture the \"why\" behind a behavior. This is where you learn what a number can't tell you.",
+     "Support and success teams are often the first to hear complaints and feature requests. That channel is free and continuous, so use it.",
+     "The pattern:",
+     "Two kinds of feedback, two questions",
+     "Key idea: Numbers tell you what is happening. Conversations tell you why."
+    ]
+   },
+   {
+    "n": 3,
+    "title": "Lesson 3: Close the Loop",
+    "lines": [
+     "Gathering feedback isn't enough. If users don't see that their input went anywhere, they stop giving it. Closing the loop is how you keep the channel alive.",
+     "Closing the feedback loop",
+     "1Users give feedback",
+     "2The team decides and acts",
+     "3Ship it, or explain why not",
+     "4Users see it landed",
+     "↻When users see it landed, they keep telling you",
+     "Three practices that close it: be transparent about decisions, including when feedback can't be acted on and why; keep a roadmap visible to key stakeholders so they can see their input in the plan; and run pilot groups so users test changes before wide release and feel part of the process."
+    ]
+   },
+   {
+    "n": 4,
+    "title": "Lesson 4: Feedback vs. Market Signal",
+    "lines": [
+     "Not all user feedback reflects a broader market need. Some of it is one person's individual pain point; some of it points at a trend showing up across the industry. A big part of doing discovery well is telling those apart.",
+     "Two techniques:",
+     "Cross-functional reviews. Sit down regularly with sales, marketing, and support to discuss which feedback lines up with broader market movement and which doesn't.",
+     "Segment the feedback. Break it down by role, region, or company size. If the same theme shows up across multiple segments, it's a signal. If it's isolated to one, treat it as a data point, not a mandate.",
+     "Feedback vs market signal",
+     "Key idea: Need alone can be niche. Opportunity alone can be a solution nobody wants."
+    ]
+   },
+   {
+    "n": 5,
+    "title": "Lesson 5: Make It a Cycle, Not an Event",
+    "lines": [
+     "The reason discovery slips to \"after the solution's already moving\" is that it's treated as a phase you pass through once. The fix is to make it a cycle that runs continuously alongside delivery."
+    ]
+   }
+  ]
+ },
+ "discovery-novice": {
+  "title": "Customer & Market Discovery — Limited Experience",
+  "lessons": [
+   {
+    "n": 1,
+    "title": "Lesson 1: Start With a Problem Statement",
+    "lines": [
+     "Monday, week three",
+     "Ledgerline sells invoicing software to companies with small finance teams. Maya joined three weeks ago as its second product manager.",
+     "Lauren Brooks says: Customers keep telling sales that billing feels clunky. Can you get a redesign of the billing dashboard on next quarter's roadmap?",
+     "Maya Chen says: Yes. Before we scope it, can I spend this week finding out what \"clunky\" is costing them? I'd like to get the redesign aimed at the right thing.",
+     "Maya books three calls with customers. The first is with Rosa, who runs billing at a 200-person distributor.",
+     "Rosa Alvarez says: The screen? It's fine, honestly. What kills me is month-end. Payments come in from the bank and I match them to invoices by hand. A customer pays three invoices in one transfer, or pays half. It takes me about six hours, every month.",
+     "Maya Chen says: What happens if a match is wrong?",
+     "Rosa Alvarez says: We chase someone who already paid. That's the call I hate making.",
+     "The other two calls tell the same story. A redesign would have made a slow, manual job look nicer. The problem was the matching.",
+     "Lauren's request was a solution (\"redesign the dashboard\"). What Maya needed first was the problem. A problem statement answers three questions, and names no solution:",
+     "What is the pain? Matching payments to invoices by hand at month-end.",
+     "Who has it, and what does it cost them? Billing specialists; about six hours a month, plus the awkward calls when a match is wrong.",
+     "Why do today's options fall short? Payments that cover several invoices, or part of one, can't be matched by the current screen at all.",
+     "\"Redesign the billing dashboard so it feels more modern.\"",
+     "Names a solution and a feeling. No pain, no people, no cost, nothing to test it against.",
+     "\"Billing specialists spend about six hours each month-end matching bank payments to invoices by hand, because payments that cover several invoices, or part of one, can't be matched automatically. Mistakes lead to chasing customers who already paid.\"",
+     "Pain, people, cost and the gap in today's tools. Every later decision can be checked against it.",
+     "of the features in the average software product are rarely or never used. Building from requests instead of problems is one of the ways that happens.",
+     "Source: Pendo, 2019 Feature Adoption Report (usage data across hundreds of software products)",
+     "Practice: Problem or solution? Pause here, and try it on the lesson page.",
+     "When a request arrives, thank them, then ask \"what happens today, and what does it cost?\" The problem is usually one question behind the request."
+    ]
+   },
+   {
+    "n": 2,
+    "title": "Lesson 2: Know Who You're Building For",
+    "lines": [
+     "Three people, one purchase",
+     "Maya asks Rosa who else would care if payment matching changed. Rosa introduces her to two colleagues.",
+     "Tom Okafor says: I sign the renewal. If this closes the month two days faster, I'll pay more for it. If it just looks better, I won't.",
+     "Priya Shah says: Anything that reads our bank feed needs single sign-on and an audit trail. Without those, it doesn't get switched on, however much finance wants it.",
+     "One customer, three people, three different tests. Rosa does the work, Tom pays, and Priya can say no.",
+     "In most products, \"the user\" is several people. The person who uses it every day is often not the person who decides to buy it, and neither of them may be the one who can block it. Design only for the first and the product never gets bought. Pitch only to the second and it gets bought, then ignored.",
+     "For each group, build a short persona: not demographics, but their day, what they are trying to achieve, what worries them, and how comfortable they are with new tools.",
+     "Maya's personas for payment matching",
+     "Rosa, billing specialist, does the work. “Month-end is six hours of matching I could do in my sleep, if I could sleep.” Wants: Matches she can trust, and fewer calls to customers who already paid. Worries: A tool that guesses wrong and leaves her to find the mistakes.",
+     "Tom, controller, pays. “Show me the month closing faster.” Wants: Faster close and cleaner numbers for the auditors. Worries: Paying for software the team doesn't use.",
+     "Priya, IT lead, can say no. “If it touches the bank, I need to know who did what.” Wants: Single sign-on, an audit trail, nothing to maintain. Worries: Another system with access to bank data.",
+     "Practice: Whose concern is it? Pause here, and try it on the lesson page.",
+     "Practice: The demo. Pause here, and try it on the lesson page."
+    ]
+   },
+   {
+    "n": 3,
+    "title": "Lesson 3: Do the Research",
+    "lines": [
+     "Two weeks, three kinds of evidence",
+     "Dev Patel says: Three customer calls is a good story. Is it enough to bet a quarter on?",
+     "Maya Chen says: Not yet. I'll spend two days reading what's already out there, then talk to five more customers of different sizes, then look at how everyone else handles this.",
+     "Primary research tells you how people really work. Secondary research tells you the shape of the market, quickly and cheaply. Competitive analysis tells you where the openings are.",
+     "How many conversations is enough? Fewer than most people think, as long as they're with the right people. Jakob Nielsen and Tom Landauer showed that in usability testing each new person finds a share of the problems the earlier ones missed, so returns fall quickly. Interview research behaves in a similar way: in one well-known study, the main themes had appeared within the first six interviews and nothing new appeared after twelve.",
+     "Each conversation finds less that's new",
+     "Share of usability problems found as you add test users, using Nielsen and Landauer's model (each user finds about 31%).",
+     "Source: Nielsen & Landauer, \"A mathematical model of the finding of usability problems\" (1993); interview themes: Guest, Bunce & Johnson, Field Methods (2006)",
+     "\"Would you use a tool that matched payments for you automatically?\"",
+     "Hypothetical and leading. People are kind; almost everyone says yes.",
+     "\"Walk me through the last time you closed the month. Where did the time go?\"",
+     "About something that already happened. You hear what they actually do, including the workarounds.",
+     "Practice: Good interview question, or not? Pause here, and try it on the lesson page.",
+     "How today's options handle Rosa's problem",
+     "Maya's competitive scan (illustrative). The question isn't \"what do they have that we don't?\" but \"what does nobody do well?\"",
+     "handles it well partly does not highlighted: the gap",
+     "Part-payments are handled poorly everywhere, and the suite that comes closest is too heavy for small teams. That gap is Ledgerline's opening."
+    ]
+   },
+   {
+    "n": 4,
+    "title": "Lesson 4: Validate Before You Build",
+    "lines": [
+     "Three months, or two weeks?",
+     "Dev Patel says: A proper matching engine, with bank feeds, rules and part-payments, is about three months for two engineers.",
+     "Maya Chen says: Before we spend that, I want to know if people will actually change how they work. What if, for two weeks, five customers send us their bank export and we match it for them with a spreadsheet and some rules?",
+     "Dev Patel says: By hand? That doesn't scale.",
+     "Maya Chen says: It doesn't need to. It needs to tell us if they'll use it, and where the matching breaks.",
+     "They run the test with ten customers. Nearly all of them say it would help. Fewer keep using it.",
+     "Rosa Alvarez says: The simple ones were great. But half our payments are part-payments, and those all came back unmatched, so I still had to do them myself.",
+     "Ways to test an idea, cheapest first",
+     "Step 1, days: Fake door. A button or landing page for a feature that doesn't exist yet. Count who clicks.",
+     "Step 2, 1 to 2 weeks: Concierge. Do the job for a few customers by hand, as Maya did. You learn exactly where it's hard.",
+     "Step 3, 2 to 4 weeks: Wizard of Oz. It looks automatic to the customer; a person does the work behind the scenes.",
+     "Step 4, weeks: Smallest real product. Build only the part that solves the core problem, for a small group, and learn from it.",
+     "What customers said, and what they did",
+     "Maya's two-week pilot with 10 customers.",
+     "Said it would help: 90%.",
+     "Sent a bank export in week 1: 80%.",
+     "Sent one again in week 2: 60%.",
+     "Asked to keep it after the pilot: 50%.",
+     "Fictional numbers from the story, showing the usual gap between saying and doing.",
+     "Practice: Half kept it, half drifted off. Pause here, and try it on the lesson page.",
+     "A minimum viable product isn't a half-finished release. It's the smallest thing that delivers real value on the core problem and lets you learn. When you test it, watch three things together: what people do (usage), what they say (interviews and surveys) and where they struggle (watching them use it). A gap between saying and doing isn't noise. It's often the finding."
+    ]
+   },
+   {
+    "n": 5,
+    "title": "Lesson 5: The Discipline of Doing It First",
+    "lines": [
+     "Six weeks later",
+     "The first release suggests matches, including part-payments with the invoice number in the reference, and shows why it chose each one. Rosa approves them with one click.",
+     "Rosa Alvarez says: Month-end took me about an hour and a half. And I didn't chase anyone who'd already paid.",
+     "Lauren Brooks says: So we never built the redesign?",
+     "Maya Chen says: We built the thing that made people stop asking for it.",
+     "At renewal, Tom upgrades. Priya signs off because every match records who approved it. Each of the three people got what they needed.",
+     "The whole course is one sequence: problem, then people, then research, then a cheap test, then build. None of the steps is hard. The discipline is doing them before the team is building, when building feels faster than finding out. Once work has started, discovery tends to become a search for evidence that the plan was right.",
+     "Why startups fail, in their founders' words",
+     "Share of 111 startup post-mortems citing each reason. Most cite more than one.",
+     "Ran out of cash or couldn't raise: 38%.",
+     "No market need: 35%.",
+     "Got outcompeted: 20%.",
+     "Flawed business model: 19%.",
+     "Regulatory or legal problems: 18%.",
+     "Pricing or cost issues: 15%.",
+     "More than a third built something the market didn't need: the problem this course is about. Source: CB Insights, \"The Top 12 Reasons Startups Fail\" (2021)",
+     "Your two weeks of discovery",
+     "Step 1, days 1 to 2: Read. Reports, competitor help pages, reviews. Write down what you think you know.",
+     "Step 2, days 3 to 7: Talk. Five or six people per type of customer, about what they did last time. Include the buyer and whoever can say no.",
+     "Step 3, day 8: Write it down. The problem statement, a persona for each group, and the gap in today's options.",
+     "Step 4, days 9 to 10: Test the riskiest part. Pick the cheapest test that could prove you wrong, and decide in advance what result would change your plan.",
+     "Two weeks of discovery is small and certain. Months spent building the wrong thing are large, and you find out late."
+    ]
+   }
+  ]
+ },
+ "execution-advanced": {
+  "title": "Execution & Delivery — Advanced Experience",
+  "lessons": [
+   {
+    "n": 1,
+    "title": "Lesson 1: From Running Launches to Building the Machine",
+    "lines": [
+     "At an experienced level, you deliver complex work reliably yourself. At an advanced level, the deliverable changes: you design delivery systems and rhythms that other teams adopt, and you coach other people through complex, high-stakes launches.",
+     "The test: if two other teams in the organization are running the delivery cadence you designed, without you in the room, and a less experienced PM just navigated a hard launch because you coached them through it rather than doing it for them, you've made the shift. If reliable delivery still only happens where you personally are, you haven't.",
+     "This is execution as an organizational capability, not a personal one."
+    ]
+   },
+   {
+    "n": 2,
+    "title": "Lesson 2: Delivery Rhythms Worth Copying",
+    "lines": [
+     "A delivery system other teams adopt is a small set of rhythms and defaults, documented well enough to lift wholesale.",
+     "A delivery rhythm worth copying",
+     "1Plan the increment",
+     "2Build and auto-test",
+     "3Ship via CI/CD",
+     "4Read the metrics",
+     "↻Small increments, every cycle",
+     "The pieces worth standardizing: an iterative roadmap format that flexes between fixes, enhancements, and new work; CI/CD and automated testing as the default, not a per-team choice; a shared quality-metrics view (defect rate, downtime, cycle time) every team reads the same way; and a fixed review cadence. When these are the house standard, a new team is productive and reliable in weeks, not quarters."
+    ]
+   },
+   {
+    "n": 3,
+    "title": "Lesson 3: Coaching Through a High-Stakes Launch",
+    "lines": [
+     "The other half of the advanced role is walking a less experienced team through a launch that matters, in a way that builds their capability rather than just getting this one out the door."
+    ]
+   },
+   {
+    "n": 4,
+    "title": "Lesson 4: Data-Driven Optimization as Standard Practice",
+    "lines": [
+     "At earlier levels, \"look at the data after a release\" is a good habit. At an advanced level, it's a standard practice every team runs by default, not a special project someone champions.",
+     "That means, as a normal part of the delivery loop:",
+     "Analyze user behavior after each meaningful release: feature adoption, engagement, where people drop off.",
+     "Track whether the product is still landing (retention, satisfaction, the core outcome metric) so a slow decline is noticed early.",
+     "Feed the findings into the next round of prioritization, so the roadmap is continuously adjusted from evidence rather than re-argued from opinion.",
+     "One PM checks post-release data when they remember. The other two teams ship and move on.",
+     "Every team's cadence includes a post-release review; the roadmap step that follows expects its findings.",
+     "Your job is to make this the water the teams swim in: the tooling is there, the cadence includes it, and shipping without looking at what happened feels wrong."
+    ]
+   },
+   {
+    "n": 5,
+    "title": "Lesson 5: Make It Outlast You",
+    "lines": [
+     "A delivery system is only advanced if it survives you leaving. The last job is durability.",
+     "A continuous-improvement culture. Teams regularly analyze what shipped, refine the process, and are recognized for incremental gains, not just big launches. The system improves itself.",
+     "Knowledge sharing built in. Delivery playbooks, launch retros shared org-wide, mentorship pairings. The patterns that work are written down and taught, not held in one person's head.",
+     "More than one person who can coach it. If you're the only one who can walk a team through a hard launch, the capability is still centralized. Deliberately grow two or three others who can.",
+     "Put the course together: a documented delivery rhythm other teams run, coaching that builds capability instead of consuming it, data-driven optimization as the default, and a culture that maintains and spreads all of it. That's execution as something the organization owns."
+    ]
+   }
+  ]
+ },
+ "execution-experienced": {
+  "title": "Execution & Delivery — Lots of Experience",
+  "lessons": [
+   {
+    "n": 1,
+    "title": "Lesson 1: Contingency vs. Hope",
+    "lines": [
+     "At an experienced level, the job is delivering complex, cross-team initiatives reliably. The thing that makes delivery reliable isn't better luck. It's building in contingency for the unexpected rather than hoping nothing goes wrong.",
+     "\"Hope\" as an execution strategy looks like a single path with no fallback, monitoring that tells you a system is down after users do, a launch plan with no rollback, a regulatory or security requirement discovered late. Every one of those is a place where a normal, predictable problem turns into a crisis.",
+     "Contingency is the practice of assuming those problems will occur and deciding in advance how the system and the plan absorb them. This course is four applications of that idea."
+    ]
+   },
+   {
+    "n": 2,
+    "title": "Lesson 2: Design for Failure",
+    "lines": [
+     "A reliable system assumes its own components will fail and keeps working anyway.",
+     "Design for failure One node goes down. The people using the service never notice.",
+     "The service stays up",
+     "The building blocks: redundancy and load balancing so one failed component doesn't take the product down; proactive monitoring and alerting so you detect a degradation before users report it; and an incident response plan written before you need it (who's on call, how you communicate, how you roll back), so a 2 a.m. outage runs on a script instead of improvisation."
+    ]
+   },
+   {
+    "n": 3,
+    "title": "Lesson 3: Rehearse the Peak",
+    "lines": [
+     "The failures that hurt most are the ones that only appear under load: a launch spike, a seasonal surge, a big new customer going live. Hoping the system holds is not a plan; rehearsing is.",
+     "Performance testing and load simulation mean deliberately pushing the system to and past its expected peak in a controlled setting, so you find the bottleneck (the query that falls over, the queue that backs up, the memory that leaks) before real traffic finds it for you.",
+     "Rehearse the peak Push load up until something gives, and note where.",
+     "Key idea: The first bottleneck: the report query.",
+     "The output isn't just \"it passed.\" It's a known ceiling (\"we're solid to 3x current load, degraded past that\") and a list of the specific things that break first, which becomes your pre-launch fix list and your scaling roadmap."
+    ]
+   },
+   {
+    "n": 4,
+    "title": "Lesson 4: Build Checkpoints Into the Process",
+    "lines": [
+     "The other source of late crises is a constraint discovered late: a security requirement, a legal review, or a compliance rule that should have shaped the design and instead forces a rebuild. The fix is structural: put the checkpoints in the process, not at the end of it."
+    ]
+   },
+   {
+    "n": 5,
+    "title": "Lesson 5: A Framework for Change",
+    "lines": [
+     "The last unexpected thing to plan for is the requirements changing mid-flight: a new regulation, a platform policy shift, a contractual obligation. Experienced teams handle this with a standing change management framework rather than treating each change as a one-off fire.",
+     "The framework defines, in advance:",
+     "Who assesses a change: the named people (product, engineering, and whichever constrained function applies) who evaluate it.",
+     "An impact assessment process: a repeatable way to work out what a change affects: which features, which workflows, which commitments.",
+     "Update protocols: how a change gets rolled out, including testing and user communication.",
+     "Risk categorization: high, medium or low, with high-risk changes folded into the next roadmap planning cycle rather than bolted on.",
+     "Put together with the earlier lessons: design for failure, rehearse the peak, checkpoint the constraints, and put a framework around changes. That's contingency instead of hope, across the whole delivery."
+    ]
+   }
+  ]
+ },
+ "execution-moderate": {
+  "title": "Execution & Delivery — Moderate Experience",
+  "lessons": [
+   {
+    "n": 1,
+    "title": "Lesson 1: Accessibility as Innovation, Not Obligation",
+    "lines": [
+     "Accessibility, without and with AI",
+     "For years, digital accessibility was treated as a compliance checkbox or a technical afterthought. AI is helping shift that mindset, creating experiences that are more inclusive, more adaptive, and more human-centered from the start.",
+     "This isn't a niche feature set. When products are designed to meet people where they are, they become easier to use for everyone, not just the users a feature was originally built for. The biggest opportunity for product leaders is to approach accessibility as innovation, not obligation."
+    ]
+   },
+   {
+    "n": 2,
+    "title": "Lesson 2: Where AI Is Already Changing Accessibility",
+    "lines": [
+     "Four categories of AI accessibility tools",
+     "Dictation, voice assistants, smart device control",
+     "Scene description, object identification, navigation guidance",
+     "Live captions, meeting transcripts, AI summaries",
+     "Plain language, document summaries, read aloud",
+     "Four categories cover most of what's changing right now. Voice interfaces let people with mobility or dexterity challenges complete tasks through natural conversation instead of typing or tapping. Visual assistance turns a smartphone camera into a real-time guide for people who are blind or have low vision: identifying objects, reading text aloud, and describing scenes.",
+     "Captioning and transcription have become dramatically more accurate for people who are deaf or hard of hearing. Live captions and transcripts are now widely available in meetings and video, not just specialized settings. Adaptive learning and cognitive support personalize how information is presented, simplifying language and reading content aloud for people with dyslexia, ADHD, or memory differences.",
+     "What makes this moment different: these capabilities are increasingly built into mainstream products, not siloed into specialized devices. That matters because accessibility scales when it's part of everyday technology, not a separate category."
+    ]
+   },
+   {
+    "n": 3,
+    "title": "Lesson 3: AI Is an Enabler, Not a Shortcut",
+    "lines": [
+     "AI is not a perfect solution on its own. Voice systems can still struggle with accents or speech patterns. Image recognition can miss context. Captions can introduce errors. Accessibility cannot rely entirely on automation.",
+     "Inclusive products require testing with real users, thoughtful design decisions, and a commitment to improving outcomes over time. Teams should build with transparency and flexibility in mind: users need to understand what the AI is doing and where it may still have limitations. Features like captions, voice commands, and scene descriptions should be easy to turn on, adjust, or correct. Accessibility is strongest when users stay in control of their experience."
+    ]
+   },
+   {
+    "n": 4,
+    "title": "Lesson 4: The Rollout Playbook",
+    "lines": [
+     "For teams wondering how to get started, the best approach begins with real user needs, not the technology itself. Step through the six-stage path from there.",
+     "The rollout playbook",
+     "Key idea: Start from user friction, not the technology, and only widen once a case earns it."
+    ]
+   },
+   {
+    "n": 5,
+    "title": "Lesson 5: Measure What Actually Matters",
+    "lines": [
+     "Define what success looks like before you build: lower task abandonment, faster completion time, better comprehension, higher satisfaction, or improved usability for specific groups. AI accessibility features should be evaluated not only by technical performance, but by whether they genuinely reduce friction and increase independence.",
+     "Transparency matters just as much as the metrics themselves. Users need to understand what the AI is doing and where it may still fall short. Give people the ability to turn features on, adjust them, or correct mistakes. Accessibility is strongest when users stay in control of their own experience."
+    ]
+   },
+   {
+    "n": 6,
+    "title": "Lesson 6: Quick Wins You Can Turn On Today",
+    "lines": [
+     "Some of the most useful accessibility improvements don't require a long implementation plan at all. You can often just turn them on. Enable live captions by default for meetings and webinars. Turn on meeting transcripts so details are searchable later. Use AI recaps after customer calls so teams stay aligned without repeating information. Add automatic alt text suggestions for shared images and presentations. Use document summarization for long policy updates and briefs. Turn on read-aloud for knowledge articles. Enable translation in chats and documents for multilingual teams.",
+     "The bigger point: accessibility isn't always about building something new. Often it's about being intentional with tools already available, and turning on features that help more people participate fully."
+    ]
+   }
+  ]
+ },
+ "execution-novice": {
+  "title": "Execution & Delivery — Limited Experience",
+  "lessons": [
+   {
+    "n": 1,
+    "title": "Lesson 1: Why Surprises Show Up Late",
+    "lines": [
+     "Unpredictable timelines and end-of-project surprises usually aren't a discipline problem. They're a structure problem. When a piece of work is built as one large batch and only integrated and tested near the end, the first honest signal about whether it works, whether it fits together, and whether the estimate held arrives when there's no time left to react.",
+     "The fix isn't working harder early. It's changing the shape of the work so that signal arrives continuously:",
+     "Smaller increments that each get integrated and tested.",
+     "A regular cadence for gathering feedback.",
+     "Automated checks that flag problems the day they appear, not the week before launch."
+    ]
+   },
+   {
+    "n": 2,
+    "title": "Lesson 2: Work in Increments, Get Feedback Early",
+    "lines": [
+     "The core practice is delivering value incrementally and iteratively instead of all at once.",
+     "Big batch vs increments The same work. What changes is when you find out something is wrong.",
+     "Surprises arrive at the end, when they cost the most",
+     "Surprises arrive early, while they're cheap",
+     "Building",
+     "Testing",
+     "Fixing surprises",
+     "Three habits make this concrete: define a small MVP scope (the essential features that address the core need, without overextending); adopt an agile cadence (Scrum or Kanban) so you iterate, gather feedback, and adjust on a rhythm; and run a beta, releasing early to a select group of users to measure performance and find rough edges before a full launch."
+    ]
+   },
+   {
+    "n": 3,
+    "title": "Lesson 3: Automate the Checks",
+    "lines": [
+     "Increments only give you early signal if something is actually checking each one. Manual testing at the end of a project is exactly the late-signal problem again.",
+     "Automate the checks Every change takes the same path to production.",
+     "KEY IDEA A break stops here, in isolation, the day it's introduced.",
+     "Automated tests (regression, functional, and security) run on every change, so a break is caught the day it's introduced by whoever introduced it, not weeks later by a user.",
+     "Continuous integration / continuous deployment (CI/CD) automates the build-and-release path. It removes the manual steps where human error creeps in and slows delivery, and it makes shipping a small change routine instead of an event.",
+     "The combined effect: problems surface immediately and in isolation (this change broke this test), which is the opposite of a pile of unexplained failures in the final week."
+    ]
+   },
+   {
+    "n": 4,
+    "title": "Lesson 4: Track a Few Quality Numbers",
+    "lines": [
+     "You can't tell whether execution is actually improving without measuring it. Pick a small set of quality metrics and watch them.",
+     "Here's the same defect-rate metric under the two structures from this course. Drag the slider across six releases:"
+    ]
+   },
+   {
+    "n": 5,
+    "title": "Lesson 5: Predictability Is the Goal",
+    "lines": [
+     "Put the pieces together and the picture is simple: small scope, an agile cadence, automated checks on every change, and a few quality metrics reviewed regularly. Each one moves the moment you learn about a problem earlier.",
+     "That's the whole difference between execution that \"happens\" with unpredictable timelines and execution you can forecast. You're not eliminating surprises. You're arranging the work so surprises are small and early instead of large and late."
+    ]
+   }
+  ]
+ },
+ "prioritization-advanced": {
+  "title": "Prioritization & Trade-offs — Advanced Experience",
+  "lessons": [
+   {
+    "n": 1,
+    "title": "Lesson 1: From Your Backlog to the System",
+    "lines": [
+     "At earlier levels, prioritization skill is about ordering your own work well. At an advanced level, the deliverable changes: you design prioritization systems that other teams adopt, and you navigate prioritization conflicts at an organizational level: the ones where two teams' top priorities compete for the same capacity or the same customers.",
+     "The test: other teams run the prioritization method you designed, using shared definitions and a shared data source, and when their priorities collide, the resolution comes from the method rather than from whoever escalates hardest.",
+     "Two things make that possible: a method that's legible across teams, and a common language (financial impact) that leadership can actually decide in."
+    ]
+   },
+   {
+    "n": 2,
+    "title": "Lesson 2: A Shared, Legible Method",
+    "lines": [
+     "A prioritization method other teams will actually adopt has three properties.",
+     "A shared, legible method Three teams, three backlogs, one way of ranking them.",
+     "Shared criteria and definitions, so \"impact\" and \"value\" mean the same thing on Team A and Team C. A common data source: one place everyone pulls the metrics from, so nobody's arguing from a different number. And defensible outputs: each item's rank traceable to its inputs, so the order survives scrutiny from any direction. When all three hold, two teams' priority lists are actually comparable, which is the precondition for resolving a conflict between them."
+    ]
+   },
+   {
+    "n": 3,
+    "title": "Lesson 3: Tie It to the P&L",
+    "lines": [
+     "At the organizational level, the language decisions get made in is financial. An advanced prioritization system connects the ranking to profit-and-loss data so the trade-offs speak that language.",
+     "Prioritize by expected ROI. Use P&L data to rank initiatives by their potential for revenue growth or cost savings, not just by a felt value score.",
+     "Link revenue goals to value-driven features. If a core value proposition is reducing customers' administrative time, tie revenue targets to the features that deliver that, so the prioritization and the financial plan point the same way.",
+     "Track the financial impact of what shipped. Measure how releases actually moved revenue, margin, and acquisition cost, and feed that back into the next round's ROI estimates.",
+     "This isn't about turning every decision into a spreadsheet. It's about being able to express a prioritization trade-off in terms leadership can weigh against every other investment the company is making."
+    ]
+   },
+   {
+    "n": 4,
+    "title": "Lesson 4: Portfolio Thinking",
+    "lines": [
+     "With multiple products or teams, prioritization isn't only within a backlog. It's allocating capacity across them. That's portfolio management.",
+     "Total product and engineering capacity Set the cross-product split first, then each team prioritizes within its slice.",
+     "Product A growth",
+     "Product B mature",
+     "Product C growth",
+     "Key idea: Skip this step and the loudest team's backlog sets the split by default. Rebalance on a cadence as products change stage."
+    ]
+   },
+   {
+    "n": 5,
+    "title": "Lesson 5: Navigating the Conflict",
+    "lines": [
+     "The moment the whole system exists to handle: two teams' top priorities collide, competing for the same capacity, the same customers, or the same launch window.",
+     "Without a shared method, this resolves by escalation: whoever gets to the executive first, or argues most forcefully, wins. With one, the conversation changes: both items are scored against the same criteria, from the same data, in the same financial terms. The question becomes \"which scores higher against what we agreed matters?\" and the answer is inspectable by everyone in the room.",
+     "Your job in that moment is to run the method, not pick a side, and to make the reasoning visible so the losing team can see it wasn't political. And the longer-term job is mentoring: growing other people who can facilitate that conversation, so cross-team prioritization doesn't depend on you being in every room.",
+     "Put the course together: a legible shared method, tied to the P&L, applied across a portfolio, used to resolve conflicts by criteria rather than volume, and taught to others. That's prioritization as something the organization runs on, not something one PM does well."
+    ]
+   }
+  ]
+ },
+ "prioritization-experienced": {
+  "title": "Prioritization & Trade-offs — Lots of Experience",
+  "lessons": [
+   {
+    "n": 1,
+    "title": "Lesson 1: The Feature Fallacy",
+    "lines": [
+     "If you measure progress by how many features ship, you'll eventually ship yourself into irrelevance. The teams that win aren't the ones with the longest release notes. They're the ones with the shortest path to a meaningful outcome.",
+     "This isn't anti-shipping. It's pro value density: the ratio of outcome created to effort required. When value density goes up, adoption, retention, and trust follow. When it goes down, your backlog grows faster than your business.",
+     "Every feature you add quietly charges three taxes:",
+     "Context-switch tax. Every new feature branches the mental model, for users and for teams. Users pay with cognitive load; teams pay with QA, docs, analytics events, and support scripts.",
+     "Adoption tax. Features don't adopt themselves. They need activation points, enablement, and discoverability. Shipping without an adoption path is just inventory.",
+     "Quality tax. More surface area means more edge cases. In regulated spaces the quality debt compounds with safety and compliance risk. It's quiet, until it isn't.",
+     "Back to Team A and Team B from the prediction above. Drag the slider to see why the team shipping less can still be pulling ahead, then estimate the value density of something on your own backlog."
+    ]
+   },
+   {
+    "n": 2,
+    "title": "Lesson 2: Outcome → Evidence → Minimum",
+    "lines": [
+     "Here's a simple loop that travels well across domains. Think OEM.",
+     "Outcome, evidence, minimum",
+     "Measure the path, then scale or kill",
+     "Outcome-first. Define the end state in observable terms: \"reduce median prescription time from 4:30 to 2:00.\" Not \"improve the orders experience.\"",
+     "Evidence-backed. Tie the bet to a falsifiable hypothesis and a minimum viable measurement plan. If nothing could prove you wrong, it's not a bet. It's a wish.",
+     "Minimally sufficient. Ship the smallest intervention that can move the outcome for a narrow segment. Then scale."
+    ]
+   },
+   {
+    "n": 3,
+    "title": "Lesson 3: From Roadmaps to Bet Maps",
+    "lines": [
+     "A roadmap says \"we will build these things.\" A bet map says \"we believe doing X for Y segment will drive Z outcome,\" and then holds itself accountable.",
+     "Each entry on a bet map carries four things a feature list never does:",
+     "A confidence level. How sure are we, and why? Low confidence isn't a reason not to bet. It's a reason to keep the bet small.",
+     "Leading indicators. What will move first if this is working, well before the outcome metric does?",
+     "Kill criteria. Written in advance: \"if we don't see the leading indicator move by X after Y weeks, we stop.\" Decided before you're emotionally invested.",
+     "A review cadence. Monthly. Kill or double down based on signal, not on who argues hardest in the room.",
+     "A bet, written down",
+     "Belief: Cuts median Orders time from 3:10 to 1:45. Confidence: Medium: the replay data is clear, the sample is small. Leading indicator: Step-3 (code search) drop-off rate. Kill criteria: Drop-off not down 10 points in 3 weeks, so stop. Review: Monthly: kill or double down on the signal.",
+     "The point of writing kill criteria before you start is that you can't negotiate with a number you set when you were still objective."
+    ]
+   },
+   {
+    "n": 4,
+    "title": "Lesson 4: Five Moves for the Quarter",
+    "lines": [
+     "Concrete ways to raise value density on a real critical path. Step through them."
+    ]
+   },
+   {
+    "n": 5,
+    "title": "Lesson 5: The Courage to Delete",
+    "lines": [
+     "Value density has a numerator and a denominator. Everything so far has been about the numerator: the outcome. Deletion is how you work the denominator.",
+     "Create a quarterly decommission list. Remove underused features, consolidate patterns, redesign flows that require explanation. Celebrate deletion with the same fanfare as launches, because a flow that no longer needs a support script is a real win.",
+     "A quick example, from healthcare but universal: Clinicians were abandoning an Orders flow at 38% completion. The instinct was to build \"Orders 2.0\" with templates and bulk actions.",
+     "The OEM approach instead:",
+     "Outcome: raise completion to 70%, cut median time from 3:10 to 1:45.",
+     "Evidence: session replays and path analysis showed friction on patient-context switching and code search.",
+     "Minimum: auto-attach patient context, pre-populate three likely order codes by unit and shift, add keyboard-first quick search.",
+     "Result after six weeks: 74% completion, 1:41 median time, and zero net-new \"features.\" Massive value density."
+    ]
+   }
+  ]
+ },
+ "prioritization-moderate": {
+  "title": "Prioritization & Trade-offs — Moderate Experience",
+  "lessons": [
+   {
+    "n": 1,
+    "title": "Lesson 1: Why the Framework Slips",
+    "lines": [
+     "At this level you already have a prioritization framework: a value-vs-effort view, maybe a scoring rubric. The problem is it doesn't hold up: the same feature scores \"high value\" in one meeting and \"medium\" in the next, and the rankings feel like they could have gone either way.",
+     "The framework isn't broken. The inputs are soft. \"Value\" is being estimated by feel, so it moves with the mood of the room, the last customer call, and who's advocating. A framework built on gut-feel inputs produces gut-feel outputs with a spreadsheet wrapped around them.",
+     "Making it consistent means grounding the inputs, especially \"value,\" in something that doesn't change between Tuesday and Thursday: data."
+    ]
+   },
+   {
+    "n": 2,
+    "title": "Lesson 2: Put Numbers Behind \"Value\"",
+    "lines": [
+     "To ground the value estimate, tie every candidate to a specific metric it should move and a rough size of that movement.",
+     "\"This improves onboarding.\" → How much? For whom? Says who?",
+     "\"Raises onboarding completion from 58% to ~68%, by cutting two steps before first value.\"",
+     "Not \"this improves onboarding\" but \"this should raise onboarding completion from 58% to ~68%.\"",
+     "Not \"this helps power users\" but \"this should lift the retention of the accounts using feature X, currently ~1,200 accounts.\"",
+     "Not \"this reduces support load\" but \"this should cut tickets in category Y, currently ~200/month, by roughly a third.\"",
+     "Now \"value\" is an estimated effect on a named number, which two people can debate with evidence instead of vibes. The candidates worth doing are usually the ones where you can name the metric and the mechanism by which the change moves it. If you can't name either, that's a signal the value is imagined."
+    ]
+   },
+   {
+    "n": 3,
+    "title": "Lesson 3: Validate the Estimate",
+    "lines": [
+     "A metric-backed value estimate is still an estimate. Before committing heavily to a high-effort item, check the guess cheaply.",
+     "Validate the estimate before you commit",
+     "↺ Cheap tests: an A/B test, a prototype, a pilot",
+     "A controlled A/B test, a prototype in front of a few users, or a small pilot tells you whether the metric actually moves in the direction and roughly the size you predicted. If it does, commit with confidence. If it doesn't, you've spent a little to avoid a large mistake. Also cross-check the value against market signal: if the feedback driving it is one loud segment and no broader trend, the value estimate may be local."
+    ]
+   },
+   {
+    "n": 4,
+    "title": "Lesson 4: Same Rubric, Every Time",
+    "lines": [
+     "The last source of inconsistency is applying the method differently from one decision to the next: different factors, different weightings, different people's interpretation of \"impact.\" Fixing that is about discipline, not sophistication."
+    ]
+   },
+   {
+    "n": 5,
+    "title": "Lesson 5: Close the Loop",
+    "lines": [
+     "The thing that makes a prioritization framework trustworthy over time is checking whether it was right.",
+     "After a prioritized item ships, compare the result against the value estimate you made: did onboarding completion actually go from 58% to 68%, or did it barely move? Compare to the baseline you recorded before, not to a vague memory.",
+     "A wrong estimate isn't a failure. It's calibration data. If your team consistently overestimates the value of UI polish and underestimates the value of reliability work, that's a bias you can correct in the next round of scoring. Over a few cycles, a framework with a feedback loop gets noticeably better at predicting value, which is exactly what makes people stop second-guessing it.",
+     "Put the course together: ground \"value\" in a named metric, validate the estimate cheaply, apply the same rubric every time on a cadence, and check the outcomes to calibrate. That's the difference between having a framework and having one that actually holds."
+    ]
+   }
+  ]
+ },
+ "prioritization-novice": {
+  "title": "Prioritization & Trade-offs — Limited Experience",
+  "lessons": [
+   {
+    "n": 1,
+    "title": "Lesson 1: The Loudest-Voice Problem",
+    "lines": [
+     "The most common early-stage prioritization pattern is reactive: the next thing worked on is whatever was requested most recently, or by the person who pushed hardest. It feels responsive, and it has three quiet costs.",
+     "You optimize for advocacy, not value. The best-connected requester wins, which has little to do with what helps users most.",
+     "You can't defend the order. \"Why is X before Y?\" has no answer beyond \"someone asked,\" which invites endless renegotiation.",
+     "Quiet, high-value work never surfaces. The improvements nobody is lobbying for, the ones that would move a real metric, stay buried.",
+     "The fix isn't ignoring stakeholders. It's having a consistent, explicit way to compare what they ask for, so the decision rests on something other than volume."
+    ]
+   },
+   {
+    "n": 2,
+    "title": "Lesson 2: A Value-vs-Effort View",
+    "lines": [
+     "The simplest tool for making the comparison explicit is a value-versus-effort view: for each candidate, estimate how much value it creates and how much effort it takes, then plot it.",
+     "A value-vs-effort view",
+     "Four rough zones fall out of it: quick wins (high value, low effort: do these now), big bets (high value, high effort: plan them deliberately), fill-ins (low value, low effort: only when there's slack), and money pits (low value, high effort: decline these). Plotting a handful of real candidates, as above, makes the trades visible: \"rebuild legacy report\" and \"SSO\" cost about the same, but only one is worth it. The plot doesn't decide for you, but it forces the two questions that matter onto the table."
+    ]
+   },
+   {
+    "n": 3,
+    "title": "Lesson 3: Score, Don't Argue",
+    "lines": [
+     "\"Value\" and \"effort\" are still fuzzy. A lightweight scoring rubric breaks them into a few factors you rate quickly, so two people comparing the same item land in roughly the same place.",
+     "Score, don't argue",
+     "Key idea: Low confidence drags the score down, which is the point.",
+     "Try it yourself below. Slide confidence down and watch what happens to the score."
+    ]
+   },
+   {
+    "n": 4,
+    "title": "Lesson 4: Non-Negotiables Come First",
+    "lines": [
+     "A scoring rubric is for the things you have a genuine choice about. Some work isn't a choice, and trying to score it just produces a weird-looking ranking.",
+     "Non-negotiables go straight to the top, unscored: regulatory or legal requirements, security fixes, contractual commitments, anything where not doing it carries a severe, non-linear cost. You're not comparing these on value-vs-effort, because the downside of skipping them isn't measured in lost value. It's measured in fines, breaches, or broken contracts.",
+     "Everything after the non-negotiables is where the rubric earns its keep. The two-tier structure (mandatory first, then ranked by score) is most of what a working prioritization process needs at this level."
+    ]
+   },
+   {
+    "n": 5,
+    "title": "Lesson 5: Saying No With a Reason",
+    "lines": [
+     "The point of all this structure isn't the ranking. It's the ability to say no without damaging the relationship.",
+     "Reactive prioritization makes every \"no\" feel personal, because there's no principle behind it, just \"we're not doing yours.\" A scored, defensible order changes the conversation: \"here's where your request landed: it scored lower on impact and reach than the items ahead of it, and here's what would move it up.\" The requester may not love it, but they can see it wasn't arbitrary.",
+     "Put the course together: recognize reactive prioritization, make the comparison explicit with value-vs-effort, score with a simple rubric, put non-negotiables on top, and let the framework carry your \"no.\" That's the shift from \"whoever asked loudest\" to a process you can stand behind."
+    ]
+   }
+  ]
+ },
+ "stakeholder-advanced": {
+  "title": "Stakeholder Communication & Influence — Advanced Experience",
+  "lessons": [
+   {
+    "n": 1,
+    "title": "Lesson 1: From Managing Relationships to Shaping the System",
+    "lines": [
+     "At earlier levels, stakeholder skill is personal: you build trust with engineering, you keep your sponsor informed, you navigate a disagreement well. At an advanced level, the job changes. You're now responsible for how the organization communicates and collaborates cross-functionally as a system, and for mentoring other people to operate it.",
+     "The tell that you've made this shift: cross-functional alignment keeps working when you're on vacation. It's built into the rhythms, the shared artifacts, and the people you've coached, not held together by your individual relationships.",
+     "A strong product culture isn't built overnight. It takes an intentional approach to align teams toward a shared mission, and that intentional design is the work."
+    ]
+   },
+   {
+    "n": 2,
+    "title": "Lesson 2: Building an Aligned Cross-Functional Culture",
+    "lines": [
+     "Aligning an organization is deliberate work with a few load-bearing pieces.",
+     "An aligned cross-functional culture Every function works from the same shared vision.",
+     "A shared vision, set with key stakeholders involved early, so every function can see why the product exists and what it's for. Org-wide communication channels (regular cross-functional syncs and a genuine single source of truth, like a shared board or wiki) established as institutions, not favors you do. When those exist, alignment stops being something you personally broker at every turn."
+    ]
+   },
+   {
+    "n": 3,
+    "title": "Lesson 3: Product, Marketing, and Sales as One Motion",
+    "lines": [
+     "Advanced cross-functional work means the go-to-market functions operate as one motion with product, not a handoff.",
+     "Build buyer personas with marketing, from shared user research and segmentation, so the people you're designing for and the people they're messaging to are the same people.",
+     "Align messaging to real value propositions. Marketing's claims and the product's actual differentiators should be the same list. Gaps there show up as churn when reality doesn't match the pitch.",
+     "Equip sales properly. Sales is often the customer's first contact. Give them playbooks, demo scripts, and objection-handling guides, and keep them trained as the product changes, so they can articulate value accurately.",
+     "Product, marketing and sales as one motion",
+     "Key idea: The customer's experience stays consistent from first touch to the product itself.",
+     "When this works, a customer's experience is consistent from the first marketing touch through the sales conversation to the product itself."
+    ]
+   },
+   {
+    "n": 4,
+    "title": "Lesson 4: Mentoring Stakeholder Skill",
+    "lines": [
+     "A system that only you can run isn't finished. The advanced level includes deliberately growing stakeholder skill in the people around you."
+    ]
+   },
+   {
+    "n": 5,
+    "title": "Lesson 5: Making It Stick",
+    "lines": [
+     "The last job is making the collaboration system durable, and knowing whether it's actually working.",
+     "Turn feedback loops into standing institutions. Customer advisory groups, beta programs, and cross-functional reviews should be permanent fixtures with owners, not things that happen when someone remembers.",
+     "Close loops org-wide. When recurring feedback themes emerge, build an action plan and communicate it to both internal teams and customers. That's what keeps every function pointed at the same reality.",
+     "Measure the collaboration, not just the product. Watch whether decisions are getting made cross-functionally without escalation, whether the same misalignments keep recurring, whether the syncs still produce decisions or have become status theater. Track sentiment (NPS, CSAT) as one signal that the internal alignment is reaching customers.",
+     "Put together: an aligned culture with a shared vision, GTM as one motion with product, stakeholder skill deliberately grown in others, and durable feedback institutions you measure. That's shaping how an organization collaborates, rather than just collaborating well within it."
+    ]
+   }
+  ]
+ },
+ "stakeholder-experienced": {
+  "title": "Stakeholder Communication & Influence — Lots of Experience",
+  "lessons": [
+   {
+    "n": 1,
+    "title": "Lesson 1: A Shared Vision Is the Starting Point",
+    "lines": [
+     "Success in product work hinges on collective collaboration between engineering, design, marketing, sales, compliance, and support. That collaboration isn't automatic. It requires an intentional approach to align teams toward a shared mission, especially given how different each function's priorities and incentives naturally are.",
+     "A shared vision acts as the guiding light for all of these teams. It clarifies why the product exists and what it's trying to achieve. Building it starts with involving key stakeholders early (engineers, compliance officers, technical experts) so all voices are genuinely heard rather than informed after the fact, and ensuring that vision reflects real user needs, not just what's easiest to build.",
+     "None of this works without real communication channels. Regular cross-functional syncs and shared tools that create a single source of truth are what keep a vision from quietly drifting apart as each team interprets it their own way.",
+     "A shared vision is the starting point",
+     "Key idea: Involve each function while the vision is forming, not after it's decided."
+    ]
+   },
+   {
+    "n": 2,
+    "title": "Lesson 2: Working Well With Engineering and Design",
+    "lines": [
+     "Maintaining strong relationships with engineering and design is critical to turning vision into reality, and each requires a different kind of care.",
+     "With engineering, act as a liaison between user needs and technical capability. Respect the real technical constraints your engineers are navigating, especially around sensitive data or complex integrations, and create room for genuine bi-directional feedback, where engineers can push back on an idea or suggest a better approach based on what they know that you don't.",
+     "With design, remember that good design is more than aesthetics. It's about reducing cognitive load and fitting how people actually work. Share user personas, interview notes, and workflow context directly with designers rather than just a list of requirements, and make accessibility a real priority, not an afterthought, since it directly determines who can actually use what you build."
+    ]
+   },
+   {
+    "n": 3,
+    "title": "Lesson 3: Bridging Product and Risk, Legal, or Compliance",
+    "lines": [
+     "In any regulated or risk-sensitive space, product managers have to navigate a complex landscape of rules and standards, and that means collaborating closely with legal, security, or compliance functions rather than treating them as a late-stage checkpoint.",
+     "Engage these functions early in the development cycle. Waiting until a feature is nearly finished to ask \"is this okay?\" is exactly what creates expensive last-minute rework and blown timelines. Run workshops to educate the broader team on the regulations or standards that actually apply, and embed compliance-related tasks directly into the roadmap so they get proper prioritization instead of being squeezed in at the end.",
+     "Bridging product and compliance Same requirements. What changes is when they arrive.",
+     "The timeline slips",
+     "Ships on time, already compliant",
+     "Building",
+     "Compliance checks",
+     "Rework",
+     "Key idea: Compliance absorbed as design inputs, instead of a last-minute gate.",
+     "The real reframe here: seek compliance as an enabler, not a barrier. The goal isn't choosing between innovation and safety. It's finding creative ways to innovate that still meet the standards that actually matter, and validating those innovations thoroughly before they ship."
+    ]
+   },
+   {
+    "n": 4,
+    "title": "Lesson 4: Building a Customer-Centric Culture Across Teams",
+    "lines": [
+     "Product success doesn't depend only on internal teams working well together. It also depends on building a genuinely customer-centric culture that continuously incorporates real feedback.",
+     "Establish real feedback loops: customer advisory groups with key users, and user testing or beta programs that validate new features before a full rollout. Collecting feedback is only half the job, though. Use metrics like Net Promoter Score and Customer Satisfaction Score to track sentiment over time, and build real action plans around recurring themes, then actually communicate those plans back to both internal teams and customers."
+    ]
+   }
+  ]
+ },
+ "stakeholder-moderate": {
+  "title": "Stakeholder Communication & Influence — Moderate Experience",
+  "lessons": [
+   {
+    "n": 1,
+    "title": "Lesson 1: The Roles on a Product Team, and Why Each One Matters",
+    "lines": [
+     "Creating an impactful product isn't just about the product itself. It's about the team behind it. A well-rounded product team requires a diverse set of skills and clearly understood roles. Step through the core roles you'll typically find on a strong product team.",
+     "What each role needs from you The PM is the connective tissue."
+    ]
+   },
+   {
+    "n": 2,
+    "title": "Lesson 2: Collaboration Doesn't Happen by Accident",
+    "lines": [
+     "Building a high-performing product team isn't just about assigning the right roles. It's about fostering effective collaboration between them. Agile methodologies like Scrum or Kanban provide the structure needed for iterative development and cross-functional alignment: regular sprint planning, stand-ups, and retrospectives, plus a shared tool for transparent progress tracking.",
+     "Structure alone isn't enough, though. Cross-functional collaboration also requires genuinely open communication. Weekly touchpoints and collaborative tools help break down silos, but the real work is cultural: setting up regular syncs on key deliverables, encouraging real-time updates in shared documents, and maintaining a culture where all team members actually feel heard, not just invited to the meeting."
+    ]
+   },
+   {
+    "n": 3,
+    "title": "Lesson 3: Empowerment, Not Just Direction",
+    "lines": [
+     "High-performing teams need more than the right skills. They need motivation, autonomy, and support. As a product leader, your role is to provide clear direction while cultivating a culture of ownership.",
+     "Start with clarity: use a framework like OKRs (Objectives and Key Results) to define quarterly objectives and the metrics that track progress against them. From there, empower your team members by giving them real autonomy in their roles, and trusting their expertise enough to let engineers, designers, and product owners experiment with new ideas and make real decisions, not just execute someone else's."
+    ]
+   },
+   {
+    "n": 4,
+    "title": "Lesson 4: Recognition and Continuous Learning",
+    "lines": [
+     "Celebrate wins, both big and small, and recognize team members who go above and beyond. This isn't just a nice gesture. It's what fosters a positive team culture and keeps people motivated over the long run: publicly acknowledging contributions in meetings, offering real incentives for exceptional work, and encouraging peer-to-peer recognition.",
+     "The work doesn't stop once a team is performing well, either. Product development is an ever-evolving field, and your team needs to keep learning to stay ahead: invest in training and development, encourage knowledge sharing through things like lunch-and-learns or mentorship, and promote a genuine growth mindset where experimenting and learning from failure gets celebrated instead of punished."
+    ]
+   }
+  ]
+ },
+ "stakeholder-novice": {
+  "title": "Stakeholder Communication & Influence — Limited Experience",
+  "lessons": [
+   {
+    "n": 1,
+    "title": "Lesson 1: Stop Waiting to Be Asked",
+    "lines": [
+     "The most common early-career communication pattern is reactive: you share information when someone asks for it. It feels responsive, but it has two quiet failures. People who don't know to ask stay uninformed. And every \"quick question\" is an interruption that could have been prevented by an update nobody had to request.",
+     "Proactive communication flips that: you share status, decisions, and changes on a predictable rhythm, before anyone has to come looking. The test is simple: can a stakeholder answer \"what's the state of this project?\" without messaging you? If not, you're still reactive.",
+     "Communication breakdowns lead to misaligned expectations and, often, product failures. Getting ahead of them is one of the highest-leverage habits an early product person can build."
+    ]
+   },
+   {
+    "n": 2,
+    "title": "Lesson 2: Build a Rhythm",
+    "lines": [
+     "Proactive communication runs on cadence: a set of recurring touchpoints so predictable that people stop needing to ask.",
+     "Build a rhythm One quarter of touchpoints. Predictable enough that people stop needing to ask.",
+     "Key idea: The exact structure matters less than the predictability.",
+     "The exact structure matters less than the predictability. Regular standups keep the team aligned day to day. A weekly sync aligns on deliverables and timelines. Sprint reviews and retrospectives give stakeholders a scheduled window into progress and a place to raise concerns. Once these exist, most \"quick questions\" stop happening, because the answer was already delivered."
+    ]
+   },
+   {
+    "n": 3,
+    "title": "Lesson 3: Set Up the Channels",
+    "lines": [
+     "A cadence needs somewhere for the information to live between meetings. Three basics:",
+     "Set up the channels",
+     "Key idea: Staying uninformed should take effort, not the other way around.",
+     "A shared project tool (Jira, Linear, Trello, whatever your team uses) where progress is visible without anyone reporting it. If a stakeholder can open the board and see status, that's a question you never have to answer.",
+     "An open communication channel (Slack, Teams) that breaks down silos, so updates and decisions are visible to everyone who needs them, not trapped in DMs.",
+     "Collaborative documents for real-time updates and feedback: a single source of truth people can check and comment on.",
+     "The goal is a setup where the default state is \"informed,\" and staying uninformed takes effort."
+    ]
+   },
+   {
+    "n": 4,
+    "title": "Lesson 4: Tailor the Update",
+    "lines": [
+     "Broadcasting the same update to everyone is better than staying silent, but it still isn't quite right. Different audiences need different cuts of the same information."
+    ]
+   },
+   {
+    "n": 5,
+    "title": "Lesson 5: Transparency Is the Habit",
+    "lines": [
+     "The through-line of everything so far is transparency by default: sharing status, decisions, setbacks, and trade-offs before you're asked, in a place people can see, at an altitude that fits the audience.",
+     "The part that's easy to skip is the setbacks. It's tempting to only broadcast wins and stay quiet when something slips. But a stakeholder who only hears good news stops trusting the channel, and starts asking around. Being straight about what went wrong, and what you're doing about it, is what makes people rely on your updates when it counts.",
+     "Put together: a predictable cadence, open channels, audience-tailored updates, and honesty about the hard parts. That's the whole shift from \"communicates when asked\" to \"keeps everyone informed.\""
+    ]
+   }
+  ]
+ },
+ "strategy-advanced": {
+  "title": "Product Strategy & Roadmapping — Advanced Experience",
+  "lessons": [
+   {
+    "n": 1,
+    "title": "Lesson 1: Agents as Decision Participants",
+    "lines": [
+     "Large language models are powerful, but without direction they behave like highly articulate generalists. Real leverage comes from intentionally shaping an agent's product judgment so it understands your customers, your constraints, and your definition of success.",
+     "A product-focused agent is not a chatbot or a feature. It is a decision participant. The most effective teams define agents the same way they define human roles, and they're clear on three things:",
+     "What decisions the agent influences.",
+     "What context the agent must always understand.",
+     "What trade-offs the agent should prioritize.",
+     "Before designing any prompts or workflows, write a one-sentence role definition. For example: \"This agent exists to challenge product assumptions, surface risk, and improve decision quality before engineering effort is committed.\" If you can't describe the agent's purpose that clearly, it will not deliver consistent value."
+    ]
+   },
+   {
+    "n": 2,
+    "title": "Lesson 2: Ground the Agent in Product Reality",
+    "lines": [
+     "LLMs have broad knowledge but no inherent understanding of your product. High-performing product agents are grounded in four categories of context, and that context should be persistently available, not re-introduced in every interaction.",
+     "Ground the agent in product reality Four kinds of context go in. Grounded, opinionated answers come out.",
+     "The difference this makes: an agent that has to be told your regulatory boundaries every time will eventually be asked something without them and answer confidently anyway. Standing context is what keeps its judgment inside your actual constraints."
+    ]
+   },
+   {
+    "n": 3,
+    "title": "Lesson 3: Intentionally Opinionated",
+    "lines": [
+     "Generic system prompts produce generic output. High-quality product agents are intentionally opinionated in the same way strong product leaders are.",
+     "Examples of productive bias:",
+     "Question feature requests unless they tie to a clear user outcome.",
+     "Surface second-order effects before recommending solutions.",
+     "Prioritize long-term customer trust over short-term engagement.",
+     "The goal is not neutrality. The goal is aligned judgment. When an agent's bias reflects your product strategy, it becomes an advantage rather than a risk: the agent starts catching the things your best product leader would catch, consistently, on every review."
+    ]
+   },
+   {
+    "n": 4,
+    "title": "Lesson 4: Embed the Agent in Real Product Moments",
+    "lines": [
+     "Agents fail when they exist outside the product lifecycle. They succeed when they're embedded into the moments where judgment matters most. Instead of asking the agent for answers, assign it a role in each moment.",
+     "The same agent at every product moment",
+     "Key idea: Assign it a role at each point. Don't wait for a single stage to ask it for answers."
+    ]
+   },
+   {
+    "n": 5,
+    "title": "Lesson 5: Maintain It as a Living System",
+    "lines": [
+     "Products evolve, and agents must evolve with them. Strong teams refresh agent context quarterly: remove outdated assumptions, add new customer insights, adjust the built-in bias as strategy changes. An outdated agent quietly reinforces old thinking and introduces risk: it's a confident voice arguing from last year's constraints.",
+     "The real advantage isn't automation. It's better product judgment at scale. Well-designed agents reduce cognitive load on senior leaders, increase consistency in decision quality, surface blind spots early, and enable speed without sacrificing thinking.",
+     "AI agents don't replace product leadership. They amplify it. The teams succeeding with agents aren't focused on automation. They're focused on improving judgment, which has always been the core of great product management. The future of product isn't just AI-powered. It's judgment-driven."
+    ]
+   }
+  ]
+ },
+ "strategy-experienced": {
+  "title": "Product Strategy & Roadmapping — Lots of Experience",
+  "lessons": [
+   {
+    "n": 1,
+    "title": "Lesson 1: The Roadmap Is Only as Good as Its Communication",
+    "lines": [
+     "A roadmap is only as effective as the communication plan around it. The same underlying roadmap has to be presented differently to different audiences, because they're each trying to answer a different question.",
+     "Engineers need the detailed view: epics, tasks, dependencies, and timing. Their question is \"what am I building and when?\"",
+     "Executives need the high-level view: themes, how each aligns to business goals, and the key risks with mitigations. Their question is \"is this the right bet and what could derail it?\"",
+     "Customers need the improvements view: what's coming that addresses their pain points or streamlines their workflow. Their question is \"what's in it for me and roughly when?\"",
+     "One roadmap, three audiences Each reader comes with a different question.",
+     "Key idea: One roadmap, three presentations. Skip the translation and a solid roadmap still leaves everyone confused.",
+     "One roadmap, three presentations. Skipping the translation is how a solid roadmap still leaves everyone confused."
+    ]
+   },
+   {
+    "n": 2,
+    "title": "Lesson 2: Transparency Builds Trust",
+    "lines": [
+     "Roadmaps change. Features get deprioritized, timelines slip, bets get abandoned. How you communicate those changes determines whether stakeholders keep trusting the roadmap at all.",
+     "Two practices:",
+     "Share changes proactively. Public roadmap updates through town halls, an advisory group, or a dedicated channel, so people hear about a shift from you, not through the grapevine.",
+     "Always explain the why. When you deprioritize something, give the rationale: what changed, what it's making room for, what trade-off you made. \"We're pushing X to fund Y because of Z\" preserves trust; a silent disappearance destroys it.",
+     "Being honest about setbacks and trade-offs, rather than only announcing wins, is what lets people rely on the roadmap when it matters."
+    ]
+   },
+   {
+    "n": 3,
+    "title": "Lesson 3: Holding Short-Term and Long-Term Together",
+    "lines": [
+     "The hardest part of managing a roadmap is balancing immediate demands (urgent user needs, a competitor move, a compliance deadline) against long-term strategic initiatives that only pay off later.",
+     "Holding short-term and long-term together Quarterly increments deliver now; each is checked against the long-term arc.",
+     "The long-term arc",
+     "Quarterly increments",
+     "Two mechanisms keep the two in balance:",
+     "Time-box long-term planning. Dedicated quarterly sessions to revisit long-term objectives and check whether the last quarter's short-term work actually moved toward them.",
+     "Run a quarterly roadmap review cadence. A standing rhythm for reviewing progress against long-term goals and adjusting based on results and feedback."
+    ]
+   },
+   {
+    "n": 4,
+    "title": "Lesson 4: Building Resilience In",
+    "lines": [
+     "An experienced roadmap owner assumes the landscape will shift (regulations, competitors, technology, priorities) and builds the roadmap so it can absorb that without being torn up. This is what \"adapting without losing the thread\" looks like in practice."
+    ]
+   },
+   {
+    "n": 5,
+    "title": "Lesson 5: Measure and Iterate",
+    "lines": [
+     "A roadmap isn't static. It evolves based on feedback, market shifts, and outcomes. To iterate it well, you need to actually measure whether it's working.",
+     "Roadmap KPIs that tell you something:",
+     "Time-to-market: how fast a theme moves from conception to release.",
+     "User satisfaction: the change in satisfaction after a significant roadmap initiative ships.",
+     "Revenue or cost impact: how a theme actually contributed to the financial goal it was mapped to.",
+     "Then close the loop: quarterly roadmap reviews to reassess priorities against progress, and retrospectives after major releases to capture what worked and what to change. A roadmap you measure and revise on a cadence is one you can adapt credibly, because the adjustments are evidence-based, not reactive.",
+     "Time-to-market is a good example of a KPI that responds to that cadence (or doesn't). Drag the slider across four quarters:"
+    ]
+   }
+  ]
+ },
+ "strategy-moderate": {
+  "title": "Product Strategy & Roadmapping — Moderate Experience",
+  "lessons": [
+   {
+    "n": 1,
+    "title": "Lesson 1: One Product, Several Different Pitches",
+    "lines": [
+     "Three buyers, three different pitches",
+     "Launching a product involves more than releasing a feature. It's about connecting with your audience, understanding the landscape, and positioning your product effectively. The first and most crucial step in any go-to-market strategy is defining your audience and positioning your product in a way that resonates with each part of it.",
+     "Most products are bought not by one person but by a small group of different people, each with a different stake in the decision. A user who loves your product's workflow is not the same person who approves the budget, who is not the same person who checks whether it integrates safely with what the company already runs. If your messaging only speaks to one of these people, the other two go unconvinced, and unconvinced people don't sign off."
+    ]
+   },
+   {
+    "n": 2,
+    "title": "Lesson 2: Value Propositions That Actually Land",
+    "lines": [
+     "Once you know who's in the room, the next step is saying something that actually matters to each of them. A value proposition needs to communicate how your product solves the specific problem faced by that specific persona, in language they'd actually use themselves.",
+     "For the end user, that's usually about time and friction: \"Streamline your work so you can focus on what matters.\" For the economic buyer, it's about cost and measurable return: \"Lower costs and improve efficiency with a fully integrated solution.\" For a technical evaluator, it's about risk: does this fit into what we already run, and can we trust it?",
+     "Value propositions that actually land One pitch, \"the most powerful platform on the market\", lands with no one.",
+     "The mistake many teams make is writing one value proposition and repeating it to everyone. It sounds efficient, but it usually lands with nobody, because it's specific to no one."
+    ]
+   },
+   {
+    "n": 3,
+    "title": "Lesson 3: Building the Launch Plan",
+    "lines": [
+     "Once your target market and messaging are defined, it's time to build the actual launch plan, covering communication, pricing, and how you'll actually reach people.",
+     "A communication plan outlines how you'll generate awareness: the marketing channels you'll use, a content strategy (case studies, whitepapers, real examples), and social proof like testimonials or pilot results that build trust before someone even talks to sales.",
+     "Pricing strategy needs just as much intention. A subscription model with tiered plans is the SaaS default for a reason: it aligns naturally with different customer segments. Usage-based pricing makes sense when your product's value scales directly with how much someone uses it. The wrong model doesn't just cost revenue. It can make a genuinely good product feel like a bad fit.",
+     "Choosing a pricing model",
+     "Price tracks the value delivered",
+     "Plans map to segments"
+    ]
+   },
+   {
+    "n": 4,
+    "title": "Lesson 4: Enabling Sales, Aligning the Rest of the Company",
+    "lines": [
+     "A go-to-market strategy is only as strong as the team executing it, and that extends past marketing into sales enablement and cross-functional alignment. Your sales team needs more than a pitch deck. They need product demos highlighting real differentiators, scripts and FAQs for handling common objections, and regular training to stay current as the product evolves.",
+     "But this can't stop at sales. Establish regular touchpoints between product, marketing, and sales so that messaging, positioning, and customer feedback all stay aligned. Without this, marketing ends up promising something sales can't sell, and sales ends up hearing about product changes from customers instead of from the product team."
+    ]
+   },
+   {
+    "n": 5,
+    "title": "Lesson 5: The Launch Isn't the Finish Line",
+    "lines": [
+     "Launching a product isn't the end. It's the beginning of the part that actually determines whether the strategy worked. Post-launch, track the metrics that matter: customer acquisition cost (what it costs to win a customer), customer lifetime value (what they're worth over time), and something like a Net Promoter Score to gauge whether people would actually recommend you.",
+     "From there, gather feedback through surveys, usability testing, and direct interviews, and use it to refine the product and the go-to-market approach together. Iteration should stay aligned with your original strategic goals, not just react to the loudest recent feedback."
+    ]
+   }
+  ]
+ },
+ "strategy-novice": {
+  "title": "Product Strategy & Roadmapping — Limited Experience",
+  "lessons": [
+   {
+    "n": 1,
+    "title": "Lesson 1: A Roadmap Is Not a Feature List",
+    "lines": [
+     "A roadmap is a strategic communication tool. Its job is to bridge the gap between where the product is going (the vision) and what the team does next (execution). A prioritized pile of requests doesn't do that job. It tells you what's next, but not why, or what it all adds up to.",
+     "The difference shows up in how you'd answer a simple question: \"Why is this on the roadmap?\"",
+     "Feature list answer: \"Three customers asked for it and it's not too hard.\"",
+     "Roadmap answer: \"It moves us toward [a specific direction the product is committed to], and here's the milestone it belongs to.\"",
+     "If you can't give the second kind of answer for most items, you have a backlog with a nice layout, not a roadmap."
+    ]
+   },
+   {
+    "n": 2,
+    "title": "Lesson 2: Strategic vs. Tactical",
+    "lines": [
+     "Roadmap work operates on two levels, and confusing them is where a lot of roadmaps go wrong.",
+     "Strategic vs tactical Two levels of planning, each kept in its own place.",
+     "KEY IDEA A roadmap crowded with tasks has stopped being strategic. Themes with nothing underneath are untethered.",
+     "Strategic planning defines the high-level themes and milestones that support the vision, like \"improve onboarding completion,\" \"reach enterprise readiness,\" \"cut time-to-value in half.\" That's what belongs on the roadmap.",
+     "Tactical planning breaks those themes into epics, features, and tasks for the development team. That's what belongs in the backlog and sprint plan.",
+     "A roadmap crowded with individual tasks has stopped being strategic. A roadmap of themes with no tactical breakdown underneath is untethered. You need both levels, kept in their own places."
+    ]
+   },
+   {
+    "n": 3,
+    "title": "Lesson 3: Link Every Theme to a Business Objective",
+    "lines": [
+     "A roadmap that reflects strategy is one where each theme maps to a specific business goal: revenue growth, market expansion, retention, or adoption. If you can't draw that line for a theme, it probably shouldn't be a theme.",
+     "Link every theme to a business objective",
+     "Key idea: If a theme's arrow lands on \"?\", it belongs in the backlog, not the roadmap.",
+     "Two moves make this real:",
+     "Map themes to objectives explicitly. Not \"improve the dashboard\" but \"improve the dashboard to reduce the support volume that's capping our margin.\" The objective is part of the theme's definition.",
+     "Get leadership buy-in on the mapping. Walk the leadership team through how each theme supports a strategic goal. Their agreement is what lets the roadmap survive the next reprioritization argument, because the priorities are already tied to goals everyone signed off on."
+    ]
+   },
+   {
+    "n": 4,
+    "title": "Lesson 4: Prioritizing the Themes",
+    "lines": [
+     "Even a strategy-linked roadmap has more themes than capacity. Prioritizing them is a systematic process, not a vibe."
+    ]
+   },
+   {
+    "n": 5,
+    "title": "Lesson 5: Realistic, Time-Bound Milestones",
+    "lines": [
+     "The last piece is milestones that are both realistic and time-bound. Milestones are how a theme stops being an aspiration and becomes something you can track: \"onboarding completion at 70% by end of Q2,\" not \"make onboarding better, ongoing.\"",
+     "\"Make onboarding better, ongoing.\"",
+     "\"Onboarding completion at 70% by the end of Q2.\"",
+     "When milestones are vague or fantasy-dated, strategy and execution drift apart: the roadmap says one thing, the team is doing another, and nobody notices for a quarter. A realistic, dated milestone is the checkpoint that catches the drift early.",
+     "Putting the whole course together: a real roadmap is themes tied to business objectives, prioritized systematically, broken into realistic time-bound milestones, and communicated as direction rather than a task list. That's the difference between \"we have a roadmap\" and \"we have a prioritized backlog.\""
+    ]
+   }
+  ]
+ }
+}

@@ -20,7 +20,8 @@
   var LINKS = [
     ["/lms-dashboard", "Home"],
     ["/my-learning", "My Learning"],
-    ["/my-tools", "My Toolkits"]
+    ["/my-tools", "My Toolkits"],
+    ["/listen", "Listen & watch"]
   ];
 
   // This page's clean address (/lms-dashboard, / for the assessment), whether it was opened as /lms-dashboard or /lms-dashboard.html.
@@ -279,6 +280,7 @@
     { g: "Go to", t: "Home", i: "⌂", u: "/lms-dashboard" },
     { g: "Go to", t: "My Learning", i: "▤", u: "/my-learning" },
     { g: "Go to", t: "My Toolkits", i: "◇", u: "/my-tools" },
+    { g: "Go to", t: "Listen & watch: every article, read aloud", i: "♪", u: "/listen" },
     { g: "Go to", t: "The training framework", i: "◆", u: "/framework" },
     { g: "Go to", t: "My Profile", i: "☺", u: "/profile" },
     { g: "Go to", t: "My Badges", i: "★", u: "/profile#badges" },
