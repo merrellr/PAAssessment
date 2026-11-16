@@ -31,6 +31,10 @@
     if (scn === 'removed') store['memberships/uDash'] = { orgId: 'orgA', orgName: 'Acme Health', role: 'member', status: 'removed', inviteToken: 't', joinedAt: Timestamp.now(), endedAt: Timestamp.now(), email: 'dash@acme.com', displayName: 'Dash User' };
     if (scn === 'removedold') store['memberships/uDash'] = { orgId: 'orgA', orgName: 'Acme Health', role: 'member', status: 'removed', inviteToken: 't', joinedAt: Timestamp.fromMillis(Date.now() - 400 * 864e5), endedAt: Timestamp.fromMillis(Date.now() - 90 * 864e5), email: 'dash@acme.com', displayName: 'Dash User' };
     if (scn === 'owner') store['platformAdmins/uDash'] = { note: 'owner' };
+    // an earlier assessment, so My growth can compare (discovery grew most, stakeholder dropped a little)
+    if (scn === 'growth') store['progress/uDash'].assessmentHistory = [
+      { assessmentId: 'dash-0', submittedAt: '2026-06-01T10:00:00.000Z', tier: 'Limited Experience', overallPct: 38,
+        categoryPct: { discovery: 15, strategy: 40, prioritization: 45, execution: 50, stakeholder: 68, aiIndividual: 30, aiOrg: 20 } }];
     // team assignments: one due tomorrow (2 of its 5 lessons done), one with no date, and a damaged entry that is ignored.
     // A removed member's company still has the list, but they must not see it.
     if (scn === 'assigned' || scn === 'removed'){

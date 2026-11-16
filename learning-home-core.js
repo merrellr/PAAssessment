@@ -66,5 +66,5 @@
     return (list || []).slice().sort((a, b) => ms(b) - ms(a)).slice(0, n || 3);
   }
 
-  root.LearningHomeCore = { doneIds, isComplete, nextLesson, resume, upNext, greeting, recentSaved };
+  root.LearningHomeCore = { doneIds, isComplete, nextLesson, courseCard, resume, upNext, greeting, recentSaved };
 })(typeof window !== 'undefined' ? window : globalThis);

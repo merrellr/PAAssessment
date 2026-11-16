@@ -140,6 +140,44 @@
   .assign-go:focus-visible{ outline: 2px solid var(--cyan); outline-offset: 2px; }
   @media (max-width: 600px){ .assign-row{ grid-template-columns: 1fr; } }
   @media (max-width: 600px){ .assign-go{ justify-self: start; } }
+  .home-card[hidden]{ display:none; }
+  @media (min-width: 901px){ .home-card.lead.wide{ grid-column: span 2; } }
+  .home-card.lead.wide{ flex-direction: row; flex-wrap: wrap; gap: 16px 24px; align-items: stretch; }
+  .step-main{ flex: 999 1 320px; min-width: 0; display:flex; flex-direction:column; gap: 6px; }
+  .step-side{ flex: 1 1 200px; min-width: 0; background: var(--tint); border-radius: 12px; padding: 14px 16px; display:flex; flex-direction:column; gap: 6px; }
+  .step-side b{ font-size: 0.8125rem; color: var(--navy-deep); }
+  .step-sub{ font-size: 0.75rem !important; color: var(--gray) !important; }
+  .growth-card{ margin-top: 14px; }
+  .growth-head{ display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center; gap: 10px; }
+  .growth-head h2{ font-family:var(--display); font-size: 1.15rem; color: var(--navy-deep); margin: 0; }
+  .growth-head p{ margin: 3px 0 0; font-size: 0.8125rem; color: var(--ink-soft); }
+  .growth-tabs{ display:flex; gap: 4px; background: var(--bg); border-radius: 22px; padding: 4px; }
+  .growth-tabs button{ min-height: 40px; padding: 0 16px; border: 0; border-radius: 18px; font: 700 0.8125rem var(--sans); cursor: pointer; background: transparent; color: var(--ink-soft); }
+  .growth-tabs button[aria-pressed="true"]{ background: var(--navy); color: var(--btn-ink); }
+  .growth-legend{ display:flex; flex-wrap:wrap; gap: 16px; margin: 14px 0 4px; font-size: 0.75rem; color: var(--ink-soft); }
+  .growth-legend span{ display:inline-flex; align-items:center; gap: 6px; }
+  .g-dot-then{ width: 10px; height: 10px; border-radius: 50%; border: 2px solid var(--gray); background: var(--surface); }
+  .g-dot-now{ width: 14px; height: 14px; border-radius: 50%; background: var(--navy); }
+  .growth-row{ display:grid; grid-template-columns: minmax(130px, 220px) minmax(0, 1fr) 54px; gap: 14px; align-items:center; padding: 9px 0; border-top: 1px solid var(--line); }
+  .growth-row .g-name{ font-size: 0.8125rem; font-weight: 700; color: var(--ink); }
+  .growth-row .g-track{ position: relative; height: 22px; }
+  .growth-row .g-track::before{ content:''; position:absolute; left:0; right:0; top:10px; height:2px; background: var(--line); }
+  .growth-row .g-bar{ position:absolute; top:9px; height:4px; border-radius:2px; background: var(--cyan); }
+  .growth-row .g-then{ position:absolute; top:4px; width:10px; height:10px; margin-left:-7px; border-radius:50%; border:2px solid var(--gray); background: var(--surface); }
+  .growth-row .g-now{ position:absolute; top:3px; width:16px; height:16px; margin-left:-8px; border-radius:50%; background: var(--navy); }
+  .growth-row .g-delta{ text-align:right; font-weight: 900; font-size: 0.875rem; color: var(--ink-soft); }
+  .growth-row .g-delta.up{ color: var(--ok); }
+  .growth-axis{ display:flex; justify-content:space-between; font-size: 0.6875rem; color: var(--gray); margin: 2px 68px 0 calc(min(220px, 30%) + 14px); }
+  .growth-note{ margin: 12px 0 0; font-size: 0.8125rem; color: var(--ink-soft); line-height: 1.5; }
+  .growth-note b{ color: var(--navy-deep); }
+  .growth-spark{ display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; margin-top: 12px; }
+  .growth-spark > div{ border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; }
+  .growth-spark .gs-top{ display:flex; justify-content:space-between; gap: 8px; font-size: 0.8125rem; font-weight: 700; }
+  .growth-spark .gs-top .up{ color: var(--ok); }
+  .growth-spark .gs-foot{ display:flex; justify-content:space-between; font-size: 0.6875rem; color: var(--gray); }
+  .growth-retake{ display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap: 10px; margin-top: 14px; padding: 12px 14px; border-radius: 12px; background: var(--tint); font-size: 0.8125rem; color: var(--ink-soft); }
+  .growth-retake a{ font-weight: 700; color: var(--navy); }
+  @media (max-width: 600px){ .growth-row{ grid-template-columns: 1fr 44px; } .growth-row .g-track{ grid-column: 1 / -1; grid-row: 2; } .growth-axis{ margin: 2px 0 0; } }
   .home-grid{ display:grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
   @media (max-width: 900px){ .home-grid{ grid-template-columns: 1fr; } }
   .home-card{ background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 18px; display:flex; flex-direction:column; gap: 6px; min-width: 0;
@@ -311,6 +349,8 @@
 <script src="analytics.js"></script>
 <script src="learning-home-core.js"></script>
 <script src="assignments-core.js"></script>
+<script src="assessment-history.js"></script>
+<script src="growth-core.js"></script>
 <script src="saved-tools-core.js"></script>
 </head>
 <body>
@@ -552,6 +592,7 @@
         <div class="home-card" id="homeNext"></div>
         <div class="home-card" id="homeTools"></div>
       </div>
+      <div class="card growth-card" id="growthPanel" hidden></div>
       <div class="home-row2">
         <a class="card rt-tile" id="targetTile" href="/profile#targets" hidden></a>
     <div class="card refresher" id="spacedReviewCard" style="display:none;">
@@ -1113,15 +1154,17 @@ async function fetchTeamAssignments(user){
   }
 }
 
-async function renderTeamAssignments(user, progress){
+function teamAssignmentCards(items, progress){
   const A = window.AssignmentsCore;
-  const boxes = [document.getElementById('assignedHome'), document.getElementById('assignedLearning')];
-  if (!A) return;
-  const items = await fetchTeamAssignments(user);
+  if (!A) return [];
   const known = {};
   Object.keys(CATALOG).forEach(id => { known[id] = CATALOG[id].lessons.length; });
   const d = new Date(), today = new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 10);
-  const cards = A.forLearner(items, progress, CATALOG, known, today);
+  return A.forLearner(items, progress, CATALOG, known, today);
+}
+
+function renderTeamAssignments(cards){
+  const boxes = [document.getElementById('assignedHome'), document.getElementById('assignedLearning')];
   if (!cards.length){ boxes.forEach(b => { b.hidden = true; b.innerHTML = ''; }); return; }
   const esc = (t) => String(t).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
   const left = cards.filter(c => !c.finished).length;
@@ -1433,8 +1476,10 @@ async function loadDashboard(user){
   renderSpacedReview(progress);
   renderProfilePrompt(progress);
   const recommended = assessmentResult ? renderRecommendations(assessmentResult, progress, await fetchCompanyFocus(user)) : [];
-  renderHome(user, progress, assessmentResult, recommended, assessmentUrl);
-  renderTeamAssignments(user, progress);
+  const assignedCards = teamAssignmentCards(await fetchTeamAssignments(user), progress);
+  renderHome(user, progress, assessmentResult, recommended, assessmentUrl, assignedCards);
+  renderTeamAssignments(assignedCards);
+  renderGrowth(progress);
   renderAssignedStat(progress, assessmentResult);
   renderWeekGoal(progress);
   renderBadges(user, progress, assessmentResult);
@@ -2507,7 +2552,7 @@ function renderRecommendations(result, progress, companyFocus){
 /* The top of the page, "Pick up where you left off": the course in progress (and the lesson to open next), the
    next recommended course (or the assessment, before there is one), and the newest saved tools. The choices are
    made in learning-home-core.js. */
-function renderHome(user, progress, assessmentResult, recommended, assessmentUrl){
+function renderHome(user, progress, assessmentResult, recommended, assessmentUrl, assignedCards){
   const H = window.LearningHomeCore;
   if (!H) return;
   const esc = (t) => String(t).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
@@ -2523,13 +2568,27 @@ function renderHome(user, progress, assessmentResult, recommended, assessmentUrl
   const resume = H.resume(progress, CATALOG);
   const first = resume || (assessmentResult ? H.upNext(recommended, progress, CATALOG, '') : null);
   const next = assessmentResult ? H.upNext(recommended, progress, CATALOG, first && first.courseId) : null;
+  // One ordered list of next steps (growth-core.js): the best one fills the wide card, with what comes after it.
+  const G = window.GrowthCore;
+  const upCards = assessmentResult ? (recommended || []).filter(cid => CATALOG[cid] && !H.isComplete(progress, CATALOG, cid)).map(cid => H.courseCard(progress, CATALOG, cid)) : [];
+  const steps = G ? G.nextSteps(resume, assignedCards || [], upCards) : [];
 
   document.getElementById('homeHello').textContent = H.greeting(user.displayName, new Date().getHours());
   document.getElementById('homeSub').textContent = resume ? 'Pick up where you left off, or see what is next for you.'
     : assessmentResult ? 'Here is the best place to start, from your assessment.' : 'Start with the skill assessment, and we will build your course plan.';
 
   const a = document.getElementById('homeResume');
-  if (resume){
+  a.classList.toggle('wide', steps.length > 0);
+  if (steps.length){
+    const s = steps[0], after = steps[1];
+    a.innerHTML = '<div class="step-main"><span class="eyebrow">Your next best step</span>' +
+      '<h2>Lesson ' + s.next + ' of ' + s.total + ': ' + esc(s.title) + '</h2><p>' + esc(s.why) + '</p>' +
+      (s.done ? bar(s) + '<p class="step-sub">' + s.done + ' of ' + s.total + ' lessons done' + (s.due && s.kind === 'assigned' ? ' · ' + esc(s.due) : '') + '</p>' : (s.due && s.kind === 'assigned' ? '<p class="step-sub">' + esc(s.due) + '</p>' : '')) +
+      go(href(s), (s.done ? 'Continue with lesson ' : 'Start lesson ') + s.next + ' →') + '</div>' +
+      '<div class="step-side"><b>After that</b><p>' + (after
+        ? esc(after.title) + ', lesson ' + after.next + '. ' + esc(after.why)
+        : 'Browse every course, or retake the assessment to refresh your plan.') + '</p></div>';
+  } else if (resume){
     const when = ago(resume.updatedAt);
     a.innerHTML = courseBody('Continue where you left off', resume, 'Lesson ' + resume.next + ' of ' + resume.total + ' is next. ' + resume.done + ' of ' + resume.total + ' lessons done' + (when ? ', last studied ' + when : '') + '.');
   } else if (first){
@@ -2543,7 +2602,10 @@ function renderHome(user, progress, assessmentResult, recommended, assessmentUrl
   }
 
   const b = document.getElementById('homeNext');
-  if (next){
+  b.hidden = steps.length > 0;
+  if (steps.length){
+    b.innerHTML = '';
+  } else if (next){
     b.innerHTML = courseBody('Up next for you', next, 'Recommended from your assessment, in ' + esc(area(next)) + '. ' + (next.done ? next.done + ' of ' + next.total + ' lessons done.' : next.total + ' short lessons.'));
   } else if (!assessmentResult && resume){
     b.innerHTML = '<span class="eyebrow">Up next for you</span><h2>Get a personal course plan</h2><p>Take the skill assessment and we will recommend what to learn next, starting with your biggest gaps.</p>' +
@@ -2557,6 +2619,50 @@ function renderHome(user, progress, assessmentResult, recommended, assessmentUrl
 
   renderHomeTools(user);
   document.getElementById('homeBand').hidden = false;
+}
+
+/* My growth (growth-core.js): the first assessment with area scores against the latest, area by area, and every
+   attempt over time. One attempt: the starting point, and when a retake will show growth. */
+let growthView = 'then';
+function renderGrowth(progress){
+  const box = document.getElementById('growthPanel'), G = window.GrowthCore, AH = window.AssessHistory;
+  if (!box || !G || !AH) return;
+  const doms = Object.keys(DOMAINS).map(k => [k, DOMAINS[k].label]);
+  const g = G.growth(AH.list(progress), doms, Date.now());
+  if (g.state === 'none'){ box.hidden = true; box.innerHTML = ''; return; }
+  const esc = (t) => String(t).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  const two = g.state === 'two', view = two ? growthView : 'then';
+  const retakeHref = document.getElementById('takeAssessmentLink').href;
+  let html = '<div class="growth-head"><div><h2>' + (two ? 'My growth' : 'Your starting point') + '</h2><p>' +
+    (two ? 'Your ' + G.monthLabel(g.firstAt) + ' assessment compared with ' + G.monthLabel(g.latestAt) + '. Overall ' + g.overallThen + ' → ' + g.overallNow + '.'
+         : 'Your scores from ' + G.monthLabel(g.firstAt) + '. Retake the assessment later to see how much you have grown.') + '</p></div>' +
+    (two ? '<div class="growth-tabs" role="group" aria-label="Chart view"><button type="button" data-gview="then" aria-pressed="' + (view === 'then') + '">Then vs now</button>' +
+      '<button type="button" data-gview="trend" aria-pressed="' + (view === 'trend') + '">Over time</button></div>' : '') + '</div>';
+  if (view === 'then'){
+    html += '<div class="growth-legend">' + (two ? '<span><span class="g-dot-then"></span>' + esc(G.monthLabel(g.firstAt)) + '</span>' : '') +
+      '<span><span class="g-dot-now"></span>' + esc(G.monthLabel(g.latestAt)) + '</span>' + (two ? '<span>Sorted by how much you grew</span>' : '') + '</div>';
+    g.areas.forEach(a => {
+      const lo = Math.min(a.then, a.now), w = Math.abs(a.now - a.then);
+      const label = a.label + ': ' + (two ? a.then + ' then, ' + a.now + ' now' : a.now);
+      html += '<div class="growth-row"><div class="g-name">' + esc(a.label) + '</div><div class="g-track" role="img" aria-label="' + esc(label) + '">' +
+        (two ? '<span class="g-bar" style="left:' + lo + '%;width:' + w + '%"></span><span class="g-then" style="left:' + a.then + '%"></span>' : '') +
+        '<span class="g-now" style="left:' + a.now + '%"></span></div>' +
+        '<div class="g-delta' + (two && a.delta >= 10 ? ' up' : '') + '">' + (two ? (a.delta > 0 ? '+' : '') + a.delta : a.now) + '</div></div>';
+    });
+    html += '<div class="growth-axis" aria-hidden="true"><span>0</span><span>50</span><span>100</span></div>';
+    if (two) html += '<p class="growth-note">' + (g.biggest ? '<b>Your biggest jump:</b> ' + esc(g.biggest.label) + ' (+' + g.biggest.delta + '). ' : '') +
+      (g.gap ? '<b>Still your gap:</b> ' + esc(g.gap.label) + ', at ' + g.gap.now + '. It is where you have the most room to grow.' : '') + '</p>';
+    else if (g.gap) html += '<p class="growth-note"><b>Your biggest opportunity:</b> ' + esc(g.gap.label) + ', at ' + g.gap.now + '. Your plan starts there.</p>';
+  } else {
+    html += '<div class="growth-spark">' + g.areas.map(a => '<div><div class="gs-top"><span>' + esc(a.label) + '</span><span class="' + (a.delta >= 10 ? 'up' : '') + '">' + (a.delta > 0 ? '+' : '') + a.delta + '</span></div>' +
+      '<svg width="100%" height="56" viewBox="0 0 200 56" preserveAspectRatio="none" role="img" aria-label="' + esc(a.label + ': ' + a.series.map(p => p.v).join(', ')) + '"><polyline points="' + G.sparkPoints(a.series, 200, 56) + '" fill="none" stroke="var(--navy)" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/></svg>' +
+      '<div class="gs-foot"><span>' + esc(G.monthLabel(g.firstAt)) + ' ' + a.then + '</span><span>' + esc(G.monthLabel(g.latestAt)) + ' ' + a.now + '</span></div></div>').join('') + '</div>';
+  }
+  if (g.retake.due) html += '<div class="growth-retake"><span>It has been ' + g.retake.daysSince + ' days since your last assessment. A retake shows how far you have come.</span><a href="' + esc(retakeHref) + '">Retake the assessment →</a></div>';
+  else if (!two && g.retake.inDays !== null) html += '<div class="growth-retake"><span>Keep learning: a retake in about ' + g.retake.inDays + ' days will show your growth here.</span></div>';
+  box.innerHTML = html;
+  box.hidden = false;
+  box.querySelectorAll('[data-gview]').forEach(btn => btn.addEventListener('click', () => { growthView = btn.getAttribute('data-gview'); renderGrowth(progress); }));
 }
 
 async function renderHomeTools(user){

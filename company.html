@@ -102,6 +102,34 @@
   .stackbar span{ display:block; height:100%; }
   .legend{ display:flex; flex-wrap:wrap; gap: 6px 16px; font-size: 0.7812rem; color: var(--ink-soft); }
   .legend i{ display:inline-block; width:10px; height:10px; border-radius:3px; margin-right:6px; vertical-align:-1px; }
+  .hm-layout{ display:flex; flex-wrap:wrap; gap: 18px; align-items:flex-start; margin-top: 12px; }
+  .hm-main{ flex: 999 1 560px; min-width: 0; }
+  .hm-side{ flex: 1 1 240px; min-width: 0; display:flex; flex-direction:column; gap: 12px; }
+  .hm-wrap{ overflow-x:auto; }
+  .hm{ border-collapse: separate; border-spacing: 3px; width: 100%; min-width: 640px; font-size: 0.8125rem; }
+  .hm th{ font-weight: 700; color: var(--ink-soft); }
+  .hm th.hm-person{ text-align:left; padding: 4px 6px; white-space: nowrap; color: var(--ink); }
+  .hm th.hm-person span{ display:block; font-weight: 400; font-size: 0.6875rem; color: var(--gray); }
+  .hm thead button{ width:100%; min-height: 40px; padding: 4px; border: 0; border-radius: 8px; background: transparent; font: 700 0.75rem var(--sans); color: var(--ink); cursor: pointer; }
+  .hm thead button[aria-pressed="true"]{ background: var(--tint); color: var(--navy); }
+  .hm thead button small{ display:block; font-weight: 400; font-size: 0.625rem; color: var(--gray); }
+  .hm td{ text-align:center; font-weight: 700; border-radius: 6px; padding: 9px 0; min-width: 54px; }
+  .hm td.hm-b0{ background:#eef3fb; color:#12305e; } .hm td.hm-b1{ background:#cddcf3; color:#12305e; } .hm td.hm-b2{ background:#9dbbe8; color:#12305e; }
+  .hm td.hm-b3{ background:#3466c0; color:#ffffff; } .hm td.hm-b4{ background:#12305e; color:#ffffff; }
+  .hm td.hm-none{ background: var(--bg); color: var(--gray); font-weight: 400; }
+  .hm tr.hm-avg th, .hm tr.hm-avg td.hm-plain{ border-top: 2px solid var(--line); padding-top: 9px; color: var(--navy); }
+  .hm td.hm-plain{ background: none; color: var(--ink); }
+  .hm tr.hm-avg td, .hm tr.hm-avg th{ border-radius: 0; }
+  .hm-legend{ display:flex; flex-wrap:wrap; align-items:center; gap: 6px; margin-top: 10px; font-size: 0.75rem; color: var(--ink-soft); }
+  .hm-legend span{ padding: 3px 8px; border-radius: 6px; }
+  .hm-call{ border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; background: var(--surface); }
+  .hm-call .eyebrow{ font-size: 0.6875rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; }
+  .hm-call.gap .eyebrow{ color: var(--warn); } .hm-call.strength .eyebrow{ color: var(--ok); }
+  .hm-call strong{ display:block; font-family: var(--display); color: var(--navy); margin: 4px 0; }
+  .hm-call p{ margin: 0 0 8px; font-size: 0.8125rem; color: var(--ink-soft); line-height: 1.5; }
+  .seg-toggle{ display:inline-flex; gap: 3px; background: var(--bg); border-radius: 20px; padding: 3px; }
+  .seg-toggle button{ min-height: 36px; padding: 0 14px; border: 0; border-radius: 17px; background: transparent; font: 700 0.75rem var(--sans); color: var(--ink-soft); cursor: pointer; }
+  .seg-toggle button[aria-pressed="true"]{ background: var(--navy); color: #ffffff; }
   .assign-item{ border-top: 1px solid var(--line); padding: 14px 0 4px; }
   .assign-item:first-child{ border-top: 0; padding-top: 4px; }
   .assign-head{ display:flex; flex-wrap:wrap; align-items:center; gap: 8px 10px; margin-bottom: 8px; }
@@ -294,6 +322,23 @@
           <button class="btn btn-ghost btn-small" id="focusResetBtn" type="button">Reset to default order</button>
           <button class="btn btn-ghost btn-small" id="focusCancelBtn" type="button">Cancel</button>
         </div>
+      </div>
+    </div>
+
+    <div class="card" id="skillsGridCard">
+      <div class="section-head">
+        <div>
+          <h2>Team skills</h2>
+          <div class="hint" style="margin:4px 0 0;" id="skillsGridHint">Each person's latest score in each skill area (0 to 100). Click an area to sort by it, lowest first.</div>
+        </div>
+        <div class="seg-toggle" role="group" aria-label="Show">
+          <button type="button" id="gridByPerson" aria-pressed="true">By person</button>
+          <button type="button" id="gridTeamOnly" aria-pressed="false">Team only</button>
+        </div>
+      </div>
+      <div class="hm-layout">
+        <div class="hm-main" id="skillsGrid"></div>
+        <div class="hm-side" id="skillsCallouts"></div>
       </div>
     </div>
 
@@ -996,6 +1041,7 @@ function renderFocus(){
 function localToday(){ const d = new Date(); return new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 10); }
 
 function renderAssignments(){
+  if (typeof gridView !== 'undefined') renderSkillsGrid();   // the gap's "Already assigned" follows the list
   $('assignAddBtn').style.display = isArchived() ? 'none' : 'inline-block';
   const box = $('assignList');
   box.innerHTML = '';
@@ -1057,16 +1103,94 @@ function fillAssignCourses(){
   });
 }
 
-$('assignAddBtn').addEventListener('click', () => {
+function openAssignForm(preset){
   fillAssignCourses();
+  if (preset) $('assignCourse').value = preset;
   $('assignDue').value = '';
   $('assignDue').min = localToday();
   $('assignNote').value = '';
   $('assignError').textContent = '';
   $('assignForm').style.display = 'block';
   $('assignAddBtn').style.display = 'none';
-  $('assignCourse').focus();
-});
+  if (preset) $('assignCard').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  (preset ? $('assignDue') : $('assignCourse')).focus();
+}
+$('assignAddBtn').addEventListener('click', () => openAssignForm(''));
+
+/* ---------------------------------------------------------- team skills */
+// The heat map (company-core.js skillGrid): by person, or team averages only (for sharing a screen, or
+// when comparing people isn't the point).
+let gridSort = -1, gridView = 'person';
+const GRID_SHORT = { discovery: 'Discovery', strategy: 'Strategy', prioritization: 'Prioritization', execution: 'Execution', stakeholder: 'Stakeholders', aiIndividual: 'AI: Individual', aiOrg: 'AI: Org' };
+function renderSkillsGrid(){
+  const g = C.skillGrid(activeRows(), gridSort);
+  $('gridByPerson').setAttribute('aria-pressed', String(gridView === 'person'));
+  $('gridTeamOnly').setAttribute('aria-pressed', String(gridView === 'team'));
+  $('skillsGridHint').textContent = gridView === 'person'
+    ? "Each person's latest score in each skill area (0 to 100). Click an area to sort by it, lowest first."
+    : 'Team averages only, with no names: handy when you share your screen.';
+  const box = $('skillsGrid'), side = $('skillsCallouts');
+  box.innerHTML = ''; side.innerHTML = '';
+  if (!g.people.length){
+    box.appendChild(el('p', { class: 'empty', text: 'This fills in as people take the assessment.' }));
+    return;
+  }
+  const cell = (v) => el('td', { class: v === null ? 'hm-none' : 'hm-b' + C.scoreBand(v), text: v === null ? '—' : String(v) });
+  const table = el('table', { class: 'hm' });
+  if (gridView === 'person'){
+    const head = el('tr', null, el('th', { scope: 'col', class: 'hm-person', text: 'Person' }));
+    g.areas.forEach((a, i) => {
+      const b = el('button', { type: 'button', 'aria-pressed': String(gridSort === i), title: a.label },
+        GRID_SHORT[a.key] || a.label, el('small', { text: gridSort === i ? 'lowest first' : 'sort' }));
+      b.addEventListener('click', () => { gridSort = gridSort === i ? -1 : i; renderSkillsGrid(); });
+      head.appendChild(el('th', { scope: 'col' }, b));
+    });
+    head.appendChild(el('th', { scope: 'col', text: 'Overall' }));
+    table.appendChild(el('thead', null, head));
+    const body = el('tbody');
+    g.people.forEach(p => {
+      const tr = el('tr', null, el('th', { scope: 'row', class: 'hm-person', text: p.name }));
+      p.scores.forEach(v => tr.appendChild(cell(v)));
+      tr.appendChild(el('td', { class: 'hm-plain', text: p.overall === null || p.overall === undefined ? '—' : String(p.overall) }));
+      body.appendChild(tr);
+    });
+    const avg = el('tr', { class: 'hm-avg' }, el('th', { scope: 'row', class: 'hm-person', text: 'Team average' }));
+    g.areas.forEach(a => avg.appendChild(el('td', { class: 'hm-plain', text: a.avg === null ? '—' : String(a.avg) })));
+    avg.appendChild(el('td', { class: 'hm-plain', text: g.overallAvg === null ? '—' : String(g.overallAvg) }));
+    body.appendChild(avg);
+    table.appendChild(body);
+  } else {
+    table.appendChild(el('thead', null, el('tr', null,
+      el('th', { scope: 'col', class: 'hm-person', text: 'Skill area' }), el('th', { scope: 'col', text: 'Team average' }),
+      el('th', { scope: 'col', text: 'Below 40' }), el('th', { scope: 'col', text: '70 or more' }))));
+    const body = el('tbody');
+    g.areas.forEach(a => body.appendChild(el('tr', null, el('th', { scope: 'row', class: 'hm-person', text: a.label }),
+      cell(a.avg), el('td', { class: 'hm-plain', text: plural(a.below40, 'person', 'people') }), el('td', { class: 'hm-plain', text: plural(a.above70, 'person', 'people') }))));
+    table.appendChild(body);
+  }
+  box.appendChild(el('div', { class: 'hm-wrap' }, table));
+  const legend = el('div', { class: 'hm-legend' }, el('span', { text: 'Score' }));
+  [['0 to 24', '#eef3fb', '#12305e'], ['25 to 39', '#cddcf3', '#12305e'], ['40 to 54', '#9dbbe8', '#12305e'], ['55 to 69', '#3466c0', '#ffffff'], ['70 and up', '#12305e', '#ffffff']]
+    .forEach(x => legend.appendChild(el('span', { style: 'background:' + x[1] + ';color:' + x[2] + ';', text: x[0] })));
+  box.appendChild(legend);
+  if (g.notAssessed) box.appendChild(el('p', { class: 'cell-sub', style: 'margin-top:8px;', text: plural(g.notAssessed, 'person hasn\'t', 'people haven\'t') + ' taken the assessment yet, so ' + (g.notAssessed === 1 ? 'isn\'t' : 'aren\'t') + ' shown.' }));
+
+  if (g.gap){
+    const taken = data.assignments.some(x => x.course === g.gapCourse);
+    const btn = isArchived() ? null : el('button', { class: 'btn btn-primary btn-small', type: 'button', text: taken ? 'Already assigned' : 'Assign a course for this gap' });
+    if (btn){ if (taken) btn.disabled = true; else btn.addEventListener('click', () => openAssignForm(g.gapCourse)); }
+    side.appendChild(el('div', { class: 'hm-call gap' }, el('div', { class: 'eyebrow', text: 'Biggest team gap' }), el('strong', { text: g.gap.label }),
+      el('p', { text: 'Team average ' + g.gap.avg + '. ' + g.gap.below40 + ' of ' + g.gap.n + ' ' + (g.gap.n === 1 ? 'person is' : 'people are') + ' below 40. Suggested course: ' + C.prettyCourseId(g.gapCourse) + '.' }), btn));
+  }
+  if (g.strength && g.strength.key !== (g.gap && g.gap.key)){
+    side.appendChild(el('div', { class: 'hm-call strength' }, el('div', { class: 'eyebrow', text: 'Team strength' }), el('strong', { text: g.strength.label }),
+      el('p', { text: 'Team average ' + g.strength.avg + '.' + (gridView === 'person' && g.mentors.length ? ' ' + g.mentors.join(' and ') + ' could help others here.' : '') })));
+  }
+  side.appendChild(el('div', { class: 'hm-call' }, el('strong', { text: 'Reading the grid' }),
+    el('p', { text: 'Look down a column for a team-wide gap (a course for everyone), and across a row for one person\'s plan (a one-to-one conversation).' })));
+}
+$('gridByPerson').addEventListener('click', () => { gridView = 'person'; renderSkillsGrid(); });
+$('gridTeamOnly').addEventListener('click', () => { gridView = 'team'; renderSkillsGrid(); });
 $('assignCancelBtn').addEventListener('click', () => {
   $('assignForm').style.display = 'none';
   $('assignAddBtn').style.display = isArchived() ? 'none' : 'inline-block';
