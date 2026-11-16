@@ -1,0 +1,712 @@
+{
+ "aiIndividual-advanced-1": {
+  "duration": 65.0,
+  "bytes": 390445,
+  "hash": "d50fc2ea4043ad70"
+ },
+ "aiIndividual-advanced-2": {
+  "duration": 65.4,
+  "bytes": 393194,
+  "hash": "2d025c9be383b199"
+ },
+ "aiIndividual-advanced-3": {
+  "duration": 78.3,
+  "bytes": 470243,
+  "hash": "dc212adfc2766d2d"
+ },
+ "aiIndividual-advanced-4": {
+  "duration": 75.7,
+  "bytes": 454826,
+  "hash": "4c49d21a81b6ee0a"
+ },
+ "aiIndividual-advanced-5": {
+  "duration": 65.0,
+  "bytes": 390444,
+  "hash": "39d7f1c3caa358d0"
+ },
+ "aiIndividual-experienced-1": {
+  "duration": 61.8,
+  "bytes": 371741,
+  "hash": "9b1b4c485e7d4d8e"
+ },
+ "aiIndividual-experienced-2": {
+  "duration": 95.7,
+  "bytes": 574916,
+  "hash": "e1c2da6a0789c592"
+ },
+ "aiIndividual-experienced-3": {
+  "duration": 74.6,
+  "bytes": 448057,
+  "hash": "f08cae2520aa10c7"
+ },
+ "aiIndividual-experienced-4": {
+  "duration": 60.6,
+  "bytes": 364528,
+  "hash": "c1ed9f8ed87262d2"
+ },
+ "aiIndividual-experienced-5": {
+  "duration": 22.6,
+  "bytes": 136157,
+  "hash": "e3323972f8b68f31"
+ },
+ "aiIndividual-experienced-6": {
+  "duration": 76.7,
+  "bytes": 461027,
+  "hash": "8c4f44992029c927"
+ },
+ "aiIndividual-moderate-1": {
+  "duration": 78.7,
+  "bytes": 472808,
+  "hash": "384a1542a3af8852"
+ },
+ "aiIndividual-moderate-2": {
+  "duration": 43.7,
+  "bytes": 263013,
+  "hash": "dec68db867d71984"
+ },
+ "aiIndividual-moderate-3": {
+  "duration": 88.1,
+  "bytes": 529280,
+  "hash": "13725232bfa914c3"
+ },
+ "aiIndividual-moderate-4": {
+  "duration": 62.9,
+  "bytes": 378074,
+  "hash": "c94612db43f5c217"
+ },
+ "aiIndividual-moderate-5": {
+  "duration": 59.4,
+  "bytes": 357030,
+  "hash": "a06a73ec7d7e5685"
+ },
+ "aiIndividual-novice-1": {
+  "duration": 52.0,
+  "bytes": 312834,
+  "hash": "4f9b984bd5a95238"
+ },
+ "aiIndividual-novice-2": {
+  "duration": 39.2,
+  "bytes": 235930,
+  "hash": "02cdc444e0ac2669"
+ },
+ "aiIndividual-novice-3": {
+  "duration": 15.7,
+  "bytes": 94669,
+  "hash": "73369cfb117d98cb"
+ },
+ "aiIndividual-novice-4": {
+  "duration": 78.4,
+  "bytes": 471237,
+  "hash": "5bc5a2dc1872fc62"
+ },
+ "aiIndividual-novice-5": {
+  "duration": 30.3,
+  "bytes": 182500,
+  "hash": "bfdeaa0b01eeb090"
+ },
+ "aiOrg-advanced-1": {
+  "duration": 65.7,
+  "bytes": 395048,
+  "hash": "503d9b2b4487c7b7"
+ },
+ "aiOrg-advanced-2": {
+  "duration": 55.0,
+  "bytes": 330557,
+  "hash": "3f1571e58fc31967"
+ },
+ "aiOrg-advanced-3": {
+  "duration": 89.2,
+  "bytes": 536176,
+  "hash": "c843e38a592ba3a6"
+ },
+ "aiOrg-advanced-4": {
+  "duration": 76.8,
+  "bytes": 461579,
+  "hash": "cdb3f9c16e2d9e0e"
+ },
+ "aiOrg-advanced-5": {
+  "duration": 63.1,
+  "bytes": 379511,
+  "hash": "35b7d6ee3d737b7d"
+ },
+ "aiOrg-experienced-1": {
+  "duration": 74.3,
+  "bytes": 446177,
+  "hash": "5c96dc5f52d52cf8"
+ },
+ "aiOrg-experienced-2": {
+  "duration": 86.7,
+  "bytes": 521074,
+  "hash": "31f9965102240890"
+ },
+ "aiOrg-experienced-3": {
+  "duration": 62.0,
+  "bytes": 373036,
+  "hash": "3ccdbd0159eeb7df"
+ },
+ "aiOrg-experienced-4": {
+  "duration": 35.3,
+  "bytes": 212777,
+  "hash": "d36f7764e62f78a4"
+ },
+ "aiOrg-experienced-5": {
+  "duration": 53.3,
+  "bytes": 320482,
+  "hash": "01a86194023acf41"
+ },
+ "aiOrg-experienced-6": {
+  "duration": 67.3,
+  "bytes": 404431,
+  "hash": "8589b82784c3b2a4"
+ },
+ "aiOrg-moderate-1": {
+  "duration": 68.7,
+  "bytes": 412782,
+  "hash": "6ce471c088b53079"
+ },
+ "aiOrg-moderate-2": {
+  "duration": 47.4,
+  "bytes": 285054,
+  "hash": "4ecd93ecdead54aa"
+ },
+ "aiOrg-moderate-3": {
+  "duration": 75.6,
+  "bytes": 454544,
+  "hash": "731bf14a381b74ef"
+ },
+ "aiOrg-moderate-4": {
+  "duration": 25.6,
+  "bytes": 154577,
+  "hash": "3486b6570c8edd95"
+ },
+ "aiOrg-moderate-5": {
+  "duration": 66.3,
+  "bytes": 398361,
+  "hash": "cdd2cd6aabe7722b"
+ },
+ "aiOrg-novice-1": {
+  "duration": 77.9,
+  "bytes": 467936,
+  "hash": "d5896642e62b143a"
+ },
+ "aiOrg-novice-2": {
+  "duration": 63.4,
+  "bytes": 380952,
+  "hash": "1bbf55bdaa1961a3"
+ },
+ "aiOrg-novice-3": {
+  "duration": 72.2,
+  "bytes": 433654,
+  "hash": "b08a43bdb7ba1fc1"
+ },
+ "aiOrg-novice-4": {
+  "duration": 43.1,
+  "bytes": 259279,
+  "hash": "9b25ce1dcd03f6a8"
+ },
+ "aiOrg-novice-5": {
+  "duration": 86.5,
+  "bytes": 519488,
+  "hash": "7ecd5e9337ec1e94"
+ },
+ "discovery-advanced-1": {
+  "duration": 58.5,
+  "bytes": 351852,
+  "hash": "1e5194832023b292"
+ },
+ "discovery-advanced-2": {
+  "duration": 68.7,
+  "bytes": 413061,
+  "hash": "4a654498b62d8544"
+ },
+ "discovery-advanced-3": {
+  "duration": 72.8,
+  "bytes": 437405,
+  "hash": "2b39f8ea6e178210"
+ },
+ "discovery-advanced-4": {
+  "duration": 20.6,
+  "bytes": 124053,
+  "hash": "17df47217acdaab5"
+ },
+ "discovery-advanced-5": {
+  "duration": 65.4,
+  "bytes": 393203,
+  "hash": "00c988d1073ee688"
+ },
+ "discovery-experienced-1": {
+  "duration": 83.1,
+  "bytes": 499037,
+  "hash": "46b209566ee79b89"
+ },
+ "discovery-experienced-2": {
+  "duration": 67.9,
+  "bytes": 408306,
+  "hash": "67b695134e827623"
+ },
+ "discovery-experienced-3": {
+  "duration": 83.5,
+  "bytes": 501642,
+  "hash": "a1cc18ec6d26bee5"
+ },
+ "discovery-experienced-4": {
+  "duration": 66.3,
+  "bytes": 398516,
+  "hash": "2b67250a35c31644"
+ },
+ "discovery-experienced-5": {
+  "duration": 32.6,
+  "bytes": 196212,
+  "hash": "d4e8874029795c41"
+ },
+ "discovery-experienced-6": {
+  "duration": 53.2,
+  "bytes": 319752,
+  "hash": "cf820cd043552b09"
+ },
+ "discovery-moderate-1": {
+  "duration": 52.7,
+  "bytes": 316866,
+  "hash": "96c914c54aea7c75"
+ },
+ "discovery-moderate-2": {
+  "duration": 53.3,
+  "bytes": 320627,
+  "hash": "fe4c2170b1e53e47"
+ },
+ "discovery-moderate-3": {
+  "duration": 49.6,
+  "bytes": 298563,
+  "hash": "fe42661a313cd4fe"
+ },
+ "discovery-moderate-4": {
+  "duration": 57.7,
+  "bytes": 346815,
+  "hash": "2a8f9006ef3337ac"
+ },
+ "discovery-moderate-5": {
+  "duration": 20.9,
+  "bytes": 126210,
+  "hash": "5c3997dfe4dbd9b0"
+ },
+ "discovery-novice-1": {
+  "duration": 182.6,
+  "bytes": 1096338,
+  "hash": "7caf301b2f05a70a"
+ },
+ "discovery-novice-2": {
+  "duration": 128.4,
+  "bytes": 771040,
+  "hash": "ce8d55fa82dedf13"
+ },
+ "discovery-novice-3": {
+  "duration": 141.2,
+  "bytes": 847923,
+  "hash": "7e2428cd70937e86"
+ },
+ "discovery-novice-4": {
+  "duration": 146.4,
+  "bytes": 879037,
+  "hash": "06aeca1dfd6fd01a"
+ },
+ "discovery-novice-5": {
+  "duration": 151.8,
+  "bytes": 911444,
+  "hash": "68748477280742ac"
+ },
+ "execution-advanced-1": {
+  "duration": 52.4,
+  "bytes": 315147,
+  "hash": "e99725f20c6816c6"
+ },
+ "execution-advanced-2": {
+  "duration": 55.4,
+  "bytes": 332988,
+  "hash": "8997a74afd0ab324"
+ },
+ "execution-advanced-3": {
+  "duration": 19.0,
+  "bytes": 114979,
+  "hash": "72e8b11b6d1249c6"
+ },
+ "execution-advanced-4": {
+  "duration": 75.0,
+  "bytes": 450939,
+  "hash": "195b2b7954c2dae7"
+ },
+ "execution-advanced-5": {
+  "duration": 69.8,
+  "bytes": 419521,
+  "hash": "5da55dd43ad567ef"
+ },
+ "execution-experienced-1": {
+  "duration": 57.2,
+  "bytes": 344065,
+  "hash": "53c77f32596e13c5"
+ },
+ "execution-experienced-2": {
+  "duration": 43.3,
+  "bytes": 260687,
+  "hash": "825ca72852e021e3"
+ },
+ "execution-experienced-3": {
+  "duration": 60.8,
+  "bytes": 365662,
+  "hash": "2e70d4233cdcceb6"
+ },
+ "execution-experienced-4": {
+  "duration": 24.8,
+  "bytes": 149823,
+  "hash": "f3373644e7333510"
+ },
+ "execution-experienced-5": {
+  "duration": 74.7,
+  "bytes": 449043,
+  "hash": "91c11545b7939797"
+ },
+ "execution-moderate-1": {
+  "duration": 46.3,
+  "bytes": 278281,
+  "hash": "c10c6e769c4c50e1"
+ },
+ "execution-moderate-2": {
+  "duration": 95.3,
+  "bytes": 572616,
+  "hash": "2289ff26848186d9"
+ },
+ "execution-moderate-3": {
+  "duration": 54.3,
+  "bytes": 326366,
+  "hash": "58f8cb3e7f1a979b"
+ },
+ "execution-moderate-4": {
+  "duration": 25.4,
+  "bytes": 153122,
+  "hash": "835d2ce52e2855f5"
+ },
+ "execution-moderate-5": {
+  "duration": 51.4,
+  "bytes": 309371,
+  "hash": "026680eda3523067"
+ },
+ "execution-moderate-6": {
+  "duration": 61.6,
+  "bytes": 369998,
+  "hash": "23117daf9c6fc8c2"
+ },
+ "execution-novice-1": {
+  "duration": 48.9,
+  "bytes": 294391,
+  "hash": "451616fa8ab3f042"
+ },
+ "execution-novice-2": {
+  "duration": 54.1,
+  "bytes": 325507,
+  "hash": "2cfe1b652e3bbb05"
+ },
+ "execution-novice-3": {
+  "duration": 69.5,
+  "bytes": 417504,
+  "hash": "303cf7d0b2f5875a"
+ },
+ "execution-novice-4": {
+  "duration": 22.3,
+  "bytes": 134264,
+  "hash": "ea5d8527436b2789"
+ },
+ "execution-novice-5": {
+  "duration": 37.5,
+  "bytes": 225991,
+  "hash": "d012703aaacae627"
+ },
+ "prioritization-advanced-1": {
+  "duration": 57.5,
+  "bytes": 345524,
+  "hash": "8a018bececfeff08"
+ },
+ "prioritization-advanced-2": {
+  "duration": 49.9,
+  "bytes": 300301,
+  "hash": "36d893d59ef2c666"
+ },
+ "prioritization-advanced-3": {
+  "duration": 74.4,
+  "bytes": 447318,
+  "hash": "4c1163c02f5d23bb"
+ },
+ "prioritization-advanced-4": {
+  "duration": 39.9,
+  "bytes": 240391,
+  "hash": "db76697aceb9993a"
+ },
+ "prioritization-advanced-5": {
+  "duration": 85.2,
+  "bytes": 511836,
+  "hash": "fbc24d5b4eb20a04"
+ },
+ "prioritization-experienced-1": {
+  "duration": 91.7,
+  "bytes": 550999,
+  "hash": "1f0ad9b6148b8595"
+ },
+ "prioritization-experienced-2": {
+  "duration": 47.6,
+  "bytes": 286052,
+  "hash": "f4b192c348482278"
+ },
+ "prioritization-experienced-3": {
+  "duration": 88.1,
+  "bytes": 528973,
+  "hash": "738ec55a27b3584e"
+ },
+ "prioritization-experienced-4": {
+  "duration": 12.6,
+  "bytes": 76382,
+  "hash": "69e977d142e5c03f"
+ },
+ "prioritization-experienced-5": {
+  "duration": 85.6,
+  "bytes": 514281,
+  "hash": "938fdc5ebb6f2149"
+ },
+ "prioritization-moderate-1": {
+  "duration": 53.0,
+  "bytes": 318876,
+  "hash": "a5afbfa4c02f071f"
+ },
+ "prioritization-moderate-2": {
+  "duration": 75.9,
+  "bytes": 455967,
+  "hash": "9494bb3f8258eb0c"
+ },
+ "prioritization-moderate-3": {
+  "duration": 49.6,
+  "bytes": 298138,
+  "hash": "de4af81c44a6c601"
+ },
+ "prioritization-moderate-4": {
+  "duration": 22.7,
+  "bytes": 136860,
+  "hash": "cf9d23aee99926c6"
+ },
+ "prioritization-moderate-5": {
+  "duration": 73.7,
+  "bytes": 442707,
+  "hash": "a1d0e13b712cf422"
+ },
+ "prioritization-novice-1": {
+  "duration": 59.9,
+  "bytes": 360349,
+  "hash": "3ee2877f98d3e290"
+ },
+ "prioritization-novice-2": {
+  "duration": 55.6,
+  "bytes": 334138,
+  "hash": "88b4720199a4edef"
+ },
+ "prioritization-novice-3": {
+  "duration": 31.1,
+  "bytes": 187542,
+  "hash": "9f5830f950fdd0bb"
+ },
+ "prioritization-novice-4": {
+  "duration": 56.1,
+  "bytes": 337166,
+  "hash": "89eb295d3c6e8419"
+ },
+ "prioritization-novice-5": {
+  "duration": 58.2,
+  "bytes": 349691,
+  "hash": "5aebc8132cbea273"
+ },
+ "stakeholder-advanced-1": {
+  "duration": 56.7,
+  "bytes": 340944,
+  "hash": "d98ab48cde7ca5ef"
+ },
+ "stakeholder-advanced-2": {
+  "duration": 46.0,
+  "bytes": 277003,
+  "hash": "8a287826bef7e368"
+ },
+ "stakeholder-advanced-3": {
+  "duration": 73.6,
+  "bytes": 442170,
+  "hash": "9d95f26f3401083a"
+ },
+ "stakeholder-advanced-4": {
+  "duration": 17.0,
+  "bytes": 102746,
+  "hash": "79db2abe17494fd3"
+ },
+ "stakeholder-advanced-5": {
+  "duration": 82.3,
+  "bytes": 494270,
+  "hash": "03bbc00a81922d8c"
+ },
+ "stakeholder-experienced-1": {
+  "duration": 82.0,
+  "bytes": 492707,
+  "hash": "043950b388cedbe8"
+ },
+ "stakeholder-experienced-2": {
+  "duration": 68.3,
+  "bytes": 410486,
+  "hash": "b103a8f9656d119e"
+ },
+ "stakeholder-experienced-3": {
+  "duration": 92.8,
+  "bytes": 557373,
+  "hash": "9c1af1ca40f651b7"
+ },
+ "stakeholder-experienced-4": {
+  "duration": 50.9,
+  "bytes": 305950,
+  "hash": "2a9aebd712047822"
+ },
+ "stakeholder-moderate-1": {
+  "duration": 31.4,
+  "bytes": 189460,
+  "hash": "20b84c7d5253d6b6"
+ },
+ "stakeholder-moderate-2": {
+  "duration": 59.8,
+  "bytes": 359511,
+  "hash": "98d9b95ca79f01ae"
+ },
+ "stakeholder-moderate-3": {
+  "duration": 49.2,
+  "bytes": 296142,
+  "hash": "c6436313b5de3a59"
+ },
+ "stakeholder-moderate-4": {
+  "duration": 56.9,
+  "bytes": 342082,
+  "hash": "35ae00c539af694d"
+ },
+ "stakeholder-novice-1": {
+  "duration": 59.3,
+  "bytes": 356470,
+  "hash": "6b98bd4874501781"
+ },
+ "stakeholder-novice-2": {
+  "duration": 50.8,
+  "bytes": 305628,
+  "hash": "e336b1637a66cded"
+ },
+ "stakeholder-novice-3": {
+  "duration": 60.0,
+  "bytes": 361073,
+  "hash": "fdff7abd62f0a917"
+ },
+ "stakeholder-novice-4": {
+  "duration": 17.9,
+  "bytes": 107919,
+  "hash": "4219d1e4e0303fc7"
+ },
+ "stakeholder-novice-5": {
+  "duration": 56.1,
+  "bytes": 337319,
+  "hash": "c323009e1d50e2a1"
+ },
+ "strategy-advanced-1": {
+  "duration": 69.7,
+  "bytes": 419255,
+  "hash": "539082a3095d83c3"
+ },
+ "strategy-advanced-2": {
+  "duration": 49.5,
+  "bytes": 297579,
+  "hash": "aae23a5d545487f5"
+ },
+ "strategy-advanced-3": {
+  "duration": 51.4,
+  "bytes": 309377,
+  "hash": "11b8e340c18aff81"
+ },
+ "strategy-advanced-4": {
+  "duration": 32.4,
+  "bytes": 195343,
+  "hash": "f54b63379a034054"
+ },
+ "strategy-advanced-5": {
+  "duration": 69.7,
+  "bytes": 419110,
+  "hash": "51388f129af81682"
+ },
+ "strategy-experienced-1": {
+  "duration": 76.1,
+  "bytes": 457287,
+  "hash": "9fde711d6d17ffa7"
+ },
+ "strategy-experienced-2": {
+  "duration": 59.1,
+  "bytes": 355024,
+  "hash": "3bdf714659c477aa"
+ },
+ "strategy-experienced-3": {
+  "duration": 57.1,
+  "bytes": 343376,
+  "hash": "5dd5858ab7833e42"
+ },
+ "strategy-experienced-4": {
+  "duration": 24.4,
+  "bytes": 147085,
+  "hash": "6e90ebe3207df6f4"
+ },
+ "strategy-experienced-5": {
+  "duration": 68.4,
+  "bytes": 410890,
+  "hash": "7c975a91bea3abb0"
+ },
+ "strategy-moderate-1": {
+  "duration": 58.0,
+  "bytes": 348990,
+  "hash": "0bcff53f666c8e89"
+ },
+ "strategy-moderate-2": {
+  "duration": 67.1,
+  "bytes": 403277,
+  "hash": "90d46d486e6d8522"
+ },
+ "strategy-moderate-3": {
+  "duration": 67.5,
+  "bytes": 405568,
+  "hash": "67f58d1566c3c910"
+ },
+ "strategy-moderate-4": {
+  "duration": 55.7,
+  "bytes": 334744,
+  "hash": "c848abf4b3cf8c26"
+ },
+ "strategy-moderate-5": {
+  "duration": 49.1,
+  "bytes": 295560,
+  "hash": "5b7c90763a655b75"
+ },
+ "strategy-novice-1": {
+  "duration": 53.2,
+  "bytes": 320038,
+  "hash": "71169b2f7109b90d"
+ },
+ "strategy-novice-2": {
+  "duration": 66.1,
+  "bytes": 397357,
+  "hash": "af13043dc89c24d8"
+ },
+ "strategy-novice-3": {
+  "duration": 65.9,
+  "bytes": 396223,
+  "hash": "4b9f89cc706f99c4"
+ },
+ "strategy-novice-4": {
+  "duration": 15.9,
+  "bytes": 96398,
+  "hash": "dce9f871d771f502"
+ },
+ "strategy-novice-5": {
+  "duration": 70.9,
+  "bytes": 426167,
+  "hash": "8d1bff8f0d1a7bdd"
+ }
+}

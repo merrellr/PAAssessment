@@ -59,6 +59,7 @@ Copy-Item "$repo\search-index.js" $site
 Copy-Item "$repo\pa-icons.js" $site
 Copy-Item "$repo\vendor" "$site\vendor" -Recurse
 Copy-Item "$repo\content" "$site\content" -Recurse
+Copy-Item "$repo\tests\ui\listen-episodes.json" "$site\listen-episodes.json"
 
 $fb = 'https://www\.gstatic\.com/firebasejs/10\.13\.0/firebase-(app|auth|firestore)\.js'
 $errHook = '<script>window.__errs=[];addEventListener("error",function(e){__errs.push((e.message||"error")+" @"+(e.filename||"").split("/").pop()+":"+e.lineno);});addEventListener("unhandledrejection",function(e){__errs.push("rejection: "+(e.reason&&e.reason.message||e.reason));});</script>'
@@ -85,6 +86,7 @@ Build-Page 'lms-dashboard.html' 'dash-test.html' 'dash-seed.js' 'dash-test.js'
 Build-Page 'lms-dashboard.html' 'twostep-test.html' 'twostep-seed.js' 'twostep-test.js'
 Build-Page 'profile.html' 'del-test.html' 'del-seed.js' 'del-test.js'
 Build-Page 'lesson.html' 'les-test.html' 'les-seed.js' 'les-test.js'
+Build-Page 'listen.html' 'listen-test.html' 'listen-seed.js' 'listen-test.js'
 Build-Page 'company.html' 'company-test.html' 'company-seed.js' 'company-test.js'
 Build-Page 'tool-requests.html' 'tool-requests-test.html' 'tool-seed.js' 'tool-test.js'
 Build-Page 'my-tools.html' 'mytools-test.html' 'mytools-seed.js' 'mytools-test.js'
@@ -160,6 +162,9 @@ try {
   foreach ($s in 'goals', 'goalsadmin', 'badges', 'targets', 'signin', 'signingoogle', 'signinbrand', 'signinlink', 'mergekeep', 'mergeother', 'twostep', 'twostepauto', 'twostepunverified', 'twostepadmin', 'twostepgoogle', 'twostepgoogleblocked', 'twostepgooglenone', 'twostepcode', 'twosteppaused', 'twosteppausedon') { $results += Run-Page "profile goals: $s" "$base/del-test.html?scn=$s" 25000 }
   foreach ($s in 'member', 'plain') { $results += Run-Page "last lesson: $s" "$base/les-test.html?scn=$s&course=discovery-novice&lesson=5" 30000 }
   foreach ($s in '1', '2', '3', '4', '5') { $results += Run-Page "lesson blocks: lesson $s" "$base/les-test.html?scn=blocks&course=discovery-novice&lesson=$s" 30000 }
+  foreach ($s in 'list', 'hash', 'fail') { $results += Run-Page "listen and watch: $s" "$base/listen-test.html?scn=$s#feature-fallacy" 25000 }
+  $results += Run-Page "lesson audio: a narrated lesson" "$base/les-test.html?scn=listen&course=discovery-novice&lesson=2" 30000
+  $results += Run-Page "lesson audio: a lesson with no audio yet" "$base/les-test.html?scn=noaudio&course=discovery-novice&lesson=4" 30000
   $results += Run-Page "lesson figures: metrics and a column chart" "$base/les-test.html?scn=figs&course=aiOrg-experienced&lesson=6" 30000
   $results += Run-Page "lesson figures: a value-vs-effort matrix and a scoring equation" "$base/les-test.html?scn=figs&course=prioritization-novice&lesson=2" 30000
   $results += Run-Page "lesson figures: a workflow drawn as a chain, lined up with the text" "$base/les-test.html?scn=figs&course=discovery-experienced&lesson=1" 30000

@@ -63,7 +63,7 @@ console.log('--- what is sent about the address ---');
 
 console.log('--- which pages have it ---');
 {
-  const withIt = ['index', 'framework', 'request-info', 'tool-requests', 'lms-dashboard', 'lesson', 'profile', 'feedback', 'my-tools'];
+  const withIt = ['index', 'framework', 'request-info', 'tool-requests', 'lms-dashboard', 'lesson', 'profile', 'feedback', 'my-tools', 'listen'];
   const without = ['owner', 'owner-tools', 'owner-pilot', 'reports', 'company', 'join', 'assessment-dashboard', 'email-settings'];
   const forwards = ['my-learning'];   // only forwards to the dashboard (which counts the visit)
   const has = (p) => /<script src="analytics\.js"><\/script>/.test(fs.readFileSync(path.join(root, p + '.html'), 'utf8'));

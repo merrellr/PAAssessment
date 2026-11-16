@@ -4,6 +4,25 @@
   addEventListener('unhandledrejection', function(e){ window.__errs.push('rejection: ' + (e.reason && e.reason.message || e.reason)); });
   var scn = new URLSearchParams(location.search).get('scn') || 'member';
   window.__scn = scn;
+  // Lesson audio: a small list of what has been narrated, so the test doesn't depend on the real audio/lessons/index.json.
+  if (scn === 'listen' || scn === 'noaudio'){
+    var realFetch = window.fetch;
+    window.__fetched = [];
+    window.fetch = function(url, opts){
+      if (/audio\/lessons\/index\.json/.test(String(url))){
+        window.__fetched.push(String(url));
+        var idx = scn === 'listen' ? { 'discovery-novice-2': { duration: 128.4, bytes: 771040, hash: 'x' }, 'discovery-novice-3': { duration: 61, bytes: 1, hash: 'y' } } : {};
+        return Promise.resolve(new Response(JSON.stringify(idx), { status: 200, headers: { 'Content-Type': 'application/json' } }));
+      }
+      if (/episodes\.json/.test(String(url))){
+        var eps = scn === 'listen' ? { episodes: [
+          { slug: 'feature-fallacy', title: 'The Feature Fallacy', dek: 'd', topic: 'Product strategy', date: '2026-06-01', duration: 330, audio: 'x.mp3', chapters: [[0, 'Introduction']], areas: ['strategy', 'discovery'] },
+          { slug: 'pm-copilots', title: 'PM Copilots', dek: 'd', topic: 'Agentic AI', date: '2026-07-01', duration: 400, audio: 'y.mp3', chapters: [[0, 'Introduction']], areas: ['aiOrg'] }] } : { episodes: [] };
+        return Promise.resolve(new Response(JSON.stringify(eps), { status: 200, headers: { 'Content-Type': 'application/json' } }));
+      }
+      return realFetch.apply(this, arguments);
+    };
+  }
   window.__fakeUser = { uid: 'uLes', email: 'Les@Acme.com', displayName: 'Les User', emailVerified: true, providerData: [], getIdToken: async function(){ return 'tok'; } };
   window.__seed = function(store, Timestamp){
     var partway = scn === 'member' || scn === 'plain';   // four of five lessons already done: the next one finishes the course
