@@ -97,6 +97,19 @@ const sleep = (ms) => new Promise(r => setTimeout(r, ms));
         t('it names the biggest jump and the remaining gap', /Your biggest jump:.*Customer & Market Discovery \(\+25\)/.test(gp.textContent) && /Still your gap:.*AI Fluency — Organizational, at 35/.test(gp.textContent));
         gp.querySelector('[data-gview="trend"]').click(); await sleep(50);
         t('Over time shows a small line per area', gp.querySelectorAll('.growth-spark polyline').length === 7 && document.getElementById('growthPanel').querySelector('[data-gview="trend"]').getAttribute('aria-pressed') === 'true');
+        // the quick tour: a click-through guide on the page (tour.js), no media
+        const gb = document.querySelector('.guide-btn[data-guide]');
+        t('a "New here? Take the quick tour" button under the greeting', !!gb && /Take the quick tour/.test(gb.textContent) && !document.querySelector('video, .tour-dialog'));
+        gb.click(); await sleep(80);
+        const pop = () => document.querySelector('.guide-pop');
+        t('it opens on step 1 with the welcome, highlighting the greeting', !!pop() && /1 of 10/.test(pop().querySelector('.g-c').textContent) && /Welcome to Product Advisory Learning/.test(pop().textContent) && !!document.querySelector('.guide-hole') && document.activeElement === pop().querySelector('.g-n'));
+        const seen = [pop().querySelector('h2').textContent];
+        for (let k = 0; k < 12 && pop(); k++) { pop().querySelector('.g-n').click(); await sleep(40); if (pop()) seen.push(pop().querySelector('h2').textContent); }
+        t('Next walks the steps (skipping any not on the page) and Done closes it', !pop() && !document.querySelector('.guide-hole, .guide-shield') && seen.indexOf('Your next best step') > -1 && seen.indexOf('My growth') > -1 && seen[seen.length - 1] === 'Your profile', seen.join(' > '));
+        gb.click(); await sleep(40);
+        document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true })); await sleep(20);
+        t('Esc closes it and focus goes back to the button', !pop() && document.activeElement === gb);
+        window.scrollTo(0, 0);
         t('a retake is offered once 90 days have passed since the last one', /Retake the assessment/.test(gp.textContent) || (Date.now() - Date.parse('2026-10-05T10:00:00.000Z')) < 90 * 864e5);
       }
       if (window.__scn === 'member'){

@@ -25,6 +25,7 @@ Copy-Item "$repo\org-share-core.js" $site
 Copy-Item "$repo\company-core.js" $site
 Copy-Item "$repo\assignments-core.js" $site
 Copy-Item "$repo\growth-core.js" $site
+Copy-Item "$repo\tour.js" $site
 Copy-Item "$repo\team-core.js" $site
 Copy-Item "$repo\focus-board.js" $site
 Copy-Item "$repo\focus-board.css" $site
