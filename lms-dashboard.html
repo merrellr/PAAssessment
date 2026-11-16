@@ -539,7 +539,8 @@
 
     <section class="home-band" id="homeBand" hidden aria-labelledby="homeHello" data-only="home">
       <div class="home-hi"><h1 class="home-hello" id="homeHello">Welcome back</h1>
-        <p class="home-sub" id="homeSub">Pick up where you left off.</p></div>
+        <p class="home-sub" id="homeSub">Pick up where you left off.</p>
+        <button type="button" class="tour-btn" data-tour="learning"><span class="tour-play" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M8 5.5v13a1 1 0 0 0 1.5.9l10.4-6.5a1 1 0 0 0 0-1.8L9.5 4.6A1 1 0 0 0 8 5.5z"/></svg></span><span><b>New here? Take the 2-minute tour</b><small>Video · 1:16 · or just listen</small></span></button></div>
       <div class="card" id="welcomeCard" style="display:none; margin-bottom:18px; background:linear-gradient(135deg, var(--tint) 0%, var(--surface) 100%); border-color: var(--line);">
         <span class="eyebrow">Welcome</span>
         <h2>You're in! Here's how to get around</h2>
@@ -2694,5 +2695,6 @@ async function renderHomeTools(user){
 </script>
 <script>document.getElementById("footerYear").textContent = new Date().getFullYear();</script>
 <script type="module" src="account-menu.js?menu=off"></script>
+<script src="tour.js"></script>
 </body>
 </html>
