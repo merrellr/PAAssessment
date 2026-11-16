@@ -110,6 +110,7 @@ export function query(c, ...parts){
   return { col: c.col, wheres: parts.filter(p => p.kind === 'where'), orders: parts.filter(p => p.kind === 'orderBy'), limit: (parts.find(p => p.kind === 'limit') || {}).n };
 }
 export async function getDoc(ref){
+  if (window.__failGet && window.__failGet.test(ref.path)) throw Object.assign(new Error('denied'), { code: 'permission-denied' });
   const d = store[ref.path];
   return { id: ref.id, exists: () => d !== undefined, data: () => (d === undefined ? undefined : clone(d)) };
 }

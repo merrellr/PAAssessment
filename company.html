@@ -102,6 +102,16 @@
   .stackbar span{ display:block; height:100%; }
   .legend{ display:flex; flex-wrap:wrap; gap: 6px 16px; font-size: 0.7812rem; color: var(--ink-soft); }
   .legend i{ display:inline-block; width:10px; height:10px; border-radius:3px; margin-right:6px; vertical-align:-1px; }
+  .assign-item{ border-top: 1px solid var(--line); padding: 14px 0 4px; }
+  .assign-item:first-child{ border-top: 0; padding-top: 4px; }
+  .assign-head{ display:flex; flex-wrap:wrap; align-items:center; gap: 8px 10px; margin-bottom: 8px; }
+  .assign-head strong{ font-family: var(--display); color: var(--navy); font-size: 0.9375rem; margin-right: auto; }
+  .pill.due-overdue{ background:var(--warn-bg); color: var(--warn); }
+  .pill.due-soon{ background:var(--note-bg); color: var(--note-ink); }
+  .pill.due-done{ background:var(--ok-bg); color: var(--ok); }
+  .assign-note{ font-size: 0.8125rem; color: var(--ink-soft); margin: 0 0 10px; }
+  .assign-behind{ margin: 6px 0 0; padding-left: 18px; font-size: 0.8125rem; }
+  .assign-behind li{ margin: 3px 0; }
   .barrow{ display:grid; grid-template-columns: minmax(120px, 1.1fr) 2fr 44px; gap: 10px; align-items:center; margin-bottom: 9px; font-size: 0.8125rem; }
   .barrow .track{ height: 10px; border-radius: 5px; background:var(--line); overflow:hidden; }
   .barrow .fill{ display:block; height:100%; background: var(--navy); border-radius: 5px; }
@@ -143,6 +153,7 @@
 <link rel="stylesheet" href="charts.css">
 <script src="vendor/Sortable.min.js"></script>
 <script src="company-core.js"></script>
+<script src="assignments-core.js"></script>
 <script src="company-report.js"></script>
 <script src="charts.js"></script>
 <script src="focus-board.js"></script>
@@ -284,6 +295,41 @@
           <button class="btn btn-ghost btn-small" id="focusCancelBtn" type="button">Cancel</button>
         </div>
       </div>
+    </div>
+
+    <div class="card" id="assignCard">
+      <div class="section-head">
+        <div>
+          <h2>Team assignments</h2>
+          <div class="hint" style="margin:4px 0 0;">Ask everyone to finish a course, by a date if you like. It shows at the top of each person's dashboard, and here you can see who has finished.</div>
+        </div>
+        <div class="btn-row">
+          <button class="btn btn-primary btn-small" id="assignAddBtn" type="button">+ Assign a course</button>
+        </div>
+      </div>
+      <div id="assignForm" style="display:none; margin-bottom:16px;">
+        <h3 style="margin-top:0;">New assignment</h3>
+        <div class="grid-3">
+          <div>
+            <label class="field-label" for="assignCourse">Course</label>
+            <select class="text-input" id="assignCourse"></select>
+          </div>
+          <div>
+            <label class="field-label" for="assignDue">Due date (optional)</label>
+            <input class="text-input" type="date" id="assignDue">
+          </div>
+          <div>
+            <label class="field-label" for="assignNote">Note to the team (optional)</label>
+            <input class="text-input" type="text" id="assignNote" maxlength="200" autocomplete="off" placeholder="Why it matters, or when you'll discuss it">
+          </div>
+        </div>
+        <div class="field-error" id="assignError"></div>
+        <div class="btn-row">
+          <button class="btn btn-primary btn-small" id="assignSaveBtn" type="button">Assign to everyone</button>
+          <button class="btn btn-ghost btn-small" id="assignCancelBtn" type="button">Cancel</button>
+        </div>
+      </div>
+      <div id="assignList"></div>
     </div>
 
     <div class="card">
@@ -446,6 +492,7 @@ const db = getFirestore(app);
 
 const $ = (id) => document.getElementById(id);
 const C = CompanyCore;
+const A = AssignmentsCore;
 
 function el(tag, attrs, ...kids){
   const node = document.createElement(tag);
@@ -584,6 +631,16 @@ async function loadAll(){
     console.error('Could not read shared records:', err);
     data.sharesError = true;
   }
+  // The team's assignments, read separately too.
+  data.assignments = [];
+  data.assignError = false;
+  try {
+    const asSnap = await getDoc(doc(db, 'orgAssignments', id));
+    data.assignments = A.normalize(asSnap.exists() ? asSnap.data().items : [], C.LESSON_COUNTS);
+  } catch (err){
+    console.error('Could not read the team assignments:', err);
+    data.assignError = true;
+  }
   // The activity log is read separately too, so it can never hide the rest of the page.
   data.audit = [];
   data.auditError = false;
@@ -627,6 +684,7 @@ function renderAll(){
   renderReport();
   renderRollup();
   renderFocus();
+  renderAssignments();
   renderTeam();
   renderInvites();
   renderFormer();
@@ -931,6 +989,124 @@ function renderFocus(){
     });
   }
   $('focusEditor').style.display = editingFocus ? 'block' : 'none';
+}
+
+/* ------------------------------------------------------- team assignments */
+// Today on the admin's own calendar (a due date is a local date).
+function localToday(){ const d = new Date(); return new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 10); }
+
+function renderAssignments(){
+  $('assignAddBtn').style.display = isArchived() ? 'none' : 'inline-block';
+  const box = $('assignList');
+  box.innerHTML = '';
+  if (data.assignError){
+    box.appendChild(el('p', { class: 'empty', text: "Couldn't load the team's assignments. The latest security rules may not be published yet." }));
+    $('assignAddBtn').style.display = 'none';
+    return;
+  }
+  if (!data.assignments.length){
+    box.appendChild(el('p', { class: 'empty', text: "Nothing assigned yet. Assign a course and it shows at the top of everyone's dashboard." }));
+    return;
+  }
+  const today = localToday();
+  const people = activeRows().map(r => ({ name: r.name, email: r.email, courses: (data.shares[r.id] && data.shares[r.id].courses) || {} }));
+  A.sorted(data.assignments).forEach(item => {
+    const p = A.teamProgress(item, people, C.LESSON_COUNTS, today);
+    const dueClass = p.people && p.finished === p.people ? 'due-done' : p.overdue ? 'due-overdue' : p.soon ? 'due-soon' : '';
+    const remove = isArchived() ? null : el('button', { class: 'btn btn-ghost btn-small', type: 'button', text: 'Remove' });
+    if (remove) remove.addEventListener('click', () => removeAssignment(item, remove));
+    const wrap = el('div', { class: 'assign-item' },
+      el('div', { class: 'assign-head' },
+        el('strong', { text: C.prettyCourseId(item.course) }),
+        el('span', { class: 'pill ' + dueClass, text: p.dueLabel }),
+        remove),
+      item.note ? el('p', { class: 'assign-note', text: item.note }) : null,
+      el('div', { class: 'barrow ' + (p.pct >= 75 ? 'high' : '') },
+        el('div', { text: 'Finished' }),
+        el('div', { class: 'track', role: 'img', 'aria-label': p.finished + ' of ' + p.people + ' people have finished' },
+          el('span', { class: 'fill', style: 'width:' + p.pct + '%;' })),
+        el('div', { class: 'val', text: p.finished + '/' + p.people })),
+      el('div', { class: 'cell-sub', text: p.people
+        ? plural(p.started, 'person', 'people') + ' in progress · ' + plural(p.notStarted, 'person', 'people') + ' not started · ' + p.total + ' lessons' + (item.assignedAt ? ' · assigned ' + A.prettyDay(item.assignedAt) : '')
+        : 'Nobody has joined yet.' }));
+    if (p.behind.length){
+      const list = el('ul', { class: 'assign-behind' });
+      p.behind.forEach(b => list.appendChild(el('li', { text: b.name + ': ' + (b.done ? b.done + ' of ' + b.total + ' lessons' : 'not started') })));
+      wrap.appendChild(el('details', { class: 'more', style: 'margin-top:8px;' }, el('summary', { text: "Who hasn't finished (" + p.behind.length + ')' }), list));
+    }
+    box.appendChild(wrap);
+  });
+}
+
+function fillAssignCourses(){
+  const sel = $('assignCourse');
+  sel.innerHTML = '';
+  sel.appendChild(el('option', { value: '', text: 'Choose a course' }));
+  const taken = {};
+  data.assignments.forEach(x => { taken[x.course] = true; });
+  C.DOMAINS.forEach(d => {
+    const g = el('optgroup', { label: d[1] });
+    C.TIER_SLUGS.forEach(slug => {
+      const id = d[0] + '-' + slug;
+      if (!C.LESSON_COUNTS[id]) return;
+      const o = el('option', { value: id, text: C.LEVEL_LABELS[slug] + ' (' + C.LESSON_COUNTS[id] + ' lessons)' + (taken[id] ? ' · already assigned' : '') });
+      if (taken[id]) o.disabled = true;
+      g.appendChild(o);
+    });
+    sel.appendChild(g);
+  });
+}
+
+$('assignAddBtn').addEventListener('click', () => {
+  fillAssignCourses();
+  $('assignDue').value = '';
+  $('assignDue').min = localToday();
+  $('assignNote').value = '';
+  $('assignError').textContent = '';
+  $('assignForm').style.display = 'block';
+  $('assignAddBtn').style.display = 'none';
+  $('assignCourse').focus();
+});
+$('assignCancelBtn').addEventListener('click', () => {
+  $('assignForm').style.display = 'none';
+  $('assignAddBtn').style.display = isArchived() ? 'none' : 'inline-block';
+});
+$('assignSaveBtn').addEventListener('click', async () => {
+  const course = $('assignCourse').value, due = $('assignDue').value, note = $('assignNote').value;
+  const r = A.add(data.assignments, { course: course, due: due, note: note }, C.LESSON_COUNTS, localToday(), A.newId());
+  if (r.error){ $('assignError').textContent = r.error; return; }
+  $('assignSaveBtn').disabled = true;
+  $('assignError').textContent = '';
+  try {
+    await setDoc(doc(db, 'orgAssignments', org.id), { items: r.items, updatedAt: serverTimestamp() });
+    data.assignments = r.items;
+    logAudit('assignment.added', '', C.prettyCourseId(course) + (due ? ', due ' + due : ''));
+    $('assignForm').style.display = 'none';
+    renderAssignments();
+    $('notice').textContent = 'Assigned. It now shows at the top of everyone\'s dashboard.';
+  } catch (err){
+    console.error('Could not save the assignment:', err);
+    $('assignError').textContent = "Couldn't save it. Check your connection and try again.";
+  } finally {
+    $('assignSaveBtn').disabled = false;
+  }
+});
+
+async function removeAssignment(item, button){
+  if (!window.confirm('Remove "' + C.prettyCourseId(item.course) + '" from the team\'s assignments? Nobody loses their progress; it just stops showing as assigned.')) return;
+  button.disabled = true;
+  const next = A.remove(data.assignments, item.id, C.LESSON_COUNTS);
+  try {
+    await setDoc(doc(db, 'orgAssignments', org.id), { items: next, updatedAt: serverTimestamp() });
+    data.assignments = next;
+    logAudit('assignment.removed', '', C.prettyCourseId(item.course));
+    renderAssignments();
+    $('notice').textContent = 'Assignment removed.';
+  } catch (err){
+    console.error('Could not remove the assignment:', err);
+    button.disabled = false;
+    $('notice').textContent = "Couldn't remove it. Check your connection and try again.";
+  }
 }
 
 function openFocusEditor(){

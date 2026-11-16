@@ -23,6 +23,7 @@ New-Item -ItemType Directory -Path $site | Out-Null
 Copy-Item "$ui\*.js" $site
 Copy-Item "$repo\org-share-core.js" $site
 Copy-Item "$repo\company-core.js" $site
+Copy-Item "$repo\assignments-core.js" $site
 Copy-Item "$repo\focus-board.js" $site
 Copy-Item "$repo\focus-board.css" $site
 Copy-Item "$repo\tool-core.js" $site
@@ -151,7 +152,7 @@ try {
     $results += Run-Page "join page: $s" "$base/join-test.html?scn=$s&token=$tok" 20000
   }
   $results += Run-Page 'join page: badtoken' "$base/join-test.html?scn=badtoken&token=abc" 20000
-  foreach ($s in 'member', 'focus', 'focusdefault', 'admin', 'plain', 'removed', 'owner', 'threelessons', 'allfive', 'recentdone', 'removedold', 'profilecard') { $results += Run-Page "dashboard: $s" "$base/dash-test.html?scn=$s" 25000 }
+  foreach ($s in 'member', 'focus', 'focusdefault', 'admin', 'plain', 'removed', 'owner', 'threelessons', 'allfive', 'recentdone', 'removedold', 'profilecard', 'assigned') { $results += Run-Page "dashboard: $s" "$base/dash-test.html?scn=$s" 25000 }
   foreach ($s in 'signin', 'nudge', 'owner', 'on', 'unverified', 'google', 'googleowner', 'ownernever', 'turnedoff', 'firstlogin', 'profilefirst', 'secondlogin', 'paused') { $results += Run-Page "two-step on the dashboard: $s" "$base/twostep-test.html?scn=$s" 25000 }
   foreach ($s in 'member', 'nonmember', 'blocked', 'votefail') { $results += Run-Page "delete account: $s" "$base/del-test.html?scn=$s" 25000 }
   $results += Run-Page 'profile photo' "$base/del-test.html?scn=photo" 25000
@@ -162,7 +163,7 @@ try {
   $results += Run-Page "lesson figures: a value-vs-effort matrix and a scoring equation" "$base/les-test.html?scn=figs&course=prioritization-novice&lesson=2" 30000
   $results += Run-Page "lesson figures: a workflow drawn as a chain, lined up with the text" "$base/les-test.html?scn=figs&course=discovery-experienced&lesson=1" 30000
   $results += Run-Page "lesson figures: think first, then reveal the after" "$base/les-test.html?scn=figs&course=aiIndividual-moderate&lesson=2" 30000
-  foreach ($s in 'admin', 'empty', 'archived', 'nocopy', 'auditdenied', 'owner', 'ownernoorg', 'plain', 'member', 'removedadmin', 'denied', 'sharesdenied', 'signedout', 'history', 'snapshotsdenied', 'snapfail', 'noplatform', 'smallplatform') {
+  foreach ($s in 'admin', 'empty', 'archived', 'nocopy', 'auditdenied', 'owner', 'ownernoorg', 'plain', 'member', 'removedadmin', 'denied', 'sharesdenied', 'signedout', 'history', 'snapshotsdenied', 'snapfail', 'noplatform', 'smallplatform', 'assign', 'assigndenied') {
     $org = if ($s -eq 'owner') { '&org=orgA' } else { '' }
     $results += Run-Page "company dashboard: $s" "$base/company-test.html?scn=$s$org" 40000
   }

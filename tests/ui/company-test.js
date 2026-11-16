@@ -102,6 +102,7 @@ async function readBlob(d){ return await d.blob.text(); }
       t('invitations list is empty with a friendly message', /No invitations waiting/.test($('inviteWrap').textContent));
       t('a company with no history says so in Recent activity', /Nothing yet/.test($('activityWrap').textContent), $('activityWrap').textContent);
     } else if (scn === 'archived'){
+      t('an archived company cannot be given new assignments', !vis('assignAddBtn'));
       t('the page opens, read-only, with a banner', shown() === 'page' && vis('archivedBanner'));
       t('adding people is switched off', $('addUsersBtn').disabled && $('addAdminBtn').disabled);
       const r = rowFor('inviteWrap', 'newone@acme.com');
@@ -470,6 +471,50 @@ async function readBlob(d){ return await d.blob.text(); }
       await sleep(150);
       const copy = window.__store['orgFocus/orgA'];
       t('a company made before the member-readable copy existed gets one when its admin opens the page', !!copy && copy.focusAreas.join() === window.__store['orgs/orgA'].focusAreas.join() && !!copy.updatedAt, JSON.stringify(copy));
+    } else if (scn === 'assign'){
+      const items = () => Array.prototype.slice.call($('assignList').querySelectorAll('.assign-item'));
+      t('the page opens with the team assignments card', shown() === 'page' && vis('assignCard'));
+      t('only known courses are shown (a damaged entry is ignored)', items().length === 1 && /Customer & Market Discovery · Limited Experience/.test(textOf(items()[0])), textOf($('assignList')));
+      t('the note to the team is shown', /Before Q1 planning/.test(textOf(items()[0])));
+      const pill = items()[0].querySelector('.pill');
+      t('past its due date with people left: it says how overdue, in the warning style', /3 days overdue/.test(textOf(pill)) && pill.classList.contains('due-overdue'), textOf(pill));
+      t('it counts the six active people: nobody finished, one in progress, five not started', /0\/6/.test(textOf(items()[0])) && /1 person in progress · 5 people not started · 5 lessons/.test(textOf(items()[0])), textOf(items()[0]));
+      t('who has not finished is listed, with how far they got', /Ben B: 2 of 5 lessons/.test(textOf(items()[0].querySelector('details'))) && /Cy C: not started/.test(textOf(items()[0].querySelector('details'))));
+      t('the former member is not counted', !/Old Timer/.test(textOf($('assignList'))));
+
+      $('assignAddBtn').click(); await sleep(50);
+      t('Assign a course opens the form', vis('assignForm'));
+      const opt = Array.prototype.find.call($('assignCourse').options, o => o.value === 'discovery-novice');
+      t('a course that is already assigned cannot be chosen again', opt && opt.disabled && /already assigned/.test(opt.textContent));
+      t('every course can be chosen, grouped by skill area', $('assignCourse').querySelectorAll('optgroup').length === 7 && $('assignCourse').querySelectorAll('option[value]:not([value=""])').length === 28);
+      $('assignSaveBtn').click(); await sleep(50);
+      t('saving without a course asks for one', /Choose a course/.test(txt('assignError')));
+      const pad = (n) => String(n).padStart(2, '0');
+      const local = (d) => d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
+      setVal('assignCourse', 'strategy-novice');
+      setVal('assignDue', local(new Date(Date.now() - 2 * 864e5)));
+      $('assignSaveBtn').click(); await sleep(50);
+      t('a due date in the past is refused', /in the past/.test(txt('assignError')), txt('assignError'));
+      const due = local(new Date(Date.now() + 30 * 864e5));
+      setVal('assignDue', due);
+      setVal('assignNote', 'We will discuss it at the offsite');
+      $('assignSaveBtn').click(); await until(() => items().length === 2);
+      const saved = window.__store['orgAssignments/orgA'];
+      t('the new assignment is saved for the team', saved.items.length === 2 && saved.items.some(x => x.course === 'strategy-novice' && x.due === due && x.note === 'We will discuss it at the offsite'), JSON.stringify(saved.items));
+      t('the damaged entry is dropped when the list is saved again', !saved.items.some(x => x.course === 'nope-course'));
+      t('the form closes and the list shows both, soonest due first', !vis('assignForm') && /Discovery/.test(textOf(items()[0])) && /Strategy/.test(textOf(items()[1])));
+      t('the activity log records it', Object.keys(window.__store).some(k => /^orgs\/orgA\/audit\//.test(k) && window.__store[k].action === 'assignment.added' && /Strategy/.test(window.__store[k].detail)));
+      t('and says so', /Assigned/.test(txt('notice')));
+
+      confirmAnswer = false;
+      btn(items()[1], 'Remove').click(); await sleep(100);
+      t('removing asks first, and Cancel keeps it', items().length === 2 && /Nobody loses their progress/.test(confirmMessages[confirmMessages.length - 1] || ''));
+      confirmAnswer = true;
+      btn(items()[1], 'Remove').click(); await until(() => items().length === 1);
+      t('Remove takes it off the list', window.__store['orgAssignments/orgA'].items.length === 1 && window.__store['orgAssignments/orgA'].items[0].course === 'discovery-novice');
+      t('and the activity log records that too', Object.keys(window.__store).some(k => /^orgs\/orgA\/audit\//.test(k) && window.__store[k].action === 'assignment.removed'));
+    } else if (scn === 'assigndenied'){
+      t('if assignments cannot be read, the rest of the page still works and says so', shown() === 'page' && rowsIn('teamWrap').length === 6 && /Couldn't load the team's assignments/.test(txt('assignList')) && !vis('assignAddBtn'), txt('assignList'));
     } else if (scn === 'sharesdenied'){
       t('if shared records cannot be read, the people list still shows', shown() === 'page' && rowsIn('teamWrap').length === 6);
       t('and each person simply shows nothing shared yet', /Nothing shared yet/.test(textOf(rowFor('teamWrap', 'Ben B'))));

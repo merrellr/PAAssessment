@@ -120,6 +120,26 @@
   .home-band{ margin-bottom: 22px; }
   .home-hello{ font-family:var(--display); font-size: 1.375rem; color: var(--navy-deep); margin: 0 0 4px; }
   .home-sub{ font-size: 0.8438rem; color: var(--ink-soft); margin: 0 0 14px; }
+  .assign-card{ margin-bottom: 18px; border: 2px solid var(--cyan); }
+  .assign-card .eyebrow{ display:block; font-size:0.6875rem; font-weight:600; letter-spacing:0.06em; text-transform:uppercase; color: var(--cyan-ink, var(--cyan)); margin: 0 0 4px; }
+  .assign-card h2{ font-family:var(--display); font-size: 1.05rem; color: var(--navy-deep); margin: 0 0 4px; }
+  .assign-card > p{ font-size: 0.8125rem; color: var(--ink-soft); margin: 0 0 10px; }
+  .assign-row{ display:grid; grid-template-columns: minmax(0, 1fr) auto; gap: 6px 16px; align-items:center; padding: 12px 0; border-top: 1px solid var(--line); }
+  .assign-row b{ font-size: 0.9062rem; color: var(--navy-deep); }
+  .assign-row .assign-meta{ font-size: 0.75rem; color: var(--ink-soft); margin-top: 2px; }
+  .assign-row .assign-note{ font-size: 0.7812rem; color: var(--ink-soft); font-style: italic; margin-top: 3px; }
+  .assign-row .home-bar{ margin-top: 6px; max-width: 320px; }
+  .assign-due{ display:inline-block; font-size: 0.6875rem; font-weight:600; padding: 2px 8px; border-radius: 20px; background: var(--tint); color: var(--navy); margin-left: 6px; white-space: nowrap; vertical-align: 1px; }
+  .assign-due.overdue{ background: var(--warn-bg, #fdecea); color: var(--warn, #b42318); }
+  .assign-due.soon{ background: var(--note-bg, #fff4d6); color: var(--note-ink, #7a5300); }
+  .assign-due.done{ background: var(--ok-bg, #e7f6ee); color: var(--ok, #1e7a46); }
+  .assign-go{ display:inline-block; padding: 9px 18px; border-radius: 22px; font-size: 0.8125rem; font-weight: 600; text-decoration:none; white-space: nowrap;
+    background: linear-gradient(90deg, var(--navy) 0%, var(--primary-strong) 100%); color: var(--btn-ink); }
+  .assign-go:hover{ opacity: 0.92; }
+  .assign-go.is-done{ background: none; color: var(--navy); border: 1.5px solid var(--line); }
+  .assign-go:focus-visible{ outline: 2px solid var(--cyan); outline-offset: 2px; }
+  @media (max-width: 600px){ .assign-row{ grid-template-columns: 1fr; } }
+  @media (max-width: 600px){ .assign-go{ justify-self: start; } }
   .home-grid{ display:grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
   @media (max-width: 900px){ .home-grid{ grid-template-columns: 1fr; } }
   .home-card{ background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 18px; display:flex; flex-direction:column; gap: 6px; min-width: 0;
@@ -290,6 +310,7 @@
 <link rel="stylesheet" href="roles.css">
 <script src="analytics.js"></script>
 <script src="learning-home-core.js"></script>
+<script src="assignments-core.js"></script>
 <script src="saved-tools-core.js"></script>
 </head>
 <body>
@@ -525,6 +546,7 @@
       </div>
         <button type="button" class="card bd-tile" id="badgeTile" hidden aria-haspopup="dialog"></button>
       </div>
+      <div class="card assign-card" id="assignedHome" hidden></div>
       <div class="home-grid">
         <div class="home-card lead" id="homeResume"></div>
         <div class="home-card" id="homeNext"></div>
@@ -549,6 +571,8 @@
       <h1>Your courses and skills</h1>
       <p>Your plan, every course, and how your skills are growing since your assessment.</p>
     </header>
+
+    <div class="card assign-card" id="assignedLearning" data-only="learning" hidden></div>
 
     <div class="card" id="skillsCard" data-only="learning" style="display:none;">
       <h2 class="skills-title">Your skills</h2>
@@ -1076,6 +1100,46 @@ async function fetchCompanyFocus(user){
   }
 }
 
+/* Team assignments: courses the person's company asked the whole team to finish (assignments-core.js). Shown at the
+   top of Home and of My Learning, to-do first. Anyone who isn't an active member, or any failure, sees nothing. */
+async function fetchTeamAssignments(user){
+  try {
+    const m = await getDoc(doc(db, 'memberships', user.uid));
+    if (!m.exists() || m.data().status !== 'active') return [];
+    const a = await getDoc(doc(db, 'orgAssignments', m.data().orgId));
+    return a.exists() && Array.isArray(a.data().items) ? a.data().items : [];
+  } catch (err){
+    return [];
+  }
+}
+
+async function renderTeamAssignments(user, progress){
+  const A = window.AssignmentsCore;
+  const boxes = [document.getElementById('assignedHome'), document.getElementById('assignedLearning')];
+  if (!A) return;
+  const items = await fetchTeamAssignments(user);
+  const known = {};
+  Object.keys(CATALOG).forEach(id => { known[id] = CATALOG[id].lessons.length; });
+  const d = new Date(), today = new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 10);
+  const cards = A.forLearner(items, progress, CATALOG, known, today);
+  if (!cards.length){ boxes.forEach(b => { b.hidden = true; b.innerHTML = ''; }); return; }
+  const esc = (t) => String(t).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  const left = cards.filter(c => !c.finished).length;
+  const rows = cards.map(c => {
+    const href = '/lesson?course=' + encodeURIComponent(c.course) + '&lesson=' + c.next + '&v=' + CONTENT_VERSION;
+    const cls = c.finished ? 'done' : c.overdue ? 'overdue' : c.soon ? 'soon' : '';
+    const label = c.finished ? 'Review' : c.done ? 'Continue →' : 'Start →';
+    return '<div class="assign-row"><div><b>' + esc(c.title) + '</b><span class="assign-due ' + cls + '">' + esc(c.dueLabel) + '</span>' +
+      '<div class="assign-meta">' + (c.finished ? 'All ' + c.total + ' lessons done.' : c.done + ' of ' + c.total + ' lessons done') + '</div>' +
+      (c.note ? '<div class="assign-note">“' + esc(c.note) + '”</div>' : '') +
+      (!c.finished && c.done ? '<div class="home-bar" role="img" aria-label="' + c.done + ' of ' + c.total + ' lessons done"><span style="width:' + c.pct + '%"></span></div>' : '') +
+      '</div><a class="assign-go' + (c.finished ? ' is-done' : '') + '" href="' + esc(href) + '">' + label + '</a></div>';
+  }).join('');
+  const html = '<span class="eyebrow">From your company</span><h2>Assigned to your team</h2>' +
+    '<p>' + (left ? 'Your company asked everyone to finish ' + (cards.length === 1 ? 'this course' : 'these courses') + '. ' + left + ' to go.' : 'You have finished everything your company assigned. Nice work.') + '</p>' + rows;
+  boxes.forEach(b => { b.innerHTML = html; b.hidden = false; });
+}
+
 function showCompanyNoticeIfMember(user){
   getDoc(doc(db, 'memberships', user.uid))
     .then(snap => {
@@ -1370,6 +1434,7 @@ async function loadDashboard(user){
   renderProfilePrompt(progress);
   const recommended = assessmentResult ? renderRecommendations(assessmentResult, progress, await fetchCompanyFocus(user)) : [];
   renderHome(user, progress, assessmentResult, recommended, assessmentUrl);
+  renderTeamAssignments(user, progress);
   renderAssignedStat(progress, assessmentResult);
   renderWeekGoal(progress);
   renderBadges(user, progress, assessmentResult);
