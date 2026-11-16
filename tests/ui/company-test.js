@@ -513,6 +513,39 @@ async function readBlob(d){ return await d.blob.text(); }
       btn(items()[1], 'Remove').click(); await until(() => items().length === 1);
       t('Remove takes it off the list', window.__store['orgAssignments/orgA'].items.length === 1 && window.__store['orgAssignments/orgA'].items[0].course === 'discovery-novice');
       t('and the activity log records that too', Object.keys(window.__store).some(k => /^orgs\/orgA\/audit\//.test(k) && window.__store[k].action === 'assignment.removed'));
+    } else if (scn === 'skills'){
+      const grid = () => $('skillsGrid').querySelector('table.hm');
+      const personRows = () => Array.prototype.slice.call(grid().querySelectorAll('tbody tr:not(.hm-avg)'));
+      t('the Team skills card shows a grid of everyone who has taken the assessment', vis('skillsGridCard') && personRows().length === 5, personRows().map(textOf).join(' | '));
+      t('one person who has not taken it is counted, not shown', /1 person hasn't taken the assessment yet/.test(txt('skillsGrid')) && !personRows().some(r => /Cy C/.test(textOf(r))), txt('skillsGrid'));
+      const ann = personRows().find(r => /Ann Admin/.test(textOf(r)));
+      const cells = ann ? Array.prototype.map.call(ann.querySelectorAll('td'), c => c.textContent) : [];
+      t('each cell is the person\'s score in that area, then their overall', cells.join() === '90,70,60,55,40,30,20,70', cells.join());
+      t('cells are shaded by score band', ann.querySelectorAll('td')[0].classList.contains('hm-b4') && ann.querySelectorAll('td')[6].classList.contains('hm-b0'));
+      const avgRow = grid().querySelector('tr.hm-avg');
+      t('a team average row closes the grid', /Team average/.test(textOf(avgRow)) && avgRow.querySelectorAll('td')[6].textContent === '36', textOf(avgRow));
+      const heads = () => Array.prototype.slice.call(grid().querySelectorAll('thead button'));
+      heads()[6].click(); await sleep(50);
+      t('clicking an area sorts by it, lowest first', heads()[6].getAttribute('aria-pressed') === 'true' && /Ben B/.test(textOf(personRows()[0])) && /Dee D/.test(textOf(personRows()[4])), personRows().map(r => r.querySelector('th').textContent).join());
+      heads()[6].click(); await sleep(50);
+      t('clicking it again turns the sort off', heads().every(b => b.getAttribute('aria-pressed') === 'false'));
+      const side = txt('skillsCallouts');
+      t('the biggest team gap is called out with how many are below 40', /Biggest team gap/.test(side) && /AI Fluency — Organizational/.test(side) && /Team average 36\. 3 of 5 people are below 40/.test(side), side);
+      t('the team strength names people who could help', /Team strength/.test(side) && /Ann Admin and Dee D could help others/.test(side), side);
+
+      $('gridTeamOnly').click(); await sleep(50);
+      const teamText = txt('skillsGrid') + ' ' + txt('skillsCallouts');
+      t('Team only shows each area\'s average and counts', grid().querySelectorAll('tbody tr').length === 7 && /Below 40/.test(teamText) && /70 or more/.test(teamText));
+      t('and no names anywhere', !/Ann Admin|Ben B|Dee D|Eli E/.test(teamText), teamText);
+      $('gridByPerson').click(); await sleep(50);
+      t('By person brings the names back', /Ann Admin/.test(txt('skillsGrid')));
+
+      const gapBtn = btn($('skillsCallouts'), 'Assign a course for this gap');
+      t('the gap has a button to assign a course for it', !!gapBtn);
+      gapBtn.click(); await sleep(80);
+      t('it opens the assignment form with the suggested course chosen', vis('assignForm') && /^aiOrg-/.test($('assignCourse').value), $('assignCourse').value);
+      $('assignSaveBtn').click(); await until(() => /Already assigned/.test(txt('skillsCallouts')));
+      t('once assigned, the gap says so instead', !!window.__store['orgAssignments/orgA'] && window.__store['orgAssignments/orgA'].items.some(x => /^aiOrg-/.test(x.course)));
     } else if (scn === 'assigndenied'){
       t('if assignments cannot be read, the rest of the page still works and says so', shown() === 'page' && rowsIn('teamWrap').length === 6 && /Couldn't load the team's assignments/.test(txt('assignList')) && !vis('assignAddBtn'), txt('assignList'));
     } else if (scn === 'sharesdenied'){

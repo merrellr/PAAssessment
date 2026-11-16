@@ -88,6 +88,21 @@ const sleep = (ms) => new Promise(r => setTimeout(r, ms));
         t('with nothing assigned, or no active company, there is no assignments card', home.hidden && learn.hidden);
       }
     }
+    {
+      const gp = document.getElementById('growthPanel');
+      if (window.__scn === 'growth'){
+        const rows = Array.prototype.map.call(gp.querySelectorAll('.growth-row'), r => r.textContent.replace(/\s+/g, ' ').trim());
+        t('with two assessments, My growth compares them, on Then vs now by default', !gp.hidden && /My growth/.test(gp.textContent) && /Overall 38 → 55/.test(gp.textContent) && gp.querySelector('[data-gview="then"]').getAttribute('aria-pressed') === 'true', gp.textContent.slice(0, 200));
+        t('one row per skill area, the biggest gain first, with a fall shown honestly', rows.length === 7 && /Customer & Market Discovery\+25/.test(rows[0]) && /Stakeholder.*-3$/.test(rows[6]), rows.join(' | '));
+        t('it names the biggest jump and the remaining gap', /Your biggest jump:.*Customer & Market Discovery \(\+25\)/.test(gp.textContent) && /Still your gap:.*AI Fluency — Organizational, at 35/.test(gp.textContent));
+        gp.querySelector('[data-gview="trend"]').click(); await sleep(50);
+        t('Over time shows a small line per area', gp.querySelectorAll('.growth-spark polyline').length === 7 && document.getElementById('growthPanel').querySelector('[data-gview="trend"]').getAttribute('aria-pressed') === 'true');
+        t('a retake is offered once 90 days have passed since the last one', /Retake the assessment/.test(gp.textContent) || (Date.now() - Date.parse('2026-10-05T10:00:00.000Z')) < 90 * 864e5);
+      }
+      if (window.__scn === 'member'){
+        t('with one assessment, it shows the starting point (no comparison yet)', !gp.hidden && /Your starting point/.test(gp.textContent) && !gp.querySelector('[data-gview]') && gp.querySelectorAll('.growth-row').length === 7 && /Your biggest opportunity:.*AI Fluency — Organizational/.test(gp.textContent), gp.textContent.slice(0, 200));
+      }
+    }
     if (window.__scn === 'profilecard'){
       const card = document.getElementById('profilePromptCard');
       t('on a later visit, the "tell us about your team" card asks for their details, and says it earns a badge', card.style.display === 'block' && /earns you a badge/.test(card.textContent));
@@ -160,10 +175,12 @@ const sleep = (ms) => new Promise(r => setTimeout(r, ms));
     const hb = document.getElementById('homeBand'), resumeCard = document.getElementById('homeResume'), nextCard = document.getElementById('homeNext'), toolsCard = document.getElementById('homeTools');
     t('the top of the page greets them by first name', !hb.hidden && /, Dash$/.test(document.getElementById('homeHello').textContent), document.getElementById('homeHello').textContent);
     const goA = resumeCard.querySelector('a.btn');
-    t('"Continue where you left off": the course in progress, with the next lesson to open', /Continue where you left off/.test(resumeCard.textContent) && /Customer & Market Discovery/.test(resumeCard.textContent) && (window.__scn === 'threelessons' ? /3 of 5 lessons done/.test(resumeCard.textContent) && goA && /course=discovery-moderate&lesson=4/.test(goA.getAttribute('href')) && /lesson 4/.test(goA.textContent)
+    t('"Your next best step": the course in progress, with the next lesson to open', /Your next best step/.test(resumeCard.textContent) && resumeCard.classList.contains('wide') && /Customer & Market Discovery/.test(resumeCard.textContent) && (window.__scn === 'threelessons' ? /3 of 5 lessons done/.test(resumeCard.textContent) && goA && /course=discovery-moderate&lesson=4/.test(goA.getAttribute('href')) && /lesson 4/.test(goA.textContent)
       : /2 of 5 lessons done/.test(resumeCard.textContent) && goA && /course=discovery-novice&lesson=3/.test(goA.getAttribute('href')) && /lesson 3/.test(goA.textContent)), resumeCard.textContent + ' ' + (goA && goA.getAttribute('href')));
-    const nextA = nextCard.querySelector('a.btn');
-    t('"Up next for you": a recommended course that is not the one in progress', /Up next for you/.test(nextCard.textContent) && nextA && !/discovery-novice/.test(nextA.getAttribute('href')) && /lesson=\d/.test(nextA.getAttribute('href')), nextCard.textContent + ' ' + (nextA && nextA.getAttribute('href')));
+    const side = resumeCard.querySelector('.step-side');
+    t('with a course in progress, "After that" still shows what comes next, and says why', !!side && /After that/.test(side.textContent) && (window.__scn === 'assigned' ? /Product Strategy/.test(side.textContent) && /company asked/.test(side.textContent) : /lesson 1/.test(side.textContent) && /assessment/.test(side.textContent)), side && side.textContent);
+    t('the separate "Up next" card makes way for the wide card', nextCard.hidden);
+    if (window.__scn === 'assigned') t('a company course due tomorrow is the next best step, ahead of the plan', /company assigned it/.test(resumeCard.textContent) && /due tomorrow/.test(resumeCard.textContent));
     if (window.__scn === 'member'){
       await (async () => { const s0 = Date.now(); while (Date.now() - s0 < 3000 && !toolsCard.querySelector('.home-saved')) await sleep(30); })();
       const links = Array.prototype.map.call(toolsCard.querySelectorAll('.home-saved a'), a => a.getAttribute('href'));

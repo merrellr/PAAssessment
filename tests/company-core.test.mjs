@@ -225,5 +225,23 @@ console.log('--- invite helpers (moved here from the owner console) ---');
   t('tokens are 32 hex characters and differ', /^[0-9a-f]{32}$/.test(C.randomToken()) && C.randomToken() !== C.randomToken());
 }
 
+console.log('--- the team skills grid (heat map) ---');
+{
+  const row = (id, name, cat, overall) => ({ id: id, name: name, email: id + '@x.co', progress: { categoryPct: cat, overallPct: overall } });
+  const c = (v) => ({ discovery: v[0], strategy: v[1], prioritization: v[2], execution: v[3], stakeholder: v[4], aiIndividual: v[5], aiOrg: v[6] });
+  const rows = [row('p', 'Priya', c([72, 68, 61, 80, 66, 58, 44]), 64), row('m', 'Marcus', c([55, 49, 57, 74, 52, 41, 30]), 51),
+    row('r', 'Riley', c([30, 25, 28, 45, 36, 44, 18]), 32), row('f', '', c([50, 50, 50, 50, 50, 50, 50]), 50), { id: 'n', name: 'New', progress: { categoryPct: null } }];
+  const g = C.skillGrid(rows, -1);
+  t('only assessed people are in the grid; the others are counted', g.people.length === 4 && g.notAssessed === 1);
+  t('by name by default; a person with no name shows their email', g.people.map(p => p.name).join() === 'f@x.co,Marcus,Priya,Riley', g.people.map(p => p.name).join());
+  t('team averages per area', g.areas[3].avg === 62 && g.areas[6].avg === 36 && g.overallAvg === 49, g.areas.map(a => a.avg).join());
+  t('the biggest gap and strength, with how many are below 40', g.gap.key === 'aiOrg' && g.gap.below40 === 2 && g.strength.key === 'execution');
+  t('mentors: the top two scorers (60+) in the strength', g.mentors.join() === 'Priya,Marcus');
+  t('the course for the gap matches the team\'s level there', g.gapCourse === 'aiOrg-moderate', g.gapCourse);
+  t('sorting by an area puts the lowest first', C.skillGrid(rows, 6).people.map(p => p.name).join() === 'Riley,Marcus,Priya,f@x.co');
+  t('the colour bands', [0, 24, 25, 39, 40, 55, 69, 70, 100].map(C.scoreBand).join() === '0,0,1,1,2,3,3,4,4');
+  t('an empty team: no gap, no strength', C.skillGrid([], -1).gap === null && C.skillGrid([], -1).overallAvg === null);
+}
+
 console.log('\n' + pass + ' passed, ' + fail + ' failed');
 process.exit(fail ? 1 : 0);

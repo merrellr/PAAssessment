@@ -376,6 +376,41 @@
     return out;
   }
 
+  /* ----------------------------------------------------- team skills grid */
+  // The heat map on the company dashboard: each assessed person's latest score in each skill area, the team
+  // average per area, the biggest gap and strength, and who could mentor others in the strength.
+  // sortBy: -1 by name, else an area index (lowest first, so gaps rise to the top).
+  const SCORE_BANDS = [0, 25, 40, 55, 70];   // the colour steps: 0-24, 25-39, 40-54, 55-69, 70+
+  function scoreBand(v) { let b = 0; SCORE_BANDS.forEach((min, i) => { if (v >= min) b = i; }); return b; }
+  function skillGrid(rows, sortBy) {
+    const people = rows.filter(r => r.progress && r.progress.categoryPct).map(r => ({
+      id: r.id, name: r.name || r.email || 'Name not shared',
+      scores: DOMAINS.map(d => { const v = Number(r.progress.categoryPct[d[0]]); return isFinite(v) ? Math.round(v) : null; }),
+      overall: r.progress.overallPct
+    }));
+    const k = typeof sortBy === 'number' ? sortBy : -1;
+    people.sort((a, b) => k < 0 ? a.name.localeCompare(b.name) : ((a.scores[k] === null ? 999 : a.scores[k]) - (b.scores[k] === null ? 999 : b.scores[k])) || a.name.localeCompare(b.name));
+    const areas = DOMAINS.map((d, i) => {
+      const xs = people.map(p => p.scores[i]).filter(v => v !== null);
+      return { key: d[0], label: d[1], avg: xs.length ? Math.round(xs.reduce((a, b) => a + b, 0) / xs.length) : null,
+        below40: xs.filter(v => v < 40).length, above70: xs.filter(v => v >= 70).length, n: xs.length };
+    });
+    const scored = areas.filter(a => a.avg !== null);
+    const gap = scored.length >= 2 ? scored.reduce((lo, a) => (a.avg < lo.avg ? a : lo)) : null;
+    const strength = scored.length >= 2 ? scored.reduce((hi, a) => (a.avg > hi.avg ? a : hi)) : null;
+    let mentors = [];
+    if (strength) {
+      const i = DOMAINS.findIndex(d => d[0] === strength.key);
+      mentors = people.filter(p => p.scores[i] !== null && p.scores[i] >= 60).sort((a, b) => b.scores[i] - a.scores[i]).slice(0, 2).map(p => p.name);
+    }
+    const overalls = people.map(p => p.overall).filter(v => typeof v === 'number');
+    return { people: people, areas: areas, gap: gap, strength: strength, mentors: mentors,
+      overallAvg: overalls.length ? Math.round(overalls.reduce((a, b) => a + b, 0) / overalls.length) : null,
+      notAssessed: rows.length - people.length,
+      // the course that fits the team in its biggest gap: the level its average points to
+      gapCourse: gap ? gap.key + '-' + tierSlugForPct(gap.avg) : '' };
+  }
+
   /* ----------------------------------------------------------- focus areas */
   // New companies start with every skill area ranked in the framework's own
   // order. The ranking only breaks ties in a member's recommendations, so a
@@ -528,6 +563,7 @@
     csvCell, buildInviteCsv, prettyCourseId, tierSlugForPct,
     assignedCourses, lessonsDone, memberProgress, buildTeamRows, filterTeamRows, rollup, buildTeamCsv, buildAnswersCsv,
     AUDIT_ACTIONS, buildAuditEntry, describeAudit,
+    SCORE_BANDS, scoreBand, skillGrid,
     DEFAULT_FOCUS_ORDER, FOCUS_TOP, moveItem, availableFocus, placeFocus, removeFocus, focusIsCustom, focusRank, focusProgress
   };
 })(typeof globalThis !== 'undefined' ? globalThis : window);
