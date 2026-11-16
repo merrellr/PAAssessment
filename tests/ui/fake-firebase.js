@@ -29,8 +29,14 @@ function clone(v){
 // Applies a resolved update onto an existing document, expanding arrayUnion markers.
 function applyUpdate(existing, data){
   const target = existing || {};
-  Object.keys(data).forEach(k => {
-    const v = data[k];
+  Object.keys(data).forEach(key => {
+    const v = data[key];
+    // a dotted field ("members.uAnn") updates one field inside a map, as in the real SDK
+    let target = existing || {}, k = key;
+    if (key.indexOf('.') > -1){
+      const parts = key.split('.'); k = parts.pop();
+      parts.forEach(p => { if (!target[p] || typeof target[p] !== 'object') target[p] = {}; target = target[p]; });
+    }
     if (v && typeof v === 'object' && v.__increment !== undefined){ target[k] = (Number(target[k]) || 0) + v.__increment; return; }
     if (v && typeof v === 'object' && v.__arrayUnion){
       const cur = Array.isArray(target[k]) ? target[k] : [];
