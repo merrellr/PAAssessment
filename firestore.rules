@@ -553,6 +553,81 @@ service cloud.firestore {
         && d.updatedAt == request.time;
     }
 
+    /* ---------------------------------------------------------- team mode (team-session.html)
+       A facilitator scores a scorecard with their team. Anyone signed in with the link can open the session and
+       join it; each person's scores stay private (even from the facilitator) until the facilitator reveals them. */
+    function validTeamSession(d) {
+      return d.keys().hasOnly(['owner', 'ownerName', 'tool', 'title', 'criteria', 'features', 'status', 'members', 'submitted', 'agreed', 'createdAt', 'updatedAt'])
+        && d.tool == 'scorecard'
+        && d.title is string && d.title.size() <= 100
+        && d.ownerName is string && d.ownerName.size() <= 80
+        && d.criteria is list && d.criteria.size() >= 1 && d.criteria.size() <= 8
+        && d.features is list && d.features.size() >= 2 && d.features.size() <= 30
+        && d.status in ['scoring', 'revealed', 'agreed']
+        && d.members is map && d.members.size() <= 50
+        && d.submitted is map
+        && (d.agreed == null || (d.agreed is list && d.agreed.size() == d.features.size()))
+        && d.updatedAt == request.time;
+    }
+    function teamSession(sid) {
+      return get(/databases/$(database)/documents/teamSessions/$(sid)).data;
+    }
+
+    match /teamSessions/{sid} {
+      // the link is the invitation: anyone signed in who has it can open the session
+      allow get: if isSignedIn();
+      allow list: if isSignedIn() && resource.data.owner == request.auth.uid;
+
+      allow create: if isSignedIn() && validTeamSession(request.resource.data)
+        && request.resource.data.owner == request.auth.uid
+        && request.resource.data.status == 'scoring'
+        && request.resource.data.members.keys().hasOnly([request.auth.uid])
+        && request.resource.data.submitted.size() == 0
+        && request.resource.data.agreed == null
+        && request.resource.data.createdAt == request.time;
+
+      // the facilitator runs it: reveal, hide again, agree, rename (the owner, the setup and when it began stay)
+      allow update: if isSignedIn() && resource.data.owner == request.auth.uid
+        && validTeamSession(request.resource.data)
+        && request.resource.data.owner == resource.data.owner
+        && request.resource.data.criteria == resource.data.criteria
+        && request.resource.data.features == resource.data.features
+        && request.resource.data.createdAt == resource.data.createdAt
+        && request.resource.data.members == resource.data.members
+        && request.resource.data.submitted.diff(resource.data.submitted).affectedKeys().hasOnly([request.auth.uid]);
+
+      // anyone else can only add their own name (join) and mark their own scores as done, while scoring is open
+      allow update: if isSignedIn() && resource.data.owner != request.auth.uid
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['members', 'submitted', 'updatedAt'])
+        && request.resource.data.members.diff(resource.data.members).affectedKeys().hasOnly([request.auth.uid])
+        && request.resource.data.submitted.diff(resource.data.submitted).affectedKeys().hasOnly([request.auth.uid])
+        && (!(request.auth.uid in request.resource.data.members) || (request.resource.data.members[request.auth.uid] is string && request.resource.data.members[request.auth.uid].size() <= 80))
+        && (request.resource.data.submitted.diff(resource.data.submitted).affectedKeys().size() == 0 || resource.data.status == 'scoring')
+        && request.resource.data.members.size() <= 50
+        && request.resource.data.updatedAt == request.time;
+
+      allow delete: if isSignedIn() && resource.data.owner == request.auth.uid;
+
+      // each person's scores: their own, always; everyone else's only once the facilitator has revealed them
+      match /scores/{uid} {
+        allow get: if isSignedIn() && (uid == request.auth.uid
+          || (teamSession(sid).status != 'scoring'
+              && (request.auth.uid in teamSession(sid).members || teamSession(sid).owner == request.auth.uid)));
+        allow list: if isSignedIn() && teamSession(sid).status != 'scoring'
+          && (request.auth.uid in teamSession(sid).members || teamSession(sid).owner == request.auth.uid);
+        allow create, update: if isSignedIn() && uid == request.auth.uid
+          && teamSession(sid).status == 'scoring'
+          && request.auth.uid in teamSession(sid).members
+          && request.resource.data.keys().hasOnly(['name', 'scores', 'updatedAt'])
+          && request.resource.data.name is string && request.resource.data.name.size() <= 80
+          && request.resource.data.scores is list && request.resource.data.scores.size() == teamSession(sid).features.size()
+          && request.resource.data.scores.join('').matches('^[0-5]*$')
+          && request.resource.data.scores.join('').size() <= 240
+          && request.resource.data.updatedAt == request.time;
+        allow delete: if isSignedIn() && (uid == request.auth.uid || teamSession(sid).owner == request.auth.uid);
+      }
+    }
+
     match /savedTools/{docId} {
       allow read, delete: if isSignedIn() && resource.data.uid == request.auth.uid;
       allow create: if isSignedIn() && validSavedTool(request.resource.data) && request.resource.data.createdAt == request.time;

@@ -522,6 +522,8 @@ function actionsMenu(get, opts){
   pop.append(item('Make a copy', copy));
   if (!o.inWorkspace) pop.append(item('Share a copy…', openShare));
   pop.append(item('Download CSV', downloadCsv));
+  // team mode: everyone scores this scorecard alone, then the scores are revealed and the team agrees a ranking
+  if (tool === 'scorecard' && get().id) pop.append(item('Score as a team…', (d) => { location.href = '/team-session?from=' + encodeURIComponent(d.id); }));
   if (o.inWorkspace) pop.append(item('New ' + C.TOOLS[tool].noun, () => leaveWorkspace().then(() => navigate('new=' + tool))));
   pop.append(el('hr', {}), item('Delete', remove, 'danger'));
   return pop;

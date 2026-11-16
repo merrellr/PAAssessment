@@ -802,6 +802,61 @@ await deny('nobody else can overwrite it', () => setDoc(doc(bob, 'savedTools/t1'
 await deny('nobody else can delete it', () => deleteDoc(doc(bob, 'savedTools/t1')));
 await allow('the owner deletes it', () => deleteDoc(doc(ann, 'savedTools/t1')));
 
+console.log('\n--- team mode (teamSessions) ---');
+{
+  const fac = asUser('fac', 'fac@x.com'), pri = asUser('pri', 'pri@x.com'), mar = asUser('mar', 'mar@x.com'), nosy = asUser('nosy', 'nosy@x.com');
+  const anon = env.unauthenticatedContext().firestore();
+  const session = (over = {}) => Object.assign({ owner: 'fac', ownerName: 'Fran', tool: 'scorecard', title: 'Q1 roadmap',
+    criteria: [{ name: 'Value', weight: 5, cost: false }, { name: 'Effort', weight: 3, cost: true }],
+    features: ['Mobile app', 'SSO'], status: 'scoring', members: { fac: 'Fran' }, submitted: {}, agreed: null,
+    createdAt: serverTimestamp(), updatedAt: serverTimestamp() }, over);
+  const S = 'teamSessions/s1';
+  const scores = (name, rows) => ({ name, scores: rows || ['52', '33'], updatedAt: serverTimestamp() });
+
+  await allow('a signed-in person starts a team session', () => setDoc(doc(fac, S), session()));
+  await deny('not for someone else', () => setDoc(doc(pri, 'teamSessions/s2'), session()));
+  await deny('not already revealed', () => setDoc(doc(fac, 'teamSessions/s3'), session({ status: 'revealed' })));
+  await deny('not with other people already in it', () => setDoc(doc(fac, 'teamSessions/s4'), session({ members: { fac: 'Fran', pri: 'Priya' } })));
+  await deny('not with fewer than two features', () => setDoc(doc(fac, 'teamSessions/s5'), session({ features: ['One'] })));
+  await deny('not with extra fields', () => setDoc(doc(fac, 'teamSessions/s6'), session({ secret: 1 })));
+  await deny('signed-out visitors cannot open a session', () => getDoc(doc(anon, S)));
+  await allow('anyone signed in with the link can open it', () => getDoc(doc(pri, S)));
+  await allow('the facilitator lists their own sessions', () => getDocs(query(collection(fac, 'teamSessions'), where('owner', '==', 'fac'))));
+  await deny('nobody can list other people\'s sessions', () => getDocs(collection(pri, 'teamSessions')));
+
+  await allow('someone joins by adding their own name', () => updateDoc(doc(pri, S), { 'members.pri': 'Priya', updatedAt: serverTimestamp() }));
+  await allow('a second person joins', () => updateDoc(doc(mar, S), { 'members.mar': 'Marcus', updatedAt: serverTimestamp() }));
+  await deny('nobody can add someone else', () => updateDoc(doc(pri, S), { 'members.nosy': 'Nosy', updatedAt: serverTimestamp() }));
+  await deny('a member cannot reveal the scores', () => updateDoc(doc(pri, S), { status: 'revealed', updatedAt: serverTimestamp() }));
+  await deny('or change the features', () => updateDoc(doc(pri, S), { features: ['A', 'B'], updatedAt: serverTimestamp() }));
+
+  await allow('a member saves their own scores', () => setDoc(doc(pri, S + '/scores/pri'), scores('Priya')));
+  await deny('not someone else\'s', () => setDoc(doc(pri, S + '/scores/mar'), scores('Priya')));
+  await deny('not without joining first', () => setDoc(doc(nosy, S + '/scores/nosy'), scores('Nosy')));
+  await deny('not with the wrong number of features', () => setDoc(doc(pri, S + '/scores/pri'), scores('Priya', ['52'])));
+  await deny('not with anything but digits 0 to 5', () => setDoc(doc(pri, S + '/scores/pri'), scores('Priya', ['5x', '33'])));
+  await allow('and marks them done', () => updateDoc(doc(pri, S), { 'submitted.pri': true, updatedAt: serverTimestamp() }));
+  await allow('the facilitator scores too', () => setDoc(doc(fac, S + '/scores/fac'), scores('Fran', ['33', '42'])));
+  await allow('and marks their own done', () => updateDoc(doc(fac, S), { 'submitted.fac': true, updatedAt: serverTimestamp() }));
+  await allow('a member reads their own scores while scoring', () => getDoc(doc(pri, S + '/scores/pri')));
+  await deny('but nobody sees anyone else\'s before the reveal', () => getDoc(doc(mar, S + '/scores/pri')));
+  await deny('not even the facilitator', () => getDoc(doc(fac, S + '/scores/pri')));
+  await deny('nor can they list them', () => getDocs(collection(fac, S + '/scores')));
+
+  await allow('the facilitator reveals the scores', () => updateDoc(doc(fac, S), { status: 'revealed', updatedAt: serverTimestamp() }));
+  await allow('now members see everyone\'s scores', () => getDocs(collection(mar, S + '/scores')));
+  await allow('and the facilitator does too', () => getDoc(doc(fac, S + '/scores/pri')));
+  await deny('someone who never joined still cannot', () => getDocs(collection(nosy, S + '/scores')));
+  await deny('scores cannot change once revealed', () => setDoc(doc(pri, S + '/scores/pri'), scores('Priya', ['11', '11'])));
+  await deny('nor be marked done', () => updateDoc(doc(mar, S), { 'submitted.mar': true, updatedAt: serverTimestamp() }));
+  await allow('the facilitator agrees the team\'s scores', () => updateDoc(doc(fac, S), { status: 'agreed', agreed: ['42', '33'], updatedAt: serverTimestamp() }));
+  await deny('the agreed scores must cover every feature', () => updateDoc(doc(fac, S), { agreed: ['42'], updatedAt: serverTimestamp() }));
+  await deny('the facilitator cannot change who is in it', () => updateDoc(doc(fac, S), { 'members.nosy': 'Nosy', updatedAt: serverTimestamp() }));
+  await deny('a member cannot delete the session', () => deleteDoc(doc(pri, S)));
+  await allow('a member removes their own scores', () => deleteDoc(doc(pri, S + '/scores/pri')));
+  await allow('the facilitator deletes the session', () => deleteDoc(doc(fac, S)));
+}
+
 console.log('\n==============================');
 console.log(passes + ' passed, ' + failures + ' failed');
 await env.cleanup();

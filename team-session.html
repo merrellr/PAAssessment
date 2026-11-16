@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Team scoring — Product Advisory Learning</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" href="/images/icons/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="/images/icons/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="/images/icons/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@600&family=Lato:ital,wght@0,300;0,400;0,700;0,900;1,400&display=swap" rel="stylesheet">
+<script src="pa-prefs.js"></script>
+<style>
+  :root{
+    --navy: #1A4584; --navy-deep: #12305e; --gray: #9AA3AD; --cyan: #35C2E8;
+    --bg: #F5F8FB; --surface: #FFFFFF; --ink: #16213E; --ink-soft: #4B5768; --line: #E3E9F0;
+    --warn: #b42318; --warn-bg: #fdecea; --mid: #7a5300; --mid-bg: #fff4d6; --ok: #1e7a46; --ok-bg: #e7f6ee;
+  }
+  @media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){ --warn: #ff8a80; --warn-bg: #3a1d1b; --mid: #f5c451; --mid-bg: #3a2f12; --ok: #6fd39b; --ok-bg: #16301f; } }
+  :root[data-theme="dark"]{ --warn: #ff8a80; --warn-bg: #3a1d1b; --mid: #f5c451; --mid-bg: #3a2f12; --ok: #6fd39b; --ok-bg: #16301f; }
+  *{ box-sizing: border-box; }
+  body{ margin:0; background: var(--bg); font-family:var(--sans); color: var(--ink); }
+  .wrap{ max-width: 1120px; margin: 0 auto; padding: 24px 16px 64px; }
+  [hidden]{ display:none !important; }
+  .eyebrow{ display:block; font-size:0.75rem; font-weight:700; letter-spacing:0.06em; text-transform:uppercase; color: var(--cyan-ink, var(--cyan)); margin-bottom: 6px; }
+  h1{ font-family:var(--display); font-size: 1.75rem; margin: 0 0 6px; color: var(--navy-deep); line-height: 1.2; }
+  h2{ font-family:var(--display); font-size: 1.125rem; margin: 0 0 8px; color: var(--navy-deep); }
+  p{ line-height:1.55; color: var(--ink-soft); font-size: 0.9375rem; margin: 0 0 10px; }
+  a{ color: var(--navy); }
+  .card{ background: var(--surface); border-radius: 16px; border: 1px solid var(--line); padding: 22px; margin-bottom: 18px; }
+  .btn{ display:inline-flex; align-items:center; justify-content:center; gap: 7px; min-height: 44px; font-family:var(--display); font-weight:700; font-size:0.9375rem; border-radius: 22px; padding: 0 20px; border: 1.5px solid transparent; cursor:pointer; text-decoration:none; }
+  .btn-primary{ background: var(--primary, var(--navy)); color: var(--btn-ink, #fff); }
+  .btn-primary:hover{ background: var(--primary-strong, var(--navy-deep)); }
+  .btn-ghost{ background: var(--surface); color: var(--navy); border-color: var(--line); }
+  .btn-ghost:hover{ border-color: var(--cyan); }
+  .btn:disabled{ opacity: .5; cursor: default; }
+  .btn:focus-visible, .seg button:focus-visible, select:focus-visible, input:focus-visible{ outline: 3px solid var(--cyan); outline-offset: 2px; }
+  .notice:empty, .error:empty{ display:none; }
+  .notice{ font-size: 0.875rem; color: var(--ok); background: var(--ok-bg); border-radius: 10px; padding: 9px 14px; margin: 0 0 16px; }
+  .error{ font-size: 0.875rem; color: var(--warn); margin: 0 0 12px; }
+  .text-input{ width:100%; max-width: 520px; padding: 11px 14px; border: 1.5px solid var(--line); border-radius: 9px; font: 1rem var(--sans); background: var(--surface); color: var(--ink); }
+  .head{ display:flex; flex-wrap:wrap; justify-content:space-between; align-items:flex-end; gap: 12px; margin-bottom: 16px; }
+  /* the four steps */
+  .steps{ list-style:none; margin: 0 0 18px; padding:0; display:grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; }
+  .steps li{ background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; font-size: 0.875rem; }
+  .steps li b{ display:block; color: var(--navy-deep); }
+  .steps li span{ color: var(--ink-soft); font-size: 0.8125rem; }
+  .steps li.now{ border: 2px solid var(--cyan); }
+  .steps li.done b{ color: var(--ok); }
+  /* facilitator panel */
+  .fac{ display:flex; flex-wrap:wrap; gap: 14px 24px; align-items:flex-start; }
+  .fac > div{ flex: 1 1 300px; min-width: 0; }
+  .share-row{ display:flex; gap: 8px; flex-wrap: wrap; }
+  .share-row input{ flex: 1 1 260px; }
+  .people{ list-style:none; margin: 8px 0 0; padding:0; display:flex; flex-wrap:wrap; gap: 8px; }
+  .people li{ display:inline-flex; align-items:center; gap: 6px; padding: 5px 11px; border-radius: 16px; background: var(--bg); border: 1px solid var(--line); font-size: 0.8125rem; color: var(--ink); }
+  .people li.in{ background: var(--ok-bg); border-color: transparent; color: var(--ok); font-weight: 700; }
+  .fac-actions{ display:flex; flex-wrap:wrap; gap: 10px; margin-top: 12px; }
+  /* scoring */
+  .feat{ border-top: 1px solid var(--line); padding: 14px 0; }
+  .feat:first-of-type{ border-top: 0; }
+  .feat h3{ margin: 0 0 8px; font-size: 1rem; color: var(--ink); }
+  .crit{ display:flex; flex-wrap:wrap; align-items:center; gap: 6px 14px; padding: 4px 0; }
+  .crit-name{ flex: 1 1 200px; font-size: 0.875rem; color: var(--ink-soft); }
+  .crit-name small{ color: var(--gray); }
+  .seg{ display:inline-flex; gap: 4px; }
+  .seg button{ width: 40px; height: 40px; border-radius: 10px; border: 1.5px solid var(--line); background: var(--surface); color: var(--ink); font: 700 0.9375rem var(--sans); cursor:pointer; }
+  .seg button[aria-pressed="true"]{ background: var(--primary, var(--navy)); border-color: var(--primary, var(--navy)); color: var(--btn-ink, #fff); }
+  .score-foot{ position: sticky; bottom: 0; display:flex; flex-wrap:wrap; align-items:center; gap: 10px 16px; justify-content:space-between; background: var(--surface); border-top: 1px solid var(--line); padding: 12px 0 2px; margin-top: 6px; }
+  .bar{ height: 6px; border-radius: 3px; background: var(--line); overflow:hidden; width: 200px; max-width: 100%; }
+  .bar i{ display:block; height:100%; background: var(--primary, var(--navy)); }
+  /* the reveal: a dot per person on a 0-100 line */
+  .reveal-grid{ display:flex; flex-wrap:wrap; gap: 18px; align-items:flex-start; }
+  .reveal-main{ flex: 999 1 600px; min-width: 0; }
+  .reveal-side{ flex: 1 1 280px; min-width: 0; display:flex; flex-direction:column; gap: 14px; }
+  .legend{ display:flex; flex-wrap:wrap; gap: 12px; margin: 8px 0 4px; font-size: 0.8125rem; color: var(--ink-soft); }
+  .legend span{ display:inline-flex; align-items:center; gap: 6px; }
+  .legend i{ width: 12px; height: 12px; border-radius: 50%; display:inline-block; }
+  .legend .avg-key{ width: 3px; height: 14px; border-radius: 0; background: var(--ink); }
+  .frow{ display:grid; grid-template-columns: minmax(130px, 210px) minmax(0, 1fr) 118px; gap: 16px; align-items:center; padding: 12px 0; border-top: 1px solid var(--line); }
+  .frow-name b{ display:block; font-size: 0.9375rem; }
+  .frow-name span{ font-size: 0.8125rem; color: var(--ink-soft); }
+  .track{ position:relative; height: 30px; }
+  .track .base{ position:absolute; left:0; right:0; top: 14px; height: 2px; background: var(--line); }
+  .track .range{ position:absolute; top: 12px; height: 6px; border-radius: 3px; background: color-mix(in srgb, var(--ink-soft) 25%, transparent); }
+  .track .avg{ position:absolute; top: 5px; width: 3px; height: 20px; margin-left: -1px; background: var(--ink); }
+  .track .dot{ position:absolute; top: 7px; width: 16px; height: 16px; margin-left: -8px; border-radius: 50%; border: 2px solid var(--surface); }
+  .badge{ justify-self:end; font-size: 0.75rem; font-weight: 700; padding: 4px 10px; border-radius: 14px; white-space: nowrap; }
+  .badge.discuss{ background: var(--warn-bg); color: var(--warn); } .badge.gap{ background: var(--mid-bg); color: var(--mid); } .badge.agreed{ background: var(--ok-bg); color: var(--ok); }
+  .axis{ display:flex; justify-content:space-between; font-size: 0.75rem; color: var(--gray); }
+  .frow.axis-row{ border-top: 0; padding-top: 2px; }
+  .side-card{ background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 18px; }
+  .side-card .eyebrow.red{ color: var(--warn); } .side-card .eyebrow.green{ color: var(--ok); }
+  .side-card ol, .side-card ul{ margin: 8px 0 0; padding-left: 20px; font-size: 0.875rem; line-height: 1.5; color: var(--ink); }
+  .side-card li + li{ margin-top: 8px; }
+  /* agreeing */
+  .agree-table{ width:100%; border-collapse: collapse; font-size: 0.875rem; }
+  .agree-table th, .agree-table td{ padding: 8px 6px; border-bottom: 1px solid var(--line); text-align:left; }
+  .agree-table select{ padding: 6px; border-radius: 8px; border: 1.5px solid var(--line); background: var(--surface); color: var(--ink); font: inherit; }
+  .agree-wrap{ overflow-x:auto; }
+  .rank{ list-style:none; margin: 0; padding: 0; counter-reset: r; }
+  .rank li{ display:flex; align-items:center; gap: 12px; padding: 10px 0; border-top: 1px solid var(--line); }
+  .rank .n{ width: 30px; height: 30px; border-radius: 50%; display:grid; place-items:center; background: var(--primary, var(--navy)); color: var(--btn-ink, #fff); font-weight: 700; font-size: 0.875rem; flex:none; }
+  .rank .nm{ flex: 1; font-weight: 700; }
+  .rank .sc{ color: var(--ink-soft); font-variant-numeric: tabular-nums; }
+  .empty{ text-align:center; padding: 28px 12px; }
+  @media (max-width: 640px){ .frow{ grid-template-columns: 1fr auto; } .frow .track, .frow .axis{ grid-column: 1 / -1; grid-row: 2; } .frow.axis-row > span{ display:none; } }
+</style>
+<link rel="stylesheet" href="pa-theme.css">
+<script src="team-core.js"></script>
+</head>
+<body>
+<script src="pa-shell.js"></script>
+<div class="wrap">
+  <div class="notice" id="notice" role="status"></div>
+  <div class="error" id="errorLine" role="alert"></div>
+
+  <section id="stateLoading" class="card empty"><p>Loading…</p></section>
+
+  <section id="stateSignedOut" class="card empty" hidden>
+    <h1>Sign in to score with your team</h1>
+    <p>Team scoring is part of Product Advisory Learning. Sign in (or create a free account), then open this link again.</p>
+    <a class="btn btn-primary" id="signInLink" href="/my-tools">Sign in</a>
+  </section>
+
+  <section id="stateMissing" class="card empty" hidden>
+    <h1>This session isn't available</h1>
+    <p id="missingWhy">The link may be incomplete, or the facilitator may have deleted the session.</p>
+    <a class="btn btn-ghost" href="/my-tools">Go to My Toolkits</a>
+  </section>
+
+  <!-- starting a session from a saved scorecard -->
+  <section id="stateCreate" hidden>
+    <span class="eyebrow">Feature Prioritization Scorecard · Team mode</span>
+    <h1>Score it as a team</h1>
+    <p>Everyone scores the same features on their own first, so nobody anchors on the loudest voice. Then you reveal the scores side by side, talk about the biggest gaps, and agree the team's ranking.</p>
+    <div class="card">
+      <label for="createTitle"><h2>Name the session</h2></label>
+      <input class="text-input" id="createTitle" maxlength="100">
+      <p style="margin-top:14px;" id="createWhat"></p>
+      <div class="error" id="createError"></div>
+      <button class="btn btn-primary" type="button" id="createBtn">Start the session</button>
+    </div>
+  </section>
+
+  <!-- a session -->
+  <section id="stateSession" hidden>
+    <div class="head">
+      <div>
+        <span class="eyebrow">Feature Prioritization Scorecard · Team mode</span>
+        <h1 id="sTitle"></h1>
+        <p id="sWho" style="margin:0;"></p>
+      </div>
+    </div>
+    <ol class="steps" id="steps"></ol>
+
+    <div class="card" id="facPanel" hidden>
+      <div class="fac">
+        <div>
+          <h2>Invite your team</h2>
+          <p style="margin-bottom:8px;">Send this link. Anyone with a Product Advisory Learning account can join and score.</p>
+          <div class="share-row"><input class="text-input" id="shareLink" readonly aria-label="Link to this session"><button class="btn btn-ghost" type="button" id="copyLink">Copy link</button></div>
+        </div>
+        <div>
+          <h2 id="peopleHead">Who's in</h2>
+          <ul class="people" id="people"></ul>
+          <div class="fac-actions" id="facActions"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card empty" id="joinPanel" hidden>
+      <h2 id="joinHead">Join this team session</h2>
+      <p>You'll score each feature on your own. Nobody sees your scores, not even the facilitator, until they're revealed.</p>
+      <button class="btn btn-primary" type="button" id="joinBtn">Join and start scoring</button>
+    </div>
+
+    <div class="card" id="scorePanel" hidden>
+      <h2>Your scores</h2>
+      <p>Score each feature from 1 (low) to 5 (high) on each criterion. Your choices save as you go.</p>
+      <div id="scoreGrid"></div>
+      <div class="score-foot">
+        <div><div id="scoreProgress" style="font-size:0.875rem; color:var(--ink-soft); margin-bottom:6px;"></div><div class="bar"><i id="scoreBar"></i></div></div>
+        <button class="btn btn-primary" type="button" id="submitBtn">I'm done scoring</button>
+      </div>
+    </div>
+
+    <div class="card empty" id="waitPanel" hidden>
+      <h2>Thanks, your scores are in</h2>
+      <p id="waitText"></p>
+      <button class="btn btn-ghost" type="button" id="editBtn">Change my scores</button>
+    </div>
+
+    <div id="revealPanel" hidden>
+      <div class="reveal-grid">
+        <div class="card reveal-main">
+          <h2>Each person's score (0 to 100)</h2>
+          <div class="legend" id="legend"></div>
+          <div id="rows"></div>
+        </div>
+        <div class="reveal-side">
+          <div class="side-card" id="discussCard"><span class="eyebrow red">Discuss these first</span><ol id="discussList"></ol></div>
+          <div class="side-card" id="agreedCard"><span class="eyebrow green">Already agreed</span><p id="agreedText" style="margin:6px 0 0; font-size:0.875rem;"></p></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card" id="agreePanel" hidden>
+      <h2>Agree the team's scores</h2>
+      <p>These start from the team's average on each criterion. Change any of them after you've talked it through; the ranking updates as you go.</p>
+      <div class="agree-wrap"><table class="agree-table" id="agreeTable"></table></div>
+      <h2 style="margin-top:18px;">The team's ranking</h2>
+      <ol class="rank" id="agreeRank"></ol>
+      <div class="fac-actions"><button class="btn btn-primary" type="button" id="saveAgreed">Save the team ranking</button><button class="btn btn-ghost" type="button" id="cancelAgree">Back to the scores</button></div>
+    </div>
+
+    <div class="card" id="resultPanel" hidden>
+      <span class="eyebrow">Agreed</span>
+      <h2>The team's ranking</h2>
+      <ol class="rank" id="resultRank"></ol>
+      <div class="fac-actions"><button class="btn btn-primary" type="button" id="saveToToolkit">Save to My Toolkits</button><button class="btn btn-ghost" type="button" id="showScores">See everyone's scores</button></div>
+    </div>
+  </section>
+
+  <div class="site-foot" style="margin-top:28px; padding:20px 0; border-top:1px solid var(--line); text-align:center; font-size:0.75rem; color:var(--gray);">
+    © <span id="footerYear"></span> Product Advisory, LLC. All rights reserved. &nbsp;·&nbsp;
+    <a href="https://www.productadvisory.co/privacy-policy" target="_blank" rel="noopener" style="color:var(--gray); text-decoration:underline;">Privacy Policy</a> &nbsp;·&nbsp;
+    <a href="https://www.productadvisory.co/terms-of-use" target="_blank" rel="noopener" style="color:var(--gray); text-decoration:underline;">Terms of Use</a>
+  </div>
+</div>
+<script>document.getElementById("footerYear").textContent = new Date().getFullYear();</script>
+<script type="module">
+const firebaseConfig = {
+  apiKey: "AIzaSyAcECtS5c6WeOhKlwRK-LYFE47npbuq_eU",
+  authDomain: "auth.productadvisory.co",
+  projectId: "product-advisory-lms",
+  storageBucket: "product-advisory-lms.firebasestorage.app",
+  messagingSenderId: "1081134406437",
+  appId: "1:1081134406437:web:72e28604d093219e7698cc"
+};
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
+import {
+  getFirestore, doc, getDoc, getDocs, setDoc, addDoc, updateDoc, collection, serverTimestamp
+} from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+const T = window.TeamCore;
+const $ = (id) => document.getElementById(id);
+const params = new URLSearchParams(location.search);
+const sid = (params.get('s') || '').replace(/[^A-Za-z0-9]/g, '').slice(0, 40);
+const fromId = (params.get('from') || '').replace(/[^A-Za-z0-9_-]/g, '').slice(0, 60);
+const CORE_URL = window.PA_TOOL_CORE_BASE ? window.PA_TOOL_CORE_BASE + 'scorecard-core.js' : 'https://www.productadvisory.co/assets/js/scorecard-core.js';
+const COLORS = ['#1c4587', '#e8833a', '#0b7ea6', '#8a5cc2', '#2e8b57', '#c2477a', '#7a6a12', '#4b5768'];
+const track = (n, p) => { if (window.PAAnalytics) PAAnalytics.event(n, p || {}); };
+
+let user = null, session = null, mine = null, people = [], editing = false, agreeDraft = null, poll = null;
+
+function el(tag, attrs, ...kids){
+  const n = document.createElement(tag);
+  Object.entries(attrs || {}).forEach(([k, v]) => {
+    if (v === null || v === undefined || v === false) return;
+    if (k === 'text') n.textContent = v;
+    else if (k === 'class') n.className = v;
+    else if (k.startsWith('on') && typeof v === 'function') n.addEventListener(k.slice(2), v);
+    else n.setAttribute(k, v === true ? '' : v);
+  });
+  kids.flat().forEach(k => { if (k !== null && k !== undefined && k !== false) n.append(k.nodeType ? k : document.createTextNode(String(k))); });
+  return n;
+}
+function show(id){ ['stateLoading', 'stateSignedOut', 'stateMissing', 'stateCreate', 'stateSession'].forEach(x => { $(x).hidden = x !== id; }); }
+function fail(msg, err){ if (err) console.error(err); $('errorLine').textContent = msg; }
+const myName = () => (user.displayName || (user.email || '').split('@')[0] || 'Me').slice(0, 80);
+const setup = () => ({ title: session.title, criteria: session.criteria, features: session.features });
+const isOwner = () => session && user && session.owner === user.uid;
+const joined = () => session && user && Object.prototype.hasOwnProperty.call(session.members || {}, user.uid);
+const submittedCount = () => Object.keys(session.submitted || {}).filter(k => session.submitted[k]).length;
+const memberCount = () => Object.keys(session.members || {}).length;
+
+function loadScorecardCore(){
+  if (window.ScorecardCore) return Promise.resolve(window.ScorecardCore);
+  return new Promise((resolve, reject) => {
+    const s = document.createElement('script'); s.src = CORE_URL;
+    s.onload = () => window.ScorecardCore ? resolve(window.ScorecardCore) : reject(new Error('no core'));
+    s.onerror = () => reject(new Error('could not load the scorecard'));
+    document.head.appendChild(s);
+  });
+}
+
+/* ---------------------------------------------------------------- start a session from a saved scorecard */
+let createSetup = null;
+async function openCreate(){
+  show('stateLoading');
+  try {
+    const snap = await getDoc(doc(db, 'savedTools', fromId));
+    if (!snap.exists() || snap.data().tool !== 'scorecard'){ $('missingWhy').textContent = "That scorecard couldn't be found in your toolkit."; show('stateMissing'); return; }
+    const core = await loadScorecardCore();
+    const state = core.decode(snap.data().data);
+    createSetup = T.fromScorecard(state, snap.data().title || (state && state.title));
+    $('createTitle').value = createSetup.title;
+    const problem = T.setupProblem(createSetup);
+    $('createWhat').textContent = problem || (createSetup.features.length + ' features, scored on ' + createSetup.criteria.length + ' criteria: ' +
+      createSetup.criteria.map(c => c.name + (c.cost ? ' (lower is better)' : '')).join(', ') + '.');
+    $('createBtn').disabled = !!problem;
+    show('stateCreate');
+  } catch (err){ fail("Couldn't open that scorecard just now. Please try again.", err); show('stateMissing'); }
+}
+$('createBtn').addEventListener('click', async () => {
+  const title = $('createTitle').value.trim() || createSetup.title;
+  $('createBtn').disabled = true;
+  try {
+    const id = T.newId();
+    await setDoc(doc(db, 'teamSessions', id), { owner: user.uid, ownerName: myName(), tool: 'scorecard', title: title.slice(0, 100),
+      criteria: createSetup.criteria, features: createSetup.features, status: 'scoring', members: { [user.uid]: myName() }, submitted: {},
+      agreed: null, createdAt: serverTimestamp(), updatedAt: serverTimestamp() });
+    track('team_session_start');
+    (window.__nav || ((u) => { location.href = u; }))('/team-session?s=' + id);
+  } catch (err){ $('createBtn').disabled = false; $('createError').textContent = "Couldn't start the session just now. Please try again."; console.error(err); }
+});
+
+/* ---------------------------------------------------------------- a session */
+async function loadSession(){
+  const snap = await getDoc(doc(db, 'teamSessions', sid));
+  if (!snap.exists()) return false;
+  session = snap.data();
+  return true;
+}
+async function loadMine(){
+  const snap = await getDoc(doc(db, 'teamSessions', sid, 'scores', user.uid)).catch(() => null);
+  mine = snap && snap.exists() ? T.normalizeScores(setup(), snap.data().scores) : T.blankScores(setup());
+}
+async function loadPeople(){
+  const snap = await getDocs(collection(db, 'teamSessions', sid, 'scores'));
+  people = snap.docs.map(d => ({ uid: d.id, name: (session.members || {})[d.id] || d.data().name, scores: d.data().scores }))
+    .filter(p => session.submitted && session.submitted[p.uid]);
+}
+
+function renderSteps(){
+  const st = session.status, n = submittedCount(), m = memberCount();
+  const steps = [
+    ['Score alone', n + ' of ' + m + ' have scored', st === 'scoring', st !== 'scoring'],
+    ['Reveal', "See everyone's scores", false, st !== 'scoring'],
+    ['Discuss', 'Start with the biggest gaps', st === 'revealed', st === 'agreed'],
+    ['Agree', 'Save the team ranking', st === 'agreed' || !!agreeDraft, st === 'agreed']];
+  $('steps').replaceChildren(...steps.map((s, i) => el('li', { class: (s[2] ? 'now ' : '') + (s[3] ? 'done' : '') }, el('b', { text: (i + 1) + '. ' + s[0] + (s[3] ? ' ✓' : '') }), el('span', { text: s[1] }))));
+}
+
+function renderFacilitator(){
+  $('facPanel').hidden = !isOwner();
+  if (!isOwner()) return;
+  $('shareLink').value = location.origin + '/team-session?s=' + sid;
+  const members = session.members || {};
+  $('peopleHead').textContent = "Who's in (" + submittedCount() + ' of ' + memberCount() + ' have scored)';
+  $('people').replaceChildren(...Object.keys(members).map(uid => el('li', { class: session.submitted && session.submitted[uid] ? 'in' : null },
+    (session.submitted && session.submitted[uid] ? '✓ ' : '… ') + members[uid] + (uid === user.uid ? ' (you)' : ''))));
+  const acts = [];
+  if (session.status === 'scoring'){
+    const ready = submittedCount() >= 2;
+    acts.push(el('button', { class: 'btn btn-primary', type: 'button', id: 'revealBtn', disabled: ready ? null : true, onclick: () => setStatus('revealed') }, 'Reveal the scores'));
+    if (!ready) acts.push(el('span', { style: 'align-self:center; font-size:0.8125rem; color:var(--ink-soft);', text: 'At least two people need to finish before you can reveal.' }));
+  } else if (session.status === 'revealed'){
+    acts.push(el('button', { class: 'btn btn-primary', type: 'button', id: 'agreeBtn', onclick: startAgree }, 'Agree the team ranking'));
+    acts.push(el('button', { class: 'btn btn-ghost', type: 'button', id: 'hideBtn', onclick: () => setStatus('scoring') }, 'Hide the scores again'));
+  }
+  $('facActions').replaceChildren(...acts);
+}
+
+function renderScoring(){
+  const s = setup(), cells = mine;
+  const grid = $('scoreGrid');
+  grid.replaceChildren(...s.features.map((f, i) => el('div', { class: 'feat' }, el('h3', { text: f }),
+    ...s.criteria.map((c, j) => el('div', { class: 'crit' },
+      el('span', { class: 'crit-name', id: 'c' + i + '_' + j }, c.name, c.cost ? el('small', { text: ' · lower is better' }) : null),
+      el('span', { class: 'seg', role: 'group', 'aria-labelledby': 'c' + i + '_' + j },
+        ...[1, 2, 3, 4, 5].map(v => el('button', { type: 'button', 'aria-pressed': String(cells[i][j] === v), 'aria-label': f + ', ' + c.name + ': ' + v,
+          onclick: () => pick(i, j, v) }, String(v)))))))));
+  renderProgress();
+}
+function renderProgress(){
+  const p = T.progress(setup(), mine);
+  $('scoreProgress').textContent = p.done + ' of ' + p.total + ' scored';
+  $('scoreBar').style.width = (p.total ? p.done / p.total * 100 : 0) + '%';
+  $('submitBtn').disabled = !p.complete;
+}
+let saveTimer = null;
+function pick(i, j, v){
+  mine[i][j] = v;
+  document.querySelectorAll('#scoreGrid .feat')[i].querySelectorAll('.crit')[j].querySelectorAll('button').forEach((b, k) => b.setAttribute('aria-pressed', String(k + 1 === v)));
+  renderProgress();
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(saveMine, 400);
+}
+async function saveMine(){
+  try { await setDoc(doc(db, 'teamSessions', sid, 'scores', user.uid), { name: myName(), scores: T.encodeScores(setup(), mine), updatedAt: serverTimestamp() }); }
+  catch (err){ fail("Your scores didn't save just now. Check your connection; they'll save on your next change.", err); }
+}
+$('submitBtn').addEventListener('click', async () => {
+  $('submitBtn').disabled = true;
+  try {
+    clearTimeout(saveTimer); await saveMine();
+    await updateDoc(doc(db, 'teamSessions', sid), { ['submitted.' + user.uid]: true, updatedAt: serverTimestamp() });
+    session.submitted = Object.assign({}, session.submitted, { [user.uid]: true });
+    editing = false;
+    track('team_scores_done');
+    render();
+  } catch (err){ $('submitBtn').disabled = false; fail("Couldn't send your scores just now. Please try again.", err); }
+});
+$('editBtn').addEventListener('click', () => { editing = true; render(); });
+
+$('joinBtn').addEventListener('click', async () => {
+  $('joinBtn').disabled = true;
+  try {
+    await updateDoc(doc(db, 'teamSessions', sid), { ['members.' + user.uid]: myName(), updatedAt: serverTimestamp() });
+    session.members = Object.assign({}, session.members, { [user.uid]: myName() });
+    await loadMine();
+    track('team_session_join');
+    render();
+  } catch (err){ $('joinBtn').disabled = false; fail("Couldn't join just now. Please try again.", err); }
+});
+
+async function setStatus(st){
+  try {
+    await updateDoc(doc(db, 'teamSessions', sid), { status: st, updatedAt: serverTimestamp() });
+    session.status = st;
+    if (st === 'revealed') track('team_scores_revealed');
+    await refresh();
+  } catch (err){ fail("That didn't work just now. Please try again.", err); }
+}
+
+function renderReveal(){
+  const s = setup(), r = T.reveal(s, people);
+  $('legend').replaceChildren(...r.people.map((p, k) => el('span', null, el('i', { style: 'background:' + COLORS[k % COLORS.length] }), p.name)),
+    el('span', null, el('i', { class: 'avg-key' }), 'Team average'));
+  $('rows').replaceChildren(...r.features.map(f => el('div', { class: 'frow' },
+    el('div', { class: 'frow-name' }, el('b', { text: f.name }), el('span', { text: 'Average ' + f.avg })),
+    el('div', { class: 'track', role: 'img', 'aria-label': f.name + ': ' + r.people.map((p, k) => p.name + ' ' + f.scores[k]).join(', ') + '. Spread ' + f.spread + ' points.' },
+      el('div', { class: 'base' }), el('div', { class: 'range', style: 'left:' + f.lo + '%; width:' + f.spread + '%' }), el('div', { class: 'avg', style: 'left:' + f.avg + '%' }),
+      ...f.scores.map((v, k) => el('div', { class: 'dot', title: r.people[k].name + ': ' + v, style: 'left:' + v + '%; background:' + COLORS[k % COLORS.length] + '; box-shadow: 0 0 0 1px ' + COLORS[k % COLORS.length] }))),
+    el('span', { class: 'badge ' + f.level, text: f.label + ' · ' + f.spread }))),
+    el('div', { class: 'frow axis-row', 'aria-hidden': 'true' }, el('span'), el('div', { class: 'axis' }, el('span', { text: '0' }), el('span', { text: '50' }), el('span', { text: '100' })), el('span')));
+  $('discussList').replaceChildren(...(r.discuss.length ? r.discuss.map(f => el('li', { text: T.discussLine(f) })) : [el('li', { text: 'No big gaps: everyone is within ' + T.DISCUSS + ' points on every feature.' })]));
+  const top = r.agreed.slice(0, 3).map(f => f.name);
+  $('agreedText').textContent = top.length ? top.join(', ') + (top.length === 1 ? ' has' : ' have') + ' everyone within ' + T.SOME_GAP + ' points. Lock ' + (top.length === 1 ? 'it' : 'them') + ' in and spend the time on the gaps.' : 'Nothing is settled yet: every feature has some gap.';
+}
+
+function startAgree(){
+  agreeDraft = T.consensus(setup(), people);
+  render();
+  $('agreePanel').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+function renderAgree(){
+  const s = setup();
+  const head = el('tr', null, el('th', { text: 'Feature' }), ...s.criteria.map(c => el('th', { text: c.name + (c.cost ? ' (lower is better)' : '') })));
+  const rows = s.features.map((f, i) => el('tr', null, el('th', { scope: 'row', text: f }), ...s.criteria.map((c, j) => el('td', null,
+    el('select', { 'aria-label': f + ', ' + c.name, onchange: (e) => { agreeDraft[i][j] = +e.target.value; renderRanking($('agreeRank'), agreeDraft); } },
+      ...[1, 2, 3, 4, 5].map(v => { const o = el('option', { value: v, text: String(v) }); if (agreeDraft[i][j] === v) o.selected = true; return o; }))))));
+  $('agreeTable').replaceChildren(el('thead', null, head), el('tbody', null, ...rows));
+  renderRanking($('agreeRank'), agreeDraft);
+}
+function renderRanking(list, agreed){
+  list.replaceChildren(...T.ranking(setup(), agreed).map(r => el('li', null, el('span', { class: 'n', text: String(r.rank) }), el('span', { class: 'nm', text: r.name }), el('span', { class: 'sc', text: r.score + ' / 100' }))));
+}
+$('cancelAgree').addEventListener('click', () => { agreeDraft = null; render(); });
+$('saveAgreed').addEventListener('click', async () => {
+  $('saveAgreed').disabled = true;
+  try {
+    const agreed = T.encodeScores(setup(), agreeDraft);
+    await updateDoc(doc(db, 'teamSessions', sid), { status: 'agreed', agreed: agreed, updatedAt: serverTimestamp() });
+    session.status = 'agreed'; session.agreed = agreed; agreeDraft = null;
+    track('team_ranking_agreed');
+    $('notice').textContent = 'Saved. Everyone in the session can now see the team ranking.';
+    render();
+  } catch (err){ fail("Couldn't save the ranking just now. Please try again.", err); }
+  $('saveAgreed').disabled = false;
+});
+
+let showScoresAfter = false;
+$('showScores').addEventListener('click', () => { showScoresAfter = !showScoresAfter; render(); });
+$('saveToToolkit').addEventListener('click', async () => {
+  $('saveToToolkit').disabled = true;
+  try {
+    const core = await loadScorecardCore();
+    const sc = T.toScorecard(setup(), session.agreed);
+    const summary = T.ranking(setup(), session.agreed).slice(0, 3).map(r => r.rank + '. ' + r.name).join(' · ');
+    await addDoc(collection(db, 'savedTools'), { uid: user.uid, tool: 'scorecard', title: (session.title + ' (team)').slice(0, 100), summary: summary.slice(0, 200),
+      data: core.encode(sc), createdAt: serverTimestamp(), updatedAt: serverTimestamp() });
+    track('team_ranking_saved');
+    $('notice').textContent = 'Saved to My Toolkits as "' + (session.title + ' (team)').slice(0, 100) + '".';
+  } catch (err){ fail("Couldn't save it to your toolkit just now. Please try again.", err); }
+  $('saveToToolkit').disabled = false;
+});
+
+function render(){
+  $('sTitle').textContent = session.title;
+  $('sWho').textContent = 'Run by ' + (session.ownerName || 'the facilitator') + ' · ' + session.features.length + ' features · ' + session.criteria.length + ' criteria';
+  renderSteps();
+  renderFacilitator();
+  const st = session.status, me = joined(), done = me && session.submitted && session.submitted[user.uid];
+  $('joinPanel').hidden = me || st === 'agreed';
+  $('joinHead').textContent = st === 'scoring' ? 'Join this team session' : 'The scores have been revealed';
+  $('joinBtn').hidden = st !== 'scoring';
+  $('scorePanel').hidden = !(me && st === 'scoring' && (!done || editing));
+  if (!$('scorePanel').hidden) renderScoring();
+  $('waitPanel').hidden = !(me && st === 'scoring' && done && !editing);
+  $('waitText').textContent = submittedCount() + ' of ' + memberCount() + ' people have finished. ' +
+    (isOwner() ? 'Reveal the scores when everyone is done.' : 'The scores appear here when ' + (session.ownerName || 'the facilitator') + ' reveals them.');
+  const canSee = (me || isOwner()) && (st === 'revealed' || (st === 'agreed' && showScoresAfter));
+  $('revealPanel').hidden = !canSee;
+  if (canSee) renderReveal();
+  $('agreePanel').hidden = !(isOwner() && st === 'revealed' && agreeDraft);
+  if (!$('agreePanel').hidden) renderAgree();
+  $('resultPanel').hidden = st !== 'agreed';
+  if (st === 'agreed'){ renderRanking($('resultRank'), session.agreed); $('showScores').textContent = showScoresAfter ? "Hide everyone's scores" : "See everyone's scores"; $('showScores').hidden = !(me || isOwner()); }
+  show('stateSession');
+}
+
+async function refresh(){
+  if (!(await loadSession())){ show('stateMissing'); return; }
+  if (joined()) await loadMine();
+  if (session.status !== 'scoring' && (joined() || isOwner())) await loadPeople().catch(err => fail("Couldn't load everyone's scores just now.", err));
+  render();
+}
+// While people are scoring, check every 15 seconds for who has finished (and for the reveal).
+function startPolling(){
+  clearInterval(poll);
+  poll = setInterval(async () => {
+    if (document.hidden || !session || editing || agreeDraft) return;
+    const before = session.status + '|' + submittedCount() + '|' + memberCount();
+    if (!(await loadSession().catch(() => true))) return;
+    const after = session.status + '|' + submittedCount() + '|' + memberCount();
+    if (before !== after){
+      if (session.status !== 'scoring' && (joined() || isOwner())) await loadPeople().catch(() => {});
+      if ($('scorePanel').hidden) render(); else { renderSteps(); renderFacilitator(); }
+    }
+  }, window.__pollMs || 15000);
+}
+
+$('copyLink').addEventListener('click', async () => {
+  try { await navigator.clipboard.writeText($('shareLink').value); $('notice').textContent = 'Link copied. Send it to your team.'; }
+  catch (e){ $('shareLink').select(); }
+});
+
+onAuthStateChanged(auth, async (u) => {
+  user = u;
+  $('errorLine').textContent = '';
+  if (!u){ $('signInLink').href = '/my-tools'; show('stateSignedOut'); return; }
+  try {
+    if (sid){ await refresh(); startPolling(); }
+    else if (fromId) await openCreate();
+    else { $('missingWhy').textContent = 'Start a team session from a saved scorecard in My Toolkits: open its ⋯ menu and choose Score as a team.'; show('stateMissing'); }
+  } catch (err){ fail("Couldn't load this session just now. Please refresh the page.", err); show('stateMissing'); }
+});
+</script>
+<script type="module" src="account-menu.js"></script>
+</body>
+</html>
