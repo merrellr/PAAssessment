@@ -4,6 +4,9 @@
   const scn = p.get('scn') || 'admin';
   const day = 864e5;
   const ago = (d) => new Date(Date.now() - d * day).toISOString();
+  // a calendar day d days back in this browser's own time zone, as the page counts days (company.html localToday);
+  // a UTC day would be one day off for part of every day
+  const agoDay = (d) => { const t = new Date(Date.now() - d * day); return new Date(t.getTime() - t.getTimezoneOffset() * 60000).toISOString().slice(0, 10); };
   window.__errs = [];
   addEventListener('error', e => window.__errs.push((e.message || 'error') + ' @' + (e.filename || '').split('/').pop() + ':' + e.lineno));
   addEventListener('unhandledrejection', e => window.__errs.push('rejection: ' + (e.reason && e.reason.message || e.reason)));
@@ -112,7 +115,7 @@
     if (scn === 'auditdenied') window.__failList = /^orgs\/orgA\/audit$/;
     // team assignments: one overdue course (Ben has done 2 of its 5 lessons, nobody has finished it)
     if (scn === 'assign') store['orgAssignments/orgA'] = { items: [
-      { id: 'a1discovery', course: 'discovery-novice', due: ago(3).slice(0, 10), note: 'Before Q1 planning', assignedAt: ago(10).slice(0, 10) },
+      { id: 'a1discovery', course: 'discovery-novice', due: agoDay(3), note: 'Before Q1 planning', assignedAt: agoDay(10) },
       { id: 'a2junk', course: 'nope-course', due: 'soon' }], updatedAt: T(10) };
     if (scn === 'assigndenied') window.__failGet = /^orgAssignments\//;
     if (scn === 'denied') window.__failList = /^memberships$/;
