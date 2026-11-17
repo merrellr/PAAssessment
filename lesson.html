@@ -569,7 +569,7 @@ function renderLesson(){
   // text, framed as a guess. The body right below then reveals what
   // actually happens, so reading becomes checking your prediction
   // rather than just absorbing information passively.
-  renderChecksInto('preCheckContainer', lesson.preCheck ? [lesson.preCheck] : null);
+  renderChecksInto('preCheckContainer', lesson.preCheck ? [lesson.preCheck] : null, 'p');
 
   const bodyEl = document.getElementById('lessonBody');
   bodyEl.innerHTML = lesson.body || '';
@@ -948,12 +948,25 @@ function renderStepper(steps){
    an array so a lesson can ask more than one question. */
 const CHECK_TICK = '<svg viewBox="0 0 24 24"><path d="M5 12.5l4.2 4.2L19 7"/></svg>';
 const CHECK_CROSS = '<svg viewBox="0 0 24 24"><path d="M7 7l10 10M17 7L7 17"/></svg>';
-function renderChecksInto(containerId, checks){
+/* Every check answered goes on the learner's answer log (progress.answers), which the coach reads on My Learning:
+   readiness, gaps and what to do next (coach-core.js). The first answer to each check counts; the id matches the
+   practice bank (course:lesson:check, or :p for "before you read on"). */
+async function recordAnswer(id, question, ok){
+  if (!currentUser || !window.CoachCore) return;
+  try {
+    const progressRef = doc(db, 'progress', currentUser.uid);
+    const snap = await getDoc(progressRef);
+    const log = (snap.exists() && snap.data().answers) || [];
+    await setDoc(progressRef, { answers: CoachCore.record(log, { d: courseId.split('-')[0], id, t: CoachCore.qType(question), ok, src: 'lesson' }) }, { merge: true });
+  } catch (e) { /* the answer still shows; it just isn't counted */ }
+}
+
+function renderChecksInto(containerId, checks, idPrefix){
   const container = document.getElementById(containerId);
   container.innerHTML = '';
   if (!checks || !checks.length) return;
 
-  checks.forEach((check) => {
+  checks.forEach((check, checkIndex) => {
     const box = document.createElement('div');
     box.className = 'check-box';
     box.innerHTML = `
@@ -984,6 +997,7 @@ function renderChecksInto(containerId, checks){
           btn.querySelector('.check-mark').innerHTML = CHECK_CROSS;
           btn.querySelector('.check-said').textContent = ' (your answer, incorrect)';
         }
+        recordAnswer(courseId + ':' + lessonNum + ':' + (idPrefix || String(checkIndex)), check.question, i === check.correct);
         feedback.classList.add('show');
         feedback.innerHTML = (i === check.correct
           ? '<span class="check-verdict ok"><span class="check-mark" aria-hidden="true">' + CHECK_TICK + '</span>Correct.</span> '
@@ -1317,6 +1331,7 @@ window.markCompleteAndContinue = async function(){
 </script>
 <script>document.getElementById("footerYear").textContent = new Date().getFullYear();</script>
 <script type="module" src="account-menu.js"></script>
+<script src="coach-core.js"></script>
 <script src="lesson-script.js"></script>
 <script src="lesson-readalong.js"></script>
 <script src="tour.js"></script>

@@ -290,6 +290,7 @@
     { g: "Go to", t: "Home", i: "⌂", u: "/lms-dashboard" },
     { g: "Go to", t: "My Learning", i: "▤", u: "/my-learning" },
     { g: "Go to", t: "My Toolkits", i: "◇", u: "/my-tools" },
+    { g: "Go to", t: "Practice with your coach", i: "◎", u: "/practice" },
     { g: "Go to", t: "The training framework", i: "◆", u: "/framework" },
     { g: "Go to", t: "My Profile", i: "☺", u: "/profile" },
     { g: "Go to", t: "My Badges", i: "★", u: "/profile#badges" },
