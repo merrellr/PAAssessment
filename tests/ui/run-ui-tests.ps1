@@ -169,7 +169,7 @@ try {
   $results += Run-Page "team mode: missing" "$base/team-test.html?scn=missing&s=nope" 25000
   $results += Run-Page "team mode: signedout" "$base/team-test.html?scn=signedout&s=s1" 25000
   foreach ($s in 'join', 'blind', 'waiting', 'reveal', 'member', 'agree', 'agreed') { $results += Run-Page "team mode: $s" "$base/team-test.html?scn=$s&s=s1" 25000 }
-  foreach ($s in 'list', 'hash', 'fail') { $results += Run-Page "listen and watch: $s" "$base/listen-test.html?scn=$s#feature-fallacy" 25000 }
+  foreach ($s in 'list', 'hash', 'fail', 'watch') { $results += Run-Page "listen and watch: $s" "$base/listen-test.html?scn=$s#feature-fallacy" 25000 }
   $results += Run-Page "lesson audio: a narrated lesson" "$base/les-test.html?scn=listen&course=discovery-novice&lesson=2" 30000
   $results += Run-Page "lesson audio: a lesson with no audio yet" "$base/les-test.html?scn=noaudio&course=discovery-novice&lesson=4" 30000
   $results += Run-Page "lesson figures: metrics and a column chart" "$base/les-test.html?scn=figs&course=aiOrg-experienced&lesson=6" 30000

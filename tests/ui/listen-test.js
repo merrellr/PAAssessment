@@ -36,7 +36,28 @@ const until = async (f, ms = 4000) => { const end = Date.now() + ms; while (Date
       all('#areaChips .chip')[0].click(); await sleep(50);
       t('All brings everything back', cards().length === 3);
 
-      if (window.__scn === 'hash'){
+      if (window.__scn === 'watch'){
+        // Listen | Watch: the videos, newest up top, with what someone started
+        t('Listen and Watch tabs, Watch counting the videos', !$('lwTabs').hidden && $('tabWatch').textContent.trim() === 'Watch (2)', $('tabWatch').textContent);
+        t('Listen is the default', $('tabListen').getAttribute('aria-selected') === 'true' && $('watchView').hidden);
+        localStorage.setItem('pa_watch', JSON.stringify({ 'feature-fallacy': { t: 120, d: 600, at: 1 } }));
+        $('tabWatch').click(); await sleep(60);
+        t('Watch shows the videos instead of the episode list', !$('watchView').hidden && $('listenView').hidden && $('tabWatch').getAttribute('aria-selected') === 'true');
+        t('the newest video is up top, ready to play', $('wvStage').dataset.slug === 'five-second-test' && /Newest/.test($('wvStage').textContent) && !!$('wvStage').querySelector('.wv-face img[src*="abc123XYZ_-"]'));
+        t('Up next lists the others', all('#wvNext button').map(b => b.dataset.slug).join() === 'feature-fallacy');
+        t('Continue watching shows a started video with how far it got', !$('wvContinue').hidden && !!$('wvContinue').querySelector('.wv-card[data-slug="feature-fallacy"] .wv-bar'));
+        t('All videos lists every episode that has a video', all('#wvAll .wv-card').map(b => b.dataset.slug).join() === 'five-second-test,feature-fallacy');
+        t('nothing loads from YouTube until play', !document.querySelector('script[src*="youtube.com/iframe_api"]') && !$('watchView').querySelector('iframe'));
+        t('a Subscribe on YouTube link, in a new tab', /@ProductAdvisoryInsights/.test($('watchView').querySelector('.yt-sub').href) && $('watchView').querySelector('.yt-sub').target === '_blank');
+        all('#areaChips .chip')[3].click(); await sleep(50);
+        t('the topic filter applies to the videos too', /No videos here yet/.test($('wvAll').textContent) && /0 videos about AI Fluency/.test($('listStatus').textContent), $('listStatus').textContent);
+        all('#areaChips .chip')[0].click(); await sleep(50);
+        $('wvNext').querySelector('button').click(); await sleep(60);
+        t('choosing a video plays it up top, in YouTube\'s privacy-mode player', $('wvStage').dataset.slug === 'feature-fallacy' && !!$('wvStage').querySelector('.wv-frame') && !!document.querySelector('script[src="https://www.youtube.com/iframe_api"]'));
+        $('tabListen').click(); await sleep(40);
+        t('Listen brings the episode list back', !$('listenView').hidden && $('watchView').hidden && all('.ep').length === 3);
+        localStorage.removeItem('pa_watch');
+      } else if (window.__scn === 'hash'){
         await tourCheck('listen', 'Pick a topic');
         const c = $('feature-fallacy');
         t('a link to one episode highlights it', c.classList.contains('target'));
