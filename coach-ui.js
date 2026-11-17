@@ -117,6 +117,11 @@
       html += '<h3 class="cc-sub cc-group"><i class="cc-dot cc-' + g[0] + '" aria-hidden="true"></i>' + g[1] + ' <span class="cc-muted">(' + list.length + ')</span></h3>';
       list.forEach(function (a) {
         var lesson = C.lessonFor(s, a.key);
+        if (!a.total) {   // nothing answered yet: one compact row
+          html += '<section class="card cc-gap compact"><div><h4>' + esc(a.name) + '</h4><p class="cc-muted">' + esc(a.pct !== null ? 'Skill check ' + a.pct + '% \u00b7 no practice yet' : 'No practice yet') + '</p></div>' + chip(a.status, a.label) +
+            '<div class="cc-gap-go"><a class="cc-btn sm" href="/practice?area=' + esc(a.key) + '">Practice</a>' + (lesson ? '<a class="cc-btn ghost sm" href="' + esc(lesson.href) + '">Teach me</a>' : '') + '</div></section>';
+          return;
+        }
         html += '<section class="card cc-gap"><div class="cc-area-head"><div><h4>' + esc(a.name) + '</h4><p class="cc-muted">' + esc(ABOUT[a.key] || '') + '</p></div>' + chip(a.status, a.label) + '</div>' +
           '<div class="cc-gap-cols"><div><span class="cc-k">Where you are</span><p>' + esc(understanding(s, a)) + '</p></div>' +
           '<div><span class="cc-k">Recent answers</span><p>' + (a.last8.length ? dots(a.last8) + '<br><span class="cc-muted">' + a.correct + ' of ' + a.total + ' right overall</span>' : '<span class="cc-muted">' + esc(evidence(a)) + '</span>') + '</p></div>' +
@@ -133,7 +138,7 @@
   function homeCard(s, next) {
     return '<div class="cc-home-ico" aria-hidden="true">' + ICON + '</div><div class="cc-home-main"><span class="eyebrow">Your coach suggests</span>' +
       '<p class="cc-home-t"><b>' + esc(next.title) + '.</b> ' + esc(next.why.split(/(?<=\.)\s/)[0]) + '</p>' +
-      '<form class="cc-ask cc-ask-sm" data-coach-ask><input type="text" maxlength="300" placeholder="Ask your coach about the lessons…" aria-label="Ask your coach about the lessons"><button type="submit" aria-label="Ask">↑</button></form></div>' +
+      '<form class="cc-ask cc-ask-sm" data-coach-ask><input type="text" maxlength="300" placeholder="Ask your coach…" aria-label="Ask your coach"><button type="submit" aria-label="Ask">↑</button></form></div>' +
       '<div class="cc-home-go"><a class="cc-btn sm" href="' + esc(next.action.href) + '" data-coach-go="' + esc(next.kind) + '">' + esc(next.action.label) + '</a>' +
       '<a class="linklike" href="/my-learning">Open My Learning' + ARROW + '</a></div>';
   }
@@ -145,9 +150,9 @@
       f.addEventListener('submit', function (e) {
         e.preventDefault();
         var q = f.querySelector('input').value.trim();
-        if (!q || !root.PAShell) return;
-        root.PAShell.openSearch(); root.PAShell.ask(q);
+        if (!q) return;
         if (root.PAAnalytics) root.PAAnalytics.event('coach_ask', { len: q.length });
+        root.location.href = '/coach?q=' + encodeURIComponent(q);
       });
     });
   }

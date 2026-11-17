@@ -94,6 +94,7 @@ Build-Page 'lms-dashboard.html' 'twostep-test.html' 'twostep-seed.js' 'twostep-t
 Build-Page 'profile.html' 'del-test.html' 'del-seed.js' 'del-test.js'
 Build-Page 'lesson.html' 'les-test.html' 'les-seed.js' 'les-test.js'
 Build-Page 'practice.html' 'practice-test.html' 'practice-seed.js' 'practice-test.js'
+Build-Page 'coach.html' 'coach-test.html' 'coach-seed.js' 'coach-test.js'
 Build-Page 'team-session.html' 'team-test.html' 'team-seed.js' 'team-test.js'
 Build-Page 'company.html' 'company-test.html' 'company-seed.js' 'company-test.js'
 Build-Page 'tool-requests.html' 'tool-requests-test.html' 'tool-seed.js' 'tool-test.js'
@@ -174,6 +175,7 @@ try {
   $results += Run-Page "team mode: missing" "$base/team-test.html?scn=missing&s=nope" 25000
   $results += Run-Page "team mode: signedout" "$base/team-test.html?scn=signedout&s=s1" 25000
   foreach ($s in 'join', 'blind', 'waiting', 'reveal', 'member', 'agree', 'agreed') { $results += Run-Page "team mode: $s" "$base/team-test.html?scn=$s&s=s1" 25000 }
+  foreach ($s in 'free', 'used', 'company') { $results += Run-Page "coach chat: $s" "$base/coach-test.html?scn=$s" 30000 }
   $results += Run-Page "practice: an area asked for" "$base/practice-test.html?scn=area&area=prioritization&n=3" 30000
   $results += Run-Page "practice: the coach picks" "$base/practice-test.html?scn=coached" 30000
   $results += Run-Page "lesson audio: a narrated lesson" "$base/les-test.html?scn=listen&course=discovery-novice&lesson=2" 30000

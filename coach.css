@@ -7,10 +7,15 @@
 .cc-btn.ghost { background: transparent; color: var(--pa-navy); border-color: var(--pa-line); }
 .cc-btn.ghost:hover { border-color: var(--pa-primary); background: transparent; }
 .cc-btn.sm { min-height: 36px; padding: 0 14px; font-size: .8125rem; }
-.cc-btn:focus-visible, .cc-alt:focus-visible, .cc-sg:focus-visible, .cc-tabs button:focus-visible, .cc-ready:focus-visible, .cc-ask input:focus-visible, .cc-ask button:focus-visible { outline: 3px solid var(--pa-cyan); outline-offset: 2px; }
+.cc-btn:focus-visible, .cc-alt:focus-visible, .cc-sg:focus-visible, .cc-tabs button:focus-visible, .cc-ready:focus-visible, .cc-ask button:focus-visible { outline: 3px solid var(--pa-cyan); outline-offset: 2px; }
+.cc-ask input:focus, .cc-ask input:focus-visible { outline: none; }
+.cc-ask:focus-within { box-shadow: 0 0 0 3px color-mix(in srgb, var(--pa-cyan) 40%, transparent); }
 
 /* the greeting, ask box and suggestions */
-.cc-head h1 { font-size: clamp(1.5rem, 3vw, 2rem); }
+.cc-head { margin-top: 14px; }
+.cc-head h1 { font-size: clamp(1.5rem, 3vw, 2rem); margin: 4px 0 6px; }
+.cc-head > .eyebrow { display: block; font-size: .6875rem; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: var(--pa-cyan-ink, var(--pa-primary)); }
+.cc-head > p { max-width: 760px; }
 .cc-ask { display: flex; align-items: center; gap: 10px; max-width: 760px; margin: 16px 0 12px; padding: 8px 8px 8px 12px; border: 1.5px solid var(--pa-line); border-radius: 28px; background: var(--pa-card); box-shadow: var(--pa-shadow); }
 .cc-ask:focus-within { border-color: var(--pa-primary); }
 .cc-ask input { flex: 1; min-width: 0; min-height: 40px; border: 0; background: transparent; color: var(--pa-ink); font: inherit; font-size: 1rem; outline: none; }
@@ -22,7 +27,10 @@
 .cc-sg:hover { border-color: var(--pa-primary); }
 
 /* tabs */
-.cc-tabs { display: flex; gap: 4px; margin: 18px 0 4px; border-bottom: 1px solid var(--pa-line); overflow-x: auto; scrollbar-width: none; }
+.cc-tabrow { display: flex; align-items: flex-end; justify-content: space-between; gap: 8px 16px; flex-wrap: wrap; margin: 20px 0 4px; border-bottom: 1px solid var(--pa-line); }
+.cc-tabs { display: flex; gap: 4px; overflow-x: auto; scrollbar-width: none; }
+.cc-tabs-tour { padding-bottom: 6px; }
+.cc-tabs-tour .guide-btn.guide-sm { margin: 0; }
 .cc-tabs button { flex: none; min-height: 42px; padding: 0 16px; border: 0; border-bottom: 3px solid transparent; background: none; color: var(--pa-muted); font: 700 .875rem var(--pa-sans); cursor: pointer; }
 .cc-tabs button[aria-selected="true"] { color: var(--pa-navy); border-bottom-color: var(--pa-primary); }
 .cc-panel { margin-top: 18px; }
@@ -128,6 +136,10 @@
   .cc-gap-cols { grid-template-columns: 1fr; gap: 10px; }
 }
 @media (max-width: 640px) {
+  .cc-suggest { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; margin-right: calc(-1 * var(--pa-gutter, 16px)); padding-right: 16px; }
+  .cc-sg { flex: none; }
+  .cc-tabrow { flex-direction: column; align-items: stretch; }
+  .cc-tabs-tour { order: -1; padding: 0 0 8px; }
   .cc-next, .cc-home { grid-template-columns: 1fr; }
   .cc-next-ico, .cc-home-ico { display: none; }
   .cc-next-go, .cc-home-go { align-items: stretch; }
@@ -136,3 +148,10 @@
   .cc-stage-steps { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 .cc-next .eyebrow, .cc-home .eyebrow { display: block; font-size: .6875rem; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: var(--pa-cyan-ink, var(--pa-primary)); }
+
+/* My gaps: an area with no answers yet is a compact row, not a full card */
+.cc-gap.compact { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; gap: 10px 16px; align-items: center; padding: 14px 18px; }
+.cc-gap.compact h4 { font-size: .9375rem; }
+.cc-gap.compact p { margin: 2px 0 0; }
+.cc-gap.compact .cc-gap-go { flex-wrap: nowrap; }
+@media (max-width: 640px) { .cc-gap.compact { grid-template-columns: 1fr auto; } .cc-gap.compact .cc-gap-go { grid-column: 1 / -1; } }

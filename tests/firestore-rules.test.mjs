@@ -767,6 +767,29 @@ await allow('deleting when there is none is harmless', () => deleteDoc(doc(verif
 await allow('the owner can delete one', async () => { await setDoc(doc(verified('s12'), 'toolSuggestions/s12'), goodSuggestion('s12')); return deleteDoc(doc(owner, 'toolSuggestions/s12')); });
 
 
+/* ------------------------------------------------------------ the coach (coach.html) */
+console.log('\n--- the coach: access and requests ---');
+const grant = (over = {}) => Object.assign({ plan: 'pro', email: 'c1@x.com', grantedAt: serverTimestamp() }, over);
+await allow('the owner gives someone the coach', () => setDoc(doc(owner, 'coachAccess/c1'), grant()));
+await allow('the person reads their own access', () => getDoc(doc(verified('c1'), 'coachAccess/c1')));
+await deny('and not anyone else\'s', () => getDoc(doc(verified('c2'), 'coachAccess/c1')));
+await deny('nobody can give themselves the coach', () => setDoc(doc(verified('c2'), 'coachAccess/c2'), grant({ email: 'c2@x.com' })));
+await deny('nor change their access', () => updateDoc(doc(verified('c1'), 'coachAccess/c1'), { plan: 'pro', email: 'c1@x.com', grantedAt: serverTimestamp() }));
+await deny('a plan other than pro or none is refused', () => setDoc(doc(owner, 'coachAccess/c3'), grant({ plan: 'gold' })));
+await deny('extra fields are refused', () => setDoc(doc(owner, 'coachAccess/c3'), grant({ unlimited: true })));
+await deny('only the owner lists who has access', () => getDocs(collection(verified('c1'), 'coachAccess')));
+await allow('the owner lists it', () => getDocs(collection(owner, 'coachAccess')));
+await allow('the owner can take it away', () => deleteDoc(doc(owner, 'coachAccess/c1')));
+const coachReq = (uid, over = {}) => Object.assign({ uid, email: uid + '@x.com', name: 'Cee', note: '', createdAt: serverTimestamp() }, over);
+await allow('a verified person asks for access', () => setDoc(doc(verified('c4'), 'coachRequests/c4'), coachReq('c4')));
+await deny('not for somebody else', () => setDoc(doc(verified('c5'), 'coachRequests/c6'), coachReq('c5')));
+await deny('not with somebody else\'s email', () => setDoc(doc(verified('c5'), 'coachRequests/c5'), coachReq('c5', { email: 'boss@x.com' })));
+await deny('an unverified person cannot ask', () => setDoc(doc(unverified('c7'), 'coachRequests/c7'), coachReq('c7')));
+await deny('extra fields are refused', () => setDoc(doc(verified('c8'), 'coachRequests/c8'), coachReq('c8', { plan: 'pro' })));
+await deny('only the owner lists requests', () => getDocs(collection(verified('c4'), 'coachRequests')));
+await allow('the owner lists them, and clears one', async () => { await getDocs(collection(owner, 'coachRequests')); return deleteDoc(doc(owner, 'coachRequests/c4')); });
+
+
 /* ------------------------------------------------------------ saved tools (my-tools.html) */
 console.log('\n--- saved tools ---');
 const goodSaved = (uid, over = {}) => Object.assign({

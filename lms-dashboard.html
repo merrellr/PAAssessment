@@ -623,22 +623,24 @@
       <p>Your coach looks at your skill check, your courses and your answers, and suggests what to do next. Your courses are all still here.</p>
       <form class="cc-ask" data-coach-ask role="search">
         <span class="cc-ask-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="m15.5 8.5-2 5-5 2 2-5z"/></svg></span>
-        <input type="text" maxlength="300" placeholder="Ask your coach about the lessons…" aria-label="Ask your coach about the lessons">
+        <input type="text" maxlength="300" placeholder="Ask your coach anything about your learning or your product work…" aria-label="Ask your coach">
         <button type="submit" aria-label="Ask">↑</button>
       </form>
       <div class="cc-suggest" id="coachSuggest">
         <a class="cc-sg" href="/practice" data-coach-sg="weakest">Quiz me on my weakest area</a>
         <a class="cc-sg" href="/practice" data-coach-sg="short">I have 15 minutes</a>
-        <button type="button" class="cc-sg" data-coach-sg="explain">Explain something I'm struggling with</button>
+        <a class="cc-sg" href="/coach?q=Explain%20the%20idea%20I%27m%20struggling%20with%20most">Explain something I'm struggling with</a>
         <button type="button" class="cc-sg" data-ltab-go="readiness">Am I improving?</button>
       </div>
-      <button type="button" class="guide-btn" data-tour="my-learning" data-guide="{&quot;title&quot;:&quot;My Learning&quot;,&quot;steps&quot;:[{&quot;s&quot;:&quot;.cc-head h1&quot;,&quot;t&quot;:&quot;Your coach&quot;,&quot;p&quot;:&quot;My Learning starts with your coach: what it would do next, and why. Your courses are all still here.&quot;},{&quot;s&quot;:&quot;.cc-head .cc-ask&quot;,&quot;t&quot;:&quot;Ask about the lessons&quot;,&quot;p&quot;:&quot;Type a question and get an answer from the course lessons, with links to them.&quot;},{&quot;s&quot;:&quot;#coachPanel .cc-next&quot;,&quot;t&quot;:&quot;What I&#x27;d do next&quot;,&quot;p&quot;:&quot;One suggestion, with the evidence behind it: your skill check, your courses and the questions you&#x27;ve answered.&quot;},{&quot;s&quot;:&quot;#coachPanel .cc-alts&quot;,&quot;t&quot;:&quot;Or, if you&#x27;d rather&quot;,&quot;p&quot;:&quot;Other good options: another area to practise, a fresh skill check, or reading the idea through first.&quot;},{&quot;s&quot;:&quot;#coachPanel .cc-loop&quot;,&quot;t&quot;:&quot;Your learning loop&quot;,&quot;p&quot;:&quot;Assess, find the gaps, learn, practise, understand why, then check again. This shows where you are.&quot;},{&quot;s&quot;:&quot;.cc-tabs&quot;,&quot;t&quot;:&quot;Readiness, gaps and courses&quot;,&quot;p&quot;:&quot;My readiness: how each area is going. My gaps: which kind of question you miss. Courses: every course and your plan, as before.&quot;}]}"><span class="guide-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="m15.5 8.5-2 5-5 2 2-5z"/></svg></span><span><b>Take the quick tour of My Learning</b><small>6 steps · about a minute</small></span></button>
+      <div class="cc-tabrow">
       <nav class="cc-tabs" role="tablist" aria-label="My Learning">
         <button type="button" role="tab" id="ltab-coach" data-ltab="coach" aria-controls="coachPanel">Coach</button>
         <button type="button" role="tab" id="ltab-readiness" data-ltab="readiness" aria-controls="readinessPanel">My readiness</button>
         <button type="button" role="tab" id="ltab-gaps" data-ltab="gaps" aria-controls="gapsPanel">My gaps</button>
         <button type="button" role="tab" id="ltab-courses" data-ltab="courses">Courses</button>
       </nav>
+      <div class="cc-tabs-tour"><button type="button" class="guide-btn guide-sm" data-tour="my-learning" data-guide="{&quot;title&quot;:&quot;My Learning&quot;,&quot;steps&quot;:[{&quot;s&quot;:&quot;.cc-head h1&quot;,&quot;t&quot;:&quot;Your coach&quot;,&quot;p&quot;:&quot;My Learning starts with your coach: what it would do next, and why. Your courses are all still here.&quot;},{&quot;s&quot;:&quot;.cc-head .cc-ask&quot;,&quot;t&quot;:&quot;Ask about the lessons&quot;,&quot;p&quot;:&quot;Type a question and get an answer from the course lessons, with links to them.&quot;},{&quot;s&quot;:&quot;#coachPanel .cc-next&quot;,&quot;t&quot;:&quot;What I&#x27;d do next&quot;,&quot;p&quot;:&quot;One suggestion, with the evidence behind it: your skill check, your courses and the questions you&#x27;ve answered.&quot;},{&quot;s&quot;:&quot;#coachPanel .cc-alts&quot;,&quot;t&quot;:&quot;Or, if you&#x27;d rather&quot;,&quot;p&quot;:&quot;Other good options: another area to practise, a fresh skill check, or reading the idea through first.&quot;},{&quot;s&quot;:&quot;#coachPanel .cc-loop&quot;,&quot;t&quot;:&quot;Your learning loop&quot;,&quot;p&quot;:&quot;Assess, find the gaps, learn, practise, understand why, then check again. This shows where you are.&quot;},{&quot;s&quot;:&quot;.cc-tabs&quot;,&quot;t&quot;:&quot;Readiness, gaps and courses&quot;,&quot;p&quot;:&quot;My readiness: how each area is going. My gaps: which kind of question you miss. Courses: every course and your plan, as before.&quot;}]}"><span class="guide-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="m15.5 8.5-2 5-5 2 2-5z"/></svg></span><span><b>How My Learning works</b></span></button></div>
+      </div>
     </header>
 
     <div class="cc-panel" id="coachPanel" role="tabpanel" aria-labelledby="ltab-coach" data-only="learning" data-coach="coach"><p class="cc-muted">Loading your coach…</p></div>
