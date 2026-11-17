@@ -126,29 +126,34 @@
   "lines": 5
  },
  "aiOrg-advanced-1": {
-  "duration": 65.7,
-  "bytes": 395048,
-  "hash": "503d9b2b4487c7b7"
+  "duration": 64.8,
+  "bytes": 389432,
+  "hash": "8c63dff265ef0891",
+  "lines": 5
  },
  "aiOrg-advanced-2": {
-  "duration": 55.0,
-  "bytes": 330557,
-  "hash": "3f1571e58fc31967"
+  "duration": 54.8,
+  "bytes": 329549,
+  "hash": "c17dd909b131a115",
+  "lines": 6
  },
  "aiOrg-advanced-3": {
-  "duration": 89.2,
-  "bytes": 536176,
-  "hash": "c843e38a592ba3a6"
+  "duration": 88.9,
+  "bytes": 533872,
+  "hash": "ecbf40e45601778a",
+  "lines": 8
  },
  "aiOrg-advanced-4": {
-  "duration": 76.8,
-  "bytes": 461579,
-  "hash": "cdb3f9c16e2d9e0e"
+  "duration": 76.6,
+  "bytes": 460139,
+  "hash": "a68797a480670448",
+  "lines": 6
  },
  "aiOrg-advanced-5": {
-  "duration": 63.1,
-  "bytes": 379511,
-  "hash": "35b7d6ee3d737b7d"
+  "duration": 62.6,
+  "bytes": 376487,
+  "hash": "c52a7eb054b66d5b",
+  "lines": 5
  },
  "aiOrg-experienced-1": {
   "duration": 74.3,
