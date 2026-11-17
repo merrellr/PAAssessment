@@ -9,16 +9,17 @@
     var realFetch = window.fetch;
     window.__fetched = [];
     window.fetch = function(url, opts){
+      if (/audio\/lessons\/lines\//.test(String(url))){
+        // a line every 2 seconds, the two titles first, then one per line on the page (lesson-script.js decides which)
+        window.__fetched.push(String(url));
+        var n = window.PALessonScript.read(document.querySelector('#lessonBody')).els.length;
+        var times = [[0, 0], [0, 0]]; for (var i = 0; i < n; i++) times.push([i * 2, i * 2 + 1.8]);
+        return Promise.resolve(new Response(JSON.stringify(times), { status: 200, headers: { 'Content-Type': 'application/json' } }));
+      }
       if (/audio\/lessons\/index\.json/.test(String(url))){
         window.__fetched.push(String(url));
-        var idx = scn === 'listen' ? { 'discovery-novice-2': { duration: 128.4, bytes: 771040, hash: 'x' }, 'discovery-novice-3': { duration: 61, bytes: 1, hash: 'y' } } : {};
+        var idx = scn === 'listen' ? { 'discovery-novice-2': { duration: 128.4, bytes: 771040, hash: 'x', lines: 99 }, 'discovery-novice-3': { duration: 61, bytes: 1, hash: 'y' } } : {};
         return Promise.resolve(new Response(JSON.stringify(idx), { status: 200, headers: { 'Content-Type': 'application/json' } }));
-      }
-      if (/episodes\.json/.test(String(url))){
-        var eps = scn === 'listen' ? { episodes: [
-          { slug: 'feature-fallacy', title: 'The Feature Fallacy', dek: 'd', topic: 'Product strategy', date: '2026-06-01', duration: 330, audio: 'x.mp3', chapters: [[0, 'Introduction']], areas: ['strategy', 'discovery'] },
-          { slug: 'pm-copilots', title: 'PM Copilots', dek: 'd', topic: 'Agentic AI', date: '2026-07-01', duration: 400, audio: 'y.mp3', chapters: [[0, 'Introduction']], areas: ['aiOrg'] }] } : { episodes: [] };
-        return Promise.resolve(new Response(JSON.stringify(eps), { status: 200, headers: { 'Content-Type': 'application/json' } }));
       }
       return realFetch.apply(this, arguments);
     };
