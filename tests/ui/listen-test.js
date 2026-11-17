@@ -2,6 +2,18 @@
 const out = [];
 const t = (label, ok, extra) => out.push((ok ? 'PASS ' : 'FAIL ') + '[' + window.__scn + '] ' + label + (ok || !extra ? '' : '   [' + extra + ']'));
 const sleep = (ms) => new Promise(r => setTimeout(r, ms));
+async function tourCheck(id, first){
+  // the quick tour on this page: a click-through guide (tour.js), opening on its first step and closing with Esc
+  const b = document.querySelector('[data-tour="' + id + '"]');
+  t('a quick tour button (' + id + ')', !!b && !!b.getAttribute('data-guide'));
+  if (!b) return;
+  b.click(); await sleep(80);
+  const pop = document.querySelector('.guide-pop');
+  t('the tour opens on its first step: ' + first, !!pop && pop.querySelector('h2').textContent === first, pop ? pop.querySelector('h2').textContent : 'none');
+  pop && pop.querySelector('.g-n').click(); await sleep(40);
+  document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true })); await sleep(20);
+  t('Esc closes the tour and focus returns to its button', !document.querySelector('.guide-pop, .guide-hole') && document.activeElement === b);
+}
 const $ = (id) => document.getElementById(id);
 const all = (sel, root) => Array.prototype.slice.call((root || document).querySelectorAll(sel));
 const until = async (f, ms = 4000) => { const end = Date.now() + ms; while (Date.now() < end) { if (f()) return true; await sleep(50); } return false; };
@@ -25,6 +37,7 @@ const until = async (f, ms = 4000) => { const end = Date.now() + ms; while (Date
       t('All brings everything back', cards().length === 3);
 
       if (window.__scn === 'hash'){
+        await tourCheck('listen', 'Pick a topic');
         const c = $('feature-fallacy');
         t('a link to one episode highlights it', c.classList.contains('target'));
       } else {

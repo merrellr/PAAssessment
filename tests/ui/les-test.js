@@ -1,6 +1,18 @@
 const out = [];
 const t = (label, ok, extra) => out.push((ok ? 'PASS ' : 'FAIL ') + '[' + window.__scn + '] ' + label + (ok || !extra ? '' : '   [' + extra + ']'));
 const sleep = (ms) => new Promise(r => setTimeout(r, ms));
+async function tourCheck(id, first){
+  // the quick tour on this page: a click-through guide (tour.js), opening on its first step and closing with Esc
+  const b = document.querySelector('[data-tour="' + id + '"]');
+  t('a quick tour button (' + id + ')', !!b && !!b.getAttribute('data-guide'));
+  if (!b) return;
+  b.click(); await sleep(80);
+  const pop = document.querySelector('.guide-pop');
+  t('the tour opens on its first step: ' + first, !!pop && pop.querySelector('h2').textContent === first, pop ? pop.querySelector('h2').textContent : 'none');
+  pop && pop.querySelector('.g-n').click(); await sleep(40);
+  document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true })); await sleep(20);
+  t('Esc closes the tour and focus returns to its button', !document.querySelector('.guide-pop, .guide-hole') && document.activeElement === b);
+}
 const $ = (id) => document.getElementById(id);
 const all = (sel, root) => Array.prototype.slice.call((root || document).querySelectorAll(sel));
 
@@ -178,6 +190,7 @@ async function listenTests(){
       window.markCompleteAndContinue();   // this one changes the page; the browser tool reads the result afterwards
       return;
     }
+    if (window.__scn === 'listen') await tourCheck('lesson', window.innerWidth < 900 ? 'Listen' : 'Course outline');
     if (window.__scn === 'listen' || window.__scn === 'noaudio') await listenTests();
     else if (window.__scn === 'blocks') await blockTests();
     else if (window.__scn === 'figs') await figTests();

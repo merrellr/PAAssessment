@@ -218,6 +218,7 @@
     <span class="eyebrow" id="courseTitle">Loading…</span>
     <h1 id="lessonTitle"></h1>
     <div class="lesson-meta" id="lessonMeta"></div>
+    <button type="button" class="guide-btn guide-sm" data-tour="lesson" data-guide="{&quot;title&quot;:&quot;this lesson&quot;,&quot;steps&quot;:[{&quot;s&quot;:&quot;#lessonRail&quot;,&quot;t&quot;:&quot;Course outline&quot;,&quot;p&quot;:&quot;Every lesson in the course, your progress, key takeaways and related listening. Hide it for more room.&quot;},{&quot;s&quot;:&quot;#lessonListen&quot;,&quot;t&quot;:&quot;Listen&quot;,&quot;p&quot;:&quot;Hear the lesson read aloud, at your speed. Good for a walk or a commute.&quot;},{&quot;s&quot;:&quot;#lessonBody&quot;,&quot;t&quot;:&quot;The lesson&quot;,&quot;p&quot;:&quot;A short story, real data and the ideas you need. About five minutes.&quot;},{&quot;s&quot;:&quot;#chartContainer&quot;,&quot;t&quot;:&quot;Try the chart&quot;,&quot;p&quot;:&quot;Drag the slider to see how the numbers move.&quot;},{&quot;s&quot;:&quot;#calcContainer&quot;,&quot;t&quot;:&quot;Work it out&quot;,&quot;p&quot;:&quot;Change the inputs and see the result.&quot;},{&quot;s&quot;:&quot;#stepperContainer&quot;,&quot;t&quot;:&quot;Step by step&quot;,&quot;p&quot;:&quot;Click through a worked example.&quot;},{&quot;s&quot;:&quot;#checkContainer&quot;,&quot;t&quot;:&quot;Check yourself&quot;,&quot;p&quot;:&quot;A quick question to lock it in, with an explanation either way.&quot;},{&quot;s&quot;:&quot;#reflectionContainer&quot;,&quot;t&quot;:&quot;Reflect&quot;,&quot;p&quot;:&quot;Write how it applies to your work. Notes are private and collected on My Learning.&quot;},{&quot;s&quot;:&quot;#completeBtn&quot;,&quot;t&quot;:&quot;Mark it done&quot;,&quot;p&quot;:&quot;Finish the lesson and move to the next one. Your progress saves as you go.&quot;}]}"><span class="guide-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="m15.5 8.5-2 5-5 2 2-5z"/></svg></span><span><b>How lessons work</b></span></button>
     <div class="listen" id="lessonListen" aria-label="Listen to this lesson" role="region">
       <audio preload="none"></audio>
       <button type="button" class="listen-play" aria-label="Play the lesson"><svg class="i-play" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13a1 1 0 0 0 1.5.9l10.4-6.5a1 1 0 0 0 0-1.8L9.5 4.6A1 1 0 0 0 8 5.5z"/></svg><svg class="i-pause" viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></svg></button>
@@ -680,7 +681,7 @@ async function renderRelatedListening(){
   const eps = episodesCache.filter(e => (e.areas || []).includes(areaKey)).slice(0, 4);
   if (!box || !eps.length) return;
   box.innerHTML = '<details class="rail-recap rail-listen"><summary>Related listening</summary><ul>' +
-    eps.map(e => '<li><a href="/listen#' + encodeURIComponent(e.slug) + '">' + escapeText(e.title) + '</a> <small>' + Math.max(1, Math.round(e.duration / 60)) + ' min</small></li>').join('') +
+    eps.map(e => '<li><a href="/listen#' + encodeURIComponent(e.slug) + '">' + escapeText(e.title) + '</a> <small>' + Math.max(1, Math.round(e.duration / 60)) + ' min' + (e.youtube ? ' · ▶ video' : '') + '</small></li>').join('') +
     '</ul><a class="rail-listen-all" href="/listen">All episodes</a></details>';
 }
 // Hide or show the course outline (wide screens); the choice is kept on this browser for every course.
@@ -1266,5 +1267,6 @@ window.markCompleteAndContinue = async function(){
 </script>
 <script>document.getElementById("footerYear").textContent = new Date().getFullYear();</script>
 <script type="module" src="account-menu.js"></script>
+<script src="tour.js"></script>
 </body>
 </html>
