@@ -66,13 +66,34 @@
   .rail-recap summary{ cursor:pointer; font-size: 0.8125rem; font-weight: 700; color: var(--navy); }
   .rail-recap ul{ margin: 8px 0 0; padding-left: 18px; font-size: 0.8125rem; color: var(--ink-soft); line-height: 1.5; }
   .rail-recap li{ margin-bottom: 6px; }
-  .rail-listen ul{ list-style: none; padding-left: 0; }
-  .rail-listen a{ color: var(--navy); font-weight: 700; text-decoration: none; }
-  .rail-listen a:hover{ text-decoration: underline; }
-  .rail-listen small{ color: var(--gray); font-weight: 400; white-space: nowrap; }
-  .rail-listen-all{ display:inline-block; margin-top: 2px; font-size: 0.8125rem; }
   .listen{ display:none; align-items:center; gap: 12px; margin: -4px 0 18px; padding: 10px 14px; border: 1px solid var(--pa-line); border-radius: 14px; background: var(--pa-band); }
-  .listen.ready{ display:flex; }
+  .listen.ready.open{ display:flex; }
+  .listen.open.playing{ position: sticky; top: 76px; z-index: 5; box-shadow: 0 10px 24px rgba(18,48,94,.12); }
+  .lesson-fmts{ display:flex; flex-wrap:wrap; gap: 8px; margin: 2px 0 16px; }
+  .fmt-pill{ display:inline-flex; align-items:center; gap: 7px; min-height: 38px; padding: 0 15px 0 11px; border-radius: 19px; border: 1.5px solid transparent; background: var(--tint, #e9f0fa); color: var(--pa-navy); font: 700 0.875rem var(--pa-sans); cursor:pointer; }
+  .fmt-pill svg{ width: 17px; height: 17px; fill:none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+  .fmt-pill span{ font-weight: 400; color: var(--pa-muted); }
+  .fmt-pill:hover{ border-color: var(--pa-primary); }
+  .fmt-pill[aria-expanded="true"]{ background: var(--pa-navy); color: var(--pa-btn-ink, #fff); }
+  .fmt-pill[aria-expanded="true"] span{ color: inherit; opacity: .8; }
+  .fmt-pill:focus-visible, .listen-ra:focus-visible, .ra-follow:focus-visible{ outline: 3px solid var(--pa-cyan); outline-offset: 2px; }
+  .listen-ra{ flex:none; min-height: 36px; padding: 0 12px; border-radius: 18px; border: 1.5px solid var(--pa-line); background: var(--pa-bg); color: var(--pa-ink); font: 700 0.8125rem var(--pa-sans); cursor:pointer; }
+  .listen-ra[aria-pressed="true"]{ border-color: var(--pa-primary); color: var(--pa-primary); }
+  @media (max-width: 520px){ .listen-ra{ display:none; } }
+  /* read-along: the paragraph being read, and the word within it */
+  #lessonBody.read-along [data-ra]{ cursor: pointer; border-radius: 8px; transition: background-color .25s, box-shadow .25s; }
+  #lessonBody .ra-on{ background: var(--tint, #e9f0fa); box-shadow: 0 0 0 8px var(--tint, #e9f0fa); border-radius: 8px; }
+  #lessonBody li.ra-on{ box-shadow: 0 0 0 6px var(--tint, #e9f0fa); }
+  #lessonBody .ra-w{ border-radius: 3px; transition: color .15s, background-color .15s; }
+  #lessonBody .ra-on .ra-w:not(.ra-done):not(.ra-now){ color: var(--pa-muted); }
+  #lessonBody .ra-now{ background: color-mix(in srgb, var(--pa-cyan) 35%, transparent); color: var(--pa-ink); box-shadow: 0 0 0 2px color-mix(in srgb, var(--pa-cyan) 35%, transparent); }
+  .ra-follow{ position: fixed; left: 50%; bottom: 18px; transform: translateX(-50%); z-index: 40; min-height: 40px; padding: 0 18px; border-radius: 20px; border: 0; background: var(--pa-navy); color: var(--pa-btn-ink, #fff); font: 700 0.875rem var(--pa-sans); box-shadow: 0 8px 22px rgba(18,48,94,.25); cursor: pointer; }
+  @media (prefers-reduced-motion: reduce){ #lessonBody .ra-w, #lessonBody.read-along [data-ra]{ transition: none; } }
+  /* "How lessons work": in the course outline on wide screens, otherwise beside "Back to My Learning" */
+  .lesson-top{ display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap: 8px 16px; margin-bottom: 16px; }
+  .lesson-top .back-link{ margin: 0; }
+  .lesson-top .guide-btn.guide-sm, .rail-tour .guide-btn.guide-sm{ margin: 0; }
+  .rail-tour{ margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--line); }
   .listen-play{ flex:none; width: 44px; height: 44px; border-radius: 50%; border: 0; background: var(--pa-primary); color: var(--pa-btn-ink); cursor:pointer; display:grid; place-items:center; }
   .listen-play:hover{ background: var(--pa-primary-strong); }
   .listen-play svg{ width: 18px; height: 18px; fill: currentColor; }
@@ -209,7 +230,7 @@
     </div>
   </a>
   <div class="brand-accent-bar"></div>
-  <a class="back-link" href="/lms-dashboard">← Back to My Learning</a>
+  <div class="lesson-top" id="lessonTop"><a class="back-link" href="/lms-dashboard">← Back to My Learning</a><button type="button" class="guide-btn guide-sm" data-tour="lesson" data-guide="{&quot;title&quot;:&quot;this lesson&quot;,&quot;steps&quot;:[{&quot;s&quot;:&quot;#lessonRail&quot;,&quot;t&quot;:&quot;Course outline&quot;,&quot;p&quot;:&quot;Every lesson in the course, your progress, key takeaways and related listening. Hide it for more room.&quot;},{&quot;s&quot;:&quot;#listenToggle&quot;,&quot;t&quot;:&quot;Listen&quot;,&quot;p&quot;:&quot;Hear the lesson read aloud, at your speed, with each paragraph highlighted as it is read. Press it again to close the player.&quot;},{&quot;s&quot;:&quot;#lessonBody&quot;,&quot;t&quot;:&quot;The lesson&quot;,&quot;p&quot;:&quot;A short story, real data and the ideas you need. About five minutes.&quot;},{&quot;s&quot;:&quot;#chartContainer&quot;,&quot;t&quot;:&quot;Try the chart&quot;,&quot;p&quot;:&quot;Drag the slider to see how the numbers move.&quot;},{&quot;s&quot;:&quot;#calcContainer&quot;,&quot;t&quot;:&quot;Work it out&quot;,&quot;p&quot;:&quot;Change the inputs and see the result.&quot;},{&quot;s&quot;:&quot;#stepperContainer&quot;,&quot;t&quot;:&quot;Step by step&quot;,&quot;p&quot;:&quot;Click through a worked example.&quot;},{&quot;s&quot;:&quot;#checkContainer&quot;,&quot;t&quot;:&quot;Check yourself&quot;,&quot;p&quot;:&quot;A quick question to lock it in, with an explanation either way.&quot;},{&quot;s&quot;:&quot;#reflectionContainer&quot;,&quot;t&quot;:&quot;Reflect&quot;,&quot;p&quot;:&quot;Write how it applies to your work. Notes are private and collected on My Learning.&quot;},{&quot;s&quot;:&quot;#completeBtn&quot;,&quot;t&quot;:&quot;Mark it done&quot;,&quot;p&quot;:&quot;Finish the lesson and move to the next one. Your progress saves as you go.&quot;}]}"><span class="guide-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="m15.5 8.5-2 5-5 2 2-5z"/></svg></span><span><b>How lessons work</b></span></button></div>
   <div class="read-progress" aria-hidden="true"><span id="readProgress"></span></div>
 
   <div class="lesson-layout" id="lessonLayout">
@@ -218,7 +239,9 @@
     <span class="eyebrow" id="courseTitle">Loading…</span>
     <h1 id="lessonTitle"></h1>
     <div class="lesson-meta" id="lessonMeta"></div>
-    <button type="button" class="guide-btn guide-sm" data-tour="lesson" data-guide="{&quot;title&quot;:&quot;this lesson&quot;,&quot;steps&quot;:[{&quot;s&quot;:&quot;#lessonRail&quot;,&quot;t&quot;:&quot;Course outline&quot;,&quot;p&quot;:&quot;Every lesson in the course, your progress, key takeaways and related listening. Hide it for more room.&quot;},{&quot;s&quot;:&quot;#lessonListen&quot;,&quot;t&quot;:&quot;Listen&quot;,&quot;p&quot;:&quot;Hear the lesson read aloud, at your speed. Good for a walk or a commute.&quot;},{&quot;s&quot;:&quot;#lessonBody&quot;,&quot;t&quot;:&quot;The lesson&quot;,&quot;p&quot;:&quot;A short story, real data and the ideas you need. About five minutes.&quot;},{&quot;s&quot;:&quot;#chartContainer&quot;,&quot;t&quot;:&quot;Try the chart&quot;,&quot;p&quot;:&quot;Drag the slider to see how the numbers move.&quot;},{&quot;s&quot;:&quot;#calcContainer&quot;,&quot;t&quot;:&quot;Work it out&quot;,&quot;p&quot;:&quot;Change the inputs and see the result.&quot;},{&quot;s&quot;:&quot;#stepperContainer&quot;,&quot;t&quot;:&quot;Step by step&quot;,&quot;p&quot;:&quot;Click through a worked example.&quot;},{&quot;s&quot;:&quot;#checkContainer&quot;,&quot;t&quot;:&quot;Check yourself&quot;,&quot;p&quot;:&quot;A quick question to lock it in, with an explanation either way.&quot;},{&quot;s&quot;:&quot;#reflectionContainer&quot;,&quot;t&quot;:&quot;Reflect&quot;,&quot;p&quot;:&quot;Write how it applies to your work. Notes are private and collected on My Learning.&quot;},{&quot;s&quot;:&quot;#completeBtn&quot;,&quot;t&quot;:&quot;Mark it done&quot;,&quot;p&quot;:&quot;Finish the lesson and move to the next one. Your progress saves as you go.&quot;}]}"><span class="guide-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="m15.5 8.5-2 5-5 2 2-5z"/></svg></span><span><b>How lessons work</b></span></button>
+    <div class="lesson-fmts" id="lessonFmts" hidden>
+      <button type="button" class="fmt-pill" id="listenToggle" aria-controls="lessonListen" aria-expanded="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 14v-2a8 8 0 0 1 16 0v2"/><rect x="3" y="14" width="5" height="7" rx="2"/><rect x="16" y="14" width="5" height="7" rx="2"/></svg><b>Listen</b><span id="listenMins"></span></button>
+    </div>
     <div class="listen" id="lessonListen" aria-label="Listen to this lesson" role="region">
       <audio preload="none"></audio>
       <button type="button" class="listen-play" aria-label="Play the lesson"><svg class="i-play" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13a1 1 0 0 0 1.5.9l10.4-6.5a1 1 0 0 0 0-1.8L9.5 4.6A1 1 0 0 0 8 5.5z"/></svg><svg class="i-pause" viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></svg></button>
@@ -228,7 +251,9 @@
         <div class="listen-times"><span class="listen-at">0:00</span><span class="listen-len"></span></div>
       </div>
       <button type="button" class="listen-speed" aria-label="Playback speed">1x</button>
+      <button type="button" class="listen-ra" aria-pressed="true" hidden title="Highlight each paragraph and word as it is read">Read along</button>
     </div>
+    <button type="button" class="ra-follow" id="raFollow" hidden>↓ Follow along</button>
 
     <div class="lesson-nav" id="lessonNav"></div>
 
@@ -596,12 +621,17 @@ async function renderListen(lesson){
   const box = document.getElementById('lessonListen');
   const audio = box.querySelector('audio');
   if (!audio.paused) audio.pause();
-  box.classList.remove('ready', 'playing');
+  box.classList.remove('ready', 'playing', 'open');
+  const toggle = document.getElementById('listenToggle');
+  document.getElementById('lessonFmts').hidden = true;
+  toggle.setAttribute('aria-expanded', 'false');
   if (listenIndex === null){
     try { const r = await fetch('/audio/lessons/index.json', { cache: 'no-cache' }); listenIndex = r.ok ? await r.json() : {}; } catch (e) { listenIndex = {}; }
   }
   const key = courseId + '-' + lesson.id, meta = listenIndex[key];
   if (!meta) return;
+  document.getElementById('lessonFmts').hidden = false;
+  document.getElementById('listenMins').textContent = Math.max(1, Math.round(meta.duration / 60)) + ' min';
   const clock = (s) => { s = Math.max(0, Math.round(s || 0)); return Math.floor(s / 60) + ':' + ('0' + s % 60).slice(-2); };
   const status = box.querySelector('.listen-status'), seek = box.querySelector('.listen-seek'), at = box.querySelector('.listen-at');
   const play = box.querySelector('.listen-play'), speed = box.querySelector('.listen-speed');
@@ -616,12 +646,23 @@ async function renderListen(lesson){
   let dragging = false;
   if (!box.dataset.wired){
     box.dataset.wired = '1';
+    // Listen under the title opens the player and starts it; pressed again, it pauses and closes the player
+    toggle.addEventListener('click', () => {
+      const open = !box.classList.contains('open');
+      box.classList.toggle('open', open);
+      toggle.setAttribute('aria-expanded', String(open));
+      if (open){ audio.play().catch(() => {}); if (window.PAAnalytics) PAAnalytics.event('lesson_audio_open', { course: courseId, lesson: String(box._lesson) }); }
+      else audio.pause();
+    });
+    // the open-player-only path for the tour (no sound)
+    box._openQuiet = () => { box.classList.add('open'); toggle.setAttribute('aria-expanded', 'true'); };
     play.addEventListener('click', () => { if (audio.paused) audio.play(); else audio.pause(); });
     speed.addEventListener('click', () => { const R = [1, 1.25, 1.5, 2]; box._setRate(R[(R.indexOf(audio.playbackRate) + 1) % R.length]); });
     seek.addEventListener('input', () => { dragging = true; at.textContent = clock(+seek.value); });
     seek.addEventListener('change', () => { dragging = false; audio.currentTime = +seek.value; if (audio.paused) audio.play(); });
     audio.addEventListener('timeupdate', () => { if (!dragging) seek.value = Math.floor(audio.currentTime); at.textContent = clock(audio.currentTime); });
     audio.addEventListener('play', () => {
+      setupReadAlong();
       box.classList.add('playing'); play.setAttribute('aria-label', 'Pause');
       box.querySelector('.listen-status').textContent = 'Playing';
       audio.playbackRate = box._rate();
@@ -631,11 +672,27 @@ async function renderListen(lesson){
     audio.addEventListener('ended', () => { box.querySelector('.listen-status').textContent = 'Finished. Try the practice on the page.'; });
   }
   box._setRate = setRate; box._rate = () => rate; box._lesson = lesson.id; box._started = false;
+  box._key = key; box._lines = meta.lines || 0;
+  if (box._ra && box._raKey !== key){ box._ra.clear(); box._ra = null; }
   box.classList.add('ready');
+}
+/* Read-along (lesson-readalong.js): the narration's line times, fetched the first time the lesson is played. */
+async function setupReadAlong(){
+  const box = document.getElementById('lessonListen');
+  if (box._ra || box._raLoading === box._key || !box._lines || !window.PAReadAlong) return;
+  const key = box._key;
+  box._raLoading = key;
+  try {
+    const r = await fetch('/audio/lessons/lines/' + key + '.json', { cache: 'no-cache' });
+    if (!r.ok || box._key !== key) return;
+    const ra = PAReadAlong.attach({ audio: box.querySelector('audio'), body: document.getElementById('lessonBody'), times: await r.json(),
+      toggle: box.querySelector('.listen-ra'), follow: document.getElementById('raFollow') });
+    if (ra && box._key === key){ box._ra = ra; box._raKey = key; box.querySelector('.listen-ra').hidden = false; }
+  } catch (e) { /* no read-along: the audio still plays */ }
 }
 
 function renderRail(lesson, complete){
-  if (complete){ const lb = document.getElementById('lessonListen'); lb.querySelector('audio').pause(); lb.classList.remove('ready', 'playing'); }
+  if (complete){ const lb = document.getElementById('lessonListen'); lb.querySelector('audio').pause(); lb.classList.remove('ready', 'playing', 'open'); document.getElementById('lessonFmts').hidden = true; }
   else renderListen(lesson);
   const idx = course.lessons.indexOf(lesson);
   const left = course.lessons.slice(idx).reduce((n, l) => n + lessonMinutes(l), 0);
@@ -663,31 +720,24 @@ function renderRail(lesson, complete){
     '<button type="button" class="rail-toggle" data-rail="close" aria-expanded="true" aria-controls="lessonRail" aria-label="Hide the course outline" title="Hide the course outline">' + chev(-1) + '</button></div>' +
     '<div class="rail-progress"><svg class="rail-ring" width="42" height="42" viewBox="0 0 42 42" aria-hidden="true"><circle class="track" cx="21" cy="21" r="17" fill="none" stroke-width="4"/><circle class="fill" cx="21" cy="21" r="17" fill="none" stroke-width="4" stroke-linecap="round" transform="rotate(-90 21 21)" stroke-dasharray="' + C.toFixed(2) + '" stroke-dashoffset="' + (C * (1 - pct)).toFixed(2) + '"/></svg>' +
     '<span><b>' + done + ' of ' + course.lessons.length + ' lessons</b>' + (done === course.lessons.length ? 'Course complete' : 'done') + '</span></div>' +
-    '<ol class="rail-list">' + items + '</ol>' + recap + '<div id="railListen"></div></div>';
-  renderRelatedListening();
+    '<ol class="rail-list">' + items + '</ol>' + recap + '<div class="rail-tour" id="railTour"></div></div>';
+  placeTour();
 }
-/* "Related listening": Product+ Audio episodes on this course's skill area (the list is published with the articles,
-   see listen.html). Each opens on the Listen & watch page. */
-let episodesCache = null;
-async function renderRelatedListening(){
-  const areaKey = String(courseId || '').split('-')[0];
-  if (episodesCache === null){
-    try {
-      const r = await fetch(window.__episodesUrl || 'https://www.productadvisory.co/assets/audio/episodes.json', { cache: 'no-cache' });
-      episodesCache = r.ok ? ((await r.json()).episodes || []) : [];
-    } catch (e) { episodesCache = []; }
-  }
-  const box = document.getElementById('railListen');
-  const eps = episodesCache.filter(e => (e.areas || []).includes(areaKey)).slice(0, 4);
-  if (!box || !eps.length) return;
-  box.innerHTML = '<details class="rail-recap rail-listen"><summary>Related listening</summary><ul>' +
-    eps.map(e => '<li><a href="/listen#' + encodeURIComponent(e.slug) + '">' + escapeText(e.title) + '</a> <small>' + Math.max(1, Math.round(e.duration / 60)) + ' min' + (e.youtube ? ' · ▶ video' : '') + '</small></li>').join('') +
-    '</ul><a class="rail-listen-all" href="/listen">All episodes</a></details>';
+// "How lessons work" sits in the course outline when it's open on a wide screen, otherwise beside "Back to My Learning".
+const WIDE = matchMedia('(min-width: 1080px)');
+function placeTour(){
+  const btn = document.querySelector('[data-tour="lesson"]'), slot = document.getElementById('railTour');
+  if (!btn) return;
+  const inRail = WIDE.matches && slot && !document.getElementById('lessonLayout').classList.contains('rail-collapsed');
+  const home = inRail ? slot : document.getElementById('lessonTop');
+  if (btn.parentNode !== home) home.appendChild(btn);
 }
+WIDE.addEventListener('change', placeTour);
 // Hide or show the course outline (wide screens); the choice is kept on this browser for every course.
 const RAIL_KEY = 'pa_rail_collapsed';
 function setRailCollapsed(on, focus){
   document.getElementById('lessonLayout').classList.toggle('rail-collapsed', on);
+  placeTour();
   try { if (on) localStorage.setItem(RAIL_KEY, '1'); else localStorage.removeItem(RAIL_KEY); } catch (e) { /* storage off */ }
   if (focus){ const b = document.querySelector('#lessonRail [data-rail="' + (on ? 'open' : 'close') + '"]'); if (b) b.focus(); }
 }
@@ -1267,6 +1317,8 @@ window.markCompleteAndContinue = async function(){
 </script>
 <script>document.getElementById("footerYear").textContent = new Date().getFullYear();</script>
 <script type="module" src="account-menu.js"></script>
+<script src="lesson-script.js"></script>
+<script src="lesson-readalong.js"></script>
 <script src="tour.js"></script>
 </body>
 </html>

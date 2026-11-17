@@ -17,8 +17,11 @@ run locally, voice `am_michael`. There is no API key and no cost.
 
 The setup is at the top of `narrate.py`.
 
-## Listen & watch
+## Read-along
 
-`listen.html` lists every Product+ article episode. It reads `https://www.productadvisory.co/assets/audio/episodes.json`,
-which the www site publishes with the articles, so a new episode appears here by itself. The lesson page's course outline
-also shows **Related listening**: the episodes on that course's skill area.
+Each lesson's narration also writes `audio/lessons/lines/<course>-<lesson>.json`: when each line is read. The lesson page
+highlights the paragraph being read. Which element each line comes from is decided by `lesson-script.js`, the same file
+step 2 reads the lessons with, so the narration and the highlighting always agree.
+
+Learning's old Listen & watch page was retired (`listen.html` now sends old links to My Learning). The Product+ articles,
+with their audio and videos, are on productadvisory.co.

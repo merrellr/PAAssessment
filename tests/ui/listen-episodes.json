@@ -1,5 +1,0 @@
-{"title": "Product+ Audio", "episodes": [
- {"slug": "five-second-test", "title": "The Five Second Test", "dek": "How to review your pricing page the way customers read it.", "topic": "Pricing", "date": "2026-11-10", "duration": 720, "audio": "ep.mp3", "chapters": [[0, "Introduction"], [105, "Start with the glance"], [192, "More choices, fewer buyers"]], "areas": ["strategy"], "youtube": "abc123XYZ_-"},
- {"slug": "pm-copilots", "title": "PM Copilots", "dek": "Agentic AI as an internal product.", "topic": "Agentic AI", "date": "2026-07-01", "duration": 400, "audio": "ep.mp3", "chapters": [[0, "Introduction"]], "areas": ["aiOrg"], "youtube": ""},
- {"slug": "feature-fallacy", "title": "The Feature Fallacy", "dek": "Why shipping more isn't helping.", "topic": "Product strategy", "date": "2026-06-01", "duration": 330, "audio": "ep.mp3", "chapters": [[0, "Introduction"], [60, "Next"]], "areas": ["strategy", "discovery"], "youtube": "def456UVW_-"}
-]}

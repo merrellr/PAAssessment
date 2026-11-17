@@ -20,8 +20,7 @@
   var LINKS = [
     ["/lms-dashboard", "Home"],
     ["/my-learning", "My Learning"],
-    ["/my-tools", "My Toolkits"],
-    ["/listen", "Listen & watch"]
+    ["/my-tools", "My Toolkits"]
   ];
 
   // This page's clean address (/lms-dashboard, / for the assessment), whether it was opened as /lms-dashboard or /lms-dashboard.html.
@@ -219,11 +218,14 @@
     help.innerHTML = '<div class="pa-panel pa-help" role="dialog" aria-modal="true" aria-labelledby="paHelpTitle">' +
       '<div class="pa-panel-head"><div><h2 id="paHelpTitle">Help</h2></div><button type="button" class="pa-icon" data-pa="close" aria-label="Close">' + ICON.close + "</button></div>" +
       "<p>Search the answers below, ask about the course content, or tell us what's missing.</p>" +
+      // this page's quick tour (tour.js): once taken, its button leaves the page and lives here
+      '<button type="button" class="pa-help-tour" data-pa="tour" hidden><span class="pa-help-tour-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="m15.5 8.5-2 5-5 2 2-5z"/></svg></span>' +
+      '<span><b>Take the tour of this page</b><small>A click-through guide, about a minute</small></span></button>' +
       '<input type="search" class="pa-help-q" placeholder="What do you need help with?" aria-label="Search help" autocomplete="off">' +
       '<div class="pa-help-ask" hidden></div>' +
       '<div class="pa-help-list">' + list + '</div><p class="pa-help-none" hidden>No answer here yet. Ask the lessons, or send us a note below.</p>' +
       '<div class="pa-panel-foot pa-help-foot"><a class="pa-btn" href="/feedback">Send feedback</a>' +
-      '<button type="button" class="pa-btn ghost" data-pa="tour">Replay the tour</button>' +
+      '<button type="button" class="pa-btn ghost" data-pa="tour" data-tour-fallback>Replay the home tour</button>' +
       '<a class="pa-btn ghost" href="mailto:info@productadvisory.co?subject=' + encodeURIComponent("Help with Product Advisory Learning") + '">Email us</a>' +
       '<a class="pa-btn ghost" href="' + BOOK_CALL + '" target="_blank" rel="noopener">Book a call<span aria-hidden="true"> ↗</span>' + NEW_TAB + "</a></div></div>";
     document.body.appendChild(help);
@@ -233,7 +235,12 @@
       var b = e.target.closest ? e.target.closest("[data-pa]") : null;
       if (b && b.getAttribute("data-pa") === "close") return closeHelp();
       // the dashboard's guided tour: here if this is the dashboard, else it opens there and starts
-      if (b && b.getAttribute("data-pa") === "tour") { closeHelp(); if (window.replayDashboardTour) window.replayDashboardTour(); else location.href = "/lms-dashboard?tour=1"; return; }
+      if (b && b.getAttribute("data-pa") === "tour") {
+        closeHelp();
+        if (window.PATour && window.PATour.start()) return;   // this page's tour
+        if (window.replayDashboardTour) window.replayDashboardTour(); else location.href = "/lms-dashboard?tour=1";
+        return;
+      }
       if (b && b.getAttribute("data-pa") === "ask") { var q = helpQ.value.trim(); closeHelp(); openPalette(); palInput.value = q; showAnswer(q); }
     });
     help.addEventListener("keydown", function (e) { if (e.key === "Escape") closeHelp(); });
@@ -266,6 +273,9 @@
     if (pal && pal.classList.contains("open")) closePalette();
     helpFocus = document.activeElement;
     help.classList.add("open");
+    var own = !!(window.PATour && window.PATour.available());   // a page with its own tour shows it first; others offer the home tour
+    help.querySelector(".pa-help-tour").hidden = !own;
+    help.querySelector("[data-tour-fallback]").hidden = own;
     helpQ.value = ""; filterHelp();
     helpQ.focus();
   }
@@ -280,7 +290,6 @@
     { g: "Go to", t: "Home", i: "⌂", u: "/lms-dashboard" },
     { g: "Go to", t: "My Learning", i: "▤", u: "/my-learning" },
     { g: "Go to", t: "My Toolkits", i: "◇", u: "/my-tools" },
-    { g: "Go to", t: "Listen & watch: every article, read aloud", i: "♪", u: "/listen" },
     { g: "Go to", t: "The training framework", i: "◆", u: "/framework" },
     { g: "Go to", t: "My Profile", i: "☺", u: "/profile" },
     { g: "Go to", t: "My Badges", i: "★", u: "/profile#badges" },

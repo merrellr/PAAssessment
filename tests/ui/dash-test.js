@@ -102,7 +102,7 @@ const sleep = (ms) => new Promise(r => setTimeout(r, ms));
         t('a "New here? Take the quick tour" button under the greeting', !!gb && /Take the quick tour/.test(gb.textContent) && !document.querySelector('video, .tour-dialog'));
         gb.click(); await sleep(80);
         const pop = () => document.querySelector('.guide-pop');
-        t('it opens on step 1 with the welcome, highlighting the greeting', !!pop() && /1 of 10/.test(pop().querySelector('.g-c').textContent) && /Welcome to Product Advisory Learning/.test(pop().textContent) && !!document.querySelector('.guide-hole') && document.activeElement === pop().querySelector('.g-n'));
+        t('it opens on step 1 with the welcome, highlighting the greeting', !!pop() && /1 of 9/.test(pop().querySelector('.g-c').textContent) && /Welcome to Product Advisory Learning/.test(pop().textContent) && !!document.querySelector('.guide-hole') && document.activeElement === pop().querySelector('.g-n'));
         const seen = [pop().querySelector('h2').textContent];
         for (let k = 0; k < 12 && pop(); k++) { pop().querySelector('.g-n').click(); await sleep(40); if (pop()) seen.push(pop().querySelector('h2').textContent); }
         t('Next walks the steps (skipping any not on the page) and Done closes it', !pop() && !document.querySelector('.guide-hole, .guide-shield') && seen.indexOf('Your next best step') > -1 && seen.indexOf('My growth') > -1 && seen[seen.length - 1] === 'Your profile', seen.join(' > '));

@@ -157,10 +157,27 @@ async function listenTests(){
   const box = $('lessonListen'), audio = box.querySelector('audio');
   if (window.__scn === 'noaudio'){
     t('a lesson with no audio yet shows no Listen bar', !box.classList.contains('ready') && getComputedStyle(box).display === 'none');
-    t('and with no episodes on its area, no Related listening', $('railListen').innerHTML === '');
+    t('and no Listen button', $('lessonFmts').hidden);
     return;
   }
-  t('a narrated lesson shows "Listen to this lesson" with its length', box.classList.contains('ready') && getComputedStyle(box).display !== 'none' && /Listen to this lesson · 2 min/.test(box.textContent) && /2:08/.test(box.textContent), box.textContent.replace(/\s+/g, ' '));
+  const tg = $('listenToggle');
+  t('a narrated lesson shows a Listen button with its length, and the player stays closed', !$('lessonFmts').hidden && /Listen\s*2 min/.test(tg.textContent) && tg.getAttribute('aria-expanded') === 'false' && getComputedStyle(box).display === 'none', tg.textContent);
+  tg.click(); await sleep(60);
+  t('Listen opens the player in place', tg.getAttribute('aria-expanded') === 'true' && getComputedStyle(box).display !== 'none' && /2:08/.test(box.textContent), box.textContent.replace(/\s+/g, ' '));
+  // read-along: the narration's line times arrive on first play; the first paragraph is read at 0:00
+  audio.dispatchEvent(new Event('play')); await sleep(400);
+  const on = document.querySelector('#lessonBody .ra-on');
+  t('read-along fetches this lesson\'s line times on first play', window.__fetched.some(u => /audio\/lessons\/lines\/discovery-novice-2\.json$/.test(u)), window.__fetched.join());
+  t('and highlights the line being read, word by word', !!on && on === window.PALessonScript.read($('lessonBody')).els[0] && !!on.querySelector('.ra-w.ra-now'));
+  t('a Read along switch shows, on', !box.querySelector('.listen-ra').hidden && box.querySelector('.listen-ra').getAttribute('aria-pressed') === 'true');
+  box.querySelector('.listen-ra').click(); await sleep(30);
+  t('switching it off clears the highlight, and it stays off', !document.querySelector('#lessonBody .ra-on') && localStorage.getItem('pa-read-along') === 'off');
+  box.querySelector('.listen-ra').click(); await sleep(30);
+  t('back on, it highlights again', !!document.querySelector('#lessonBody .ra-on') && localStorage.getItem('pa-read-along') === null);
+  audio.dispatchEvent(new Event('pause'));
+  tg.click(); await sleep(40);
+  t('Listen again closes the player', tg.getAttribute('aria-expanded') === 'false' && getComputedStyle(box).display === 'none');
+  tg.click(); await sleep(40);
   t('it plays this lesson\'s file', /\/audio\/lessons\/discovery-novice-2\.mp3$/.test(audio.src), audio.src);
   t('the audio is only downloaded when someone presses play', audio.getAttribute('preload') === 'none');
   t('the position slider spans the whole lesson', box.querySelector('.listen-seek').max === '128');
@@ -169,14 +186,13 @@ async function listenTests(){
   sp.click(); t('the speed button steps up: 1.25x', sp.textContent === '1.25x' && audio.playbackRate === 1.25);
   sp.click(); sp.click(); sp.click(); t('and wraps back round to 1x', sp.textContent === '1x' && audio.playbackRate === 1);
   sp.click(); t('the chosen speed is remembered', localStorage.getItem('pa-listen-speed') === '1.25');
-  t('the list of narrated lessons is fetched once', window.__fetched.length === 1, String(window.__fetched.length));
+  t('the list of narrated lessons is fetched once', window.__fetched.filter(u => /index\.json/.test(u)).length === 1, window.__fetched.join());
+  const tb = document.querySelector('[data-tour="lesson"]');
+  t('How lessons work sits in the course outline on a wide screen, else beside Back to My Learning', window.innerWidth >= 1080 ? !!tb.closest('#railTour') : !!tb.closest('#lessonTop'), tb.parentNode.id);
   const next = all('.rail-list a', $('lessonRail')).find(a => /&lesson=3$/.test(a.getAttribute('href')));
   t('the Listen bar sits under the lesson heading, before the lesson', box.compareDocumentPosition($('lessonBody')) & Node.DOCUMENT_POSITION_FOLLOWING);
   t('every other lesson in the outline is still a link', !!next);
-  const rel = $('railListen');
-  const links = all('a', rel).map(a => a.getAttribute('href'));
-  t('the outline lists Product+ Audio episodes on this course\'s skill area (Discovery), and only those', links.join() === '/listen#feature-fallacy,/listen', links.join());
-  t('with their length', /The Feature Fallacy 6 min/.test(rel.textContent.replace(/\s+/g, ' ')), rel.textContent);
+  t('no Related listening in the outline (the Listen & watch page was retired)', !$('railListen') && !/\/listen/.test($('lessonRail').innerHTML));
 }
 
 (async function(){
@@ -191,6 +207,16 @@ async function listenTests(){
       return;
     }
     if (window.__scn === 'listen') await tourCheck('lesson', window.innerWidth < 900 ? 'Listen' : 'Course outline');
+    if (window.__scn === 'listen'){
+      // once taken, the tour is remembered; Help offers this page's tour (its button leaves the page on the next visit)
+      t('taking the tour is remembered on this browser', JSON.parse(localStorage.getItem('pa-tours-taken') || '[]').indexOf('lesson') > -1);
+      document.querySelector('[data-pa="help"]').click(); await sleep(80);
+      const ht = document.querySelector('.pa-help-tour');
+      t('Help offers "Take the tour of this page" first', !!ht && !ht.hidden && document.querySelector('[data-tour-fallback]').hidden);
+      ht.click(); await sleep(120);
+      t('and it starts this page\'s tour', !!document.querySelector('.guide-pop') && !document.querySelector('.pa-help-back.open'));
+      document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true })); await sleep(30);
+    }
     if (window.__scn === 'listen' || window.__scn === 'noaudio') await listenTests();
     else if (window.__scn === 'blocks') await blockTests();
     else if (window.__scn === 'figs') await figTests();
