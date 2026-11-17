@@ -79,6 +79,42 @@
   .now.playing .ep-play .i-play{ display:none; } .now.playing .ep-play .i-pause{ display:block; }
   .chip:focus-visible, .ep-play:focus-visible, .ep-ch button:focus-visible, .ep-more summary:focus-visible, .ep-watch:focus-visible, .now-speed:focus-visible{ outline: 2px solid var(--cyan); outline-offset: 2px; }
   @media (max-width: 560px){ .ep{ padding: 14px; gap: 4px 12px; } .ep-play{ width: 44px; height: 44px; } }
+  /* Listen | Watch */
+  .lw-tabs{ display:inline-flex; gap: 4px; padding: 4px; margin: 0 0 16px; border-radius: 22px; background: var(--surface); border: 1px solid var(--line); }
+  .lw-tab{ min-height: 38px; padding: 0 18px; border-radius: 18px; border: 0; background: transparent; color: var(--ink-soft); font: 700 0.875rem var(--sans); cursor:pointer; }
+  .lw-tab[aria-selected="true"]{ background: var(--navy); color: var(--btn-ink, #fff); }
+  .lw-tab em{ font-style: normal; font-weight: 400; opacity: .8; }
+  .wv h3{ font-family: var(--display); font-size: 1rem; color: var(--navy-deep); margin: 0 0 12px; }
+  .wv-hero{ display:grid; grid-template-columns: minmax(0, 2.2fr) minmax(220px, 1fr); gap: 22px; margin-bottom: 30px; }
+  .wv-hero.solo{ grid-template-columns: minmax(0, 1fr); }
+  .wv-face, .wv-next button{ display:block; width:100%; padding:0; border:0; background:none; color: var(--ink); font: inherit; text-align:left; cursor:pointer; }
+  .wv-thumb{ position: relative; display:block; aspect-ratio: 16 / 9; border-radius: 12px; overflow:hidden; background:#0b1f40; }
+  .wv-thumb img{ display:block; width:100%; height:100%; object-fit: cover; }
+  .wv-play{ position:absolute; left:50%; top:50%; width:64px; height:64px; margin:-32px 0 0 -32px; border-radius:50%; background: rgba(11,31,64,.78); box-shadow: 0 0 0 3px rgba(255,255,255,.85); }
+  .wv-play::after{ content:""; position:absolute; left:25px; top:20px; border-left: 20px solid #fff; border-top: 12px solid transparent; border-bottom: 12px solid transparent; }
+  .wv-face:hover .wv-play, .wv-next button:hover .wv-play, .wv-card:hover .wv-play{ background: var(--primary, var(--navy)); }
+  .wv-len{ position:absolute; right:8px; bottom:8px; padding: 2px 7px; border-radius: 6px; background: rgba(0,0,0,.72); color:#fff; font: 700 0.6875rem var(--sans); }
+  .wv-bar{ position:absolute; left:0; right:0; bottom:0; height:4px; background: rgba(255,255,255,.35); }
+  .wv-bar::after{ content:""; position:absolute; left:0; top:0; bottom:0; width: var(--p); background:#ff0033; }
+  .wv-frame{ position:relative; aspect-ratio: 16 / 9; border-radius: 12px; overflow:hidden; background:#000; }
+  .wv-frame iframe, .wv-frame > div{ position:absolute; inset:0; width:100%; height:100%; border:0; }
+  .wv-cap{ margin-top: 12px; }
+  .wv-cap b{ display:block; font-size: 1.15rem; color: var(--navy-deep); margin: 2px 0 4px; }
+  .wv-next ol{ list-style:none; margin:0; padding:0; display:grid; gap: 12px; }
+  .wv-next button{ display:grid; grid-template-columns: 130px 1fr; gap: 10px; align-items:start; }
+  .wv-next .wv-thumb{ border-radius: 8px; }
+  .wv-next .wv-play{ width:32px; height:32px; margin:-16px 0 0 -16px; box-shadow: 0 0 0 2px rgba(255,255,255,.85); }
+  .wv-next .wv-play::after{ left:12px; top:9px; border-left-width:11px; border-top-width:7px; border-bottom-width:7px; }
+  .wv-next b{ font-size: 0.8438rem; line-height: 1.3; }
+  .wv-grid{ display:grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 18px; margin-bottom: 30px; }
+  .wv-card{ display:block; padding:0; border:0; background:none; color: var(--ink); font: inherit; text-align:left; cursor:pointer; }
+  .wv-card b{ display:block; margin-top: 8px; font-size: 0.9062rem; line-height: 1.3; }
+  .wv-sub{ display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap: 12px 20px; padding: 16px 20px; border-radius: 14px; background: var(--tint, #e9f0fa); }
+  .wv-sub p{ margin:0; flex: 1 1 300px; }
+  .yt-sub{ display:inline-flex; align-items:center; gap: 8px; min-height: 40px; padding: 0 16px; border-radius: 20px; background: var(--navy); color: var(--btn-ink, #fff); font: 700 0.8438rem var(--sans); text-decoration:none; }
+  .yt-sub svg{ width: 22px; height: 22px; }
+  .lw-tab:focus-visible, .wv-face:focus-visible, .wv-next button:focus-visible, .wv-card:focus-visible, .yt-sub:focus-visible{ outline: 2px solid var(--cyan); outline-offset: 2px; }
+  @media (max-width: 760px){ .wv-hero{ grid-template-columns: 1fr; } }
 </style>
 <link rel="stylesheet" href="pa-theme.css">
 </head>
@@ -90,13 +126,27 @@
       <span class="eyebrow">Product Advisory Learning</span>
       <h1>Listen &amp; watch</h1>
       <p>Every Product+ article, read aloud, with chapters. Listen on a walk or a commute, then go deeper in the courses. Some come with a video, too.</p>
-      <button type="button" class="guide-btn" data-tour="listen" data-guide="{&quot;title&quot;:&quot;Listen &amp; watch&quot;,&quot;steps&quot;:[{&quot;s&quot;:&quot;#areaChips&quot;,&quot;t&quot;:&quot;Pick a topic&quot;,&quot;p&quot;:&quot;Show episodes about one skill area, or all of them.&quot;},{&quot;s&quot;:&quot;#episodes .ep-play&quot;,&quot;t&quot;:&quot;Play an episode&quot;,&quot;p&quot;:&quot;Every Product+ article read aloud. It keeps playing at the bottom while you browse.&quot;},{&quot;s&quot;:&quot;#episodes .ep summary&quot;,&quot;t&quot;:&quot;Chapters&quot;,&quot;p&quot;:&quot;Open the chapters and jump to any of them.&quot;},{&quot;s&quot;:&quot;#episodes .ep-watch&quot;,&quot;t&quot;:&quot;Watch&quot;,&quot;p&quot;:&quot;Some episodes come with a video: the narration with the charts.&quot;},{&quot;s&quot;:&quot;#nowPlaying&quot;,&quot;t&quot;:&quot;Now playing&quot;,&quot;p&quot;:&quot;Pause, seek and change speed here. Your place is remembered.&quot;}]}"><span class="guide-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="m15.5 8.5-2 5-5 2 2-5z"/></svg></span><span><b>Take the quick tour</b><small>5 steps · about a minute</small></span></button>
+      <button type="button" class="guide-btn" data-tour="listen" data-guide="{&quot;title&quot;:&quot;Listen &amp; watch&quot;,&quot;steps&quot;:[{&quot;s&quot;:&quot;#areaChips&quot;,&quot;t&quot;:&quot;Pick a topic&quot;,&quot;p&quot;:&quot;Show episodes about one skill area, or all of them.&quot;},{&quot;s&quot;:&quot;#lwTabs&quot;,&quot;t&quot;:&quot;Listen or watch&quot;,&quot;p&quot;:&quot;Switch to Watch for the videos: the newest up top, the ones you started, and all the rest.&quot;},{&quot;s&quot;:&quot;#episodes .ep-play&quot;,&quot;t&quot;:&quot;Play an episode&quot;,&quot;p&quot;:&quot;Every Product+ article read aloud. It keeps playing at the bottom while you browse.&quot;},{&quot;s&quot;:&quot;#episodes .ep summary&quot;,&quot;t&quot;:&quot;Chapters&quot;,&quot;p&quot;:&quot;Open the chapters and jump to any of them.&quot;},{&quot;s&quot;:&quot;#episodes .ep-watch&quot;,&quot;t&quot;:&quot;Watch&quot;,&quot;p&quot;:&quot;Some episodes come with a video: the narration with the charts.&quot;},{&quot;s&quot;:&quot;#nowPlaying&quot;,&quot;t&quot;:&quot;Now playing&quot;,&quot;p&quot;:&quot;Pause, seek and change speed here. Your place is remembered.&quot;}]}"><span class="guide-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="m15.5 8.5-2 5-5 2 2-5z"/></svg></span><span><b>Take the quick tour</b><small>6 steps · about a minute</small></span></button>
     </div>
   </div>
-  <p class="lw-note">Every lesson has a <b>Listen</b> button as well, at the top of the lesson.</p>
+  <div class="lw-tabs" role="tablist" aria-label="Listen or watch" id="lwTabs" hidden>
+    <button type="button" class="lw-tab" role="tab" id="tabListen" aria-controls="listenView" aria-selected="true">Listen</button>
+    <button type="button" class="lw-tab" role="tab" id="tabWatch" aria-controls="watchView" aria-selected="false">Watch <em id="watchCount"></em></button>
+  </div>
   <div class="chips" id="areaChips" role="group" aria-label="Show episodes about"></div>
   <p class="sr-only" id="listStatus" role="status" aria-live="polite"></p>
-  <div id="episodes"><p class="empty">Loading the episodes…</p></div>
+  <div id="listenView" role="tabpanel" aria-labelledby="tabListen">
+    <p class="lw-note">Every lesson has a <b>Listen</b> button as well, at the top of the lesson.</p>
+    <div id="episodes"><p class="empty">Loading the episodes…</p></div>
+  </div>
+  <div id="watchView" class="wv" role="tabpanel" aria-labelledby="tabWatch" hidden>
+    <div class="wv-hero" id="wvHero"><div id="wvStage"></div><aside class="wv-next" id="wvNext"><h3>Up next</h3><ol></ol></aside></div>
+    <div id="wvContinue" hidden><h3>Continue watching</h3><div class="wv-grid"></div></div>
+    <h3 id="wvAllHead">All videos</h3>
+    <div class="wv-grid" id="wvAll"></div>
+    <div class="wv-sub"><p><b>New explainers on YouTube.</b> Every Product+ article as an animated video, with the numbers drawn on screen.</p>
+      <a class="yt-sub" href="https://www.youtube.com/@ProductAdvisoryInsights?sub_confirmation=1" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21.6 7.2a2.5 2.5 0 0 0-1.8-1.8C18.2 5 12 5 12 5s-6.2 0-7.8.4A2.5 2.5 0 0 0 2.4 7.2 26 26 0 0 0 2 12a26 26 0 0 0 .4 4.8 2.5 2.5 0 0 0 1.8 1.8C5.8 19 12 19 12 19s6.2 0 7.8-.4a2.5 2.5 0 0 0 1.8-1.8A26 26 0 0 0 22 12a26 26 0 0 0-.4-4.8z" fill="#fff"/><path d="m10 15 5.2-3L10 9z" fill="#ff0033"/></svg>Subscribe on YouTube<span class="sr-only"> (opens in a new tab)</span></a></div>
+  </div>
 
   <div class="site-foot" style="margin-top:28px; padding:20px 0; border-top:1px solid var(--line); text-align:center; font-size:0.75rem; color:var(--gray);">
     © <span id="footerYear"></span> Product Advisory, LLC. All rights reserved. &nbsp;·&nbsp;
@@ -177,9 +227,94 @@
     [['', 'All']].concat(used.map(k => [k, AREAS[k]])).forEach(([k, label]) => {
       const b = document.createElement('button');
       b.type = 'button'; b.className = 'chip'; b.textContent = label; b.setAttribute('aria-pressed', String(area === k));
-      b.addEventListener('click', () => { area = k; renderChips(); renderList(); });
+      b.addEventListener('click', () => { area = k; renderChips(); if (tab === 'watch') renderWatch(); else renderList(); });
       box.appendChild(b);
     });
+  }
+
+  /* ---------- Watch: the videos, newest up top. YouTube's privacy-mode player loads only when someone presses play.
+     How far someone got is kept in this browser (pa_watch: slug -> {t, d}) for Continue watching and the progress bars. */
+  let tab = 'listen', heroSlug = '';
+  const players = [];
+  const watchLog = () => { try { return JSON.parse(localStorage.getItem('pa_watch') || '{}') || {}; } catch (e) { return {}; } };
+  const watchSave = (slug, t, d) => { if (!(d > 0)) return; const l = watchLog(); l[slug] = { t: Math.round(t), d: Math.round(d), at: Date.now() }; try { localStorage.setItem('pa_watch', JSON.stringify(l)); } catch (e) {} };
+  const watchState = (slug) => { const w = watchLog()[slug]; if (!w || !(w.d > 0) || w.t < 15) return null; const p = Math.min(1, w.t / w.d); return { pct: p, done: p > 0.92, t: w.t }; };
+  const thumbOf = (e) => e.thumb || 'https://i.ytimg.com/vi/' + encodeURIComponent(e.youtube) + '/hqdefault.jpg';
+  const thumbHtml = (e) => { const w = watchState(e.slug);
+    return '<span class="wv-thumb"><img src="' + esc(thumbOf(e)) + '" alt="" width="960" height="540" loading="lazy"><span class="wv-play" aria-hidden="true"></span>' +
+      '<span class="wv-len">' + (w && w.done ? '✓ Watched' : Math.max(1, Math.round(e.duration / 60)) + ' min') + '</span>' +
+      (w && !w.done ? '<span class="wv-bar" style="--p:' + Math.round(w.pct * 100) + '%"></span>' : '') + '</span>'; };
+  let ytReady = null;
+  const loadYT = () => ytReady || (ytReady = new Promise(res => {
+    if (window.YT && window.YT.Player) return res(window.YT);
+    const prev = window.onYouTubeIframeAPIReady;
+    window.onYouTubeIframeAPIReady = () => { if (prev) prev(); res(window.YT); };
+    const sc = document.createElement('script'); sc.src = 'https://www.youtube.com/iframe_api'; sc.async = true; document.head.appendChild(sc);
+  }));
+  function playVideo(box, ep){
+    audio.pause();
+    players.forEach(p => { try { p.pauseVideo(); } catch (e) {} });
+    const w = watchState(ep.slug), start = w && !w.done ? w.t : 0;
+    box.innerHTML = '<div class="wv-frame"><div></div></div>';
+    const slot = box.querySelector('.wv-frame div');
+    let timer = null;
+    event('episode_watch', { episode: ep.slug, where: 'watch_view' });
+    loadYT().then(YT => {
+      const p = new YT.Player(slot, { host: 'https://www.youtube-nocookie.com', videoId: ep.youtube,
+        playerVars: { autoplay: 1, rel: 0, playsinline: 1, start: Math.floor(start) },
+        events: { onStateChange: (e) => {
+          clearInterval(timer);
+          const save = () => { try { watchSave(ep.slug, p.getCurrentTime(), p.getDuration()); } catch (x) {} };
+          if (e.data === YT.PlayerState.PLAYING) timer = setInterval(save, 5000);
+          if (e.data === YT.PlayerState.PAUSED) save();
+          if (e.data === YT.PlayerState.ENDED) { try { watchSave(ep.slug, p.getDuration(), p.getDuration()); } catch (x) {} renderWatch(); }
+        } } });
+      players.push(p);
+    });
+  }
+  function renderWatch(){
+    const vids = episodes.filter(e => e.youtube && (!area || (e.areas || []).includes(area)));
+    if (tab === 'watch') $('listStatus').textContent = vids.length + (vids.length === 1 ? ' video' : ' videos') + (area ? ' about ' + AREAS[area] : '');
+    $('wvHero').hidden = !vids.length;
+    if (!vids.length){ $('wvAll').innerHTML = '<p class="empty">No videos here yet.</p>'; $('wvContinue').hidden = true; return; }
+    if (!vids.some(v => v.slug === heroSlug)) heroSlug = vids[0].slug;
+    const hero = vids.find(v => v.slug === heroSlug), stage = $('wvStage');
+    if (stage.dataset.slug !== heroSlug || !stage.querySelector('.wv-frame')){
+      stage.dataset.slug = heroSlug;
+      stage.innerHTML = '<div class="wv-media"><button type="button" class="wv-face" aria-label="Play the video: ' + esc(hero.title) + '">' + thumbHtml(hero) + '</button></div>' +
+        '<div class="wv-cap"><span class="eyebrow">' + (hero === vids[0] ? 'Newest · ' : '') + esc(hero.topic) + '</span><b>' + esc(hero.title) + '</b><p>' + esc(hero.dek) + '</p></div>';
+      stage.querySelector('.wv-face').addEventListener('click', () => playVideo(stage.querySelector('.wv-media'), hero));
+    }
+    const next = vids.filter(v => v.slug !== heroSlug).slice(0, 3);
+    $('wvHero').classList.toggle('solo', !next.length);
+    $('wvNext').hidden = !next.length;
+    $('wvNext').querySelector('ol').innerHTML = next.map(v => '<li><button type="button" data-slug="' + esc(v.slug) + '">' + thumbHtml(v) + '<b>' + esc(v.title) + '</b></button></li>').join('');
+    const card = (v) => '<button type="button" class="wv-card" data-slug="' + esc(v.slug) + '">' + thumbHtml(v) + '<b>' + esc(v.title) + '</b></button>';
+    const started = vids.filter(v => { const w = watchState(v.slug); return v.slug !== heroSlug && w && !w.done; });
+    $('wvContinue').hidden = !started.length;
+    $('wvContinue').querySelector('.wv-grid').innerHTML = started.map(card).join('');
+    $('wvAllHead').innerHTML = 'All videos <span style="font-weight:400;color:var(--gray)">' + vids.length + '</span>';
+    $('wvAll').innerHTML = vids.map(card).join('');
+    document.querySelectorAll('#wvNext button, #watchView .wv-card').forEach(b => b.addEventListener('click', () => {
+      heroSlug = b.dataset.slug; renderWatch();
+      playVideo($('wvStage').querySelector('.wv-media'), episodes.find(x => x.slug === heroSlug));
+      $('wvStage').scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+    }));
+  }
+  function setTab(t, focus){
+    tab = t;
+    $('tabListen').setAttribute('aria-selected', String(t === 'listen')); $('tabWatch').setAttribute('aria-selected', String(t === 'watch'));
+    $('tabListen').tabIndex = t === 'listen' ? 0 : -1; $('tabWatch').tabIndex = t === 'watch' ? 0 : -1;
+    $('listenView').hidden = t !== 'listen'; $('watchView').hidden = t !== 'watch';
+    if (t === 'watch') renderWatch(); else { players.forEach(p => { try { p.pauseVideo(); } catch (e) {} }); renderList(); }
+    if (focus) $(t === 'watch' ? 'tabWatch' : 'tabListen').focus();
+  }
+  $('tabListen').addEventListener('click', () => setTab('listen'));
+  $('tabWatch').addEventListener('click', () => { setTab('watch'); event('watch_view', {}); });
+  $('lwTabs').addEventListener('keydown', (e) => { if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') { e.preventDefault(); setTab(tab === 'listen' ? 'watch' : 'listen', true); } });
+  function preferWatch(){   // #watch in the address, or Watch picked in "Make it yours" on productadvisory.co
+    if (location.hash === '#watch') return true;
+    try { const m = document.cookie.match(/(?:^|; )pa_look=([^;]*)/); const l = JSON.parse(m ? decodeURIComponent(m[1]) : (localStorage.getItem('pa_look') || '{}')); return l && l.format === 'watch'; } catch (e) { return false; }
   }
 
   function renderList(){
@@ -234,6 +369,10 @@
   fetch(EPISODES_URL, { cache: 'no-cache' }).then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); }).then(d => {
     episodes = (d && d.episodes) || [];
     renderChips(); renderList();
+    const nv = episodes.filter(e => e.youtube).length;
+    $('lwTabs').hidden = !nv;
+    $('watchCount').textContent = nv ? '(' + nv + ')' : '';
+    if (nv && preferWatch() && !(location.hash && location.hash !== '#watch')) setTab('watch');
   }).catch(() => {
     $('episodes').innerHTML = '<p class="empty">Couldn\'t load the episodes just now. Check your connection and refresh the page.</p>';
   });
