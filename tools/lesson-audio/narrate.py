@@ -17,6 +17,13 @@ ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)
 SCRIPTS = os.path.join(ROOT, 'tools', 'lesson-audio', 'scripts.json')
 OUT = os.path.join(ROOT, 'audio', 'lessons')
 VOICE, SPEED, RATE = 'am_michael', 1.0, 24000
+# The finishing pass ("crisp"): trims rumble below 75 Hz, takes a little mud out at 250 Hz, lifts the presence range
+# where consonants sit (3.8 kHz) and the air above 9 kHz, softens harsh s's, evens out the level, and brings it to
+# podcast loudness (-16 LUFS, peaks under -1.5 dB). Saved as 128 kbps at 44.1 kHz. Timing is unchanged, so the
+# chapters and read-along line up as before. Change it here and every lesson is narrated again.
+FX = ('aresample=44100:resampler=soxr,highpass=f=75,equalizer=f=250:t=q:w=1.2:g=-2.5,equalizer=f=3800:t=q:w=1.4:g=3,'
+      'highshelf=f=9000:g=2,deesser=i=0.35,acompressor=threshold=-20dB:ratio=2.5:attack=8:release=120:makeup=2,'
+      'loudnorm=I=-16:TP=-1.5:LRA=9')
 
 # Words the voice gets wrong as written. Short forms (AI, PM, KPIs...) are in LEX below, not here: spelled with dots
 # ("A.I.") the voice stops after every letter. Same rules as Product+ Audio on www (src/audio/make_audio.py).
@@ -120,7 +127,7 @@ def script(course_title, lesson):
 
 
 def script_hash(lines):
-    return hashlib.sha256(json.dumps([VOICE, SPEED, LEX, lines]).encode()).hexdigest()[:16]
+    return hashlib.sha256(json.dumps([VOICE, SPEED, LEX, FX, lines]).encode()).hexdigest()[:16]
 
 
 def phonemes(kokoro, text):
@@ -174,7 +181,7 @@ def main():
             with tempfile.TemporaryDirectory() as d:
                 wav = os.path.join(d, 'a.wav')
                 sf.write(wav, audio, RATE)
-                subprocess.run(['ffmpeg', '-loglevel', 'error', '-y', '-i', wav, '-ac', '1', '-codec:a', 'libmp3lame', '-b:a', '48k',
+                subprocess.run(['ffmpeg', '-loglevel', 'error', '-y', '-i', wav, '-af', FX, '-ac', '1', '-ar', '44100', '-codec:a', 'libmp3lame', '-b:a', '128k',
                                 '-map_metadata', '-1', '-fflags', '+bitexact', '-flags:a', '+bitexact',
                                 '-metadata', 'title=' + lesson['title'], '-metadata', 'artist=Product Advisory',
                                 '-metadata', 'album=' + data[course]['title'], mp3], check=True)

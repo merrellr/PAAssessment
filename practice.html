@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>Practice · Product Advisory Learning</title>
+<link rel="icon" href="/images/icons/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="/images/icons/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="/images/icons/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@600&family=Lato:ital,wght@0,300;0,400;0,700;0,900;1,400&display=swap" rel="stylesheet">
+<script src="pa-prefs.js"></script>
+<script src="analytics.js"></script>
+<style>
+  *{ box-sizing: border-box; }
+  body{ margin:0; background: var(--pa-bg); font-family: var(--pa-sans); color: var(--pa-ink); }
+  .wrap{ max-width: 1180px; margin: 0 auto; padding: 24px 16px 64px; }
+  [hidden]{ display:none !important; }
+  h1{ font-family: var(--pa-display); color: var(--pa-navy-deep); margin: 2px 0 4px; font-size: clamp(1.4rem, 3vw, 1.9rem); }
+  .back{ display:block; width:fit-content; margin-bottom: 14px; color: var(--pa-muted); font-size: .8125rem; text-decoration:none; }
+  .back:hover{ color: var(--pa-navy); }
+  .pr-layout{ display:grid; grid-template-columns: 300px minmax(0, 1fr); gap: 24px; align-items:start; margin-top: 18px; }
+  .pr-side{ display:flex; flex-direction:column; gap: 16px; position: sticky; top: 84px; }
+  .card{ background: var(--pa-card); border: 1px solid var(--pa-line); border-radius: 16px; padding: 18px 20px; }
+  .card h2{ font-size: 1rem; margin: 0 0 10px; }
+  .pr-goal{ display:flex; flex-wrap: wrap; align-items:center; justify-content:space-between; gap: 12px; padding: 12px 18px; border-radius: 14px; border: 1px solid var(--pa-line); background: var(--pa-card); }
+  .pr-goal b{ font-weight: 800; }
+  .pr-pips{ display:flex; align-items:center; gap: 6px; color: var(--pa-muted); font-size: .8125rem; }
+  .pr-pips span{ white-space: nowrap; }
+  .pr-pips i{ width: 26px; height: 6px; border-radius: 3px; background: var(--pa-line); }
+  .pr-pips i.on{ background: var(--pa-primary); }
+  .pr-pips i.ok{ background: var(--pa-ok, #2e8b57); } .pr-pips i.miss{ background: var(--pa-warn, #c0622a); }
+  .pr-say{ display:flex; gap: 12px; align-items:flex-start; margin: 18px 0; font-size: 1rem; line-height: 1.6; }
+  .pr-say .ico{ flex:none; display:grid; place-items:center; width: 34px; height: 34px; border-radius: 50%; background: var(--pa-primary); color: var(--pa-btn-ink); }
+  .pr-say .ico svg{ width: 17px; height: 17px; fill:none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .pr-say p{ margin: 4px 0 0; }
+  .pr-q{ padding: 22px 24px; }
+  .pr-tags{ display:flex; flex-wrap:wrap; gap: 6px; margin-bottom: 12px; }
+  .pr-tags span{ padding: 3px 10px; border-radius: 12px; background: var(--pa-tint); color: var(--pa-navy); font-size: .75rem; font-weight: 700; }
+  .pr-question{ font-size: 1.125rem; line-height: 1.55; margin: 0 0 18px; color: var(--pa-ink); }
+  .pr-opts{ display:flex; flex-direction:column; gap: 10px; }
+  .pr-opt{ display:flex; gap: 12px; align-items:flex-start; width:100%; padding: 14px 16px; border: 1.5px solid var(--pa-line); border-radius: 12px; background: var(--pa-bg); color: var(--pa-ink); font: inherit; font-size: .9688rem; line-height: 1.5; text-align:left; cursor:pointer; }
+  .pr-opt:hover:not(:disabled){ border-color: var(--pa-primary); }
+  .pr-opt[aria-pressed="true"]{ border-color: var(--pa-primary); box-shadow: 0 0 0 2px color-mix(in srgb, var(--pa-primary) 25%, transparent); }
+  .pr-opt .k{ flex:none; font-weight: 800; color: var(--pa-muted); }
+  .pr-opt.right{ border-color: var(--pa-ok, #2e8b57); background: var(--pa-ok-bg, #eef9f1); }
+  .pr-opt.wrong{ border-color: var(--pa-warn, #c0622a); background: var(--pa-warn-bg, #fdf1ea); }
+  .pr-opt:disabled{ cursor: default; }
+  .pr-foot{ display:flex; justify-content:flex-end; gap: 10px; margin-top: 16px; flex-wrap: wrap; }
+  .pr-why{ margin-top: 16px; padding: 14px 16px; border-radius: 12px; background: var(--pa-band); border: 1px solid var(--pa-line); }
+  .pr-why .verdict{ font-weight: 800; }
+  .pr-why .verdict.ok{ color: var(--pa-ok-ink, #1f6b47); } .pr-why .verdict.bad{ color: var(--pa-warn, #c0622a); }
+  .pr-why p{ margin: 6px 0 0; line-height: 1.6; }
+  .pr-why a{ color: var(--pa-primary); font-weight: 700; }
+  .pr-offer{ margin-top: 14px; padding: 14px 16px; border-radius: 12px; border: 1.5px dashed var(--pa-primary); }
+  .pr-offer p{ margin: 0 0 10px; }
+  .pr-offer .row{ display:flex; flex-wrap:wrap; gap: 8px; }
+  .pr-adapt{ list-style:none; margin: 0; padding: 0 0 0 12px; border-left: 2px solid var(--pa-line); font-size: .8438rem; }
+  .pr-adapt li{ margin: 0 0 8px; }
+  .pr-area-row{ display:flex; justify-content:space-between; align-items:center; gap: 8px; padding: 7px 0; border-bottom: 1px solid var(--pa-line); font-size: .8438rem; }
+  .pr-area-row.cur{ font-weight: 800; }
+  .pr-done h2{ font-size: 1.25rem; }
+  .pr-done .big{ font-family: var(--pa-display); font-size: 2.2rem; color: var(--pa-navy-deep); margin: 4px 0; }
+  @media (max-width: 900px){ .pr-layout{ grid-template-columns: 1fr; } .pr-side{ position: static; order: 2; } }
+</style>
+<link rel="stylesheet" href="pa-theme.css">
+<link rel="stylesheet" href="coach.css">
+<script src="coach-core.js"></script>
+<script src="coach-bank.js"></script>
+</head>
+<body>
+<script src="pa-shell.js"></script>
+<div class="wrap">
+  <a class="back" href="/my-learning">← Back to My Learning</a>
+  <span class="eyebrow">Practice with your coach</span>
+  <h1 id="prTitle">Practice</h1>
+  <div class="pr-goal" id="prGoal" hidden><span><b>Session goal:</b> <span id="prGoalText"></span></span><span class="pr-pips" id="prPips" aria-label="Progress"></span></div>
+  <div class="pr-layout">
+    <aside class="pr-side" aria-label="How the coach is adapting">
+      <section class="card"><h2>How I'm adapting</h2><ol class="pr-adapt" id="prAdapt"></ol></section>
+      <section class="card"><h2>Your readiness</h2><div id="prAreas"></div><a class="cc-area-go" href="/my-learning#readiness">View readiness →</a></section>
+    </aside>
+    <main>
+      <div class="pr-say" id="prSay"><span class="ico" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="m15.5 8.5-2 5-5 2 2-5z"/></svg></span><div><p id="prSayText">Getting your session ready…</p></div></div>
+      <section class="card pr-q" id="prCard" hidden aria-live="polite">
+        <div class="pr-tags" id="prTags"></div>
+        <p class="pr-question" id="prQuestion"></p>
+        <div class="pr-opts" id="prOpts" role="group" aria-label="Answers"></div>
+        <div class="pr-why" id="prWhy" hidden></div>
+        <div class="pr-offer" id="prOffer" hidden></div>
+        <div class="pr-foot"><button type="button" class="cc-btn" id="prSubmit" disabled>Check my answer</button><button type="button" class="cc-btn" id="prNext" hidden>Next question →</button></div>
+      </section>
+      <section class="card pr-done" id="prDone" hidden aria-live="polite"></section>
+    </main>
+  </div>
+  <div class="site-foot" style="margin-top:28px; padding:20px 0; border-top:1px solid var(--pa-line); text-align:center; font-size:0.75rem; color:var(--pa-muted);">
+    © <span id="footerYear"></span> Product Advisory, LLC. All rights reserved. &nbsp;·&nbsp;
+    <a href="https://www.productadvisory.co/privacy-policy" target="_blank" rel="noopener" style="color:inherit; text-decoration:underline;">Privacy Policy</a> &nbsp;·&nbsp;
+    <a href="https://www.productadvisory.co/terms-of-use" target="_blank" rel="noopener" style="color:inherit; text-decoration:underline;">Terms of Use</a>
+  </div>
+</div>
+<script>document.getElementById("footerYear").textContent = new Date().getFullYear();</script>
+<script type="module">
+/* Practice: a short session in one skill area, picked by the coach (coach-core.js) from the lesson checks
+   (coach-bank.js). After each answer: whether it was right and why (the lesson's own explanation), with the lesson
+   to read. Two right in a row and it gets harder; two misses and the coach offers to slow down or teach the idea
+   first. Every answer goes on the learner's answer log, which is what My Learning's readiness and gaps are made of. */
+const firebaseConfig = {
+  apiKey: "AIzaSyAcECtS5c6WeOhKlwRK-LYFE47npbuq_eU",
+  authDomain: "auth.productadvisory.co",
+  projectId: "product-advisory-lms",
+  storageBucket: "product-advisory-lms.firebasestorage.app",
+  messagingSenderId: "1081134406437",
+  appId: "1:1081134406437:web:72e28604d093219e7698cc"
+};
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
+import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+const app = initializeApp(firebaseConfig), auth = getAuth(app), db = getFirestore(app);
+
+const C = window.CoachCore, BANK = window.CoachBank;
+const AREAS = { discovery: 'Customer & Market Discovery', strategy: 'Product Strategy & Roadmapping', prioritization: 'Prioritization & Trade-offs',
+  execution: 'Execution & Delivery', stakeholder: 'Stakeholder Communication & Influence', aiIndividual: 'AI Fluency — Individual', aiOrg: 'AI Fluency — Organizational' };
+const LEVEL = ['Foundations', 'Building', 'Applied', 'Advanced'];
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
+const event = (n, p) => { if (window.PAAnalytics) PAAnalytics.event(n, p || {}); };
+const params = new URLSearchParams(location.search);
+
+let user = null, progress = { courses: {} }, log = [], pct = null;
+let area = null, level = 0, total = 4, asked = [], results = [], current = null, picked = -1, style = null, offerShown = false;
+
+function lessonTitle(q){ const ls = (BANK.lessons[q.c] || []).find(l => l.id === q.l); return ls ? ls.title : 'the lesson'; }
+function adaptNote(text){ const li = document.createElement('li'); li.textContent = text; $('prAdapt').appendChild(li); }
+function renderAreas(){
+  const r = C.readiness({ areas: AREAS, pct, log });
+  $('prAreas').innerHTML = r.map(a => '<div class="pr-area-row' + (a.key === area ? ' cur' : '') + '"><span>' + esc(a.name) + '</span><span class="cc-chip cc-' + a.status + '"><i aria-hidden="true"></i>' + esc(a.label) + '</span></div>').join('');
+}
+function renderPips(){
+  $('prPips').innerHTML = '<span>' + Math.min(results.length + 1, total) + ' of ' + total + '</span>' +
+    Array.from({ length: total }, (_, i) => '<i class="' + (i < results.length ? (results[i] ? 'ok' : 'miss') : i === results.length ? 'on' : '') + '"></i>').join('');
+}
+
+function ask(){
+  current = C.pickQuestion(BANK, area, level, asked, log, style);
+  if (!current){ finish(); return; }
+  asked.push(current.id); picked = -1; offerShown = false;
+  $('prTags').innerHTML = '<span>' + esc(C.STYLES[current.t]) + '</span><span>' + LEVEL[C.TIERS.indexOf(current.tier)] + '</span><span>From: ' + esc(lessonTitle(current)) + '</span>';
+  $('prQuestion').textContent = current.q;
+  $('prOpts').innerHTML = current.o.map((o, i) => '<button type="button" class="pr-opt" aria-pressed="false" data-i="' + i + '"><span class="k">' + 'ABCDEFG'[i] + '.</span><span>' + esc(o) + '</span></button>').join('');
+  $('prWhy').hidden = true; $('prOffer').hidden = true; $('prNext').hidden = true; $('prSubmit').hidden = false; $('prSubmit').disabled = true;
+  $('prCard').hidden = false; renderPips();
+  $('prOpts').querySelectorAll('.pr-opt').forEach(b => b.addEventListener('click', () => {
+    if (b.disabled) return;
+    picked = +b.dataset.i;
+    $('prOpts').querySelectorAll('.pr-opt').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
+    $('prSubmit').disabled = false;
+  }));
+}
+
+async function check(){
+  if (picked < 0) return;
+  const ok = picked === current.a;
+  results.push(ok);
+  $('prOpts').querySelectorAll('.pr-opt').forEach(b => { b.disabled = true; const i = +b.dataset.i; if (i === current.a) b.classList.add('right'); else if (i === picked) b.classList.add('wrong'); });
+  const href = '/lesson?course=' + current.c + '&lesson=' + current.l;
+  $('prWhy').innerHTML = '<span class="verdict ' + (ok ? 'ok' : 'bad') + '">' + (ok ? '✓ Right.' : '✗ Not quite.') + '</span> <b>Why:</b>' +
+    '<p>' + esc(current.x || 'The answer comes from ' + lessonTitle(current) + '.') + '</p><p><a href="' + href + '">Read it in ' + esc(lessonTitle(current)) + ' →</a></p>';
+  $('prWhy').hidden = false; $('prSubmit').hidden = true;
+  log = C.record(log, { d: area, id: current.id, t: current.t, ok, src: 'practice' });
+  save();
+  event('practice_answer', { area, ok, kind: current.t, level });
+  renderAreas(); renderPips();
+  const move = C.adapt(results);
+  if (move === 'harder' && level < 3){ level++; adaptNote('Two right in a row: moving up to ' + LEVEL[level] + ' questions.'); }
+  if (move === 'offer'){
+    offerShown = true;
+    $('prOffer').innerHTML = '<p>I noticed two misses in a row. Want to slow down, or read the idea through first?</p><div class="row">' +
+      '<button type="button" class="cc-btn ghost sm" id="prSlow">Let\'s slow down</button><a class="cc-btn ghost sm" href="' + href + '" id="prTeach">Teach me first</a></div>';
+    $('prOffer').hidden = false;
+    $('prSlow').addEventListener('click', () => {
+      if (level > 0) level--; style = 'knowledge';
+      adaptNote('Two misses: stepping back to ' + LEVEL[level] + ', starting with a question about the idea itself.');
+      $('prOffer').hidden = true; event('practice_slow_down', { area });
+      next();
+    });
+    $('prTeach').addEventListener('click', () => event('practice_teach_me', { area }));
+  }
+  if (results.length >= total){ $('prNext').textContent = 'See how it went →'; }
+  $('prNext').hidden = false; $('prNext').focus();
+}
+
+function next(){
+  if (results.length >= total){ finish(); return; }
+  if (style && results.length && results[results.length - 1]) style = null;   // back to the mix once they're back on track
+  ask();
+}
+
+let saving = Promise.resolve();
+function save(){
+  // one write at a time, the latest log each time (only the answer log; nothing else on progress is touched)
+  saving = saving.then(() => setDoc(doc(db, 'progress', user.uid), { answers: log }, { merge: true })).catch(() => {});
+}
+
+function finish(){
+  $('prCard').hidden = true; $('prGoal').hidden = true;
+  const r = C.recap(results, AREAS[area]);
+  const areas = C.readiness({ areas: AREAS, pct, log }), mine = areas.find(a => a.key === area);
+  const nx = C.nextStep({ areas: AREAS, pct, log, progress, bank: BANK });
+  $('prSay').hidden = true;
+  $('prDone').innerHTML = '<span class="eyebrow">Session done</span><p class="big">' + r.right + ' of ' + r.n + ' right</p><p>' + esc(r.line) + '</p>' +
+    '<p>' + esc(AREAS[area]) + ' is now <span class="cc-chip cc-' + mine.status + '"><i aria-hidden="true"></i>' + esc(mine.label) + '</span>' + (mine.total ? ' (' + mine.correct + ' of ' + mine.total + ' right overall).' : '.') + '</p>' +
+    '<h2>What I\'d do next</h2><p><b>' + esc(nx.title) + '.</b> ' + esc(nx.why) + '</p><div class="pr-foot" style="justify-content:flex-start">' +
+    '<a class="cc-btn" href="' + esc(nx.action.href) + '">' + esc(nx.action.label) + ' →</a><a class="cc-btn ghost" href="/practice?area=' + area + '">Another ' + esc(AREAS[area]) + ' session</a><a class="cc-btn ghost" href="/my-learning">Back to My Learning</a></div>';
+  $('prDone').hidden = false;
+  event('practice_done', { area, right: r.right, n: r.n });
+}
+
+function start(){
+  const want = params.get('area');
+  const next0 = C.nextStep({ areas: AREAS, pct, log, progress, bank: BANK });
+  area = AREAS[want] ? want : (next0.area || 'discovery');
+  total = Math.max(3, Math.min(10, +params.get('n') || 4));
+  level = C.startLevel(pct, area);
+  const ws = C.weakStyle(log, area);
+  style = ws ? ws.t : null;
+  document.title = 'Practice: ' + AREAS[area] + ' · Product Advisory Learning';
+  $('prTitle').textContent = AREAS[area];
+  $('prGoalText').textContent = ws ? 'get ' + C.STYLE_PHRASE[ws.t] + ' right' : 'see where you stand in ' + AREAS[area];
+  $('prGoal').hidden = false;
+  const a = C.readiness({ areas: AREAS, pct, log }).find(x => x.key === area);
+  $('prSayText').textContent = 'Let\'s work on ' + AREAS[area] + '. ' + (ws ? 'I picked ' + C.STYLE_PHRASE[ws.t] + ', because that\'s where your recent misses are.'
+    : a.total ? 'You have ' + a.correct + ' of ' + a.total + ' right here so far, so I\'ll mix the kinds of question.'
+    : pct ? 'I\'m starting at ' + LEVEL[level] + ' questions, from your skill check (' + Math.round(pct[area]) + '%).' : 'I\'m starting with the foundations.') +
+    ' ' + total + ' questions; after each one I\'ll explain why.';
+  adaptNote('Starting at ' + LEVEL[level] + (ws ? ', with ' + C.STYLE_PHRASE[ws.t] : '') + '.');
+  renderAreas();
+  event('practice_start', { area, level, n: total });
+  ask();
+}
+
+$('prSubmit').addEventListener('click', check);
+$('prNext').addEventListener('click', next);
+
+onAuthStateChanged(auth, async (u) => {
+  if (!u){ location.href = '/lms-dashboard'; return; }
+  user = u;
+  try {
+    const snap = await getDoc(doc(db, 'progress', u.uid));
+    progress = snap.exists() ? snap.data() : { courses: {} };
+  } catch (e) { /* a fresh session still works; answers just won't count until it can save */ }
+  log = progress.answers || [];
+  pct = progress.assessmentResult && progress.assessmentResult.categoryPct ? progress.assessmentResult.categoryPct : null;
+  start();
+});
+</script>
+<script type="module" src="account-menu.js"></script>
+<script src="tour.js"></script>
+</body>
+</html>

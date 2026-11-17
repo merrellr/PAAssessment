@@ -304,6 +304,10 @@
   }
   /* Home and My Learning: one page, two views */
   body[data-view="home"] [data-only="learning"], body[data-view="learning"] [data-only="home"]{ display:none !important; }
+  /* My Learning tabs: Coach, My readiness, My gaps (coach-ui.js) and Courses (the course path, as before) */
+  body[data-view="learning"]:not([data-ltab="courses"]) [data-only="learning"]:not([data-coach]){ display:none !important; }
+  body[data-ltab="coach"] [data-coach]:not([data-coach~="coach"]), body[data-ltab="readiness"] [data-coach]:not([data-coach~="readiness"]),
+  body[data-ltab="gaps"] [data-coach]:not([data-coach~="gaps"]), body[data-ltab="courses"] [data-coach]:not([data-coach~="courses"]){ display:none !important; }
   /* Home: the greeting on its own line, then (first visit) the welcome, then your result beside your badges */
   .home-hi{ margin: 4px 0 18px; }
   .home-hi .home-hello{ margin:0 0 4px; }
@@ -352,6 +356,10 @@
 <script src="assessment-history.js"></script>
 <script src="growth-core.js"></script>
 <script src="saved-tools-core.js"></script>
+<script src="coach-core.js"></script>
+<script src="coach-bank.js" defer></script>
+<script src="coach-ui.js"></script>
+<link rel="stylesheet" href="coach.css">
 </head>
 <body>
 <script src="pa-shell.js"></script>
@@ -587,6 +595,7 @@
       </div>
         <button type="button" class="card bd-tile" id="badgeTile" hidden aria-haspopup="dialog"></button>
       </div>
+      <section class="card cc-home" id="coachHome" hidden aria-label="Your coach"></section>
       <div class="card assign-card" id="assignedHome" hidden></div>
       <div class="home-grid">
         <div class="home-card lead" id="homeResume"></div>
@@ -608,12 +617,33 @@
     </section>
 
 
-    <header class="learn-head" data-only="learning">
+    <header class="learn-head cc-head" data-only="learning" data-coach="coach readiness gaps courses">
       <span class="eyebrow">My Learning</span>
-      <h1>Your courses and skills</h1>
-      <p>Your plan, every course, and how your skills are growing since your assessment.</p>
-      <button type="button" class="guide-btn" data-tour="my-learning" data-guide="{&quot;title&quot;:&quot;My Learning&quot;,&quot;steps&quot;:[{&quot;s&quot;:&quot;.learn-head h1&quot;,&quot;t&quot;:&quot;My Learning&quot;,&quot;p&quot;:&quot;Your plan, every course, and how your skills are growing since your skill check.&quot;},{&quot;s&quot;:&quot;#assignedLearning&quot;,&quot;t&quot;:&quot;Assigned to you&quot;,&quot;p&quot;:&quot;Courses your company assigned, with their due dates.&quot;},{&quot;s&quot;:&quot;#skillsCard&quot;,&quot;t&quot;:&quot;Your skills&quot;,&quot;p&quot;:&quot;Seven skill areas from your latest skill check. The further out, the stronger.&quot;},{&quot;s&quot;:&quot;#tileRow&quot;,&quot;t&quot;:&quot;Strength and growth area&quot;,&quot;p&quot;:&quot;Where you&#x27;re strongest, and where a course would help most.&quot;},{&quot;s&quot;:&quot;#catalogToggle&quot;,&quot;t&quot;:&quot;My plan or browse all&quot;,&quot;p&quot;:&quot;Your plan shows the courses picked for your level. Browse all shows all 28.&quot;},{&quot;s&quot;:&quot;#recBanner&quot;,&quot;t&quot;:&quot;Recommended for you&quot;,&quot;p&quot;:&quot;The areas where you have the most to gain.&quot;},{&quot;s&quot;:&quot;#courseCatalog&quot;,&quot;t&quot;:&quot;Your courses&quot;,&quot;p&quot;:&quot;Seven skill areas, four levels each. Your progress shows on every course.&quot;},{&quot;s&quot;:&quot;#weekGoal&quot;,&quot;t&quot;:&quot;Your weekly goal&quot;,&quot;p&quot;:&quot;Lessons per week. Change it on My Profile.&quot;},{&quot;s&quot;:&quot;#myNotesCard&quot;,&quot;t&quot;:&quot;Your notes&quot;,&quot;p&quot;:&quot;Every reflection you&#x27;ve written in a lesson, in one place. Private to you.&quot;}]}"><span class="guide-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="m15.5 8.5-2 5-5 2 2-5z"/></svg></span><span><b>Take the quick tour of My Learning</b><small>9 steps · about a minute</small></span></button>
+      <h1 id="coachHello">What do you want to work on today?</h1>
+      <p>Your coach looks at your skill check, your courses and your answers, and suggests what to do next. Your courses are all still here.</p>
+      <form class="cc-ask" data-coach-ask role="search">
+        <span class="cc-ask-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="m15.5 8.5-2 5-5 2 2-5z"/></svg></span>
+        <input type="text" maxlength="300" placeholder="Ask your coach about the lessons…" aria-label="Ask your coach about the lessons">
+        <button type="submit" aria-label="Ask">↑</button>
+      </form>
+      <div class="cc-suggest" id="coachSuggest">
+        <a class="cc-sg" href="/practice" data-coach-sg="weakest">Quiz me on my weakest area</a>
+        <a class="cc-sg" href="/practice" data-coach-sg="short">I have 15 minutes</a>
+        <button type="button" class="cc-sg" data-coach-sg="explain">Explain something I'm struggling with</button>
+        <button type="button" class="cc-sg" data-ltab-go="readiness">Am I improving?</button>
+      </div>
+      <button type="button" class="guide-btn" data-tour="my-learning" data-guide="{&quot;title&quot;:&quot;My Learning&quot;,&quot;steps&quot;:[{&quot;s&quot;:&quot;.cc-head h1&quot;,&quot;t&quot;:&quot;Your coach&quot;,&quot;p&quot;:&quot;My Learning starts with your coach: what it would do next, and why. Your courses are all still here.&quot;},{&quot;s&quot;:&quot;.cc-head .cc-ask&quot;,&quot;t&quot;:&quot;Ask about the lessons&quot;,&quot;p&quot;:&quot;Type a question and get an answer from the course lessons, with links to them.&quot;},{&quot;s&quot;:&quot;#coachPanel .cc-next&quot;,&quot;t&quot;:&quot;What I&#x27;d do next&quot;,&quot;p&quot;:&quot;One suggestion, with the evidence behind it: your skill check, your courses and the questions you&#x27;ve answered.&quot;},{&quot;s&quot;:&quot;#coachPanel .cc-alts&quot;,&quot;t&quot;:&quot;Or, if you&#x27;d rather&quot;,&quot;p&quot;:&quot;Other good options: another area to practise, a fresh skill check, or reading the idea through first.&quot;},{&quot;s&quot;:&quot;#coachPanel .cc-loop&quot;,&quot;t&quot;:&quot;Your learning loop&quot;,&quot;p&quot;:&quot;Assess, find the gaps, learn, practise, understand why, then check again. This shows where you are.&quot;},{&quot;s&quot;:&quot;.cc-tabs&quot;,&quot;t&quot;:&quot;Readiness, gaps and courses&quot;,&quot;p&quot;:&quot;My readiness: how each area is going. My gaps: which kind of question you miss. Courses: every course and your plan, as before.&quot;}]}"><span class="guide-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="m15.5 8.5-2 5-5 2 2-5z"/></svg></span><span><b>Take the quick tour of My Learning</b><small>6 steps · about a minute</small></span></button>
+      <nav class="cc-tabs" role="tablist" aria-label="My Learning">
+        <button type="button" role="tab" id="ltab-coach" data-ltab="coach" aria-controls="coachPanel">Coach</button>
+        <button type="button" role="tab" id="ltab-readiness" data-ltab="readiness" aria-controls="readinessPanel">My readiness</button>
+        <button type="button" role="tab" id="ltab-gaps" data-ltab="gaps" aria-controls="gapsPanel">My gaps</button>
+        <button type="button" role="tab" id="ltab-courses" data-ltab="courses">Courses</button>
+      </nav>
     </header>
+
+    <div class="cc-panel" id="coachPanel" role="tabpanel" aria-labelledby="ltab-coach" data-only="learning" data-coach="coach"><p class="cc-muted">Loading your coach…</p></div>
+    <div class="cc-panel" id="readinessPanel" role="tabpanel" aria-labelledby="ltab-readiness" data-only="learning" data-coach="readiness"></div>
+    <div class="cc-panel" id="gapsPanel" role="tabpanel" aria-labelledby="ltab-gaps" data-only="learning" data-coach="gaps"></div>
 
     <div class="card assign-card" id="assignedLearning" data-only="learning" hidden></div>
 
@@ -1485,8 +1515,30 @@ async function loadDashboard(user){
   renderAssignedStat(progress, assessmentResult);
   renderWeekGoal(progress);
   renderBadges(user, progress, assessmentResult);
+  renderCoach(user, progress, assessmentResult, assessmentUrl);
 
   syncProgressReport(user, progress, assessmentResult);
+}
+
+/* The coach (coach-core.js, drawn by coach-ui.js): what to do next and why, readiness and gaps, from the skill
+   check, the courses and the answers saved on progress.answers. The practice bank (coach-bank.js) gives it lesson
+   titles; it loads deferred, so the coach waits for it. */
+function renderCoach(user, progress, assessmentResult, assessmentUrl){
+  if (!window.CoachUI) return;
+  const go = () => {
+    const H = window.LearningHomeCore;
+    const pct = assessmentResult && assessmentResult.categoryPct ? assessmentResult.categoryPct : null;
+    const areas = {}; Object.keys(DOMAINS).forEach(k => { areas[k] = DOMAINS[k].label; });
+    const lessonsDone = Object.keys(progress.courses || {}).reduce((n, cid) => n + (H ? H.doneIds(progress, CATALOG, cid).length : 0), 0);
+    const at = assessmentResult && (assessmentResult.submittedAt || assessmentResult.firstSubmittedAt);
+    const resume = H ? H.resume(progress, CATALOG) : null;
+    if (resume) resume.title = CATALOG[resume.courseId].title;
+    CoachUI.render({ areas, pct, assessedAt: at || null, assessedLabel: at ? 'Skill check, ' + new Date(at).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) : '',
+      log: progress.answers || [], progress, bank: window.CoachBank || null, resume, lessonsDone, assessUrl: assessmentUrl, now: Date.now() });
+    const focus = window.CoachCore.nextStep({ areas, pct, log: progress.answers || [], progress, bank: window.CoachBank || null }).area;
+    document.querySelectorAll('[data-coach-sg="weakest"], [data-coach-sg="short"]').forEach(a => { a.href = '/practice' + (focus ? '?area=' + focus : '') + (a.dataset.coachSg === 'short' ? (focus ? '&' : '?') + 'n=6' : ''); });
+  };
+  if (window.CoachBank) go(); else window.addEventListener('load', go, { once: true });
 }
 
 /* Badges: "3 of 28 badges" next to the weekly goal, and a pop-up when one is newly earned.
@@ -1529,9 +1581,44 @@ let dashBadges = null;
 // One page, two views: Home (/lms-dashboard: at a glance) and My Learning (/my-learning: courses and skills).
 // Switching is instant; the address, the header, the menus and the browser's Back button follow along.
 function viewFromUrl(){ return /^\/my-learning/.test(location.pathname) || new URLSearchParams(location.search).get('view') === 'learning' ? 'learning' : 'home'; }
+/* My Learning's tabs: Coach (the default), My readiness, My gaps and Courses (the course path). A link to something
+   on the course path opens Courses; #readiness, #gaps and #courses in the address open that tab. */
+const LTABS = ['coach', 'readiness', 'gaps', 'courses'];
+window.setLearnTab = function(t, focus){
+  t = LTABS.indexOf(t) > -1 ? t : 'coach';
+  document.body.dataset.ltab = t;
+  document.querySelectorAll('.cc-tabs [data-ltab]').forEach(b => {
+    const on = b.dataset.ltab === t;
+    b.setAttribute('aria-selected', on ? 'true' : 'false'); b.tabIndex = on ? 0 : -1;
+    if (on && focus) b.focus();
+  });
+  try { localStorage.setItem('pa_ltab', t); } catch (e) { /* storage off */ }
+};
+(function(){
+  const h = location.hash.slice(1); let t = LTABS.indexOf(h) > -1 ? h : null;
+  if (!t) { try { t = localStorage.getItem('pa_ltab'); } catch (e) { /* storage off */ } }
+  setLearnTab(t || 'coach');
+  document.addEventListener('click', (e) => {
+    const b = e.target.closest && e.target.closest('[data-ltab], [data-ltab-go]');
+    if (!b) return;
+    setLearnTab(b.dataset.ltab || b.dataset.ltabGo);
+    if (b.dataset.ltabGo){ if (document.body.dataset.view !== 'learning') showView('learning'); document.querySelector('.cc-tabs').scrollIntoView({ block: 'start', behavior: 'smooth' }); }
+  });
+  const tabs = document.querySelector('.cc-tabs');
+  if (tabs) tabs.addEventListener('keydown', (e) => {
+    if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return;
+    e.preventDefault();
+    const i = LTABS.indexOf(document.body.dataset.ltab), n = (i + (e.key === 'ArrowRight' ? 1 : LTABS.length - 1)) % LTABS.length;
+    setLearnTab(LTABS[n], true);
+  });
+  const sg = document.querySelector('[data-coach-sg="explain"]');
+  if (sg) sg.addEventListener('click', () => { const i = document.querySelector('.cc-head [data-coach-ask] input'); i.value = 'Explain '; i.focus(); });
+})();
+
 window.showView = function(v, anchorId, push){
   v = v === 'learning' ? 'learning' : 'home';
   document.body.dataset.view = v;
+  if (v === 'learning' && anchorId && LTABS.indexOf(anchorId) < 0){ const el = document.getElementById(anchorId); if (el && !el.closest('[data-coach]')) setLearnTab('courses'); }
   const url = v === 'learning' ? '/my-learning' : '/lms-dashboard';
   if (push !== false && location.pathname !== url) history.pushState({ view: v }, '', url + (anchorId ? '#' + anchorId : ''));
   document.title = (v === 'learning' ? 'My Learning' : 'Home') + ' · Product Advisory Learning';
@@ -2394,6 +2481,21 @@ function loadCourseContent(courseId){
 
 const CHECK_TICK = '<svg viewBox="0 0 24 24"><path d="M5 12.5l4.2 4.2L19 7"/></svg>';
 const CHECK_CROSS = '<svg viewBox="0 0 24 24"><path d="M7 7l10 10M17 7L7 17"/></svg>';
+/* A refresher answer counts toward the coach's readiness and gaps like any other (progress.answers). The question
+   is found in the practice bank by its wording, for its area, id and kind. */
+async function recordRefresher(question, ok){
+  const user = auth.currentUser, C = window.CoachCore, B = window.CoachBank;
+  if (!user || !C || !B) return;
+  const text = String(question).replace(/<[^>]+>/g, ' ').replace(/&[a-z#0-9]+;/g, ' ').replace(/\s+/g, ' ').trim();
+  const q = B.questions.find(x => x.q === text);
+  if (!q) return;
+  try {
+    const ref = doc(db, 'progress', user.uid), snap = await getDoc(ref);
+    const log = (snap.exists() && snap.data().answers) || [];
+    await setDoc(ref, { answers: C.record(log, { d: q.d, id: q.id, t: q.t, ok, src: 'review' }) }, { merge: true });
+  } catch (e) { /* the answer still shows; it just isn't counted */ }
+}
+
 function renderSpacedReviewCheck(check){
   const container = document.getElementById('spacedReviewCheckContainer');
   container.innerHTML = '';
@@ -2432,6 +2534,7 @@ function renderSpacedReviewCheck(check){
         ? '<span class="check-verdict ok"><span class="check-mark" aria-hidden="true">' + CHECK_TICK + '</span>Correct.</span> '
         : '<span class="check-verdict bad"><span class="check-mark" aria-hidden="true">' + CHECK_CROSS + '</span>Not quite.</span> ') + check.explanation;
       refresherAnswered();
+      recordRefresher(check.question, i === check.correct);
     };
     optionsWrap.appendChild(btn);
   });
