@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>Coach access — Product Advisory Learning</title>
+<link rel="icon" href="/images/icons/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="/images/icons/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="/images/icons/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@600&family=Lato:ital,wght@0,300;0,400;0,700;0,900;1,400&display=swap" rel="stylesheet">
+<script src="pa-prefs.js"></script>
+<style>
+  *{ box-sizing: border-box; }
+  body{ margin:0; background: var(--pa-bg); font-family: var(--pa-sans); color: var(--pa-ink); }
+  .wrap{ max-width: 960px; margin: 0 auto; padding: 24px 16px 64px; }
+  [hidden]{ display:none !important; }
+  .back-link{ font-size: .8125rem; color: var(--pa-muted); text-decoration:none; display:inline-block; margin-bottom: 16px; }
+  .card{ background: var(--pa-card); border-radius: 16px; border: 1px solid var(--pa-line); padding: 22px 24px; margin-bottom: 20px; }
+  h1{ font-family: var(--pa-display); font-size: 1.375rem; margin: 0 0 4px; color: var(--pa-navy-deep); }
+  h2{ font-family: var(--pa-display); font-size: 1rem; margin: 0 0 4px; color: var(--pa-navy-deep); }
+  p{ line-height: 1.55; color: var(--pa-muted); font-size: .875rem; margin: 0 0 12px; }
+  table{ width:100%; border-collapse: collapse; font-size: .875rem; }
+  th, td{ text-align:left; padding: 10px 8px; border-bottom: 1px solid var(--pa-line); vertical-align: middle; }
+  th{ font-size: .75rem; color: var(--pa-muted); font-weight: 700; }
+  td .acts{ display:flex; gap: 6px; justify-content:flex-end; flex-wrap: wrap; }
+  .empty{ color: var(--pa-muted); font-size: .875rem; }
+  .grid{ display:grid; grid-template-columns: 1fr 1fr auto; gap: 10px; align-items:end; }
+  label{ display:block; font-size: .75rem; font-weight: 700; color: var(--pa-muted); margin: 0 0 4px; }
+  input[type=text]{ width:100%; padding: 10px 12px; border: 1.5px solid var(--pa-line); border-radius: 9px; background: var(--pa-bg); color: var(--pa-ink); font: inherit; font-size: .875rem; }
+  .notice{ font-size: .8125rem; margin-top: 8px; min-height: 1em; }
+  @media (max-width: 640px){ .grid{ grid-template-columns: 1fr; } }
+</style>
+<link rel="stylesheet" href="pa-theme.css">
+<link rel="stylesheet" href="coach.css">
+</head>
+<body>
+<script src="pa-shell.js"></script>
+<div class="wrap">
+  <a class="back-link" href="/owner">← Back to the owner console</a>
+  <div class="card" id="stateLoading"><p style="margin:0;">Checking your account…</p></div>
+  <div class="card" id="stateNotOwner" hidden><h1>This page is for the platform owner</h1><p style="margin:0;">Your account isn't set up as the platform owner.</p></div>
+  <div id="page" hidden>
+    <div class="card">
+      <span class="eyebrow">Owner console</span>
+      <h1>Coach access</h1>
+      <p>Everyone gets one free conversation with the coach. People in a company get it with their seat. Anyone else needs access from you: grant it here when someone asks (no payment yet). Practice, readiness and gaps are free for everyone.</p>
+    </div>
+    <div class="card">
+      <h2>Requests</h2>
+      <p>People who used their free conversation and pressed "Request access".</p>
+      <div id="reqList"><p class="empty">Loading…</p></div>
+    </div>
+    <div class="card">
+      <h2>People with access</h2>
+      <div id="grantList"><p class="empty">Loading…</p></div>
+      <h2 style="margin-top:20px;">Give someone access</h2>
+      <p>For someone who hasn't asked yet: their account ID is in the owner console's user list.</p>
+      <form class="grid" id="grantForm">
+        <div><label for="gUid">Account ID</label><input type="text" id="gUid" maxlength="128" autocomplete="off"></div>
+        <div><label for="gEmail">Email (for your records)</label><input type="text" id="gEmail" maxlength="254" autocomplete="off"></div>
+        <button type="submit" class="cc-btn">Give access</button>
+      </form>
+      <div class="notice" id="grantNotice" role="status"></div>
+    </div>
+  </div>
+</div>
+<script type="module">
+const firebaseConfig = {
+  apiKey: "AIzaSyAcECtS5c6WeOhKlwRK-LYFE47npbuq_eU",
+  authDomain: "auth.productadvisory.co",
+  projectId: "product-advisory-lms",
+  storageBucket: "product-advisory-lms.firebasestorage.app",
+  messagingSenderId: "1081134406437",
+  appId: "1:1081134406437:web:72e28604d093219e7698cc"
+};
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
+import { getFirestore, doc, getDoc, getDocs, setDoc, deleteDoc, collection, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+const app = initializeApp(firebaseConfig), auth = getAuth(app), db = getFirestore(app);
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
+const when = (t) => t && t.toDate ? t.toDate().toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }) : '';
+const show = (id) => ['stateLoading', 'stateNotOwner', 'page'].forEach(s => { $(s).hidden = s !== id; });
+
+async function grant(uid, email, note){
+  await setDoc(doc(db, 'coachAccess', uid), { plan: 'pro', email: String(email || '').toLowerCase().slice(0, 254), grantedAt: serverTimestamp(), note: String(note || '').slice(0, 200) });
+  try { await deleteDoc(doc(db, 'coachRequests', uid)); } catch (e) { /* no request */ }
+}
+async function load(){
+  const reqs = (await getDocs(collection(db, 'coachRequests'))).docs.map(d => d.data());
+  $('reqList').innerHTML = reqs.length ? '<table><thead><tr><th>Name</th><th>Email</th><th>Asked</th><th></th></tr></thead><tbody>' + reqs.map(r =>
+    '<tr><td>' + esc(r.name || '—') + '</td><td>' + esc(r.email) + '</td><td>' + esc(when(r.createdAt)) + '</td><td><div class="acts">' +
+    '<button type="button" class="cc-btn sm" data-grant="' + esc(r.uid) + '" data-email="' + esc(r.email) + '">Give access</button>' +
+    '<button type="button" class="cc-btn ghost sm" data-dismiss="' + esc(r.uid) + '">Dismiss</button></div></td></tr>').join('') + '</tbody></table>' : '<p class="empty">No requests right now.</p>';
+  const grants = (await getDocs(collection(db, 'coachAccess'))).docs.map(d => Object.assign({ uid: d.id }, d.data())).filter(g => g.plan === 'pro');
+  $('grantList').innerHTML = grants.length ? '<table><thead><tr><th>Email</th><th>Since</th><th>Account ID</th><th></th></tr></thead><tbody>' + grants.map(g =>
+    '<tr><td>' + esc(g.email || '—') + '</td><td>' + esc(when(g.grantedAt)) + '</td><td><code>' + esc(g.uid) + '</code></td><td><div class="acts"><button type="button" class="cc-btn ghost sm" data-revoke="' + esc(g.uid) + '">Take away</button></div></td></tr>').join('') + '</tbody></table>'
+    : '<p class="empty">Nobody yet.</p>';
+}
+document.addEventListener('click', async (e) => {
+  const b = e.target.closest('[data-grant], [data-dismiss], [data-revoke]');
+  if (!b) return;
+  b.disabled = true;
+  try {
+    if (b.dataset.grant) await grant(b.dataset.grant, b.dataset.email, 'From a request');
+    if (b.dataset.dismiss) await deleteDoc(doc(db, 'coachRequests', b.dataset.dismiss));
+    if (b.dataset.revoke && confirm('Take away coach access? They keep everything else.')) await deleteDoc(doc(db, 'coachAccess', b.dataset.revoke));
+    await load();
+  } catch (err) { b.disabled = false; alert('That didn\'t save. Check your connection and try again.'); }
+});
+$('grantForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const uid = $('gUid').value.trim(), email = $('gEmail').value.trim();
+  if (!/^[A-Za-z0-9_-]{6,128}$/.test(uid)) { $('grantNotice').textContent = 'That doesn\'t look like an account ID.'; return; }
+  try { await grant(uid, email, 'Given by hand'); $('grantNotice').textContent = 'Done. They have the coach now.'; $('gUid').value = ''; $('gEmail').value = ''; await load(); }
+  catch (err) { $('grantNotice').textContent = 'That didn\'t save. Try again.'; }
+});
+onAuthStateChanged(auth, async (user) => {
+  if (!user) { location.href = '/lms-dashboard'; return; }
+  try {
+    if (!(await getDoc(doc(db, 'platformAdmins', user.uid))).exists()) { show('stateNotOwner'); return; }
+  } catch (e) { show('stateNotOwner'); return; }
+  show('page'); load();
+});
+</script>
+<script type="module" src="account-menu.js"></script>
+</body>
+</html>

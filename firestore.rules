@@ -650,5 +650,35 @@ service cloud.firestore {
       // The owner can delete any; people can delete their own (for example when they delete their account).
       allow delete: if isPlatformOwner() || (isSignedIn() && uid == request.auth.uid);
     }
+
+    // ------------------------------------------------------------- the coach (coach.html)
+    // Who has the coach beyond the free conversation. Only the owner grants it (the owner console); a person can
+    // read their own, so the page knows. The Apps Script reads it with the person's own token before answering.
+    match /coachAccess/{uid} {
+      allow get: if isSignedIn() && (uid == request.auth.uid || isPlatformOwner());
+      allow list: if isPlatformOwner();
+      allow create, update: if isPlatformOwner()
+        && request.resource.data.keys().hasOnly(['plan', 'email', 'grantedAt', 'note'])
+        && request.resource.data.plan in ['pro', 'none']
+        && request.resource.data.email is string && request.resource.data.email.size() <= 254
+        && request.resource.data.get('note', '') is string && request.resource.data.get('note', '').size() <= 200
+        && request.resource.data.grantedAt == request.time;
+      allow delete: if isPlatformOwner();
+    }
+    // "Request access" on the coach's upgrade card: one request per person, read and cleared by the owner.
+    function validCoachRequest(d) {
+      return d.keys().hasOnly(['uid', 'email', 'name', 'note', 'createdAt'])
+        && d.uid == request.auth.uid
+        && d.email == request.auth.token.email.lower()
+        && d.name is string && d.name.size() <= 100
+        && d.note is string && d.note.size() <= 300
+        && d.createdAt == request.time;
+    }
+    match /coachRequests/{uid} {
+      allow get: if isSignedIn() && (uid == request.auth.uid || isPlatformOwner());
+      allow list: if isPlatformOwner();
+      allow create, update: if isVerifiedUser() && uid == request.auth.uid && validCoachRequest(request.resource.data);
+      allow delete: if isPlatformOwner() || (isSignedIn() && uid == request.auth.uid);
+    }
   }
 }
