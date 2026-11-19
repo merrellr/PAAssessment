@@ -11,7 +11,7 @@ async function tourCheck(id, first){
   t('the tour opens on its first step: ' + first, !!pop && pop.querySelector('h2').textContent === first, pop ? pop.querySelector('h2').textContent : 'none');
   pop && pop.querySelector('.g-n').click(); await sleep(40);
   document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true })); await sleep(20);
-  t('Esc closes the tour and focus returns to its button', !document.querySelector('.guide-pop, .guide-hole') && document.activeElement === b);
+  t('Esc closes the tour; its button leaves the page and focus goes to Help', !document.querySelector('.guide-pop, .guide-hole') && b.getClientRects().length === 0 && document.activeElement && document.activeElement.hasAttribute('data-help-anchor'), document.activeElement && document.activeElement.outerHTML.slice(0, 80));
 }
 const $ = (id) => document.getElementById(id);
 const all = (sel, root) => Array.prototype.slice.call((root || document).querySelectorAll(sel));

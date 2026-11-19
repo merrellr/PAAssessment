@@ -317,8 +317,35 @@ if (window.self === window.top) {
     try {
       const snap = await getDoc(doc(db, 'progress', user.uid));
       if (photoUid === user.uid) setPhoto(snap.exists() && snap.data().profile ? snap.data().profile.photo : '');
+      if (photoUid === user.uid) syncTours(user, snap.exists() ? snap.data().toursTaken : null);
     } catch (e) { /* keep the cached one */ }
   }
+
+  /* The tours someone has taken (tour.js) follow their account: a tour taken on the laptop doesn't come back on the
+     phone. progress/{uid}.toursTaken holds the same list as this browser's pa-tours-taken ("id" or "id@version"). */
+  const TOUR_ID = /^[a-z0-9-]{1,40}(@\d{1,3})?$/;
+  let toursUid = '', toursSaved = '';
+  function cleanTours(l){ return (Array.isArray(l) ? l : []).filter(x => typeof x === 'string' && TOUR_ID.test(x)).slice(-60); }
+  function saveTours(list){
+    const clean = cleanTours(list), key = JSON.stringify(clean);
+    if (!toursUid || key === toursSaved) return;
+    toursSaved = key;
+    setDoc(doc(db, 'progress', toursUid), { toursTaken: clean }, { merge: true }).catch(() => { toursSaved = ''; /* this browser still remembers */ });
+  }
+  function syncTours(user, fromAccount){
+    toursUid = user.uid;
+    const acct = cleanTours(fromAccount);
+    toursSaved = JSON.stringify(acct);
+    let mine;
+    if (window.PATour && window.PATour.merge) mine = window.PATour.merge(acct);
+    else {   // tour.js not on this page (or not loaded yet): it picks the list up when it starts
+      window.__paToursAccount = acct;
+      try { mine = JSON.parse(localStorage.getItem('pa-tours-taken') || '[]'); } catch (e) { mine = []; }
+      const have = new Set(cleanTours(mine)); acct.forEach(x => have.add(x)); mine = [...have];
+    }
+    saveTours(mine);   // this browser knew some the account didn't
+  }
+  window.addEventListener('pa-tours-changed', (e) => saveTours(e.detail));
   // My profile announces a new or removed photo, so the button changes at once.
   window.addEventListener('pa-avatar', (e) => { if (photoUid) setPhoto(e.detail || ''); });
 

@@ -309,7 +309,10 @@
   body[data-ltab="coach"] [data-coach]:not([data-coach~="coach"]), body[data-ltab="readiness"] [data-coach]:not([data-coach~="readiness"]),
   body[data-ltab="gaps"] [data-coach]:not([data-coach~="gaps"]), body[data-ltab="courses"] [data-coach]:not([data-coach~="courses"]){ display:none !important; }
   /* Home: the greeting on its own line, then (first visit) the welcome, then your result beside your badges */
-  .home-hi{ margin: 4px 0 18px; }
+  /* the greeting, with the tour beside it (it leaves once taken, and lives under Help) */
+  .home-hi{ margin: 4px 0 18px; display:flex; align-items:center; justify-content:space-between; gap: 10px 20px; flex-wrap: wrap; }
+  .home-hi .guide-wrap{ flex: none; }
+  .home-hi .guide-btn.guide-sm{ margin: 0; }
   .home-hi .home-hello{ margin:0 0 4px; }
   .home-hi .home-sub{ margin:0; }
   #welcomeCard{ padding: 20px 24px; }
@@ -546,9 +549,9 @@
 
 
     <section class="home-band" id="homeBand" hidden aria-labelledby="homeHello" data-only="home">
-      <div class="home-hi"><h1 class="home-hello" id="homeHello">Welcome back</h1>
-        <p class="home-sub" id="homeSub">Pick up where you left off.</p>
-        <button type="button" class="guide-btn" data-tour="learning" data-guide="{&quot;title&quot;:&quot;Product Advisory Learning&quot;,&quot;steps&quot;:[{&quot;s&quot;:&quot;.home-hi&quot;,&quot;t&quot;:&quot;Welcome to Product Advisory Learning&quot;,&quot;p&quot;:&quot;Courses, tools and audio for product managers, built around where you are today. This is your home.&quot;},{&quot;s&quot;:&quot;#heroBand&quot;,&quot;t&quot;:&quot;Your skill level&quot;,&quot;p&quot;:&quot;From your skill check: your level overall and your progress through your courses.&quot;},{&quot;s&quot;:&quot;#homeResume&quot;,&quot;t&quot;:&quot;Your next best step&quot;,&quot;p&quot;:&quot;The course to do now, and what comes after it. Pick up where you left off in one click.&quot;},{&quot;s&quot;:&quot;#homeTools&quot;,&quot;t&quot;:&quot;My Toolkits&quot;,&quot;p&quot;:&quot;The free tools (Scorecard, AI Use Cases and more), with your work saved to your account. You can even score a scorecard as a team.&quot;},{&quot;s&quot;:&quot;#growthPanel&quot;,&quot;t&quot;:&quot;My growth&quot;,&quot;p&quot;:&quot;Your first skill check against your latest, area by area. Retake it after 90 days to see how far you&#x27;ve come.&quot;},{&quot;s&quot;:&quot;#badgeTile&quot;,&quot;t&quot;:&quot;My Badges&quot;,&quot;p&quot;:&quot;Earned as you finish lessons and courses, with the next one to aim for.&quot;},{&quot;s&quot;:&quot;#targetTile&quot;,&quot;t&quot;:&quot;Role targets&quot;,&quot;p&quot;:&quot;Pick your role to see the level it calls for in each skill area.&quot;},{&quot;s&quot;:&quot;.pa-nav a[href=\&quot;/my-learning\&quot;]&quot;,&quot;alt&quot;:&quot;.pa-menu-btn&quot;,&quot;t&quot;:&quot;My Learning&quot;,&quot;p&quot;:&quot;All the courses: seven skill areas, four levels each. Every lesson mixes a short story, real data and practice.&quot;},{&quot;s&quot;:&quot;#profileAvatarBtn&quot;,&quot;t&quot;:&quot;Your profile&quot;,&quot;p&quot;:&quot;Your details, notifications and two-step sign-in. If your company joins, admins get a team dashboard here.&quot;}]}"><span class="guide-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="m15.5 8.5-2 5-5 2 2-5z"/></svg></span><span><b>New here? Take the quick tour</b><small>9 steps · about a minute</small></span></button></div>
+      <div class="home-hi"><div class="home-hi-text"><h1 class="home-hello" id="homeHello">Welcome back</h1>
+        <p class="home-sub" id="homeSub">Pick up where you left off.</p></div>
+        <button type="button" class="guide-btn guide-sm" data-tour="learning" data-guide="{&quot;title&quot;:&quot;Product Advisory Learning&quot;,&quot;steps&quot;:[{&quot;s&quot;:&quot;.home-hi&quot;,&quot;t&quot;:&quot;Welcome to Product Advisory Learning&quot;,&quot;p&quot;:&quot;Courses, tools and audio for product managers, built around where you are today. This is your home.&quot;},{&quot;s&quot;:&quot;#heroBand&quot;,&quot;t&quot;:&quot;Your skill level&quot;,&quot;p&quot;:&quot;From your skill check: your level overall and your progress through your courses.&quot;},{&quot;s&quot;:&quot;#homeResume&quot;,&quot;t&quot;:&quot;Your next best step&quot;,&quot;p&quot;:&quot;The course to do now, and what comes after it. Pick up where you left off in one click.&quot;},{&quot;s&quot;:&quot;#homeTools&quot;,&quot;t&quot;:&quot;My Toolkits&quot;,&quot;p&quot;:&quot;The free tools (Scorecard, AI Use Cases and more), with your work saved to your account. You can even score a scorecard as a team.&quot;},{&quot;s&quot;:&quot;#growthPanel&quot;,&quot;t&quot;:&quot;My growth&quot;,&quot;p&quot;:&quot;Your first skill check against your latest, area by area. Retake it after 90 days to see how far you&#x27;ve come.&quot;},{&quot;s&quot;:&quot;#badgeTile&quot;,&quot;t&quot;:&quot;My Badges&quot;,&quot;p&quot;:&quot;Earned as you finish lessons and courses, with the next one to aim for.&quot;},{&quot;s&quot;:&quot;#targetTile&quot;,&quot;t&quot;:&quot;Role targets&quot;,&quot;p&quot;:&quot;Pick your role to see the level it calls for in each skill area.&quot;},{&quot;s&quot;:&quot;.pa-nav a[href=\&quot;/my-learning\&quot;]&quot;,&quot;alt&quot;:&quot;.pa-menu-btn&quot;,&quot;t&quot;:&quot;My Learning&quot;,&quot;p&quot;:&quot;All the courses: seven skill areas, four levels each. Every lesson mixes a short story, real data and practice.&quot;},{&quot;s&quot;:&quot;#profileAvatarBtn&quot;,&quot;t&quot;:&quot;Your profile&quot;,&quot;p&quot;:&quot;Your details, notifications and two-step sign-in. If your company joins, admins get a team dashboard here.&quot;}]}"><span class="guide-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="m15.5 8.5-2 5-5 2 2-5z"/></svg></span><span><b>New here? Take the 1-minute tour</b></span></button></div>
       <div class="card" id="welcomeCard" style="display:none; margin-bottom:18px; background:linear-gradient(135deg, var(--tint) 0%, var(--surface) 100%); border-color: var(--line);">
         <span class="eyebrow">Welcome</span>
         <h2>You're in! Here's how to get around</h2>
@@ -1096,7 +1099,7 @@ onAuthStateChanged(auth, async (user) => {
     document.getElementById('dashboardSkeleton').style.display = 'none';
     document.getElementById('dashboardContent').style.display = 'block';
     // "Replay the tour" in Help, from another page
-    if (new URLSearchParams(location.search).get('tour') === '1'){ history.replaceState(null, '', location.pathname); setTimeout(startDashboardTour, 300); }
+    // ?tour=1 (Help's "Take the tour" from another page) is started by tour.js, once the page is showing
 
     startActiveTimeTracking(user);
   } else {
@@ -1364,7 +1367,7 @@ window.handleResendVerification = async function(){
 
 window.dismissWelcome = async function(){
   document.getElementById('welcomeCard').style.display = 'none';
-  startDashboardTour();
+  if (!(window.PATour && window.PATour.start('learning'))) startDashboardTour();
   if (!currentUser) return;
   try {
     const progressRef = doc(db, 'progress', currentUser.uid);
@@ -1463,7 +1466,7 @@ function startDashboardTour(){
    popover isn't hidden behind it. */
 window.replayDashboardTour = function(){
   document.getElementById('profileDropdown').style.display = 'none';
-  startDashboardTour();
+  if (!(window.PATour && window.PATour.start('learning'))) startDashboardTour();
 };
 
 const TIER_ORDER = ['novice', 'moderate', 'experienced', 'advanced'];

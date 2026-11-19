@@ -765,3 +765,5 @@ html.pa-shell .icon-btn { background: var(--pa-card); }
 .pa-help-tour b { display: block; color: var(--pa-navy); font-size: .95rem; }
 .pa-help-tour small { display: block; color: var(--pa-muted); font-size: .8rem; }
 .guide-btn.guide-taken { display: none !important; }
+.pa-help-new { display: inline-block; margin-right: 6px; padding: 1px 7px; border-radius: 9px; background: var(--pa-cyan); color: #08202e; font-size: .68rem; font-style: normal; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; vertical-align: 1px; }
+.pa-help-new[hidden] { display: none; }
