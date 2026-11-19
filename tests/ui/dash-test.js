@@ -97,24 +97,65 @@ const sleep = (ms) => new Promise(r => setTimeout(r, ms));
         t('it names the biggest jump and the remaining gap', /Your biggest jump:.*Customer & Market Discovery \(\+25\)/.test(gp.textContent) && /Still your gap:.*AI Fluency — Organizational, at 35/.test(gp.textContent));
         gp.querySelector('[data-gview="trend"]').click(); await sleep(50);
         t('Over time shows a small line per area', gp.querySelectorAll('.growth-spark polyline').length === 7 && document.getElementById('growthPanel').querySelector('[data-gview="trend"]').getAttribute('aria-pressed') === 'true');
-        // the quick tour: a click-through guide on the page (tour.js), no media
+        // the quick tour: a click-through guide on the page (tour.js), no media, beside the greeting
         const gb = document.querySelector('.guide-btn[data-guide]');
-        t('a "New here? Take the quick tour" button under the greeting', !!gb && /Take the quick tour/.test(gb.textContent) && !document.querySelector('video, .tour-dialog'));
+        const shown = (el) => !!el && el.getClientRects().length > 0;
+        t('a "New here? Take the 1-minute tour" button beside the greeting, with a × to hide it', !!gb && /Take the 1-minute tour/.test(gb.textContent) && !!gb.closest('.home-hi') && !!gb.parentNode.querySelector('.guide-x') && !document.querySelector('video, .tour-dialog'));
+        const hiR = document.getElementById('homeHello').getBoundingClientRect(), gbR = gb.getBoundingClientRect();
+        t('on a wide screen it sits on the greeting\'s row, to the right', window.innerWidth < 900 || (gbR.left > hiR.right && gbR.top < hiR.bottom + 40), JSON.stringify([hiR.right, hiR.bottom, gbR.left, gbR.top]));
         gb.click(); await sleep(80);
         const pop = () => document.querySelector('.guide-pop');
         t('it opens on step 1 with the welcome, highlighting the greeting', !!pop() && /1 of 9/.test(pop().querySelector('.g-c').textContent) && /Welcome to Product Advisory Learning/.test(pop().textContent) && !!document.querySelector('.guide-hole') && document.activeElement === pop().querySelector('.g-n'));
         const seen = [pop().querySelector('h2').textContent];
         for (let k = 0; k < 12 && pop(); k++) { pop().querySelector('.g-n').click(); await sleep(40); if (pop()) seen.push(pop().querySelector('h2').textContent); }
         t('Next walks the steps (skipping any not on the page) and Done closes it', !pop() && !document.querySelector('.guide-hole, .guide-shield') && seen.indexOf('Your next best step') > -1 && seen.indexOf('My growth') > -1 && seen[seen.length - 1] === 'Your profile', seen.join(' > '));
-        gb.click(); await sleep(40);
+        const help = document.querySelector('[data-help-anchor]');
+        await sleep(400);
+        t('once taken, the button leaves the page; focus goes to Help, with a note that the tour lives there now', !shown(gb) && !shown(gb.parentNode) && document.activeElement === help && /again any time from Help/.test((document.querySelector('.guide-tip') || {}).textContent || ''), [shown(gb), document.activeElement && document.activeElement.outerHTML.slice(0, 60), !!document.querySelector('.guide-tip')].join(' | '));
+        await sleep(300);
+        t('taking it is saved to the account too, so it stays gone on their other devices', JSON.stringify((store['progress/uDash'] || {}).toursTaken) === '["learning"]', JSON.stringify((store['progress/uDash'] || {}).toursTaken));
+        help.click(); await sleep(80);
+        const ht = document.querySelector('.pa-help-tour');
+        t('Help offers this page\'s tour', !!ht && !ht.hidden && document.querySelector('.pa-help-new').hidden);
+        ht.click(); await sleep(120);
+        t('and it starts the whole tour again', !!pop() && /1 of 9/.test(pop().querySelector('.g-c').textContent));
         document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true })); await sleep(20);
-        t('Esc closes it and focus goes back to the button', !pop() && document.activeElement === gb);
+        t('Esc closes it; the button stays gone and no second note appears', !pop() && !shown(gb) && document.querySelectorAll('.guide-tip').length <= 1);
+        // a new feature: the tour gets a version 2 with a new step, so the button comes back as "New on this page"
+        const cfg = JSON.parse(gb.getAttribute('data-guide'));
+        cfg.steps[2].v = 2; gb.setAttribute('data-guide', JSON.stringify(cfg)); gb.setAttribute('data-tour-v', '2');
+        window.PATour.merge([]); await sleep(30);
+        t('when the tour changes, its button comes back marked New, counting the new steps', shown(gb) && gb.classList.contains('guide-new') && /New/.test(gb.querySelector('.guide-tag').textContent) && /See what.s new/.test(gb.textContent) && /1 new step/.test(gb.textContent + ' ' + gb.title), gb.textContent);
+        help.click(); await sleep(60);
+        t('and Help marks this page\'s tour New too', !document.querySelector('.pa-help-new').hidden && /what\u2019s new/.test(document.querySelector('.pa-help-tour small').textContent));
+        document.querySelector('.pa-help-back [data-pa="close"]').click(); await sleep(30);
+        gb.click(); await sleep(80);
+        t('it walks just the new step, as "What\'s new"', !!pop() && /What's new · 1 of 1/.test(pop().querySelector('.g-c').textContent) && pop().querySelector('h2').textContent === 'Your next best step', pop() && pop().textContent);
+        pop().querySelector('.g-n').click(); await sleep(300);
+        t('then it leaves again, saved as version 2', !pop() && !shown(gb) && /learning@2/.test(localStorage.getItem('pa-tours-taken')) && JSON.stringify(store['progress/uDash'].toursTaken) === '["learning@2"]', localStorage.getItem('pa-tours-taken'));
         window.scrollTo(0, 0);
         t('a retake is offered once 90 days have passed since the last one', /Retake the assessment/.test(gp.textContent) || (Date.now() - Date.parse('2026-10-05T10:00:00.000Z')) < 90 * 864e5);
       }
       if (window.__scn === 'member'){
         t('with one assessment, it shows the starting point (no comparison yet)', !gp.hidden && /Your starting point/.test(gp.textContent) && !gp.querySelector('[data-gview]') && gp.querySelectorAll('.growth-row').length === 7 && /Your biggest opportunity:.*AI Fluency — Organizational/.test(gp.textContent), gp.textContent.slice(0, 200));
       }
+    }
+    if (window.__scn === 'tourstaken'){
+      // taken on another device: the account remembers, so the button never shows here; × on the My Learning tour hides it
+      const gb = document.querySelector('[data-tour="learning"]'), shown = (el) => !!el && el.getClientRects().length > 0;
+      t('a tour taken on another device stays gone here (from the account)', !!gb && !shown(gb) && /learning/.test(localStorage.getItem('pa-tours-taken') || ''));
+      window.showView('learning'); window.setLearnTab('coach');
+      await sleep(150);
+      const mb = document.querySelector('[data-tour="my-learning"]'), x = mb && mb.parentNode.querySelector('.guide-x');
+      t('My Learning\'s tour shows (not taken yet), with a × to hide it', shown(mb) && !!x);
+      x.click(); await sleep(300);
+      t('× hides it without starting it, and remembers', !shown(mb) && !document.querySelector('.guide-pop') && JSON.parse(localStorage.getItem('pa-tours-taken')).indexOf('my-learning') > -1 && store['progress/uDash'].toursTaken.indexOf('my-learning') > -1 && store['progress/uDash'].toursTaken.indexOf('learning') > -1, JSON.stringify(store['progress/uDash'].toursTaken));
+    }
+    if (window.__scn === 'tourlink'){
+      // Help's "Take the tour" from another page opens /lms-dashboard?tour=1: the Home tour starts once the page shows
+      const pop = document.querySelector('.guide-pop');
+      t('?tour=1 starts the Home tour by itself, from step 1', !!pop && /Quick tour · 1 of 9/.test(pop.querySelector('.g-c').textContent) && !/tour=/.test(location.search), pop ? pop.textContent : location.search);
+      document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true })); await sleep(20);
     }
     if (window.__scn === 'profilecard'){
       const card = document.getElementById('profilePromptCard');

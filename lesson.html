@@ -94,6 +94,7 @@
   .lesson-top .back-link{ margin: 0; }
   .lesson-top .guide-btn.guide-sm, .rail-tour .guide-btn.guide-sm{ margin: 0; }
   .rail-tour{ margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--line); }
+  .rail-tour:not(:has(.guide-btn:not(.guide-taken))){ display: none; }
   .listen-play{ flex:none; width: 44px; height: 44px; border-radius: 50%; border: 0; background: var(--pa-primary); color: var(--pa-btn-ink); cursor:pointer; display:grid; place-items:center; }
   .listen-play:hover{ background: var(--pa-primary-strong); }
   .listen-play svg{ width: 18px; height: 18px; fill: currentColor; }
@@ -726,8 +727,9 @@ function renderRail(lesson, complete){
 // "How lessons work" sits in the course outline when it's open on a wide screen, otherwise beside "Back to My Learning".
 const WIDE = matchMedia('(min-width: 1080px)');
 function placeTour(){
-  const btn = document.querySelector('[data-tour="lesson"]'), slot = document.getElementById('railTour');
-  if (!btn) return;
+  const b = document.querySelector('[data-tour="lesson"]'), slot = document.getElementById('railTour');
+  if (!b) return;
+  const btn = b.closest('.guide-wrap') || b;   // tour.js puts the button and its × in a .guide-wrap
   const inRail = WIDE.matches && slot && !document.getElementById('lessonLayout').classList.contains('rail-collapsed');
   const home = inRail ? slot : document.getElementById('lessonTop');
   if (btn.parentNode !== home) home.appendChild(btn);

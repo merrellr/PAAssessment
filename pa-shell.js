@@ -52,12 +52,12 @@
       '<a class="pa-brand" href="/lms-dashboard" aria-label="Product Advisory Learning, my dashboard">' + WORDMARK + '<span class="pa-app">Learning</span></a>' +
       '<nav class="pa-links" aria-label="Main">' + links + '<button type="button" class="pa-m-only" data-pa="help">Help</button><button type="button" class="pa-m-only" data-pa="prefs">Make it yours</button></nav>' +
       '<div class="pa-tools">' +
-      '<button type="button" class="pa-icon pa-help-btn" data-pa="help" aria-label="Help: answers, ask a question, send feedback" title="Help">' + ICON.help + '<span class="pa-help-lbl">Help</span></button>' +
+      '<button type="button" class="pa-icon pa-help-btn" data-pa="help" data-help-anchor aria-label="Help: answers, ask a question, send feedback" title="Help">' + ICON.help + '<span class="pa-help-lbl">Help</span></button>' +
       '<button type="button" class="pa-icon" data-pa="search" aria-label="Search courses and lessons">' + ICON.search + "<kbd>" + (mac ? "⌘" : "Ctrl") + "</kbd><kbd>K</kbd></button>" +
       '<button type="button" class="pa-icon pa-prefs-btn" data-pa="prefs" aria-label="Make it yours: change how this site looks" title="Make it yours">' + ICON.sliders + "</button>" +
       '<button type="button" class="pa-icon" data-pa="theme" aria-label="Toggle light or dark" title="Light / dark">' + ICON.moon + "</button>" +
       '<span id="paNavAccount"></span>' +
-      '<button type="button" class="pa-icon pa-menu-btn" data-pa="menu" aria-label="Menu" aria-expanded="false">' + ICON.menu + "</button>" +
+      '<button type="button" class="pa-icon pa-menu-btn" data-pa="menu" data-help-anchor aria-label="Menu" aria-expanded="false">' + ICON.menu + "</button>" +
       "</div></div></header>";
   }
 
@@ -220,7 +220,7 @@
       "<p>Search the answers below, ask about the course content, or tell us what's missing.</p>" +
       // this page's quick tour (tour.js): once taken, its button leaves the page and lives here
       '<button type="button" class="pa-help-tour" data-pa="tour" hidden><span class="pa-help-tour-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="m15.5 8.5-2 5-5 2 2-5z"/></svg></span>' +
-      '<span><b>Take the tour of this page</b><small>A click-through guide, about a minute</small></span></button>' +
+      '<span><b><em class="pa-help-new" hidden>New</em>Take the tour of this page</b><small>A click-through guide, about a minute</small></span></button>' +
       '<input type="search" class="pa-help-q" placeholder="What do you need help with?" aria-label="Search help" autocomplete="off">' +
       '<div class="pa-help-ask" hidden></div>' +
       '<div class="pa-help-list">' + list + '</div><p class="pa-help-none" hidden>No answer here yet. Ask the lessons, or send us a note below.</p>' +
@@ -275,6 +275,10 @@
     help.classList.add("open");
     var own = !!(window.PATour && window.PATour.available());   // a page with its own tour shows it first; others offer the home tour
     help.querySelector(".pa-help-tour").hidden = !own;
+    // the page's tour has changed since they took it: say so
+    var fresh = own && window.PATour.status && window.PATour.status() === "new";
+    help.querySelector(".pa-help-new").hidden = !fresh;
+    help.querySelector(".pa-help-tour small").textContent = fresh ? "Updated with what\u2019s new on this page" : "A click-through guide, about a minute";
     help.querySelector("[data-tour-fallback]").hidden = own;
     helpQ.value = ""; filterHelp();
     helpQ.focus();
