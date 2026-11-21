@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My notes — Product Advisory Learning</title>
+<link rel="icon" href="/images/icons/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="/images/icons/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="/images/icons/apple-touch-icon.png">
+<meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@600&family=Lato:ital,wght@0,300;0,400;0,700;0,900;1,400&display=swap" rel="stylesheet">
+<script src="pa-prefs.js"></script>
+<style>
+  :root{
+    --navy: #1A4584; --navy-deep: #12305e; --gray: #9AA3AD; --cyan: #35C2E8;
+    --bg: #F5F8FB; --surface: #FFFFFF; --ink: #16213E; --ink-soft: #4B5768; --line: #E3E9F0;
+    --warn: #C0622A; --ok: #2E8B57;
+    --hl-y: #ffe892; --hl-b: #c4e2ff; --hl-g: #c3efd2; --hl-p: #ffd0e2;
+  }
+  @media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){ --hl-y: rgba(255,214,64,.34); --hl-b: rgba(90,170,255,.34); --hl-g: rgba(70,210,130,.32); --hl-p: rgba(255,110,170,.32); } }
+  :root[data-theme="dark"]{ --hl-y: rgba(255,214,64,.34); --hl-b: rgba(90,170,255,.34); --hl-g: rgba(70,210,130,.32); --hl-p: rgba(255,110,170,.32); }
+  *{ box-sizing: border-box; }
+  body{ margin:0; background: var(--bg); font-family:var(--sans); color: var(--ink); }
+  .wrap{ max-width: 920px; margin: 0 auto; padding: 24px 16px 56px; }
+  [hidden]{ display:none !important; }
+  .card{ background: var(--surface); border-radius: 16px; border: 1px solid var(--line); padding: 24px; box-shadow: 0 1px 2px rgba(22,33,62,0.04), 0 12px 32px rgba(22,33,62,0.06); margin-bottom: 20px; }
+  .eyebrow{ display:block; font-size:0.6875rem; font-weight:600; letter-spacing:0.06em; text-transform:uppercase; color: var(--cyan-ink, var(--cyan)); margin-bottom: 6px; }
+  h1{ font-family:var(--display); font-size: 1.625rem; margin: 0 0 8px; color: var(--navy-deep); line-height: 1.2; }
+  h2{ font-family:var(--display); font-size: 1.0625rem; margin: 0; color: var(--navy-deep); }
+  p{ line-height:1.55; color: var(--ink-soft); font-size: 0.9rem; margin: 0 0 10px; }
+  a{ color: var(--navy); }
+  .small{ font-size: 0.7812rem; color: var(--gray); }
+  .btn{ display:inline-flex; align-items:center; gap:6px; padding: 9px 16px; border-radius: 999px; border: 1.5px solid var(--navy); background: var(--navy); color: var(--btn-ink, #fff); font: 700 0.85rem var(--sans); text-decoration:none; cursor:pointer; }
+  .btn.ghost{ background: transparent; color: var(--navy); }
+  .btn:disabled{ opacity:.5; cursor: default; }
+  .head{ display:flex; flex-wrap:wrap; justify-content:space-between; align-items:flex-end; gap: 12px 20px; margin-bottom: 18px; }
+  .toolbar{ display:flex; flex-wrap:wrap; gap: 8px; align-items:center; margin-bottom: 14px; }
+  .toolbar input{ flex: 1 1 220px; padding: 10px 14px; border: 1.5px solid var(--line); border-radius: 10px; background: var(--surface); color: var(--ink); font: 0.9rem var(--sans); }
+  .chips{ display:flex; flex-wrap:wrap; gap: 6px; margin: 0 0 16px; }
+  .chip{ border: 1px solid var(--line); background: var(--surface); color: var(--ink-soft); border-radius: 999px; padding: 5px 12px; font: 0.8rem var(--sans); cursor: pointer; }
+  .chip[aria-pressed="true"]{ background: var(--navy); border-color: var(--navy); color: var(--btn-ink, #fff); }
+  .group{ margin-bottom: 22px; }
+  .group-head{ display:flex; justify-content:space-between; align-items:baseline; gap: 12px; margin: 0 0 8px; }
+  .group-head small{ color: var(--gray); white-space: nowrap; }
+  .kind{ font-size: 0.68rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--gray); margin-right: 6px; }
+  .note{ border-left: 4px solid var(--hl); background: color-mix(in srgb, var(--hl) 32%, var(--surface)); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px; }
+  .c-y{ --hl: var(--hl-y); } .c-b{ --hl: var(--hl-b); } .c-g{ --hl: var(--hl-g); } .c-p{ --hl: var(--hl-p); }
+  .note q{ display:block; color: var(--ink); line-height: 1.5; font-size: 0.95rem; quotes: "“" "”"; }
+  .note .text{ margin: 8px 0 0; color: var(--ink-soft); white-space: pre-wrap; font-size: 0.9rem; }
+  .note .tags{ margin-top: 6px; font-size: 0.78rem; font-weight: 700; color: var(--navy); }
+  .note .acts{ display:flex; flex-wrap:wrap; gap: 14px; margin-top: 8px; font-size: 0.82rem; }
+  .linklike{ background:none; border:none; padding:0; font:inherit; color: var(--navy); text-decoration: underline; cursor:pointer; }
+  .linklike.warn{ color: var(--warn); }
+  .edit textarea, .edit input{ display:block; width:100%; margin: 8px 0 0; padding: 8px 10px; border: 1.5px solid var(--line); border-radius: 9px; background: var(--surface); color: var(--ink); font: 0.9rem var(--sans); }
+  .edit textarea{ min-height: 80px; resize: vertical; }
+  .edit .row{ display:flex; gap: 10px; margin-top: 8px; }
+  .empty{ text-align:center; padding: 36px 20px; }
+  .status{ font-size: 0.82rem; color: var(--ok); min-height: 1.2em; }
+  .how{ display:grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); margin-top: 14px; }
+  .how div{ background: var(--bg); border-radius: 12px; padding: 12px 14px; }
+  .how b{ display:block; color: var(--navy-deep); margin-bottom: 4px; font-size: 0.9rem; }
+  .how span{ font-size: 0.85rem; color: var(--ink-soft); }
+</style>
+<link rel="stylesheet" href="pa-theme.css">
+<script src="notes-core.js"></script>
+<script src="analytics.js"></script>
+</head>
+<body>
+<script src="pa-shell.js"></script>
+<div class="wrap">
+  <div class="head">
+    <div>
+      <span class="eyebrow">Product Advisory Learning</span>
+      <h1 id="title">My notes</h1>
+      <p>Your highlights, notes and tags from Product+ articles and <i>The Product Manager's Playbook</i>. They sync between this account and every browser you read in while signed in.</p>
+    </div>
+    <div><button class="btn ghost" id="exportBtn" type="button" disabled>Export as Markdown</button></div>
+  </div>
+  <p class="status" id="status" role="status"></p>
+
+  <!-- signed out -->
+  <section class="card" id="signedOut" hidden aria-labelledby="soTitle">
+    <h2 id="soTitle">Sign in to see your notes</h2>
+    <p style="margin-top:8px;">Highlights and notes you make while reading on productadvisory.co are saved in that browser. Sign in to Learning and they're kept in your account, on every device, and listed here.</p>
+    <a class="btn" href="/lms-dashboard">Sign in or create a free account</a>
+    <p class="small" style="margin-top:10px;">Then come back to My notes from the Profile menu.</p>
+  </section>
+
+  <!-- signed in -->
+  <section id="signedIn" hidden aria-labelledby="title">
+    <div class="toolbar">
+      <input type="search" id="q" placeholder="Search your notes" aria-label="Search your notes">
+      <div class="chips" id="kinds" role="group" aria-label="Show" style="margin:0;"></div>
+    </div>
+    <div class="chips" id="tags" role="group" aria-label="Filter by tag"></div>
+    <div id="list"><p class="small">Loading…</p></div>
+  </section>
+
+  <div class="site-foot" style="margin-top:28px; padding:20px 0; border-top:1px solid var(--line); text-align:center; font-size:0.75rem; color:var(--gray);">
+    © <span id="footerYear"></span> Product Advisory, LLC. All rights reserved. &nbsp;·&nbsp;
+    <a href="https://www.productadvisory.co/privacy-policy" target="_blank" rel="noopener" style="color:var(--gray); text-decoration:underline;">Privacy Policy</a> &nbsp;·&nbsp;
+    <a href="https://www.productadvisory.co/terms-of-use" target="_blank" rel="noopener" style="color:var(--gray); text-decoration:underline;">Terms of Use</a> &nbsp;·&nbsp;
+    <a href="#" data-cookie-settings style="color:var(--gray); text-decoration:underline;">Cookie settings</a>
+  </div>
+</div>
+<script>document.getElementById("footerYear").textContent = new Date().getFullYear();</script>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
+import { getFirestore, collection, getDocs, doc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+
+const N = window.NotesCore;
+const app = initializeApp({
+  apiKey: "AIzaSyAcECtS5c6WeOhKlwRK-LYFE47npbuq_eU",
+  authDomain: "auth.productadvisory.co",
+  projectId: "product-advisory-lms",
+  storageBucket: "product-advisory-lms.firebasestorage.app",
+  messagingSenderId: "1081134406437",
+  appId: "1:1081134406437:web:72e28604d093219e7698cc"
+});
+const auth = getAuth(app);
+const db = getFirestore(app);
+const $ = (id) => document.getElementById(id);
+const track = (name) => { try { if (window.gtag) window.gtag('event', name); } catch (e) { /* no analytics */ } };
+
+function el(tag, attrs, ...kids){
+  const node = document.createElement(tag);
+  Object.keys(attrs || {}).forEach(k => {
+    const v = attrs[k];
+    if (v === null || v === undefined || v === false) return;
+    if (k === 'class') node.className = v;
+    else if (k.slice(0, 2) === 'on') node.addEventListener(k.slice(2), v);
+    else node.setAttribute(k, v === true ? '' : v);
+  });
+  kids.forEach(c => { if (c !== null && c !== undefined && c !== false) node.append(c.nodeType ? c : document.createTextNode(String(c))); });
+  return node;
+}
+
+let user = null, notes = [], editing = '';
+const view = { q: '', tag: '', kind: 'all' };
+
+onAuthStateChanged(auth, async (u) => {
+  user = u;
+  $('signedOut').hidden = !!u;
+  $('signedIn').hidden = !u;
+  if (!u) { notes = []; $('exportBtn').disabled = true; return; }
+  try {
+    const snap = await getDocs(collection(db, 'readerNotes', u.uid, 'items'));
+    notes = snap.docs.map(d => N.clean(Object.assign({ id: d.id }, d.data()))).filter(Boolean);
+    render();
+  } catch (e) {
+    $('list').innerHTML = '';
+    $('list').append(el('p', { class: 'small' }, 'Your notes could not be loaded just now. Please refresh to try again.'));
+  }
+});
+
+async function store(n){
+  await setDoc(doc(db, 'readerNotes', user.uid, 'items', n.id), Object.assign(N.toDoc(n), { savedAt: serverTimestamp() }));
+  notes = notes.map(x => x.id === n.id ? n : x);
+}
+
+function render(){
+  const live = N.live(notes);
+  $('exportBtn').disabled = !live.length;
+  // kinds
+  const kinds = $('kinds'); kinds.innerHTML = '';
+  [['all', 'All'], ['article', 'Articles'], ['book', 'The book']].forEach(([k, label]) => {
+    kinds.append(el('button', { type: 'button', class: 'chip', 'aria-pressed': view.kind === k ? 'true' : 'false',
+      onclick: () => { view.kind = k; render(); } }, label));
+  });
+  // tags
+  const tags = N.tagCounts(notes), tagBox = $('tags'); tagBox.innerHTML = '';
+  if (view.tag && !tags.some(t => t.tag === view.tag)) view.tag = '';
+  tags.forEach(t => tagBox.append(el('button', { type: 'button', class: 'chip', 'aria-pressed': view.tag === t.tag ? 'true' : 'false',
+    onclick: () => { view.tag = view.tag === t.tag ? '' : t.tag; render(); } }, '#' + t.tag + ' ' + t.n)));
+  tagBox.hidden = !tags.length;
+
+  const list = $('list'); list.innerHTML = '';
+  if (!live.length){
+    list.append(el('div', { class: 'card empty' },
+      el('h2', {}, 'No notes yet'),
+      el('p', { style: 'margin-top:8px;' }, 'While you read on productadvisory.co, select any text to highlight it, add a note or tag it. Notes you make while signed in appear here.'),
+      el('div', { class: 'how' },
+        el('div', {}, el('b', {}, '1. Select text'), el('span', {}, 'In any Product+ article or chapter of the book.')),
+        el('div', {}, el('b', {}, '2. Highlight or note'), el('span', {}, 'Pick a colour, or Note to write your own thoughts and tags.')),
+        el('div', {}, el('b', {}, '3. Find it again'), el('span', {}, 'Under Notes on the page, or here, on every device.'))),
+      el('p', { style: 'margin-top:16px;' },
+        el('a', { class: 'btn', href: N.WWW + '/insights' }, 'Read Product+ articles'), ' ',
+        el('a', { class: 'btn ghost', href: N.WWW + '/books/playbook/preface-to-the-second-edition' }, "Read The Product Manager's Playbook"))));
+    return;
+  }
+  const groups = N.view(notes, view);
+  if (!groups.length){ list.append(el('p', { class: 'small' }, 'Nothing matches. Try another search or tag.')); return; }
+  groups.forEach(g => {
+    const box = el('section', { class: 'group card', 'aria-label': g.title });
+    box.append(el('div', { class: 'group-head' },
+      el('h2', {}, el('span', { class: 'kind' }, g.kind === 'book' ? 'Book' : 'Article'), el('a', { href: N.WWW + g.url }, g.title)),
+      el('small', {}, g.notes.length + (g.notes.length === 1 ? ' note' : ' notes'))));
+    g.notes.forEach(n => box.append(noteCard(n)));
+    list.append(box);
+  });
+}
+
+function noteCard(n){
+  const card = el('article', { class: 'note c-' + n.color });
+  card.append(el('q', {}, n.quote.length > 600 ? n.quote.slice(0, 600) + '…' : n.quote));
+  if (editing === n.id){
+    const ta = el('textarea', { 'aria-label': 'Note', maxlength: '2000' }); ta.value = n.note;
+    const tg = el('input', { type: 'text', 'aria-label': 'Tags, separated by commas', placeholder: 'Tags, separated by commas', maxlength: '200' }); tg.value = n.tags.join(', ');
+    card.append(el('div', { class: 'edit' }, ta, tg, el('div', { class: 'row' },
+      el('button', { type: 'button', class: 'btn', onclick: async () => {
+        const next = N.edit(n, { note: ta.value, tags: tg.value.split(/[,#\n]/) });
+        try { await store(next); editing = ''; render(); $('status').textContent = 'Saved.'; }
+        catch (e) { $('status').textContent = 'That didn’t save. Please try again.'; }
+      } }, 'Save'),
+      el('button', { type: 'button', class: 'btn ghost', onclick: () => { editing = ''; render(); } }, 'Cancel'))));
+    setTimeout(() => ta.focus(), 0);
+    return card;
+  }
+  if (n.note) card.append(el('p', { class: 'text' }, n.note));
+  if (n.tags.length) card.append(el('div', { class: 'tags' }, n.tags.map(t => '#' + t).join(' ')));
+  card.append(el('div', { class: 'acts' },
+    el('a', { href: N.openUrl(n) }, 'Open where you saved it'),
+    el('button', { type: 'button', class: 'linklike', onclick: () => { editing = n.id; render(); } }, n.note || n.tags.length ? 'Edit note' : 'Add a note'),
+    el('button', { type: 'button', class: 'linklike warn', onclick: async () => {
+      if (!confirm('Delete this highlight and its note?')) return;
+      try { await store(N.edit(n, 'delete')); render(); $('status').textContent = 'Deleted.'; track('notes_delete_learning'); }
+      catch (e) { $('status').textContent = 'That didn’t delete. Please try again.'; }
+    } }, 'Delete')));
+  return card;
+}
+
+let qTimer = 0;
+$('q').addEventListener('input', () => { clearTimeout(qTimer); qTimer = setTimeout(() => { view.q = $('q').value; render(); }, 150); });
+$('exportBtn').addEventListener('click', () => {
+  const a = el('a', { href: URL.createObjectURL(new Blob([N.toMarkdown(notes)], { type: 'text/markdown' })), download: 'my-product-advisory-notes.md' });
+  document.body.append(a); a.click(); a.remove();
+  track('notes_export_learning');
+});
+</script>
+<script type="module" src="account-menu.js"></script>
+</body>
+</html>

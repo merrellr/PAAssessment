@@ -561,6 +561,23 @@ async function removeSavedTools(user, database){
   for (const d of snap.docs) await deleteDoc(doc(database, 'savedTools', d.id));
 }
 
+/* Highlights and notes from www (my-notes.html) belong to the person too. */
+async function removeReaderNotes(user, database){
+  const snap = await getDocs(collection(database, 'readerNotes', user.uid, 'items'));
+  for (const d of snap.docs) await deleteDoc(doc(database, 'readerNotes', user.uid, 'items', d.id));
+}
+
+/* Combining two accounts copies the closing account's notes to the main one (the newer edit of a note wins). */
+async function moveReaderNotes(mainDb, mainUser, closeDb, closeUser){
+  const theirs = await getDocs(collection(closeDb, 'readerNotes', closeUser.uid, 'items'));
+  for (const d of theirs.docs){
+    const x = d.data(), ref = doc(mainDb, 'readerNotes', mainUser.uid, 'items', d.id), have = await getDoc(ref);
+    if (have.exists() && (have.data().updated || 0) >= (x.updated || 0)) continue;
+    const rec = Object.assign({}, x); delete rec.savedAt;
+    await setDoc(ref, Object.assign(rec, { savedAt: serverTimestamp() }));
+  }
+}
+
 /* Combining two accounts moves the closing account's saved tools to the main one. Each copy's id comes from the
    original's, so trying again after a failure doesn't make doubles. */
 async function moveSavedTools(mainDb, mainUser, closeDb, closeUser){
@@ -1183,6 +1200,8 @@ async function combineInto(mainDb, mainUser, closeDb, closeUser){
   } catch (err){ console.error('Could not move the Tool Roadmap votes:', err); /* the votes are a nice-to-have */ }
   try { await moveSavedTools(mainDb, mainUser, closeDb, closeUser); }
   catch (err){ console.error('Could not move the saved tools:', err); throw new Error("We couldn't move your saved tools just now, so nothing has been deleted. Please try again in a minute."); }
+  try { await moveReaderNotes(mainDb, mainUser, closeDb, closeUser); }
+  catch (err){ console.error('Could not move the notes:', err); throw new Error("We couldn't move your highlights and notes just now, so nothing has been deleted. Please try again in a minute."); }
 }
 async function combineAccounts(){
   const other = otherAuth.currentUser;
@@ -1590,6 +1609,8 @@ async function closeRecords(database, user){
   catch (err){ console.error('Could not remove the Tool Roadmap votes:', err); throw new Error("We couldn't remove your Tool Roadmap votes, so nothing has been deleted. Please try again in a minute."); }
   try { await removeSavedTools(user, database); }
   catch (err){ console.error('Could not remove the saved tools:', err); throw new Error("We couldn't remove your saved tools, so nothing has been deleted. Please try again in a minute."); }
+  try { await removeReaderNotes(user, database); }
+  catch (err){ console.error('Could not remove the notes:', err); throw new Error("We couldn't remove your highlights and notes, so nothing has been deleted. Please try again in a minute."); }
   let sheetResult = null;
   try { sheetResult = await requestSheetDeletion(await user.getIdToken(true)); } catch (err){ /* a failed attempt */ }
   if (!sheetResult || sheetResult.ok !== true) throw new Error("We couldn't remove your records from our results spreadsheet, so nothing has been deleted. Please try again in a minute.");

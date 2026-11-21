@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Notes sync — Product Advisory Learning</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" href="/images/icons/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="/images/icons/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="/images/icons/apple-touch-icon.png">
+<meta name="referrer" content="no-referrer">
+<!-- A hidden frame on www.productadvisory.co's articles and book pages (assets/js/notes.js there). It shares this site's
+     sign-in, so a reader signed in to Learning has their highlights and notes kept in their account, with no second
+     sign-in. It talks only to www's pages (NotesCore.ORIGINS) and only about the signed-in person's own notes.
+
+     www → here:  { pa: 'notes', type: 'sync', notes: [...] }   the notes on that device, deletion markers included
+     here → www:  { pa: 'notes', type: 'ready' }                 loaded, and again whenever sign-in changes
+                  { pa: 'notes', type: 'state', signedIn, name, notes?, error? }   after each sync: the merged set
+     Firestore:   readerNotes/{uid}/items/{noteId}  (see firestore.rules) -->
+<script src="notes-core.js"></script>
+</head>
+<body>
+<p style="font:14px system-ui,sans-serif;color:#4B5768;margin:16px;">This page keeps your highlights and notes from productadvisory.co in your Product Advisory Learning account. <a href="/my-notes">See My notes</a>.</p>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
+import { getFirestore, collection, getDocs, doc, writeBatch, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+
+const N = window.NotesCore;
+const app = initializeApp({
+  apiKey: "AIzaSyAcECtS5c6WeOhKlwRK-LYFE47npbuq_eU",
+  authDomain: "auth.productadvisory.co",
+  projectId: "product-advisory-lms",
+  storageBucket: "product-advisory-lms.firebasestorage.app",
+  messagingSenderId: "1081134406437",
+  appId: "1:1081134406437:web:72e28604d093219e7698cc"
+});
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+// The page that holds this frame, if it is one of www's: the only place messages go.
+const parentOrigin = (() => {
+  if (window.parent === window) return '';
+  let o = '';
+  try { o = (location.ancestorOrigins && location.ancestorOrigins[0]) || ''; } catch (e) { /* not offered */ }
+  return N.ORIGINS.indexOf(o) > -1 ? o : '';
+})();
+let lastOrigin = parentOrigin;   // Firefox doesn't say who holds the frame; the first message from www does
+const tell = (msg, origin) => { const to = origin || lastOrigin; if (to) window.parent.postMessage(Object.assign({ pa: 'notes' }, msg), to); };
+
+let user = null, known = false;
+onAuthStateChanged(auth, (u) => {
+  const changed = !known || (user && user.uid) !== (u && u.uid);
+  user = u; known = true;
+  if (changed) tell({ type: 'ready' });   // www then sends its notes
+});
+
+async function sync(local, origin) {
+  if (!user) return tell({ type: 'state', signedIn: false }, origin);
+  const uid = user.uid, name = user.displayName || user.email || '';
+  try {
+    const col = collection(db, 'readerNotes', uid, 'items');
+    const snap = await getDocs(col);
+    const remote = snap.docs.map((d) => Object.assign({ id: d.id }, d.data()));
+    const m = N.merge(local, remote);
+    for (let i = 0; i < m.upload.length; i += 400) {
+      const batch = writeBatch(db);
+      m.upload.slice(i, i + 400).forEach((n) => batch.set(doc(db, 'readerNotes', uid, 'items', n.id), Object.assign(N.toDoc(n), { savedAt: serverTimestamp() })));
+      await batch.commit();
+    }
+    if (!user || user.uid !== uid) return;   // signed out meanwhile
+    tell({ type: 'state', signedIn: true, name, notes: m.notes }, origin);
+  } catch (e) {
+    tell({ type: 'state', signedIn: true, name, error: (e && e.code) || 'failed' }, origin);
+  }
+}
+
+addEventListener('message', (e) => {
+  if (N.ORIGINS.indexOf(e.origin) < 0 || e.source !== window.parent) return;
+  const d = e.data || {};
+  if (d.pa !== 'notes' || d.type !== 'sync' || !Array.isArray(d.notes)) return;
+  lastOrigin = e.origin;
+  const go = () => sync(d.notes.slice(0, N.MAX_NOTES), e.origin);
+  if (known) go(); else { const wait = setInterval(() => { if (known) { clearInterval(wait); go(); } }, 100); }
+});
+</script>
+</body>
+</html>
