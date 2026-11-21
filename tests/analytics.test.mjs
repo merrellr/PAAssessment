@@ -63,8 +63,8 @@ console.log('--- what is sent about the address ---');
 
 console.log('--- which pages have it ---');
 {
-  const withIt = ['index', 'framework', 'request-info', 'tool-requests', 'lms-dashboard', 'lesson', 'profile', 'feedback', 'my-tools', 'practice', 'coach'];
-  const without = ['owner', 'owner-tools', 'owner-pilot', 'reports', 'company', 'join', 'assessment-dashboard', 'email-settings', 'team-session', 'owner-coach'];
+  const withIt = ['index', 'framework', 'request-info', 'tool-requests', 'lms-dashboard', 'lesson', 'profile', 'feedback', 'my-tools', 'practice', 'coach', 'my-notes'];
+  const without = ['owner', 'owner-tools', 'owner-pilot', 'reports', 'company', 'join', 'assessment-dashboard', 'email-settings', 'team-session', 'owner-coach', 'notes-bridge'];
   const forwards = ['my-learning', 'listen'];   // only forward to a page that counts the visit (listen: the retired Listen & watch page)
   const has = (p) => /<script src="analytics\.js"><\/script>/.test(fs.readFileSync(path.join(root, p + '.html'), 'utf8'));
   withIt.forEach(p => t(p + '.html has it', has(p)));

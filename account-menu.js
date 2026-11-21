@@ -151,6 +151,7 @@ if (window.self === window.top) {
     menu.appendChild(link('Home', '/lms-dashboard', page === 'lms-dashboard.html' && !/^\/my-learning/.test(location.pathname) && !/view=learning/.test(location.search)));
     menu.appendChild(link('My Learning', '/my-learning', /^\/my-learning/.test(location.pathname) || /view=learning/.test(location.search)));
     menu.appendChild(link('My Toolkits', '/my-tools', page === 'my-tools.html'));
+    menu.appendChild(link('My notes', '/my-notes', page === 'my-notes.html'));
     if (flags.companyAdmin || flags.owner){
       section(flags.owner ? 'Manage' : 'My company');
       if (flags.companyAdmin) menu.appendChild(link('Company dashboard', '/company', page === 'company.html'));

@@ -825,6 +825,39 @@ await deny('nobody else can overwrite it', () => setDoc(doc(bob, 'savedTools/t1'
 await deny('nobody else can delete it', () => deleteDoc(doc(bob, 'savedTools/t1')));
 await allow('the owner deletes it', () => deleteDoc(doc(ann, 'savedTools/t1')));
 
+console.log('\n--- My notes (readerNotes) ---');
+{
+  const goodNote = (over = {}) => Object.assign({
+    url: '/insights/five-second-test', title: 'The five-second test', kind: 'article', color: 'g', quote: 'Customers glance',
+    prefix: 'Real ', suffix: ' at pricing', pos: 120, note: 'Use in onboarding', tags: ['pricing'], created: 1000, updated: 2000,
+    deleted: false, savedAt: serverTimestamp()
+  }, over);
+  const cat = asUser('cat', 'cat@x.com'), dan = asUser('dan', 'dan@x.com');
+  const P = 'readerNotes/cat/items/';
+  await allow('a reader saves a highlight to their own account', () => setDoc(doc(cat, P + 'abc123'), goodNote()));
+  await allow('a book highlight with a different colour', () => setDoc(doc(cat, P + 'abc124'), goodNote({ kind: 'book', color: 'p', url: '/books/playbook/the-integrated-playbook' })));
+  await deny('not into somebody else\'s notes', () => setDoc(doc(dan, P + 'abc125'), goodNote()));
+  await deny('a signed-out visitor cannot save', () => setDoc(doc(anon, P + 'abc126'), goodNote()));
+  await deny('only our own kind of id', () => setDoc(doc(cat, P + 'ABC_1'), goodNote()));
+  await deny('only a page on www', () => setDoc(doc(cat, P + 'abc127'), goodNote({ url: 'https://evil.com/x' })));
+  await deny('only the four colours', () => setDoc(doc(cat, P + 'abc127'), goodNote({ color: 'red' })));
+  await deny('a quote over 3,000 characters is refused', () => setDoc(doc(cat, P + 'abc127'), goodNote({ quote: 'q'.repeat(3001) })));
+  await deny('a note over 2,000 characters is refused', () => setDoc(doc(cat, P + 'abc127'), goodNote({ note: 'n'.repeat(2001) })));
+  await deny('no more than ten tags', () => setDoc(doc(cat, P + 'abc127'), goodNote({ tags: Array.from({ length: 11 }, (_, i) => 't' + i) })));
+  await deny('extra fields are refused', () => setDoc(doc(cat, P + 'abc127'), goodNote({ shared: true })));
+  await deny('the save time must be the server\'s', () => setDoc(doc(cat, P + 'abc127'), goodNote({ savedAt: Timestamp.fromMillis(5) })));
+  await deny('a deletion marker cannot keep its words', () => setDoc(doc(cat, P + 'abc127'), goodNote({ deleted: true })));
+  await allow('a deletion marker with its words cleared', () => setDoc(doc(cat, P + 'abc124'), goodNote({ deleted: true, quote: '', note: '', tags: [], prefix: '', suffix: '', pos: 0, updated: 3000 })));
+  await allow('the reader reads and lists their notes', async () => { await getDoc(doc(cat, P + 'abc123')); return getDocs(collection(cat, 'readerNotes/cat/items')); });
+  await deny('nobody else can read them', () => getDoc(doc(dan, P + 'abc123')));
+  await deny('or list them', () => getDocs(collection(dan, 'readerNotes/cat/items')));
+  await deny('not even the platform owner', () => getDocs(collection(owner, 'readerNotes/cat/items')));
+  await allow('the reader edits a note', () => setDoc(doc(cat, P + 'abc123'), goodNote({ note: 'changed', updated: 2500 })));
+  await deny('nobody else can change it', () => updateDoc(doc(dan, P + 'abc123'), { note: 'x', savedAt: serverTimestamp() }));
+  await deny('nobody else can delete it', () => deleteDoc(doc(dan, P + 'abc123')));
+  await allow('the reader deletes it (when they delete their account)', () => deleteDoc(doc(cat, P + 'abc123')));
+}
+
 console.log('\n--- team mode (teamSessions) ---');
 {
   const fac = asUser('fac', 'fac@x.com'), pri = asUser('pri', 'pri@x.com'), mar = asUser('mar', 'mar@x.com'), nosy = asUser('nosy', 'nosy@x.com');

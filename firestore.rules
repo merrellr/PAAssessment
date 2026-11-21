@@ -39,6 +39,9 @@
 //                       A signed-in person with a verified email can back up to 3
 //                       tools (one vote each), and suggest a tool. Only the
 //                       platform owner manages the tools and reviews suggestions.
+//   My notes:           (readerNotes/{uid}/items) highlights, notes and tags a
+//                       reader makes on www's articles and book. Only that reader
+//                       reads or writes them. NEW: publish to switch them on.
 //   Everything else is denied by default.
 rules_version = '2';
 service cloud.firestore {
@@ -633,6 +636,33 @@ service cloud.firestore {
       allow create: if isSignedIn() && validSavedTool(request.resource.data) && request.resource.data.createdAt == request.time;
       allow update: if isSignedIn() && resource.data.uid == request.auth.uid
         && validSavedTool(request.resource.data) && request.resource.data.createdAt == resource.data.createdAt;
+    }
+
+    /* ---------------------------------------------------------- My notes (my-notes.html, notes-bridge.html)
+       Highlights, notes and tags a reader makes on www.productadvisory.co's articles and book, kept in their own
+       account. Only they can read or change them. A deleted note stays as a marker with its words cleared, so the
+       deletion reaches their other devices. Times are the reader's own (milliseconds), for "newer edit wins". */
+    function validReaderNote(d) {
+      return d.keys().hasOnly(['url', 'title', 'kind', 'color', 'quote', 'prefix', 'suffix', 'pos', 'note', 'tags', 'created', 'updated', 'deleted', 'savedAt'])
+        && d.url is string && d.url.size() <= 200 && d.url.matches('^/[a-z0-9/_-]*$')
+        && d.title is string && d.title.size() <= 200
+        && d.kind in ['article', 'book']
+        && d.color in ['y', 'b', 'g', 'p']
+        && d.quote is string && d.quote.size() <= 3000
+        && d.prefix is string && d.prefix.size() <= 40
+        && d.suffix is string && d.suffix.size() <= 40
+        && d.pos is int && d.pos >= 0
+        && d.note is string && d.note.size() <= 2000
+        && d.tags is list && d.tags.size() <= 10 && d.tags.join(',').size() <= 330
+        && d.created is int && d.updated is int
+        && d.deleted is bool
+        && (d.deleted == false || (d.quote == '' && d.note == '' && d.tags.size() == 0))
+        && d.savedAt == request.time;
+    }
+    match /readerNotes/{uid}/items/{noteId} {
+      allow read, delete: if isSignedIn() && uid == request.auth.uid;
+      allow create, update: if isSignedIn() && uid == request.auth.uid && noteId.matches('^[a-z0-9]{6,24}$')
+        && validReaderNote(request.resource.data);
     }
 
     match /toolSuggestions/{uid} {
