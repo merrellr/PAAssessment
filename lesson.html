@@ -564,6 +564,14 @@ async function loadProgress(){
   }
 }
 
+/* What Compass (the assistant in the header) sees here: this lesson's text, when the learner asks. */
+window.PACompassPage = function(){
+  const lesson = course && course.lessons.find(l => l.id === lessonNum);
+  const body = document.getElementById('lessonBody');
+  if (!lesson || !body) return null;
+  return { k: 'lesson', t: course.title + ': ' + lesson.title, x: lesson.title + '\n' + body.innerText };
+};
+
 /* Highlights, notes and tags on the lesson's text (notes-ui.js), saved to the person's account (My notes). */
 let lessonNotes = null;
 function attachNotes(lesson, bodyEl){

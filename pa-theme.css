@@ -676,6 +676,11 @@ html.pa-shell .icon-btn { background: var(--pa-card); }
 .pa-btn { display: inline-flex; align-items: center; gap: 6px; padding: 9px 16px; border-radius: var(--pa-pill); border: 2px solid var(--pa-primary); background: var(--pa-primary); color: var(--pa-btn-ink); font: 700 .9rem var(--pa-sans); text-decoration: none; cursor: pointer; }
 .pa-btn.ghost { background: transparent; color: var(--pa-navy); border-color: color-mix(in srgb, var(--pa-navy) 45%, transparent); }
 
+/* ---------- Compass, the assistant (the header button; the panel's styles are in compass.css) ---------- */
+.pa-compass-btn { gap: 6px; padding: 0 12px 0 9px; font-weight: 700; font-size: .9rem; color: var(--pa-navy); }
+.pa-compass-btn[aria-expanded="true"] { background: var(--pa-navy); color: var(--pa-btn-ink); border-color: var(--pa-navy); }
+@media (max-width: 1080px) { .pa-compass-btn { padding: 0 9px; } }
+
 /* ---------- Help panel (pa-shell.js) ---------- */
 .pa-help-btn { gap: 6px; padding: 0 12px 0 9px; font-weight: 700; font-size: .9rem; color: var(--pa-navy); }
 .pa-help .pa-help-q { width: 100%; font: inherit; font-size: 1rem; padding: 11px 14px; border: 1.5px solid var(--pa-line); border-radius: 12px; background: var(--pa-card); color: var(--pa-ink); margin: 2px 0 10px; }

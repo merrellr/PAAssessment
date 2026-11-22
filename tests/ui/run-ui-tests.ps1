@@ -36,6 +36,9 @@ Copy-Item "$repo\saved-tools-core.js" $site
 Copy-Item "$repo\notes-core.js" $site
 Copy-Item "$repo\notes-ui.js" $site
 Copy-Item "$repo\notes-ui.css" $site
+Copy-Item "$repo\compass-core.js" $site
+Copy-Item "$repo\compass-ui.js" $site
+Copy-Item "$repo\compass.css" $site
 Copy-Item "$repo\learning-home-core.js" $site
 Copy-Item "$repo\coach-core.js" $site
 Copy-Item "$repo\coach-bank.js" $site

@@ -35,7 +35,8 @@
     moon: tiny('<path d="M12 3a9 9 0 1 0 9 9 7 7 0 0 1-9-9Z"/>'),
     menu: tiny('<path d="M4 7h16M4 12h16M4 17h16"/>'),
     close: tiny('<path d="M6 6l12 12M18 6 6 18"/>'),
-    help: tiny('<circle cx="12" cy="12" r="9"/><path d="M9.6 9.3a2.5 2.5 0 0 1 4.8.9c0 1.7-2.4 2.2-2.4 3.6"/><path d="M12 17h.01"/>')
+    help: tiny('<circle cx="12" cy="12" r="9"/><path d="M9.6 9.3a2.5 2.5 0 0 1 4.8.9c0 1.7-2.4 2.2-2.4 3.6"/><path d="M12 17h.01"/>'),
+    compass: tiny('<circle cx="12" cy="12" r="9"/><path d="m15.5 8.5-2 5-5 2 2-5z"/>')
   };
   var WORDMARK = '<span class="pa-wm" aria-hidden="true"><span class="pa-wm-box">Product</span><span>&Lambda;dvisory</span></span>';
 
@@ -50,8 +51,9 @@
     var mac = /Mac|iPhone|iPad/.test(navigator.platform || navigator.userAgent);
     return '<header class="pa-nav" id="paNav"><div class="pa-nav-in">' +
       '<a class="pa-brand" href="/lms-dashboard" aria-label="Product Advisory Learning, my dashboard">' + WORDMARK + '<span class="pa-app">Learning</span></a>' +
-      '<nav class="pa-links" aria-label="Main">' + links + '<button type="button" class="pa-m-only" data-pa="help">Help</button><button type="button" class="pa-m-only" data-pa="prefs">Make it yours</button></nav>' +
+      '<nav class="pa-links" aria-label="Main">' + links + '<button type="button" class="pa-m-only" data-pa="compass">Compass</button><button type="button" class="pa-m-only" data-pa="help">Help</button><button type="button" class="pa-m-only" data-pa="prefs">Make it yours</button></nav>' +
       '<div class="pa-tools">' +
+      '<button type="button" class="pa-icon pa-compass-btn" data-pa="compass" aria-expanded="false" aria-controls="paCompass" aria-label="Compass: ask about this page" title="Compass: ask about this page">' + ICON.compass + '<span class="pa-help-lbl">Compass</span></button>' +
       '<button type="button" class="pa-icon pa-help-btn" data-pa="help" data-help-anchor aria-label="Help: answers, ask a question, send feedback" title="Help">' + ICON.help + '<span class="pa-help-lbl">Help</span></button>' +
       '<button type="button" class="pa-icon" data-pa="search" aria-label="Search courses and lessons">' + ICON.search + "<kbd>" + (mac ? "⌘" : "Ctrl") + "</kbd><kbd>K</kbd></button>" +
       '<button type="button" class="pa-icon pa-prefs-btn" data-pa="prefs" aria-label="Make it yours: change how this site looks" title="Make it yours">' + ICON.sliders + "</button>" +
@@ -191,8 +193,9 @@
     ["The assessment", "What do the four levels mean?", 'Limited, Moderate, Lots of and Advanced Experience describe how you work in each area today, not how long you have done the job. The <a href="/framework">training framework</a> describes each level in every area.', "level tier limited moderate advanced experience framework"],
     ["Courses and progress", "Does my progress save?", "Yes, automatically, whenever you are signed in. Open a course from your dashboard and you pick up where you left off.", "progress save resume continue course lesson lost"],
     ["Courses and progress", "Can I set a weekly goal?", 'Yes. On <a href="/profile#goals">My Profile</a>, choose how many lessons a week and up to three focus areas. Your dashboard shows how this week is going, and your check-in email reports on it.', "goal target weekly focus areas plan habit"],
-    ["Courses and progress", "Where are my notes?", "The answers you write in lessons are under <b>Your notes</b> on your dashboard. They are private to you, and are never shared with a company.", "notes reflections answers private"],
+    ["Courses and progress", "Where are my notes?", 'Highlights, notes and tags you make in lessons, on your toolkit work and in Product+ articles are on <a href="/my-notes">My notes</a> (also in the Profile menu, and on your Home page). The answers you write in lessons are under <b>Your notes</b> on your dashboard. All of them are private to you, and are never shared with a company.', "notes reflections answers private"],
     ["Courses and progress", "Can I ask a question about a lesson?", "Yes. Type your question in the box above and choose <b>Ask the lessons</b>, or press Ctrl K (⌘K on a Mac) on any page. The answer comes only from the course lessons, with links to them.", "ask ai question lesson course help"],
+    ["Courses and progress", "What is Compass?", 'Compass is the assistant in the header. Open it on any page and ask about what you’re looking at: the lesson, your progress, the toolkit work you have open, or your notes. It answers only from that page and the course, shows its sources, and sees nothing until you ask. Expand it to full screen with the arrows button. Each person can ask 25 questions a day.', "compass assistant ai ask question chat help explain quiz"],
     ["Your account", "How do I change my password or email?", 'Change your password from the <b>Profile</b> menu on your dashboard. Change your email on <a href="/profile">My Profile</a>; we send a link to the new address to confirm it.', "password email change account login"],
     ["Your account", "Can I sign in with my personal email too?", 'Yes. On <a href="/profile#signin">My Profile</a>, under <b>Ways to sign in</b>, add your personal Google account (or, if you sign in with Google, another email). Every way opens the same account, so your learning stays with you if you change jobs.', "personal email gmail second email link account sign in google change job keep progress"],
     ["Your account", "How do I add a profile photo?", 'On <a href="/profile">My Profile</a>, choose <b>Upload photo</b>, then drag and zoom it to fit the circle. It shows on your Profile button, and only you see it.', "photo picture image avatar upload profile"],
@@ -551,10 +554,29 @@
       else if (a === "prefs") openPanel();
       else if (a === "theme") toggleTheme();
       else if (a === "help") openHelp();
+      else if (a === "compass") openCompass();
       else if (a === "menu") { var open = nav.classList.toggle("open"); b.setAttribute("aria-expanded", open ? "true" : "false"); }
     });
   }
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init); else init();
 
-  window.PAShell = { openHelp: openHelp, openSearch: openPalette, openPrefs: openPanel, toggleTheme: toggleTheme, search: searchIndex, loadIndex: loadIndex, retrieve: retrieve, loadAsk: loadAsk, ask: showAnswer };
+  /* ---------------------------------------------------------------- Compass, the assistant (compass-ui.js)
+     Loaded the first time it's opened, and again on the next page if it was left open there. */
+  var compassLoading = null;
+  function loadCompass() {
+    if (window.PACompass) return Promise.resolve();
+    if (compassLoading) return compassLoading;
+    compassLoading = new Promise(function (resolve, reject) {
+      if (!document.querySelector('link[href^="compass.css"]')) {
+        var css = document.createElement("link"); css.rel = "stylesheet"; css.href = "compass.css"; document.head.appendChild(css);
+      }
+      var add = function (src, next) { var s = document.createElement("script"); s.src = src; s.onload = next; s.onerror = function () { compassLoading = null; reject(new Error(src)); }; document.head.appendChild(s); };
+      add("compass-core.js", function () { add("compass-ui.js", resolve); });
+    });
+    return compassLoading;
+  }
+  function openCompass() { loadCompass().then(function () { if (window.PACompass) window.PACompass.toggle(); }).catch(function () { /* offline: the button does nothing */ }); }
+  try { var cs = JSON.parse(sessionStorage.getItem("pa_compass_v1") || "null"); if (cs && cs.open) loadCompass().catch(function () {}); } catch (e) { /* storage off */ }
+
+  window.PAShell = { openHelp: openHelp, openSearch: openPalette, openPrefs: openPanel, toggleTheme: toggleTheme, search: searchIndex, loadIndex: loadIndex, retrieve: retrieve, loadAsk: loadAsk, ask: showAnswer, openCompass: openCompass };
 })();

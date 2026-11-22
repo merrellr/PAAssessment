@@ -250,6 +250,14 @@ function noteCard(n){
   return card;
 }
 
+/* What Compass (the assistant in the header) sees here: your notes, newest first. */
+window.PACompassPage = () => {
+  const list = N.newest(notes, 40);
+  if (!list.length) return null;
+  return { k: 'notes', t: 'My notes', x: list.map(n => '- [' + (N.KIND_LABEL[n.kind] || '') + ': ' + (n.title || '') + '] ' +
+    (n.quote ? '"' + n.quote.slice(0, 240) + '"' : '') + (n.note ? ' Note: ' + n.note.slice(0, 300) : '') + (n.tags.length ? ' ' + n.tags.map(x => '#' + x).join(' ') : '')).join('\n') };
+};
+
 let qTimer = 0;
 $('q').addEventListener('input', () => { clearTimeout(qTimer); qTimer = setTimeout(() => { view.q = $('q').value; render(); }, 150); });
 $('exportBtn').addEventListener('click', () => {

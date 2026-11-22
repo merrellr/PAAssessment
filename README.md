@@ -372,6 +372,24 @@ manual review — it holds no uid and isn't read by the app.
   over in the # (`#save=`), and after saving the person lands in the workspace. Logic: `saved-tools-core.js` (tested
   in `tests/saved-tools.test.mjs`); UI tests use `tests/ui/fake-tool.html` in place of the www tools.
 
+## Compass (the assistant in the header) and My notes
+
+**Compass** is the button in every Learning page's header. It opens a panel on the right (or full screen) where a
+signed-in learner asks about what they're looking at: the lesson they're reading, their Home or My Learning page,
+the toolkit work they have open, or their notes. Each page says what Compass may see (`window.PACompassPage`); only
+the part of it that matches the question is sent, and only when they ask. Answers come only from that page and the
+lesson passages (Ask's index), with numbered sources; anything they don't cover is said plainly and the question is
+logged on the "Unanswered questions" tab. Personal coaching (what to practise, a plan) is left to the Coach.
+
+- `compass-core.js` (tested by `tests/compass-core.test.mjs`): what to send, the conversation, sources, answers.
+- `compass-ui.js` + `compass.css`: the panel. `pa-shell.js` loads them the first time Compass is opened.
+- `apps-script/Code.gs` section 14b, `action=compass` (tested by `tests/compass-server.test.mjs`): the same free
+  Groq model as Ask, 25 questions per person a day and 400 in total. **To switch it on, paste Code.gs into the
+  Apps Script editor and deploy a new version**, as for any change to the script.
+
+**My notes** (`my-notes.html`) collects highlights, notes and tags from lessons (`notes-ui.js`), toolkit work
+(`my-tools.html`) and www's articles and book (through `notes-bridge.html`), in `readerNotes/{uid}/items`.
+
 ## My badges
 
 My Profile → **My Badges** (`/profile#badges`, also in both Profile menus) shows every badge, how many are

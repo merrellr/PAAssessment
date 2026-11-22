@@ -20,6 +20,8 @@ check named; open **Details** to read it. To run the page tests yourself on any 
 | Every page's real code: owner console, join page, dashboard, company dashboard, delete account, lessons, shared-record sync | `ui/` | `node tests/ui/run-ui-tests.mjs` (Chromium, any computer; it also runs the two `apps-script/` pages below), or `powershell -ExecutionPolicy Bypass -File tests\ui\run-ui-tests.ps1` (Edge on Windows) |
 | The "Request more information" form's logic (screens, answers, what is sent) | `lead-core.test.mjs` | `node --experimental-default-type=module tests/lead-core.test.mjs` |
 | My notes: highlights and notes from www (cleaning, merging the device and the account, the list, the export) | `notes-core.test.mjs` | `node tests/notes-core.test.mjs` |
+| Compass, the assistant: what a page sends, the conversation, sources and answers | `compass-core.test.mjs` | `node tests/compass-core.test.mjs` |
+| Compass on the server: who may ask, the prompt, sources, limits and the route | `compass-server.test.mjs` | `node --experimental-default-type=module tests/compass-server.test.mjs` |
 | The Tool Roadmap's logic | `tool-core.test.mjs` | `node --experimental-default-type=module tests/tool-core.test.mjs` |
 | Saving and emailing "Request more information" leads (validation, scoring, spam rules) | `apps-script/lead-test.html` | same as the line below, with `lead-test.html` |
 | The Reports numbers, insight sentences, AI privacy guard and weekly email (the server side) | `reports-logic.test.mjs` | `node tests/reports-logic.test.mjs` |

@@ -537,6 +537,19 @@ function noteForm(n){
     el('button', { type: 'button', class: 'btn btn-primary btn-small', onclick: go }, n ? 'Save' : 'Add note'),
     n ? el('button', { type: 'button', class: 'btn btn-ghost btn-small', onclick: () => { noteEditing = ''; paintWsNotes(); } }, 'Cancel') : null));
 }
+/* What Compass (the assistant in the header) sees here: the open piece of work, or the list of your work. */
+window.PACompassPage = () => {
+  if (ws){
+    const t = C.TOOLS[ws.tool] || {};
+    const notes = notesFor(ws.id).map(n => '- ' + n.note + (n.tags.length ? ' (' + n.tags.map(x => '#' + x).join(' ') + ')' : '')).join('\n');
+    return { k: 'tool', t: (t.short ? t.short + ': ' : '') + C.displayTitle(wsRecord()),
+      x: 'Tool: ' + (t.name || '') + '. ' + (t.blurb || '') + '\nName: ' + C.displayTitle(wsRecord()) +
+        '\nResults so far: ' + (ws.summary || 'nothing entered yet') + (notes ? '\nThe learner\'s notes on this work:\n' + notes : '') };
+  }
+  if (!saved.length) return { k: 'tools', t: 'My Toolkits', x: 'The toolkits: ' + Object.keys(C.TOOLS).map(k => C.TOOLS[k].name + ': ' + C.TOOLS[k].blurb).join('\n') };
+  return { k: 'tools', t: 'My Toolkits', x: 'The learner\'s saved work:\n' + saved.slice(0, 25).map(d => '- ' + C.displayTitle(d) + ' (' + (C.TOOLS[d.tool] ? C.TOOLS[d.tool].name : 'tool') + ')' + (d.summary ? ': ' + d.summary : '')).join('\n') +
+    '\nThe toolkits: ' + Object.keys(C.TOOLS).map(k => C.TOOLS[k].name + ': ' + C.TOOLS[k].blurb).join('\n') };
+};
 const wsNoteTitle = () => (C.TOOLS[ws.tool] ? C.TOOLS[ws.tool].short + ': ' : '') + C.displayTitle(wsRecord());
 $('wsNotesBtn').addEventListener('click', () => {
   const box = $('wsNotes'), open = box.hidden;
