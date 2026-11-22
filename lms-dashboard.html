@@ -662,8 +662,8 @@
           </div>
           <div class="hero-stat" style="text-align:center; padding:0 16px; border-left:1px solid var(--line);">
             <div><span style="font-family:var(--display); font-weight:700; font-size:1.25rem; color:var(--navy);" id="statAssignedCompleted">0</span><span style="font-size:0.8125rem; color:var(--gray);"> of </span><span style="font-family:var(--display); font-weight:700; font-size:1.25rem; color:var(--navy);" id="statAssignedTotal">0</span></div>
-            <div style="font-size:0.6562rem; color:var(--gray);">completed in plan</div>
-            <div style="font-size:0.625rem; color:var(--gray); margin-top:2px;"><span id="statTotalCompletedAllTime">0</span> all-time</div>
+            <div style="font-size:0.6562rem; color:var(--gray);">courses completed in plan</div>
+            <div style="font-size:0.625rem; color:var(--gray); margin-top:2px;"><span id="statTotalCompletedAllTime">0</span> courses all-time</div>
           </div>
           <div id="growthCard" class="hero-stat" style="display:none; text-align:center; padding:0 16px; border-left:1px solid var(--line);">
             <div id="growthDelta" style="font-family:var(--display); font-weight:700; font-size:1.25rem;"></div>
@@ -2868,11 +2868,49 @@ function renderGrowth(progress){
 }
 
 /* What Compass (the assistant in the header) sees here: the text of the view on screen (Home, or My Learning). */
+/* What Compass reads on Home and My Learning. The tiles show numbers without their labels (a ring, "2 of 21",
+   "-9%"), and read as one block of text the AI matched numbers to the wrong things. So Compass gets a short list of
+   labelled facts first, then each part of the page on its own line under its name. */
+function compassFacts(){
+  const txt = (id) => { const el = document.getElementById(id); return el ? (el.textContent || '').replace(/\s+/g, ' ').trim() : ''; };
+  const shown = (id) => { const el = document.getElementById(id); return !!el && !el.hidden && el.style.display !== 'none' && txt(id) !== ''; };
+  const f = [];
+  if (shown('heroBand')){
+    if (txt('summaryTierLabel')) f.push('Overall skill level (from the latest skill check): ' + txt('summaryTierLabel') + (txt('summaryOverallPct') ? ', overall score ' + txt('summaryOverallPct') : ''));
+    const since = [txt('summaryTimeSinceFirst'), txt('summaryTimeSince')].join(' ').replace(/·/g, ';').replace(/\s+/g, ' ').trim().replace(/;$/, '');
+    if (since) f.push('Time on the program: ' + since);
+    if (txt('summaryActiveTime')) f.push(txt('summaryActiveTime'));
+    f.push('Courses completed in the current plan: ' + txt('statAssignedCompleted') + ' of ' + txt('statAssignedTotal') + ' courses (each course has several lessons)');
+    f.push('Courses completed all-time: ' + txt('statTotalCompletedAllTime'));
+    if (shown('growthCard') && txt('growthDelta')) f.push('Change in overall score since the first skill check (' + txt('growthFirstTier') + '): ' + txt('growthDelta') + ' (a minus sign means the score went down)');
+  }
+  if (shown('badgeTile')){
+    const b = txt('badgeTile'), have = /(\d+)\s*of\s*(\d+)\s*badges/i.exec(b), next = /Next:\s*(.+?)\s*·\s*(\d+)\s*of\s*(\d+)/i.exec(b);
+    if (have) f.push('Badges earned: ' + have[1] + ' of ' + have[2]);
+    if (next) f.push('Next badge to earn: "' + next[1] + '", progress ' + next[2] + ' of ' + next[3] + (/lesson/i.test(next[1]) ? ' lessons finished (single lessons, across all courses)' : ''));
+  }
+  if (txt('insightStrengthText')) f.push('Strongest skill area: ' + txt('insightStrengthText'));
+  if (txt('insightGrowthText')) f.push('Skill area to grow: ' + txt('insightGrowthText'));
+  return f;
+}
 window.PACompassPage = function(){
   const view = document.body.getAttribute('data-view') === 'learning' ? 'learning' : 'home';
-  const text = Array.from(document.querySelectorAll('[data-only="' + view + '"], [data-only="' + view + '"] ~ .home-grid'))
-    .map(el => el.innerText).filter(Boolean).join('\n');
-  return { k: view, t: view === 'learning' ? 'My Learning' : 'Home', x: text };
+  const parts = view === 'home'
+    ? [['Coach suggestion', 'coachHome'], ['Assigned by your company', 'assignedHome'], ['Your next best step', 'homeResume'], ['After that', 'homeNext'],
+       ['Skill check by area', 'growthPanel'], ['Role target', 'targetTile'], ['My Toolkits', 'homeTools'], ['My notes', 'homeNotes']]
+    : [['Coach', 'coachPanel'], ['Readiness', 'readinessPanel'], ['Gaps', 'gapsPanel'], ['Assigned by your company', 'assignedLearning'],
+       ['Your skills by area', 'skillsCard'], ['Recommended for you', 'recBanner'], ['Your courses', 'courseCatalog']];
+  const lines = [];
+  parts.forEach(([label, id]) => {
+    const el = document.getElementById(id);
+    if (!el || el.hidden || el.offsetParent === null) return;
+    const t = (el.innerText || '').replace(/\s*\n\s*/g, ' · ').replace(/\s+/g, ' ').trim();
+    if (t) lines.push(label + ': ' + t);
+  });
+  const facts = compassFacts();
+  // pin: always sent whole, ahead of the parts of the page picked for the question
+  const pin = facts.length ? 'FACTS ABOUT THIS LEARNER (labelled; use these numbers exactly):\n' + facts.map((x) => '- ' + x).join('\n') + '\nTHE PAGE, PART BY PART:' : '';
+  return { k: view, t: view === 'learning' ? 'My Learning' : 'Home', x: lines.join('\n'), pin };
 };
 
 /* My notes: how many notes in each place, and the three most recent. */

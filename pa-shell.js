@@ -568,7 +568,7 @@
 
   /* ---------------------------------------------------------------- Compass, the assistant (compass-ui.js)
      Loaded the first time it's opened, and again on the next page if it was left open there. */
-  var compassLoading = null, COMPASS_V = "?v=20261122d";   // change this when compass-*.js change, so browsers fetch the new copy at once
+  var compassLoading = null, COMPASS_V = "?v=20261122e";   // change this when compass-*.js change, so browsers fetch the new copy at once
   function loadCompass() {
     if (window.PACompass) return Promise.resolve();
     if (compassLoading) return compassLoading;
