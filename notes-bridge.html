@@ -94,7 +94,7 @@ function backend(params) {   // the same JSONP call as account-menu.js
     const cb = 'paCompassCb_' + Date.now() + '_' + Math.floor(Math.random() * 1e6), script = document.createElement('script');
     let done = false;
     const finish = (v) => { if (done) return; done = true; clearTimeout(timer); delete window[cb]; script.remove(); resolve(v); };
-    const timer = setTimeout(() => finish(null), 25000);
+    const timer = setTimeout(() => finish(null), 45000);
     window[cb] = (r) => finish(r || null);
     script.onerror = () => finish(null);
     script.src = BACKEND + '?' + new URLSearchParams(Object.assign({}, params, { callback: cb })).toString();

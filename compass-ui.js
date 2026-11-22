@@ -86,7 +86,7 @@
     var d = document.createElement('div');
     d.className = 'cp-msg cp-' + m.r + (m.err ? ' cp-err' : '');
     if (m.r === 'u') { d.textContent = m.t; return d; }
-    if (m.err) { d.innerHTML = '<p>' + C.errorText(m.err) + '</p>'; return d; }
+    if (m.err) { d.innerHTML = '<p>' + C.errorText(m.err) + (m.why ? '<small class="cp-why">Details: ' + C.esc(m.why) + '</small>' : '') + '</p>'; return d; }
     d.innerHTML = C.render(m.t, m.src);
     var cited = (m.cited || []).filter(function (n) { return m.src && m.src[n - 1]; });
     if (cited.length) {
@@ -147,12 +147,12 @@
     }).then(function (tok) {
       if (!tok) throw { code: 'signin' };
       return acct.backend({ action: 'compass', idToken: tok, q: q, h: JSON.stringify(hist), page: sent ? JSON.stringify(sent) : '',
-        ctx: JSON.stringify(passages.map(function (p) { return { u: p.u, t: p.t, x: String(p.x).slice(0, 650) }; })) });
+        ctx: JSON.stringify(passages.map(function (p) { return { u: p.u, t: p.t, x: String(p.x).slice(0, 650) }; })) }, 45000);   // an answer can take a while
     })).then(function (r) {
-      if (!r || !r.ok) throw { code: r && r.error || 'down' };
+      if (!r || !r.ok) throw { code: r && r.error || 'down', detail: r ? r.detail : 'no reply from the server in time' };
       if (typeof r.left === 'number') state.left = r.left;
       done({ r: 'a', t: r.text, cited: r.cited || [], src: C.sources(sent, passages, location.pathname + location.search) });
-    }).catch(function (e) { done({ r: 'a', err: (e && e.code) || 'down' }); });
+    }).catch(function (e) { done({ r: 'a', err: (e && e.code) || 'down', why: e && e.detail ? String(e.detail).slice(0, 200) : '' }); });
   }
 
   function fit() { input.style.height = 'auto'; input.style.height = Math.min(160, input.scrollHeight) + 'px'; }
