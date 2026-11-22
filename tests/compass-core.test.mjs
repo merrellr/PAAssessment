@@ -43,5 +43,18 @@ t('nothing matching gives nothing', C.retrieve(idx, 'zzz qqq', 4).length === 0 &
 t('articles and the book have a label, a prompt and suggestions', C.SEES.article === 'This article' && C.SEES.book === 'This chapter' && C.SUGGEST.book.length >= 3);
 t('the sign-in message links to Learning itself (it also shows on www)', /https:\/\/assessment\.productadvisory\.co\/lms-dashboard/.test(C.errorText('signin')));
 
+console.log('--- the request fits in a web address ---');
+const tok = 'e'.repeat(1200), base = { action: 'compass', idToken: tok, q: 'Explain this lesson simply' };
+const bigPage = { k: 'lesson', t: 'Pricing: Lesson 2', x: 'The decoy effect — “middle” plans win. '.repeat(60).slice(0, 2000) };
+const ps = Array.from({ length: 4 }, (_, i) => ({ u: 'lesson.html?course=strategy-moderate&lesson=' + (i + 1), t: 'Strategy: Lesson ' + (i + 1), x: 'Show the page to a stranger — for “five” seconds, then ask. '.repeat(20) }));
+const hist6 = Array.from({ length: 6 }, (_, i) => ({ r: i % 2 ? 'a' : 'u', t: 'A long turn about pricing — “decoys” and anchors. '.repeat(12) }));
+const len = (p) => new URLSearchParams(p).toString().length;
+const f = C.fitRequest(base, bigPage, ps, hist6);
+t('a big question with history is trimmed to fit', len(f.params) <= C.URL_MAX, len(f.params));
+t('it still sends the question, the page and at least one passage', f.params.q === base.q && JSON.parse(f.params.page).x.length >= 300 && f.passages.length >= 1 && JSON.parse(f.params.ctx).length === f.passages.length);
+const small = C.fitRequest(base, { k: 'lesson', t: 'x', x: 'short page' }, ps.slice(0, 1).map((p) => Object.assign({}, p, { x: 'short' })), []);
+t('a small question goes as it is', JSON.parse(small.params.page).x === 'short page' && small.passages.length === 1);
+t('no page at all is fine', C.fitRequest(base, null, [], []).params.page === '');
+
 console.log(`\n${pass} passed, ${fail} failed`);
 if (fail) process.exit(1);

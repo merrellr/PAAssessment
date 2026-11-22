@@ -90,6 +90,13 @@ reset(); replies = [{ code: 401, raw: '{"error":{"message":"Invalid API Key"}}' 
 const bad = E({});
 t('an error from the AI service says what it was', !bad.ok && /Groq answered 401: .*Invalid API Key/.test(bad.detail) && asked.length === 1);
 
+reset();
+const realProps = sandbox.PropertiesService.getScriptProperties;
+sandbox.PropertiesService.getScriptProperties = () => { const o = realProps(); return Object.assign({}, o, { setProperty: () => { throw new Error('You have exceeded the property storage quota'); } }); };
+const full = E({});
+sandbox.PropertiesService.getScriptProperties = realProps;
+t('a full property store does not stop an answer', full.ok && asked.length === 1, JSON.stringify(full));
+
 console.log('--- what the page may send ---');
 reset();
 E({ page: JSON.stringify({ k: 'hack', t: 'x', x: 'y' }) });

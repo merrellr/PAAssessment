@@ -115,8 +115,12 @@ async function compassAsk(d, origin) {
   let tok = null;
   try { tok = await user.getIdToken(); } catch (e) { tok = null; }
   if (!tok) return reply({ ok: false, error: 'signin' });
-  const r = await backend({ action: 'compass', idToken: tok, q: String(d.q || '').slice(0, 400), h: String(d.h || '[]').slice(0, 8000), page: String(d.page || '').slice(0, 6000),
-    ctx: JSON.stringify(passages.map((p) => ({ u: p.u, t: p.t, x: String(p.x).slice(0, 650) }))) });
+  let hist = [];
+  try { hist = JSON.parse(String(d.h || '[]')); if (!Array.isArray(hist)) hist = []; } catch (e) { hist = []; }
+  const fit = window.CompassCore ? window.CompassCore.fitRequest({ action: 'compass', idToken: tok, q: String(d.q || '').slice(0, 400) }, page, passages, hist)
+    : { params: { action: 'compass', idToken: tok, q: String(d.q || '').slice(0, 400), h: '[]', page: '', ctx: '[]' }, passages: [] };
+  passages = fit.passages;
+  const r = await backend(fit.params);
   reply(r || { ok: false, error: 'down' }, passages.map((p) => ({ u: 'https://assessment.productadvisory.co/' + String(p.u).replace(/^\//, ''), t: p.t })));
 }
 

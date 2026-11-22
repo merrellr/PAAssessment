@@ -156,7 +156,10 @@ function doGet(e) {
   }
   if (e.parameter.action === "compass") {
     const p = e.parameter;
-    return jsonpOut_(p.callback, compassEndpoint_(p.idToken || "", p.q || "", p.h || "", p.page || "", p.ctx || ""));
+    var out;
+    try { out = compassEndpoint_(p.idToken || "", p.q || "", p.h || "", p.page || "", p.ctx || ""); }
+    catch (err) { console.error('Compass: ' + (err && err.stack || err)); out = { ok: false, error: 'server_error', detail: 'server: ' + String(err && err.message || err).slice(0, 200) }; }
+    return jsonpOut_(p.callback, out);
   }
   if (e.parameter.action === "coachChat") {
     const p = e.parameter;
@@ -2653,9 +2656,11 @@ function compassQuota_(uid) {
 
 // A question that got no answer doesn't count against the day's limit.
 function compassRefund_(uid) {
+  try {
   var props = PropertiesService.getScriptProperties();
   var day = Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'yyyy-MM-dd');
   ['compass_' + day, 'compass_' + day + '_' + uid].forEach(function (k) { var n = Number(props.getProperty(k) || 0); if (n > 0) props.setProperty(k, String(n - 1)); });
+  } catch (err) { /* a refund is best effort */ }
 }
 
 // Everything from the page, rebuilt and capped. Returns null if anything is off.
@@ -2709,7 +2714,8 @@ function compassEndpoint_(idToken, q, histJson, pageJson, ctxJson) {
   if (!clean) return { ok: false, error: 'bad_question' };
   var apiKey = PropertiesService.getScriptProperties().getProperty('GROQ_API_KEY');
   if (!apiKey) return { ok: false, error: 'no_key' };
-  var left = compassQuota_(who.uid);
+  var left;
+  try { left = compassQuota_(who.uid); } catch (err) { console.error('Compass quota: ' + err); left = COMPASS_PER_USER_DAILY_; }   // a full property store never stops an answer
   if (left === null) return { ok: false, error: 'daily_limit' };
   try {
     // The model thinks before it answers, and that counts against max_tokens: ask it to keep the thinking short and
