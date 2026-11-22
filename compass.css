@@ -57,3 +57,13 @@ a.cp-cite:hover { background: var(--cyan, #35C2E8); color: #fff; }
 .cp.full .cp-msg { font-size: 1rem; }
 @media (max-width: 700px) { .cp { width: 100vw; border-left: 0; } .cp-full { display: none; } }
 @media print { .cp { display: none !important; } }
+/* Dark mode in Learning: the brand blue (--navy) is too dim as text on a dark panel, so chips, links, citations and
+   source numbers use the light cyan instead. Pages without Learning's theme (www) have no --pa-cyan-ink and keep theirs. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .cp { --cp-accent: var(--pa-cyan-ink, var(--navy, #1A4584)); --cp-chip-line: var(--pa-tint-2, var(--line, #E3E9F0)); }
+}
+:root[data-theme="dark"] .cp { --cp-accent: var(--pa-cyan-ink, var(--navy, #1A4584)); --cp-chip-line: var(--pa-tint-2, var(--line, #E3E9F0)); }
+.cp .cp-chip, .cp .cp-a a, .cp .cp-src a, .cp .cp-src b, .cp .cp-cite { color: var(--cp-accent, var(--navy, #1A4584)); }
+.cp .cp-chip { border-color: var(--cp-chip-line, var(--line, #E3E9F0)); }
+.cp .cp-acts button:hover { color: var(--cp-accent, var(--navy, #1A4584)); }
+.cp a.cp-cite:hover { color: #fff; }
