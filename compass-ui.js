@@ -175,7 +175,7 @@
     panel.hidden = true;
     document.documentElement.classList.remove('cp-open', 'cp-full-open');
     setButtons();
-    var b = opener && opener.focus && document.contains(opener) && opener !== document.body ? opener : document.querySelector('.pa-tools [data-pa="compass"]');
+    var b = opener && opener.focus && document.contains(opener) && opener !== document.body ? opener : document.getElementById('paCompassFab');
     if (b) b.focus();
   }
   panel.querySelector('.cp-x').addEventListener('click', close);

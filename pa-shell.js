@@ -51,9 +51,8 @@
     var mac = /Mac|iPhone|iPad/.test(navigator.platform || navigator.userAgent);
     return '<header class="pa-nav" id="paNav"><div class="pa-nav-in">' +
       '<a class="pa-brand" href="/lms-dashboard" aria-label="Product Advisory Learning, my dashboard">' + WORDMARK + '<span class="pa-app">Learning</span></a>' +
-      '<nav class="pa-links" aria-label="Main">' + links + '<button type="button" class="pa-m-only" data-pa="compass">Compass</button><button type="button" class="pa-m-only" data-pa="help">Help</button><button type="button" class="pa-m-only" data-pa="prefs">Make it yours</button></nav>' +
+      '<nav class="pa-links" aria-label="Main">' + links + '<button type="button" class="pa-m-only" data-pa="help">Help</button><button type="button" class="pa-m-only" data-pa="prefs">Make it yours</button></nav>' +
       '<div class="pa-tools">' +
-      '<button type="button" class="pa-icon pa-compass-btn" data-pa="compass" aria-expanded="false" aria-controls="paCompass" aria-label="Compass: ask about this page" title="Compass: ask about this page">' + ICON.compass + '<span class="pa-help-lbl">Compass</span></button>' +
       '<button type="button" class="pa-icon pa-help-btn" data-pa="help" data-help-anchor aria-label="Help: answers, ask a question, send feedback" title="Help">' + ICON.help + '<span class="pa-help-lbl">Help</span></button>' +
       '<button type="button" class="pa-icon" data-pa="search" aria-label="Search courses and lessons">' + ICON.search + "<kbd>" + (mac ? "⌘" : "Ctrl") + "</kbd><kbd>K</kbd></button>" +
       '<button type="button" class="pa-icon pa-prefs-btn" data-pa="prefs" aria-label="Make it yours: change how this site looks" title="Make it yours">' + ICON.sliders + "</button>" +
@@ -575,6 +574,23 @@
     });
     return compassLoading;
   }
+  // The Compass button: bottom right, on every page with this header (Notes, where a page has it, sits above it).
+  function compassButton() {
+    if (document.getElementById("paCompassFab") || !document.getElementById("paNav")) return;
+    var b = document.createElement("button");
+    b.type = "button"; b.id = "paCompassFab"; b.className = "pa-compass-fab"; b.setAttribute("data-pa", "compass");
+    b.setAttribute("aria-expanded", "false"); b.setAttribute("aria-controls", "paCompass");
+    b.setAttribute("aria-label", "Compass: ask about this page"); b.title = "Compass: ask about this page";
+    b.innerHTML = ICON.compass + "<span>Compass</span>";
+    b.addEventListener("click", openCompass);
+    document.body.appendChild(b);
+    // only for signed-in learners: shown at once when this device was signed in last time, then kept in step with sign-in
+    var show = function (on) { b.hidden = !on; document.documentElement.classList.toggle("has-compass", !!on); };
+    var was = false; try { was = localStorage.getItem("pa_signed_in") === "1"; } catch (e) { /* storage off */ }
+    show(was);
+    window.addEventListener("pa-auth", function (e) { show(!!e.detail); if (!e.detail && window.PACompass && document.documentElement.classList.contains("cp-open")) window.PACompass.close(); });
+  }
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", compassButton); else compassButton();
   function openCompass() { loadCompass().then(function () { if (window.PACompass) window.PACompass.toggle(); }).catch(function () { /* offline: the button does nothing */ }); }
   try { var cs = JSON.parse(sessionStorage.getItem("pa_compass_v1") || "null"); if (cs && cs.open) loadCompass().catch(function () {}); } catch (e) { /* storage off */ }
 

@@ -40,6 +40,53 @@
   .field-error{ font-size: 0.7812rem; color: var(--warn); margin: -6px 0 12px 2px; min-height: 1px; }
 
   .auth-tabs{ display:flex; gap:24px; border-bottom: 1.5px solid var(--line); margin-bottom: 18px; }
+  /* ---------- the sign-in page: what Learning is beside the form (a short line above it on a phone) ---------- */
+  .lg{ display:grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 440px); gap: 28px; align-items: stretch; max-width: 1000px; margin: 28px auto 8px; }
+  .lg-side{ position:relative; overflow:hidden; border-radius: 20px; color:#fff; padding: 36px 34px;
+    background: radial-gradient(120% 90% at 100% 100%, rgba(53,194,232,.35) 0%, rgba(53,194,232,0) 55%), linear-gradient(155deg, #1d4f96 0%, #163d78 50%, #0f2a55 100%); }
+  .lg-side::after{ content:""; position:absolute; inset:0; background-image: radial-gradient(rgba(255,255,255,.08) 1px, transparent 1.2px); background-size: 14px 14px; pointer-events:none;
+    -webkit-mask-image: linear-gradient(180deg, transparent 0%, #000 70%); mask-image: linear-gradient(180deg, transparent 0%, #000 70%); }
+  .lg-side-in{ position:relative; z-index:1; display:flex; flex-direction:column; height:100%; }
+  .lg-kicker{ font-size:.6875rem; font-weight:700; letter-spacing:.14em; text-transform:uppercase; color:#8fd9f2; }
+  .lg-h{ font-family:var(--display); font-size: clamp(1.45rem, 2.6vw, 1.95rem); line-height:1.18; margin: 10px 0 10px; color:#fff; }
+  .lg-lede{ color:#d6e3f5; font-size:.95rem; line-height:1.55; margin:0 0 22px; }
+  .lg-points{ list-style:none; margin:0 0 22px; padding:0; display:grid; gap: 14px; }
+  .lg-points li{ display:flex; gap:12px; align-items:flex-start; font-size:.9rem; line-height:1.5; color:#d6e3f5; }
+  .lg-points b{ color:#fff; }
+  .lg-ico{ flex:none; width:32px; height:32px; border-radius:10px; display:grid; place-items:center; background: rgba(255,255,255,.12); }
+  .lg-ico svg{ width:17px; height:17px; fill:none; stroke:#8fd9f2; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
+  .lg-new{ margin: auto 0 0; padding-top: 16px; border-top: 1px solid rgba(255,255,255,.18); font-size:.875rem; color:#d6e3f5; }
+  .lg-new a{ color:#fff; font-weight:700; }
+  .lg-card{ margin:0 !important; padding: 30px 30px 24px !important; border-radius: 20px !important; }
+  .lg-title{ font-family:var(--display); font-size: 1.4rem; color: var(--navy-deep); margin: 0 0 4px; }
+  .lg-card #authSub{ font-size:.875rem; color: var(--ink-soft); margin: 0 0 18px; line-height:1.5; }
+  .lg-tabs{ margin-bottom: 20px; }
+  .lg-tabs .auth-tab:focus-visible{ outline: 2px solid var(--cyan); outline-offset: 4px; border-radius: 4px; }
+  .lg-google{ display:flex !important; align-items:center; justify-content:center; gap:10px; width:100%; min-height: 46px; margin: 0 !important; padding: 0 16px !important;
+    background: var(--surface) !important; color: var(--ink) !important; border: 1.5px solid var(--line) !important; border-radius: 12px !important;
+    font: 600 .95rem var(--sans) !important; box-shadow: 0 1px 2px rgba(22,33,62,.06); cursor:pointer; }
+  .lg-google:hover{ border-color: var(--cyan) !important; }
+  .lg-google:focus-visible{ outline: 3px solid var(--cyan); outline-offset: 2px; }
+  .lg-fine{ font-size:.72rem; color: var(--gray); text-align:center; margin: 8px 0 0; line-height:1.45; }
+  .lg-fine a{ color: var(--gray); }
+  .lg-card .divider-row{ margin: 18px 0 16px; }
+  .lg-card .input-icon-wrap .text-input{ min-height: 46px; border-radius: 12px; }
+  .lg-forgot{ text-align:right !important; margin: -2px 0 12px !important; font-size: .8125rem !important; }
+  .lg-forgot a{ color: var(--navy); cursor:pointer; }
+  .lg-terms{ display:none; align-items:flex-start; gap:9px; font-size:.8125rem; color: var(--ink-soft); margin: 4px 0 14px; cursor:pointer; line-height:1.45; }
+  .lg-terms input{ margin-top: 3px; width:16px; height:16px; accent-color: var(--navy); }
+  .lg-terms a{ color: var(--navy); }
+  .lg-submit{ width:100%; min-height: 46px; border-radius: 12px !important; font-size: .95rem !important; }
+  .lg-private{ display:flex; align-items:center; justify-content:center; gap:6px; margin-top: 14px; }
+  .lg-private svg{ width:13px; height:13px; fill:none; stroke:currentColor; stroke-width:2; }
+  .lg-sr{ position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap; border:0; }
+  @media (max-width: 860px){
+    .lg{ grid-template-columns: 1fr; gap: 14px; margin-top: 14px; }
+    .lg-side{ padding: 22px 22px; border-radius: 16px; }
+    .lg-points, .lg-new{ display:none; }
+    .lg-lede{ margin: 0; }
+    .lg-card{ padding: 24px 20px 20px !important; }
+  }
   .auth-tab{ padding-bottom: 10px; font-family:var(--display); font-weight:600; font-size: 0.9375rem; color: var(--gray); cursor:pointer; border-bottom: 2px solid transparent; margin-bottom: -1.5px; }
   .auth-tab.active{ color: var(--navy-deep); border-bottom-color: var(--cyan); }
 
@@ -443,70 +490,93 @@
 
   <!-- LOGIN / SIGN UP -->
   <div data-screen="auth" class="active">
-    <div class="card" style="max-width:420px;margin:0 auto;">
+    <div class="lg">
+      <!-- What Learning is: beside the form on wide screens, a short line above it on a phone -->
+      <section class="lg-side" aria-label="About Product Advisory Learning">
+        <div class="lg-side-in">
+          <span class="lg-kicker">Product Advisory Learning</span>
+          <h1 class="lg-h">Get better at product, one short lesson at a time.</h1>
+          <p class="lg-lede">A free skill check, courses matched to your level, and tools you can use at work on Monday.</p>
+          <ul class="lg-points">
+            <li><span class="lg-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></span><span><b>A 5-minute skill check</b> across seven areas, from discovery to AI at work.</span></li>
+            <li><span class="lg-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 5h16v12H4z"/><path d="M8 21h8M12 17v4"/></svg></span><span><b>Short courses</b> with a story, real numbers and practice, at your level.</span></li>
+            <li><span class="lg-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 20V11M11 20V5M17 20v-6M3 20h18"/></svg></span><span><b>Free toolkits</b> for prioritizing, AI use cases and build, buy or partner.</span></li>
+            <li><span class="lg-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="m15.5 8.5-2 5-5 2 2-5z"/></svg></span><span><b>Compass and My notes</b>: ask about what you're reading, and keep what matters.</span></li>
+          </ul>
+          <p class="lg-new">New here? <a href="/">Take the skill check first</a>, then save your results with a free account.</p>
+        </div>
+      </section>
 
-      <span style="display:block; font-size:0.6875rem; font-weight:600; letter-spacing:0.06em; text-transform:uppercase; color:var(--cyan); margin-bottom:6px;">My Learning</span>
-      <h1 style="font-size:1.1875rem; margin:0 0 6px;">See your personalized results and course plan</h1>
-      <p style="font-size:0.8438rem; color:var(--ink-soft); margin:0 0 16px; line-height:1.55;">Log in or create an account to view your assessment score across all seven skill areas and the courses matched to your level. Haven't taken the assessment yet? <a href="/" style="color:var(--navy);">Start here</a>.</p>
+      <section class="lg-card card" aria-labelledby="lgTitle">
+        <h2 class="lg-title" id="lgTitle">Welcome back</h2>
+        <p id="authSub">Log in to pick up your courses where you left off.</p>
 
-      <div class="auth-tabs">
-        <div class="auth-tab active" id="tabLogin" onclick="setAuthMode(false)">Log in</div>
-        <div class="auth-tab" id="tabSignup" onclick="setAuthMode(true)">Create account</div>
-      </div>
+        <div class="auth-tabs lg-tabs" role="tablist" aria-label="Log in or create an account">
+          <div class="auth-tab active" id="tabLogin" role="tab" tabindex="0" onclick="setAuthMode(false)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();setAuthMode(false);}">Log in</div>
+          <div class="auth-tab" id="tabSignup" role="tab" tabindex="0" onclick="setAuthMode(true)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();setAuthMode(true);}">Create account</div>
+        </div>
 
-      <p id="authSub">Log in to pick up your courses where you left off.</p>
-
-      <div class="input-icon-wrap" id="nameWrap" style="display:none;">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--gray)" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>
-        <input class="text-input" type="text" id="authName" placeholder="Full name">
-      </div>
-
-      <div class="input-icon-wrap">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--gray)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg>
-        <input class="text-input" type="email" id="authEmail" placeholder="Email address">
-      </div>
-
-      <div class="input-icon-wrap">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--gray)" stroke-width="2"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
-        <input class="text-input" type="password" id="authPassword" placeholder="Password" oninput="updateAuthStrength()">
-        <button type="button" class="password-toggle" id="passwordToggleBtn" onclick="togglePasswordVisibility()" aria-label="Show password">
-          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="var(--gray)" stroke-width="2"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/></svg>
+        <button class="btn btn-google g-btn lg-google" type="button" onclick="handleGoogleSignIn()">
+          <svg class="g-logo" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path fill="#4285F4" d="M23.52 12.27c0-.85-.08-1.67-.22-2.45H12v4.64h6.47a5.53 5.53 0 0 1-2.4 3.63v3h3.88c2.27-2.09 3.57-5.17 3.57-8.82z"/><path fill="#34A853" d="M12 24c3.24 0 5.95-1.07 7.94-2.91l-3.88-3c-1.08.72-2.45 1.15-4.06 1.15-3.13 0-5.78-2.11-6.73-4.96H1.27v3.11A12 12 0 0 0 12 24z"/><path fill="#FBBC05" d="M5.27 14.28A7.2 7.2 0 0 1 4.89 12c0-.79.14-1.56.38-2.28V6.61H1.27A12 12 0 0 0 0 12c0 1.94.46 3.77 1.27 5.39l4-3.11z"/><path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.44-3.44C17.94 1.19 15.24 0 12 0 7.31 0 3.26 2.69 1.27 6.61l4 3.11C6.22 6.86 8.87 4.75 12 4.75z"/></svg>
+          <span id="googleLabel">Continue with Google</span>
         </button>
-      </div>
+        <div id="googleTermsNote" class="lg-fine">By continuing with Google, you agree to the <a href="https://www.productadvisory.co/terms-of-use" target="_blank" rel="noopener">Terms of Use</a> and <a href="https://www.productadvisory.co/privacy-policy" target="_blank" rel="noopener">Privacy Policy</a>.</div>
 
-      <div id="authPasswordStrength" style="display:none; font-size:0.75rem; color:var(--gray); margin:-4px 0 10px 2px;"></div>
+        <div class="divider-row"><span>or with your email</span></div>
 
-      <div class="input-icon-wrap" id="confirmPasswordWrap" style="display:none;">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--gray)" stroke-width="2"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
-        <input class="text-input" type="password" id="authPasswordConfirm" placeholder="Confirm password">
-      </div>
+        <div class="input-icon-wrap" id="nameWrap" style="display:none;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--gray)" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>
+          <label class="lg-sr" for="authName">Full name</label>
+          <input class="text-input" type="text" id="authName" placeholder="Full name" autocomplete="name">
+        </div>
 
-      <div class="field-error" id="authError"></div>
-      <div class="field-error" id="authSuccess" style="color:var(--ok);"></div>
+        <div class="input-icon-wrap">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--gray)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg>
+          <label class="lg-sr" for="authEmail">Email address</label>
+          <input class="text-input" type="email" id="authEmail" placeholder="Email address" autocomplete="email">
+        </div>
 
-      <div class="toggle-row" id="forgotRow" style="text-align:right; margin-top:-4px;">
-        <a onclick="handleForgotPassword()">Forgot password?</a>
-      </div>
+        <div class="input-icon-wrap">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--gray)" stroke-width="2"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
+          <label class="lg-sr" for="authPassword">Password</label>
+          <input class="text-input" type="password" id="authPassword" placeholder="Password" oninput="updateAuthStrength()" autocomplete="current-password">
+          <button type="button" class="password-toggle" id="passwordToggleBtn" onclick="togglePasswordVisibility()" aria-label="Show password">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="var(--gray)" stroke-width="2"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/></svg>
+          </button>
+        </div>
 
-      <label id="termsCheckRow" style="display:none; align-items:flex-start; gap:8px; font-size:0.7812rem; color:var(--ink-soft); margin:8px 0 14px; cursor:pointer;">
-        <input type="checkbox" id="agreeTermsCheckbox" style="margin-top:2px;">
-        <span>By creating an account you agree to the <a href="https://www.productadvisory.co/terms-of-use" target="_blank" rel="noopener" style="color:var(--navy);">Terms of Use</a> and <a href="https://www.productadvisory.co/privacy-policy" target="_blank" rel="noopener" style="color:var(--navy);">Privacy Policy</a>.</span>
-      </label>
+        <div id="authPasswordStrength" style="display:none; font-size:0.75rem; color:var(--gray); margin:-4px 0 10px 2px;"></div>
 
-      <button class="btn btn-primary btn-gradient" id="authSubmitBtn" onclick="handleAuthSubmit()">Log in</button>
+        <div class="input-icon-wrap" id="confirmPasswordWrap" style="display:none;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--gray)" stroke-width="2"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
+          <label class="lg-sr" for="authPasswordConfirm">Confirm password</label>
+          <input class="text-input" type="password" id="authPasswordConfirm" placeholder="Confirm password" autocomplete="new-password">
+        </div>
 
-      <div class="divider-row"><span>or</span></div>
+        <div class="toggle-row lg-forgot" id="forgotRow">
+          <a href="#" onclick="event.preventDefault(); handleForgotPassword()">Forgot password?</a>
+        </div>
 
-      <button class="btn btn-google g-btn" onclick="handleGoogleSignIn()">
-        <svg class="g-logo" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path fill="#4285F4" d="M23.52 12.27c0-.85-.08-1.67-.22-2.45H12v4.64h6.47a5.53 5.53 0 0 1-2.4 3.63v3h3.88c2.27-2.09 3.57-5.17 3.57-8.82z"/><path fill="#34A853" d="M12 24c3.24 0 5.95-1.07 7.94-2.91l-3.88-3c-1.08.72-2.45 1.15-4.06 1.15-3.13 0-5.78-2.11-6.73-4.96H1.27v3.11A12 12 0 0 0 12 24z"/><path fill="#FBBC05" d="M5.27 14.28A7.2 7.2 0 0 1 4.89 12c0-.79.14-1.56.38-2.28V6.61H1.27A12 12 0 0 0 0 12c0 1.94.46 3.77 1.27 5.39l4-3.11z"/><path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.44-3.44C17.94 1.19 15.24 0 12 0 7.31 0 3.26 2.69 1.27 6.61l4 3.11C6.22 6.86 8.87 4.75 12 4.75z"/></svg>
-        <span id="googleLabel">Continue with Google</span>
-      </button>
-      <div id="googleTermsNote" style="font-size:0.6875rem; color:var(--gray); text-align:center; margin-top:8px;">By continuing with Google, you agree to the <a href="https://www.productadvisory.co/terms-of-use" target="_blank" rel="noopener" style="color:var(--gray);">Terms of Use</a> and <a href="https://www.productadvisory.co/privacy-policy" target="_blank" rel="noopener" style="color:var(--gray);">Privacy Policy</a>.</div>
+        <label id="termsCheckRow" class="lg-terms" style="display:none;">
+          <input type="checkbox" id="agreeTermsCheckbox">
+          <span>I agree to the <a href="https://www.productadvisory.co/terms-of-use" target="_blank" rel="noopener">Terms of Use</a> and <a href="https://www.productadvisory.co/privacy-policy" target="_blank" rel="noopener">Privacy Policy</a>.</span>
+        </label>
+
+        <div class="field-error" id="authError" role="alert"></div>
+        <div class="field-error" id="authSuccess" role="status" style="color:var(--ok);"></div>
+
+        <button class="btn btn-primary btn-gradient lg-submit" id="authSubmitBtn" type="button" onclick="handleAuthSubmit()">Log in</button>
+
+        <p class="lg-fine lg-private"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>Free. Your results and notes are private to you.</p>
+      </section>
     </div>
   </div>
 
   <!-- DASHBOARD -->
   <div data-screen="dashboard">
+  <script>/* Signed in on this device last time: show the dashboard (its loading skeleton) straight away, not the sign-in
+     form, while Firebase restores the session. If they turn out to be signed out, the sign-in form follows. */
+  (function(){ try { if (localStorage.getItem('pa_signed_in') === '1'){ var a = document.querySelector('[data-screen="auth"]'), d = document.querySelector('[data-screen="dashboard"]'); if (a && d){ a.classList.remove('active'); d.classList.add('active'); } } } catch (e) {} })();</script>
 
     <div class="card" id="changePasswordCard" style="display:none; max-width:420px; margin-bottom:22px;">
       <h2>Change password</h2>
@@ -939,7 +1009,11 @@ window.setAuthMode = function(signUp){
   isSignUpMode = signUp;
   document.getElementById('tabLogin').classList.toggle('active', !isSignUpMode);
   document.getElementById('tabSignup').classList.toggle('active', isSignUpMode);
-  document.getElementById('authSub').textContent = isSignUpMode ? "Create an account, then take a short assessment to unlock the courses matched to your level." : 'Log in to pick up your courses where you left off.';
+  document.getElementById('lgTitle').textContent = isSignUpMode ? 'Create your free account' : 'Welcome back';
+  document.getElementById('authSub').textContent = isSignUpMode ? "Then take the 5-minute skill check to unlock the courses matched to your level." : 'Log in to pick up your courses where you left off.';
+  document.getElementById('authPassword').setAttribute('autocomplete', isSignUpMode ? 'new-password' : 'current-password');
+  document.getElementById('tabLogin').setAttribute('aria-selected', String(!isSignUpMode));
+  document.getElementById('tabSignup').setAttribute('aria-selected', String(isSignUpMode));
   document.getElementById('authSubmitBtn').textContent = isSignUpMode ? 'Create account' : 'Log in';
   document.getElementById('googleLabel').textContent = isSignUpMode ? 'Sign up with Google' : 'Continue with Google';
   document.getElementById('authError').textContent = '';
@@ -1098,6 +1172,7 @@ function friendlyAuthError(code){
 onAuthStateChanged(auth, async (user) => {
   if (user){
     currentUser = user;
+    try { localStorage.setItem('pa_signed_in', '1'); } catch (e) { /* storage off */ }
     populateProfileMenu(user);
     document.getElementById('profileMenuWrap').style.display = 'block';
     document.getElementById('verifyBanner').style.display = user.emailVerified ? 'none' : 'block';
@@ -1119,6 +1194,7 @@ onAuthStateChanged(auth, async (user) => {
     startActiveTimeTracking(user);
   } else {
     currentUser = null;
+    try { localStorage.removeItem('pa_signed_in'); } catch (e) { /* storage off */ }
     document.getElementById('profileMenuWrap').style.display = 'none';
     showScreen('auth');
   }

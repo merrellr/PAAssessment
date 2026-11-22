@@ -423,6 +423,9 @@ if (window.self === window.top) {
     // Pages that need to know (feedback.html) read PAAccount.user, or listen for 'pa-auth'.
     window.PAAccount.user = user ? { name: user.displayName || '', email: user.email || '' } : null;
     window.PAAccount.ready = true;
+    // Remembered on this device, so the next page can show its signed-in layout straight away instead of a sign-in
+    // form while Firebase restores the session (lms-dashboard.html reads it before it draws).
+    try { if (user) localStorage.setItem('pa_signed_in', '1'); else localStorage.removeItem('pa_signed_in'); } catch (e) { /* storage off */ }
     window.dispatchEvent(new CustomEvent('pa-auth', { detail: window.PAAccount.user }));
     if (user){
       welcomeIfNew(user); adminWelcomeIfDue(user);
