@@ -86,7 +86,7 @@ let compassLoading = null;
 function loadCompass() {
   if (compassLoading) return compassLoading;
   const add = (src) => new Promise((resolve, reject) => { const s = document.createElement('script'); s.src = src; s.onload = resolve; s.onerror = reject; document.head.appendChild(s); });
-  compassLoading = Promise.all([add('compass-core.js'), add('ask-index.js')]).catch((err) => { compassLoading = null; throw err; });
+  compassLoading = Promise.all([add('compass-core.js?v=20261122c'), add('ask-index.js')]).catch((err) => { compassLoading = null; throw err; });
   return compassLoading;
 }
 function backend(params) {   // the same JSONP call as account-menu.js
