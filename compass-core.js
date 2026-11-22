@@ -82,6 +82,33 @@
   function cleanUrl(u) { return String(u || '').replace(/^\/?([a-z-]+)\.html/, '/$1'); }
 
   // The sources an answer can cite, numbered as the server numbers them: [1] this page (if it sent one), then the passages.
+  /* The request travels in a web address, and the browser adds the reader's Google cookies to it: past about 16 KB
+     together Google refuses it with an error page before the script ever runs. So the question's extras (the
+     conversation, the page excerpt, the lesson passages) are trimmed, least useful first, until the address fits.
+     base: the fixed fields (action, idToken, q). Returns { params, passages } with the passages actually sent. */
+  var URL_MAX = 5500;
+  function fitRequest(base, page, passages, hist, max) {
+    max = max || URL_MAX; passages = passages || []; hist = hist || [];
+    var pc = page ? String(page.x || '').length : 0, np = passages.length, xc = 650, nh = hist.length, params;
+    for (var guard = 0; guard < 60; guard++) {
+      var kept = passages.slice(0, np);
+      params = Object.assign({}, base, {
+        h: JSON.stringify(hist.slice(hist.length - nh)),
+        page: page ? JSON.stringify({ k: page.k, t: page.t, x: String(page.x || '').slice(0, pc) }) : '',
+        ctx: JSON.stringify(kept.map(function (p) { return { u: p.u, t: p.t, x: String(p.x).slice(0, xc) }; }))
+      });
+      if (new URLSearchParams(params).toString().length <= max) return { params: params, passages: kept };
+      if (nh > 2) nh -= 2;
+      else if (xc > 350) xc -= 100;
+      else if (pc > 800) pc = Math.floor(pc * 0.8);
+      else if (np > 1) np--;
+      else if (nh > 0) nh = 0;
+      else if (pc > 300) pc = Math.floor(pc * 0.7);
+      else break;
+    }
+    return { params: params, passages: passages.slice(0, np) };
+  }
+
   function sources(page, passages, here) {
     var out = [];
     if (page) out.push({ t: page.t ? 'This page: ' + page.t : 'This page', u: here || '' , self: true });
@@ -157,6 +184,6 @@
     return out;
   }
 
-  root.CompassCore = { SEES: SEES, LEARNING: LEARNING, retrieve: retrieve, PLACEHOLDER: PLACEHOLDER, SUGGEST: SUGGEST, PAGE_CHARS: PAGE_CHARS, HISTORY: HISTORY,
+  root.CompassCore = { fitRequest: fitRequest, URL_MAX: URL_MAX, SEES: SEES, LEARNING: LEARNING, retrieve: retrieve, PLACEHOLDER: PLACEHOLDER, SUGGEST: SUGGEST, PAGE_CHARS: PAGE_CHARS, HISTORY: HISTORY,
     terms: terms, chunks: chunks, pickPage: pickPage, history: history, cleanUrl: cleanUrl, sources: sources, render: render, esc: esc, errorText: errorText };
 })(typeof window !== 'undefined' ? window : globalThis);

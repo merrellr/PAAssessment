@@ -146,8 +146,9 @@
       return acct ? acct.idToken() : null;
     }).then(function (tok) {
       if (!tok) throw { code: 'signin' };
-      return acct.backend({ action: 'compass', idToken: tok, q: q, h: JSON.stringify(hist), page: sent ? JSON.stringify(sent) : '',
-        ctx: JSON.stringify(passages.map(function (p) { return { u: p.u, t: p.t, x: String(p.x).slice(0, 650) }; })) }, 45000);   // an answer can take a while
+      var fit = C.fitRequest({ action: 'compass', idToken: tok, q: q }, sent, passages, hist);
+      passages = fit.passages;
+      return acct.backend(fit.params, 45000);   // an answer can take a while
     })).then(function (r) {
       if (!r || !r.ok) throw { code: r && r.error || 'down', detail: r ? r.detail : (Date.now() - t0 < 40000 ? 'the server sent back an error page after ' + Math.round((Date.now() - t0) / 1000) + ' s' : 'no reply from the server within 45 s') };
       if (typeof r.left === 'number') state.left = r.left;
