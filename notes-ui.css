@@ -31,12 +31,12 @@ mark.pa-hl.flash { animation: pa-flash 1.4s ease-out; }
 .pa-ed-del { border: 0; background: none; color: var(--warn, #C0622A); font: .88rem var(--sans, system-ui, sans-serif); cursor: pointer; padding: 6px 4px; }
 .pa-ed-del:hover { text-decoration: underline; }
 .pa-ed-done { border: 0; border-radius: 999px; padding: 7px 16px; background: var(--navy, #1A4584); color: var(--btn-ink, #fff); font: 700 .85rem var(--sans, system-ui, sans-serif); cursor: pointer; }
-.pa-notes-fab { position: fixed; right: 18px; bottom: 18px; z-index: 55; display: inline-flex; align-items: center; gap: 7px; padding: 10px 16px; border-radius: 999px; border: 1px solid var(--line, #E3E9F0); background: var(--surface, #fff); color: var(--navy, #1A4584); font: 700 .9rem var(--sans, system-ui, sans-serif); cursor: pointer; box-shadow: 0 8px 22px rgba(16,30,60,.16); }
+.pa-notes-fab { position: fixed; left: 18px; bottom: 18px; z-index: 55; display: inline-flex; align-items: center; gap: 7px; padding: 10px 16px; border-radius: 999px; border: 1px solid var(--line, #E3E9F0); background: var(--surface, #fff); color: var(--navy, #1A4584); font: 700 .9rem var(--sans, system-ui, sans-serif); cursor: pointer; box-shadow: 0 8px 22px rgba(16,30,60,.16); }
 .pa-notes-fab:hover { border-color: var(--cyan, #35C2E8); }
 .pa-notes-fab:focus-visible { outline: 3px solid var(--cyan, #35C2E8); outline-offset: 2px; }
 .pa-fab-n:empty { display: none; }
 .pa-fab-n { min-width: 20px; padding: 1px 6px; border-radius: 999px; background: var(--navy, #1A4584); color: var(--btn-ink, #fff); font-size: .75rem; text-align: center; }
-.pa-notes-panel { position: fixed; right: 18px; bottom: 74px; z-index: 56; width: min(380px, calc(100vw - 24px)); max-height: min(70vh, 640px); display: flex; flex-direction: column; border-radius: 16px; background: var(--surface, #fff); border: 1px solid var(--line, #E3E9F0); box-shadow: 0 18px 44px rgba(16,30,60,.24); overflow: hidden; }
+.pa-notes-panel { position: fixed; left: 18px; bottom: 74px; z-index: 56; width: min(380px, calc(100vw - 24px)); max-height: min(70vh, 640px); display: flex; flex-direction: column; border-radius: 16px; background: var(--surface, #fff); border: 1px solid var(--line, #E3E9F0); box-shadow: 0 18px 44px rgba(16,30,60,.24); overflow: hidden; }
 .pa-np-head { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px 6px; }
 .pa-np-head h2 { margin: 0; font: 700 1.05rem var(--display, var(--sans, system-ui)); color: var(--navy-deep, #12305e); }
 .pa-np-head h2:focus { outline: none; }
@@ -61,7 +61,25 @@ mark.pa-hl.flash { animation: pa-flash 1.4s ease-out; }
 .pa-note-toast.on { opacity: 1; transform: translate(-50%, 0); pointer-events: auto; }
 .pa-note-toast button { border: 0; background: none; color: #7fd8f2; font: 700 .9rem var(--sans, system-ui, sans-serif); cursor: pointer; }
 @media (max-width: 760px) {
-  .pa-notes-fab { right: 12px; bottom: 12px; padding: 9px 14px; }
+  .pa-notes-fab { left: 12px; bottom: 12px; padding: 9px 14px; }
   .pa-notes-panel { right: 8px; left: 8px; width: auto; bottom: 64px; max-height: 72vh; }
 }
 @media (prefers-reduced-motion: reduce) { mark.pa-hl.flash { animation: none; } .pa-note-toast { transition: none; } }
+
+/* "My notes" in the lesson's outline (wide screens, outline open): the corner button steps aside, the list opens on the left */
+.pa-notes-rail { display: none; }
+@media (min-width: 1080px) {
+  .lesson-layout:not(.rail-collapsed) .pa-notes-rail { display: flex; }
+  html.notes-railed body:has(.lesson-layout:not(.rail-collapsed)) .pa-notes-fab { display: none; }
+  .pa-notes-panel.from-rail { left: 0; top: 0; bottom: 0; width: 400px; max-height: none; border-radius: 0; border-width: 0 1px 0 0; z-index: 170; box-shadow: 18px 0 44px rgba(16,30,60,.16); }
+  .pa-notes-panel.from-rail .pa-np-head { padding-top: 22px; }
+}
+.pa-notes-rail { align-items: center; gap: 8px; width: 100%; margin: 14px 0 0; padding: 9px 12px; border-radius: 12px; border: 1px solid var(--line, #E3E9F0);
+  background: var(--surface, #fff); color: var(--navy, #1A4584); font: 700 .875rem var(--sans, system-ui, sans-serif); cursor: pointer; text-align: left; }
+.pa-notes-rail:hover { border-color: var(--cyan, #35C2E8); }
+.pa-notes-rail[aria-expanded="true"] { background: var(--bg, #F5F8FB); border-color: var(--cyan, #35C2E8); }
+.pa-notes-rail:focus-visible { outline: 3px solid var(--cyan, #35C2E8); outline-offset: 2px; }
+.pa-notes-rail svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.pa-notes-rail span { flex: 1; }
+.pa-notes-rail .pa-fab-n:empty { display: none; }
+.pa-notes-rail .pa-fab-n { min-width: 20px; padding: 1px 6px; border-radius: 999px; background: var(--navy, #1A4584); color: var(--btn-ink, #fff); font-size: .72rem; text-align: center; }

@@ -691,10 +691,7 @@ html.cp-open .pa-compass-fab { display: none; }   /* the panel is open */
 @media (max-width: 760px) { .pa-compass-fab { right: 12px; bottom: 12px; padding: 10px 15px 10px 12px; } }
 @media print { .pa-compass-fab { display: none; } }
 @media (prefers-reduced-motion: reduce) { .pa-compass-fab:hover { transform: none; } }
-/* Notes (lessons), when the page has it: just above Compass */
-html.has-compass .pa-notes-fab { bottom: 74px; }
-html.has-compass .pa-notes-panel { bottom: 130px; }
-@media (max-width: 760px) { html.has-compass .pa-notes-fab { bottom: 66px; } html.has-compass .pa-notes-panel { bottom: 116px; } }
+/* Notes (lessons) lives on the left: notes-ui.css */
 
 /* ---------- Help panel (pa-shell.js) ---------- */
 .pa-help-btn { gap: 6px; padding: 0 12px 0 9px; font-weight: 700; font-size: .9rem; color: var(--pa-navy); }

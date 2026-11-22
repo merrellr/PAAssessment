@@ -7,6 +7,8 @@
      title  shown in My notes ("Course: Lesson 3. Title")
      kind   'lesson'
      store  NotesCore.store(...) for the signed-in person: { all(), save(note) }
+     rail   optional: a function returning the element in the page's left column to put "My notes" in (the lesson's
+            outline). Notes lives on the left; Compass, the assistant, has the bottom right.
 
    Select text: four colours, Note and Copy. Click a highlight to change its colour, note or tags, or delete it.
    Notes (bottom right) lists this lesson's notes or all of them, and links to My notes. Styles: notes-ui.css. */
@@ -281,16 +283,32 @@
     }
 
     /* ------------------------------------------------------------ the Notes panel */
+    // In the lesson's outline on wide screens (it stays in view as you read); a small button bottom left otherwise.
     var fab = el("button", { type: "button", class: "pa-note-ui pa-notes-fab", "aria-expanded": "false", "aria-controls": "pa-notes-panel", html: ICON.list + '<span>Notes</span><b class="pa-fab-n"></b>' });
+    var railBtn = el("button", { type: "button", class: "pa-note-ui pa-notes-rail", "aria-expanded": "false", "aria-controls": "pa-notes-panel", html: ICON.list + '<span>My notes</span><b class="pa-fab-n"></b>' });
     var panel = el("aside", { class: "pa-note-ui pa-notes-panel", id: "pa-notes-panel", "aria-label": "Your highlights and notes", hidden: true });
     document.body.appendChild(fab); document.body.appendChild(panel);
-    var scope = "page";
-    fab.addEventListener("click", function () { if (panel.hidden) { panel.hidden = false; fab.setAttribute("aria-expanded", "true"); renderPanel(); var h = panel.querySelector("h2"); if (h) h.focus(); track("notes_open"); } else closePanel(); });
+    var scope = "page", opener = fab;
+    function mountRail() {   // the outline is drawn again with each lesson, so this is checked each time
+      var slot = typeof o.rail === "function" ? o.rail() : null;
+      if (slot && railBtn.parentNode !== slot) slot.appendChild(railBtn);
+      document.documentElement.classList.toggle("notes-railed", !!slot);
+    }
+    function setOpen(on) { fab.setAttribute("aria-expanded", on ? "true" : "false"); railBtn.setAttribute("aria-expanded", on ? "true" : "false"); }
+    function openPanel(from) {
+      opener = from; panel.classList.toggle("from-rail", from === railBtn);
+      panel.hidden = false; setOpen(true); renderPanel();
+      var h = panel.querySelector("h2"); if (h) h.focus();
+      track("notes_open", { from: from === railBtn ? "rail" : "button" });
+    }
+    fab.addEventListener("click", function () { if (panel.hidden) openPanel(fab); else closePanel(); });
+    railBtn.addEventListener("click", function () { if (panel.hidden) openPanel(railBtn); else closePanel(); });
     panel.addEventListener("keydown", function (e) { if (e.key === "Escape") closePanel(); });
-    function closePanel() { panel.hidden = true; fab.setAttribute("aria-expanded", "false"); fab.focus(); }
+    function closePanel() { panel.hidden = true; setOpen(false); (opener && opener.offsetParent ? opener : fab).focus(); }
     function renderPanel() {
       var here = mine().length;
-      fab.querySelector(".pa-fab-n").textContent = here ? String(here) : "";
+      mountRail();
+      [fab, railBtn].forEach(function (b) { b.querySelector(".pa-fab-n").textContent = here ? String(here) : ""; });
       if (panel.hidden) return;
       var list = scope === "page" ? mine() : all();
       panel.textContent = "";
@@ -325,7 +343,7 @@
     function jump(id, edit) {
       var m = root.querySelector('mark.pa-hl[data-note="' + id + '"]');
       if (!m) return false;
-      if (matchMedia("(max-width: 760px)").matches) { panel.hidden = true; fab.setAttribute("aria-expanded", "false"); }
+      if (matchMedia("(max-width: 760px)").matches) { panel.hidden = true; setOpen(false); }
       m.scrollIntoView({ behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "center" });
       root.querySelectorAll('mark.pa-hl[data-note="' + id + '"]').forEach(function (x) { x.classList.remove("flash"); void x.offsetWidth; x.classList.add("flash"); });
       if (edit) setTimeout(function () { openEditor(id, false); }, 450);
