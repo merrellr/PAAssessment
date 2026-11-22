@@ -568,15 +568,15 @@
 
   /* ---------------------------------------------------------------- Compass, the assistant (compass-ui.js)
      Loaded the first time it's opened, and again on the next page if it was left open there. */
-  var compassLoading = null;
+  var compassLoading = null, COMPASS_V = "?v=20261122c";   // change this when compass-*.js change, so browsers fetch the new copy at once
   function loadCompass() {
     if (window.PACompass) return Promise.resolve();
     if (compassLoading) return compassLoading;
     compassLoading = new Promise(function (resolve, reject) {
       if (!document.querySelector('link[href^="compass.css"]')) {
-        var css = document.createElement("link"); css.rel = "stylesheet"; css.href = "compass.css"; document.head.appendChild(css);
+        var css = document.createElement("link"); css.rel = "stylesheet"; css.href = "compass.css" + COMPASS_V; document.head.appendChild(css);
       }
-      var add = function (src, next) { var s = document.createElement("script"); s.src = src; s.onload = next; s.onerror = function () { compassLoading = null; reject(new Error(src)); }; document.head.appendChild(s); };
+      var add = function (src, next) { var s = document.createElement("script"); s.src = src + COMPASS_V; s.onload = next; s.onerror = function () { compassLoading = null; reject(new Error(src)); }; document.head.appendChild(s); };
       add("compass-core.js", function () { add("compass-ui.js", resolve); });
     });
     return compassLoading;
