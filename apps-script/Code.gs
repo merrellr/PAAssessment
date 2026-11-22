@@ -2651,6 +2651,13 @@ function compassQuota_(uid) {
   return COMPASS_PER_USER_DAILY_ - mine - 1;   // questions left today
 }
 
+// A question that got no answer doesn't count against the day's limit.
+function compassRefund_(uid) {
+  var props = PropertiesService.getScriptProperties();
+  var day = Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'yyyy-MM-dd');
+  ['compass_' + day, 'compass_' + day + '_' + uid].forEach(function (k) { var n = Number(props.getProperty(k) || 0); if (n > 0) props.setProperty(k, String(n - 1)); });
+}
+
 // Everything from the page, rebuilt and capped. Returns null if anything is off.
 function compassClean_(q, histJson, pageJson, ctxJson) {
   var question = String(q || '').replace(/\s+/g, ' ').trim();
@@ -2705,23 +2712,43 @@ function compassEndpoint_(idToken, q, histJson, pageJson, ctxJson) {
   var left = compassQuota_(who.uid);
   if (left === null) return { ok: false, error: 'daily_limit' };
   try {
-    var response = UrlFetchApp.fetch('https://api.groq.com/openai/v1/chat/completions', {
-      method: 'post', contentType: 'application/json', headers: { Authorization: 'Bearer ' + apiKey },
-      payload: JSON.stringify({ model: GROQ_MODEL_, temperature: 0.3, max_tokens: 800, messages: compassPrompt_(clean) }),
-      muteHttpExceptions: true
-    });
-    if (response.getResponseCode() < 200 || response.getResponseCode() >= 300) return { ok: false, error: 'ai_error', detail: 'Groq answered ' + response.getResponseCode() };
-    var text = String(JSON.parse(response.getContentText()).choices[0].message.content || '').replace(/```/g, '').replace(/\*\*/g, '').replace(/^#+\s*/gm, '').trim().slice(0, 1600);
+    // The model thinks before it answers, and that counts against max_tokens: ask it to keep the thinking short and
+    // leave room for the answer. A busy moment (429, 5xx) or an empty answer is tried once more.
+    var msgs = compassPrompt_(clean), effort = true, got = null, why = '';
+    for (var attempt = 0; attempt < 2 && !got; attempt++) {
+      var body = { model: GROQ_MODEL_, temperature: 0.3, max_tokens: 1500, messages: msgs };
+      if (effort) body.reasoning_effort = 'low';
+      var response = UrlFetchApp.fetch('https://api.groq.com/openai/v1/chat/completions', {
+        method: 'post', contentType: 'application/json', headers: { Authorization: 'Bearer ' + apiKey },
+        payload: JSON.stringify(body), muteHttpExceptions: true
+      });
+      var code = response.getResponseCode(), raw = response.getContentText();
+      if (code === 400 && effort && /reasoning/i.test(raw)) { effort = false; attempt--; continue; }   // a model without that setting
+      if (code < 200 || code >= 300) {
+        why = 'Groq answered ' + code + ': ' + String(raw).replace(/\s+/g, ' ').slice(0, 160);
+        console.error('Compass: ' + why);
+        if (code === 429 || code >= 500) { Utilities.sleep(1500); continue; }
+        break;
+      }
+      var choice = (JSON.parse(raw).choices || [])[0] || {};
+      var content = String((choice.message && choice.message.content) || '').trim();
+      if (content) got = content;
+      else { why = 'empty answer (finish: ' + (choice.finish_reason || 'unknown') + ')'; console.error('Compass: ' + why); }
+    }
+    if (!got) { compassRefund_(who.uid); return { ok: false, error: 'ai_error', detail: why || 'no answer' }; }
+    var text = got.replace(/```/g, '').replace(/\*\*/g, '').replace(/^#+\s*/gm, '').trim().slice(0, 1600);
     var missed = /^\s*\[NO-ANSWER\]/i.test(text);
     if (missed) {
       text = text.replace(/^\s*\[NO-ANSWER\]\s*/i, '');
       logUnanswered_(clean.q, 'Compass: not on the page or in the lessons', (clean.page ? clean.page.t + ' · ' : '') + clean.passages.map(function (p) { return p.t; }).join(' · '));
     }
-    if (!text) return { ok: false, error: 'ai_error', detail: 'empty answer' };
+    if (!text) { compassRefund_(who.uid); return { ok: false, error: 'ai_error', detail: 'empty answer' }; }
     var n = (clean.page ? 1 : 0) + clean.passages.length, cited = [];
     (text.match(/\[(\d)\]/g) || []).forEach(function (m) { var k = Number(m.slice(1, -1)); if (k >= 1 && k <= n && cited.indexOf(k) < 0) cited.push(k); });
     return { ok: true, text: text, cited: cited, missed: missed, left: left };
   } catch (err) {
+    console.error('Compass: ' + (err && err.stack || err));
+    compassRefund_(who.uid);
     return { ok: false, error: 'ai_error', detail: String(err && err.message || err).slice(0, 200) };
   }
 }

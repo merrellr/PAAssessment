@@ -9,15 +9,15 @@ const here = path.dirname(fileURLToPath(import.meta.url));
 let pass = 0, fail = 0;
 const t = (label, ok, extra) => { if (ok) { pass++; console.log('PASS  ' + label); } else { fail++; console.log('FAIL  ' + label + (extra ? '   [' + extra + ']' : '')); } };
 
-let props, asked, reply, logged;
-function reset() { props = { GROQ_API_KEY: 'k' }; asked = []; reply = { code: 200, text: 'A pricing page is read in seconds [1]. Test it with strangers [2].' }; logged = []; }
+let props, asked, reply, logged, replies;
+function reset() { props = { GROQ_API_KEY: 'k' }; asked = []; reply = { code: 200, text: 'A pricing page is read in seconds [1]. Test it with strangers [2].' }; logged = []; replies = null; }
 reset();
 const res = (code, body) => ({ getResponseCode: () => code, getContentText: () => JSON.stringify(body) });
 const sandbox = {
   console, Date, Math, JSON, Object, Array, String, Number, isFinite, parseInt, encodeURIComponent, RegExp, Set, Error,
   Logger: { log() {} },
   Session: { getScriptTimeZone: () => 'UTC', getEffectiveUser: () => ({ getEmail: () => 'owner@example.com' }) },
-  Utilities: { formatDate: (d) => new Date(d).toISOString().slice(0, 10) },
+  Utilities: { formatDate: (d) => new Date(d).toISOString().slice(0, 10), sleep() {} },
   ContentService: { MimeType: { JSON: 'json', JAVASCRIPT: 'js' }, createTextOutput: (x) => ({ text: x, setMimeType() { return this; } }) },
   PropertiesService: { getScriptProperties: () => ({ getProperty: (k) => (k in props ? props[k] : null), setProperty: (k, v) => { props[k] = String(v); },
     deleteProperty: (k) => { delete props[k]; }, getKeys: () => Object.keys(props) }) },
@@ -26,7 +26,11 @@ const sandbox = {
   SpreadsheetApp: { getActiveSpreadsheet: () => ({ getSheetByName: () => ({ appendRow: (r) => logged.push(r) }), insertSheet: () => ({ appendRow() {}, setFrozenRows() {} }) }) },
   UrlFetchApp: { fetch: (url, opts) => {
     if (/accounts:lookup/.test(url)) { const tok = JSON.parse(opts.payload).idToken; return tok === 'good' ? res(200, { users: [{ localId: 'u1', email: 'a@b.com' }] }) : res(400, {}); }
-    if (/api\.groq\.com/.test(url)) { asked.push(JSON.parse(opts.payload)); return res(reply.code, { choices: [{ message: { content: reply.text } }] }); }
+    if (/api\.groq\.com/.test(url)) {
+      asked.push(JSON.parse(opts.payload));
+      const r = replies ? replies.shift() : reply;
+      return r.raw ? { getResponseCode: () => r.code, getContentText: () => r.raw } : res(r.code, { choices: [{ message: { content: r.text }, finish_reason: r.finish || 'stop' }] });
+    }
     throw new Error('unexpected url ' + url);
   } }
 };
@@ -65,6 +69,26 @@ reset(); reply.text = 'See [9] and [2].';
 t('a citation to a source that was never sent is dropped', E({}).cited.join() === '2');
 reset(); reply.code = 500;
 t('an AI error says so', E({}).error === 'ai_error');
+
+console.log('--- when the AI service struggles ---');
+reset();
+E({});
+t('it asks the model to keep its thinking short, and leaves room for the answer', asked[0].reasoning_effort === 'low' && asked[0].max_tokens >= 1200);
+reset(); replies = [{ code: 200, text: '', finish: 'length' }, { code: 200, text: 'Second time lucky [1].' }];
+const again = E({});
+t('an empty answer is tried once more', again.ok && asked.length === 2 && /Second time/.test(again.text));
+reset(); replies = [{ code: 429, raw: '{"error":{"message":"Rate limit reached"}}' }, { code: 200, text: 'Fine now [1].' }];
+t('a busy moment (429) is tried once more', E({}).ok && asked.length === 2);
+reset(); replies = [{ code: 400, raw: '{"error":{"message":"reasoning_effort is not supported"}}' }, { code: 200, text: 'Answered [1].' }];
+const plain = E({});
+t('a model without the thinking setting is asked again without it', plain.ok && asked.length === 2 && !('reasoning_effort' in asked[1]));
+reset(); replies = [{ code: 200, text: '', finish: 'length' }, { code: 200, text: '', finish: 'length' }];
+const day0 = new Date().toISOString().slice(0, 10);
+const empty = E({});
+t('two empty answers: it says why, and the question does not count against the day', !empty.ok && /empty answer \(finish: length\)/.test(empty.detail) && Number(props['compass_' + day0 + '_u1'] || 0) === 0, JSON.stringify(empty) + ' ' + props['compass_' + day0 + '_u1']);
+reset(); replies = [{ code: 401, raw: '{"error":{"message":"Invalid API Key"}}' }];
+const bad = E({});
+t('an error from the AI service says what it was', !bad.ok && /Groq answered 401: .*Invalid API Key/.test(bad.detail) && asked.length === 1);
 
 console.log('--- what the page may send ---');
 reset();

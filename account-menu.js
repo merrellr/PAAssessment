@@ -225,13 +225,13 @@ if (window.self === window.top) {
   const BACKEND = "https://script.google.com/macros/s/AKfycbyMQnshyho2q3igshqZmIm6RyJCYl1WsRJbShHz2blCt81iVmlngeNlYfO0QltR7TjwHg/exec";
   const WELCOME_WITHIN_MS = 2 * 86400000;
   const askedThisPage = {};
-  function backend(params){
+  function backend(params, waitMs){
     return new Promise((resolve) => {
       const cb = 'paWelcomeCb_' + Date.now() + '_' + Math.floor(Math.random() * 1e6);
       const script = document.createElement('script');
       let settled = false;
       const finish = (v) => { if (settled) return; settled = true; clearTimeout(timer); delete window[cb]; script.remove(); resolve(v); };
-      const timer = setTimeout(() => finish(null), 20000);
+      const timer = setTimeout(() => finish(null), waitMs || 20000);
       window[cb] = (r) => finish(r || null);
       script.onerror = () => finish(null);
       script.src = BACKEND + '?' + new URLSearchParams(Object.assign({}, params, { callback: cb })).toString();
