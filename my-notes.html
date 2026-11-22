@@ -41,6 +41,13 @@
   .chips{ display:flex; flex-wrap:wrap; gap: 6px; margin: 0 0 16px; }
   .chip{ border: 1px solid var(--line); background: var(--surface); color: var(--ink-soft); border-radius: 999px; padding: 5px 12px; font: 0.8rem var(--sans); cursor: pointer; }
   .chip[aria-pressed="true"]{ background: var(--navy); border-color: var(--navy); color: var(--btn-ink, #fff); }
+  .chip .cn{ opacity: .7; font-size: .72rem; }
+  .cats{ display:flex; flex-wrap:wrap; gap: 0; margin: 0 0 14px; border-bottom: 1px solid var(--line); }
+  .cats .chip{ border: 0; border-bottom: 3px solid transparent; border-radius: 0; background: none; padding: 10px 14px; font-size: 0.9rem; font-weight: 600; color: var(--ink-soft); margin-bottom: -1px; }
+  .cats .chip[aria-pressed="true"]{ background: none; color: var(--navy); border-bottom-color: var(--navy); }
+  .cats .chip:focus-visible{ outline: 2px solid var(--cyan); outline-offset: -2px; }
+  .c-tool{ --hl: var(--cyan); }
+  .note.c-tool{ background: color-mix(in srgb, var(--cyan) 10%, var(--surface)); }
   .group{ margin-bottom: 22px; }
   .group-head{ display:flex; justify-content:space-between; align-items:baseline; gap: 12px; margin: 0 0 8px; }
   .group-head small{ color: var(--gray); white-space: nowrap; }
@@ -74,7 +81,7 @@
     <div>
       <span class="eyebrow">Product Advisory Learning</span>
       <h1 id="title">My notes</h1>
-      <p>Your highlights, notes and tags from Product+ articles and <i>The Product Manager's Playbook</i>. They sync between this account and every browser you read in while signed in.</p>
+      <p>Everything you've highlighted, noted and tagged: Product+ articles and <i>The Product Manager's Playbook</i>, your lessons, and your toolkit work. Kept in your account, on every device.</p>
     </div>
     <div><button class="btn ghost" id="exportBtn" type="button" disabled>Export as Markdown</button></div>
   </div>
@@ -90,9 +97,9 @@
 
   <!-- signed in -->
   <section id="signedIn" hidden aria-labelledby="title">
+    <div class="cats" id="kinds" role="group" aria-label="Show notes from"></div>
     <div class="toolbar">
       <input type="search" id="q" placeholder="Search your notes" aria-label="Search your notes">
-      <div class="chips" id="kinds" role="group" aria-label="Show" style="margin:0;"></div>
     </div>
     <div class="chips" id="tags" role="group" aria-label="Filter by tag"></div>
     <div id="list"><p class="small">Loading…</p></div>
@@ -139,7 +146,9 @@ function el(tag, attrs, ...kids){
 }
 
 let user = null, notes = [], editing = '';
-const view = { q: '', tag: '', kind: 'all' };
+const view = { q: '', tag: '', category: 'all' };
+// open on a category: /my-notes?show=learning
+(() => { const c = new URLSearchParams(location.search).get('show'); if (N.CATEGORIES.some(x => x[0] === c)) view.category = c; })();
 
 onAuthStateChanged(auth, async (u) => {
   user = u;
@@ -164,11 +173,13 @@ async function store(n){
 function render(){
   const live = N.live(notes);
   $('exportBtn').disabled = !live.length;
-  // kinds
+  // categories: All, Insights (articles and the book), My Learning (lessons), My Toolkits
   const kinds = $('kinds'); kinds.innerHTML = '';
-  [['all', 'All'], ['article', 'Articles'], ['book', 'The book']].forEach(([k, label]) => {
-    kinds.append(el('button', { type: 'button', class: 'chip', 'aria-pressed': view.kind === k ? 'true' : 'false',
-      onclick: () => { view.kind = k; render(); } }, label));
+  const counts = N.categoryCounts(notes);
+  N.CATEGORIES.forEach(([k, label]) => {
+    kinds.append(el('button', { type: 'button', class: 'chip', 'aria-pressed': view.category === k ? 'true' : 'false',
+      onclick: () => { view.category = k; history.replaceState(null, '', location.pathname + (k === 'all' ? '' : '?show=' + k)); render(); } },
+      label + ' ', el('span', { class: 'cn' }, String(counts[k]))));
   });
   // tags
   const tags = N.tagCounts(notes), tagBox = $('tags'); tagBox.innerHTML = '';
@@ -181,22 +192,28 @@ function render(){
   if (!live.length){
     list.append(el('div', { class: 'card empty' },
       el('h2', {}, 'No notes yet'),
-      el('p', { style: 'margin-top:8px;' }, 'While you read on productadvisory.co, select any text to highlight it, add a note or tag it. Notes you make while signed in appear here.'),
+      el('p', { style: 'margin-top:8px;' }, 'Select any text in a lesson, a Product+ article or the book to highlight it, add a note or tag it. Or open a piece of work in My Toolkits and choose Notes.'),
       el('div', { class: 'how' },
-        el('div', {}, el('b', {}, '1. Select text'), el('span', {}, 'In any Product+ article or chapter of the book.')),
+        el('div', {}, el('b', {}, '1. Select text'), el('span', {}, 'In a lesson, a Product+ article or a chapter of the book.')),
         el('div', {}, el('b', {}, '2. Highlight or note'), el('span', {}, 'Pick a colour, or Note to write your own thoughts and tags.')),
         el('div', {}, el('b', {}, '3. Find it again'), el('span', {}, 'Under Notes on the page, or here, on every device.'))),
       el('p', { style: 'margin-top:16px;' },
-        el('a', { class: 'btn', href: N.WWW + '/insights' }, 'Read Product+ articles'), ' ',
+        el('a', { class: 'btn', href: '/my-learning' }, 'Go to My Learning'), ' ',
+        el('a', { class: 'btn ghost', href: N.WWW + '/insights' }, 'Read Product+ articles'), ' ',
         el('a', { class: 'btn ghost', href: N.WWW + '/books/playbook/preface-to-the-second-edition' }, "Read The Product Manager's Playbook"))));
     return;
   }
   const groups = N.view(notes, view);
-  if (!groups.length){ list.append(el('p', { class: 'small' }, 'Nothing matches. Try another search or tag.')); return; }
+  if (!groups.length){
+    const cat = N.CATEGORIES.find(c => c[0] === view.category);
+    list.append(el('p', { class: 'small' }, view.q || view.tag ? 'Nothing matches. Try another search or tag.'
+      : 'No notes in ' + (cat ? cat[1] : 'this category') + ' yet.'));
+    return;
+  }
   groups.forEach(g => {
     const box = el('section', { class: 'group card', 'aria-label': g.title });
     box.append(el('div', { class: 'group-head' },
-      el('h2', {}, el('span', { class: 'kind' }, g.kind === 'book' ? 'Book' : 'Article'), el('a', { href: N.WWW + g.url }, g.title)),
+      el('h2', {}, el('span', { class: 'kind' }, N.KIND_LABEL[g.kind] || ''), el('a', { href: N.pageUrl(g) }, g.title)),
       el('small', {}, g.notes.length + (g.notes.length === 1 ? ' note' : ' notes'))));
     g.notes.forEach(n => box.append(noteCard(n)));
     list.append(box);
@@ -204,13 +221,14 @@ function render(){
 }
 
 function noteCard(n){
-  const card = el('article', { class: 'note c-' + n.color });
-  card.append(el('q', {}, n.quote.length > 600 ? n.quote.slice(0, 600) + '…' : n.quote));
+  const card = el('article', { class: 'note c-' + (n.kind === 'tool' ? 'tool' : n.color) });
+  if (n.quote) card.append(el('q', {}, n.quote.length > 600 ? n.quote.slice(0, 600) + '…' : n.quote));
   if (editing === n.id){
     const ta = el('textarea', { 'aria-label': 'Note', maxlength: '2000' }); ta.value = n.note;
     const tg = el('input', { type: 'text', 'aria-label': 'Tags, separated by commas', placeholder: 'Tags, separated by commas', maxlength: '200' }); tg.value = n.tags.join(', ');
     card.append(el('div', { class: 'edit' }, ta, tg, el('div', { class: 'row' },
       el('button', { type: 'button', class: 'btn', onclick: async () => {
+        if (n.kind === 'tool' && !ta.value.trim()){ ta.focus(); return; }   // a toolkit note is only its words
         const next = N.edit(n, { note: ta.value, tags: tg.value.split(/[,#\n]/) });
         try { await store(next); editing = ''; render(); $('status').textContent = 'Saved.'; }
         catch (e) { $('status').textContent = 'That didn’t save. Please try again.'; }
@@ -222,7 +240,7 @@ function noteCard(n){
   if (n.note) card.append(el('p', { class: 'text' }, n.note));
   if (n.tags.length) card.append(el('div', { class: 'tags' }, n.tags.map(t => '#' + t).join(' ')));
   card.append(el('div', { class: 'acts' },
-    el('a', { href: N.openUrl(n) }, 'Open where you saved it'),
+    el('a', { href: N.openUrl(n) }, n.kind === 'tool' ? 'Open the work' : 'Open where you saved it'),
     el('button', { type: 'button', class: 'linklike', onclick: () => { editing = n.id; render(); } }, n.note || n.tags.length ? 'Edit note' : 'Add a note'),
     el('button', { type: 'button', class: 'linklike warn', onclick: async () => {
       if (!confirm('Delete this highlight and its note?')) return;

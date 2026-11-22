@@ -1,0 +1,67 @@
+/* Highlights, notes and tags in lessons (notes-ui.js). The same look as on www's articles, in Learning's colours. */
+:root { --hl-y: #ffe892; --hl-b: #c4e2ff; --hl-g: #c3efd2; --hl-p: #ffd0e2; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --hl-y: rgba(255,214,64,.34); --hl-b: rgba(90,170,255,.34); --hl-g: rgba(70,210,130,.32); --hl-p: rgba(255,110,170,.32); } }
+:root[data-theme="dark"] { --hl-y: rgba(255,214,64,.34); --hl-b: rgba(90,170,255,.34); --hl-g: rgba(70,210,130,.32); --hl-p: rgba(255,110,170,.32); }
+.pa-hl-y { --hl: var(--hl-y); } .pa-hl-b { --hl: var(--hl-b); } .pa-hl-g { --hl: var(--hl-g); } .pa-hl-p { --hl: var(--hl-p); }
+mark.pa-hl { background: var(--hl); color: inherit; border-radius: 2px; padding: 1px 0; cursor: pointer; box-decoration-break: clone; -webkit-box-decoration-break: clone; }
+mark.pa-hl.has-note { border-bottom: 2px dotted color-mix(in srgb, var(--ink, #16213E) 55%, transparent); }
+mark.pa-hl:focus-visible { outline: 3px solid var(--cyan, #35C2E8); outline-offset: 1px; }
+mark.pa-hl.flash { animation: pa-flash 1.4s ease-out; }
+@keyframes pa-flash { 0%, 40% { box-shadow: 0 0 0 4px color-mix(in srgb, var(--cyan, #35C2E8) 55%, transparent); } 100% { box-shadow: 0 0 0 0 transparent; } }
+@media print { .pa-note-ui { display: none !important; } mark.pa-hl { background: none; border-bottom: 2px solid #999; } }
+.pa-note-ui[hidden] { display: none !important; }
+.pa-note-ui { font-family: var(--sans, system-ui, sans-serif); box-sizing: border-box; }
+.pa-note-ui * { box-sizing: border-box; }
+.pa-selbar { position: absolute; z-index: 60; display: flex; align-items: center; gap: 4px; padding: 6px; border-radius: 999px; background: #151b2b; color: #fff; box-shadow: 0 8px 24px rgba(0,0,0,.28); }
+.pa-dot { width: 26px; height: 26px; border-radius: 50%; border: 2px solid rgba(255,255,255,.85); background: var(--hl); cursor: pointer; padding: 0; flex: none; }
+.pa-selbar .pa-dot { --hl-y: #ffe07a; --hl-b: #9fd0ff; --hl-g: #9fe6b8; --hl-p: #ffb3d0; }
+.pa-dot:hover { transform: scale(1.1); }
+.pa-dot:focus-visible, .pa-sb-btn:focus-visible { outline: 3px solid var(--cyan, #35C2E8); outline-offset: 2px; }
+.pa-sb-btn { display: inline-flex; align-items: center; gap: 5px; padding: 5px 10px; border: 0; border-radius: 999px; background: none; color: #fff; font: 600 .85rem var(--sans, system-ui, sans-serif); cursor: pointer; }
+.pa-sb-btn:hover { background: rgba(255,255,255,.14); }
+.pa-sb-btn svg, .pa-notes-fab svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.pa-editor { position: absolute; z-index: 61; width: min(340px, calc(100vw - 16px)); padding: 12px; border-radius: 14px; background: var(--surface, #fff); border: 1px solid var(--line, #E3E9F0); box-shadow: 0 14px 36px rgba(16,30,60,.22); }
+.pa-ed-dots { display: flex; gap: 8px; margin-bottom: 10px; }
+.pa-ed-dots .pa-dot { border-color: var(--line, #E3E9F0); }
+.pa-ed-dots .pa-dot[aria-checked="true"] { box-shadow: 0 0 0 2px var(--surface, #fff), 0 0 0 4px var(--navy, #1A4584); }
+.pa-ed-text, .pa-ed-tags { display: block; width: 100%; margin: 0 0 8px; padding: 8px 10px; border: 1.5px solid var(--line, #E3E9F0); border-radius: 10px; background: var(--surface, #fff); color: var(--ink, #16213E); font: .9rem var(--sans, system-ui, sans-serif); }
+.pa-ed-text { resize: vertical; min-height: 70px; }
+.pa-ed-text:focus, .pa-ed-tags:focus { outline: 2px solid var(--cyan, #35C2E8); outline-offset: 1px; }
+.pa-ed-foot { display: flex; justify-content: space-between; align-items: center; }
+.pa-ed-del { border: 0; background: none; color: var(--warn, #C0622A); font: .88rem var(--sans, system-ui, sans-serif); cursor: pointer; padding: 6px 4px; }
+.pa-ed-del:hover { text-decoration: underline; }
+.pa-ed-done { border: 0; border-radius: 999px; padding: 7px 16px; background: var(--navy, #1A4584); color: var(--btn-ink, #fff); font: 700 .85rem var(--sans, system-ui, sans-serif); cursor: pointer; }
+.pa-notes-fab { position: fixed; right: 18px; bottom: 18px; z-index: 55; display: inline-flex; align-items: center; gap: 7px; padding: 10px 16px; border-radius: 999px; border: 1px solid var(--line, #E3E9F0); background: var(--surface, #fff); color: var(--navy, #1A4584); font: 700 .9rem var(--sans, system-ui, sans-serif); cursor: pointer; box-shadow: 0 8px 22px rgba(16,30,60,.16); }
+.pa-notes-fab:hover { border-color: var(--cyan, #35C2E8); }
+.pa-notes-fab:focus-visible { outline: 3px solid var(--cyan, #35C2E8); outline-offset: 2px; }
+.pa-fab-n:empty { display: none; }
+.pa-fab-n { min-width: 20px; padding: 1px 6px; border-radius: 999px; background: var(--navy, #1A4584); color: var(--btn-ink, #fff); font-size: .75rem; text-align: center; }
+.pa-notes-panel { position: fixed; right: 18px; bottom: 74px; z-index: 56; width: min(380px, calc(100vw - 24px)); max-height: min(70vh, 640px); display: flex; flex-direction: column; border-radius: 16px; background: var(--surface, #fff); border: 1px solid var(--line, #E3E9F0); box-shadow: 0 18px 44px rgba(16,30,60,.24); overflow: hidden; }
+.pa-np-head { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px 6px; }
+.pa-np-head h2 { margin: 0; font: 700 1.05rem var(--display, var(--sans, system-ui)); color: var(--navy-deep, #12305e); }
+.pa-np-head h2:focus { outline: none; }
+.pa-np-x { border: 0; background: none; font-size: 1.6rem; line-height: 1; color: var(--gray, #9AA3AD); cursor: pointer; padding: 0 4px; }
+.pa-np-tabs { display: flex; flex-wrap: wrap; gap: 6px; padding: 4px 16px 8px; }
+.pa-np-tabs button { border: 1px solid var(--line, #E3E9F0); background: none; color: var(--ink-soft, #4B5768); border-radius: 999px; padding: 4px 11px; font: .8rem var(--sans, system-ui, sans-serif); cursor: pointer; }
+.pa-np-tabs button[aria-pressed="true"] { background: var(--navy, #1A4584); color: var(--btn-ink, #fff); border-color: var(--navy, #1A4584); }
+.pa-np-list { list-style: none; margin: 0; padding: 4px 16px; overflow-y: auto; flex: 1; }
+.pa-np-item { display: block; margin: 0 0 10px; padding: 10px 12px; border-radius: 10px; border-left: 4px solid var(--hl); background: color-mix(in srgb, var(--hl) 35%, transparent); color: var(--ink, #16213E); text-decoration: none; }
+.pa-np-item:hover { background: color-mix(in srgb, var(--hl) 60%, transparent); }
+.pa-np-item q { display: block; font-size: .88rem; line-height: 1.45; quotes: "“" "”"; }
+.pa-np-where { display: block; color: var(--gray, #9AA3AD); font-size: .72rem; font-weight: 700; margin-bottom: 3px; }
+.pa-np-note { margin: 6px 0 0; font-size: .85rem; color: var(--ink-soft, #4B5768); white-space: pre-wrap; }
+.pa-np-tags { display: block; margin-top: 5px; font-size: .76rem; color: var(--navy, #1A4584); font-weight: 700; }
+.pa-np-lost { display: block; margin-top: 4px; color: var(--gray, #9AA3AD); font-style: italic; font-size: .76rem; }
+.pa-np-empty { padding: 6px 16px 14px; color: var(--ink-soft, #4B5768); font-size: .88rem; margin: 0; }
+.pa-np-foot { padding: 10px 16px 14px; border-top: 1px solid var(--line, #E3E9F0); }
+.pa-np-sync { margin: 0; font-size: .8rem; color: var(--ink-soft, #4B5768); }
+.pa-np-sync a { color: var(--navy, #1A4584); font-weight: 700; }
+.pa-sync-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #2E8B57; margin-right: 6px; vertical-align: 1px; }
+.pa-note-toast { position: fixed; left: 50%; bottom: 22px; z-index: 70; transform: translate(-50%, 20px); opacity: 0; pointer-events: none; display: flex; gap: 14px; align-items: center; padding: 10px 16px; border-radius: 12px; background: #151b2b; color: #fff; font-size: .9rem; transition: opacity .2s, transform .2s; max-width: calc(100vw - 32px); }
+.pa-note-toast.on { opacity: 1; transform: translate(-50%, 0); pointer-events: auto; }
+.pa-note-toast button { border: 0; background: none; color: #7fd8f2; font: 700 .9rem var(--sans, system-ui, sans-serif); cursor: pointer; }
+@media (max-width: 760px) {
+  .pa-notes-fab { right: 12px; bottom: 12px; padding: 9px 14px; }
+  .pa-notes-panel { right: 8px; left: 8px; width: auto; bottom: 64px; max-height: 72vh; }
+}
+@media (prefers-reduced-motion: reduce) { mark.pa-hl.flash { animation: none; } .pa-note-toast { transition: none; } }

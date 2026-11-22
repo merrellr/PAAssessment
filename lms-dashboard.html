@@ -179,6 +179,19 @@
   .growth-retake a{ font-weight: 700; color: var(--navy); }
   @media (max-width: 600px){ .growth-row{ grid-template-columns: 1fr 44px; } .growth-row .g-track{ grid-column: 1 / -1; grid-row: 2; } .growth-axis{ margin: 2px 0 0; } }
   .home-grid{ display:grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+  /* My notes fills what's left of its row: the whole row under three cards, or two columns beside My Toolkits */
+  @media (min-width: 901px){ .home-notes{ grid-column: 1 / -1; } .home-grid:has(.lead.wide) .home-notes{ grid-column: span 2; } }
+  .home-notes .hn-head{ display:flex; justify-content:space-between; align-items:baseline; gap: 12px; flex-wrap: wrap; }
+  .home-notes .hn-cats{ display:flex; flex-wrap:wrap; gap: 6px 14px; font-size: 0.75rem; color: var(--gray); }
+  .home-notes .hn-cats a{ color: var(--ink-soft); text-decoration: none; }
+  .home-notes .hn-cats a:hover{ color: var(--navy); text-decoration: underline; }
+  .home-notes .hn-cats b{ color: var(--navy); }
+  .hn-list{ list-style:none; margin: 6px 0 0; padding: 0; display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; }
+  .hn-list a{ display:block; height:100%; padding: 10px 12px; border-radius: 10px; border-left: 4px solid var(--hn, var(--cyan)); background: var(--bg); color: var(--ink); text-decoration:none; font-size: 0.8125rem; line-height: 1.45; }
+  .hn-list a:hover{ background: var(--tint, var(--bg)); }
+  .hn-list small{ display:block; font-size: 0.6875rem; font-weight: 700; color: var(--gray); margin-bottom: 3px; overflow:hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .hn-list .q{ display:-webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow:hidden; }
+  .hn-y{ --hn: #f2c94c; } .hn-b{ --hn: #5aa9f0; } .hn-g{ --hn: #46c37b; } .hn-p{ --hn: #f07aa8; } .hn-t{ --hn: var(--cyan); }
   @media (max-width: 900px){ .home-grid{ grid-template-columns: 1fr; } }
   .home-card{ background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 18px; display:flex; flex-direction:column; gap: 6px; min-width: 0;
     box-shadow: 0 1px 2px rgba(22,33,62,0.04), 0 8px 24px rgba(22,33,62,0.05); }
@@ -359,6 +372,7 @@
 <script src="assessment-history.js"></script>
 <script src="growth-core.js"></script>
 <script src="saved-tools-core.js"></script>
+<script src="notes-core.js"></script>
 <script src="coach-core.js"></script>
 <script src="coach-bank.js" defer></script>
 <script src="coach-ui.js"></script>
@@ -604,6 +618,7 @@
         <div class="home-card lead" id="homeResume"></div>
         <div class="home-card" id="homeNext"></div>
         <div class="home-card" id="homeTools"></div>
+        <div class="home-card home-notes" id="homeNotes"></div>
       </div>
       <div class="card growth-card" id="growthPanel" hidden></div>
       <div class="home-row2">
@@ -904,7 +919,7 @@ import {
   sendPasswordResetEmail, sendEmailVerification, updateProfile,
   updatePassword, reauthenticateWithCredential, EmailAuthProvider
 } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
-import { getFirestore, doc, getDoc, setDoc, increment, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+import { getFirestore, doc, getDoc, setDoc, increment, collection, query, where, getDocs, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
 import { syncOrgShare } from "./org-share.js";
 import { withTwoStep, twoStepError } from "./two-step.js";
 
@@ -2728,6 +2743,7 @@ function renderHome(user, progress, assessmentResult, recommended, assessmentUrl
   }
 
   renderHomeTools(user);
+  renderHomeNotes(user);
   document.getElementById('homeBand').hidden = false;
 }
 
@@ -2773,6 +2789,33 @@ function renderGrowth(progress){
   box.innerHTML = html;
   box.hidden = false;
   box.querySelectorAll('[data-gview]').forEach(btn => btn.addEventListener('click', () => { growthView = btn.getAttribute('data-gview'); renderGrowth(progress); }));
+}
+
+/* My notes: how many notes in each place, and the three most recent. */
+async function renderHomeNotes(user){
+  const box = document.getElementById('homeNotes'), N = window.NotesCore;
+  const esc = (t) => String(t).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  if (!box || !N) return;
+  const head = (extra) => '<div class="hn-head"><div><span class="eyebrow">Your notes</span><h2>My notes</h2></div>' + (extra || '') + '</div>';
+  box.innerHTML = head() + '<p>Loading…</p>';
+  let list = null;
+  try { list = await N.store({ db, collection, getDocs, doc, setDoc, serverTimestamp }, user.uid).all(); }
+  catch (err){ console.error('Could not load notes:', err); }
+  const live = list ? N.live(list) : [];
+  if (!live.length){
+    box.innerHTML = head() + '<p>Highlight and take notes as you learn: select any text in a lesson, a Product+ article or the book, or add notes to your toolkit work. They all collect here.</p>' +
+      '<div class="home-go"><a class="home-out" href="/my-notes">Open My notes</a></div>';
+    return;
+  }
+  const c = N.categoryCounts(live);
+  const cats = '<div class="hn-cats">' + N.CATEGORIES.slice(1).map(([k, label]) =>
+    '<a href="/my-notes?show=' + k + '"><b>' + c[k] + '</b> ' + esc(label) + '</a>').join('') + '</div>';
+  const items = N.newest(live, 3).map(n => {
+    const text = n.note && n.kind === 'tool' ? n.note : (n.quote || n.note);
+    return '<li><a class="' + (n.kind === 'tool' ? 'hn-t' : 'hn-' + n.color) + '" href="' + esc(N.openUrl(n)) + '"><small>' + esc((N.KIND_LABEL[n.kind] || '') + ' · ' + (n.title || '')) + '</small>' +
+      '<span class="q">' + esc(text.length > 160 ? text.slice(0, 160) + '…' : text) + '</span></a></li>';
+  }).join('');
+  box.innerHTML = head(cats) + '<ul class="hn-list">' + items + '</ul><div class="home-go"><a class="more" href="/my-notes">All your notes (' + c.all + ') →</a></div>';
 }
 
 async function renderHomeTools(user){

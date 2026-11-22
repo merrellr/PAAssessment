@@ -856,6 +856,11 @@ console.log('\n--- My notes (readerNotes) ---');
   await deny('nobody else can change it', () => updateDoc(doc(dan, P + 'abc123'), { note: 'x', savedAt: serverTimestamp() }));
   await deny('nobody else can delete it', () => deleteDoc(doc(dan, P + 'abc123')));
   await allow('the reader deletes it (when they delete their account)', () => deleteDoc(doc(cat, P + 'abc123')));
+  await allow('a lesson highlight, with its course and lesson in the address', () => setDoc(doc(cat, P + 'lesson1'), goodNote({ kind: 'lesson', url: '/lesson?course=aiOrg-moderate&lesson=3' })));
+  await allow('a note on saved toolkit work, with no quote', () => setDoc(doc(cat, P + 'toolnt1'), goodNote({ kind: 'tool', url: '/my-tools?open=AbC123xyz', quote: '', prefix: '', suffix: '', pos: 0 })));
+  await deny('only the four kinds', () => setDoc(doc(cat, P + 'kind01'), goodNote({ kind: 'other' })));
+  await deny('an address with anything odd in it', () => setDoc(doc(cat, P + 'addr01'), goodNote({ url: '/lesson?course=<b>' })));
+  await deny('or a part after #', () => setDoc(doc(cat, P + 'addr02'), goodNote({ url: '/lesson?course=a#x' })));
 }
 
 console.log('\n--- team mode (teamSessions) ---');

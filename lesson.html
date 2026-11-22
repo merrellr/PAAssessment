@@ -208,6 +208,7 @@
   .status-msg{ font-size: 0.8125rem; color: var(--gray); margin-top: 10px; }
 </style>
 <link rel="stylesheet" href="pa-theme.css">
+<link rel="stylesheet" href="notes-ui.css">
 <link rel="stylesheet" href="lesson-blocks.css">
 <link rel="stylesheet" href="lesson-figures.css">
 <script src="analytics.js"></script>
@@ -216,6 +217,8 @@
 <script src="badges-core.js"></script>
 <script src="lesson-blocks.js"></script>
 <script src="lesson-figures.js"></script>
+<script src="notes-core.js"></script>
+<script src="notes-ui.js"></script>
 </head>
 <body>
 <script src="pa-shell.js"></script>
@@ -398,7 +401,7 @@ const CATALOG = buildCatalog();
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
-import { getFirestore, doc, getDoc, setDoc, increment } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+import { getFirestore, doc, getDoc, setDoc, increment, collection, getDocs, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
 import { syncOrgShare } from "./org-share.js";
 
 const app = initializeApp(firebaseConfig);
@@ -561,6 +564,19 @@ async function loadProgress(){
   }
 }
 
+/* Highlights, notes and tags on the lesson's text (notes-ui.js), saved to the person's account (My notes). */
+let lessonNotes = null;
+function attachNotes(lesson, bodyEl){
+  if (!window.PANotes || !window.NotesCore || !currentUser) return;
+  if (lessonNotes){ lessonNotes.repaint(); return; }
+  lessonNotes = PANotes.attach({
+    root: bodyEl, kind: 'lesson',
+    page: '/lesson?course=' + courseId + '&lesson=' + lesson.id,
+    title: course.title + ': ' + (/^lesson\s*\d+/i.test(lesson.title) ? lesson.title : 'Lesson ' + lesson.id + '. ' + lesson.title),
+    store: NotesCore.store({ db, collection, getDocs, doc, setDoc, serverTimestamp }, currentUser.uid)
+  });
+}
+
 function renderLesson(){
   if (!course) return;
   const lesson = course.lessons.find(l => l.id === lessonNum) || course.lessons[0];
@@ -577,6 +593,7 @@ function renderLesson(){
   if (lesson.figures && window.PAFig) PAFig.mount(bodyEl, lesson.figures);
   if (lesson.blocks && window.LessonBlocks) LessonBlocks.render(bodyEl, lesson.blocks);
   renderRail(lesson);
+  attachNotes(lesson, bodyEl);
 
   renderChart(lesson.chart);
   renderCalculator(lesson.calculator);

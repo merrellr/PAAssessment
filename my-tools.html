@@ -116,6 +116,23 @@
   .saved .sum{ font-size: 0.8125rem; color: var(--ink-soft); margin: 0; display:-webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow:hidden; }
   .saved .foot{ display:flex; align-items:center; justify-content:space-between; gap: 8px; margin-top: auto; padding-top: 6px; }
   .saved .when{ font-size: 0.75rem; color: var(--gray); }
+  .saved .note-n{ position: relative; z-index: 2; display:inline-flex; align-items:center; gap: 4px; font-size: 0.75rem; color: var(--navy); font-weight: 700; text-decoration: none; }
+  .saved .note-n svg, #wsNotesBtn svg{ width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  #wsNotesBtn{ display:inline-flex; align-items:center; gap: 6px; }
+  #wsNotesBtn .n:empty{ display:none; }
+  #wsNotesBtn .n{ min-width: 18px; padding: 0 6px; border-radius: 999px; background: var(--navy); color: var(--btn-ink, #fff); font-size: 0.7rem; text-align:center; }
+  .ws-notes{ background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 16px 18px; margin: 0 0 14px; }
+  .ws-notes h2{ font-size: 1rem; margin: 0 0 4px; }
+  .ws-notes .lede{ font-size: 0.8125rem; margin: 0 0 12px; }
+  .ws-note{ border-left: 4px solid var(--cyan); background: var(--bg); border-radius: 10px; padding: 10px 12px; margin: 0 0 8px; }
+  .ws-note p{ margin: 0; color: var(--ink); white-space: pre-wrap; font-size: 0.875rem; }
+  .ws-note .tags{ margin-top: 4px; font-size: 0.75rem; font-weight: 700; color: var(--navy); }
+  .ws-note .meta{ display:flex; flex-wrap:wrap; gap: 12px; margin-top: 6px; font-size: 0.75rem; color: var(--gray); }
+  .ws-note .meta button{ background:none; border:none; padding:0; font: inherit; color: var(--navy); text-decoration: underline; cursor:pointer; }
+  .ws-note .meta button.warn{ color: var(--warn); }
+  .ws-note-form textarea, .ws-note-form input{ display:block; width:100%; margin: 0 0 8px; padding: 9px 12px; border: 1.5px solid var(--line); border-radius: 9px; background: var(--surface); color: var(--ink); font: 0.875rem var(--sans); }
+  .ws-note-form textarea{ min-height: 70px; resize: vertical; }
+  .ws-note-form .row{ display:flex; gap: 10px; align-items:center; flex-wrap: wrap; }
   .saved .menu{ position: relative; z-index: 1; }   /* above the card-wide link */
   .saved .rename{ position:relative; z-index: 2; display:flex; gap: 8px; }
   .saved .rename .text-input{ margin: 0; padding: 8px 10px; }
@@ -182,6 +199,7 @@
 </style>
 <link rel="stylesheet" href="pa-theme.css">
 <script src="saved-tools-core.js"></script>
+<script src="notes-core.js"></script>
 <script src="analytics.js"></script>
 </head>
 <body>
@@ -272,6 +290,7 @@
       </div>
       <span class="ws-status" id="wsStatus" role="status" data-s="idle"><span class="dot" aria-hidden="true"></span><span id="wsStatusText">Not saved yet</span></span>
       <div class="ws-acts">
+        <button class="btn btn-ghost btn-small" id="wsNotesBtn" type="button" aria-expanded="false" aria-controls="wsNotes"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4h14v12l-4 4H5z"/><path d="M15 20v-4h4M9 9h6M9 13h4"/></svg>Notes <span class="n" id="wsNotesN"></span></button>
         <button class="btn btn-primary btn-small" id="wsShare" type="button"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg>Share</button>
         <details class="menu" id="wsMore">
           <summary class="btn btn-ghost btn-small" aria-label="More actions">More <span aria-hidden="true">▾</span></summary>
@@ -280,6 +299,7 @@
       </div>
     </div>
     <div class="ws-tip" id="wsTip" hidden><span aria-hidden="true">💡</span><span id="wsTipText"></span><button class="linklike small" type="button" id="wsTipX">Got it</button></div>
+    <section class="ws-notes" id="wsNotes" hidden aria-labelledby="wsNotesTitle"></section>
     <div class="ws-frame" id="wsFrame">
       <div class="ws-loading" id="wsLoading" aria-hidden="true"><div></div><div></div><div></div></div>
     </div>
@@ -369,7 +389,10 @@ const ICONS = {
 const mark = (tool, cls) => el('span', { class: 'mark' + (cls ? ' ' + cls : ''), 'data-tool': tool, 'aria-hidden': 'true',
   html: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">' + (ICONS[tool] || '') + '</svg>' });
 
+const N = NotesCore;
 let currentUser = null;
+let notesStore = null;   // the person's notes (My notes), for the notes on each piece of work
+let myNotes = [];
 let saved = [];          // [{ id, tool, title, summary, data, createdAt, updatedAt }]
 let loaded = false;      // the list has been read for this person
 let pending = null;      // work handed over by a public tool, waiting to be saved
@@ -385,7 +408,7 @@ let view = { tool: 'all', q: '', sort: 'newest' };
 function route(){
   const q = new URLSearchParams(location.search);
   const open = q.get('open') || q.get('view');
-  if (open && /^[A-Za-z0-9]{1,40}$/.test(open)) return { open };
+  if (open && /^[A-Za-z0-9]{1,40}$/.test(open)) return { open, notes: q.get('notes') === '1' };
   const nw = q.get('new');
   if (nw && C.TOOLS[nw]) return { tool: nw, example: q.get('start') === 'example' };
   return {};
@@ -447,6 +470,81 @@ async function loadSaved(){
     $('errorLine').textContent = "We couldn't load your toolkit just now. Please refresh the page.";
   }
 }
+
+/* ---------------------------------------------------------------- notes on a piece of work (My notes, kind 'tool') */
+async function loadNotes(){
+  myNotes = []; notesStore = null;
+  if (!currentUser) return;
+  notesStore = N.store({ db, collection, getDocs, doc, setDoc, serverTimestamp }, currentUser.uid);
+  try { myNotes = await notesStore.all(); } catch (err){ console.error('Could not load notes:', err); }
+}
+const notesUrl = (id) => '/my-tools?open=' + id;
+const notesFor = (id) => (id ? N.onPage(myNotes, notesUrl(id)) : []);
+async function saveNote(n){
+  const c = await notesStore.save(n);
+  myNotes = myNotes.filter(x => x.id !== c.id).concat([c]);
+  return c;
+}
+const NOTE_ICON = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4h14v12l-4 4H5z"/><path d="M15 20v-4h4M9 9h6M9 13h4"/></svg>';
+let noteEditing = '';
+function paintWsNotes(){
+  if (!ws) return;
+  const list = notesFor(ws.id), box = $('wsNotes');
+  $('wsNotesN').textContent = list.length ? String(list.length) : '';
+  if (box.hidden) return;
+  box.textContent = '';
+  box.append(el('h2', { id: 'wsNotesTitle', tabindex: '-1' }, 'Notes on this work'),
+    el('p', { class: 'lede' }, 'Reminders, decisions and follow-ups. Only you can see them; they\u2019re also in My notes.'));
+  if (!ws.id){
+    box.append(el('p', { class: 'small' }, 'Notes are kept with your saved work. Make a change in the tool first, then add notes here.'));
+    return;
+  }
+  list.forEach(n => {
+    const item = el('div', { class: 'ws-note' });
+    if (noteEditing === n.id){
+      item.append(noteForm(n));
+    } else {
+      item.append(el('p', {}, n.note));
+      if (n.tags.length) item.append(el('div', { class: 'tags' }, n.tags.map(t => '#' + t).join(' ')));
+      item.append(el('div', { class: 'meta' }, el('span', {}, C.ago(n.updated)),
+        el('button', { type: 'button', onclick: () => { noteEditing = n.id; paintWsNotes(); } }, 'Edit'),
+        el('button', { type: 'button', class: 'warn', onclick: async () => {
+          if (!window.confirm('Delete this note?')) return;
+          try { await saveNote(N.edit(n, 'delete')); paintWsNotes(); track('tool_note_delete', ws.tool); }
+          catch (err){ $('errorLine').textContent = "That note didn't delete. Please try again."; }
+        } }, 'Delete')));
+    }
+    box.append(item);
+  });
+  if (!noteEditing) box.append(noteForm(null));
+}
+function noteForm(n){
+  const ta = el('textarea', { 'aria-label': n ? 'Note' : 'New note', maxlength: '2000', placeholder: n ? '' : 'Add a note: a decision, a question to follow up, who to talk to…' });
+  const tg = el('input', { type: 'text', 'aria-label': 'Tags, separated by commas', placeholder: 'Tags, separated by commas (optional)', maxlength: '200' });
+  if (n){ ta.value = n.note; tg.value = n.tags.join(', '); }
+  const go = async () => {
+    if (!ta.value.trim()){ ta.focus(); return; }
+    const tags = tg.value.split(/[,#\n]/);
+    const next = n ? N.edit(n, { note: ta.value, tags, title: wsNoteTitle() })
+      : { id: N.newId(), url: notesUrl(ws.id), title: wsNoteTitle(), kind: 'tool', color: 'b', quote: '', prefix: '', suffix: '', pos: 0,
+          note: ta.value, tags, created: Date.now(), updated: Date.now(), deleted: false };
+    try { await saveNote(next); noteEditing = ''; paintWsNotes(); if (!n) track('tool_note_add', ws.tool); }
+    catch (err){ $('errorLine').textContent = "That note didn't save. Please try again."; }
+  };
+  if (n) setTimeout(() => ta.focus(), 0);
+  return el('div', { class: 'ws-note-form' }, ta, tg, el('div', { class: 'row' },
+    el('button', { type: 'button', class: 'btn btn-primary btn-small', onclick: go }, n ? 'Save' : 'Add note'),
+    n ? el('button', { type: 'button', class: 'btn btn-ghost btn-small', onclick: () => { noteEditing = ''; paintWsNotes(); } }, 'Cancel') : null));
+}
+const wsNoteTitle = () => (C.TOOLS[ws.tool] ? C.TOOLS[ws.tool].short + ': ' : '') + C.displayTitle(wsRecord());
+$('wsNotesBtn').addEventListener('click', () => {
+  const box = $('wsNotes'), open = box.hidden;
+  box.hidden = !open;
+  $('wsNotesBtn').setAttribute('aria-expanded', String(open));
+  noteEditing = '';
+  paintWsNotes();
+  if (open){ $('wsNotesTitle').focus(); track('tool_notes_open', ws && ws.tool); }
+});
 
 /* ---------------------------------------------------------------- saving a handover */
 async function savePending(asNew){
@@ -542,7 +640,9 @@ function card(d){
     actionsMenu(() => d, { rename: () => rename(d, box, title) }));
   box.append(el('div', { class: 'saved-top' }, mark(d.tool, 'sm'), el('span', { class: 'kind' }, tool.short), menu), title);
   if (d.summary) box.append(el('p', { class: 'sum' }, d.summary));
-  box.append(el('div', { class: 'foot' }, el('span', { class: 'when' }, 'Edited ' + C.ago(editedAt(d)))));
+  const nn = notesFor(d.id).length;
+  box.append(el('div', { class: 'foot' }, el('span', { class: 'when' }, 'Edited ' + C.ago(editedAt(d))),
+    nn ? el('a', { class: 'note-n', href: openHref(d.id) + '&notes=1', onclick: linkTo(openHref(d.id) + '&notes=1'), html: NOTE_ICON + nn + (nn === 1 ? ' note' : ' notes') }) : null));
   return box;
 }
 
@@ -614,6 +714,10 @@ function openWorkspace(r){
   paintWsTitle();
   if (d) savedStatus(); else setStatus('idle', 'Saves when you start');
   paintWsMenu();
+  noteEditing = '';
+  $('wsNotes').hidden = !r.notes;
+  $('wsNotesBtn').setAttribute('aria-expanded', String(!!r.notes));
+  paintWsNotes();
   // the tool, from its page on www, inside this one
   if (frame) frame.remove();
   $('wsLoading').hidden = false;
@@ -690,7 +794,7 @@ async function persist(){
       const ref = await addDoc(collection(db, 'savedTools'), Object.assign({}, rec, { createdAt: serverTimestamp(), updatedAt: serverTimestamp() }));
       w.id = ref.id;
       w.key = 'open:' + w.id;
-      if (ws === w) history.replaceState(null, '', openHref(w.id));
+      if (ws === w){ history.replaceState(null, '', openHref(w.id)); paintWsNotes(); }
       track('tool_create', w.tool);
     } else {
       await updateDoc(doc(db, 'savedTools', w.id), { title: rec.title, summary: rec.summary, data: rec.data, updatedAt: serverTimestamp() });
@@ -879,6 +983,7 @@ async function remove(d){
     const inWs = ws && ws.id === d.id;
     if (inWs){ clearTimeout(saveTimer); ws.dirty = false; }
     if (d.id) await deleteDoc(doc(db, 'savedTools', d.id));
+    for (const n of notesFor(d.id)){ try { await saveNote(N.edit(n, 'delete')); } catch (err){ /* the work is gone; a stray note can be deleted in My notes */ } }
     $('notice').textContent = 'Deleted.';
     track('tool_delete', d.tool);
     await loadSaved();
@@ -890,7 +995,7 @@ onAuthStateChanged(auth, async (user) => {
   currentUser = user;
   loaded = false;
   $('errorLine').textContent = '';
-  await loadSaved();
+  await Promise.all([loadSaved(), loadNotes()]);
   render();
   if (user && pending) $('pendingTitle').focus();
 });
