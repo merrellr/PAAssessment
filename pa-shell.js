@@ -45,7 +45,7 @@
     var here = page();
     var links = LINKS.map(function (l) {
       var ext = /^https?:/.test(l[0]);
-      return '<a href="' + l[0] + '"' + (ext ? ' target="_blank" rel="noopener"' : "") + (l[0] === here ? ' aria-current="page"' : "") + ">" +
+      return '<a href="' + l[0] + '" data-signed-in' + (ext ? ' target="_blank" rel="noopener"' : "") + (l[0] === here ? ' aria-current="page"' : "") + ">" +
         esc(l[1]) + (ext ? '<span aria-hidden="true"> ↗</span>' + NEW_TAB : "") + "</a>";
     }).join("");
     var mac = /Mac|iPhone|iPad/.test(navigator.platform || navigator.userAgent);
@@ -61,6 +61,13 @@
       '<button type="button" class="pa-icon pa-menu-btn" data-pa="menu" data-help-anchor aria-label="Menu" aria-expanded="false">' + ICON.menu + "</button>" +
       "</div></div></header>";
   }
+
+  /* Home, My Learning and My Toolkits are for signed-in learners: hidden from visitors who aren't (the sign-in page,
+     the public assessment). Known at once from the device's last sign-in (pa_signed_in, account-menu.js), then kept
+     in step with the real sign-in when it's restored. */
+  function signedIn(on) { document.documentElement.classList.toggle("pa-signed-out", !on); }
+  try { signedIn(localStorage.getItem("pa_signed_in") === "1"); } catch (e) { signedIn(false); }
+  window.addEventListener("pa-auth", function (e) { signedIn(!!e.detail); });
 
   // Drawn where this script sits (straight after <body>), before the rest of the page.
   var me = document.currentScript;

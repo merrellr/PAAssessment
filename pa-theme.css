@@ -676,6 +676,9 @@ html.pa-shell .icon-btn { background: var(--pa-card); }
 .pa-btn { display: inline-flex; align-items: center; gap: 6px; padding: 9px 16px; border-radius: var(--pa-pill); border: 2px solid var(--pa-primary); background: var(--pa-primary); color: var(--pa-btn-ink); font: 700 .9rem var(--pa-sans); text-decoration: none; cursor: pointer; }
 .pa-btn.ghost { background: transparent; color: var(--pa-navy); border-color: color-mix(in srgb, var(--pa-navy) 45%, transparent); }
 
+/* Signed-out visitors: no Home, My Learning or My Toolkits in the header (pa-shell.js) */
+html.pa-signed-out .pa-links a[data-signed-in] { display: none !important; }
+
 /* ---------- Compass, the assistant: its button, bottom right (the panel's styles are in compass.css) ---------- */
 .pa-compass-fab[hidden] { display: none; }
 .pa-compass-fab { position: fixed; right: 18px; bottom: 18px; z-index: 57; display: inline-flex; align-items: center; gap: 8px; padding: 11px 18px 11px 14px;
