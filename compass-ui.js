@@ -63,7 +63,7 @@
     fullBtn.setAttribute('aria-label', state.full ? 'Back to the side panel' : 'Full screen');
     fullBtn.title = state.full ? 'Side panel' : 'Full screen';
     fullBtn.innerHTML = state.full ? SHRINK : EXPAND;
-    panel.querySelector('.cp-foot').innerHTML = 'Answers come only from this page and your courses, with sources. Nothing is shared until you ask.' +
+    panel.querySelector('.cp-foot').innerHTML = 'Answers come only from this page and the courses, with sources. Nothing is shared until you ask.' +
       (state.left !== null && state.left !== undefined ? ' <span class="cp-left">' + state.left + ' question' + (state.left === 1 ? '' : 's') + ' left today.</span>' : '');
   }
 
@@ -138,6 +138,9 @@
     track('compass_ask', { page: sent ? sent.k : 'none' });
     var done = function (m) { busy = false; state.msgs.push(m); save(); paintLog(); paintChrome(); input.focus(); };
     if (!navigator.onLine) return done({ r: 'a', err: 'offline' });
+    // A page can bring its own way to ask (www asks through notes-bridge.html): fn(q, hist, page) -> Promise<{ r, passages }>.
+    var own = typeof window.PACompassTransport === 'function' ? window.PACompassTransport : null;
+    (own ? own(q, hist, sent).then(function (x) { passages = (x && x.passages) || []; return x && x.r; }) :
     (shell && shell.loadAsk ? shell.loadAsk() : Promise.resolve()).then(function () {
       passages = shell && shell.retrieve ? shell.retrieve(q + (sent && sent.t ? ' ' + sent.t : ''), 4) : [];
       return acct ? acct.idToken() : null;
@@ -145,7 +148,7 @@
       if (!tok) throw { code: 'signin' };
       return acct.backend({ action: 'compass', idToken: tok, q: q, h: JSON.stringify(hist), page: sent ? JSON.stringify(sent) : '',
         ctx: JSON.stringify(passages.map(function (p) { return { u: p.u, t: p.t, x: String(p.x).slice(0, 650) }; })) });
-    }).then(function (r) {
+    })).then(function (r) {
       if (!r || !r.ok) throw { code: r && r.error || 'down' };
       if (typeof r.left === 'number') state.left = r.left;
       done({ r: 'a', t: r.text, cited: r.cited || [], src: C.sources(sent, passages, location.pathname + location.search) });
@@ -175,7 +178,7 @@
     panel.hidden = true;
     document.documentElement.classList.remove('cp-open', 'cp-full-open');
     setButtons();
-    var b = opener && opener.focus && document.contains(opener) && opener !== document.body ? opener : document.querySelector('.pa-tools [data-pa="compass"]');
+    var b = opener && opener.focus && document.contains(opener) && opener !== document.body ? opener : document.getElementById('paCompassFab');
     if (b) b.focus();
   }
   panel.querySelector('.cp-x').addEventListener('click', close);

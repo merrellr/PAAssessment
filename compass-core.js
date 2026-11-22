@@ -11,9 +11,10 @@
   'use strict';
 
   var SEES = { lesson: 'This lesson', home: 'Your home page', learning: 'Your courses', tool: 'This piece of work',
-    tools: 'Your toolkit', notes: 'Your notes', page: 'This page' };
+    tools: 'Your toolkit', notes: 'Your notes', page: 'This page', article: 'This article', book: 'This chapter' };
   var PLACEHOLDER = { lesson: 'Ask about this lesson…', home: 'Ask about your learning…', learning: 'Ask about the courses…',
-    tool: 'Ask about this work…', tools: 'Ask about your toolkit…', notes: 'Ask about your notes…', page: 'Ask about the courses…' };
+    tool: 'Ask about this work…', tools: 'Ask about your toolkit…', notes: 'Ask about your notes…', page: 'Ask about the courses…',
+    article: 'Ask about this article…', book: 'Ask about this chapter…' };
   var SUGGEST = {
     lesson: ['Explain this lesson simply', 'Give me a real-world example', 'Quiz me on this lesson', 'What are the key takeaways?'],
     home: ['What should I do next?', 'Summarize where I am', 'Which lesson should I finish first?'],
@@ -21,8 +22,11 @@
     tool: ['Explain these results', 'What would change the ranking?', 'What should I check before deciding?'],
     tools: ['Which tool helps me prioritize features?', 'Summarize my saved work', 'When should I build, buy or partner?'],
     notes: ['Summarize my notes', 'What themes show up in my notes?', 'Turn my notes into three actions'],
-    page: ['What can I learn here?', 'How do I prioritize features?', 'What is product discovery?']
+    page: ['What can I learn here?', 'How do I prioritize features?', 'What is product discovery?'],
+    article: ['Summarize this article', 'How would I apply this at work?', 'What should I try first?', 'Which lesson goes deeper?'],
+    book: ['Summarize this chapter', 'Explain the main idea simply', 'Quiz me on this chapter', 'How do I apply this with my team?']
   };
+  var LEARNING = 'https://assessment.productadvisory.co';
   var PAGE_CHARS = 2000;     // what a page sends at most (the server allows a little more)
   var HISTORY = 6;           // turns of the conversation that come along
 
@@ -105,8 +109,8 @@
   }
 
   var ERRORS = {
-    signin: 'Compass is for signed-in learners. <a href="/lms-dashboard">Sign in</a>, then ask again.',
-    not_verified: 'Compass is for signed-in learners. <a href="/lms-dashboard">Sign in</a>, then ask again.',
+    signin: 'Compass comes free with a Product Advisory Learning account. <a href="' + LEARNING + '/lms-dashboard" target="_blank" rel="noopener">Sign in or create one</a>, then ask again here.',
+    not_verified: 'Compass comes free with a Product Advisory Learning account. <a href="' + LEARNING + '/lms-dashboard" target="_blank" rel="noopener">Sign in or create one</a>, then ask again here.',
     daily_limit: 'That’s all the questions for today. Compass will be back tomorrow.',
     bad_question: 'Try asking that in a few more words (up to 400 characters).',
     no_key: 'Compass is resting just now. Please try again later.',
@@ -114,6 +118,45 @@
   };
   function errorText(code) { return ERRORS[code] || 'Compass couldn’t answer just now. Please try again in a moment.'; }
 
-  root.CompassCore = { SEES: SEES, PLACEHOLDER: PLACEHOLDER, SUGGEST: SUGGEST, PAGE_CHARS: PAGE_CHARS, HISTORY: HISTORY,
+  /* The best lesson passages for a question, from Ask's index (ask-index.js: [{ u, t, x }]), as pa-shell.js's search
+     does: words weighted by how rare they are, a bonus for the lesson title, at most two per lesson. For pages that
+     don't have pa-shell.js (notes-bridge.html, answering for www). */
+  var stats = null, statsFor = null;
+  function retrieve(data, q, max) {
+    data = data || [];
+    if (statsFor !== data) {
+      var df = {};
+      stats = { df: df, docs: data.map(function (p) {
+        var tf = {}, tt = {};
+        terms(p.x).forEach(function (w) { tf[w] = (tf[w] || 0) + 1; });
+        terms(p.t).forEach(function (w) { tt[w] = 1; });
+        Object.keys(tf).forEach(function (w) { df[w] = (df[w] || 0) + 1; });
+        return { tf: tf, tt: tt };
+      }) };
+      statsFor = data;
+    }
+    var qs = terms(q).filter(function (w, i, a) { return a.indexOf(w) === i; });
+    var n = data.length || 1, scored = [];
+    data.forEach(function (p, i) {
+      var d = stats.docs[i], score = 0;
+      qs.forEach(function (w) {
+        var idf = Math.log(1 + n / (1 + (stats.df[w] || 0)));
+        if (d.tf[w]) score += idf * (1 + Math.log(d.tf[w]));
+        if (d.tt[w]) score += idf * 1.5;
+      });
+      if (score > 0) scored.push({ p: p, score: score });
+    });
+    scored.sort(function (a, b) { return b.score - a.score; });
+    var out = [], per = {};
+    for (var k = 0; k < scored.length && out.length < (max || 4); k++) {
+      var u = scored[k].p.u;
+      if ((per[u] || 0) >= 2) continue;
+      per[u] = (per[u] || 0) + 1;
+      out.push(scored[k].p);
+    }
+    return out;
+  }
+
+  root.CompassCore = { SEES: SEES, LEARNING: LEARNING, retrieve: retrieve, PLACEHOLDER: PLACEHOLDER, SUGGEST: SUGGEST, PAGE_CHARS: PAGE_CHARS, HISTORY: HISTORY,
     terms: terms, chunks: chunks, pickPage: pickPage, history: history, cleanUrl: cleanUrl, sources: sources, render: render, esc: esc, errorText: errorText };
 })(typeof window !== 'undefined' ? window : globalThis);

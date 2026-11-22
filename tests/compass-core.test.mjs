@@ -31,5 +31,17 @@ t('bullets become a list, and HTML in an answer is shown as text', /<ul><li>Show
 t('every kind of page has a label, a prompt and suggestions', Object.keys(C.SEES).every(k => C.PLACEHOLDER[k] && C.SUGGEST[k] && C.SUGGEST[k].length >= 3));
 t('errors read as plain sentences, with a sign-in link where it helps', /Sign in/.test(C.errorText('signin')) && /tomorrow/.test(C.errorText('daily_limit')) && /try again/.test(C.errorText('anything')));
 
+console.log('--- lesson search (for the bridge) and www ---');
+const idx = [
+  { u: 'lesson.html?course=strategy-moderate&lesson=1', t: 'Pricing pages', x: 'Customers glance at a pricing page for five seconds before deciding.' },
+  { u: 'lesson.html?course=strategy-moderate&lesson=1', t: 'Pricing pages', x: 'The decoy plan makes the middle option look better.' },
+  { u: 'lesson.html?course=strategy-moderate&lesson=1', t: 'Pricing pages', x: 'Count the decisions a buyer must make.' },
+  { u: 'lesson.html?course=discovery-novice&lesson=2', t: 'Interviews', x: 'Ask about the last time the problem happened.' }];
+const hits = C.retrieve(idx, 'How does pricing page decoy work?', 4);
+t('the passages that match the question, at most two per lesson', hits.length === 2 && hits.every(h => /strategy/.test(h.u)) && hits.some(h => h.x.indexOf('decoy') > -1));
+t('nothing matching gives nothing', C.retrieve(idx, 'zzz qqq', 4).length === 0 && C.retrieve([], 'pricing', 4).length === 0);
+t('articles and the book have a label, a prompt and suggestions', C.SEES.article === 'This article' && C.SEES.book === 'This chapter' && C.SUGGEST.book.length >= 3);
+t('the sign-in message links to Learning itself (it also shows on www)', /https:\/\/assessment\.productadvisory\.co\/lms-dashboard/.test(C.errorText('signin')));
+
 console.log(`\n${pass} passed, ${fail} failed`);
 if (fail) process.exit(1);
