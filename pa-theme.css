@@ -682,7 +682,7 @@ html.pa-signed-out .pa-links a[data-signed-in] { display: none !important; }
 /* ---------- Compass, the assistant: its button, bottom right (the panel's styles are in compass.css) ---------- */
 .pa-compass-fab[hidden] { display: none; }
 .pa-compass-fab { position: fixed; right: 18px; bottom: 18px; z-index: 57; display: inline-flex; align-items: center; gap: 8px; padding: 11px 18px 11px 14px;
-  border-radius: 999px; border: 0; background: linear-gradient(135deg, var(--pa-navy), color-mix(in srgb, var(--pa-navy) 70%, var(--pa-cyan))); color: var(--pa-btn-ink, #fff);
+  border-radius: 999px; border: 0; background: linear-gradient(135deg, #1c4587, #2a7fb8); color: #fff;   /* fixed colours: --pa-navy turns near-white in dark mode */
   font: 700 .95rem var(--pa-sans); cursor: pointer; box-shadow: 0 10px 26px rgba(16, 30, 60, .28); }
 .pa-compass-fab svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 .pa-compass-fab:hover { transform: translateY(-1px); box-shadow: 0 14px 30px rgba(16, 30, 60, .32); }
