@@ -2791,6 +2791,14 @@ function renderGrowth(progress){
   box.querySelectorAll('[data-gview]').forEach(btn => btn.addEventListener('click', () => { growthView = btn.getAttribute('data-gview'); renderGrowth(progress); }));
 }
 
+/* What Compass (the assistant in the header) sees here: the text of the view on screen (Home, or My Learning). */
+window.PACompassPage = function(){
+  const view = document.body.getAttribute('data-view') === 'learning' ? 'learning' : 'home';
+  const text = Array.from(document.querySelectorAll('[data-only="' + view + '"], [data-only="' + view + '"] ~ .home-grid'))
+    .map(el => el.innerText).filter(Boolean).join('\n');
+  return { k: view, t: view === 'learning' ? 'My Learning' : 'Home', x: text };
+};
+
 /* My notes: how many notes in each place, and the three most recent. */
 async function renderHomeNotes(user){
   const box = document.getElementById('homeNotes'), N = window.NotesCore;
