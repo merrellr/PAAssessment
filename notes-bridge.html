@@ -15,7 +15,13 @@
      www → here:  { pa: 'notes', type: 'sync', notes: [...] }   the notes on that device, deletion markers included
      here → www:  { pa: 'notes', type: 'ready' }                 loaded, and again whenever sign-in changes
                   { pa: 'notes', type: 'state', signedIn, name, notes?, error? }   after each sync: the merged set
-     Firestore:   readerNotes/{uid}/items/{noteId}  (see firestore.rules) -->
+     Firestore:   readerNotes/{uid}/items/{noteId}  (see firestore.rules)
+
+     It also answers for Compass, the assistant, on www's articles and book (www's assets/js/compass-www.js):
+     www → here:  { pa: 'notes', type: 'compass-ask', id, q, h, page }   a question, the conversation, the page's excerpt
+     here → www:  { pa: 'notes', type: 'compass-answer', id, r, passages }   the server's answer, and the lesson passages
+                  it was given (with full addresses), so www can show them as sources
+     The lesson passages come from Ask's index here (ask-index.js), so answers on www can point into the courses. -->
 <script src="notes-core.js"></script>
 </head>
 <body>
@@ -74,9 +80,55 @@ async function sync(local, origin) {
   }
 }
 
+/* ---------------------------------------------------------------- Compass, for www */
+const BACKEND = "https://script.google.com/macros/s/AKfycbyMQnshyho2q3igshqZmIm6RyJCYl1WsRJbShHz2blCt81iVmlngeNlYfO0QltR7TjwHg/exec";
+let compassLoading = null;
+function loadCompass() {
+  if (compassLoading) return compassLoading;
+  const add = (src) => new Promise((resolve, reject) => { const s = document.createElement('script'); s.src = src; s.onload = resolve; s.onerror = reject; document.head.appendChild(s); });
+  compassLoading = Promise.all([add('compass-core.js'), add('ask-index.js')]).catch((err) => { compassLoading = null; throw err; });
+  return compassLoading;
+}
+function backend(params) {   // the same JSONP call as account-menu.js
+  return new Promise((resolve) => {
+    const cb = 'paCompassCb_' + Date.now() + '_' + Math.floor(Math.random() * 1e6), script = document.createElement('script');
+    let done = false;
+    const finish = (v) => { if (done) return; done = true; clearTimeout(timer); delete window[cb]; script.remove(); resolve(v); };
+    const timer = setTimeout(() => finish(null), 25000);
+    window[cb] = (r) => finish(r || null);
+    script.onerror = () => finish(null);
+    script.src = BACKEND + '?' + new URLSearchParams(Object.assign({}, params, { callback: cb })).toString();
+    document.body.appendChild(script);
+  });
+}
+async function compassAsk(d, origin) {
+  const id = String(d.id || '').slice(0, 40);
+  const reply = (r, passages) => tell({ type: 'compass-answer', id, r, passages: passages || [] }, origin);
+  if (!user) return reply({ ok: false, error: 'signin' });
+  let page = null;
+  try { page = d.page ? JSON.parse(String(d.page)) : null; } catch (e) { page = null; }
+  let passages = [];
+  try {
+    await loadCompass();
+    passages = window.CompassCore.retrieve(window.PA_ASK || [], String(d.q || '') + (page && page.t ? ' ' + page.t : ''), 4);
+  } catch (e) { passages = []; }
+  let tok = null;
+  try { tok = await user.getIdToken(); } catch (e) { tok = null; }
+  if (!tok) return reply({ ok: false, error: 'signin' });
+  const r = await backend({ action: 'compass', idToken: tok, q: String(d.q || '').slice(0, 400), h: String(d.h || '[]').slice(0, 8000), page: String(d.page || '').slice(0, 6000),
+    ctx: JSON.stringify(passages.map((p) => ({ u: p.u, t: p.t, x: String(p.x).slice(0, 650) }))) });
+  reply(r || { ok: false, error: 'down' }, passages.map((p) => ({ u: 'https://assessment.productadvisory.co/' + String(p.u).replace(/^\//, ''), t: p.t })));
+}
+
 addEventListener('message', (e) => {
   if (N.ORIGINS.indexOf(e.origin) < 0 || e.source !== window.parent) return;
   const d = e.data || {};
+  if (d.pa === 'notes' && d.type === 'compass-ask') {
+    lastOrigin = e.origin;
+    const go = () => compassAsk(d, e.origin);
+    if (known) go(); else { const wait = setInterval(() => { if (known) { clearInterval(wait); go(); } }, 100); }
+    return;
+  }
   if (d.pa !== 'notes' || d.type !== 'sync' || !Array.isArray(d.notes)) return;
   lastOrigin = e.origin;
   const go = () => sync(d.notes.slice(0, N.MAX_NOTES), e.origin);

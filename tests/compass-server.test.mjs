@@ -80,6 +80,13 @@ reset();
 E({ h: JSON.stringify(Array.from({ length: 20 }, (_, i) => ({ r: i % 2 ? 'a' : 'u', t: 'turn ' + i }))) });
 t('only the last six turns come along', asked[0].messages.length === 1 + 6 + 1);
 
+reset();
+E({ page: JSON.stringify({ k: 'article', t: 'The five-second test', x: 'Customers glance at pricing pages.' }) });
+t('a Product+ article on www is a page Compass can read', /a Product\+ article/.test(asked[0].messages[0].content) && /THIS PAGE: The five-second test/.test(asked[0].messages[asked[0].messages.length - 1].content));
+reset();
+E({ page: JSON.stringify({ k: 'book', t: 'Chapter 1', x: 'The product leader owns the outcome.' }) });
+t('and so is a chapter of the book', /a chapter of The Product Manager's Playbook/.test(asked[0].messages[0].content));
+
 console.log('--- the daily limits ---');
 reset();
 for (let i = 0; i < 25; i++) E({});

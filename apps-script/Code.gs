@@ -2636,7 +2636,8 @@ var COMPASS_DAILY_ = 400;
 var COMPASS_HISTORY_TURNS_ = 6;
 var COMPASS_PAGE_CHARS_ = 2600;
 var COMPASS_KINDS_ = { lesson: 'a lesson', home: 'their Learning home page (their progress and next steps)', learning: 'My Learning (their courses)',
-  tool: 'a piece of their own toolkit work', tools: 'their list of toolkit work', notes: 'their notes', page: 'a page in Product Advisory Learning' };
+  tool: 'a piece of their own toolkit work', tools: 'their list of toolkit work', notes: 'their notes', page: 'a page in Product Advisory Learning',
+  article: 'a Product+ article on productadvisory.co', book: 'a chapter of The Product Manager\'s Playbook, Product Advisory\'s free book' };
 
 function compassQuota_(uid) {
   var props = PropertiesService.getScriptProperties();
