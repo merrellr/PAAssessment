@@ -747,7 +747,7 @@ function renderRail(lesson, complete){
     '<button type="button" class="rail-toggle" data-rail="close" aria-expanded="true" aria-controls="lessonRail" aria-label="Hide the course outline" title="Hide the course outline">' + chev(-1) + '</button></div>' +
     '<div class="rail-progress"><svg class="rail-ring" width="42" height="42" viewBox="0 0 42 42" aria-hidden="true"><circle class="track" cx="21" cy="21" r="17" fill="none" stroke-width="4"/><circle class="fill" cx="21" cy="21" r="17" fill="none" stroke-width="4" stroke-linecap="round" transform="rotate(-90 21 21)" stroke-dasharray="' + C.toFixed(2) + '" stroke-dashoffset="' + (C * (1 - pct)).toFixed(2) + '"/></svg>' +
     '<span><b>' + done + ' of ' + course.lessons.length + ' lessons</b>' + (done === course.lessons.length ? 'Course complete' : 'done') + '</span></div>' +
-    '<ol class="rail-list">' + items + '</ol>' + recap + '<div class="rail-notes" id="railNotes"></div><div class="rail-tour" id="railTour"></div></div>';
+    '<ol class="rail-list">' + items + '</ol>' + recap + '<div class="rail-tour" id="railTour"></div><div class="rail-notes" id="railNotes"></div></div>';
   placeTour();
 }
 // "How lessons work" sits in the course outline when it's open on a wide screen, otherwise beside "Back to My Learning".
