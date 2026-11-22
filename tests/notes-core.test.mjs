@@ -53,5 +53,37 @@ t('links go back to the place on www', N.openUrl(c) === 'https://www.productadvi
 const md = N.toMarkdown(list, '2026-11-21');
 t('the export is plain Markdown with each page, quote, note and tags', /^# My notes from Product Advisory/.test(md) && md.indexOf('## Chapter X') > -1 && md.indexOf('> Customers glance') > -1 && md.indexOf('#ux-team') > -1 && md.indexOf('Exported 2026-11-21') > -1);
 
+console.log('--- lessons and toolkits (Learning) ---');
+const lesson = N.clean(note({ id: 'lesson1', kind: 'lesson', url: '/lesson?course=aiOrg-moderate&lesson=3', title: 'AI at work: Lesson 3' }));
+t('a lesson note keeps its course and lesson address', lesson && lesson.url === '/lesson?course=aiOrg-moderate&lesson=3');
+t('an address with anything else in it is refused', N.clean(note({ kind: 'lesson', url: '/lesson?course=<x>' })) === null && N.clean(note({ url: '/lesson?a=b#c' })) === null);
+const tool = N.clean(note({ id: 'toolnt1', kind: 'tool', url: '/my-tools?open=AbC123', title: 'Q3 roadmap', quote: '', note: 'Check SSO cost with Dev' }));
+t('a toolkit note needs no quote, only its note', tool && tool.quote === '' && N.clean(note({ kind: 'tool', url: '/my-tools?open=x', quote: '', note: '  ' })) === null);
+t('an unknown kind becomes an article', N.clean(note({ kind: 'weird' })).kind === 'article');
+const mixed = [c, lesson, tool, N.clean(note({ id: 'bookno1', kind: 'book', url: '/books/playbook/x' }))];
+t('categories: Insights holds articles and the book; My Learning lessons; My Toolkits toolkit notes',
+  N.view(mixed, { category: 'insights' }).length === 2 && N.view(mixed, { category: 'learning' })[0].url === lesson.url && N.view(mixed, { category: 'tools' })[0].url === tool.url);
+t('category counts', JSON.stringify(N.categoryCounts(mixed)) === '{"all":4,"insights":2,"learning":1,"tools":1}');
+t('www notes link to www; lesson and toolkit notes stay here', N.openUrl(lesson) === '/lesson?course=aiOrg-moderate&lesson=3#pa-note=lesson1' && N.openUrl(tool) === '/my-tools?open=AbC123' && N.pageUrl(c) === 'https://www.productadvisory.co/insights/five-second-test');
+t('the notes on one page; counts by page; the newest', N.onPage(mixed, tool.url).length === 1 && N.countByUrl(mixed)[lesson.url] === 1 && N.newest(mixed, 2).length === 2);
+const md2 = N.toMarkdown([tool], '2026-11-22');
+t('a toolkit note exports with its note and a link to Learning', md2.indexOf('Check SSO cost with Dev') > -1 && md2.indexOf('https://assessment.productadvisory.co/my-tools?open=AbC123') > -1 && md2.indexOf('> ') === -1);
+t('new ids are the kind the rules allow', /^[a-z0-9]{6,24}$/.test(N.newId()));
+
+console.log('--- the account store ---');
+{
+  const calls = [];
+  const fb = { db: {}, collection: (db, ...p) => p.join('/'), doc: (db, ...p) => p.join('/'), serverTimestamp: () => 'SERVER',
+    getDocs: async () => ({ docs: [{ id: 'abc123', data: () => N.toDoc(c) }, { id: 'bad', data: () => ({}) }] }),
+    setDoc: async (ref, data) => { calls.push([ref, data]); } };
+  const st = N.store(fb, 'cat');
+  const all = await st.all();
+  t('reads the account\'s notes, dropping anything that isn\'t one', all.length === 1 && all[0].id === 'abc123');
+  await st.save(tool);
+  t('saves under readerNotes/<uid>/items/<id> with the server\'s time', calls[0][0] === 'readerNotes/cat/items/toolnt1' && calls[0][1].savedAt === 'SERVER' && !('id' in calls[0][1]));
+  let threw = false; try { await st.save({ id: 'x' }); } catch (e) { threw = true; }
+  t('refuses to save something that isn\'t a note', threw);
+}
+
 console.log(`\n${pass} passed, ${fail} failed`);
 if (fail) process.exit(1);

@@ -33,6 +33,9 @@ Copy-Item "$repo\focus-board.js" $site
 Copy-Item "$repo\focus-board.css" $site
 Copy-Item "$repo\tool-core.js" $site
 Copy-Item "$repo\saved-tools-core.js" $site
+Copy-Item "$repo\notes-core.js" $site
+Copy-Item "$repo\notes-ui.js" $site
+Copy-Item "$repo\notes-ui.css" $site
 Copy-Item "$repo\learning-home-core.js" $site
 Copy-Item "$repo\coach-core.js" $site
 Copy-Item "$repo\coach-bank.js" $site
