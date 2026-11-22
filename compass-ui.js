@@ -134,7 +134,7 @@
     busy = true; save(); paintLog();
     input.value = ''; fit();
     var page = pageInfo(), sent = page ? { k: page.k, t: page.t, x: C.pickPage(page.x, q) } : null;
-    var passages = [], shell = window.PAShell, acct = window.PAAccount;
+    var passages = [], shell = window.PAShell, acct = window.PAAccount, t0 = Date.now();
     track('compass_ask', { page: sent ? sent.k : 'none' });
     var done = function (m) { busy = false; state.msgs.push(m); save(); paintLog(); paintChrome(); input.focus(); };
     if (!navigator.onLine) return done({ r: 'a', err: 'offline' });
@@ -149,7 +149,7 @@
       return acct.backend({ action: 'compass', idToken: tok, q: q, h: JSON.stringify(hist), page: sent ? JSON.stringify(sent) : '',
         ctx: JSON.stringify(passages.map(function (p) { return { u: p.u, t: p.t, x: String(p.x).slice(0, 650) }; })) }, 45000);   // an answer can take a while
     })).then(function (r) {
-      if (!r || !r.ok) throw { code: r && r.error || 'down', detail: r ? r.detail : 'no reply from the server in time' };
+      if (!r || !r.ok) throw { code: r && r.error || 'down', detail: r ? r.detail : (Date.now() - t0 < 40000 ? 'the server sent back an error page after ' + Math.round((Date.now() - t0) / 1000) + ' s' : 'no reply from the server within 45 s') };
       if (typeof r.left === 'number') state.left = r.left;
       done({ r: 'a', t: r.text, cited: r.cited || [], src: C.sources(sent, passages, location.pathname + location.search) });
     }).catch(function (e) { done({ r: 'a', err: (e && e.code) || 'down', why: e && e.detail ? String(e.detail).slice(0, 200) : '' }); });
