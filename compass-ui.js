@@ -26,7 +26,7 @@
   function track(name, extra) { try { if (window.gtag) window.gtag('event', name, extra || {}); } catch (e) { /* no analytics */ } }
 
   function pageInfo() {
-    try { var p = typeof window.PACompassPage === 'function' ? window.PACompassPage() : null; if (p && p.x) return { k: C.SEES[p.k] ? p.k : 'page', t: String(p.t || ''), x: String(p.x) }; } catch (e) { /* no page info */ }
+    try { var p = typeof window.PACompassPage === 'function' ? window.PACompassPage() : null; if (p && (p.x || p.pin)) return { k: C.SEES[p.k] ? p.k : 'page', t: String(p.t || ''), x: String(p.x || ''), pin: String(p.pin || '') }; } catch (e) { /* no page info */ }
     return null;
   }
   function kind() { var p = pageInfo(); return p ? p.k : 'page'; }
@@ -133,7 +133,9 @@
     state.msgs.push({ r: 'u', t: q });
     busy = true; save(); paintLog();
     input.value = ''; fit();
-    var page = pageInfo(), sent = page ? { k: page.k, t: page.t, x: C.pickPage(page.x, q) } : null;
+    var page = pageInfo(), pin = page && page.pin ? String(page.pin).slice(0, 1200) : '';
+    // a page's pinned facts always go whole, first; the rest of the page is picked for the question
+    var sent = page ? { k: page.k, t: page.t, x: (pin ? pin + '\n' : '') + C.pickPage(page.x, q, C.PAGE_CHARS - (pin ? pin.length + 1 : 0)) } : null;
     var passages = [], shell = window.PAShell, acct = window.PAAccount, t0 = Date.now();
     track('compass_ask', { page: sent ? sent.k : 'none' });
     var done = function (m) { busy = false; state.msgs.push(m); save(); paintLog(); paintChrome(); input.focus(); };
