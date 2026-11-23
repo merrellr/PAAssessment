@@ -21,6 +21,8 @@
 .cc-ask input { flex: 1; min-width: 0; min-height: 40px; border: 0; background: transparent; color: var(--pa-ink); font: inherit; font-size: 1rem; outline: none; }
 .cc-ask button { flex: none; width: 40px; height: 40px; border-radius: 50%; border: 0; background: var(--pa-primary); color: var(--pa-btn-ink); font-size: 1.1rem; font-weight: 800; cursor: pointer; }
 .cc-ask-ico { flex: none; display: grid; place-items: center; width: 32px; height: 32px; border-radius: 50%; background: var(--pa-tint); color: var(--pa-primary); }
+.cc-ask-compass { display: grid; place-items: center; width: 34px; height: 34px; border-radius: 50%; background: #1e293b; color: #fff; flex: none; }
+.cc-ask-compass .pa-cicon { width: 24px; height: 24px; }
 .cc-ask-ico svg, .cc-next-ico svg, .cc-home-ico svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 .cc-suggest { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 6px; }
 .cc-sg { display: inline-flex; align-items: center; min-height: 36px; padding: 0 14px; border-radius: 18px; border: 1.5px solid var(--pa-line); background: var(--pa-card); color: var(--pa-ink); font: 600 .8125rem var(--pa-sans); text-decoration: none; cursor: pointer; }
@@ -38,6 +40,12 @@
 /* what I'd do next */
 .cc-next { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 16px 20px; align-items: start; padding: 22px 24px; border: 1.5px solid color-mix(in srgb, var(--pa-primary) 35%, var(--pa-line)); }
 .cc-next-ico, .cc-home-ico { display: grid; place-items: center; width: 44px; height: 44px; border-radius: 50%; background: var(--pa-primary); color: var(--pa-btn-ink); }
+.cc-home-ico.cc-home-compass { background: #1e293b; color: #fff; box-shadow: inset 0 0 0 1px rgba(255,255,255,.12); }
+.cc-home-compass .pa-cicon { width: 28px; height: 28px; }
+.cc-try { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-top: 8px; font-size: .8rem; color: var(--pa-muted); }
+.cc-try-q { border: 1px solid var(--pa-line); background: var(--pa-bg); color: var(--pa-ink-2); border-radius: 999px; padding: 4px 10px; font: inherit; font-size: .8rem; cursor: pointer; }
+.cc-try-q:hover { border-color: var(--pa-primary); color: var(--pa-ink); }
+.cc-try-q:focus-visible { outline: 3px solid var(--pa-cyan); outline-offset: 2px; }
 .cc-next-ico svg { width: 22px; height: 22px; }
 .cc-next h2 { margin: 4px 0 8px; font-size: 1.25rem; }
 .cc-why { margin: 0; color: var(--pa-ink); line-height: 1.6; }

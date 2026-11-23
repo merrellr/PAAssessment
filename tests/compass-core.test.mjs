@@ -56,5 +56,13 @@ const small = C.fitRequest(base, { k: 'lesson', t: 'x', x: 'short page' }, ps.sl
 t('a small question goes as it is', JSON.parse(small.params.page).x === 'short page' && small.passages.length === 1);
 t('no page at all is fine', C.fitRequest(base, null, [], []).params.page === '');
 
+console.log('--- the Compass icon and the panel subtitle ---');
+import fs from 'node:fs';
+const shell = fs.readFileSync(new URL('../pa-shell.js', import.meta.url), 'utf8');
+t('CompassIcon is one drawing: pa-shell.js carries exactly the same one as compass-core.js', shell.indexOf("compass: '" + C.ICON.replace(/'/g, "\\'") + "'") > -1);
+t('it has the circle, the star and the blue north needle, and is hidden from screen readers', /<circle/.test(C.ICON) && /#2563EB/.test(C.ICON) && /aria-hidden="true"/.test(C.ICON));
+t('Home and My Learning say what Compass sees there', C.seesLine('home') === 'Your assessment & learning plan' && C.seesLine('learning') === 'Your assessment & learning plan');
+t('an article says "This article and your courses"', C.seesLine('article') === 'This article and your courses');
+
 console.log(`\n${pass} passed, ${fail} failed`);
 if (fail) process.exit(1);

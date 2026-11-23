@@ -51,7 +51,7 @@
     }
     var lp = C.loop(s);
     html += '<div class="cc-row"><section class="card cc-loop" aria-labelledby="ccLoopTitle"><h3 id="ccLoopTitle">Your learning loop</h3>' +
-      '<p class="cc-muted">Assess, find the gaps, learn, practise, understand why, then check again. The coach keeps you moving round it.</p><ol class="cc-steps">' +
+      '<p class="cc-muted">Assess, find the gaps, learn, practise, understand why, then check again. Compass keeps you moving round it.</p><ol class="cc-steps">' +
       lp.steps.map(function (st, i) {
         var state = st.done ? 'done' : i === lp.current ? 'now' : 'todo';
         return '<li class="cc-step ' + state + '"' + (state === 'now' ? ' aria-current="step"' : '') + '><span class="cc-step-n" aria-hidden="true">' + (st.done ? '✓' : i + 1) + '</span>' +
@@ -135,10 +135,22 @@
   }
 
   // ---------------------------------------------------------------- Home: a small coach card
+  // Example questions for the "Ask Compass…" box, from what Compass suggests and where the learner is. A click puts one
+  // in the box (it isn't sent until they press Ask).
+  function examples(s, next) {
+    var name = next.area ? ((s && s.areas) || {})[next.area] || '' : '';
+    var out = ['Why is this my next step?'];
+    if (name) out.push('Explain ' + name + ' in plain English');
+    out.push(next.kind === 'assess' ? 'What does the assessment cover?' : 'Plan my learning for this week');
+    return out.slice(0, 3);
+  }
   function homeCard(s, next) {
-    return '<div class="cc-home-ico" aria-hidden="true">' + ICON + '</div><div class="cc-home-main"><span class="eyebrow">Your coach suggests</span>' +
+    var icon = (root.PAIcons && root.PAIcons.compass) || ICON;
+    return '<div class="cc-home-ico cc-home-compass" aria-hidden="true">' + icon + '</div><div class="cc-home-main"><span class="eyebrow">Compass Suggests</span>' +
       '<p class="cc-home-t"><b>' + esc(next.title) + '.</b> ' + esc(next.why.split(/(?<=\.)\s/)[0]) + '</p>' +
-      '<form class="cc-ask cc-ask-sm" data-coach-ask><input type="text" maxlength="300" placeholder="Ask your coach…" aria-label="Ask your coach"><button type="submit" aria-label="Ask">↑</button></form></div>' +
+      '<form class="cc-ask cc-ask-sm" data-coach-ask><input type="text" maxlength="300" placeholder="Ask Compass…" aria-label="Ask Compass"><button type="submit" aria-label="Ask">↑</button></form>' +
+      '<div class="cc-try" aria-label="Example questions"><span>Try:</span>' + examples(s, next).map(function (q) {
+        return '<button type="button" class="cc-try-q" data-try="' + esc(q) + '">' + esc(q) + '</button>'; }).join('') + '</div></div>' +
       '<div class="cc-home-go"><a class="cc-btn sm" href="' + esc(next.action.href) + '" data-coach-go="' + esc(next.kind) + '">' + esc(next.action.label) + '</a>' +
       '<a class="linklike" href="/my-learning">Open My Learning' + ARROW + '</a></div>';
   }
@@ -151,8 +163,15 @@
         e.preventDefault();
         var q = f.querySelector('input').value.trim();
         if (!q) return;
-        if (root.PAAnalytics) root.PAAnalytics.event('coach_ask', { len: q.length });
-        root.location.href = '/coach?q=' + encodeURIComponent(q);
+        if (root.PAAnalytics) root.PAAnalytics.event('coach_ask', { len: q.length, to: 'compass' });
+        // Compass answers it, in its panel; without it (an old cached page), the coach does
+        var sh = root.PAShell;
+        if (sh && sh.askCompass) { f.querySelector('input').value = ''; sh.askCompass(q).catch(function () { root.location.href = '/coach?q=' + encodeURIComponent(q); }); }
+        else root.location.href = '/coach?q=' + encodeURIComponent(q);
+      });
+      // the example questions: a click fills the box
+      Array.prototype.forEach.call((f.parentNode || f).querySelectorAll('[data-try]'), function (b) {
+        b.addEventListener('click', function () { var i = f.querySelector('input'); i.value = b.getAttribute('data-try'); i.focus(); if (root.PAAnalytics) root.PAAnalytics.event('compass_try', {}); });
       });
     });
   }

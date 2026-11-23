@@ -35,6 +35,8 @@
   .pr-say{ display:flex; gap: 12px; align-items:flex-start; margin: 18px 0; font-size: 1rem; line-height: 1.6; }
   .pr-say .ico{ flex:none; display:grid; place-items:center; width: 34px; height: 34px; border-radius: 50%; background: var(--pa-primary); color: var(--pa-btn-ink); }
   .pr-say .ico svg{ width: 17px; height: 17px; fill:none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .pr-say .ico.ico-compass{ background: #1e293b; color: #fff; }
+  .pr-say .ico.ico-compass svg{ width: 24px; height: 24px; }
   .pr-say p{ margin: 4px 0 0; }
   .pr-q{ padding: 22px 24px; }
   .pr-tags{ display:flex; flex-wrap:wrap; gap: 6px; margin-bottom: 12px; }
@@ -74,16 +76,16 @@
 <script src="pa-shell.js"></script>
 <div class="wrap">
   <a class="back" href="/my-learning">← Back to My Learning</a>
-  <span class="eyebrow">Practice with your coach</span>
+  <span class="eyebrow">Practice with Compass</span>
   <h1 id="prTitle">Practice</h1>
   <div class="pr-goal" id="prGoal" hidden><span><b>Session goal:</b> <span id="prGoalText"></span></span><span class="pr-pips" id="prPips" aria-label="Progress"></span></div>
   <div class="pr-layout">
-    <aside class="pr-side" aria-label="How the coach is adapting">
+    <aside class="pr-side" aria-label="How Compass is adapting">
       <section class="card"><h2>How I'm adapting</h2><ol class="pr-adapt" id="prAdapt"></ol></section>
       <section class="card"><h2>Your readiness</h2><div id="prAreas"></div><a class="cc-area-go" href="/my-learning#readiness">View readiness →</a></section>
     </aside>
     <main>
-      <div class="pr-say" id="prSay"><span class="ico" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="m15.5 8.5-2 5-5 2 2-5z"/></svg></span><div><p id="prSayText">Getting your session ready…</p></div></div>
+      <div class="pr-say" id="prSay"><span class="ico ico-compass" aria-hidden="true"><svg class="pa-cicon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="10.6" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M12 3.7 13.2 10.8 20.3 12 13.2 13.2 12 20.3 10.8 13.2 3.7 12 10.8 10.8Z" fill="currentColor" stroke="none"/><path d="M18.15 5.85 12 12 13.94 13.94Z" fill="#2563EB" stroke="none"/><path d="M18.15 5.85 12 12 10.06 10.06Z" fill="#5B9BFF" stroke="none"/><path d="M5.85 18.15 12 12 13.94 13.94Z" fill="#64748B" stroke="none"/><path d="M5.85 18.15 12 12 10.06 10.06Z" fill="#94A3B8" stroke="none"/><circle cx="12" cy="12" r="1.05" fill="#0F172A" stroke="none"/></svg></span><div><p id="prSayText">Getting your session ready…</p></div></div>
       <section class="card pr-q" id="prCard" hidden aria-live="polite">
         <div class="pr-tags" id="prTags"></div>
         <p class="pr-question" id="prQuestion"></p>

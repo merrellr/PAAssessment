@@ -33,6 +33,12 @@ mark.pa-hl.flash { animation: pa-flash 1.4s ease-out; }
 .pa-ed-done { border: 0; border-radius: 999px; padding: 7px 16px; background: var(--navy, #1A4584); color: var(--btn-ink, #fff); font: 700 .85rem var(--sans, system-ui, sans-serif); cursor: pointer; }
 .pa-notes-fab { position: fixed; left: 18px; bottom: 18px; z-index: 55; display: inline-flex; align-items: center; gap: 7px; padding: 10px 16px; border-radius: 999px; border: 1px solid var(--line, #E3E9F0); background: var(--surface, #fff); color: var(--navy, #1A4584); font: 700 .9rem var(--sans, system-ui, sans-serif); cursor: pointer; box-shadow: 0 8px 22px rgba(16,30,60,.16); }
 .pa-notes-fab:hover { border-color: var(--cyan, #35C2E8); }
+.pa-notes-fab { width: 48px; height: 48px; padding: 0; justify-content: center; border-radius: 50%; }
+.pa-notes-fab svg { width: 20px; height: 20px; }
+.pa-notes-fab .pa-fab-n { position: absolute; top: -4px; right: -4px; min-width: 20px; padding: 1px 5px; font-size: .7rem; line-height: 1.4; }
+.pa-notes-fab::after { content: attr(data-tip); position: absolute; left: calc(100% + 10px); top: 50%; transform: translateY(-50%); white-space: nowrap;
+  padding: 6px 10px; border-radius: 8px; background: #0f172a; color: #fff; font-size: .8rem; font-weight: 600; opacity: 0; pointer-events: none; transition: opacity .15s; }
+.pa-notes-fab:hover::after, .pa-notes-fab:focus-visible::after { opacity: 1; }
 .pa-notes-fab:focus-visible { outline: 3px solid var(--cyan, #35C2E8); outline-offset: 2px; }
 .pa-fab-n:empty { display: none; }
 .pa-fab-n { min-width: 20px; padding: 1px 6px; border-radius: 999px; background: var(--navy, #1A4584); color: var(--btn-ink, #fff); font-size: .75rem; text-align: center; }
@@ -61,7 +67,7 @@ mark.pa-hl.flash { animation: pa-flash 1.4s ease-out; }
 .pa-note-toast.on { opacity: 1; transform: translate(-50%, 0); pointer-events: auto; }
 .pa-note-toast button { border: 0; background: none; color: #7fd8f2; font: 700 .9rem var(--sans, system-ui, sans-serif); cursor: pointer; }
 @media (max-width: 760px) {
-  .pa-notes-fab { left: 12px; bottom: 12px; padding: 9px 14px; }
+  .pa-notes-fab { left: 12px; bottom: 12px; width: 46px; height: 46px; }
   .pa-notes-panel { right: 8px; left: 8px; width: auto; bottom: 64px; max-height: 72vh; }
 }
 @media (prefers-reduced-motion: reduce) { mark.pa-hl.flash { animation: none; } .pa-note-toast { transition: none; } }

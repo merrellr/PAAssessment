@@ -10,7 +10,7 @@
   var C = window.CompassCore;
   if (!C) return;
   var KEY = 'pa_compass_v1';
-  var ICON = '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m15.5 8.5-2 5-5 2 2-5z"/></svg>';
+  var ICON = C.ICON;   // CompassIcon (compass-core.js)
   var EXPAND = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>';
   var SHRINK = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 14h6v6M20 10h-6V4M14 10l7-7M3 21l7-7"/></svg>';
   var CLOSE = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>';
@@ -55,7 +55,7 @@
 
   function paintChrome() {
     var k = kind();
-    panel.querySelector('.cp-sees').textContent = 'Sees: ' + C.SEES[k] + ' and your courses';
+    panel.querySelector('.cp-sees').textContent = 'Sees: ' + C.seesLine(k);
     input.placeholder = C.PLACEHOLDER[k];
     panel.classList.toggle('full', !!state.full);
     document.documentElement.classList.toggle('cp-full-open', !!(state.open && state.full));

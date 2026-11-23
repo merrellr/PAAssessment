@@ -10,6 +10,13 @@
 (function (root) {
   'use strict';
 
+  // CompassIcon: the one Compass mark (circle, compass star, blue north needle), used at every Compass entry point on
+  // both sites. Copies: pa-shell.js (ICON.compass) and www's assets/js/compass-www.js; tests/compass-core.test.mjs keeps them identical.
+  // It draws in currentColor, with the needle always blue, so it sits on the slate disc of the button and the panel.
+  var ICON = '<svg class="pa-cicon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="10.6" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M12 3.7 13.2 10.8 20.3 12 13.2 13.2 12 20.3 10.8 13.2 3.7 12 10.8 10.8Z" fill="currentColor" stroke="none"/><path d="M18.15 5.85 12 12 13.94 13.94Z" fill="#2563EB" stroke="none"/><path d="M18.15 5.85 12 12 10.06 10.06Z" fill="#5B9BFF" stroke="none"/><path d="M5.85 18.15 12 12 13.94 13.94Z" fill="#64748B" stroke="none"/><path d="M5.85 18.15 12 12 10.06 10.06Z" fill="#94A3B8" stroke="none"/><circle cx="12" cy="12" r="1.05" fill="#0F172A" stroke="none"/></svg>';
+  // The line under "Compass" in the panel: what it can see on this kind of page.
+  var SEES_LINE = { home: 'Your assessment & learning plan', learning: 'Your assessment & learning plan' };
+  function seesLine(k) { return SEES_LINE[k] || ((SEES[k] || SEES.page) + ' and your courses'); }
   var SEES = { lesson: 'This lesson', home: 'Your home page', learning: 'Your courses', tool: 'This piece of work',
     tools: 'Your toolkit', notes: 'Your notes', page: 'This page', article: 'This article', book: 'This chapter' };
   var PLACEHOLDER = { lesson: 'Ask about this lesson…', home: 'Ask about your learning…', learning: 'Ask about the courses…',
@@ -184,6 +191,6 @@
     return out;
   }
 
-  root.CompassCore = { fitRequest: fitRequest, URL_MAX: URL_MAX, SEES: SEES, LEARNING: LEARNING, retrieve: retrieve, PLACEHOLDER: PLACEHOLDER, SUGGEST: SUGGEST, PAGE_CHARS: PAGE_CHARS, HISTORY: HISTORY,
+  root.CompassCore = { ICON: ICON, SEES_LINE: SEES_LINE, seesLine: seesLine, fitRequest: fitRequest, URL_MAX: URL_MAX, SEES: SEES, LEARNING: LEARNING, retrieve: retrieve, PLACEHOLDER: PLACEHOLDER, SUGGEST: SUGGEST, PAGE_CHARS: PAGE_CHARS, HISTORY: HISTORY,
     terms: terms, chunks: chunks, pickPage: pickPage, history: history, cleanUrl: cleanUrl, sources: sources, render: render, esc: esc, errorText: errorText };
 })(typeof window !== 'undefined' ? window : globalThis);
