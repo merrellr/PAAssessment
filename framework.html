@@ -326,7 +326,7 @@ async function fetchAssessmentResult(user){
     window[cb] = function(result){ delete window[cb]; script.remove(); resolve(result || null); };
     script.src = RESULTS_LOG_URL + '?action=lookup&email=' + encodeURIComponent(email) + '&idToken=' + encodeURIComponent(idToken) + '&callback=' + cb;
     script.onerror = function(){ delete window[cb]; script.remove(); resolve(null); };
-    document.body.appendChild(script);
+    (window.PAJsonp || function (s) { document.body.appendChild(s); })(script);
   });
 }
 

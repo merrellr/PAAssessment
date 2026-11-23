@@ -119,7 +119,7 @@
       window[cb] = (r) => finish(r || null);
       s.onerror = () => finish(null);
       s.src = BACKEND + '?' + new URLSearchParams(Object.assign({ action: 'emailPrefs', u: link.u, k: link.k }, params, { callback: cb })).toString();
-      document.body.appendChild(s);
+      (window.PAJsonp || function (x) { document.body.appendChild(x); })(s);
     });
   }
   function show(id){ ['stateLoading', 'stateError', 'stateReady'].forEach(k => { $(k).hidden = k !== id; }); }

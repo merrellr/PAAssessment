@@ -33,9 +33,9 @@
   .ch-thread{ display:flex; flex-direction:column; gap: 18px; min-height: 240px; }
   .msg{ display:flex; gap: 12px; align-items:flex-start; }
   .msg .who{ flex:none; display:grid; place-items:center; width: 34px; height: 34px; border-radius: 50%; background: var(--pa-primary); color: var(--pa-btn-ink); font-size: .75rem; font-weight: 800; }
-  .msg.coach .who{ background: #1e293b; color: #fff; box-shadow: inset 0 0 0 1px rgba(255,255,255,.12); }
+  .msg.coach .who{ background: var(--pa-cdisc); color: var(--pa-cdisc-ink); box-shadow: inset 0 0 0 1px var(--pa-cdisc-line); }
   .msg.coach .who .pa-cicon{ width: 24px; height: 24px; }
-  .ico-compass{ background: #1e293b !important; color: #fff !important; }
+  .ico-compass{ background: var(--pa-cdisc) !important; color: var(--pa-cdisc-ink) !important; box-shadow: inset 0 0 0 1px var(--pa-cdisc-line); }
   .ch-head .ico.ico-compass svg{ width: 32px; height: 32px; }
   .msg .who svg{ width: 17px; height: 17px; fill:none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
   .msg.me{ flex-direction: row-reverse; }

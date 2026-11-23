@@ -1132,7 +1132,7 @@ function gradeScenario(answer){
     window[cb] = (result) => finish(result || null);
     script.onerror = () => finish(null);
     script.src = RESULTS_LOG_URL + '?action=gradeScenario&answer=' + encodeURIComponent(answer.slice(0, SCENARIO_MAX_CHARS)) + '&cid=' + encodeURIComponent(getScenarioClientId()) + '&callback=' + cb;
-    document.body.appendChild(script);
+    (window.PAJsonp || function (s) { document.body.appendChild(s); })(script);
   });
 }
 
