@@ -146,13 +146,14 @@
   }
   function homeCard(s, next) {
     var icon = (root.PAIcons && root.PAIcons.compass) || ICON;
-    return '<div class="cc-home-ico cc-home-compass" aria-hidden="true">' + icon + '</div><div class="cc-home-main"><span class="eyebrow">Compass Suggests</span>' +
-      '<p class="cc-home-t"><b>' + esc(next.title) + '.</b> ' + esc(next.why.split(/(?<=\.)\s/)[0]) + '</p>' +
-      '<form class="cc-ask cc-ask-sm" data-coach-ask><input type="text" maxlength="300" placeholder="Ask Compass…" aria-label="Ask Compass"><button type="submit" aria-label="Ask">↑</button></form>' +
-      '<div class="cc-try" aria-label="Example questions"><span>Try:</span>' + examples(s, next).map(function (q) {
-        return '<button type="button" class="cc-try-q" data-try="' + esc(q) + '">' + esc(q) + '</button>'; }).join('') + '</div></div>' +
+    return '<div class="cc-home-top"><div class="cc-home-main"><span class="eyebrow">Compass Suggests</span>' +
+      '<p class="cc-home-t"><b>' + esc(next.title) + '.</b> ' + esc(next.why.split(/(?<=\.)\s/)[0]) + '</p></div>' +
       '<div class="cc-home-go"><a class="cc-btn sm" href="' + esc(next.action.href) + '" data-coach-go="' + esc(next.kind) + '">' + esc(next.action.label) + '</a>' +
-      '<a class="linklike" href="/my-learning">Open My Learning' + ARROW + '</a></div>';
+      '<a class="linklike" href="/my-learning">Open My Learning' + ARROW + '</a></div></div>' +
+      '<form class="cc-ask cc-ask-home" data-coach-ask><span class="cc-ask-compass" aria-hidden="true">' + icon + '</span>' +
+      '<input type="text" maxlength="300" placeholder="Ask Compass…" aria-label="Ask Compass"><button type="submit" aria-label="Ask">↑</button></form>' +
+      '<div class="cc-try" aria-label="Example questions"><span>Try:</span>' + examples(s, next).map(function (q) {
+        return '<button type="button" class="cc-try-q" data-try="' + esc(q) + '">' + esc(q) + '</button>'; }).join('') + '</div>';
   }
 
   // The ask box: answers from the lessons (Ask, in pa-shell.js) for now.

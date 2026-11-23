@@ -235,7 +235,7 @@ if (window.self === window.top) {
       window[cb] = (r) => finish(r || null);
       script.onerror = () => finish(null);
       script.src = BACKEND + '?' + new URLSearchParams(Object.assign({}, params, { callback: cb })).toString();
-      document.body.appendChild(script);
+      (window.PAJsonp || function (s) { document.body.appendChild(s); })(script);
     });
   }
   // For the search menu's "Ask AI" (pa-shell.js) and the feedback form: the signed-in person's token, and the same

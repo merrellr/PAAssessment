@@ -201,7 +201,7 @@
     ["Courses and progress", "Does my progress save?", "Yes, automatically, whenever you are signed in. Open a course from your dashboard and you pick up where you left off.", "progress save resume continue course lesson lost"],
     ["Courses and progress", "Can I set a weekly goal?", 'Yes. On <a href="/profile#goals">My Profile</a>, choose how many lessons a week and up to three focus areas. Your dashboard shows how this week is going, and your check-in email reports on it.', "goal target weekly focus areas plan habit"],
     ["Courses and progress", "Where are my notes?", 'Highlights, notes and tags you make in lessons, on your toolkit work and in Product+ articles are on <a href="/my-notes">My notes</a> (also in the Profile menu, and on your Home page). The answers you write in lessons are under <b>Your notes</b> on your dashboard. All of them are private to you, and are never shared with a company.', "notes reflections answers private"],
-    ["Courses and progress", "Can I ask a question about a lesson?", "Yes. Type your question in the box above and choose <b>Ask the lessons</b>, or press Ctrl K (⌘K on a Mac) on any page. The answer comes only from the course lessons, with links to them.", "ask ai question lesson course help"],
+    ["Courses and progress", "Can I ask a question about a lesson?", "Yes. Type your question in the box above and choose <b>Ask Compass</b>, or press Ctrl K (⌘K on a Mac) on any page. The answer comes only from the course lessons, with links to them.", "ask ai question lesson course help"],
     ["Courses and progress", "What is Compass?", 'Compass is the assistant in the header. Open it on any page and ask about what you’re looking at: the lesson, your progress, the toolkit work you have open, or your notes. It answers only from that page and the course, shows its sources, and sees nothing until you ask. Expand it to full screen with the arrows button. Each person can ask 25 questions a day.', "compass assistant ai ask question chat help explain quiz"],
     ["Your account", "How do I change my password or email?", 'Change your password from the <b>Profile</b> menu on your dashboard. Change your email on <a href="/profile">My Profile</a>; we send a link to the new address to confirm it.', "password email change account login"],
     ["Your account", "Can I sign in with my personal email too?", 'Yes. On <a href="/profile#signin">My Profile</a>, under <b>Ways to sign in</b>, add your personal Google account (or, if you sign in with Google, another email). Every way opens the same account, so your learning stays with you if you change jobs.', "personal email gmail second email link account sign in google change job keep progress"],
@@ -233,7 +233,7 @@
       '<span><b><em class="pa-help-new" hidden>New</em>Take the tour of this page</b><small>A click-through guide, about a minute</small></span></button>' +
       '<input type="search" class="pa-help-q" placeholder="What do you need help with?" aria-label="Search help" autocomplete="off">' +
       '<div class="pa-help-ask" hidden></div>' +
-      '<div class="pa-help-list">' + list + '</div><p class="pa-help-none" hidden>No answer here yet. Ask the lessons, or send us a note below.</p>' +
+      '<div class="pa-help-list">' + list + '</div><p class="pa-help-none" hidden>No answer here yet. Ask Compass, or send us a note below.</p>' +
       '<div class="pa-panel-foot pa-help-foot"><a class="pa-btn" href="/feedback">Send feedback</a>' +
       '<button type="button" class="pa-btn ghost" data-pa="tour" data-tour-fallback>Replay the home tour</button>' +
       '<a class="pa-btn ghost" href="mailto:info@productadvisory.co?subject=' + encodeURIComponent("Help with Product Advisory Learning") + '">Email us</a>' +
@@ -251,7 +251,7 @@
         if (window.replayDashboardTour) window.replayDashboardTour(); else location.href = "/lms-dashboard?tour=1";
         return;
       }
-      if (b && b.getAttribute("data-pa") === "ask") { var q = helpQ.value.trim(); closeHelp(); openPalette(); palInput.value = q; showAnswer(q); }
+      if (b && b.getAttribute("data-pa") === "ask") { var q = helpQ.value.trim(); closeHelp(); askOrAnswer(q); }
     });
     help.addEventListener("keydown", function (e) { if (e.key === "Escape") closeHelp(); });
     helpQ.addEventListener("input", filterHelp);
@@ -276,7 +276,7 @@
     help.querySelector(".pa-help-none").hidden = !qs.length || shown > 0;
     var ask = help.querySelector(".pa-help-ask");
     ask.hidden = !isQuestion(q);
-    ask.innerHTML = ask.hidden ? "" : '<button type="button" class="pa-help-askbtn" data-pa="ask"><span aria-hidden="true">✦</span> Ask the lessons: “' + esc(q) + "”</button>";
+    ask.innerHTML = ask.hidden ? "" : '<button type="button" class="pa-help-askbtn" data-pa="ask"><span class="pa-cmark" aria-hidden="true">' + ICON.compass + '</span> Ask Compass: “' + esc(q) + "”</button>";
   }
   function openHelp() {
     if (!help) buildHelp();
@@ -440,6 +440,9 @@
     acct.idToken().then(function (tok) { if (tok) acct.backend({ action: "askMiss", idToken: tok, q: q }); }).catch(function () {});
   }
   var askSeq = 0;
+  function askOrAnswer(q) {
+    askCompass(q).catch(function () { openPalette(); palInput.value = q; showAnswer(q); });
+  }
   function showAnswer(q) {
     var seq = ++askSeq;
     palItems = [];
@@ -459,7 +462,7 @@
     }).then(function (r) {
       if (!r || !r.ok) throw { code: r && r.error || "down" };
       box(head + '<div class="pa-ans">' + answerHtml(r.text, used) + "</div>" + sourcesHtml(used, r.cited && r.cited.length ? r.cited : null) +
-        '<p class="pa-note">An AI answer written only from your course lessons. Open a lesson for the full picture.</p>');
+        '<p class="pa-note">Compass wrote this only from your course lessons. Open a lesson for the full picture.</p>');
     }).catch(function (e) {
       var code = e && e.code, msg;
       if (code === "nothing") reportMiss(q);
@@ -475,7 +478,7 @@
     pal = document.createElement("div");
     pal.className = "palette-backdrop";
     pal.innerHTML = '<div class="palette" role="dialog" aria-modal="true" aria-label="Search">' +
-      '<input type="text" placeholder="Search the lessons, or ask a question…" aria-label="Search or ask" autocomplete="off">' +
+      '<input type="text" placeholder="Search the lessons, or ask Compass…" aria-label="Search or ask Compass" autocomplete="off">' +
       '<ul role="listbox"></ul>' +
       '<div class="foot"><span><kbd>↑</kbd> <kbd>↓</kbd> move</span><span><kbd>↵</kbd> open</span><span><kbd>esc</kbd> close</span></div></div>';
     document.body.appendChild(pal);
@@ -491,7 +494,7 @@
     });
   }
   function go(it) {
-    if (it.ask) return showAnswer(it.ask);
+    if (it.ask) { closePalette(); return askOrAnswer(it.ask); }
     closePalette();
     if (it.run) return it.run();
     if (it.ext) window.open(it.u, "_blank", "noopener");
@@ -502,7 +505,7 @@
     var ql = q.toLowerCase();
     var acts = ACTIONS.filter(function (a) { return !ql || (a.t + " " + a.g).toLowerCase().indexOf(ql) > -1; });
     var hits = q ? searchIndex(q).map(function (it) { return { g: KIND[it.k], t: it.t, sub: it.s, i: it.k === "lesson" ? "›" : it.k === "course" ? "▤" : "◆", u: clean(it.u) }; }) : [];
-    palItems = (q && isQuestion(q) ? [{ g: "Ask AI", t: "Ask the lessons: “" + q + "”", i: "✦", ask: q }] : []).concat(hits, acts);
+    palItems = (q && isQuestion(q) ? [{ g: "Ask Compass", t: "Ask Compass: “" + q + "”", i: "✦", ico: ICON.compass, ask: q }] : []).concat(hits, acts);
     if (q && !hits.length && window.PA_SEARCH && !isQuestion(q)) {
       palItems.push({ g: "Ask Product Advisory", t: "Ask on productadvisory.co: “" + q + "”", i: "?", u: WWW + "?ask=" + encodeURIComponent(q), ext: true });
     }
@@ -510,7 +513,7 @@
     var html = "", grp = "";
     palItems.forEach(function (a, n) {
       if (a.g !== grp) { grp = a.g; html += '<li class="grp" role="presentation">' + esc(grp) + "</li>"; }
-      html += '<li><button type="button" role="option" data-n="' + n + '"><span class="pi">' + esc(a.i) + '</span><span class="pa-txt">' + esc(a.t) +
+      html += '<li><button type="button" role="option" data-n="' + n + '"><span class="pi' + (a.ico ? ' pi-compass' : '') + '">' + (a.ico || esc(a.i)) + '</span><span class="pa-txt">' + esc(a.t) +
         (a.sub ? '<span class="pa-sub">' + esc(a.sub) + "</span>" : "") + "</span>" + (a.ext ? "<small>opens in a new tab</small>" : "") + "</button></li>";
     });
     if (!palItems.length) html = '<li class="pa-empty">' + (window.PA_SEARCH ? "No matches." : "Loading courses…") + "</li>";
@@ -567,9 +570,27 @@
   }
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init); else init();
 
+  /* ---------------------------------------------------------------- talking to the Apps Script
+     Every page asks the Apps Script (script.google.com) with a <script> tag and a callback ("JSONP"). A browser signed
+     in to several Google accounts sends their cookies with that request, and Google can answer with an error page
+     instead of running the script. So the request is first made with fetch and no cookies at all (the script's
+     answers allow it); only if that fails does the page fall back to the <script> tag as before.
+     PAJsonp(script): script is the prepared <script> element (src with ?callback=name, and window[name] set). */
+  window.PAJsonp = function (script) {
+    var src = script.src || "", m = /[?&]callback=([A-Za-z_$][\w$]*)/.exec(src);
+    var fallback = function () { if (!script.parentNode) document.body.appendChild(script); };
+    if (!m || !/^https:\/\/script\.google\.com\//.test(src) || !window.fetch) return fallback();
+    fetch(src, { credentials: "omit", redirect: "follow", cache: "no-store" }).then(function (r) { return r.text(); }).then(function (t) {
+      var x = /^\s*([A-Za-z_$][\w$]*)\(([\s\S]*)\);?\s*$/.exec(t);
+      if (!x || x[1] !== m[1]) return fallback();
+      var data; try { data = JSON.parse(x[2]); } catch (e) { return fallback(); }
+      if (typeof window[m[1]] === "function") window[m[1]](data);
+    }).catch(fallback);
+  };
+
   /* ---------------------------------------------------------------- Compass, the assistant (compass-ui.js)
      Loaded the first time it's opened, and again on the next page if it was left open there. */
-  var compassLoading = null, COMPASS_V = "?v=20261123b";   // change this when compass-*.js change, so browsers fetch the new copy at once
+  var compassLoading = null, COMPASS_V = "?v=20261123c";   // change this when compass-*.js change, so browsers fetch the new copy at once
   function loadCompass() {
     if (window.PACompass) return Promise.resolve();
     if (compassLoading) return compassLoading;

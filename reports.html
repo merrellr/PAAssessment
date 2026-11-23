@@ -283,7 +283,7 @@ function callBackend(params){
     window[cb] = (r) => finish(r || null);
     script.onerror = () => finish(null);
     script.src = RESULTS_LOG_URL + '?' + new URLSearchParams(Object.assign({}, params, { callback: cb })).toString();
-    document.body.appendChild(script);
+    (window.PAJsonp || function (s) { document.body.appendChild(s); })(script);
   });
 }
 

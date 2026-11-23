@@ -86,7 +86,7 @@ let compassLoading = null;
 function loadCompass() {
   if (compassLoading) return compassLoading;
   const add = (src) => new Promise((resolve, reject) => { const s = document.createElement('script'); s.src = src; s.onload = resolve; s.onerror = reject; document.head.appendChild(s); });
-  compassLoading = Promise.all([add('compass-core.js?v=20261123b'), add('ask-index.js')]).catch((err) => { compassLoading = null; throw err; });
+  compassLoading = Promise.all([add('compass-core.js?v=20261123c'), add('ask-index.js')]).catch((err) => { compassLoading = null; throw err; });
   return compassLoading;
 }
 function backend(params) {   // the same JSONP call as account-menu.js
@@ -98,7 +98,12 @@ function backend(params) {   // the same JSONP call as account-menu.js
     window[cb] = (r) => finish(r || null);
     script.onerror = () => finish(null);
     script.src = BACKEND + '?' + new URLSearchParams(Object.assign({}, params, { callback: cb })).toString();
-    document.body.appendChild(script);
+    // fetch first, with no cookies: several Google accounts signed in can make Google answer the <script> tag with an error page
+    fetch(script.src, { credentials: 'omit', redirect: 'follow', cache: 'no-store' }).then((r) => r.text()).then((t) => {
+      const x = /^\s*([A-Za-z_$][\w$]*)\(([\s\S]*)\);?\s*$/.exec(t);
+      if (!x || x[1] !== cb) throw new Error('not jsonp');
+      finish(JSON.parse(x[2]) || null);
+    }).catch(() => { if (!done) document.body.appendChild(script); });
   });
 }
 async function compassAsk(d, origin) {

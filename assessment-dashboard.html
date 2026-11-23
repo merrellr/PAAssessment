@@ -120,7 +120,7 @@ function loadDashboard(){
   script.onerror = function(){
     content.innerHTML = '<div class="empty-state">Couldn\'t load results right now. Check back shortly.</div>';
   };
-  document.body.appendChild(script);
+  (window.PAJsonp || function (s) { document.body.appendChild(s); })(script);
 }
 
 function renderDashboard(stats){
