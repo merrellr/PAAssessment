@@ -40,6 +40,27 @@ const key = (k) => document.dispatchEvent(new KeyboardEvent('keydown', { key: k,
         window.dispatchEvent(new Event('pa-membership-changed')); await sleep(100);
         t('announcing it again asks nothing more', adminCalls().length === 1);
       }
+    } else if (/^terms/.test(scn)){
+      const dlg = () => $('pa-terms');
+      if (scn === 'termsold' || scn === 'termsdecline'){
+        t('an older account that never agreed to the terms is asked, in a dialog', !!dlg() && dlg().getAttribute('role') === 'dialog' && dlg().getAttribute('aria-modal') === 'true');
+        t('it links to the Terms of Use and the Privacy Policy', !!dlg().querySelector('a[href$="/terms-of-use"]') && !!dlg().querySelector('a[href$="/privacy-policy"]'));
+        t('"I agree" has the focus', document.activeElement === dlg().querySelector('.pt-yes'));
+        if (scn === 'termsold'){
+          dlg().querySelector('.pt-yes').click(); await sleep(200);
+          const rec = window.__store['progress/uT'];
+          t('"I agree" saves when, on their record, and keeps everything else', rec && !!Date.parse(rec.agreedToTermsAt) && rec.profile && rec.profile.jobTitle === 'PM', JSON.stringify(rec));
+          t('and the dialog goes away', !dlg());
+        } else {
+          dlg().querySelector('.pt-no').click(); await sleep(300);
+          t('"Sign out" signs them out without saving an agreement', !window.__store['progress/uT'].agreedToTermsAt && !dlg());
+        }
+      } else if (scn === 'termsagreed'){ t('an account that agreed is not asked', !dlg());
+      } else if (scn === 'termsjustmade'){ t('a brand-new account is not asked (its sign-up page saves the agreement)', !dlg());
+      } else if (scn === 'termsnorecord'){ t('an account with no record yet is not asked', !dlg());
+      }
+      const u = { metadata: { creationTime: new Date(Date.now() - 864e5).toUTCString() } };
+      t('the rule: no agreement means ask; an agreement means not', window.PATermsNeeded({}, u, Date.now()) === true && window.PATermsNeeded({ agreedToTermsAt: '2026-01-01T00:00:00Z' }, u, Date.now()) === false);
     } else if (scn === 'oldaccount'){
       t('an account made ten days ago does not ask', window.__calls.length === 0);
       t('the menu is unaffected', !!$('paAccountBtn'));

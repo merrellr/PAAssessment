@@ -229,6 +229,9 @@ try {
   foreach ($s in 'plain', 'noname', 'owner', 'admin', 'removedadmin', 'memberrole', 'signedout') {
     $results += Run-Page "profile menu: $s" "$base/menu-test.html?scn=$s" 30000
   }
+  foreach ($s in 'termsold', 'termsdecline', 'termsagreed', 'termsjustmade', 'termsnorecord') {
+    $results += Run-Page "profile menu: $s" "$base/menu-test.html?scn=$s" 30000
+  }
   foreach ($s in 'newaccount', 'oldaccount', 'welcomedone', 'welcomefail', 'welcomedown') {
     $results += Run-Page "profile menu: $s" "$base/menu-test.html?scn=$s" 30000
   }
