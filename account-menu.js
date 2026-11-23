@@ -319,8 +319,74 @@ if (window.self === window.top) {
       const snap = await getDoc(doc(db, 'progress', user.uid));
       if (photoUid === user.uid) setPhoto(snap.exists() && snap.data().profile ? snap.data().profile.photo : '');
       if (photoUid === user.uid) syncTours(user, snap.exists() ? snap.data().toursTaken : null);
+      if (photoUid === user.uid && snap.exists()) termsCheck(user, snap.data());   // no record yet: nothing to ask on
     } catch (e) { /* keep the cached one */ }
   }
+
+  /* Agreeing to the Terms of Use and Privacy Policy. Every way of signing up asks for it (a box to tick, or the line
+     by "Continue with Google") and keeps the time on the account (progress/{uid}.agreedToTermsAt). Accounts from
+     before that, and anyone who hasn't agreed since the terms last changed, are asked once, here, on whatever page
+     they open: "I agree" saves it; "Sign out" leaves. Brand-new accounts are left alone for a few minutes while
+     their sign-up page saves it.
+     When the terms change: set TERMS_UPDATED to that date (YYYY-MM-DD) and everyone who agreed before it is asked
+     again, with TERMS_CHANGED as the reason. */
+  const TERMS_UPDATED = '';
+  const TERMS_CHANGED = 'We have updated our Terms of Use and Privacy Policy.';
+  const TERMS_URL = 'https://www.productadvisory.co/terms-of-use', PRIVACY_URL = 'https://www.productadvisory.co/privacy-policy';
+  function termsNeeded(data, user, now){
+    const made = user.metadata && user.metadata.creationTime ? Date.parse(user.metadata.creationTime) : 0;
+    if (made && now - made < 10 * 60 * 1000) return false;          // just signed up: their sign-up page saves it
+    const at = Date.parse((data && data.agreedToTermsAt) || '') || 0;
+    if (!at) return true;
+    return !!TERMS_UPDATED && at < Date.parse(TERMS_UPDATED + 'T00:00:00Z');
+  }
+  window.PATermsNeeded = termsNeeded;   // for the tests
+  function termsCheck(user, data){
+    if (!termsNeeded(data, user, Date.now()) || document.getElementById('pa-terms') || /\/join(\.html)?$/.test(location.pathname)) return;
+    const css = document.createElement('style');
+    css.textContent = '#pa-terms{position:fixed;inset:0;z-index:300;display:grid;place-items:center;padding:16px;background:rgba(10,18,32,.55);}' +
+      '#pa-terms .pt-box{width:min(460px,100%);background:var(--surface,#fff);color:var(--ink,#16213E);border:1px solid var(--line,#E3E9F0);border-radius:16px;padding:24px;box-shadow:0 24px 60px rgba(10,18,32,.3);font:15px/1.55 var(--sans,system-ui,sans-serif);}' +
+      '#pa-terms h2{margin:0 0 8px;font:700 1.2rem var(--display,var(--sans,system-ui));color:var(--navy-deep,#12305e);}' +
+      '#pa-terms p{margin:0 0 12px;color:var(--ink-soft,#4B5768);}#pa-terms a{color:var(--cyan-ink,var(--navy,#1A4584));}' +
+      '#pa-terms .pt-row{display:flex;gap:10px;flex-wrap:wrap;justify-content:flex-end;margin-top:18px;}' +
+      '#pa-terms button{min-height:42px;padding:0 18px;border-radius:21px;font:700 .95rem var(--sans,system-ui);cursor:pointer;}' +
+      '#pa-terms .pt-yes{border:0;background:linear-gradient(135deg,#1c4587,#2a7fb8);color:#fff;}' +
+      '#pa-terms .pt-no{border:1.5px solid var(--line,#E3E9F0);background:none;color:var(--ink-soft,#4B5768);}' +
+      '#pa-terms button:focus-visible{outline:3px solid var(--cyan,#35C2E8);outline-offset:2px;}#pa-terms .pt-err{color:#b42318;min-height:1.2em;margin:8px 0 0;}';
+    const box = document.createElement('div');
+    box.id = 'pa-terms';
+    box.setAttribute('role', 'dialog'); box.setAttribute('aria-modal', 'true'); box.setAttribute('aria-labelledby', 'pa-terms-h');
+    const updated = !!(data && data.agreedToTermsAt);
+    box.innerHTML = '<div class="pt-box"><h2 id="pa-terms-h">' + (updated ? 'Our terms have changed' : 'One quick thing before you go on') + '</h2>' +
+      '<p>' + (updated ? TERMS_CHANGED + ' ' : '') + 'To keep using Product Advisory Learning, please confirm that you agree to our ' +
+      '<a href="' + TERMS_URL + '" target="_blank" rel="noopener">Terms of Use</a> and <a href="' + PRIVACY_URL + '" target="_blank" rel="noopener">Privacy Policy</a>. ' +
+      'Your account, courses and progress stay just as they are.</p>' +
+      '<div class="pt-row"><button type="button" class="pt-no">Sign out</button><button type="button" class="pt-yes">I agree</button></div>' +
+      '<p class="pt-err" role="alert"></p></div>';
+    document.head.appendChild(css);
+    document.body.appendChild(box);
+    const yes = box.querySelector('.pt-yes'), no = box.querySelector('.pt-no'), err = box.querySelector('.pt-err');
+    const close = () => { box.remove(); css.remove(); };
+    yes.addEventListener('click', async () => {
+      yes.disabled = true; err.textContent = '';
+      try {
+        await setDoc(doc(db, 'progress', user.uid), { agreedToTermsAt: new Date().toISOString() }, { merge: true });
+        close();
+        try { if (window.gtag) window.gtag('event', 'terms_accept', { reason: updated ? 'updated' : 'existing_account' }); } catch (e) { /* no analytics */ }
+      } catch (e) { yes.disabled = false; err.textContent = 'That didn\'t save. Please check your connection and try again.'; }
+    });
+    no.addEventListener('click', () => { signOut(auth).finally(close); });   // each page shows its own signed-out view
+    // keep the keyboard inside the dialog
+    box.addEventListener('keydown', (e) => {
+      if (e.key !== 'Tab') return;
+      const f = [...box.querySelectorAll('a, button:not([disabled])')];
+      if (!f.length) return;
+      if (e.shiftKey && document.activeElement === f[0]) { e.preventDefault(); f[f.length - 1].focus(); }
+      else if (!e.shiftKey && document.activeElement === f[f.length - 1]) { e.preventDefault(); f[0].focus(); }
+    });
+    setTimeout(() => yes.focus(), 30);
+  }
+  window.addEventListener('pa-auth', (e) => { if (!e.detail) { const t = document.getElementById('pa-terms'); if (t) t.remove(); } });
 
   /* The tours someone has taken (tour.js) follow their account: a tour taken on the laptop doesn't come back on the
      phone. progress/{uid}.toursTaken holds the same list as this browser's pa-tours-taken ("id" or "id@version"). */

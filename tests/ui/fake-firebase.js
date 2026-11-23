@@ -59,6 +59,8 @@ export const __store = store;
 window.__store = store;
 window.__writeLog = [];
 if (window.__seed) window.__seed(store, Timestamp);
+// Accounts in the tests have agreed to the terms (account-menu.js asks anyone who hasn't), unless a test says otherwise.
+if (!window.__termsUnset) Object.keys(store).forEach(k => { if (/^progress\/[^/]+$/.test(k) && store[k] && !store[k].agreedToTermsAt) store[k].agreedToTermsAt = '2026-01-01T00:00:00.000Z'; });
 
 const authCbs = [];   // like the real SDK, every listener hears about every sign-in and sign-out
 function fireAuth(u){ authCbs.slice().forEach(cb => cb(u)); }

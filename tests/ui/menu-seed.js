@@ -16,9 +16,14 @@
     : adminScn ? user('uJoin', 'join@x.com', 'Jo Joiner', 40 * 24 * hours)
     : scn.indexOf('admin') === 0 || scn === 'removedadmin' || scn === 'memberrole' ? user('uAdm', 'adm@x.com', 'Ada Admin')
     : scn === 'oldaccount' ? user('uOld', 'old@x.com', 'Old Hand', 10 * 24 * hours)
+    : /^terms/.test(scn) ? user('uT', 't@x.com', 'Terry Terms', scn === 'termsjustmade' ? 60000 : 200 * 24 * hours)
     : welcomeScn ? user('uNew', 'new@x.com', 'Nora Newcomer', 1 * hours)
     : user('uP', 'plain@x.com', 'Pat Plain');
+  // the terms: an older account with a record but no agreement on it (termsold, termsdecline, termsjustmade: made a
+  // minute ago), one that agreed (termsagreed), and one with no record at all (termsnorecord)
+  if (/^terms/.test(scn) && scn !== 'termsagreed') window.__termsUnset = true;
   window.__seed = function(store, Timestamp){
+    if (/^terms/.test(scn) && scn !== 'termsnorecord') store['progress/uT'] = { courses: {}, profile: { jobTitle: 'PM' } };
     if (scn === 'admin') store['memberships/uAdm'] = { orgId: 'orgA', role: 'admin', status: 'active' };
     if (scn === 'removedadmin') store['memberships/uAdm'] = { orgId: 'orgA', role: 'admin', status: 'removed' };
     if (scn === 'memberrole') store['memberships/uAdm'] = { orgId: 'orgA', role: 'member', status: 'active' };
