@@ -28,7 +28,7 @@ const ask = async (q) => { $('chInput').value = q; $('chForm').dispatchEvent(new
       t('the conversation so far goes with the next question', JSON.parse(s2.h).length === 2 && JSON.parse(s2.h)[0].t === 'How do I prioritize requests?' && s2.conv === sent.conv);
       t('it is kept in this browser', JSON.parse(localStorage.getItem('pa_coach_chat')).msgs.length === 4);
       await ask('One more question');
-      t('when the free chat runs out: the upgrade card, and no more typing', !$('chUpgrade').hidden && $('chForm').hidden && /used your free coach conversation/.test($('chUpgrade').textContent));
+      t('when the free chat runs out: the upgrade card, and no more typing', !$('chUpgrade').hidden && $('chForm').hidden && /used your free Compass Coach conversation/.test($('chUpgrade').textContent));
       await until(() => $('chRequest'));
       $('chRequest').click();
       await until(() => /your request is in/.test($('chUpgrade').textContent));
