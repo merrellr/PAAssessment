@@ -55,7 +55,7 @@
   .lg-points b{ color:#fff; }
   .lg-ico{ flex:none; width:32px; height:32px; border-radius:10px; display:grid; place-items:center; background: rgba(255,255,255,.12); }
   .lg-ico svg{ width:17px; height:17px; fill:none; stroke:#8fd9f2; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
-  .lg-ico-compass{ background:#1e293b; color:#fff; } .lg-ico-compass svg{ width:22px; height:22px; stroke:none; }
+  .lg-ico-compass{ background:#1e293b; color:#fff; border-radius:50%; box-shadow: inset 0 0 0 1px rgba(255,255,255,.14); } .lg-ico-compass svg{ width:22px; height:22px; stroke:none; }
   .lg-new{ margin: auto 0 0; padding-top: 16px; border-top: 1px solid rgba(255,255,255,.18); font-size:.875rem; color:#d6e3f5; }
   .lg-new a{ color:#fff; font-weight:700; }
   .lg-card{ margin:0 !important; padding: 30px 30px 24px !important; border-radius: 20px !important; }
@@ -229,6 +229,17 @@
   .home-grid{ display:grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
   /* My notes fills what's left of its row: the whole row under three cards, or two columns beside My Toolkits */
   @media (min-width: 901px){ .home-notes{ grid-column: 1 / -1; } .home-grid:has(.lead.wide) .home-notes{ grid-column: span 2; } }
+  /* With the wide "Your next best step", My Toolkits runs down the right beside it and My notes, so each card keeps its
+     own height (no stretched card with empty space under its button) */
+  @media (min-width: 901px){
+    .home-grid:has(.lead.wide){ grid-auto-flow: row dense; align-items: start; }
+    .home-grid:has(.lead.wide) #homeTools{ grid-column: 3; grid-row: 1 / span 2; align-self: start; }
+    .home-grid:has(.lead.wide) #homeTools .home-go{ margin-top: 4px; }
+    .home-grid:has(.lead.wide) .home-card.lead.wide{ grid-column: 1 / span 2; grid-row: 1; }
+    .home-grid:has(.lead.wide) .home-notes{ grid-column: 1 / span 2; grid-row: 2; }
+  }
+  .home-card.lead.wide .home-go{ margin-top: 14px; padding-top: 0; }
+  .home-card.lead.wide .step-side{ align-self: flex-start; }
   .home-notes .hn-head{ display:flex; justify-content:space-between; align-items:baseline; gap: 12px; flex-wrap: wrap; }
   .home-notes .hn-cats{ display:flex; flex-wrap:wrap; gap: 6px 14px; font-size: 0.75rem; color: var(--gray); }
   .home-notes .hn-cats a{ color: var(--ink-soft); text-decoration: none; }
