@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="robots" content="noindex, nofollow">
-<title>Coach access — Product Advisory Learning</title>
+<title>Compass Coach access — Product Advisory Learning</title>
 <link rel="icon" href="/images/icons/favicon.svg" type="image/svg+xml">
 <link rel="icon" href="/images/icons/favicon-32.png" sizes="32x32" type="image/png">
 <link rel="apple-touch-icon" href="/images/icons/apple-touch-icon.png">
@@ -45,8 +45,8 @@
   <div id="page" hidden>
     <div class="card">
       <span class="eyebrow">Owner console</span>
-      <h1>Coach access</h1>
-      <p>Everyone gets one free conversation with the coach. People in a company get it with their seat. Anyone else needs access from you: grant it here when someone asks (no payment yet). Practice, readiness and gaps are free for everyone.</p>
+      <h1>Compass Coach access</h1>
+      <p>Everyone gets one free conversation with Compass Coach. People in a company get it with their seat. Anyone else needs access from you: grant it here when someone asks (no payment yet). Practice, readiness and gaps are free for everyone.</p>
     </div>
     <div class="card">
       <h2>Requests</h2>
@@ -107,7 +107,7 @@ document.addEventListener('click', async (e) => {
   try {
     if (b.dataset.grant) await grant(b.dataset.grant, b.dataset.email, 'From a request');
     if (b.dataset.dismiss) await deleteDoc(doc(db, 'coachRequests', b.dataset.dismiss));
-    if (b.dataset.revoke && confirm('Take away coach access? They keep everything else.')) await deleteDoc(doc(db, 'coachAccess', b.dataset.revoke));
+    if (b.dataset.revoke && confirm('Take away Compass Coach access? They keep everything else.')) await deleteDoc(doc(db, 'coachAccess', b.dataset.revoke));
     await load();
   } catch (err) { b.disabled = false; alert('That didn\'t save. Check your connection and try again.'); }
 });
@@ -115,7 +115,7 @@ $('grantForm').addEventListener('submit', async (e) => {
   e.preventDefault();
   const uid = $('gUid').value.trim(), email = $('gEmail').value.trim();
   if (!/^[A-Za-z0-9_-]{6,128}$/.test(uid)) { $('grantNotice').textContent = 'That doesn\'t look like an account ID.'; return; }
-  try { await grant(uid, email, 'Given by hand'); $('grantNotice').textContent = 'Done. They have the coach now.'; $('gUid').value = ''; $('gEmail').value = ''; await load(); }
+  try { await grant(uid, email, 'Given by hand'); $('grantNotice').textContent = 'Done. They have Compass Coach now.'; $('gUid').value = ''; $('gEmail').value = ''; await load(); }
   catch (err) { $('grantNotice').textContent = 'That didn\'t save. Try again.'; }
 });
 onAuthStateChanged(auth, async (user) => {

@@ -36,7 +36,8 @@
     menu: tiny('<path d="M4 7h16M4 12h16M4 17h16"/>'),
     close: tiny('<path d="M6 6l12 12M18 6 6 18"/>'),
     help: tiny('<circle cx="12" cy="12" r="9"/><path d="M9.6 9.3a2.5 2.5 0 0 1 4.8.9c0 1.7-2.4 2.2-2.4 3.6"/><path d="M12 17h.01"/>'),
-    compass: tiny('<circle cx="12" cy="12" r="9"/><path d="m15.5 8.5-2 5-5 2 2-5z"/>')
+    compass: '<svg class="pa-cicon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="10.6" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M12 3.7 13.2 10.8 20.3 12 13.2 13.2 12 20.3 10.8 13.2 3.7 12 10.8 10.8Z" fill="currentColor" stroke="none"/><path d="M18.15 5.85 12 12 13.94 13.94Z" fill="#2563EB" stroke="none"/><path d="M18.15 5.85 12 12 10.06 10.06Z" fill="#5B9BFF" stroke="none"/><path d="M5.85 18.15 12 12 13.94 13.94Z" fill="#64748B" stroke="none"/><path d="M5.85 18.15 12 12 10.06 10.06Z" fill="#94A3B8" stroke="none"/><circle cx="12" cy="12" r="1.05" fill="#0F172A" stroke="none"/></svg>',   // CompassIcon: the same as CompassCore.ICON (compass-core.js)
+    guide: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4.5 3.75 6.75v13L9 17.5l6 2.25 5.25-2.25v-13L15 6.75Z" stroke-width="1.8" stroke-linejoin="round"/><path d="M9 4.5v13M15 6.75v13" stroke-width="1.8" stroke-linecap="round"/></svg>'
   };
   var WORDMARK = '<span class="pa-wm" aria-hidden="true"><span class="pa-wm-box">Product</span><span>&Lambda;dvisory</span></span>';
 
@@ -228,7 +229,7 @@
       '<div class="pa-panel-head"><div><h2 id="paHelpTitle">Help</h2></div><button type="button" class="pa-icon" data-pa="close" aria-label="Close">' + ICON.close + "</button></div>" +
       "<p>Search the answers below, ask about the course content, or tell us what's missing.</p>" +
       // this page's quick tour (tour.js): once taken, its button leaves the page and lives here
-      '<button type="button" class="pa-help-tour" data-pa="tour" hidden><span class="pa-help-tour-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="m15.5 8.5-2 5-5 2 2-5z"/></svg></span>' +
+      '<button type="button" class="pa-help-tour" data-pa="tour" hidden><span class="pa-help-tour-ico" aria-hidden="true">' + ICON.guide + '</span>' +
       '<span><b><em class="pa-help-new" hidden>New</em>Take the tour of this page</b><small>A click-through guide, about a minute</small></span></button>' +
       '<input type="search" class="pa-help-q" placeholder="What do you need help with?" aria-label="Search help" autocomplete="off">' +
       '<div class="pa-help-ask" hidden></div>' +
@@ -303,8 +304,8 @@
     { g: "Go to", t: "Home", i: "⌂", u: "/lms-dashboard" },
     { g: "Go to", t: "My Learning", i: "▤", u: "/my-learning" },
     { g: "Go to", t: "My Toolkits", i: "◇", u: "/my-tools" },
-    { g: "Go to", t: "Practice with your coach", i: "◎", u: "/practice" },
-    { g: "Go to", t: "Talk to your coach", i: "✦", u: "/coach" },
+    { g: "Go to", t: "Practice with Compass", i: "◎", u: "/practice" },
+    { g: "Go to", t: "Talk to Compass Coach", i: "✦", u: "/coach" },
     { g: "Go to", t: "The training framework", i: "◆", u: "/framework" },
     { g: "Go to", t: "My Profile", i: "☺", u: "/profile" },
     { g: "Go to", t: "My Badges", i: "★", u: "/profile#badges" },
@@ -568,7 +569,7 @@
 
   /* ---------------------------------------------------------------- Compass, the assistant (compass-ui.js)
      Loaded the first time it's opened, and again on the next page if it was left open there. */
-  var compassLoading = null, COMPASS_V = "?v=20261122e";   // change this when compass-*.js change, so browsers fetch the new copy at once
+  var compassLoading = null, COMPASS_V = "?v=20261123b";   // change this when compass-*.js change, so browsers fetch the new copy at once
   function loadCompass() {
     if (window.PACompass) return Promise.resolve();
     if (compassLoading) return compassLoading;
@@ -587,8 +588,9 @@
     var b = document.createElement("button");
     b.type = "button"; b.id = "paCompassFab"; b.className = "pa-compass-fab"; b.setAttribute("data-pa", "compass");
     b.setAttribute("aria-expanded", "false"); b.setAttribute("aria-controls", "paCompass");
-    b.setAttribute("aria-label", "Compass: ask about this page"); b.title = "Compass: ask about this page";
-    b.innerHTML = ICON.compass + "<span>Compass</span>";
+    // icon only, with "Ask Compass" as its name and tooltip
+    b.setAttribute("aria-label", "Ask Compass"); b.setAttribute("data-tip", "Ask Compass");
+    b.innerHTML = ICON.compass;
     b.addEventListener("click", openCompass);
     document.body.appendChild(b);
     // only for signed-in learners: shown at once when this device was signed in last time, then kept in step with sign-in
@@ -599,7 +601,10 @@
   }
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", compassButton); else compassButton();
   function openCompass() { loadCompass().then(function () { if (window.PACompass) window.PACompass.toggle(); }).catch(function () { /* offline: the button does nothing */ }); }
+  // Ask Compass a question from elsewhere on the page (the "Ask Compass…" box on Home)
+  function askCompass(q) { return loadCompass().then(function () { if (window.PACompass) window.PACompass.ask(q); }); }
   try { var cs = JSON.parse(sessionStorage.getItem("pa_compass_v1") || "null"); if (cs && cs.open) loadCompass().catch(function () {}); } catch (e) { /* storage off */ }
 
-  window.PAShell = { openHelp: openHelp, openSearch: openPalette, openPrefs: openPanel, toggleTheme: toggleTheme, search: searchIndex, loadIndex: loadIndex, retrieve: retrieve, loadAsk: loadAsk, ask: showAnswer, openCompass: openCompass };
+  window.PAShell = { openHelp: openHelp, openSearch: openPalette, openPrefs: openPanel, toggleTheme: toggleTheme, search: searchIndex, loadIndex: loadIndex, retrieve: retrieve, loadAsk: loadAsk, ask: showAnswer, openCompass: openCompass, askCompass: askCompass };
+  window.PAIcons = { compass: ICON.compass, guide: ICON.guide };
 })();
