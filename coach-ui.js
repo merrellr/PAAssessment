@@ -69,7 +69,7 @@
     var html = '<section class="card cc-stage"><div class="cc-stage-head"><div><span class="cc-muted">Overall</span><h2>' + esc(stage.label) + '</h2></div>' +
       '<span class="cc-muted">' + (answers ? 'Based on ' + answers + ' answer' + (answers === 1 ? '' : 's') : 'Based on') + (s.pct ? (answers ? ' and' : '') + ' your skill check' : '') + '</span></div><ol class="cc-stage-steps">' +
       stage.steps.map(function (st, i) { return '<li class="' + (i <= stage.index ? 'on' : '') + (i === stage.index ? ' now' : '') + '"><i aria-hidden="true"></i><b>' + esc(st.label) + '</b><small>' + esc(st.sub) + '</small></li>'; }).join('') +
-      '</ol><p class="cc-note">This is how your learning is going, from your skill check and the questions you answer. It isn’t a grade, and it changes as you practise.</p></section>' +
+      '</ol><p class="cc-note">This is how your learning is going, from your skill check and the questions you answer. It isn’t a grade or a prediction of how you’d do anywhere else, and it changes as you practise.</p></section>' +
       '<h3 class="cc-sub">By skill area</h3><div class="cc-areas">' +
       areas.map(function (a) {
         return '<section class="card cc-area"><div class="cc-area-head"><h4>' + esc(a.name) + '</h4>' + chip(a.status, a.label) + '</div><p class="cc-muted">' + esc(ABOUT[a.key] || '') + '</p>' +
@@ -147,13 +147,46 @@
   function homeCard(s, next) {
     var icon = (root.PAIcons && root.PAIcons.compass) || ICON;
     return '<div class="cc-home-top"><div class="cc-home-main"><span class="eyebrow">Compass Suggests</span>' +
-      '<p class="cc-home-t"><b>' + esc(next.title) + '.</b> ' + esc(next.why.split(/(?<=\.)\s/)[0]) + '</p></div>' +
+      '<p class="cc-home-t"><b>' + esc(next.title) + '.</b> ' + esc(next.why.split(/(?<=\.)\s/)[0]) + '</p>' +
+      (next.chips && next.chips.length ? '<div class="cc-chips" aria-label="Why Compass suggests this">' + next.chips.map(function (c) { return '<span>' + esc(c) + '</span>'; }).join('') + '</div>' : '') +
+      (next.ready ? '<a class="cc-ready cc-ready-sm" href="' + esc(next.ready.href) + '"><span class="cc-ready-k">Ready if you need it:</span> <b>' + esc(next.ready.title) + '</b><span class="cc-ready-m">' + next.ready.min + ' min</span></a>' : '') +
+      '</div>' +
       '<div class="cc-home-go"><a class="cc-btn sm" href="' + esc(next.action.href) + '" data-coach-go="' + esc(next.kind) + '">' + esc(next.action.label) + '</a>' +
+      '<span class="cc-min"><span aria-hidden="true">◷ </span>About ' + next.minutes + ' min</span>' +
       '<a class="linklike" href="/my-learning">Open My Learning' + ARROW + '</a></div></div>' +
       '<form class="cc-ask cc-ask-home" data-coach-ask><span class="cc-ask-compass" aria-hidden="true">' + icon + '</span>' +
       '<input type="text" maxlength="300" placeholder="Ask Compass…" aria-label="Ask Compass"><button type="submit" aria-label="Ask">↑</button></form>' +
       '<div class="cc-try" aria-label="Example questions"><span>Try:</span>' + examples(s, next).map(function (q) {
         return '<button type="button" class="cc-try-q" data-try="' + esc(q) + '">' + esc(q) + '</button>'; }).join('') + '</div>';
+  }
+
+  // Home: four ways in (Assess, My gaps, Practice, Learn), each with where things stand, and a readiness summary
+  var TILE_ICO = {
+    assess: '<path d="M9 4h6v3H9z"/><path d="M8 5.5H6.5A1.5 1.5 0 0 0 5 7v12.5A1.5 1.5 0 0 0 6.5 21h11a1.5 1.5 0 0 0 1.5-1.5V7a1.5 1.5 0 0 0-1.5-1.5H16"/><path d="m9 14 2 2 4-4"/>',
+    gaps: '<path d="M4 8V5.5A1.5 1.5 0 0 1 5.5 4H8M16 4h2.5A1.5 1.5 0 0 1 20 5.5V8M20 16v2.5a1.5 1.5 0 0 1-1.5 1.5H16M8 20H5.5A1.5 1.5 0 0 1 4 18.5V16"/><circle cx="11.5" cy="11.5" r="3"/><path d="m16 16-2.3-2.3"/>',
+    practice: '<circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="4.5"/><circle cx="12" cy="12" r="1.2"/>',
+    learn: '<path d="M5 5.5A1.5 1.5 0 0 1 6.5 4H19v14H6.5A1.5 1.5 0 0 0 5 19.5z"/><path d="M5 19.5A1.5 1.5 0 0 0 6.5 21H19v-3"/>'
+  };
+  function homeTiles(s, next, areas) {
+    var when = s.assessedAt ? new Date(s.assessedAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) : '';
+    var flagged = areas.filter(function (a) { return a.status === 'attention'; }).length;
+    var focus = next.area ? (s.areas || {})[next.area] : '';
+    var lesson = next.ready || (next.area ? C.lessonFor(s, next.area) : null);
+    var tiles = [
+      { k: 'assess', t: 'Assess', p: 'Find out where you stand', sub: when ? 'Last skill check ' + when : 'Not taken yet', href: s.assessUrl || '/' },
+      { k: 'gaps', t: 'My gaps', p: 'Focus on what needs attention', sub: !s.pct ? 'After your skill check' : flagged ? (flagged === 1 ? '1 area' : flagged + ' areas') + ' to focus on' : 'No area flagged', href: '/my-learning#gaps' },
+      { k: 'practice', t: 'Practice', p: 'Apply what you know', sub: focus ? focus + ' is queued up' : 'Pick any area', href: next.kind === 'practice' || next.kind === 'review' ? next.action.href : '/practice' },
+      { k: 'learn', t: 'Learn', p: 'Understand an idea', sub: lesson ? 'Next: ' + lesson.title.replace(/^Lesson \d+:\s*/, '') : s.resume ? 'Next: ' + s.resume.title : 'Browse the courses', href: lesson ? lesson.href : '/my-learning#courses' }
+    ];
+    return tiles.map(function (x) {
+      return '<a class="hl-tile" href="' + esc(x.href) + '" data-coach-go="tile-' + x.k + '"><span class="hl-ico" aria-hidden="true"><svg viewBox="0 0 24 24">' + TILE_ICO[x.k] + '</svg></span>' +
+        '<span class="hl-k">' + esc(x.t) + '</span><span class="hl-p">' + esc(x.p) + '</span><span class="hl-sub">' + esc(x.sub) + '</span></a>';
+    }).join('');
+  }
+  function homeReady(areas, stage) {
+    return '<div class="hr-head"><span class="eyebrow">Your readiness</span><span class="hr-stage">Overall: <b>' + esc(stage.label) + '</b></span></div>' +
+      '<h2>My readiness</h2><ul class="hr-list">' + areas.map(function (a) { return '<li><span>' + esc(a.name) + '</span>' + chip(a.status, a.label) + '</li>'; }).join('') + '</ul>' +
+      '<div class="home-go"><a class="more" href="/my-learning#readiness">View my readiness' + ARROW + '</a></div>';
   }
 
   // The ask box: answers from the lessons (Ask, in pa-shell.js) for now.
@@ -185,6 +218,8 @@
     if ($('gapsPanel')) $('gapsPanel').innerHTML = gapsTab(s, next, areas);
     var home = $('coachHome');
     if (home) { home.innerHTML = homeCard(s, next); home.hidden = false; }
+    if ($('homeLoop')) { $('homeLoop').innerHTML = homeTiles(s, next, areas); $('homeLoop').hidden = false; }
+    if ($('homeReadiness')) { $('homeReadiness').innerHTML = homeReady(areas, stage); $('homeReadiness').hidden = !s.pct; }
     wireAsk(document);
     Array.prototype.forEach.call(document.querySelectorAll('[data-coach-go]'), function (a) {
       if (a._wired) return; a._wired = true;

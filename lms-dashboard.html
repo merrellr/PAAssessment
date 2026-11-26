@@ -233,7 +233,8 @@
      own height (no stretched card with empty space under its button) */
   @media (min-width: 901px){
     .home-grid:has(.lead.wide){ grid-auto-flow: row dense; align-items: start; }
-    .home-grid:has(.lead.wide) #homeTools{ grid-column: 3; grid-row: 1 / span 2; align-self: start; }
+    .home-grid:has(.lead.wide) #homeTools{ grid-column: 3; grid-row: 1; align-self: start; }
+    .home-grid:has(.lead.wide) #homeReadiness{ grid-column: 3; grid-row: 2; align-self: start; }
     .home-grid:has(.lead.wide) #homeTools .home-go{ margin-top: 4px; }
     .home-grid:has(.lead.wide) .home-card.lead.wide{ grid-column: 1 / span 2; grid-row: 1; }
     .home-grid:has(.lead.wide) .home-notes{ grid-column: 1 / span 2; grid-row: 2; }
@@ -695,11 +696,13 @@
         <button type="button" class="card bd-tile" id="badgeTile" hidden aria-haspopup="dialog"></button>
       </div>
       <section class="card cc-home" id="coachHome" hidden aria-label="Compass Suggests"></section>
+      <nav class="home-loop" id="homeLoop" hidden aria-label="Ways in: assess, gaps, practice, learn"></nav>
       <div class="card assign-card" id="assignedHome" hidden></div>
       <div class="home-grid">
         <div class="home-card lead" id="homeResume"></div>
         <div class="home-card" id="homeNext"></div>
         <div class="home-card" id="homeTools"></div>
+        <div class="home-card home-ready" id="homeReadiness" hidden></div>
         <div class="home-card home-notes" id="homeNotes"></div>
       </div>
       <div class="card growth-card" id="growthPanel" hidden></div>
