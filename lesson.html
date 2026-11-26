@@ -485,7 +485,7 @@ onAuthStateChanged(auth, async (user) => {
   }
   currentUser = user;
   if (new URLSearchParams(location.search).get('demo') === '1' && window.DemoUI){
-    try { window.__paDemo = (await getDoc(doc(db, 'platformAdmins', user.uid))).exists(); } catch (e) { window.__paDemo = false; }
+    window.__paDemo = true;   // anyone signed in; nothing is saved (demo.js)
     if (window.__paDemo) DemoUI.script('lesson');
   }
   if (!course) return; // already showed a friendly message above

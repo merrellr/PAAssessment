@@ -1,4 +1,4 @@
-// demo.js: the owner's demo mode (?demo=1 on My Learning and Practice, for the platform owner only). A fictional
+// demo.js: the live demo (?demo=1 on My Learning, Practice and lessons, for anyone signed in). A fictional
 // learner, Alex Rivera, with a skill check, finished lessons, practice answers over the last two weeks and a study
 // plan, so a buyer sees every part of Compass working. Nothing is read from or written to anyone's account: the pages
 // load DemoCore.progress() instead of the owner's record, and every write is skipped (window.__paDemo).
@@ -102,6 +102,20 @@
     });
   }
 
-  root.DemoCore = { NAME: NAME, PCT: PCT, progress: progress, plan: plan, STEPS: STEPS };
+  // Log that this account opened the demo (once a session): Apps Script demoView, with where they came from (?src=).
+  function log(user, endpoint, page) {
+    try { if (sessionStorage.getItem('pa-demo-logged')) return; sessionStorage.setItem('pa-demo-logged', '1'); } catch (e) {}
+    if (!user || !user.getIdToken || !endpoint) return;
+    var src = (new URLSearchParams(location.search).get('src') || '').replace(/[^a-z0-9-]/g, '').slice(0, 40);
+    user.getIdToken().then(function (tok) {
+      var cb = 'paDemo_' + Date.now(), s = document.createElement('script');
+      root[cb] = function () { delete root[cb]; s.remove(); };
+      s.src = endpoint + '?action=demoView&idToken=' + encodeURIComponent(tok) + '&src=' + encodeURIComponent(src) + '&page=' + encodeURIComponent(page) + '&callback=' + cb;
+      s.onerror = function () { delete root[cb]; s.remove(); };
+      (root.PAJsonp || function (x) { document.body.appendChild(x); })(s);
+    }).catch(function () {});
+  }
+
+  root.DemoCore = { NAME: NAME, PCT: PCT, progress: progress, plan: plan, STEPS: STEPS, log: log };
   root.DemoUI = { script: script };
 })(typeof window !== 'undefined' ? window : globalThis);

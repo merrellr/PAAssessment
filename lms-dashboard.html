@@ -383,6 +383,7 @@
   body[data-ltab="gaps"] [data-coach]:not([data-coach~="gaps"]), body[data-ltab="courses"] [data-coach]:not([data-coach~="courses"]), body[data-ltab="library"] [data-coach]:not([data-coach~="library"]){ display:none !important; }
   /* Home: the greeting on its own line, then (first visit) the welcome, then your result beside your badges */
   /* the greeting, with the tour beside it (it leaves once taken, and lives under Help) */
+  .lg-demo{ margin: 0 0 14px; padding: 10px 14px; border-radius: 10px; background: var(--tint, #e9f0fa); font-size: .875rem; line-height: 1.5; }
   .home-hi{ margin: 4px 0 18px; display:flex; align-items:center; justify-content:space-between; gap: 10px 20px; flex-wrap: wrap; }
   .home-hi .guide-wrap{ flex: none; }
   .home-hi .guide-btn.guide-sm{ margin: 0; }
@@ -528,6 +529,8 @@
       <section class="lg-card card" aria-labelledby="lgTitle">
         <h2 class="lg-title" id="lgTitle">Welcome back</h2>
         <p id="authSub">Log in to pick up your courses where you left off.</p>
+        <p class="lg-demo" id="demoNote" hidden><b>The live demo:</b> sign in, or create a free account, to explore Product Advisory Learning as a sample learner. It takes a minute, and nothing you do in the demo is saved.</p>
+        <script>(function(){ if (new URLSearchParams(location.search).get('demo') === '1'){ var n = document.getElementById('demoNote'); if (n) n.hidden = false; var t = document.getElementById('lgTitle'); if (t) t.textContent = 'Open the live demo'; } })();</script>
 
         <div class="auth-tabs lg-tabs" role="tablist" aria-label="Log in or create an account">
           <div class="auth-tab active" id="tabLogin" role="tab" tabindex="0" onclick="setAuthMode(false)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();setAuthMode(false);}">Log in</div>
@@ -1210,10 +1213,12 @@ onAuthStateChanged(auth, async (user) => {
 
     document.getElementById('dashboardSkeleton').style.display = 'block';
     document.getElementById('dashboardContent').style.display = 'none';
-    // Demo mode (?demo=1): the platform owner only. A fictional learner instead of their account; nothing is saved.
+    // The live demo (?demo=1): anyone signed in. A fictional learner instead of their account; nothing is saved, and
+    // each opening is logged (Apps Script demoView) so we can see who looked.
     if (DEMO_ASKED && window.DemoCore){
-      try { window.__paDemo = (await getDoc(doc(db, 'platformAdmins', user.uid))).exists(); } catch (e) { window.__paDemo = false; }
-      if (window.__paDemo && window.DemoUI) DemoUI.script('dashboard');
+      window.__paDemo = true;
+      if (window.DemoUI) DemoUI.script('dashboard');
+      DemoCore.log(user, RESULTS_LOG_URL, 'my-learning');
     }
     await loadDashboard(window.__paDemo ? { uid: 'demo-alex', displayName: DemoCore.NAME, email: 'alex.rivera@example.com', emailVerified: true, providerData: [], getIdToken: () => Promise.resolve('') } : user);
     // If this person belongs to a company, refresh the copy their company sees
