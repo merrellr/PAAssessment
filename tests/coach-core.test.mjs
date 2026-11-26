@@ -98,5 +98,29 @@ let fresh = true;
 try { execFileSync('node', [new URL('../tools/coach/build-bank.mjs', import.meta.url).pathname, '--check'], { stdio: 'pipe' }); } catch (e) { fresh = false; }
 t('coach-bank.js matches content/ (else run node tools/coach/build-bank.mjs)', fresh);
 
+// recent activity, what's changed, and the pattern
+{
+  const DAY = 864e5, today = NOW, yest = NOW - DAY;
+  const L = [
+    { d: 'strategy', id: 'a', t: 'scenario', ok: false, at: yest, src: 'practice' },
+    { d: 'strategy', id: 'b', t: 'scenario', ok: false, at: yest + 1, src: 'practice' },
+    { d: 'strategy', id: 'c', t: 'knowledge', ok: true, at: yest + 2, src: 'practice' },
+    { d: 'discovery', id: 'd', t: 'knowledge', ok: true, at: today - 5, src: 'lesson' },
+    { d: 'strategy', id: 'e', t: 'knowledge', ok: true, at: today - 4, src: 'practice' },
+    { d: 'strategy', id: 'f', t: 'knowledge', ok: true, at: today - 3, src: 'practice' },
+    { d: 'strategy', id: 'g', t: 'knowledge', ok: true, at: today - 2, src: 'practice' },
+  ];
+  const ctx = { areas: AREAS, pct, log: L, lessonLog: { '2026-11-15': 2 }, now: NOW };
+  const act = C.activity(ctx, 10);
+  t('activity: grouped by day, area and source, newest first', act.length === 4 && act[0].title === 'Practised Strategy' && act[0].detail === '3 of 3 right' && act[0].flag === 'good', JSON.stringify(act));
+  t('activity: a session with most answers missed is flagged for review', act[2].title === 'Practised Strategy' && act[2].detail === '1 of 3 right' && act[2].flag === 'review');
+  t('activity: a lesson check, and lessons finished from the lesson log', act[1].title === 'Lesson check in Discovery' && act[1].detail === 'Right' && act[3].title === 'Finished 2 lessons');
+  t('activity: Today and Yesterday', C.when(today - 2, NOW) === 'Today' && C.when(yest, NOW) === 'Yesterday');
+  const ch = C.changes(ctx, today - 10);
+  t('changes: answers since, and an area that moved up', ch.answers === 4 && ch.right === 4 && ch.moves.length === 1 && ch.moves[0].d === 'strategy' && ch.moves[0].up && /Strategy moved up to Developing/.test(ch.line), JSON.stringify(ch));
+  t('changes: nothing new says so', /Nothing new/.test(C.changes({ areas: AREAS, pct, log: L, now: NOW }, NOW + 1).line));
+  t('activity: lessons finished also come from progress.lessonLog', C.activity({ areas: AREAS, log: [], progress: { lessonLog: { '2026-11-16': 1 } } }).length === 1);
+}
+
 console.log('\n' + pass + ' passed, ' + fail + ' failed');
 process.exit(fail ? 1 : 0);

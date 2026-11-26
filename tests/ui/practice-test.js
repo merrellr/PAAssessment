@@ -35,7 +35,8 @@ const answer = async (right) => {
       await answer(true);
       $('prNext').click(); await sleep(80);
       t('after the last question: the recap, the area\'s status now, and what to do next', !$('prDone').hidden && /1 of 3 right/.test($('prDone').textContent) && /Prioritization & Trade-offs is now/.test($('prDone').textContent) && /What I'd do next/.test($('prDone').textContent), $('prDone').textContent.slice(0, 200));
-      t('the readiness panel shows every area, this one marked', $('prAreas').children.length === 7 && /Prioritization/.test($('prAreas').querySelector('.cur').textContent));
+      t('the readiness panel shows every area, this one marked', $('prAreas').querySelectorAll('.pr-area-row').length === 7 && /Prioritization/.test($('prAreas').querySelector('.cur').textContent));
+      t('the other areas are links that switch the session to them', $('prAreas').querySelectorAll('a.pr-area-row').length === 6 && /\/practice\?area=/.test($('prAreas').querySelector('a.pr-area-row').getAttribute('href')));
     } else {
       t('with no area asked for, the coach picks the one to work on: Strategy', $('prTitle').textContent === 'Product Strategy & Roadmapping', $('prTitle').textContent);
       t('and leads with the kind of question being missed', /questions that apply it to a situation/.test($('prSayText').textContent) && /Applying it to a situation/.test($('prTags').textContent), $('prSayText').textContent);

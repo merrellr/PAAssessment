@@ -63,6 +63,11 @@
   .pr-adapt li{ margin: 0 0 8px; }
   .pr-area-row{ display:flex; justify-content:space-between; align-items:center; gap: 8px; padding: 7px 0; border-bottom: 1px solid var(--pa-line); font-size: .8438rem; }
   .pr-area-row.cur{ font-weight: 800; }
+  a.pr-area-row{ color: var(--pa-ink); text-decoration: none; border-radius: 6px; margin: 0 -6px; padding: 7px 6px; }
+  a.pr-area-row:hover{ background: var(--pa-tint); }
+  a.pr-area-row:hover > span:first-child{ color: var(--pa-primary); }
+  a.pr-area-row:focus-visible{ outline: 3px solid var(--pa-cyan); outline-offset: 1px; }
+  .pr-area-hint{ margin: 0 0 6px; font-size: .75rem; color: var(--pa-muted); }
   .pr-done h2{ font-size: 1.25rem; }
   .pr-done .big{ font-family: var(--pa-display); font-size: 2.2rem; color: var(--pa-navy-deep); margin: 4px 0; }
   @media (max-width: 900px){ .pr-layout{ grid-template-columns: 1fr; } .pr-side{ position: static; order: 2; } }
@@ -138,7 +143,9 @@ function lessonTitle(q){ const ls = (BANK.lessons[q.c] || []).find(l => l.id ===
 function adaptNote(text){ const li = document.createElement('li'); li.textContent = text; $('prAdapt').appendChild(li); }
 function renderAreas(){
   const r = C.readiness({ areas: AREAS, pct, log });
-  $('prAreas').innerHTML = r.map(a => '<div class="pr-area-row' + (a.key === area ? ' cur' : '') + '"><span>' + esc(a.name) + '</span><span class="cc-chip cc-' + a.status + '"><i aria-hidden="true"></i>' + esc(a.label) + '</span></div>').join('');
+  $('prAreas').innerHTML = '<p class="pr-area-hint">Choose an area to practise it instead.</p>' + r.map(a => a.key === area
+    ? '<div class="pr-area-row cur" aria-current="true"><span>' + esc(a.name) + ' <span class="cc-muted">· now</span></span><span class="cc-chip cc-' + a.status + '"><i aria-hidden="true"></i>' + esc(a.label) + '</span></div>'
+    : '<a class="pr-area-row" href="/practice?area=' + encodeURIComponent(a.key) + '" aria-label="Practise ' + esc(a.name) + ' instead"><span>' + esc(a.name) + '</span><span class="cc-chip cc-' + a.status + '"><i aria-hidden="true"></i>' + esc(a.label) + '</span></a>').join('');
 }
 function renderPips(){
   $('prPips').innerHTML = '<span>' + Math.min(results.length + 1, total) + ' of ' + total + '</span>' +

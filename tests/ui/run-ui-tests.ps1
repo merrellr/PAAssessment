@@ -170,7 +170,7 @@ try {
     $results += Run-Page "join page: $s" "$base/join-test.html?scn=$s&token=$tok" 20000
   }
   $results += Run-Page 'join page: badtoken' "$base/join-test.html?scn=badtoken&token=abc" 20000
-  foreach ($s in 'member', 'focus', 'focusdefault', 'admin', 'plain', 'removed', 'owner', 'threelessons', 'allfive', 'recentdone', 'removedold', 'profilecard', 'assigned', 'growth', 'tourstaken') { $results += Run-Page "dashboard: $s" "$base/dash-test.html?scn=$s" 25000 }
+  foreach ($s in 'member', 'focus', 'focusdefault', 'admin', 'plain', 'removed', 'owner', 'threelessons', 'allfive', 'recentdone', 'removedold', 'profilecard', 'assigned', 'growth', 'tourstaken', 'activity') { $results += Run-Page "dashboard: $s" "$base/dash-test.html?scn=$s" 25000 }
   $results += Run-Page 'dashboard: tourlink' "$base/dash-test.html?scn=tourlink&tour=1" 25000
   foreach ($s in 'signin', 'nudge', 'owner', 'on', 'unverified', 'google', 'googleowner', 'ownernever', 'turnedoff', 'firstlogin', 'profilefirst', 'secondlogin', 'paused') { $results += Run-Page "two-step on the dashboard: $s" "$base/twostep-test.html?scn=$s" 25000 }
   foreach ($s in 'member', 'nonmember', 'blocked', 'votefail') { $results += Run-Page "delete account: $s" "$base/del-test.html?scn=$s" 25000 }

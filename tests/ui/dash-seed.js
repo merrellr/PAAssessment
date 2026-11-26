@@ -18,6 +18,12 @@
     // a weekly goal of 2, with one lesson finished today and two last month
     if (scn === 'threelessons') { var d = new Date(), key = d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2);
       store['progress/uDash'].goals = { weeklyLessons: 2, focus: [] }; store['progress/uDash'].lessonLog = { '2026-09-01': 2 }; store['progress/uDash'].lessonLog[key] = 1; }
+    // practice answers: a hard session yesterday, a good one today (Strategy moves up), and a lesson check
+    if (scn === 'activity') { var N = Date.now(), Y = N - 864e5, A = function (d, ok, at, src, t) { return { d: d, id: d + at, t: t || 'scenario', ok: ok, at: at, src: src || 'practice' }; };
+      store['progress/uDash'].answers = [A('strategy', false, Y - 40), A('strategy', false, Y - 30), A('strategy', false, Y - 20), A('strategy', true, Y - 10, 0, 'knowledge'),
+        A('discovery', true, N - 5000, 'lesson', 'knowledge'), A('strategy', true, N - 4500), A('strategy', true, N - 4000), A('strategy', true, N - 3000), A('strategy', true, N - 2000)];
+      var td = new Date(N), tk = td.getFullYear() + '-' + ('0' + (td.getMonth() + 1)).slice(-2) + '-' + ('0' + td.getDate()).slice(-2);
+      store['progress/uDash'].lessonLog = {}; store['progress/uDash'].lessonLog[tk] = 1; }
     if (scn === 'threelessons') store['progress/uDash'].courses['discovery-moderate'] = { completed: [1, 2, 3], lastLesson: 3, updatedAt: '2026-10-08T09:00:00.000Z' };
     // finished long ago, with a saved reflection on its last lesson: eligible for spaced review
     if (scn === 'allfive') store['progress/uDash'].courses['discovery-moderate'] = { completed: [1, 2, 3, 4, 5], lastLesson: 5, updatedAt: '2026-10-08T09:00:00.000Z', reflections: { '5': 'My own answer to the final question' } };
