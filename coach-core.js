@@ -49,6 +49,7 @@
   function record(log, entry) {
     var e = { d: String(entry.d || ''), id: String(entry.id || ''), t: STYLES[entry.t] ? entry.t : 'knowledge', ok: !!entry.ok, at: +entry.at || Date.now() };
     if (entry.src) e.src = String(entry.src);
+    if (entry.cf === 0 || entry.cf === 1 || entry.cf === 2) e.cf = entry.cf;   // how sure they were: 0 guessing, 1 fairly sure, 2 sure
     var out = (Array.isArray(log) ? log : []).concat([e]);
     return out.length > LOG_MAX ? out.slice(out.length - LOG_MAX) : out;
   }
@@ -275,6 +276,25 @@
       ask: a.flag === 'review' && name ? 'Explain what I missed in ' + name : 'How am I doing since last time?' };
   }
 
+  // How well confidence matched results, for answers that say how sure they were (cf). entries: answers, each { ok, cf }.
+  // { n, sureRight, sureWrong, guessRight, line }: a confident miss is worth a second look; a right guess is luck to
+  // turn into knowledge.
+  function calibration(entries) {
+    var rated = (entries || []).filter(function (e) { return e && (e.cf === 0 || e.cf === 1 || e.cf === 2); });
+    if (!rated.length) return null;
+    var c = { n: rated.length, sureRight: 0, sureWrong: 0, guessRight: 0, guessWrong: 0 };
+    rated.forEach(function (e) {
+      if (e.cf === 2) { if (e.ok) c.sureRight++; else c.sureWrong++; }
+      if (e.cf === 0) { if (e.ok) c.guessRight++; else c.guessWrong++; }
+    });
+    var bits = [];
+    if (c.sureWrong) bits.push('You were sure on ' + plural(c.sureWrong, 'answer') + ' you missed: those are worth a second look, because a confident mistake is the one you’d repeat at work.');
+    if (c.guessRight) bits.push(plural(c.guessRight, 'guess') + (c.guessRight === 1 ? ' was' : ' were') + ' right: read the explanation so it’s knowledge next time, not luck.');
+    if (!bits.length) bits.push(c.sureRight ? 'Your confidence matched your answers well.' : 'Saying how sure you are helps you see what you really know.');
+    c.line = bits.join(' ');
+    return c;
+  }
+
   // What has changed since a moment (the start of today, by default): areas whose status moved, and the answers given
   // since. { answers, right, moves: [{ d, name, from, to, up }], line }.
   function changes(ctx, since) {
@@ -338,5 +358,5 @@
 
   root.CoachCore = { STYLES: STYLES, STYLE_PHRASE: STYLE_PHRASE, STATUS: STATUS, STAGES: STAGES, TIERS: TIERS, LOG_MAX: LOG_MAX, REASSESS_DAYS: REASSESS_DAYS,
     qType: qType, record: record, doneIds: doneIds, readiness: readiness, stage: stage, styles: styles, weakStyle: weakStyle, lessonFor: lessonFor,
-    nextStep: nextStep, alternatives: alternatives, loop: loop, activity: activity, when: when, changes: changes, lastTime: lastTime, pickQuestion: pickQuestion, startLevel: startLevel, adapt: adapt, recap: recap };
+    nextStep: nextStep, alternatives: alternatives, loop: loop, activity: activity, when: when, changes: changes, lastTime: lastTime, calibration: calibration, pickQuestion: pickQuestion, startLevel: startLevel, adapt: adapt, recap: recap };
 })(typeof window !== 'undefined' ? window : globalThis);

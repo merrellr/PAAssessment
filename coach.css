@@ -373,3 +373,50 @@
 @media (prefers-reduced-motion: reduce) { .demo-flash { animation: none; outline: 3px solid var(--pa-cyan); } }
 body.pa-demo .pa-notes-fab, body.pa-demo #homeNotes { display: none !important; }
 @media (max-width: 640px) { .demo-script:not(:has(details[open])) { width: auto; } }
+
+/* ---------------------------------------------------------------- Practice: charts, "How sure are you?", Explain it back */
+.pr-chart { margin: 4px 0 12px; }
+.ch { margin: 0; }
+.ch figcaption { font-weight: 700; font-size: .875rem; margin-bottom: 6px; }
+.ch svg { width: 100%; height: auto; display: block; }
+.ch .cg { stroke: var(--pa-line); stroke-width: 1; }
+.ch .ct { font-size: 11px; fill: var(--pa-muted); font-family: inherit; }
+.ch .cv { font-size: 11px; font-weight: 700; fill: var(--pa-ink); font-family: inherit; }
+.ch .cs0 { fill: var(--pa-primary); } .ch .cs1 { fill: var(--pa-cyan, #35c2e8); }
+.ch .cl0, .ch .cl1 { fill: none; stroke-width: 2.5; stroke-linejoin: round; stroke-linecap: round; }
+.ch .cl0 { stroke: var(--pa-primary); } .ch .cl1 { stroke: var(--pa-cyan, #35c2e8); }
+.ch-legend { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: .78rem; color: var(--pa-muted); margin-top: 4px; }
+.ch-legend i { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 6px; vertical-align: -1px; }
+.ch-legend i.cs0 { background: var(--pa-primary); } .ch-legend i.cs1 { background: var(--pa-cyan, #35c2e8); }
+.ch-data { margin-top: 6px; font-size: .8rem; }
+.ch-data summary { cursor: pointer; color: var(--pa-primary); font-weight: 600; }
+.ch-data table { border-collapse: collapse; margin-top: 6px; }
+.ch-data th, .ch-data td { text-align: left; padding: 3px 12px 3px 0; border-bottom: 1px solid var(--pa-line); }
+.ch-data td { font-variant-numeric: tabular-nums; }
+.ch-note { margin: 4px 0 0; font-size: .72rem; color: var(--pa-muted); }
+.pr-sure { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px; margin: 12px 0 4px; font-size: .84rem; }
+.pr-sure > span { font-weight: 700; }
+.pr-sure small { color: var(--pa-muted); font-size: .75rem; }
+.pr-sure-opts { display: flex; gap: 6px; }
+.pr-sure-opts button { font: inherit; font-size: .8rem; padding: 5px 12px; border-radius: 999px; border: 1px solid var(--pa-line); background: var(--pa-card); color: var(--pa-ink); cursor: pointer; }
+.pr-sure-opts button[aria-checked="true"] { background: var(--pa-primary); border-color: var(--pa-primary); color: #fff; font-weight: 700; }
+.pr-sure-opts button:disabled { cursor: default; opacity: .85; }
+.pr-sure-opts button:focus-visible { outline: 3px solid var(--pa-cyan); outline-offset: 2px; }
+.pr-sure-note { padding: 8px 12px; border-radius: 10px; background: var(--pa-tint); font-size: .84rem; }
+.pr-cal { padding: 10px 14px; border-radius: 10px; background: var(--pa-tint); font-size: .875rem; }
+.pr-tb { margin: 18px 0; padding: 16px 18px; border: 1px solid var(--pa-line); border-radius: 14px; }
+.pr-tb h2 { margin: 0 0 6px; }
+.pr-tb textarea { width: 100%; box-sizing: border-box; font: inherit; font-size: .9rem; padding: 10px 12px; border-radius: 10px; border: 1px solid var(--pa-line); background: var(--pa-card); color: var(--pa-ink); resize: vertical; }
+.pr-tb textarea:focus-visible { outline: 3px solid var(--pa-cyan); outline-offset: 1px; }
+.pr-tb-row { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-top: 8px; }
+.pr-tb-n { font-size: .75rem; color: var(--pa-muted); }
+.pr-tb-out { margin-top: 12px; padding: 12px 14px; border-radius: 10px; background: var(--pa-tint); font-size: .875rem; }
+.pr-tb-out p { margin: 0 0 8px; } .pr-tb-out ul { margin: 0 0 8px; padding-left: 20px; }
+.pr-tb-k { font-weight: 800; font-size: .72rem; letter-spacing: .06em; text-transform: uppercase; color: var(--pa-muted); }
+.pr-tb-err { color: #b42318; }
+@media (max-width: 560px) {   /* a chart keeps readable labels on a phone: it scrolls sideways inside the card */
+  .pr-chart .ch { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .pr-chart .ch svg { min-width: 460px; }
+}
+.pr-q, .pr-chart, .pr-chart .ch { min-width: 0; max-width: 100%; }
+.pr-layout > main { min-width: 0; }

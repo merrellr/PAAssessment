@@ -76,6 +76,7 @@
 <link rel="stylesheet" href="coach.css">
 <script src="coach-core.js"></script>
 <script src="coach-bank.js"></script>
+<script src="coach-charts.js"></script>
 <script src="demo.js"></script>
 </head>
 <body>
@@ -94,8 +95,11 @@
       <div class="pr-say" id="prSay"><span class="ico ico-compass" aria-hidden="true"><svg class="pa-cicon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="10.6" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M12 3.7 13.2 10.8 20.3 12 13.2 13.2 12 20.3 10.8 13.2 3.7 12 10.8 10.8Z" fill="currentColor" stroke="none"/><path d="M18.15 5.85 12 12 13.94 13.94Z" fill="#2563EB" stroke="none"/><path d="M18.15 5.85 12 12 10.06 10.06Z" fill="#5B9BFF" stroke="none"/><path d="M5.85 18.15 12 12 13.94 13.94Z" fill="#64748B" stroke="none"/><path d="M5.85 18.15 12 12 10.06 10.06Z" fill="#94A3B8" stroke="none"/><circle cx="12" cy="12" r="1.05" fill="#0F172A" stroke="none"/></svg></span><div><p id="prSayText">Getting your session ready…</p></div></div>
       <section class="card pr-q" id="prCard" hidden aria-live="polite">
         <div class="pr-tags" id="prTags"></div>
+        <div class="pr-chart" id="prChart" hidden></div>
         <p class="pr-question" id="prQuestion"></p>
         <div class="pr-opts" id="prOpts" role="group" aria-label="Answers"></div>
+        <div class="pr-sure" id="prSure" hidden><span id="prSureL">How sure are you?</span><div class="pr-sure-opts" role="radiogroup" aria-labelledby="prSureL">
+          <button type="button" role="radio" aria-checked="false" data-cf="0">Guessing</button><button type="button" role="radio" aria-checked="false" data-cf="1">Fairly sure</button><button type="button" role="radio" aria-checked="false" data-cf="2">Sure</button></div><small>Optional. It helps you see what you really know.</small></div>
         <div class="pr-why" id="prWhy" hidden></div>
         <div class="pr-offer" id="prOffer" hidden></div>
         <div class="pr-foot"><button type="button" class="cc-btn" id="prSubmit" disabled>Check my answer</button><button type="button" class="cc-btn" id="prNext" hidden>Next question →</button></div>
@@ -131,6 +135,8 @@ const setDoc = (...a) => window.__paDemo ? Promise.resolve() : fsSetDoc(...a);
 const app = initializeApp(firebaseConfig), auth = getAuth(app), db = getFirestore(app);
 
 const C = window.CoachCore, BANK = window.CoachBank;
+// the chart questions (coach-charts.js, fictional data) are practice questions like any other
+if (window.CoachCharts && BANK && !BANK._charts){ BANK._charts = true; BANK.questions = BANK.questions.concat(window.CoachCharts.questions); }
 const AREAS = { discovery: 'Customer & Market Discovery', strategy: 'Product Strategy & Roadmapping', prioritization: 'Prioritization & Trade-offs',
   execution: 'Execution & Delivery', stakeholder: 'Stakeholder Communication & Influence', aiIndividual: 'AI Fluency — Individual', aiOrg: 'AI Fluency — Organizational' };
 const LEVEL = ['Foundations', 'Building', 'Applied', 'Advanced'];
@@ -141,6 +147,7 @@ const params = new URLSearchParams(location.search);
 
 let user = null, progress = { courses: {} }, log = [], pct = null;
 let area = null, level = 0, total = 4, asked = [], results = [], current = null, picked = -1, style = null, offerShown = false;
+let sure = null, session = [];   // how sure for this question (0-2, or null), and this session's answers { q, ok, cf }
 
 function lessonTitle(q){ const ls = (BANK.lessons[q.c] || []).find(l => l.id === q.l); return ls ? ls.title : 'the lesson'; }
 function adaptNote(text){ const li = document.createElement('li'); li.textContent = text; $('prAdapt').appendChild(li); }
@@ -161,6 +168,8 @@ function ask(){
   asked.push(current.id); picked = -1; offerShown = false;
   $('prTags').innerHTML = '<span>' + esc(C.STYLES[current.t]) + '</span><span>' + LEVEL[C.TIERS.indexOf(current.tier)] + '</span><span>From: ' + esc(lessonTitle(current)) + '</span>';
   $('prQuestion').textContent = current.q;
+  $('prChart').hidden = !current.chart; $('prChart').innerHTML = current.chart && window.CoachCharts ? window.CoachCharts.svg(current.chart) : '';
+  sure = null; $('prSure').hidden = true; $('prSure').querySelectorAll('[data-cf]').forEach(b => { b.setAttribute('aria-checked', 'false'); b.disabled = false; });
   $('prOpts').innerHTML = current.o.map((o, i) => '<button type="button" class="pr-opt" aria-pressed="false" data-i="' + i + '"><span class="k">' + 'ABCDEFG'[i] + '.</span><span>' + esc(o) + '</span></button>').join('');
   $('prWhy').hidden = true; $('prOffer').hidden = true; $('prNext').hidden = true; $('prSubmit').hidden = false; $('prSubmit').disabled = true;
   $('prCard').hidden = false; renderPips();
@@ -168,22 +177,25 @@ function ask(){
     if (b.disabled) return;
     picked = +b.dataset.i;
     $('prOpts').querySelectorAll('.pr-opt').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
-    $('prSubmit').disabled = false;
+    $('prSubmit').disabled = false; $('prSure').hidden = false;
   }));
 }
 
 async function check(){
   if (picked < 0) return;
   const ok = picked === current.a;
-  results.push(ok);
+  results.push(ok); session.push({ q: current, ok, cf: sure });
+  $('prSure').querySelectorAll('[data-cf]').forEach(b => { b.disabled = true; }); if (sure === null) $('prSure').hidden = true;
   $('prOpts').querySelectorAll('.pr-opt').forEach(b => { b.disabled = true; const i = +b.dataset.i; if (i === current.a) b.classList.add('right'); else if (i === picked) b.classList.add('wrong'); });
   const href = '/lesson?course=' + current.c + '&lesson=' + current.l;
   $('prWhy').innerHTML = '<span class="verdict ' + (ok ? 'ok' : 'bad') + '">' + (ok ? '✓ Right.' : '✗ Not quite.') + '</span> <b>Why:</b>' +
-    '<p>' + esc(current.x || 'The answer comes from ' + lessonTitle(current) + '.') + '</p><p><a href="' + href + '">Read it in ' + esc(lessonTitle(current)) + ' →</a></p>';
+    '<p>' + esc(current.x || 'The answer comes from ' + lessonTitle(current) + '.') + '</p>' +
+    (!ok && sure === 2 ? '<p class="pr-sure-note">You were sure about this one. A confident miss is worth a second look: it’s the kind you’d repeat at work.</p>' : ok && sure === 0 ? '<p class="pr-sure-note">A good guess. Read the why so it’s knowledge next time.</p>' : '') +
+    '<p><a href="' + href + '">Read it in ' + esc(lessonTitle(current)) + ' →</a></p>';
   $('prWhy').hidden = false; $('prSubmit').hidden = true;
-  log = C.record(log, { d: area, id: current.id, t: current.t, ok, src: 'practice' });
+  log = C.record(log, { d: area, id: current.id, t: current.t, ok, src: 'practice', cf: sure === null ? undefined : sure });
   save();
-  event('practice_answer', { area, ok, kind: current.t, level });
+  event('practice_answer', { area, ok, kind: current.t, level, sure: sure === null ? 'none' : ['guess', 'fairly', 'sure'][sure], chart: !!current.chart });
   renderAreas(); renderPips();
   const move = C.adapt(results);
   if (move === 'harder' && level < 3){ level++; adaptNote('Two right in a row: moving up to ' + LEVEL[level] + ' questions.'); }
@@ -210,6 +222,64 @@ function next(){
   ask();
 }
 
+/* ---------------------------------------------------------------- Explain it back (teach-back)
+   After a session, the learner explains the idea of the lesson they found hardest, in their own words, and Compass
+   says what they got right and what to add, from that lesson only. It goes through Compass (action=compass), so it
+   shares Compass's daily limit. The explanation is the conversation's last turn (Compass takes up to 400 characters
+   there), the lesson's own text is the page Compass reads. */
+const TB_MAX = 380;
+function tbLesson(){
+  const missed = session.filter(s => !s.ok), pick = (missed[0] || session[session.length - 1] || {}).q;
+  return pick ? { c: pick.c, l: pick.l, title: lessonTitle(pick).replace(/^Lesson \d+:\s*/, '') } : null;
+}
+function tbCard(){
+  const L = tbLesson();
+  if (!L) return '';
+  return '<section class="pr-tb" aria-labelledby="prTbT"><h2 id="prTbT">Explain it back</h2>' +
+    '<p>In two or three sentences, explain the main idea of <b>' + esc(L.title) + '</b> as you would to a colleague. Compass will tell you what you got right and what to add, from the lesson.</p>' +
+    '<label class="sr-only" for="prTbText">Your explanation</label><textarea id="prTbText" rows="4" maxlength="' + TB_MAX + '" placeholder="The main idea is…"></textarea>' +
+    '<div class="pr-tb-row"><span class="pr-tb-n" id="prTbN" aria-live="polite">0 of ' + TB_MAX + '</span><button type="button" class="cc-btn sm" id="prTbGo" disabled>Get feedback from Compass</button></div>' +
+    '<div class="pr-tb-out" id="prTbOut" aria-live="polite" hidden></div></section>';
+}
+function tbText(t){   // Compass's reply: citations dropped, short paragraphs and bullets
+  const lines = String(t || '').replace(/\s*\[\d\](\[\d\])*/g, '').split(/\n+/).map(s => s.trim()).filter(Boolean);
+  let html = '', list = [];
+  const flush = () => { if (list.length){ html += '<ul>' + list.map(x => '<li>' + esc(x) + '</li>').join('') + '</ul>'; list = []; } };
+  lines.forEach(l => { if (/^[-•*]\s+/.test(l)) list.push(l.replace(/^[-•*]\s+/, '')); else { flush(); html += '<p>' + esc(l) + '</p>'; } });
+  flush();
+  return html;
+}
+const TB_ERR = { daily_limit: 'You’ve used today’s Compass questions. Try again tomorrow.', not_verified: 'Please sign in again, then try once more.', bad_question: 'Something was off with that. Try a shorter explanation.' };
+function wireTeachBack(){
+  const ta = $('prTbText'), go = $('prTbGo'), out = $('prTbOut'), L = tbLesson();
+  if (!ta || !L) return;
+  ta.addEventListener('input', () => { $('prTbN').textContent = ta.value.length + ' of ' + TB_MAX; go.disabled = ta.value.trim().length < 20; });
+  go.addEventListener('click', async () => {
+    const text = ta.value.replace(/\s+/g, ' ').trim().slice(0, TB_MAX);
+    if (text.length < 20) return;
+    go.disabled = true; out.hidden = false; out.innerHTML = '<p class="pr-tb-wait">Compass is reading the lesson and your explanation…</p>';
+    event('teachback_ask', { area });
+    try {
+      const shell = window.PAShell, acct = window.PAAccount;
+      if (shell && shell.loadAsk) await shell.loadAsk().catch(() => {});   // without the lesson text, Compass still has the title
+      const url = 'lesson.html?course=' + L.c + '&lesson=' + L.l;
+      const lessonText = (window.PA_ASK || []).filter(p => p.u === url).map(p => p.x).join('\n').slice(0, 2000);
+      const tok = acct ? await acct.idToken() : null;
+      if (!tok || !acct.backend) throw { code: 'not_verified' };
+      const r = await acct.backend({ action: 'compass', idToken: tok,
+        q: 'Teach-back: give me feedback on my explanation above, using only this lesson. Say what I got right, what I missed or got wrong, and one thing to add. Be specific and encouraging.',
+        h: JSON.stringify([{ r: 'u', t: 'My explanation of "' + L.title + '": ' + text }]),
+        page: JSON.stringify({ k: 'lesson', t: L.title, x: lessonText || L.title }), ctx: '[]' }, 45000);
+      if (!r || !r.ok) throw { code: (r && r.error) || 'down' };
+      out.innerHTML = '<p class="pr-tb-k">Compass on your explanation</p>' + tbText(r.text) + '<p class="pr-tb-foot"><a href="/lesson?course=' + L.c + '&lesson=' + L.l + '">Read ' + esc(L.title) + ' again →</a></p>';
+      event('teachback_done', { area });
+    } catch (e) {
+      out.innerHTML = '<p class="pr-tb-err">' + esc(TB_ERR[e && e.code] || 'Compass couldn’t answer just now. Try again in a minute.') + '</p>';
+      go.disabled = false;
+    }
+  });
+}
+
 let saving = Promise.resolve();
 function save(){
   // one write at a time, the latest log each time (only the answer log; nothing else on progress is touched)
@@ -218,15 +288,18 @@ function save(){
 
 function finish(){
   $('prCard').hidden = true; $('prGoal').hidden = true;
-  const r = C.recap(results, AREAS[area]);
+  const r = C.recap(results, AREAS[area]), cal = C.calibration(session);
   const areas = C.readiness({ areas: AREAS, pct, log }), mine = areas.find(a => a.key === area);
   const nx = C.nextStep({ areas: AREAS, pct, log, progress, bank: BANK });
   $('prSay').hidden = true;
   $('prDone').innerHTML = '<span class="eyebrow">Session done</span><p class="big">' + r.right + ' of ' + r.n + ' right</p><p>' + esc(r.line) + '</p>' +
     '<p>' + esc(AREAS[area]) + ' is now <span class="cc-chip cc-' + mine.status + '"><i aria-hidden="true"></i>' + esc(mine.label) + '</span>' + (mine.total ? ' (' + mine.correct + ' of ' + mine.total + ' right overall).' : '.') + '</p>' +
+    (cal ? '<p class="pr-cal"><b>How sure you were:</b> ' + esc(cal.line) + '</p>' : '') +
+    tbCard() +
     '<h2>What I\'d do next</h2><p><b>' + esc(nx.title) + '.</b> ' + esc(nx.why) + '</p><div class="pr-foot" style="justify-content:flex-start">' +
     '<a class="cc-btn" href="' + esc(nx.action.href) + '">' + esc(nx.action.label) + ' →</a><a class="cc-btn ghost" href="/practice?area=' + area + '">Another ' + esc(AREAS[area]) + ' session</a><a class="cc-btn ghost" href="/my-learning">Back to My Learning</a></div>';
   $('prDone').hidden = false;
+  wireTeachBack();
   event('practice_done', { area, right: r.right, n: r.n });
 }
 
@@ -253,6 +326,11 @@ function start(){
   ask();
 }
 
+$('prSure').querySelectorAll('[data-cf]').forEach(b => b.addEventListener('click', () => {
+  if (b.disabled) return;
+  sure = +b.dataset.cf;
+  $('prSure').querySelectorAll('[data-cf]').forEach(x => x.setAttribute('aria-checked', String(x === b)));
+}));
 $('prSubmit').addEventListener('click', check);
 $('prNext').addEventListener('click', next);
 
