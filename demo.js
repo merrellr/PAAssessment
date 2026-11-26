@@ -48,6 +48,16 @@
   function plan(ctx) {
     if (!root.PlanCore) return null;
     var now = ctx.now || Date.now(), p = root.PlanCore.build(Object.assign({}, ctx, { now: now - 8 * DAY }), { aim: 'promoted', weeks: 4, hours: 2 });
+    // Alex has been following it: most of week 1's lessons are done, and two of this week's
+    var courses = (ctx.progress && ctx.progress.courses) || {};
+    [[0, 99], [1, 2]].forEach(function (w) {
+      var wk = p.list[w[0]]; if (!wk) return;
+      wk.items.filter(function (it) { return it.k === 'lesson'; }).slice(0, w[1]).forEach(function (it, k, all) {
+        if (w[0] === 0 && k === all.length - 1) return;   // one left over from last week
+        var c = courses[it.course] || (courses[it.course] = { completed: [] });
+        if (c.completed.indexOf(it.lesson) < 0) c.completed.push(it.lesson);
+      });
+    });
     return p;
   }
 
@@ -86,20 +96,64 @@
     bar.innerHTML = '<b>Demo mode</b><span>You’re seeing ' + NAME + ', a fictional learner. Nothing here is saved, and your own account isn’t shown or changed.</span>' +
       '<span class="demo-acts"><button type="button" data-demo="reset">Reset demo</button><a href="' + (page === 'dashboard' ? '/lms-dashboard' : location.pathname + location.search.replace(/[?&]demo=1/, '').replace(/^&/, '?')) + '" data-demo-exit>Exit demo</a></span>';
     document.body.insertBefore(bar, document.body.firstChild);
-    bar.querySelector('[data-demo="reset"]').onclick = function () { location.href = '/lms-dashboard?demo=1'; };
-    if (page !== 'dashboard') return;
+    bar.querySelector('[data-demo="reset"]').onclick = function () { ss(SS.step, ''); try { sessionStorage.removeItem(SS.step); sessionStorage.removeItem(SS.min); } catch (e) {} location.href = '/lms-dashboard?demo=1'; };
+    if (page !== 'dashboard' && page !== 'practice') return;
+    stepper(page);
+  }
+
+  // The demo script, one step at a time (like the tours): "Step 3 of 7", what to show, Back / Next / Skip. Next moves
+  // on and shows that part of the page; Skip (or ×) shrinks it to a small pill that opens it again. The step and
+  // whether it's open are kept for the session, so it follows on to Practice (step 7) and back.
+  var SS = { step: 'pa-demo-step', min: 'pa-demo-min' };
+  function ss(k, v) { try { if (v === undefined) return sessionStorage.getItem(k); sessionStorage.setItem(k, String(v)); } catch (e) { return null; } }
+  function stepper(page) {
     var box = document.createElement('aside');
     box.className = 'demo-script'; box.setAttribute('aria-label', 'Demo script');
-    box.innerHTML = '<details><summary>Demo script <span>' + STEPS.length + ' steps</span></summary><ol>' + STEPS.map(function (s, i) {
-      return '<li><b>' + esc(s.t) + '</b><p>' + esc(s.p) + '</p><button type="button" data-step="' + i + '">Show me</button></li>';
-    }).join('') + '</ol></details>';
     document.body.appendChild(box);
-    Array.prototype.forEach.call(box.querySelectorAll('[data-step]'), function (b) {
-      b.onclick = function () {
-        Array.prototype.forEach.call(box.querySelectorAll('li'), function (li) { li.classList.remove('on'); });
-        b.parentNode.classList.add('on'); show(STEPS[+b.getAttribute('data-step')].go);
-      };
-    });
+    var last = STEPS.length - 1, i = Math.max(0, Math.min(last, +(ss(SS.step) || (page === 'practice' ? last : 0)) || 0));
+    if (page === 'practice') i = last;
+    var started = ss(SS.step) !== null;
+    function paint(focusSel) {
+      var min = ss(SS.min) === '1', st = STEPS[i];
+      box.classList.toggle('min', min);
+      if (min) {
+        box.innerHTML = '<button type="button" class="ds-pill" data-ds="open" aria-label="Open the demo script, step ' + (i + 1) + ' of ' + STEPS.length + '">Demo script <span>' + (i + 1) + ' of ' + STEPS.length + '</span></button>';
+      } else {
+        box.innerHTML = '<div class="ds-head"><span class="ds-n">' + (started ? 'Step ' + (i + 1) + ' of ' + STEPS.length : 'Demo script · ' + STEPS.length + ' steps') + '</span>' +
+          '<button type="button" class="ds-x" data-ds="min" aria-label="Hide the demo script">×</button></div>' +
+          '<div class="ds-dots" aria-hidden="true">' + STEPS.map(function (_, k) { return '<i class="' + (k < i ? 'done' : k === i && started ? 'on' : '') + '"></i>'; }).join('') + '</div>' +
+          (started ? '<h2 class="ds-t" tabindex="-1">' + esc(st.t) + '</h2><p class="ds-p">' + esc(st.p) + '</p>'
+            : '<h2 class="ds-t" tabindex="-1">A quick tour of Compass</h2><p class="ds-p">Seven stops, about five minutes. Each step shows a part of Product Advisory Learning working for a sample learner.</p>') +
+          '<div class="ds-acts">' +
+          (started ? '<button type="button" class="ds-back" data-ds="back"' + (i === 0 ? ' disabled' : '') + '>Back</button>' : '') +
+          '<button type="button" class="ds-skip" data-ds="min">Skip</button>' +
+          '<button type="button" class="ds-next" data-ds="next">' + (!started ? 'Start' : i === last ? 'Finish' : 'Next') + '</button></div>';
+      }
+      box.querySelectorAll('[data-ds]').forEach(function (b) { b.onclick = function () { act(b.getAttribute('data-ds')); }; });
+      var f = focusSel && box.querySelector(focusSel); if (f) f.focus({ preventScroll: true });
+    }
+    function go(k) {
+      i = k; started = true; ss(SS.step, i); ss(SS.min, 0);
+      var g = STEPS[i].go;
+      if (g.href && page !== 'practice') { location.href = g.href; return; }
+      if (!g.href && page === 'practice') { location.href = '/lms-dashboard?demo=1'; return; }
+      if (!g.href) show(g);
+      paint('.ds-t');
+    }
+    function act(a) {
+      if (a === 'min') { ss(SS.min, 1); paint('.ds-pill'); }
+      else if (a === 'open') { ss(SS.min, 0); paint('.ds-next'); }
+      else if (a === 'back' && i > 0) go(i - 1);
+      else if (a === 'next') {
+        if (!started) go(0);
+        else if (i < last) go(i + 1);
+        else { ss(SS.min, 1); paint('.ds-pill'); }   // Finish
+      }
+    }
+    // coming back to My Learning mid-tour: show where we were
+    if (started && page === 'dashboard' && !STEPS[i].go.href) setTimeout(function () { show(STEPS[i].go); }, 300);
+    box.addEventListener('keydown', function (e) { if (e.key === 'Escape') act('min'); });
+    paint();
   }
 
   // Log that this account opened the demo (once a session): Apps Script demoView, with where they came from (?src=).
