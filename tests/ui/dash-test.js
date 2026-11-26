@@ -213,6 +213,45 @@ const sleep = (ms) => new Promise(r => setTimeout(r, ms));
       t('a saved reflection appears under Your notes', notesCard.style.display === 'block' && /My own answer to the final question/.test(notesCard.textContent));
       t('together with the question it answers (taken from the lesson text)', !!last && !!last.reflection && notesCard.textContent.indexOf(last.reflection.prompt.slice(0, 40)) > -1, notesCard.textContent.slice(0, 200));
     }
+    if (window.__scn === 'demo' || window.__scn === 'demonotowner'){
+      const before = JSON.stringify(store['progress/uDash']);
+      if (window.__scn === 'demonotowner'){
+        t('demo mode asked for by someone who isn\'t the owner: their own dashboard, no banner', !document.querySelector('.demo-bar') && !window.__paDemo && !/Alex/.test(document.querySelector('.home-hello') ? document.querySelector('.home-hello').textContent : ''));
+      } else {
+        const bar = document.querySelector('.demo-bar'), sc = document.querySelector('.demo-script');
+        t('demo mode (owner): the banner says it is a fictional learner and nothing is saved', bar && /Alex Rivera/.test(bar.textContent) && /Nothing here is saved/.test(bar.textContent) && window.__paDemo === true);
+        t('it greets Alex, not the owner', /Alex/.test(document.body.textContent) && !/Hi, Dash|Dash User/.test((document.querySelector('.home-hello') || document.body).textContent));
+        t('Alex\'s data: the plan is in week 2, practice history shows', /Week 2 of 4/.test(document.getElementById('planPanel').textContent) && document.querySelectorAll('#readinessPanel .cc-act li').length >= 3);
+        t('the demo script: seven steps, each with Show me', sc && sc.querySelectorAll('li').length === 7 && sc.querySelectorAll('[data-step]').length === 7);
+        t('the script starts closed, so it does not cover the page', !sc.querySelector('details').open);
+        sc.querySelector('details').open = true;
+        sc.querySelector('[data-step="2"]').click(); await sleep(80);
+        t('Show me on "A study plan" opens My Learning on the plan', document.body.dataset.view === 'learning' && document.body.dataset.ltab === 'plan', document.body.dataset.view + '/' + document.body.dataset.ltab);
+        const a = document.querySelector('#readinessPanel .cc-act a'), stop = e => e.preventDefault(); document.addEventListener('click', stop); a.click(); document.removeEventListener('click', stop);
+        t('links to practice stay in the demo', /demo=1/.test(a.getAttribute('href')), a.getAttribute('href'));
+        document.querySelector('#planPanel [data-pl-act="remove"]') && (window.confirm = () => true, document.querySelector('#planPanel [data-pl-act="remove"]').click()); await sleep(150);
+        t('the owner\'s own record is never read for display, and nothing is written', JSON.stringify(store['progress/uDash']) === before && !/PRIVATE THOUGHTS/.test(document.body.textContent));
+      }
+    }
+    if (window.__scn === 'library'){
+      const lp = document.getElementById('libraryPanel');
+      document.getElementById('ltab-library').click(); await sleep(40);
+      t('Library tab: Worth your time right now, three picks each with why', document.body.dataset.ltab === 'library' && /Worth your time right now/.test(lp.textContent) && lp.querySelectorAll('.lb-pick').length === 3 && [...lp.querySelectorAll('.lb-why')].every(w => w.textContent.length > 20), [...lp.querySelectorAll('.lb-pick')].map(p => p.textContent).join(' | '));
+      t('a read pick, a listen pick (from the audio index) and a toolkit', /Lesson/.test(lp.querySelectorAll('.lb-pk')[0].textContent) && /Listen/.test(lp.querySelectorAll('.lb-pk')[1].textContent) && /listen=1/.test(lp.querySelectorAll('.lb-pick')[1].getAttribute('href')) && lp.querySelectorAll('.lb-pick')[2].getAttribute('href') === '/my-tools');
+      t('an Ask Compass box with examples', lp.querySelector('form[data-coach-ask] input') && lp.querySelectorAll('.cc-try-q').length === 3);
+      const det = lp.querySelector('.lb-browse');
+      t('Browse everything starts closed, with the counts', !det.open && /lessons · 3 to listen to · \d+ articles · 5 toolkits/.test(det.querySelector('summary').textContent), det.querySelector('summary').textContent);
+      det.querySelector('summary').click(); await sleep(60);
+      const count = () => +((lp.querySelector('.lb-count').textContent.match(/\d+/) || [0])[0]);
+      t('opened: the first 40 of everything, and a Show more', det.open && lp.querySelectorAll('.lb-row').length === 40 && lp.querySelector('[data-lib-more]') && count() > 150, count());
+      lp.querySelector('[data-lib-kind="tool"]').click(); await sleep(30);
+      t('Toolkits only: the five toolkits, the chip pressed', lp.querySelectorAll('.lb-row').length === 5 && lp.querySelector('[data-lib-kind="tool"]').getAttribute('aria-pressed') === 'true');
+      lp.querySelector('[data-lib-kind="all"]').click(); await sleep(30);
+      const sel = document.getElementById('lbArea'); sel.value = 'prioritization'; sel.dispatchEvent(new Event('change')); await sleep(30);
+      t('a skill area: its lessons, practice and its toolkit', [...lp.querySelectorAll('.lb-row')].every(r => /Prioritization|Scorecard/.test(r.textContent)) && /Feature Prioritization Scorecard/.test(lp.textContent));
+      const q = document.getElementById('lbQ'); q.value = 'zzqx'; q.dispatchEvent(new Event('input')); await sleep(30);
+      t('search with no match says so and keeps focus in the box', /Nothing matches/.test(lp.textContent) && document.activeElement === document.getElementById('lbQ'));
+    }
     if (window.__scn === 'plan'){
       const pp = document.getElementById('planPanel'), home = document.getElementById('homePlan');
       t('Home: with no plan, an offer to build one', !home.hidden && /Want a plan\?/.test(home.textContent) && home.querySelector('a[href="/my-learning#plan"]'));
@@ -259,9 +298,9 @@ const sleep = (ms) => new Promise(r => setTimeout(r, ms));
     if (window.__scn === 'allfive') t('all 5 of its 5 lessons does', doneStat === '1', doneStat);
     // Pick up where you left off (the top of the page)
     const hb = document.getElementById('homeBand'), resumeCard = document.getElementById('homeResume'), nextCard = document.getElementById('homeNext'), toolsCard = document.getElementById('homeTools');
-    t('the top of the page greets them by first name', !hb.hidden && /, Dash$/.test(document.getElementById('homeHello').textContent), document.getElementById('homeHello').textContent);
+    if (window.__scn !== 'demo') t('the top of the page greets them by first name', !hb.hidden && /, Dash$/.test(document.getElementById('homeHello').textContent), document.getElementById('homeHello').textContent);
     const goA = resumeCard.querySelector('a.btn');
-    t('"Your next best step": the course in progress, with the next lesson to open', /Your next best step/.test(resumeCard.textContent) && resumeCard.classList.contains('wide') && /Customer & Market Discovery/.test(resumeCard.textContent) && (window.__scn === 'threelessons' ? /3 of 5 lessons done/.test(resumeCard.textContent) && goA && /course=discovery-moderate&lesson=4/.test(goA.getAttribute('href')) && /lesson 4/.test(goA.textContent)
+    if (window.__scn !== 'demo') t('"Your next best step": the course in progress, with the next lesson to open', /Your next best step/.test(resumeCard.textContent) && resumeCard.classList.contains('wide') && /Customer & Market Discovery/.test(resumeCard.textContent) && (window.__scn === 'threelessons' ? /3 of 5 lessons done/.test(resumeCard.textContent) && goA && /course=discovery-moderate&lesson=4/.test(goA.getAttribute('href')) && /lesson 4/.test(goA.textContent)
       : /2 of 5 lessons done/.test(resumeCard.textContent) && goA && /course=discovery-novice&lesson=3/.test(goA.getAttribute('href')) && /lesson 3/.test(goA.textContent)), resumeCard.textContent + ' ' + (goA && goA.getAttribute('href')));
     const side = resumeCard.querySelector('.step-side');
     t('with a course in progress, "After that" still shows what comes next, and says why', !!side && /After that/.test(side.textContent) && (window.__scn === 'assigned' ? /Product Strategy/.test(side.textContent) && /company asked/.test(side.textContent) : /lesson 1/.test(side.textContent) && /assessment/.test(side.textContent)), side && side.textContent);
@@ -277,7 +316,7 @@ const sleep = (ms) => new Promise(r => setTimeout(r, ms));
     }
     const companyLink = document.getElementById('companyDashMenuItem');
     const roleBadge = document.getElementById('profileRoleBadge').textContent;
-    t('the Profile menu shows a role badge', window.__scn === 'owner' ? roleBadge === 'Super admin' : window.__scn === 'admin' ? /^Company admin/.test(roleBadge) : roleBadge === 'Learner', roleBadge);
+    t('the Profile menu shows a role badge', window.__scn === 'owner' || window.__scn === 'demo' ? roleBadge === 'Super admin' : window.__scn === 'admin' ? /^Company admin/.test(roleBadge) : roleBadge === 'Learner', roleBadge);
     const dd = document.getElementById('profileDropdown');
     t('the Profile menu: their picture and who they are at the top, then Account and Learning; no progress, tour, feedback or cookie settings', !/Your details|Your progress|Replay the tour|Send feedback|Cookie settings/.test(dd.textContent) && /^[A-Z?]{1,2}$/.test(document.getElementById('profileFace').textContent) && /^Account,Learning/.test(Array.prototype.map.call(dd.querySelectorAll('.profile-progress-label'), x => x.textContent).join()), dd.textContent.replace(/\s+/g, ' '));
     if (window.__scn === 'admin'){

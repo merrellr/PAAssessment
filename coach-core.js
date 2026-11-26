@@ -259,6 +259,22 @@
     return days <= 0 ? 'Today' : days === 1 ? 'Yesterday' : d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
   }
 
+  // "Last time…": the most recent session (practice, a lesson check, a refresher or lessons finished), as a sentence
+  // for Compass to open with, and a question to offer about it. null when there's nothing yet.
+  function lastTime(ctx) {
+    var a = activity(ctx, 1)[0];
+    if (!a) return null;
+    var now = ctx.now || Date.now(), w = when(a.at, now), name = a.d ? areaName(ctx, a.d) : '';
+    var lead = w === 'Today' ? 'Earlier today' : 'Last time (' + (w === 'Yesterday' ? 'yesterday' : w) + ')';
+    var did = a.kind === 'practice' ? 'you practised ' + name + ': ' + a.detail.toLowerCase()
+      : a.kind === 'lesson' ? 'you answered a lesson check in ' + name + (a.detail === 'Right' ? ' and got it right' : a.detail === 'Missed' ? ' and missed it' : ': ' + a.detail.toLowerCase())
+      : a.kind === 'review' ? 'you did a refresher in ' + name + ': ' + a.detail.toLowerCase()
+      : 'you ' + a.title.charAt(0).toLowerCase() + a.title.slice(1);
+    var tail = a.flag === 'review' ? ' Worth another look.' : a.flag === 'good' && a.kind !== 'lessons' ? ' Nicely done.' : '';
+    return { line: lead + ' ' + did + '.' + tail, d: a.d, flag: a.flag,
+      ask: a.flag === 'review' && name ? 'Explain what I missed in ' + name : 'How am I doing since last time?' };
+  }
+
   // What has changed since a moment (the start of today, by default): areas whose status moved, and the answers given
   // since. { answers, right, moves: [{ d, name, from, to, up }], line }.
   function changes(ctx, since) {
@@ -322,5 +338,5 @@
 
   root.CoachCore = { STYLES: STYLES, STYLE_PHRASE: STYLE_PHRASE, STATUS: STATUS, STAGES: STAGES, TIERS: TIERS, LOG_MAX: LOG_MAX, REASSESS_DAYS: REASSESS_DAYS,
     qType: qType, record: record, doneIds: doneIds, readiness: readiness, stage: stage, styles: styles, weakStyle: weakStyle, lessonFor: lessonFor,
-    nextStep: nextStep, alternatives: alternatives, loop: loop, activity: activity, when: when, changes: changes, pickQuestion: pickQuestion, startLevel: startLevel, adapt: adapt, recap: recap };
+    nextStep: nextStep, alternatives: alternatives, loop: loop, activity: activity, when: when, changes: changes, lastTime: lastTime, pickQuestion: pickQuestion, startLevel: startLevel, adapt: adapt, recap: recap };
 })(typeof window !== 'undefined' ? window : globalThis);

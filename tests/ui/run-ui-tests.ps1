@@ -46,6 +46,9 @@ Copy-Item "$repo\coach-ui.js" $site
 Copy-Item "$repo\coach.css" $site
 Copy-Item "$repo\plan-core.js" $site
 Copy-Item "$repo\plan-ui.js" $site
+Copy-Item "$repo\library-core.js" $site
+Copy-Item "$repo\library-ui.js" $site
+Copy-Item "$repo\demo.js" $site
 Copy-Item "$repo\tests\ui\fake-tool.html" "$site\faketool-impact-score.html"
 Copy-Item "$repo\tests\ui\fake-tool.html" "$site\faketool-build-buy-partner.html"
 Copy-Item "$repo\tests\ui\fake-tool.html" "$site\faketool-scorecard.html"
@@ -172,7 +175,9 @@ try {
     $results += Run-Page "join page: $s" "$base/join-test.html?scn=$s&token=$tok" 20000
   }
   $results += Run-Page 'join page: badtoken' "$base/join-test.html?scn=badtoken&token=abc" 20000
-  foreach ($s in 'member', 'focus', 'focusdefault', 'admin', 'plain', 'removed', 'owner', 'threelessons', 'allfive', 'recentdone', 'removedold', 'profilecard', 'assigned', 'growth', 'tourstaken', 'activity', 'plan') { $results += Run-Page "dashboard: $s" "$base/dash-test.html?scn=$s" 25000 }
+  foreach ($s in 'member', 'focus', 'focusdefault', 'admin', 'plain', 'removed', 'owner', 'threelessons', 'allfive', 'recentdone', 'removedold', 'profilecard', 'assigned', 'growth', 'tourstaken', 'activity', 'plan', 'library') { $results += Run-Page "dashboard: $s" "$base/dash-test.html?scn=$s" 25000 }
+  $results += Run-Page "dashboard: demo mode (owner)" "$base/dash-test.html?scn=demo&demo=1" 25000
+  $results += Run-Page "dashboard: demo mode asked for, not the owner" "$base/dash-test.html?scn=demonotowner&demo=1" 25000
   $results += Run-Page 'dashboard: tourlink' "$base/dash-test.html?scn=tourlink&tour=1" 25000
   foreach ($s in 'signin', 'nudge', 'owner', 'on', 'unverified', 'google', 'googleowner', 'ownernever', 'turnedoff', 'firstlogin', 'profilefirst', 'secondlogin', 'paused') { $results += Run-Page "two-step on the dashboard: $s" "$base/twostep-test.html?scn=$s" 25000 }
   foreach ($s in 'member', 'nonmember', 'blocked', 'votefail') { $results += Run-Page "delete account: $s" "$base/del-test.html?scn=$s" 25000 }
@@ -188,6 +193,7 @@ try {
   $results += Run-Page "practice: an area asked for" "$base/practice-test.html?scn=area&area=prioritization&n=3" 30000
   $results += Run-Page "practice: the coach picks" "$base/practice-test.html?scn=coached" 30000
   $results += Run-Page "lesson audio: a narrated lesson" "$base/les-test.html?scn=listen&course=discovery-novice&lesson=2" 30000
+  $results += Run-Page "lesson audio: opened from the Library" "$base/les-test.html?scn=listenopen&course=discovery-novice&lesson=2&listen=1" 30000
   $results += Run-Page "lesson audio: a lesson with no audio yet" "$base/les-test.html?scn=noaudio&course=discovery-novice&lesson=4" 30000
   $results += Run-Page "lesson figures: metrics and a column chart" "$base/les-test.html?scn=figs&course=aiOrg-experienced&lesson=6" 30000
   $results += Run-Page "lesson figures: a value-vs-effort matrix and a scoring equation" "$base/les-test.html?scn=figs&course=prioritization-novice&lesson=2" 30000

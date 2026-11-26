@@ -58,6 +58,7 @@
   function coachTab(s, next, alts, areas, stage) {
     var html = '';
     html += '<section class="card cc-next" aria-labelledby="ccNextTitle"><div class="cc-next-ico" aria-hidden="true">' + ICON + '</div><div class="cc-next-main">' +
+      (C.lastTime(s) ? '<p class="cc-last">' + esc(C.lastTime(s).line) + '</p>' : '') +
       '<span class="eyebrow">Here’s what I’d do next</span><h2 id="ccNextTitle">' + esc(next.title) + '</h2><p class="cc-why">' + esc(next.why) + '</p>' +
       (next.chips.length ? '<div class="cc-chips">' + next.chips.map(function (c) { return '<span>' + esc(c) + '</span>'; }).join('') + '</div>' : '') +
       (next.ready ? '<a class="cc-ready" href="' + esc(next.ready.href) + '"><span class="cc-ready-k">Ready if you need it:</span> <b>' + esc(next.ready.title) + '</b><span class="cc-ready-m">' + next.ready.min + ' min</span></a>' : '') +
@@ -161,17 +162,20 @@
   // in the box (it isn't sent until they press Ask).
   function examples(s, next) {
     var name = next.area ? ((s && s.areas) || {})[next.area] || '' : '';
-    var out = ['Why is this my next step?'];
+    var last = s && s.log ? C.lastTime(s) : null;
+    var out = last ? [last.ask, 'Why is this my next step?'] : ['Why is this my next step?'];
     if (name) out.push('Explain ' + name + ' in plain English');
     out.push(next.kind === 'assess' ? 'What does the assessment cover?' : 'Plan my learning for this week');
     return out.slice(0, 3);
   }
-  function homeCard(s, next) {
-    var icon = (root.PAIcons && root.PAIcons.compass) || ICON;
+  function homeCard(s, next, alts) {
+    var icon = (root.PAIcons && root.PAIcons.compass) || ICON, last = C.lastTime(s), then = (alts || [])[0];
     return '<div class="cc-home-top"><div class="cc-home-main"><span class="eyebrow">Compass Suggests</span>' +
+      (last ? '<p class="cc-last">' + esc(last.line) + '</p>' : '') +
       '<p class="cc-home-t"><b>' + esc(next.title) + '.</b> ' + esc(next.why.split(/(?<=\.)\s/)[0]) + '</p>' +
       (next.chips && next.chips.length ? '<div class="cc-chips" aria-label="Why Compass suggests this">' + next.chips.map(function (c) { return '<span>' + esc(c) + '</span>'; }).join('') + '</div>' : '') +
       (next.ready ? '<a class="cc-ready cc-ready-sm" href="' + esc(next.ready.href) + '"><span class="cc-ready-k">Ready if you need it:</span> <b>' + esc(next.ready.title) + '</b><span class="cc-ready-m">' + next.ready.min + ' min</span></a>' : '') +
+      (then ? '<p class="cc-then"><span>Up next:</span> <a href="' + esc(then.href) + '" data-coach-go="then-' + esc(then.kind) + '">' + esc(then.title) + '</a> <span class="cc-muted">· ' + then.minutes + ' min</span></p>' : '') +
       '</div>' +
       '<div class="cc-home-go"><a class="cc-btn sm" href="' + esc(next.action.href) + '" data-coach-go="' + esc(next.kind) + '">' + esc(next.action.label) + '</a>' +
       '<span class="cc-min"><span aria-hidden="true">◷ </span>About ' + next.minutes + ' min</span>' +
@@ -197,11 +201,20 @@
     var tiles = [
       { k: 'assess', t: 'Assess', p: 'Find out where you stand', sub: when ? 'Last skill check ' + when : 'Not taken yet', href: s.assessUrl || '/' },
       { k: 'gaps', t: 'My gaps', p: 'Focus on what needs attention', sub: !s.pct ? 'After your skill check' : flagged ? (flagged === 1 ? '1 area' : flagged + ' areas') + ' to focus on' : 'No area flagged', href: '/my-learning#gaps' },
-      { k: 'practice', t: 'Practice', p: 'Apply what you know', sub: focus ? focus + ' is queued up' : 'Pick any area', href: next.kind === 'practice' || next.kind === 'review' ? next.action.href : '/practice' },
-      { k: 'learn', t: 'Learn', p: 'Understand an idea', sub: lesson ? 'Next: ' + lesson.title.replace(/^Lesson \d+:\s*/, '') : s.resume ? 'Next: ' + s.resume.title : 'Browse the courses', href: lesson ? lesson.href : '/my-learning#courses' }
+      { k: 'learn', t: 'Learn', p: 'Understand an idea', sub: lesson ? 'Next: ' + lesson.title.replace(/^Lesson \d+:\s*/, '') : s.resume ? 'Next: ' + s.resume.title : 'Browse the courses', href: lesson ? lesson.href : '/my-learning#courses' },
+      { k: 'practice', t: 'Practice', p: 'Apply what you know', sub: focus ? focus + ' is queued up' : 'Pick any area', href: next.kind === 'practice' || next.kind === 'review' ? next.action.href : '/practice' }
     ];
-    return tiles.map(function (x) {
-      return '<a class="hl-tile" href="' + esc(x.href) + '" data-coach-go="tile-' + x.k + '"><span class="hl-ico" aria-hidden="true"><svg viewBox="0 0 24 24">' + TILE_ICO[x.k] + '</svg></span>' +
+    // the learning loop (C.loop): each tile is done, where you are now, or still to come; Explain why counts as
+    // Practice and Reassess as Assess
+    var lp = C.loop(s), byKey = {}, AS = { why: 'practice', reassess: 'assess' };
+    lp.steps.forEach(function (st) { byKey[st.key] = st; });
+    var cur = lp.steps[lp.current], nowKey = AS[cur.key] || cur.key, recheck = cur.key === 'reassess';
+    if (recheck && cur.sub !== 'Due now') nowKey = 'practice';   // round the loop, not due a re-check yet: keep practising
+    return tiles.map(function (x, i) {
+      var state = x.k === nowKey ? 'now' : byKey[x.k] && byKey[x.k].done ? 'done' : 'todo';
+      var badge = state === 'now' ? '<span class="hl-state now">' + (x.k === 'assess' && recheck ? 'Check again' : 'You are here') + '</span>' : state === 'done' ? '<span class="hl-state done"><span aria-hidden="true">✓ </span>Done</span>' : '';
+      return '<a class="hl-tile s-' + state + '" href="' + esc(x.href) + '" data-coach-go="tile-' + x.k + '"' + (state === 'now' ? ' aria-current="step"' : '') + '>' +
+        '<span class="hl-top"><span class="hl-ico" aria-hidden="true"><svg viewBox="0 0 24 24">' + TILE_ICO[x.k] + '</svg></span><span class="hl-n" aria-hidden="true">' + (i + 1) + '</span>' + badge + '</span>' +
         '<span class="hl-k">' + esc(x.t) + '</span><span class="hl-p">' + esc(x.p) + '</span><span class="hl-sub">' + esc(x.sub) + '</span></a>';
     }).join('');
   }
@@ -241,7 +254,7 @@
     if ($('readinessPanel')) $('readinessPanel').innerHTML = readinessTab(s, areas, stage);
     if ($('gapsPanel')) $('gapsPanel').innerHTML = gapsTab(s, next, areas);
     var home = $('coachHome');
-    if (home) { home.innerHTML = homeCard(s, next); home.hidden = false; }
+    if (home) { home.innerHTML = homeCard(s, next, alts); home.hidden = false; }
     if ($('homeLoop')) { $('homeLoop').innerHTML = homeTiles(s, next, areas); $('homeLoop').hidden = false; }
     if ($('homeReadiness')) { $('homeReadiness').innerHTML = homeReady(areas, stage, s); $('homeReadiness').hidden = !s.pct; }
     wireAsk(document);

@@ -40,7 +40,7 @@
     var mark = live ? '<span class="pl-tick' + (it.done ? ' done' : '') + '" aria-hidden="true">' + (it.done ? '✓' : '') + '</span>' : '<span class="pl-tick" aria-hidden="true"></span>';
     return '<li class="pl-item' + (it.done ? ' done' : '') + '">' + mark + '<span class="pl-k">' + esc(KIND[it.k]) + '</span>' +
       '<a href="' + esc(it.href) + '" data-pl-go="' + it.k + '">' + esc(it.title) + '</a>' +
-      '<span class="pl-m">' + (it.part && !it.done ? esc(it.part) : it.min + ' min') + (live && it.done ? '<span class="hp"> (done)</span>' : '') + '</span></li>';
+      '<span class="pl-m">' + (it.part && !it.done ? esc(it.part) : it.min + ' min') + (live && it.done ? '<span class="sr-only"> (done)</span>' : '') + '</span></li>';
   }
   function weekCard(w, i, live) {
     var mins = w.items.reduce(function (n, x) { return n + x.min; }, 0), open = !live || w.state === 'now';

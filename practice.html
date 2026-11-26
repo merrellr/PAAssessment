@@ -76,6 +76,7 @@
 <link rel="stylesheet" href="coach.css">
 <script src="coach-core.js"></script>
 <script src="coach-bank.js"></script>
+<script src="demo.js"></script>
 </head>
 <body>
 <script src="pa-shell.js"></script>
@@ -124,7 +125,9 @@ const firebaseConfig = {
 };
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
-import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+import { getFirestore, doc, getDoc, setDoc as fsSetDoc } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+// the owner's demo mode (?demo=1, demo.js): the fictional learner's answers, and nothing is saved
+const setDoc = (...a) => window.__paDemo ? Promise.resolve() : fsSetDoc(...a);
 const app = initializeApp(firebaseConfig), auth = getAuth(app), db = getFirestore(app);
 
 const C = window.CoachCore, BANK = window.CoachBank;
@@ -256,7 +259,11 @@ $('prNext').addEventListener('click', next);
 onAuthStateChanged(auth, async (u) => {
   if (!u){ location.href = '/lms-dashboard'; return; }
   user = u;
-  try {
+  if (params.get('demo') === '1' && window.DemoCore){
+    try { window.__paDemo = (await getDoc(doc(db, 'platformAdmins', u.uid))).exists(); } catch (e) { window.__paDemo = false; }
+  }
+  if (window.__paDemo){ progress = DemoCore.progress(Date.now()); if (window.DemoUI) DemoUI.script('practice'); }
+  else try {
     const snap = await getDoc(doc(db, 'progress', u.uid));
     progress = snap.exists() ? snap.data() : { courses: {} };
   } catch (e) { /* a fresh session still works; answers just won't count until it can save */ }

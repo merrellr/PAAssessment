@@ -116,6 +116,11 @@ t('coach-bank.js matches content/ (else run node tools/coach/build-bank.mjs)', f
   t('activity: a session with most answers missed is flagged for review', act[2].title === 'Practised Strategy' && act[2].detail === '1 of 3 right' && act[2].flag === 'review');
   t('activity: a lesson check, and lessons finished from the lesson log', act[1].title === 'Lesson check in Discovery' && act[1].detail === 'Right' && act[3].title === 'Finished 2 lessons');
   t('activity: Today and Yesterday', C.when(today - 2, NOW) === 'Today' && C.when(yest, NOW) === 'Yesterday');
+  const lt = C.lastTime(ctx);
+  t('last time: the latest session, said plainly', lt && /^Earlier today you practised Strategy: 3 of 3 right\. Nicely done\.$/.test(lt.line) && lt.ask === 'How am I doing since last time?', lt && lt.line);
+  const lt2 = C.lastTime({ ...ctx, log: L.slice(0, 3), lessonLog: {} });
+  t('last time: a hard session yesterday says so, and offers to explain the misses', /^Last time \(yesterday\) you practised Strategy: 1 of 3 right\. Worth another look\.$/.test(lt2.line) && lt2.ask === 'Explain what I missed in Strategy', lt2.line);
+  t('last time: nothing yet, nothing said', C.lastTime({ areas: AREAS, log: [], now: NOW }) === null);
   const ch = C.changes(ctx, today - 10);
   t('changes: answers since, and an area that moved up', ch.answers === 4 && ch.right === 4 && ch.moves.length === 1 && ch.moves[0].d === 'strategy' && ch.moves[0].up && /Strategy moved up to Developing/.test(ch.line), JSON.stringify(ch));
   t('changes: nothing new says so', /Nothing new/.test(C.changes({ areas: AREAS, pct, log: L, now: NOW }, NOW + 1).line));
