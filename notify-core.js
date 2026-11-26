@@ -10,6 +10,7 @@
                 (missing means weekly: everyone gets the weekly email until they change it)
      goals:     { weeklyLessons: 1-10, focus: up to 3 skill-area keys }
      lessonLog: { 'YYYY-MM-DD': lessons finished that day }, written by lesson.html
+     studyPlan: the Compass study plan (plan-core.js): { start, weeks, list: [{ d, items: [{ k, course, lesson, title, href }] }] }
 
    An email covers the period that has just ended: the daily one (sent in the
    morning) covers yesterday, the weekly one (Monday) last week, the monthly one
@@ -147,6 +148,21 @@
        freq, nowMs, offsetMin,
        links: { site, settings, unsubscribe }   (site ends with '/')
      } */
+  /* The study plan's current week, for the check-in: which week, its area, the lessons done and the next thing to do.
+     Practice is left out here (the answers aren't read for emails); My Learning shows it. */
+  function planWeek(plan, courses, nowMs, site) {
+    if (!plan || !Array.isArray(plan.list) || !plan.list.length || !plan.start) return null;
+    const i = Math.floor((nowMs - plan.start) / (7 * DAY));
+    if (i < 0) return null;
+    if (i >= plan.list.length) return { over: true, n: plan.list.length, total: plan.list.length };
+    const items = (plan.list[i].items || []).filter(it => it && it.title);
+    const done = it => it.k === 'lesson' && ((courses[it.course] || {}).completed || []).indexOf(it.lesson) > -1;
+    const lessons = items.filter(it => it.k === 'lesson');
+    const next = items.filter(it => !done(it))[0] || null;
+    return { over: false, n: i + 1, total: plan.list.length, area: C.domainLabel(plan.list[i].d), lessonsDone: lessons.filter(done).length, lessonsTotal: lessons.length,
+      next: next ? { title: next.title, url: site + String(next.href || '').replace(/^\//, '') } : null, url: site + 'my-learning#plan' };
+  }
+
   function checkin(input) {
     const freq = normalizeFreq(input.freq);
     const progress = input.progress || {};
@@ -204,6 +220,7 @@
       freq: freq, subject: subject, greeting: first ? 'Hi ' + first + ',' : 'Hi,', headline: headline, status: status,
       window: win, done: done, target: target, goalPct: Math.min(100, Math.round(done / target * 100)),
       planPct: planPct, planDone: planDone, planTotal: planTotal,
+      studyPlan: planWeek(progress.studyPlan, courses, input.nowMs, site),
       focus: focusRows, focusSuggested: suggested,
       next: next ? Object.assign({}, next, { url: site + 'lesson?course=' + encodeURIComponent(next.courseId) + '&lesson=' + next.lesson }) : null,
       cta: !input.assessment ? { label: 'Take the assessment', url: site } : next ? { label: (next.resume ? 'Pick up where you left off' : 'Start your next lesson'), url: site + 'lesson?course=' + encodeURIComponent(next.courseId) + '&lesson=' + next.lesson } : { label: 'Open my learning', url: site + 'lms-dashboard' },
@@ -312,7 +329,16 @@
           '<tr><td colspan="2" style="padding:0 0 6px;">' + bar(f.total ? f.pct : 100, CYAN) + '</td></tr>').join('') + '</table>';
       if (m.focusSuggested) h += '<p style="margin:0 0 14px;font-size:13px;color:' + SOFT + ';">These are your two lowest-scoring areas. <a href="' + esc(m.links.goals) + '" style="color:' + NAVY + ';">Choose your own focus areas</a>.</p>';
     }
-    if (m.next) {
+    const sp = m.studyPlan;
+    if (sp) {
+      h += '<div style="margin:16px 0 6px;padding:14px 16px;border:1px solid ' + LINE + ';border-left:4px solid ' + NAVY + ';border-radius:8px;">' +
+        '<div style="font-size:12px;color:' + MUTED + ';text-transform:uppercase;letter-spacing:.06em;font-weight:bold;">Your study plan</div>' +
+        (sp.over ? '<div style="font-size:15px;font-weight:bold;color:' + INK + ';margin-top:3px;">Your plan’s weeks are done. See what’s left, or make a new plan.</div>'
+          : '<div style="font-size:15px;font-weight:bold;color:' + INK + ';margin-top:3px;">Week ' + sp.n + ' of ' + sp.total + ': ' + esc(sp.area) + '</div>' +
+            '<div style="font-size:13px;color:' + SOFT + ';">' + sp.lessonsDone + ' of ' + sp.lessonsTotal + ' lessons done this week' + (sp.next ? '. Next: <a href="' + esc(sp.next.url) + '" style="color:' + NAVY + ';">' + esc(sp.next.title) + '</a>' : '') + '</div>') +
+        '<div style="font-size:13px;margin-top:6px;"><a href="' + esc(sp.url) + '" style="color:' + NAVY + ';">See my plan</a></div></div>';
+    }
+    if (m.next && !(sp && sp.next)) {
       h += '<div style="margin:16px 0 6px;padding:14px 16px;border:1px solid ' + LINE + ';border-left:4px solid ' + CYAN + ';border-radius:8px;">' +
         '<div style="font-size:12px;color:' + MUTED + ';text-transform:uppercase;letter-spacing:.06em;font-weight:bold;">' + (m.next.resume ? 'Pick up where you left off' : 'Up next') + '</div>' +
         '<div style="font-size:15px;font-weight:bold;color:' + INK + ';margin-top:3px;">' + esc(m.next.title) + '</div>' +
@@ -327,7 +353,8 @@
       lines.push('Your plan: ' + (m.planPct === null ? '-' : m.planPct + '%') + ' (' + m.planDone + ' of ' + m.planTotal + ' lessons)');
     }
     if (m.focus.length) { lines.push('', (m.focusSuggested ? 'Suggested focus areas' : 'Your focus areas') + ':'); m.focus.forEach(f => lines.push('- ' + f.label + ': ' + (f.total ? f.done + ' of ' + f.total + ' lessons' : 'tested out'))); }
-    if (m.next) lines.push('', (m.next.resume ? 'Pick up where you left off: ' : 'Up next: ') + m.next.title + ', lesson ' + m.next.lesson + ' of ' + m.next.lessons);
+    if (sp) lines.push('', 'Your study plan: ' + (sp.over ? 'the weeks are done. See what is left, or make a new plan.' : 'week ' + sp.n + ' of ' + sp.total + ', ' + sp.area + '. ' + sp.lessonsDone + ' of ' + sp.lessonsTotal + ' lessons done this week.' + (sp.next ? ' Next: ' + sp.next.title + ' ' + sp.next.url : '')), 'See my plan: ' + sp.url);
+    if (m.next && !(sp && sp.next)) lines.push('', (m.next.resume ? 'Pick up where you left off: ' : 'Up next: ') + m.next.title + ', lesson ' + m.next.lesson + ' of ' + m.next.lessons);
     lines.push('', m.cta.label + ': ' + m.cta.url, 'Change my goals: ' + m.links.goals);
     return { subject: m.subject, html: shell(h, footerHtml('check-in', m.freq, m.links)), text: lines.join('\n') + footerText('check-in', m.freq, m.links) };
   }

@@ -218,6 +218,10 @@ async function listenTests(){
       document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true })); await sleep(30);
     }
     if (window.__scn === 'listen' || window.__scn === 'noaudio') await listenTests();
+    else if (window.__scn === 'listenopen'){
+      const box = document.getElementById('lessonListen');
+      t('from the Library (&listen=1): the player opens, ready to play, with nothing playing yet', box.classList.contains('open') && document.getElementById('listenToggle').getAttribute('aria-expanded') === 'true' && document.querySelector('#lessonListen audio').paused);
+    }
     else if (window.__scn === 'blocks') await blockTests();
     else if (window.__scn === 'figs') await figTests();
     else await lessonFlow(store);

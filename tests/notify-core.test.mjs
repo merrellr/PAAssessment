@@ -156,5 +156,20 @@ t('email masked for the settings page', N.maskEmail('jane@acme.com') === 'j***@a
 
 t('apps-script/notify.gs is up to date (run: node tools/build-notify-gs.mjs)', fs.readFileSync(new URL('../apps-script/notify.gs', import.meta.url), 'utf8') === renderNotifyGs());
 
+/* ---------------- the study plan in the check-in */
+{
+  const plan = { v: 1, aim: 'promoted', weeks: 2, start: MON - 2 * DAY, list: [
+    { d: 'strategy', items: [{ k: 'lesson', d: 'strategy', course: 'strategy-novice', lesson: 1, title: 'Why Strategy', href: '/lesson?course=strategy-novice&lesson=1', min: 7 },
+      { k: 'lesson', d: 'strategy', course: 'strategy-novice', lesson: 2, title: 'Choosing Where to Play', href: '/lesson?course=strategy-novice&lesson=2', min: 7 },
+      { k: 'practice', d: 'strategy', n: 3, title: '3 practice sessions in Strategy', href: '/practice?area=strategy', min: 30 }] },
+    { d: 'stakeholder', items: [{ k: 'practice', d: 'stakeholder', n: 2, title: 'x', href: '/practice?area=stakeholder', min: 20 }] }] };
+  const m = mk({ courses: { 'strategy-novice': { completed: [1] } }, studyPlan: plan });
+  t('check-in: the study plan\'s week, its area, lessons done and the next one', m.studyPlan && m.studyPlan.n === 1 && m.studyPlan.total === 2 && m.studyPlan.lessonsDone === 1 && m.studyPlan.lessonsTotal === 2 && m.studyPlan.next.title === 'Choosing Where to Play' && m.studyPlan.next.url === LINKS.site + 'lesson?course=strategy-novice&lesson=2', JSON.stringify(m.studyPlan));
+  const mail = N.checkinEmail(m);
+  t('the email shows it, and the plan\'s next step replaces the generic "Up next"', /Your study plan/.test(mail.html) && /Week 1 of 2/.test(mail.html) && /See my plan/.test(mail.html) && !/>Up next</.test(mail.html) && /Your study plan: week 1 of 2/.test(mail.text), mail.text);
+  t('past the plan\'s last week it says the weeks are done', mk({ studyPlan: plan }, { nowMs: MON + 20 * DAY }).studyPlan.over === true);
+  t('no plan, nothing extra', mk({}).studyPlan === null && !/Your study plan/.test(N.checkinEmail(mk({})).html));
+}
+
 console.log('\n' + pass + ' passed, ' + fail + ' failed');
 if (fail) process.exit(1);

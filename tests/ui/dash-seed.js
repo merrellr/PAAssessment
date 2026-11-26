@@ -6,6 +6,14 @@
   var scn = p.get('scn') || 'member';
   window.__scn = scn;
   window.__fakeUser = { uid: 'uDash', email: 'Dash@Acme.com', displayName: 'Dash User', emailVerified: true, providerData: [], getIdToken: async function(){ return 'tok'; } };
+  // the Library: a small lesson audio index, so the test doesn't depend on the real audio/lessons/index.json
+  if (scn === 'library'){
+    var realFetch = window.fetch;
+    window.fetch = function(url, opts){
+      if (/audio\/lessons\/index\.json/.test(String(url))) return Promise.resolve(new Response(JSON.stringify({ 'discovery-novice-3': { duration: 290 }, 'strategy-novice-1': { duration: 250 }, 'stakeholder-novice-2': { duration: 310 } }), { status: 200, headers: { 'Content-Type': 'application/json' } }));
+      return realFetch.apply(this, arguments);
+    };
+  }
   window.__seed = function(store, Timestamp){
     store['progress/uDash'] = {
       courses: { 'discovery-novice': { completed: [1, 2], lastLesson: 2, updatedAt: '2026-10-07T09:00:00.000Z', reflections: { l1: 'PRIVATE THOUGHTS' } } },
@@ -38,7 +46,7 @@
     if (scn === 'admin') store['memberships/uDash'] = { orgId: 'orgA', orgName: 'Acme Health', role: 'admin', status: 'active', inviteToken: 't', joinedAt: Timestamp.now(), endedAt: null, email: 'dash@acme.com', displayName: 'Dash User' };
     if (scn === 'removed') store['memberships/uDash'] = { orgId: 'orgA', orgName: 'Acme Health', role: 'member', status: 'removed', inviteToken: 't', joinedAt: Timestamp.now(), endedAt: Timestamp.now(), email: 'dash@acme.com', displayName: 'Dash User' };
     if (scn === 'removedold') store['memberships/uDash'] = { orgId: 'orgA', orgName: 'Acme Health', role: 'member', status: 'removed', inviteToken: 't', joinedAt: Timestamp.fromMillis(Date.now() - 400 * 864e5), endedAt: Timestamp.fromMillis(Date.now() - 90 * 864e5), email: 'dash@acme.com', displayName: 'Dash User' };
-    if (scn === 'owner') store['platformAdmins/uDash'] = { note: 'owner' };
+    if (scn === 'owner' || scn === 'demo') store['platformAdmins/uDash'] = { note: 'owner' };
     // an earlier assessment, so My growth can compare (discovery grew most, stakeholder dropped a little)
     if (scn === 'growth') store['progress/uDash'].assessmentHistory = [
       { assessmentId: 'dash-0', submittedAt: '2026-06-01T10:00:00.000Z', tier: 'Limited Experience', overallPct: 38,

@@ -377,10 +377,10 @@
   }
   /* Home and My Learning: one page, two views */
   body[data-view="home"] [data-only="learning"], body[data-view="learning"] [data-only="home"]{ display:none !important; }
-  /* My Learning tabs: Coach, My readiness, My gaps (coach-ui.js) and Courses (the course path, as before) */
+  /* My Learning tabs: Compass Coach, My readiness, My gaps (coach-ui.js), My plan (plan-ui.js), Courses (the course path, as before) and Library (library-ui.js) */
   body[data-view="learning"]:not([data-ltab="courses"]) [data-only="learning"]:not([data-coach]){ display:none !important; }
-  body[data-ltab="coach"] [data-coach]:not([data-coach~="coach"]), body[data-ltab="readiness"] [data-coach]:not([data-coach~="readiness"]),
-  body[data-ltab="gaps"] [data-coach]:not([data-coach~="gaps"]), body[data-ltab="courses"] [data-coach]:not([data-coach~="courses"]){ display:none !important; }
+  body[data-ltab="coach"] [data-coach]:not([data-coach~="coach"]), body[data-ltab="plan"] [data-coach]:not([data-coach~="plan"]), body[data-ltab="readiness"] [data-coach]:not([data-coach~="readiness"]),
+  body[data-ltab="gaps"] [data-coach]:not([data-coach~="gaps"]), body[data-ltab="courses"] [data-coach]:not([data-coach~="courses"]), body[data-ltab="library"] [data-coach]:not([data-coach~="library"]){ display:none !important; }
   /* Home: the greeting on its own line, then (first visit) the welcome, then your result beside your badges */
   /* the greeting, with the tour beside it (it leaves once taken, and lives under Help) */
   .home-hi{ margin: 4px 0 18px; display:flex; align-items:center; justify-content:space-between; gap: 10px 20px; flex-wrap: wrap; }
@@ -436,6 +436,11 @@
 <script src="coach-core.js"></script>
 <script src="coach-bank.js" defer></script>
 <script src="coach-ui.js"></script>
+<script src="plan-core.js"></script>
+<script src="plan-ui.js"></script>
+<script src="library-core.js"></script>
+<script src="library-ui.js"></script>
+<script src="demo.js"></script>
 <link rel="stylesheet" href="coach.css">
 </head>
 <body>
@@ -697,6 +702,7 @@
       </div>
       <section class="card cc-home" id="coachHome" hidden aria-label="Compass Suggests"></section>
       <nav class="home-loop" id="homeLoop" hidden aria-label="Ways in: assess, gaps, practice, learn"></nav>
+      <section class="card home-plan" id="homePlan" hidden aria-label="Your study plan"></section>
       <div class="card assign-card" id="assignedHome" hidden></div>
       <div class="home-grid">
         <div class="home-card lead" id="homeResume"></div>
@@ -738,15 +744,19 @@
       <div class="cc-tabrow">
       <nav class="cc-tabs" role="tablist" aria-label="My Learning">
         <button type="button" role="tab" id="ltab-coach" data-ltab="coach" aria-controls="coachPanel">Compass Coach</button>
+        <button type="button" role="tab" id="ltab-plan" data-ltab="plan" aria-controls="planPanel">My plan</button>
         <button type="button" role="tab" id="ltab-readiness" data-ltab="readiness" aria-controls="readinessPanel">My readiness</button>
         <button type="button" role="tab" id="ltab-gaps" data-ltab="gaps" aria-controls="gapsPanel">My gaps</button>
         <button type="button" role="tab" id="ltab-courses" data-ltab="courses">Courses</button>
+        <button type="button" role="tab" id="ltab-library" data-ltab="library" aria-controls="libraryPanel">Library</button>
       </nav>
       <div class="cc-tabs-tour"><button type="button" class="guide-btn guide-sm" data-tour="my-learning" data-guide="{&quot;title&quot;:&quot;My Learning&quot;,&quot;steps&quot;:[{&quot;s&quot;:&quot;.cc-head h1&quot;,&quot;t&quot;:&quot;Compass Coach&quot;,&quot;p&quot;:&quot;My Learning starts with Compass Coach: what it would do next, and why. Your courses are all still here.&quot;},{&quot;s&quot;:&quot;.cc-head .cc-ask&quot;,&quot;t&quot;:&quot;Ask about the lessons&quot;,&quot;p&quot;:&quot;Type a question and get an answer from the course lessons, with links to them.&quot;},{&quot;s&quot;:&quot;#coachPanel .cc-next&quot;,&quot;t&quot;:&quot;What I&#x27;d do next&quot;,&quot;p&quot;:&quot;One suggestion, with the evidence behind it: your skill check, your courses and the questions you&#x27;ve answered.&quot;},{&quot;s&quot;:&quot;#coachPanel .cc-alts&quot;,&quot;t&quot;:&quot;Or, if you&#x27;d rather&quot;,&quot;p&quot;:&quot;Other good options: another area to practise, a fresh skill check, or reading the idea through first.&quot;},{&quot;s&quot;:&quot;#coachPanel .cc-loop&quot;,&quot;t&quot;:&quot;Your learning loop&quot;,&quot;p&quot;:&quot;Assess, find the gaps, learn, practise, understand why, then check again. This shows where you are.&quot;},{&quot;s&quot;:&quot;.cc-tabs&quot;,&quot;t&quot;:&quot;Readiness, gaps and courses&quot;,&quot;p&quot;:&quot;My readiness: how each area is going. My gaps: which kind of question you miss. Courses: every course and your plan, as before.&quot;}]}"><span class="guide-ico" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4.5 3.75 6.75v13L9 17.5l6 2.25 5.25-2.25v-13L15 6.75Z" stroke-width="1.8" stroke-linejoin="round"/><path d="M9 4.5v13M15 6.75v13" stroke-width="1.8" stroke-linecap="round"/></svg></span><span><b>How My Learning works</b></span></button></div>
       </div>
     </header>
 
     <div class="cc-panel" id="coachPanel" role="tabpanel" aria-labelledby="ltab-coach" data-only="learning" data-coach="coach"><p class="cc-muted">Loading Compass Coach…</p></div>
+    <div class="cc-panel" id="planPanel" role="tabpanel" aria-labelledby="ltab-plan" data-only="learning" data-coach="plan"></div>
+    <div class="cc-panel" id="libraryPanel" role="tabpanel" aria-labelledby="ltab-library" data-only="learning" data-coach="library"></div>
     <div class="cc-panel" id="readinessPanel" role="tabpanel" aria-labelledby="ltab-readiness" data-only="learning" data-coach="readiness"></div>
     <div class="cc-panel" id="gapsPanel" role="tabpanel" aria-labelledby="ltab-gaps" data-only="learning" data-coach="gaps"></div>
 
@@ -1004,7 +1014,10 @@ import {
   sendPasswordResetEmail, sendEmailVerification, updateProfile,
   updatePassword, reauthenticateWithCredential, EmailAuthProvider
 } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
-import { getFirestore, doc, getDoc, setDoc, increment, collection, query, where, getDocs, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+import { getFirestore, doc, getDoc, setDoc as fsSetDoc, increment, collection, query, where, getDocs, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+// Every write on this page goes through here, so the owner's demo mode (?demo=1, demo.js) never saves anything.
+const setDoc = (...a) => window.__paDemo ? Promise.resolve() : fsSetDoc(...a);
+const DEMO_ASKED = new URLSearchParams(location.search).get('demo') === '1';
 import { syncOrgShare } from "./org-share.js";
 import { withTwoStep, twoStepError } from "./two-step.js";
 
@@ -1197,10 +1210,15 @@ onAuthStateChanged(auth, async (user) => {
 
     document.getElementById('dashboardSkeleton').style.display = 'block';
     document.getElementById('dashboardContent').style.display = 'none';
-    await loadDashboard(user);
+    // Demo mode (?demo=1): the platform owner only. A fictional learner instead of their account; nothing is saved.
+    if (DEMO_ASKED && window.DemoCore){
+      try { window.__paDemo = (await getDoc(doc(db, 'platformAdmins', user.uid))).exists(); } catch (e) { window.__paDemo = false; }
+      if (window.__paDemo && window.DemoUI) DemoUI.script('dashboard');
+    }
+    await loadDashboard(window.__paDemo ? { uid: 'demo-alex', displayName: DemoCore.NAME, email: 'alex.rivera@example.com', emailVerified: true, providerData: [], getIdToken: () => Promise.resolve('') } : user);
     // If this person belongs to a company, refresh the copy their company sees
     // (a finished assessment or lesson shows up here the next time they visit).
-    syncOrgShare(db, user).catch(() => { /* never blocks the dashboard */ });
+    if (!window.__paDemo) syncOrgShare(db, user).catch(() => { /* never blocks the dashboard */ });
     document.getElementById('dashboardSkeleton').style.display = 'none';
     document.getElementById('dashboardContent').style.display = 'block';
     // "Replay the tour" in Help, from another page
@@ -1595,8 +1613,8 @@ window.setCatalogView = function(mode){
 
 async function loadDashboard(user){
   const progressRef = doc(db, 'progress', user.uid);
-  const progressSnap = await getDoc(progressRef);
-  const progress = progressSnap.exists() ? progressSnap.data() : { courses: {} };
+  const progressSnap = window.__paDemo ? null : await getDoc(progressRef);
+  const progress = window.__paDemo ? DemoCore.progress(Date.now()) : progressSnap.exists() ? progressSnap.data() : { courses: {} };
 
   document.getElementById('welcomeCard').style.display = progress.hasSeenWelcome ? 'none' : 'block';
 
@@ -1644,7 +1662,11 @@ function renderCoach(user, progress, assessmentResult, assessmentUrl){
     const at = assessmentResult && (assessmentResult.submittedAt || assessmentResult.firstSubmittedAt);
     const resume = H ? H.resume(progress, CATALOG) : null;
     if (resume) resume.title = CATALOG[resume.courseId].title;
-    CoachUI.render({ areas, pct, assessedAt: at || null, assessedLabel: at ? 'Skill check, ' + new Date(at).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) : '',
+    const ctx = { areas, pct, assessedAt: at || null, log: progress.answers || [], progress, bank: window.CoachBank || null, assessUrl: assessmentUrl, now: Date.now() };
+    if (progress.demo && !progress.studyPlan && window.DemoCore) progress.studyPlan = DemoCore.plan(ctx);
+    const plan = window.PlanUI ? PlanUI.render(ctx, { save: p => setDoc(doc(db, 'progress', user.uid), { studyPlan: p }, { merge: true }) }) : null;
+    if (window.LibraryUI) LibraryUI.render(ctx, { plan });
+    CoachUI.render({ areas, pct, assessedAt: at || null, planArea: plan && !plan.over && !plan.week.complete ? plan.week.d : null, assessedLabel: at ? 'Skill check, ' + new Date(at).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) : '',
       log: progress.answers || [], progress, bank: window.CoachBank || null, resume, lessonsDone, assessUrl: assessmentUrl, now: Date.now() });
     const focus = window.CoachCore.nextStep({ areas, pct, log: progress.answers || [], progress, bank: window.CoachBank || null }).area;
     document.querySelectorAll('[data-coach-sg="weakest"], [data-coach-sg="short"]').forEach(a => { a.href = '/practice' + (focus ? '?area=' + focus : '') + (a.dataset.coachSg === 'short' ? (focus ? '&' : '?') + 'n=6' : ''); });
@@ -1694,7 +1716,7 @@ let dashBadges = null;
 function viewFromUrl(){ return /^\/my-learning/.test(location.pathname) || new URLSearchParams(location.search).get('view') === 'learning' ? 'learning' : 'home'; }
 /* My Learning's tabs: Coach (the default), My readiness, My gaps and Courses (the course path). A link to something
    on the course path opens Courses; #readiness, #gaps and #courses in the address open that tab. */
-const LTABS = ['coach', 'readiness', 'gaps', 'courses'];
+const LTABS = ['coach', 'plan', 'readiness', 'gaps', 'courses', 'library'];
 window.setLearnTab = function(t, focus){
   t = LTABS.indexOf(t) > -1 ? t : 'coach';
   document.body.dataset.ltab = t;

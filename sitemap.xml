@@ -13,6 +13,12 @@
     <priority>0.7</priority>
   </url>
   <url>
+    <loc>https://assessment.productadvisory.co/why</loc>
+    <lastmod>2026-10-18</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://assessment.productadvisory.co/tool-requests</loc>
     <lastmod>2026-10-18</lastmod>
     <changefreq>weekly</changefreq>

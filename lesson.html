@@ -216,6 +216,7 @@
 <script src="notify-core.js"></script>
 <script src="badges-core.js"></script>
 <script src="lesson-blocks.js"></script>
+<script src="demo.js"></script>
 <script src="lesson-figures.js"></script>
 <script src="notes-core.js"></script>
 <script src="notes-ui.js"></script>
@@ -401,7 +402,9 @@ const CATALOG = buildCatalog();
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
-import { getFirestore, doc, getDoc, setDoc, increment, collection, getDocs, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+import { getFirestore, doc, getDoc, setDoc as fsSetDoc, increment, collection, getDocs, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+// the owner's demo mode (?demo=1, demo.js): the lesson works as usual, but finishing it or answering saves nothing
+const setDoc = (...a) => window.__paDemo ? Promise.resolve() : fsSetDoc(...a);
 import { syncOrgShare } from "./org-share.js";
 
 const app = initializeApp(firebaseConfig);
@@ -481,6 +484,10 @@ onAuthStateChanged(auth, async (user) => {
     return;
   }
   currentUser = user;
+  if (new URLSearchParams(location.search).get('demo') === '1' && window.DemoUI){
+    try { window.__paDemo = (await getDoc(doc(db, 'platformAdmins', user.uid))).exists(); } catch (e) { window.__paDemo = false; }
+    if (window.__paDemo) DemoUI.script('lesson');
+  }
   if (!course) return; // already showed a friendly message above
 
   // Gate content behind the assessment: no result means the courses
@@ -698,6 +705,8 @@ async function renderListen(lesson){
     audio.addEventListener('pause', () => { box.classList.remove('playing'); play.setAttribute('aria-label', 'Play the lesson'); box.querySelector('.listen-status').textContent = 'Paused'; });
     audio.addEventListener('ended', () => { box.querySelector('.listen-status').textContent = 'Finished. Try the practice on the page.'; });
   }
+  // ?listen=1 (the Library's "Listen"): open the player, ready to play (a browser won't start sound without a click)
+  if (params.get('listen') === '1' && !box._listenOpened){ box._listenOpened = true; box._openQuiet(); play.focus({ preventScroll: true }); }
   box._setRate = setRate; box._rate = () => rate; box._lesson = lesson.id; box._started = false;
   box._key = key; box._lines = meta.lines || 0;
   if (box._ra && box._raKey !== key){ box._ra.clear(); box._ra = null; }

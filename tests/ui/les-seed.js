@@ -5,7 +5,7 @@
   var scn = new URLSearchParams(location.search).get('scn') || 'member';
   window.__scn = scn;
   // Lesson audio: a small list of what has been narrated, so the test doesn't depend on the real audio/lessons/index.json.
-  if (scn === 'listen' || scn === 'noaudio'){
+  if (scn === 'listen' || scn === 'noaudio' || scn === 'listenopen'){
     var realFetch = window.fetch;
     window.__fetched = [];
     window.fetch = function(url, opts){
@@ -18,7 +18,7 @@
       }
       if (/audio\/lessons\/index\.json/.test(String(url))){
         window.__fetched.push(String(url));
-        var idx = scn === 'listen' ? { 'discovery-novice-2': { duration: 128.4, bytes: 771040, hash: 'x', lines: 99 }, 'discovery-novice-3': { duration: 61, bytes: 1, hash: 'y' } } : {};
+        var idx = scn === 'listen' || scn === 'listenopen' ? { 'discovery-novice-2': { duration: 128.4, bytes: 771040, hash: 'x', lines: 99 }, 'discovery-novice-3': { duration: 61, bytes: 1, hash: 'y' } } : {};
         return Promise.resolve(new Response(JSON.stringify(idx), { status: 200, headers: { 'Content-Type': 'application/json' } }));
       }
       return realFetch.apply(this, arguments);
