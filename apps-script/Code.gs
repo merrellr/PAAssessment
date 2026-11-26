@@ -3173,7 +3173,7 @@ function notifyRun_(nowMs, opts) {
   if (opts.dryRun || !queue.length) return out;
 
   var full = fsGetMany_('progress', queue.filter(function (q) { return q.kind === 'checkin'; }).map(function (q) { return q.user.uid; }),
-    ['notify', 'goals', 'lessonLog', 'courses', 'assessmentResult']);
+    ['notify', 'goals', 'lessonLog', 'courses', 'assessmentResult', 'studyPlan']);
   var results = null, platform = null, orgs = {};
   for (var i = 0; i < queue.length; i++) {
     var q = queue[i], u = q.user;

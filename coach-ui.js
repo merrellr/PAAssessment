@@ -236,6 +236,7 @@
   function render(s) {
     if (!C) return;
     var areas = C.readiness(s), stage = C.stage(areas), next = C.nextStep(s), alts = C.alternatives(s, next);
+    if (s.planArea && next.area === s.planArea && next.chips) next.chips = ['In this week’s plan'].concat(next.chips);
     if ($('coachPanel')) $('coachPanel').innerHTML = coachTab(s, next, alts, areas, stage);
     if ($('readinessPanel')) $('readinessPanel').innerHTML = readinessTab(s, areas, stage);
     if ($('gapsPanel')) $('gapsPanel').innerHTML = gapsTab(s, next, areas);

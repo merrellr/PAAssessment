@@ -213,6 +213,28 @@ const sleep = (ms) => new Promise(r => setTimeout(r, ms));
       t('a saved reflection appears under Your notes', notesCard.style.display === 'block' && /My own answer to the final question/.test(notesCard.textContent));
       t('together with the question it answers (taken from the lesson text)', !!last && !!last.reflection && notesCard.textContent.indexOf(last.reflection.prompt.slice(0, 40)) > -1, notesCard.textContent.slice(0, 200));
     }
+    if (window.__scn === 'plan'){
+      const pp = document.getElementById('planPanel'), home = document.getElementById('homePlan');
+      t('Home: with no plan, an offer to build one', !home.hidden && /Want a plan\?/.test(home.textContent) && home.querySelector('a[href="/my-learning#plan"]'));
+      t('My plan tab: three questions, Build disabled until each is answered', document.getElementById('ltab-plan') && pp.querySelectorAll('.pl-q').length === 3 && pp.querySelector('[data-pl-act="build"]').disabled);
+      const pick = (k, v) => pp.querySelector('[data-pl="' + k + '"][data-v="' + v + '"]').click();
+      pick('aim', 'promoted'); pick('weeks', '4'); pick('hours', '2');
+      t('answers show as chosen (radio buttons)', pp.querySelector('[data-pl="aim"][data-v="promoted"]').getAttribute('aria-checked') === 'true' && !pp.querySelector('[data-pl-act="build"]').disabled);
+      pp.querySelector('[data-pl-act="build"]').click(); await sleep(30);
+      t('the preview: 4 weeks, lessons and practice, before it is saved', /Get promoted: 4 weeks/.test(pp.textContent) && pp.querySelectorAll('.pl-week').length === 4 && /lessons and \d+ practice sessions/.test(pp.textContent) && !store['progress/uDash'].studyPlan, pp.querySelector('.pl-sum') && pp.querySelector('.pl-sum').textContent);
+      t('it starts with the aim: Strategy for Get promoted', /Product Strategy/.test(pp.querySelector('.pl-week b').textContent), pp.querySelector('.pl-week b').textContent);
+      pp.querySelector('[data-pl-act="edit"]').click(); await sleep(20);
+      t('Change my answers goes back with the answers kept', pp.querySelector('[data-pl="weeks"][data-v="4"]').getAttribute('aria-checked') === 'true');
+      pp.querySelector('[data-pl-act="build"]').click(); await sleep(20);
+      pp.querySelector('[data-pl-act="save"]').click(); await sleep(150);
+      const sp = store['progress/uDash'].studyPlan;
+      t('Use this plan saves it on progress.studyPlan', sp && sp.v === 1 && sp.aim === 'promoted' && sp.list.length === 4 && sp.hours === 2, JSON.stringify(sp || {}).slice(0, 120));
+      t('then the plan: week 1 of 4, the next item, this week open and the rest closed', /Week 1 of 4/.test(pp.querySelector('h2').textContent) && pp.querySelector('.pl-next') && pp.querySelector('.pl-week.s-now[open]') && pp.querySelectorAll('.pl-week[open]').length === 1);
+      t('Home: this week in your plan, with what is left', /This week in your plan/.test(home.textContent) && home.querySelectorAll('.pl-item').length >= 1 && /Week 1 of 4/.test(home.textContent), home.textContent.slice(0, 160));
+      window.confirm = () => true;
+      pp.querySelector('[data-pl-act="remove"]').click(); await sleep(150);
+      t('Remove my plan clears it and shows the questions again', store['progress/uDash'].studyPlan === null && pp.querySelectorAll('.pl-q').length === 3);
+    }
     if (window.__scn === 'activity'){
       const rp = document.getElementById('readinessPanel'), cp = document.getElementById('coachPanel'), gp = document.getElementById('gapsPanel');
       const rows = [...rp.querySelectorAll('.cc-act li')].map(li => li.textContent);

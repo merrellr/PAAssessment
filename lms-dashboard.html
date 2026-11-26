@@ -379,7 +379,7 @@
   body[data-view="home"] [data-only="learning"], body[data-view="learning"] [data-only="home"]{ display:none !important; }
   /* My Learning tabs: Coach, My readiness, My gaps (coach-ui.js) and Courses (the course path, as before) */
   body[data-view="learning"]:not([data-ltab="courses"]) [data-only="learning"]:not([data-coach]){ display:none !important; }
-  body[data-ltab="coach"] [data-coach]:not([data-coach~="coach"]), body[data-ltab="readiness"] [data-coach]:not([data-coach~="readiness"]),
+  body[data-ltab="coach"] [data-coach]:not([data-coach~="coach"]), body[data-ltab="plan"] [data-coach]:not([data-coach~="plan"]), body[data-ltab="readiness"] [data-coach]:not([data-coach~="readiness"]),
   body[data-ltab="gaps"] [data-coach]:not([data-coach~="gaps"]), body[data-ltab="courses"] [data-coach]:not([data-coach~="courses"]){ display:none !important; }
   /* Home: the greeting on its own line, then (first visit) the welcome, then your result beside your badges */
   /* the greeting, with the tour beside it (it leaves once taken, and lives under Help) */
@@ -436,6 +436,8 @@
 <script src="coach-core.js"></script>
 <script src="coach-bank.js" defer></script>
 <script src="coach-ui.js"></script>
+<script src="plan-core.js"></script>
+<script src="plan-ui.js"></script>
 <link rel="stylesheet" href="coach.css">
 </head>
 <body>
@@ -697,6 +699,7 @@
       </div>
       <section class="card cc-home" id="coachHome" hidden aria-label="Compass Suggests"></section>
       <nav class="home-loop" id="homeLoop" hidden aria-label="Ways in: assess, gaps, practice, learn"></nav>
+      <section class="card home-plan" id="homePlan" hidden aria-label="Your study plan"></section>
       <div class="card assign-card" id="assignedHome" hidden></div>
       <div class="home-grid">
         <div class="home-card lead" id="homeResume"></div>
@@ -738,6 +741,7 @@
       <div class="cc-tabrow">
       <nav class="cc-tabs" role="tablist" aria-label="My Learning">
         <button type="button" role="tab" id="ltab-coach" data-ltab="coach" aria-controls="coachPanel">Compass Coach</button>
+        <button type="button" role="tab" id="ltab-plan" data-ltab="plan" aria-controls="planPanel">My plan</button>
         <button type="button" role="tab" id="ltab-readiness" data-ltab="readiness" aria-controls="readinessPanel">My readiness</button>
         <button type="button" role="tab" id="ltab-gaps" data-ltab="gaps" aria-controls="gapsPanel">My gaps</button>
         <button type="button" role="tab" id="ltab-courses" data-ltab="courses">Courses</button>
@@ -747,6 +751,7 @@
     </header>
 
     <div class="cc-panel" id="coachPanel" role="tabpanel" aria-labelledby="ltab-coach" data-only="learning" data-coach="coach"><p class="cc-muted">Loading Compass Coach…</p></div>
+    <div class="cc-panel" id="planPanel" role="tabpanel" aria-labelledby="ltab-plan" data-only="learning" data-coach="plan"></div>
     <div class="cc-panel" id="readinessPanel" role="tabpanel" aria-labelledby="ltab-readiness" data-only="learning" data-coach="readiness"></div>
     <div class="cc-panel" id="gapsPanel" role="tabpanel" aria-labelledby="ltab-gaps" data-only="learning" data-coach="gaps"></div>
 
@@ -1644,7 +1649,9 @@ function renderCoach(user, progress, assessmentResult, assessmentUrl){
     const at = assessmentResult && (assessmentResult.submittedAt || assessmentResult.firstSubmittedAt);
     const resume = H ? H.resume(progress, CATALOG) : null;
     if (resume) resume.title = CATALOG[resume.courseId].title;
-    CoachUI.render({ areas, pct, assessedAt: at || null, assessedLabel: at ? 'Skill check, ' + new Date(at).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) : '',
+    const ctx = { areas, pct, assessedAt: at || null, log: progress.answers || [], progress, bank: window.CoachBank || null, assessUrl: assessmentUrl, now: Date.now() };
+    const plan = window.PlanUI ? PlanUI.render(ctx, { save: p => setDoc(doc(db, 'progress', user.uid), { studyPlan: p }, { merge: true }) }) : null;
+    CoachUI.render({ areas, pct, assessedAt: at || null, planArea: plan && !plan.over && !plan.week.complete ? plan.week.d : null, assessedLabel: at ? 'Skill check, ' + new Date(at).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) : '',
       log: progress.answers || [], progress, bank: window.CoachBank || null, resume, lessonsDone, assessUrl: assessmentUrl, now: Date.now() });
     const focus = window.CoachCore.nextStep({ areas, pct, log: progress.answers || [], progress, bank: window.CoachBank || null }).area;
     document.querySelectorAll('[data-coach-sg="weakest"], [data-coach-sg="short"]').forEach(a => { a.href = '/practice' + (focus ? '?area=' + focus : '') + (a.dataset.coachSg === 'short' ? (focus ? '&' : '?') + 'n=6' : ''); });
@@ -1694,7 +1701,7 @@ let dashBadges = null;
 function viewFromUrl(){ return /^\/my-learning/.test(location.pathname) || new URLSearchParams(location.search).get('view') === 'learning' ? 'learning' : 'home'; }
 /* My Learning's tabs: Coach (the default), My readiness, My gaps and Courses (the course path). A link to something
    on the course path opens Courses; #readiness, #gaps and #courses in the address open that tab. */
-const LTABS = ['coach', 'readiness', 'gaps', 'courses'];
+const LTABS = ['coach', 'plan', 'readiness', 'gaps', 'courses'];
 window.setLearnTab = function(t, focus){
   t = LTABS.indexOf(t) > -1 ? t : 'coach';
   document.body.dataset.ltab = t;

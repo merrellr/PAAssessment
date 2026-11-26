@@ -185,7 +185,7 @@
   .cc-style-bars .cc-bar { grid-column: 1 / -1; grid-row: 2; }
   .cc-stage-steps { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
-.cc-next .eyebrow, .cc-home .eyebrow { display: block; font-size: .6875rem; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: var(--pa-cyan-ink, var(--pa-primary)); }
+.cc-next .eyebrow, .cc-home .eyebrow, .pl-build .eyebrow, .pl-sum .eyebrow, .home-plan .eyebrow { display: block; font-size: .6875rem; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: var(--pa-cyan-ink, var(--pa-primary)); }
 
 /* My gaps: an area with no answers yet is a compact row, not a full card */
 .cc-gap.compact { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; gap: 10px 16px; align-items: center; padding: 14px 18px; }
@@ -213,3 +213,72 @@
 .hr-today { margin: 10px 0 0; font-size: .8rem; color: var(--pa-muted); line-height: 1.45; }
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .cc-act-flag { background: rgba(251,191,36,.16); color: #fcd34d; } }
 :root[data-theme="dark"] .cc-act-flag { background: rgba(251,191,36,.16); color: #fcd34d; }
+
+/* ---------------------------------------------------------------- the Compass study plan (plan-ui.js) */
+.pl-head { display: flex; gap: 14px; align-items: flex-start; margin-bottom: 6px; }
+.pl-head h2 { margin: 2px 0 4px; }
+.pl-mark { flex: none; display: grid; place-items: center; width: 44px; height: 44px; border-radius: 50%; background: var(--pa-cdisc); color: var(--pa-cdisc-ink); box-shadow: inset 0 0 0 1px var(--pa-cdisc-line); }
+.pl-mark .pa-cicon { width: 30px; height: 30px; margin: 0; }
+.pl-mark.sm { width: 34px; height: 34px; }
+.pl-mark.sm .pa-cicon { width: 23px; height: 23px; }
+.pl-q { border: 0; margin: 18px 0 0; padding: 0; min-width: 0; }
+.pl-q legend { font-weight: 800; font-size: .95rem; margin-bottom: 8px; padding: 0; }
+.pl-opts { display: flex; flex-wrap: wrap; gap: 8px; }
+.pl-opt { font: inherit; font-size: .875rem; padding: 9px 16px; border-radius: 999px; border: 1px solid var(--pa-line); background: var(--pa-card); color: var(--pa-ink); cursor: pointer; transition: border-color .15s, background .15s; }
+.pl-opt:hover { border-color: var(--pa-primary); }
+.pl-opt.on { background: var(--pa-primary); border-color: var(--pa-primary); color: #fff; font-weight: 700; }
+.pl-opt:focus-visible { outline: 3px solid var(--pa-cyan); outline-offset: 2px; }
+.pl-go { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-top: 20px; }
+.pl-go .cc-btn[disabled] { opacity: .5; cursor: not-allowed; }
+.pl-err { color: #b42318; font-size: .84rem; }
+.pl-sum h2 { margin: 2px 0 6px; }
+.pl-sum-top { display: flex; justify-content: space-between; gap: 16px; align-items: flex-start; }
+.pl-line { margin: 0; font-size: .95rem; }
+.pl-meta { margin: 12px 0 0; font-size: .8rem; }
+.pl-next { margin-top: 14px; }
+.pl-ring { flex: none; width: 74px; height: 74px; border-radius: 50%; display: grid; place-items: center;
+  background: radial-gradient(closest-side, var(--pa-card) 78%, transparent 80% 100%), conic-gradient(var(--pa-primary) calc(var(--p) * 1%), var(--pa-tint-2) 0); }
+.pl-ring span { font-weight: 800; font-size: .95rem; }
+.pl-weeks { display: grid; gap: 10px; margin-top: 14px; }
+.pl-week { padding: 0; }
+.pl-week > summary { list-style: none; cursor: pointer; display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 12px; padding: 14px 18px; border-radius: inherit; }
+.pl-week > summary::-webkit-details-marker { display: none; }
+.pl-week > summary::after { content: '▾'; margin-left: 4px; color: var(--pa-muted); transition: transform .15s; }
+.pl-week:not([open]) > summary::after { transform: rotate(-90deg); }
+.pl-week > summary:focus-visible { outline: 3px solid var(--pa-cyan); outline-offset: 2px; }
+.pl-week > summary b { flex: 1; min-width: 12ch; }
+.pl-wn { font-size: .6875rem; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: var(--pa-primary); }
+.pl-wd, .pl-wp { font-size: .78rem; color: var(--pa-muted); }
+.pl-done { font-weight: 700; color: var(--pa-good, #15803d); }
+.pl-week.s-now { border-color: var(--pa-primary); box-shadow: 0 0 0 1px var(--pa-primary), 0 8px 24px rgba(22,33,62,.06); }
+.pl-week.s-past:not([open]) { opacity: .85; }
+.pl-why { margin: -4px 18px 6px; font-size: .84rem; color: var(--pa-muted); }
+.pl-week .pl-items { margin: 0 18px 14px; }
+.pl-items { list-style: none; padding: 0; margin: 0; }
+.pl-item { display: grid; grid-template-columns: 22px 78px minmax(0, 1fr) auto; gap: 10px; align-items: center; padding: 8px 0; border-top: 1px solid var(--pa-line); font-size: .875rem; }
+.pl-item:first-child { border-top: 0; }
+.pl-tick { width: 20px; height: 20px; border-radius: 50%; border: 1.5px solid var(--pa-line); display: grid; place-items: center; font-size: .7rem; font-weight: 800; }
+.pl-tick.done { background: var(--pa-good, #15803d); border-color: var(--pa-good, #15803d); color: #fff; }
+.pl-k { font-size: .6875rem; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: var(--pa-muted); }
+.pl-item a { color: var(--pa-ink); text-decoration: none; font-weight: 600; }
+.pl-item a:hover { color: var(--pa-primary); text-decoration: underline; }
+.pl-item.done a { color: var(--pa-muted); text-decoration: line-through; font-weight: 500; }
+.pl-m { font-size: .78rem; color: var(--pa-muted); white-space: nowrap; }
+@media (max-width: 560px) {
+  .pl-week > summary b { order: 3; flex-basis: 100%; }
+  .pl-wp { order: 1; margin-left: auto; }
+  .pl-week > summary::after { order: 2; }
+  .pl-item { grid-template-columns: 22px minmax(0, 1fr) auto; }
+  .pl-k { display: none; }
+  .pl-ring { width: 58px; height: 58px; }
+}
+/* Home: this week in your plan */
+.home-plan { margin: 0 0 18px; }
+.home-plan[hidden] { display: none; }
+.hp-ask { display: flex; align-items: center; gap: 14px; }
+.hp-ask > div { flex: 1; font-size: .92rem; }
+.hp-head { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+.hp-wk { font-size: .78rem; color: var(--pa-muted); }
+.hp-line { margin: 6px 0 4px; font-weight: 600; }
+.home-plan .pl-items { margin-top: 4px; }
+@media (max-width: 560px) { .hp-ask { flex-wrap: wrap; } }

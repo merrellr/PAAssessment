@@ -321,6 +321,6 @@
   function startLevel(pct, d) { var p = pct && typeof pct[d] === 'number' ? pct[d] : 0; return p > 75 ? 3 : p > 50 ? 2 : p > 25 ? 1 : 0; }
 
   root.CoachCore = { STYLES: STYLES, STYLE_PHRASE: STYLE_PHRASE, STATUS: STATUS, STAGES: STAGES, TIERS: TIERS, LOG_MAX: LOG_MAX, REASSESS_DAYS: REASSESS_DAYS,
-    qType: qType, record: record, readiness: readiness, stage: stage, styles: styles, weakStyle: weakStyle, lessonFor: lessonFor,
+    qType: qType, record: record, doneIds: doneIds, readiness: readiness, stage: stage, styles: styles, weakStyle: weakStyle, lessonFor: lessonFor,
     nextStep: nextStep, alternatives: alternatives, loop: loop, activity: activity, when: when, changes: changes, pickQuestion: pickQuestion, startLevel: startLevel, adapt: adapt, recap: recap };
 })(typeof window !== 'undefined' ? window : globalThis);
