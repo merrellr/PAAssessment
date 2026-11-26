@@ -235,7 +235,7 @@ const sleep = (ms) => new Promise(r => setTimeout(r, ms));
     }
     if (window.__scn === 'library'){
       const lp = document.getElementById('libraryPanel');
-      document.getElementById('ltab-library').click(); await sleep(40);
+      window.showView('learning'); document.getElementById('ltab-library').click(); await sleep(40);
       t('Library tab: Worth your time right now, three picks each with why', document.body.dataset.ltab === 'library' && /Worth your time right now/.test(lp.textContent) && lp.querySelectorAll('.lb-pick').length === 3 && [...lp.querySelectorAll('.lb-why')].every(w => w.textContent.length > 20), [...lp.querySelectorAll('.lb-pick')].map(p => p.textContent).join(' | '));
       t('a read pick, a listen pick (from the audio index) and a toolkit', /Lesson/.test(lp.querySelectorAll('.lb-pk')[0].textContent) && /Listen/.test(lp.querySelectorAll('.lb-pk')[1].textContent) && /listen=1/.test(lp.querySelectorAll('.lb-pick')[1].getAttribute('href')) && lp.querySelectorAll('.lb-pick')[2].getAttribute('href') === '/my-tools');
       t('an Ask Compass box with examples', lp.querySelector('form[data-coach-ask] input') && lp.querySelectorAll('.cc-try-q').length === 3);
