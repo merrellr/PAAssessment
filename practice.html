@@ -260,7 +260,7 @@ onAuthStateChanged(auth, async (u) => {
   if (!u){ location.href = '/lms-dashboard'; return; }
   user = u;
   if (params.get('demo') === '1' && window.DemoCore){
-    try { window.__paDemo = (await getDoc(doc(db, 'platformAdmins', u.uid))).exists(); } catch (e) { window.__paDemo = false; }
+    window.__paDemo = true;   // anyone signed in; nothing is saved (demo.js)
   }
   if (window.__paDemo){ progress = DemoCore.progress(Date.now()); if (window.DemoUI) DemoUI.script('practice'); }
   else try {

@@ -213,10 +213,13 @@ const sleep = (ms) => new Promise(r => setTimeout(r, ms));
       t('a saved reflection appears under Your notes', notesCard.style.display === 'block' && /My own answer to the final question/.test(notesCard.textContent));
       t('together with the question it answers (taken from the lesson text)', !!last && !!last.reflection && notesCard.textContent.indexOf(last.reflection.prompt.slice(0, 40)) > -1, notesCard.textContent.slice(0, 200));
     }
-    if (window.__scn === 'demo' || window.__scn === 'demonotowner'){
+    if (window.__scn === 'demo' || window.__scn === 'demolearner'){
       const before = JSON.stringify(store['progress/uDash']);
-      if (window.__scn === 'demonotowner'){
-        t('demo mode asked for by someone who isn\'t the owner: their own dashboard, no banner', !document.querySelector('.demo-bar') && !window.__paDemo && !/Alex/.test(document.querySelector('.home-hello') ? document.querySelector('.home-hello').textContent : ''));
+      if (window.__scn === 'demolearner'){
+        t('the live demo works for any signed-in learner, not just the owner', document.querySelector('.demo-bar') && window.__paDemo === true && /Alex/.test(document.getElementById('homeHello').textContent));
+        let logged = ''; try { logged = sessionStorage.getItem('pa-demo-logged'); } catch (e) {}
+        t('the opening is logged once this session', logged === '1');
+        t('nothing of theirs is written, not even on load (no day of learning, no badges)', JSON.stringify(store['progress/uDash']) === before && !('activeLog' in store['progress/uDash']) && !('badges' in store['progress/uDash']), Object.keys(store['progress/uDash']).join());
       } else {
         const bar = document.querySelector('.demo-bar'), sc = document.querySelector('.demo-script');
         t('demo mode (owner): the banner says it is a fictional learner and nothing is saved', bar && /Alex Rivera/.test(bar.textContent) && /Nothing here is saved/.test(bar.textContent) && window.__paDemo === true);
@@ -298,9 +301,9 @@ const sleep = (ms) => new Promise(r => setTimeout(r, ms));
     if (window.__scn === 'allfive') t('all 5 of its 5 lessons does', doneStat === '1', doneStat);
     // Pick up where you left off (the top of the page)
     const hb = document.getElementById('homeBand'), resumeCard = document.getElementById('homeResume'), nextCard = document.getElementById('homeNext'), toolsCard = document.getElementById('homeTools');
-    if (window.__scn !== 'demo') t('the top of the page greets them by first name', !hb.hidden && /, Dash$/.test(document.getElementById('homeHello').textContent), document.getElementById('homeHello').textContent);
+    if (!/^demo/.test(window.__scn)) t('the top of the page greets them by first name', !hb.hidden && /, Dash$/.test(document.getElementById('homeHello').textContent), document.getElementById('homeHello').textContent);
     const goA = resumeCard.querySelector('a.btn');
-    if (window.__scn !== 'demo') t('"Your next best step": the course in progress, with the next lesson to open', /Your next best step/.test(resumeCard.textContent) && resumeCard.classList.contains('wide') && /Customer & Market Discovery/.test(resumeCard.textContent) && (window.__scn === 'threelessons' ? /3 of 5 lessons done/.test(resumeCard.textContent) && goA && /course=discovery-moderate&lesson=4/.test(goA.getAttribute('href')) && /lesson 4/.test(goA.textContent)
+    if (!/^demo/.test(window.__scn)) t('"Your next best step": the course in progress, with the next lesson to open', /Your next best step/.test(resumeCard.textContent) && resumeCard.classList.contains('wide') && /Customer & Market Discovery/.test(resumeCard.textContent) && (window.__scn === 'threelessons' ? /3 of 5 lessons done/.test(resumeCard.textContent) && goA && /course=discovery-moderate&lesson=4/.test(goA.getAttribute('href')) && /lesson 4/.test(goA.textContent)
       : /2 of 5 lessons done/.test(resumeCard.textContent) && goA && /course=discovery-novice&lesson=3/.test(goA.getAttribute('href')) && /lesson 3/.test(goA.textContent)), resumeCard.textContent + ' ' + (goA && goA.getAttribute('href')));
     const side = resumeCard.querySelector('.step-side');
     t('with a course in progress, "After that" still shows what comes next, and says why', !!side && /After that/.test(side.textContent) && (window.__scn === 'assigned' ? /Product Strategy/.test(side.textContent) && /company asked/.test(side.textContent) : /lesson 1/.test(side.textContent) && /assessment/.test(side.textContent)), side && side.textContent);

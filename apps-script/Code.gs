@@ -141,6 +141,10 @@ function doGet(e) {
     return jsonpOut_(e.parameter.callback, toolLaunchEndpoint_(e.parameter.idToken || "", e.parameter.tool || "", e.parameter.preview === "1"));
   }
 
+  if (e.parameter.action === "demoView") {
+    return jsonpOut_(e.parameter.callback, demoViewEndpoint_(e.parameter.idToken || "", e.parameter.src || "", e.parameter.page || ""));
+  }
+
   if (e.parameter.action === "feedback") {
     const p = e.parameter;
     return jsonpOut_(p.callback, feedbackEndpoint_(p.idToken || "", p.topic || "", p.rating || "", p.message || "", p.page || ""));
@@ -2788,6 +2792,42 @@ function feedbackQuota_(uid) {
   props.setProperty(totalKey, String(total + 1));
   props.setProperty(userKey, String(mine + 1));
   return true;
+}
+
+/* ---------------------------------------------------------------- the live demo
+   Anyone signed in can open the demo learner (?demo=1 on My Learning, Practice and lessons). Each opening is logged
+   here, once a day per account: when, who, which page sent them (src, e.g. site-services) and where they opened it.
+   The first time an account opens it, Rob gets an email: it's a warm lead. Visitors' IP addresses aren't available
+   to Apps Script, so the account is what's recorded. */
+var DEMO_SHEET_NAME_ = 'Demo views';
+var DEMO_HEADERS_ = ['When', 'Name', 'Email', 'Came from', 'Page', 'First time?', 'UID'];
+function demoViewEndpoint_(idToken, src, page) {
+  var who = null;
+  try { who = verifyFirebaseIdToken_(idToken); } catch (err) { who = null; }
+  if (!who || !who.uid) return { ok: false, error: 'not_verified' };
+  src = /^[a-z0-9-]{1,40}$/.test(String(src || '')) ? String(src) : '';
+  page = /^[a-z0-9-]{1,40}$/.test(String(page || '')) ? String(page) : '';
+  var cache = CacheService.getScriptCache(), day = Utilities.formatDate(new Date(), 'UTC', 'yyyy-MM-dd'), key = 'demo_' + who.uid + '_' + day;
+  if (cache.get(key)) return { ok: true, logged: false };
+  var lock = null;
+  try { lock = LockService.getScriptLock(); lock.tryLock(10000); } catch (err) { /* carry on without it */ }
+  try {
+    var ss = SpreadsheetApp.getActiveSpreadsheet(), sheet = ss.getSheetByName(DEMO_SHEET_NAME_);
+    if (!sheet) { sheet = ss.insertSheet(DEMO_SHEET_NAME_); sheet.appendRow(DEMO_HEADERS_); sheet.setFrozenRows(1); }
+    var uids = sheet.getLastRow() > 1 ? sheet.getRange(2, 7, sheet.getLastRow() - 1, 1).getValues().map(function (r) { return String(r[0]); }) : [];
+    var first = uids.indexOf(who.uid) < 0;
+    sheet.appendRow([new Date(), who.name, who.email, src, page, first ? 'Yes' : '', who.uid].map(leadSafeCell_));
+    cache.put(key, '1', 6 * 60 * 60);
+    if (first) {
+      try {
+        if (MailApp.getRemainingDailyQuota() >= 1) {
+          var lines = ['Someone opened the live demo for the first time.', '', 'Who: ' + (who.name ? who.name + ' <' + who.email + '>' : who.email), 'Came from: ' + (src || 'Learning'), 'Opened on: ' + (page || 'My Learning')];
+          sendMail_({ to: LEAD_NOTIFY_EMAIL_, replyTo: who.email, subject: 'Demo opened' + (who.name ? ' by ' + who.name : ''), body: lines.join('\n') + '\n\nThe "Demo views" sheet has every opening.' }, 'noreply');
+        }
+      } catch (err) { /* the row is saved either way */ }
+    }
+    return { ok: true, logged: true, first: first };
+  } finally { if (lock) try { lock.releaseLock(); } catch (e) {} }
 }
 
 function feedbackEndpoint_(idToken, topic, rating, message, page) {
