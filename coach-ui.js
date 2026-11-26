@@ -34,6 +34,26 @@
     return area.total ? area.correct + ' of ' + area.total + ' answers right' : area.pct !== null ? 'Skill check: ' + area.pct + '%' : 'Nothing yet';
   }
 
+  // ---------------------------------------------------------------- recent activity, and what's changed today
+  var ACT_ICO = { practice: '◎', lesson: '✓', review: '↻', lessons: '▤' };
+  function activityCard(s, max) {
+    var items = C.activity(s, max || 5), now = s.now || Date.now();
+    var body = items.length ? '<ul class="cc-act">' + items.map(function (x) {
+      var href = x.d ? '/practice?area=' + x.d : '/my-learning#courses';
+      return '<li><span class="cc-act-ico k-' + x.kind + '" aria-hidden="true">' + ACT_ICO[x.kind] + '</span><a href="' + esc(href) + '">' + esc(x.title) + '</a>' +
+        '<span class="cc-act-d">' + esc(x.detail) + (x.flag === 'review' ? ' <span class="cc-act-flag">Needs review</span>' : '') + '</span>' +
+        '<span class="cc-act-w">' + esc(C.when(x.at, now)) + '</span></li>';
+    }).join('') + '</ul>' : '<p class="cc-muted">Nothing yet. Your practice sessions, lesson checks and finished lessons show here.</p>';
+    return '<section class="card cc-act-card" aria-labelledby="ccActT"><h3 id="ccActT">Recent activity</h3>' + body + '</section>';
+  }
+  function changesCard(s) {
+    var ch = C.changes(s);
+    return '<section class="card cc-chg" aria-labelledby="ccChgT"><h3 id="ccChgT">What’s changed today</h3><p>' + esc(ch.line) + '</p>' +
+      (ch.moves.length ? '<ul class="cc-chg-list">' + ch.moves.map(function (m) {
+        return '<li><span>' + esc(m.name) + '</span><span class="cc-muted">' + esc(m.from) + ' → </span><b class="' + (m.up ? 'up' : 'down') + '">' + esc(m.to) + '</b></li>';
+      }).join('') + '</ul>' : '') + '</section>';
+  }
+
   // ---------------------------------------------------------------- the Coach tab
   function coachTab(s, next, alts, areas, stage) {
     var html = '';
@@ -60,6 +80,7 @@
       '<section class="card cc-ready-sum" aria-labelledby="ccReadySumTitle"><div class="cc-sum-head"><h3 id="ccReadySumTitle">My readiness</h3><span>Status: <b>' + esc(stage.label) + '</b></span></div><ul>' +
       areas.map(function (a) { return '<li><span>' + esc(a.name) + '</span>' + chip(a.status, a.label) + '</li>'; }).join('') +
       '</ul><button type="button" class="linklike" data-ltab-go="readiness">View readiness' + ARROW + '</button></section></div>';
+    html += '<div class="cc-row">' + activityCard(s, 5) + changesCard(s) + '</div>';
     return html;
   }
 
@@ -70,6 +91,7 @@
       '<span class="cc-muted">' + (answers ? 'Based on ' + answers + ' answer' + (answers === 1 ? '' : 's') : 'Based on') + (s.pct ? (answers ? ' and' : '') + ' your skill check' : '') + '</span></div><ol class="cc-stage-steps">' +
       stage.steps.map(function (st, i) { return '<li class="' + (i <= stage.index ? 'on' : '') + (i === stage.index ? ' now' : '') + '"><i aria-hidden="true"></i><b>' + esc(st.label) + '</b><small>' + esc(st.sub) + '</small></li>'; }).join('') +
       '</ol><p class="cc-note">This is how your learning is going, from your skill check and the questions you answer. It isn’t a grade or a prediction of how you’d do anywhere else, and it changes as you practise.</p></section>' +
+      '<div class="cc-row">' + activityCard(s, 6) + changesCard(s) + '</div>' +
       '<h3 class="cc-sub">By skill area</h3><div class="cc-areas">' +
       areas.map(function (a) {
         return '<section class="card cc-area"><div class="cc-area-head"><h4>' + esc(a.name) + '</h4>' + chip(a.status, a.label) + '</div><p class="cc-muted">' + esc(ABOUT[a.key] || '') + '</p>' +
@@ -123,7 +145,7 @@
           return;
         }
         html += '<section class="card cc-gap"><div class="cc-area-head"><div><h4>' + esc(a.name) + '</h4><p class="cc-muted">' + esc(ABOUT[a.key] || '') + '</p></div>' + chip(a.status, a.label) + '</div>' +
-          '<div class="cc-gap-cols"><div><span class="cc-k">Where you are</span><p>' + esc(understanding(s, a)) + '</p></div>' +
+          '<div class="cc-gap-cols"><div><span class="cc-k">Observed pattern</span><p>' + esc(understanding(s, a)) + '</p></div>' +
           '<div><span class="cc-k">Recent answers</span><p>' + (a.last8.length ? dots(a.last8) + '<br><span class="cc-muted">' + a.correct + ' of ' + a.total + ' right overall</span>' : '<span class="cc-muted">' + esc(evidence(a)) + '</span>') + '</p></div>' +
           '<div><span class="cc-k">Suggested next</span><p>' + esc(nextAction(a)) + '</p></div></div>' +
           '<div class="cc-gap-go">' + (lesson ? '<a class="cc-btn sm" href="' + esc(lesson.href) + '">Teach me</a>' : '') +
@@ -183,9 +205,10 @@
         '<span class="hl-k">' + esc(x.t) + '</span><span class="hl-p">' + esc(x.p) + '</span><span class="hl-sub">' + esc(x.sub) + '</span></a>';
     }).join('');
   }
-  function homeReady(areas, stage) {
+  function homeReady(areas, stage, s) {
     return '<div class="hr-head"><span class="eyebrow">Your readiness</span><span class="hr-stage">Overall: <b>' + esc(stage.label) + '</b></span></div>' +
       '<h2>My readiness</h2><ul class="hr-list">' + areas.map(function (a) { return '<li><span>' + esc(a.name) + '</span>' + chip(a.status, a.label) + '</li>'; }).join('') + '</ul>' +
+      (C.changes(s).answers ? '<p class="hr-today">' + esc(C.changes(s).line) + '</p>' : '') +
       '<div class="home-go"><a class="more" href="/my-learning#readiness">View my readiness' + ARROW + '</a></div>';
   }
 
@@ -219,7 +242,7 @@
     var home = $('coachHome');
     if (home) { home.innerHTML = homeCard(s, next); home.hidden = false; }
     if ($('homeLoop')) { $('homeLoop').innerHTML = homeTiles(s, next, areas); $('homeLoop').hidden = false; }
-    if ($('homeReadiness')) { $('homeReadiness').innerHTML = homeReady(areas, stage); $('homeReadiness').hidden = !s.pct; }
+    if ($('homeReadiness')) { $('homeReadiness').innerHTML = homeReady(areas, stage, s); $('homeReadiness').hidden = !s.pct; }
     wireAsk(document);
     Array.prototype.forEach.call(document.querySelectorAll('[data-coach-go]'), function (a) {
       if (a._wired) return; a._wired = true;

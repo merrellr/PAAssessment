@@ -227,6 +227,60 @@
     return { steps: steps, current: current };
   }
 
+  // Recent activity, newest first: practice sessions, lesson checks and refreshers (grouped by day and area), and
+  // lessons finished (progress.lessonLog: { 'YYYY-MM-DD': n }). Each: { at, kind, d, title, detail, flag }, where
+  // flag is 'review' when most of the answers were misses, 'good' when they were all right.
+  var SRC = { practice: 'Practised', lesson: 'Lesson check in', review: 'Refresher in' };
+  function activity(ctx, max) {
+    var log = ctx.log || [], groups = {}, out = [];
+    log.forEach(function (e) {
+      if (!e || !e.at) return;
+      var day = new Date(e.at).toDateString(), src = SRC[e.src] ? e.src : 'lesson', k = day + '|' + e.d + '|' + src;
+      var g = groups[k] || (groups[k] = { at: 0, kind: src, d: e.d, n: 0, right: 0 });
+      g.at = Math.max(g.at, e.at); g.n++; if (e.ok) g.right++;
+    });
+    Object.keys(groups).forEach(function (k) {
+      var g = groups[k], name = areaName(ctx, g.d);
+      out.push({ at: g.at, kind: g.kind, d: g.d, title: SRC[g.kind] + ' ' + name,
+        detail: g.n === 1 ? (g.right ? 'Right' : 'Missed') : g.right + ' of ' + g.n + ' right',
+        flag: g.n - g.right >= 2 && g.right / g.n < 0.5 ? 'review' : g.right === g.n ? 'good' : '' });
+    });
+    var lessonLog = ctx.lessonLog || (ctx.progress && ctx.progress.lessonLog) || {};
+    Object.keys(lessonLog).forEach(function (day) {
+      var n = +lessonLog[day] || 0, t = new Date(day + 'T00:00:00').getTime();   // the start of the day: below that day's sessions
+      if (n > 0 && isFinite(t)) out.push({ at: t, kind: 'lessons', d: null, title: 'Finished ' + plural(n, 'lesson'), detail: '', flag: 'good' });
+    });
+    return out.sort(function (a, b) { return b.at - a.at; }).slice(0, max || 6);
+  }
+  // "Today", "Yesterday", or a short date.
+  function when(at, now) {
+    var d = new Date(at), today = new Date(now || Date.now());
+    var days = Math.round((new Date(today.toDateString()) - new Date(d.toDateString())) / 864e5);
+    return days <= 0 ? 'Today' : days === 1 ? 'Yesterday' : d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+  }
+
+  // What has changed since a moment (the start of today, by default): areas whose status moved, and the answers given
+  // since. { answers, right, moves: [{ d, name, from, to, up }], line }.
+  function changes(ctx, since) {
+    var now = ctx.now || Date.now(), from = since || new Date(new Date(now).toDateString()).getTime(), log = ctx.log || [];
+    var after = log.filter(function (e) { return e.at >= from; });
+    var before = readiness(Object.assign({}, ctx, { log: log.filter(function (e) { return e.at < from; }) }));
+    var nowR = readiness(ctx), rank = { unknown: -1, attention: 0, developing: 1, strong: 2 };
+    var moves = [];
+    nowR.forEach(function (a, i) {
+      var b = before[i];
+      if (b && b.status !== a.status && a.status !== 'unknown') moves.push({ d: a.key, name: a.name, from: b.label, to: a.label, up: rank[a.status] > rank[b.status] });
+    });
+    var right = after.filter(function (e) { return e.ok; }).length, line;
+    if (!after.length) line = 'Nothing new yet today. One focused session is enough for me to start updating this.';
+    else {
+      line = 'Today: ' + plural(after.length, 'answer') + ', ' + right + ' right.';
+      if (moves.length) line += ' ' + moves.map(function (m) { return m.name + ' ' + (m.up ? 'moved up' : 'slipped') + ' to ' + m.to; }).join('; ') + '.';
+      else line += ' No area has changed status yet.';
+    }
+    return { answers: after.length, right: right, moves: moves, line: line };
+  }
+
   // Practice: the next question for an area. Unseen before seen, at the level asked for (or the nearest), never the
   // one just asked. level: 0-3 (novice to advanced). Returns a bank question or null.
   function pickQuestion(bank, d, level, askedIds, log, style) {
@@ -268,5 +322,5 @@
 
   root.CoachCore = { STYLES: STYLES, STYLE_PHRASE: STYLE_PHRASE, STATUS: STATUS, STAGES: STAGES, TIERS: TIERS, LOG_MAX: LOG_MAX, REASSESS_DAYS: REASSESS_DAYS,
     qType: qType, record: record, readiness: readiness, stage: stage, styles: styles, weakStyle: weakStyle, lessonFor: lessonFor,
-    nextStep: nextStep, alternatives: alternatives, loop: loop, pickQuestion: pickQuestion, startLevel: startLevel, adapt: adapt, recap: recap };
+    nextStep: nextStep, alternatives: alternatives, loop: loop, activity: activity, when: when, changes: changes, pickQuestion: pickQuestion, startLevel: startLevel, adapt: adapt, recap: recap };
 })(typeof window !== 'undefined' ? window : globalThis);

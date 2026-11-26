@@ -171,7 +171,7 @@
   .cc-gap-cols { grid-template-columns: 1fr; gap: 10px; }
 }
 @media (max-width: 640px) {
-  .cc-suggest { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; margin-right: calc(-1 * var(--pa-gutter, 16px)); padding-right: 16px; }
+  .cc-suggest { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; margin-right: -16px; padding-right: 16px; }   /* to the screen edge: the page's side padding is 16px here */
   .cc-sg { flex: none; }
   .cc-tabrow { flex-direction: column; align-items: stretch; }
   .cc-tabs-tour { order: -1; padding: 0 0 8px; }
@@ -193,3 +193,23 @@
 .cc-gap.compact p { margin: 2px 0 0; }
 .cc-gap.compact .cc-gap-go { flex-wrap: nowrap; }
 @media (max-width: 640px) { .cc-gap.compact { grid-template-columns: 1fr auto; } .cc-gap.compact .cc-gap-go { grid-column: 1 / -1; } }
+
+/* Recent activity and what's changed (Compass Coach and My readiness) */
+.cc-act { list-style: none; margin: 6px 0 0; padding: 0; }
+.cc-act li { display: grid; grid-template-columns: 28px minmax(0, 1fr) auto; grid-template-rows: auto auto; column-gap: 10px; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--pa-line); }
+.cc-act li:last-child { border-bottom: 0; }
+.cc-act-ico { grid-row: 1 / span 2; display: grid; place-items: center; width: 28px; height: 28px; border-radius: 8px; background: var(--pa-tint); color: var(--pa-primary); font-size: .85rem; }
+.cc-act a { font-weight: 700; font-size: .875rem; color: var(--pa-ink); text-decoration: none; }
+.cc-act a:hover { color: var(--pa-primary); text-decoration: underline; }
+.cc-act-d { grid-column: 2; font-size: .78rem; color: var(--pa-muted); }
+.cc-act-w { grid-column: 3; grid-row: 1 / span 2; font-size: .75rem; color: var(--pa-muted); white-space: nowrap; }
+.cc-act-flag { display: inline-block; margin-left: 6px; padding: 1px 7px; border-radius: 999px; font-size: .6875rem; font-weight: 700; background: var(--pa-warn-bg, #fff4e5); color: var(--pa-warn-ink, #9a5b00); }
+.cc-chg p { margin: 6px 0 0; font-size: .9rem; line-height: 1.5; }
+.cc-chg-list { list-style: none; margin: 10px 0 0; padding: 0; }
+.cc-chg-list li { display: flex; gap: 8px; align-items: baseline; padding: 6px 0; border-top: 1px solid var(--pa-line); font-size: .84rem; }
+.cc-chg-list li > span:first-child { flex: 1; }
+.cc-chg-list b.up { color: var(--pa-good, #15803d); }
+.cc-chg-list b.down { color: var(--pa-bad, #b45309); }
+.hr-today { margin: 10px 0 0; font-size: .8rem; color: var(--pa-muted); line-height: 1.45; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .cc-act-flag { background: rgba(251,191,36,.16); color: #fcd34d; } }
+:root[data-theme="dark"] .cc-act-flag { background: rgba(251,191,36,.16); color: #fcd34d; }

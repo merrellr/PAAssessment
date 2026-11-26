@@ -213,6 +213,16 @@ const sleep = (ms) => new Promise(r => setTimeout(r, ms));
       t('a saved reflection appears under Your notes', notesCard.style.display === 'block' && /My own answer to the final question/.test(notesCard.textContent));
       t('together with the question it answers (taken from the lesson text)', !!last && !!last.reflection && notesCard.textContent.indexOf(last.reflection.prompt.slice(0, 40)) > -1, notesCard.textContent.slice(0, 200));
     }
+    if (window.__scn === 'activity'){
+      const rp = document.getElementById('readinessPanel'), cp = document.getElementById('coachPanel'), gp = document.getElementById('gapsPanel');
+      const rows = [...rp.querySelectorAll('.cc-act li')].map(li => li.textContent);
+      t('My readiness: recent activity, newest first, with the session that needs review flagged', rows.length === 4 && /Practised Product Strategy/.test(rows[0]) && /4 of 4 right/.test(rows[0]) && rows.some(r => /1 of 4 right/.test(r) && /Needs review/.test(r) && /Yesterday/.test(r)) && rows.some(r => /Lesson check in/.test(r)) && rows.some(r => /Finished 1 lesson/.test(r)), rows.join(' | '));
+      t('My readiness: what changed today, with the area that moved up', /Today: 5 answers, 5 right/.test(rp.querySelector('.cc-chg').textContent) && /Needs attention → Developing/.test((rp.querySelector('.cc-chg-list') || {}).textContent || ''), rp.querySelector('.cc-chg').textContent);
+      t('Compass Coach: recent activity too', cp.querySelectorAll('.cc-act li').length === 4);
+      t('My gaps: the observed pattern column', /Observed pattern/.test(gp.textContent));
+      t('Home: the readiness card says what changed today', /Today: 5 answers/.test((document.querySelector('#homeReadiness .hr-today') || {}).textContent || ''));
+      t('an activity row links to practising that area', /\/practice\?area=strategy/.test(rp.querySelector('.cc-act a').getAttribute('href')));
+    }
     if (window.__scn === 'threelessons' || window.__scn === 'recentdone' || window.__scn === 'plain'){
       t('no review card when nothing was finished a week ago (an unfinished course, a very recent one, or none)', reviewCard.style.display === 'none');
     }
