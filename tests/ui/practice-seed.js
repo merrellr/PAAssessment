@@ -5,6 +5,12 @@
   var scn = new URLSearchParams(location.search).get('scn') || 'area';
   window.__scn = scn;
   window.__fakeUser = { uid: 'uPr', email: 'pr@acme.com', displayName: 'Pat Practice', emailVerified: true, providerData: [], getIdToken: async function(){ return 'tok'; } };
+  // charts: Prioritization keeps only its chart questions (coach-charts.js), so the session is two charts
+  if (scn === 'charts') {
+    var bank;
+    Object.defineProperty(window, 'CoachBank', { configurable: true, get: function () { return bank; },
+      set: function (v) { v.questions = v.questions.filter(function (q) { return q.d !== 'prioritization'; }); bank = v; } });
+  }
   window.__seed = function(store){
     var now = Date.now(), answers = [];
     if (scn === 'coached') {   // two scenario misses in Strategy: the coach should lead with those

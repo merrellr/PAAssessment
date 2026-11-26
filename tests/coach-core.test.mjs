@@ -127,5 +127,12 @@ t('coach-bank.js matches content/ (else run node tools/coach/build-bank.mjs)', f
   t('activity: lessons finished also come from progress.lessonLog', C.activity({ areas: AREAS, log: [], progress: { lessonLog: { '2026-11-16': 1 } } }).length === 1);
 }
 
+// confidence
+t('the answer log keeps how sure they were (0 to 2), and ignores anything else', C.record([], { d: 'x', id: 'y', ok: 1, cf: 2 })[0].cf === 2 && !('cf' in C.record([], { d: 'x', id: 'y', ok: 1, cf: 7 })[0]) && !('cf' in C.record([], { d: 'x', id: 'y', ok: 1 })[0]));
+{ const cal = C.calibration([{ ok: false, cf: 2 }, { ok: true, cf: 2 }, { ok: true, cf: 0 }, { ok: true }]);
+  t('calibration: sure but missed, and right guesses, said plainly', cal.n === 3 && cal.sureWrong === 1 && cal.sureRight === 1 && cal.guessRight === 1 && /sure on 1 answer you missed/.test(cal.line) && /1 guess was right/.test(cal.line), cal && cal.line);
+  t('calibration: nothing rated, nothing said', C.calibration([{ ok: true }]) === null);
+  t('calibration: all sure and right', /matched your answers well/.test(C.calibration([{ ok: true, cf: 2 }]).line)); }
+
 console.log('\n' + pass + ' passed, ' + fail + ' failed');
 process.exit(fail ? 1 : 0);

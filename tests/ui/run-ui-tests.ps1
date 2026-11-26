@@ -42,6 +42,7 @@ Copy-Item "$repo\compass.css" $site
 Copy-Item "$repo\learning-home-core.js" $site
 Copy-Item "$repo\coach-core.js" $site
 Copy-Item "$repo\coach-bank.js" $site
+Copy-Item "$repo\coach-charts.js" $site
 Copy-Item "$repo\coach-ui.js" $site
 Copy-Item "$repo\coach.css" $site
 Copy-Item "$repo\plan-core.js" $site
@@ -192,6 +193,7 @@ try {
   foreach ($s in 'free', 'used', 'company') { $results += Run-Page "coach chat: $s" "$base/coach-test.html?scn=$s" 30000 }
   $results += Run-Page "practice: an area asked for" "$base/practice-test.html?scn=area&area=prioritization&n=3" 30000
   $results += Run-Page "practice: the coach picks" "$base/practice-test.html?scn=coached" 30000
+  $results += Run-Page "practice: charts, how sure, explain it back" "$base/practice-test.html?scn=charts&area=prioritization&n=3" 30000
   $results += Run-Page "lesson audio: a narrated lesson" "$base/les-test.html?scn=listen&course=discovery-novice&lesson=2" 30000
   $results += Run-Page "lesson audio: opened from the Library" "$base/les-test.html?scn=listenopen&course=discovery-novice&lesson=2&listen=1" 30000
   $results += Run-Page "lesson audio: a lesson with no audio yet" "$base/les-test.html?scn=noaudio&course=discovery-novice&lesson=4" 30000
