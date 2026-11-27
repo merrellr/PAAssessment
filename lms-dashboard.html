@@ -442,6 +442,10 @@
 <script src="library-core.js"></script>
 <script src="library-ui.js"></script>
 <script src="demo.js"></script>
+<script src="coach-charts.js"></script>
+<script src="competencies-core.js"></script>
+<script src="shape-core.js"></script>
+<script src="shape-ui.js"></script>
 <link rel="stylesheet" href="coach.css">
 </head>
 <body>
@@ -760,6 +764,7 @@
     <div class="cc-panel" id="coachPanel" role="tabpanel" aria-labelledby="ltab-coach" data-only="learning" data-coach="coach"><p class="cc-muted">Loading Compass Coach…</p></div>
     <div class="cc-panel" id="planPanel" role="tabpanel" aria-labelledby="ltab-plan" data-only="learning" data-coach="plan"></div>
     <div class="cc-panel" id="libraryPanel" role="tabpanel" aria-labelledby="ltab-library" data-only="learning" data-coach="library"></div>
+    <div class="cc-panel" id="shapePanel" data-only="learning" data-coach="readiness"></div>
     <div class="cc-panel" id="readinessPanel" role="tabpanel" aria-labelledby="ltab-readiness" data-only="learning" data-coach="readiness"></div>
     <div class="cc-panel" id="gapsPanel" role="tabpanel" aria-labelledby="ltab-gaps" data-only="learning" data-coach="gaps"></div>
 
@@ -1673,6 +1678,17 @@ function renderCoach(user, progress, assessmentResult, assessmentUrl){
     if (window.LibraryUI) LibraryUI.render(ctx, { plan });
     CoachUI.render({ areas, pct, assessedAt: at || null, planArea: plan && !plan.over && !plan.week.complete ? plan.week.d : null, assessedLabel: at ? 'Skill check, ' + new Date(at).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) : '',
       log: progress.answers || [], progress, bank: window.CoachBank || null, resume, lessonsDone, assessUrl: assessmentUrl, now: Date.now() });
+    // My shape: the 28 competencies against the target role (the same progress.targets as Profile's role targets)
+    if (window.ShapeUI && window.RolesCore){
+      const tg = progress.targets || {};
+      ShapeUI.render({ pct, log: progress.answers || [], progress, bank: window.CoachBank || null }, { roles: RolesCore.rolesFor(), roleId: tg.roleId || '', personal: tg.personal || {},
+        save: v => {
+          progress.targets = { roleId: v.roleId || '', personal: v.personal || {}, updatedAt: new Date().toISOString() };
+          const t2 = RolesCore.forProgress(progress, assessmentResult || null), tt = document.getElementById('targetTile');
+          if (tt && window.RolesUI) tt.innerHTML = RolesUI.tile(t2);
+          return setDoc(doc(db, 'progress', user.uid), { targets: progress.targets }, { merge: true });
+        } });
+    }
     const focus = window.CoachCore.nextStep({ areas, pct, log: progress.answers || [], progress, bank: window.CoachBank || null }).area;
     document.querySelectorAll('[data-coach-sg="weakest"], [data-coach-sg="short"]').forEach(a => { a.href = '/practice' + (focus ? '?area=' + focus : '') + (a.dataset.coachSg === 'short' ? (focus ? '&' : '?') + 'n=6' : ''); });
   };
