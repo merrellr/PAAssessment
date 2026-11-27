@@ -309,6 +309,8 @@ const sleep = (ms) => new Promise(r => setTimeout(r, ms));
       t('My gaps: the observed pattern column', /Observed pattern/.test(gp.textContent));
       const sp = document.getElementById('shapePanel');
       t('My shape: the chart, and with no role yet, an invitation to pick one', sp.querySelector('svg.sh-svg') && /Pick a role/.test(sp.textContent) && sp.querySelectorAll('.sh-all tbody tr').length === 28);
+      const ck = document.getElementById('shCheck');
+      t('My shape: the competency check is offered, by how much rests on little evidence', ck && ck.getAttribute('href') === '/check' && (/Take the competency check \(10 min\)/.test(ck.textContent) ? /\d+ of 28<\/b> rest on little or no evidence/.test(sp.innerHTML) : /again/.test(ck.textContent)), ck && ck.textContent);
       const sel = document.getElementById('shRole'); sel.value = 'pm'; sel.dispatchEvent(new Event('change')); await sleep(150);
       t('choosing a role saves it as the role target (the same as Profile) and shows the gaps to it', (store['progress/uDash'].targets || {}).roleId === 'pm' && /Top gaps to Product Manager|at or above Product Manager/.test(document.getElementById('shapePanel').textContent), JSON.stringify(store['progress/uDash'].targets || {}));
       t('Home: My skills shape in the readiness card', /My skills shape/.test((document.getElementById('homeShapeLine') || {}).textContent || ''));

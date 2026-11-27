@@ -476,6 +476,9 @@ body.pa-demo .pa-notes-fab, body.pa-demo #homeNotes { display: none !important; 
 .sh-g-what { margin: 4px 0 8px; font-size: .84rem; line-height: 1.45; }
 .sh-g-go { display: flex; flex-wrap: wrap; gap: 8px; }
 .sh-count { font-size: .78rem; margin-top: 8px; }
+.sh-check { margin-top: 14px; padding: 12px; border: 1px dashed var(--pa-line); border-radius: 10px; font-size: .85rem; }
+.sh-check p { margin: 0 0 8px; }
+.sh-check-q { margin-top: 12px; font-size: .8rem; }
 .sh-ok { padding: 10px 12px; border-radius: 10px; background: var(--pa-tint); font-size: .875rem; }
 .sh-all { margin-top: 16px; border-top: 1px solid var(--pa-line); padding-top: 10px; }
 .sh-all summary { cursor: pointer; font-weight: 700; color: var(--pa-primary); }
