@@ -179,7 +179,7 @@ try {
     $results += Run-Page "join page: $s" "$base/join-test.html?scn=$s&token=$tok" 20000
   }
   $results += Run-Page 'join page: badtoken' "$base/join-test.html?scn=badtoken&token=abc" 20000
-  foreach ($s in 'member', 'focus', 'focusdefault', 'admin', 'plain', 'removed', 'owner', 'threelessons', 'allfive', 'recentdone', 'removedold', 'profilecard', 'assigned', 'growth', 'tourstaken', 'activity', 'plan', 'library') { $results += Run-Page "dashboard: $s" "$base/dash-test.html?scn=$s" 25000 }
+  foreach ($s in 'member', 'focus', 'focusdefault', 'admin', 'plain', 'removed', 'owner', 'threelessons', 'allfive', 'recentdone', 'removedold', 'profilecard', 'assigned', 'growth', 'tourstaken', 'activity', 'plan', 'library', 'assignedrole') { $results += Run-Page "dashboard: $s" "$base/dash-test.html?scn=$s" 25000 }
   $results += Run-Page "dashboard: demo mode (owner)" "$base/dash-test.html?scn=demo&demo=1" 25000
   $results += Run-Page "dashboard: live demo for any learner" "$base/dash-test.html?scn=demolearner&demo=1&src=site-services" 25000
   $results += Run-Page 'dashboard: tourlink' "$base/dash-test.html?scn=tourlink&tour=1" 25000
@@ -204,7 +204,7 @@ try {
   $results += Run-Page "lesson figures: a value-vs-effort matrix and a scoring equation" "$base/les-test.html?scn=figs&course=prioritization-novice&lesson=2" 30000
   $results += Run-Page "lesson figures: a workflow drawn as a chain, lined up with the text" "$base/les-test.html?scn=figs&course=discovery-experienced&lesson=1" 30000
   $results += Run-Page "lesson figures: think first, then reveal the after" "$base/les-test.html?scn=figs&course=aiIndividual-moderate&lesson=2" 30000
-  foreach ($s in 'admin', 'empty', 'archived', 'nocopy', 'auditdenied', 'owner', 'ownernoorg', 'plain', 'member', 'removedadmin', 'denied', 'sharesdenied', 'signedout', 'history', 'snapshotsdenied', 'snapfail', 'noplatform', 'smallplatform', 'assign', 'assigndenied', 'skills') {
+  foreach ($s in 'admin', 'empty', 'archived', 'nocopy', 'auditdenied', 'owner', 'ownernoorg', 'plain', 'member', 'removedadmin', 'denied', 'sharesdenied', 'signedout', 'history', 'snapshotsdenied', 'snapfail', 'noplatform', 'smallplatform', 'assign', 'assigndenied', 'skills', 'shapes') {
     $org = if ($s -eq 'owner') { '&org=orgA' } else { '' }
     $results += Run-Page "company dashboard: $s" "$base/company-test.html?scn=$s$org" 40000
   }

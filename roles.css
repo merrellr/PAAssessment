@@ -33,3 +33,4 @@
 .rt-segs i{ flex: 1; height: 7px; border-radius: 99px; max-width: 64px; }
 .rt-segs i.rt-unknown{ background: var(--line); }
 .rt-tile-go{ font-size: 1.25rem; color: var(--navy); }
+.rt-consent{ margin: 0 0 14px; padding: 10px 12px; border-radius: 10px; background: var(--tint, #e9f0fa); font-size: .84rem; line-height: 1.5; }

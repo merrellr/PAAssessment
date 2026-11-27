@@ -23,6 +23,29 @@ const tileNum = (label) => {
   return tl ? tl.querySelector('.num').textContent : null;
 };
 
+async function shapeTests(){
+  await until(() => $('shapeTeam') && $('shapeTeam').querySelector('table'));
+  const st = $('shapeTeam');
+  t('skills shape against roles: competencies down the side, one column per person with a shared shape', st.querySelectorAll('tbody tr:not(.sh-hm-area)').length === 28 && st.querySelectorAll('thead th').length === 2 && /Ben B/.test(textOf(st.querySelector('thead'))) && /Senior Product Manager/.test(textOf(st.querySelector('thead'))));
+  t('cells are coloured against the person\'s role, with a legend', st.querySelectorAll('td.sh-c.st-met').length > 0 && st.querySelectorAll('td.sh-c.st-below').length > 0 && /At or above/.test(textOf(st.querySelector('.hm-legend'))));
+  const ben = rowFor('teamWrap', 'Ben B'), sel = ben.querySelector('select.role-pick');
+  t('the team list has a Role column with each person\'s role', sel && sel.value === 'spm' && rowFor('teamWrap', 'Dee D').querySelector('select.role-pick').value === 'pm');
+  btn(ben, 'Details').click(); await sleep(60);
+  const det = $('teamWrap').querySelector('.detail-row');
+  t('Details: the shape against the role, how many are met, and the biggest gaps with Assign a course', /Skills shape/.test(textOf(det)) && det.querySelector('svg.sh-svg') && /of 28 competencies at or above Senior Product Manager/.test(textOf(det)) && /Biggest gaps/.test(textOf(det)) && Array.prototype.some.call(det.querySelectorAll('button'), b => /Assign a course|Course assigned/.test(b.textContent)), textOf(det).slice(0, 200));
+  btn(rowFor('teamWrap', 'Ben B'), 'Hide details').click(); await sleep(40);
+  btn(rowFor('teamWrap', 'Dee D'), 'Details').click(); await sleep(60);
+  t('a role with no shape yet says it shows after they next open My Learning', /after they next open My Learning/.test(textOf($('teamWrap').querySelector('.detail-row'))));
+  window.confirm = () => true;
+  const eli = rowFor('teamWrap', 'Eli E').querySelector('select.role-pick');
+  eli.value = 'head'; eli.dispatchEvent(new Event('change')); await sleep(120);
+  const w = window.__store['orgRoles/orgA/people/uEli'];
+  t('assigning a role saves it (who, when) and logs it', w && w.roleId === 'head' && w.assignedBy === 'uAdmin' && /is now measured against Head of Product/.test(txt('notice')), JSON.stringify(w));
+  const eli2 = rowFor('teamWrap', 'Eli E').querySelector('select.role-pick');
+  eli2.value = ''; eli2.dispatchEvent(new Event('change')); await sleep(120);
+  t('No role removes it, and says the shape is no longer shared', !window.__store['orgRoles/orgA/people/uEli'] && /no longer shared/.test(txt('notice')));
+}
+
 /* The email service is an Apps Script web app reached by a <script> tag. Here
    the tag is intercepted and answered by a fake. */
 let backendMode = 'ok';
@@ -513,6 +536,8 @@ async function readBlob(d){ return await d.blob.text(); }
       btn(items()[1], 'Remove').click(); await until(() => items().length === 1);
       t('Remove takes it off the list', window.__store['orgAssignments/orgA'].items.length === 1 && window.__store['orgAssignments/orgA'].items[0].course === 'discovery-novice');
       t('and the activity log records that too', Object.keys(window.__store).some(k => /^orgs\/orgA\/audit\//.test(k) && window.__store[k].action === 'assignment.removed'));
+    } else if (scn === 'shapes'){
+      await shapeTests();
     } else if (scn === 'skills'){
       const grid = () => $('skillsGrid').querySelector('table.hm');
       const personRows = () => Array.prototype.slice.call(grid().querySelectorAll('tbody tr:not(.hm-avg)'));

@@ -251,6 +251,14 @@ const sleep = (ms) => new Promise(r => setTimeout(r, ms));
         t('the owner\'s own record is never read for display, and nothing is written', JSON.stringify(store['progress/uDash']) === before && !/PRIVATE THOUGHTS/.test(document.body.textContent));
       }
     }
+    if (window.__scn === 'assignedrole'){
+      window.showView('learning'); window.setLearnTab('readiness'); await sleep(400);
+      const sel = document.getElementById('shRole');
+      t('a role the company assigned: My shape measures against it, and it can\'t be changed here', sel && sel.disabled && sel.value === 'gpm');
+      t('and says plainly that their manager can see the shape (never the answers)', /Your company assigned this role/.test((document.getElementById('shConsent') || {}).textContent || '') && /never your answers/.test(document.getElementById('shConsent').textContent));
+      let shared = null; for (let i = 0; i < 30 && !shared; i++){ await sleep(100); const m = store['orgs/orgA/members/uDash']; shared = m && m.shape; }
+      t('the shape goes to the company\'s shared record: the role, levels and evidence, nothing else', shared && shared.roleId === 'gpm' && Object.keys(shared.levels).length > 0 && Object.keys(shared).sort().join() === 'at,levels,roleId,strength', JSON.stringify(shared || {}).slice(0, 160));
+    }
     if (window.__scn === 'library'){
       const lp = document.getElementById('libraryPanel');
       window.showView('learning'); document.getElementById('ltab-library').click(); await sleep(40);

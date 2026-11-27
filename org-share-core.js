@@ -95,3 +95,26 @@ export function orgIdsFor(membership, progress){
   if (progress && Array.isArray(progress.orgIds)) progress.orgIds.forEach(id => { if (typeof id === 'string' && id) ids[id] = true; });
   return Object.keys(ids);
 }
+
+/* The skills shape a company sees once it has assigned the person a role (firestore.rules
+   validShapeShare): the role, each competency's level and how much evidence is behind it
+   (s strong, m some, t thin), and when. Nothing else: no answers, no lesson history.
+   levels: ShapeCore.levels(...) ([{ key, level, strength }]). null when there is nothing to share. */
+const STRENGTH_CODE = { strong: 's', some: 'm', thin: 't' };
+export function buildShape(levels, roleId, nowIso){
+  if (!Array.isArray(levels) || typeof roleId !== 'string' || !/^[a-z0-9-]{1,40}$/.test(roleId)) return null;
+  const lv = {}, st = {};
+  levels.slice(0, 28).forEach(c => {
+    if (!c || typeof c.key !== 'string' || !(c.level > 0)) return;
+    lv[c.key] = Math.round(Math.min(4, c.level) * 10) / 10;
+    st[c.key] = STRENGTH_CODE[c.strength] || 't';
+  });
+  if (!Object.keys(lv).length) return null;
+  return { roleId: roleId, levels: lv, strength: st, at: String(nowIso || new Date().toISOString()).slice(0, 40) };
+}
+// Back from the shared record: [{ key, level, strength }] for ShapeCore.compare.
+export function shapeLevels(shape){
+  const back = { s: 'strong', m: 'some', t: 'thin' };
+  if (!shape || !shape.levels) return [];
+  return Object.keys(shape.levels).map(k => ({ key: k, level: Number(shape.levels[k]) || 0, strength: back[(shape.strength || {})[k]] || 'thin' }));
+}
