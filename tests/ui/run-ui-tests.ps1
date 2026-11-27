@@ -206,6 +206,7 @@ try {
   $results += Run-Page "team workspace: a member" "$base/ws-test.html?scn=member" 30000
   $results += Run-Page "team workspace: an admin" "$base/ws-test.html?scn=admin" 30000
   $results += Run-Page "team workspace: no company (the sample)" "$base/ws-test.html?scn=solo" 30000
+  $results += Run-Page "team workspace: Ask switched on" "$base/ws-test.html?scn=ask" 30000
   $results += Run-Page "lesson audio: a narrated lesson" "$base/les-test.html?scn=listen&course=discovery-novice&lesson=2" 30000
   $results += Run-Page "lesson audio: opened from the Library" "$base/les-test.html?scn=listenopen&course=discovery-novice&lesson=2&listen=1" 30000
   $results += Run-Page "lesson audio: a lesson with no audio yet" "$base/les-test.html?scn=noaudio&course=discovery-novice&lesson=4" 30000

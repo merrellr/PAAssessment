@@ -901,6 +901,31 @@ async function loadDetail(){
     console.error('Could not read shared records:', err);
     detail.sharesError = true;
   }
+  // Paid extras switched on for this company (orgFeatures): Ask in the Team Knowledge Workspace
+  try {
+    const f = await getDoc(doc(db, 'orgFeatures', id));
+    if (id !== currentOrgId) return;
+    detail.wsAsk = !!(f.exists() && f.data().wsAsk === true);
+  } catch (err){
+    console.error('Could not read paid features:', err);
+    detail.wsAskError = true;
+  }
+}
+
+/* Switches Ask in the company's Team Knowledge Workspace on or off. Members read the switch; Apps Script checks
+   it again before answering. */
+async function setWorkspaceAsk(on){
+  const id = currentOrgId;
+  try {
+    await setDoc(doc(db, 'orgFeatures', id), { wsAsk: !!on, updatedAt: serverTimestamp() });
+    if (id !== currentOrgId) return;
+    detail.wsAsk = !!on; detail.wsAskError = false;
+    $('detailNotice').textContent = 'Workspace Ask is now ' + (on ? 'on' : 'off') + ' for ' + (currentOrg() || {}).name + '.';
+  } catch (err){
+    console.error('Could not change Workspace Ask:', err);
+    $('detailNotice').textContent = "Couldn't change Workspace Ask. The latest security rules may not be published yet.";
+  }
+  renderDetail();
 }
 
 function currentOrg(){ return orgs.find(o => o.id === currentOrgId); }
@@ -993,6 +1018,9 @@ function renderDetail(){
   item('Billing address', org.billingAddress || '—');
   item('Notes', org.notes || '—');
   item('Focus areas, in priority order', focusChips);
+  const askBtn = el('button', { type: 'button', class: 'btn btn-ghost btn-small', id: 'wsAskBtn', text: detail.wsAsk ? 'Turn off' : 'Turn on' });
+  askBtn.addEventListener('click', () => setWorkspaceAsk(!detail.wsAsk));
+  item('Workspace Ask (paid)', el('span', { class: 'ws-ask' }, el('span', { id: 'wsAskState', text: detail.wsAskError ? 'Unknown ' : detail.wsAsk ? 'On ' : 'Off ' }), askBtn));
 
   $('usersHint').textContent = (org.plan === 'seat' ? 'Every active person, including admins, uses one seat. ' : '') + 'People join with their own invite link.';
   renderPeople();

@@ -564,6 +564,44 @@ await deny('more than 20 areas are refused', () => setDoc(doc(adminA, 'workspace
 await deny('another company cannot read the settings', () => getDoc(doc(adminB, 'workspaces/orgA')));
 await deny('nobody deletes the settings', () => deleteDoc(doc(adminA, 'workspaces/orgA')));
 
+console.log('\n--- workspace notes and updates ---');
+const wsNote = (by, over = {}) => Object.assign({ kind: 'note', title: 'Sprint review', body: 'Route planning slips to autumn.', links: [], source: 'Review, 12 Mar', authorId: by, authorName: 'Pat',
+  createdAt: serverTimestamp(), updatedAt: serverTimestamp() }, over);
+const WN = 'workspaces/orgA/notes/';
+await allow('a member adds a note', () => setDoc(doc(memberA, WN + 'noteMember1'), wsNote('memberA')));
+await allow('and posts a short update (no title needed)', () => setDoc(doc(memberA, WN + 'updMember01'), wsNote('memberA', { kind: 'update', title: '', body: 'Shipped guided setup.', source: '' })));
+await allow('members read them', () => getDocs(collection(adminA, 'workspaces/orgA/notes')));
+await deny('another company cannot', () => getDocs(collection(adminB, 'workspaces/orgA/notes')));
+await deny('nor the platform owner', () => getDocs(collection(owner, 'workspaces/orgA/notes')));
+await deny('a note needs a title', () => setDoc(doc(memberA, WN + 'noteFake01'), wsNote('memberA', { title: '' })));
+await deny('an update is short', () => setDoc(doc(memberA, WN + 'noteFake02'), wsNote('memberA', { kind: 'update', title: '', body: 'x'.repeat(601) })));
+await deny('a note is under 4,000 characters', () => setDoc(doc(memberA, WN + 'noteFake03'), wsNote('memberA', { body: 'x'.repeat(4001) })));
+await deny('an empty body is refused', () => setDoc(doc(memberA, WN + 'noteFake04'), wsNote('memberA', { body: '' })));
+await deny('the author must be the person writing', () => setDoc(doc(memberA, WN + 'noteFake05'), wsNote('adminA')));
+await deny('an unknown kind is refused', () => setDoc(doc(memberA, WN + 'noteFake06'), wsNote('memberA', { kind: 'secret' })));
+await deny('extra fields are refused', () => setDoc(doc(memberA, WN + 'noteFake07'), wsNote('memberA', { pinned: true })));
+await deny('more than 20 links are refused', () => setDoc(doc(memberA, WN + 'noteFake08'), wsNote('memberA', { links: Array.from({ length: 21 }, (_, i) => 'lnk' + i + 'xxx') })));
+await allow('the author edits their note', () => updateDoc(doc(memberA, WN + 'noteMember1'), { body: 'Slips to October.', updatedAt: serverTimestamp() }));
+await deny('someone else (even an admin) cannot edit it', () => updateDoc(doc(adminA, WN + 'noteMember1'), { body: 'Changed', updatedAt: serverTimestamp() }));
+await deny('a note cannot become an update', () => updateDoc(doc(memberA, WN + 'noteMember1'), { kind: 'update', updatedAt: serverTimestamp() }));
+await deny('another member cannot delete it', () => deleteDoc(doc(asUser('rm1', 'rm1@a.com'), WN + 'noteMember1')));
+await allow('an admin deletes it', () => deleteDoc(doc(adminA, WN + 'noteMember1')));
+await allow('the author deletes their update', () => deleteDoc(doc(memberA, WN + 'updMember01')));
+await deny('an archived company takes no new notes', () => setDoc(doc(asUser('oldMember', 'old@x.com'), 'workspaces/orgOld/notes/noteOldCo1'), wsNote('oldMember')));
+await allow('an item may carry the editor\'s name, for the updates feed', () => setDoc(doc(memberA, WS + 'itemNamed01'), wsItem('memberA', { updatedByName: 'Pat Member' })));
+await deny('a long name is refused', () => setDoc(doc(memberA, WS + 'itemNamed02'), wsItem('memberA', { updatedByName: 'x'.repeat(81) })));
+
+console.log('\n--- paid features (orgFeatures) ---');
+await allow('the owner switches Ask on for a company', () => setDoc(doc(owner, 'orgFeatures/orgA'), { wsAsk: true, updatedAt: serverTimestamp() }));
+await allow('its members can see that it is on', () => getDoc(doc(memberA, 'orgFeatures/orgA')));
+await deny('a company admin cannot switch it on themselves', () => setDoc(doc(adminA, 'orgFeatures/orgA'), { wsAsk: true, updatedAt: serverTimestamp() }));
+await deny('another company cannot read it', () => getDoc(doc(adminB, 'orgFeatures/orgA')));
+await deny('a stranger cannot read it', () => getDoc(doc(stranger, 'orgFeatures/orgA')));
+await deny('only known switches', () => setDoc(doc(owner, 'orgFeatures/orgA'), { wsAsk: true, unlimited: true, updatedAt: serverTimestamp() }));
+await deny('a switch is true or false', () => setDoc(doc(owner, 'orgFeatures/orgA'), { wsAsk: 'yes', updatedAt: serverTimestamp() }));
+await allow('the owner switches it off', () => setDoc(doc(owner, 'orgFeatures/orgA'), { wsAsk: false, updatedAt: serverTimestamp() }));
+await deny('nobody deletes it', () => deleteDoc(doc(owner, 'orgFeatures/orgA')));
+
 console.log('\n--- team assignments (orgAssignments) ---');
 const assignItem = { id: 'abc1234567', course: 'discovery-novice', due: '2026-12-15', note: 'Before planning', assignedAt: '2026-11-16' };
 const saveAssign = (db, orgId, items, over = {}) => setDoc(doc(db, 'orgAssignments/' + orgId), Object.assign({ items: items, updatedAt: serverTimestamp() }, over));

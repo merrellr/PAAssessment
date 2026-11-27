@@ -134,6 +134,27 @@
   .pm-canvas.tracing .pm-n[aria-pressed="true"]{ box-shadow: 0 0 0 2px var(--tc); }
   .pm-canvas.tracing path{ stroke-opacity: .08; }
   .pm-canvas.tracing path.on{ stroke: var(--pa-primary); stroke-opacity: 1; stroke-width: 2; }
+  .sr-only{ position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); border:0; }
+  details.f summary{ cursor:pointer; font-weight: 700; font-size: .8125rem; }
+  details.f input[type=search]{ margin-top: 8px; }
+  .fd{ list-style:none; margin:0; padding:0; }
+  .fd li{ border-top: 1px solid var(--pa-line); padding: 12px 0; }
+  .fd .h{ display:flex; flex-wrap:wrap; gap: 4px 10px; align-items:baseline; font-size: .78rem; color: var(--pa-muted); }
+  .fd .k{ font-weight: 800; letter-spacing: .04em; text-transform: uppercase; font-size: .68rem; color: var(--pa-cyan-ink, var(--pa-primary)); }
+  .fd .b{ margin: 4px 0 0; font-size: .9rem; white-space: pre-wrap; overflow-wrap:anywhere; }
+  .fd .src{ font-size: .78rem; color: var(--pa-muted); }
+  .fd .about{ display:flex; flex-wrap:wrap; gap: 4px 10px; margin-top: 4px; font-size: .8rem; }
+  .fd .about .open{ font-weight: 600; color: var(--pa-navy); }
+  .fd .acts2{ display:flex; gap: 14px; margin-top: 6px; font-size: .8rem; }
+  .fd .acts2 button{ background:none; border:0; padding:0; font: 700 .8rem var(--pa-sans); color: var(--pa-navy); cursor:pointer; text-decoration: underline; }
+  .ask-in{ display:flex; gap: 8px; flex-wrap:wrap; }
+  .ask-in input{ flex: 1 1 260px; min-width: 0; padding: 10px 14px; border: 1.5px solid var(--pa-line); border-radius: 10px; background: var(--pa-card); color: var(--pa-ink); font: .95rem var(--pa-sans); }
+  .ask-a{ margin-top: 14px; padding: 14px 16px; border-radius: 12px; border: 1px solid var(--pa-line); background: var(--pa-bg); font-size: .92rem; line-height: 1.55; }
+  .ask-a p{ margin: 0 0 8px; } .ask-a ul{ margin: 0 0 8px; padding-left: 18px; }
+  .ask-a .q{ font-weight: 700; color: var(--pa-navy-deep); }
+  .cite{ display:inline-block; min-width: 1.5em; padding: 0 5px; margin: 0 1px; border-radius: 6px; border: 1px solid var(--pa-line); background: var(--pa-card); color: var(--pa-navy); font: 700 .72rem var(--pa-sans); cursor:pointer; vertical-align: 1px; }
+  .ask-src{ font-size: .82rem; margin: 6px 0 0; padding-left: 20px; }
+  .ask-ex{ border: 1px dashed var(--pa-line); border-radius: 12px; padding: 12px 14px; margin-top: 12px; }
   .paid{ font-size: .68rem; font-weight: 800; letter-spacing: .05em; text-transform: uppercase; color: var(--pa-cyan-ink, var(--pa-primary)); margin-left: 6px; }
 </style>
 <link rel="stylesheet" href="pa-theme.css">
@@ -153,10 +174,12 @@
 
   <div class="tabs" role="tablist" aria-label="Workspace">
     <button type="button" role="tab" id="tabItems" aria-selected="true" aria-controls="pnItems">Items</button>
+    <button type="button" role="tab" id="tabFeed" aria-selected="false" aria-controls="pnFeed">Updates &amp; notes</button>
     <button type="button" role="tab" id="tabValue" aria-selected="false" aria-controls="pnValue">Value view</button>
     <button type="button" role="tab" id="tabRel" aria-selected="false" aria-controls="pnRel">Release map</button>
     <button type="button" role="tab" id="tabGoals" aria-selected="false" aria-controls="pnGoals">Goal timeline</button>
     <button type="button" role="tab" id="tabMap" aria-selected="false" aria-controls="pnMap">Product map</button>
+    <button type="button" role="tab" id="tabAsk" aria-selected="false" aria-controls="pnAsk">Ask <span class="paid">Paid</span></button>
     <button type="button" role="tab" id="tabImport" aria-selected="false" aria-controls="pnImport">Import a CSV</button>
     <button type="button" role="tab" id="tabSettings" aria-selected="false" aria-controls="pnSettings" hidden>Settings</button>
   </div>
@@ -172,16 +195,27 @@
       <div id="wsList" aria-live="polite"></div>
     </div>
     <section class="card" id="wsEditor" hidden aria-labelledby="edTitle"></section>
-    <section class="card" aria-labelledby="soonT">
-      <h2 id="soonT">Coming to this workspace</h2>
-      <p class="cc-muted" style="margin:0;font-size:.875rem;">Next, built from what you add here:</p>
-      <div class="soon">
-        <div><b>Updates and notes</b>What changed, and the team’s discussions kept with the items they’re about.</div>
-        <div><b>Ask, with sources<span class="paid">Paid</span></b>Questions about the workspace answered by Compass, citing the items and notes used.</div>
-      </div>
-    </section>
   </section>
 
+  <section id="pnFeed" role="tabpanel" aria-labelledby="tabFeed" hidden>
+    <div class="card" id="feedPost">
+      <h2>Share an update</h2>
+      <form id="upForm" class="ed" novalidate>
+        <div class="f"><label for="upText" class="sr-only">Update</label><textarea id="upText" maxlength="600" rows="3" placeholder="What changed? e.g. Route optimisation is in beta with Harbor."></textarea>
+          <small><span id="upN">0</span> of 600</small></div>
+        <details class="f" id="upLinksBox"><summary>Link it to items <span class="cc-muted" id="upLinkN"></span></summary><input type="search" id="upLinkQ" placeholder="Find an item" aria-label="Find an item to link"><div class="picks" id="upLinks"></div></details>
+        <div class="acts"><button type="submit" class="cc-btn sm" id="upGo">Post update</button><button type="button" class="cc-btn sm ghost" id="noteNew">+ Add a note</button><span class="err" id="upErr" role="alert" hidden></span></div>
+      </form>
+    </div>
+    <section class="card" id="noteEd" hidden aria-labelledby="noteEdT"></section>
+    <div class="card">
+      <div class="chips" id="feedChips" role="group" aria-label="Show"></div>
+      <div id="feedList" aria-live="polite"></div>
+    </div>
+  </section>
+  <section id="pnAsk" role="tabpanel" aria-labelledby="tabAsk" hidden>
+    <div class="card" id="askBody"></div>
+  </section>
   <section id="pnValue" role="tabpanel" aria-labelledby="tabValue" hidden>
     <div class="card">
       <h2>Value view</h2>
@@ -266,6 +300,7 @@ const W = window.WorkspaceCore, T = W.TYPES;
 const $ = (id) => document.getElementById(id);
 const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
 const event = (name, props) => { try { if (window.PAAnalytics) window.PAAnalytics.event(name, props || {}); } catch (e) {} };
+let notes = [], askOn = false, askHist = [];
 let user = null, org = null, isAdmin = false, sample = false, items = [], settings = { valueMode: 'either', areas: [] }, filter = '', editing = null, csv = null;
 
 const itemsCol = () => collection(db, 'workspaces', org.id, 'items');
@@ -274,10 +309,10 @@ const showErr = (m) => { $('wsErr').textContent = m; $('wsErr').hidden = !m; };
 const fail = (e, what) => { console.error(what, e); showErr('Could not ' + what + (e && e.code === 'permission-denied' ? ': you may no longer be in this company, or it isn’t active.' : '. Please try again.')); };
 
 /* ---------------------------------------------------------------- tabs */
-const TABS = [['tabItems', 'pnItems'], ['tabValue', 'pnValue'], ['tabRel', 'pnRel'], ['tabGoals', 'pnGoals'], ['tabMap', 'pnMap'], ['tabImport', 'pnImport'], ['tabSettings', 'pnSettings']];
+const TABS = [['tabItems', 'pnItems'], ['tabFeed', 'pnFeed'], ['tabAsk', 'pnAsk'], ['tabValue', 'pnValue'], ['tabRel', 'pnRel'], ['tabGoals', 'pnGoals'], ['tabMap', 'pnMap'], ['tabImport', 'pnImport'], ['tabSettings', 'pnSettings']];
 function showTab(id){
   TABS.forEach(([t, p]) => { $(t).setAttribute('aria-selected', String(t === id)); $(p).hidden = t !== id; });
-  if (id === 'tabValue') drawValue(); else if (id === 'tabRel') drawRel(); else if (id === 'tabGoals') drawGoals(); else if (id === 'tabMap') drawMap();
+  if (id === 'tabFeed') drawFeed(); else if (id === 'tabAsk') drawAsk(); else if (id === 'tabValue') drawValue(); else if (id === 'tabRel') drawRel(); else if (id === 'tabGoals') drawGoals(); else if (id === 'tabMap') drawMap();
   if (id !== 'tabItems') event('workspace_view', { view: id.slice(3).toLowerCase() });
 }
 TABS.forEach(([t]) => $(t).addEventListener('click', () => showTab(t)));
@@ -344,6 +379,7 @@ function openEditor(it, isNew){
         '<div class="f"><label for="edR">How strategic</label><select id="edR"' + (ro ? ' disabled' : '') + '>' + W.TIERS.map((l, i) => opt(String(i), l, String(it.tier || 0))).join('') + '</select></div>' : '') +
     '</div>' + picks +
     (from.length ? '<div class="f"><span style="font-weight:700;font-size:.8125rem;">Linked from</span><ul class="conn">' + from.map(o => '<li>' + esc(T[o.type].label) + ': ' + esc(o.title) + '</li>').join('') + '</ul></div>' : '') +
+    (!isNew && W.notesFor(notes, it.id).length ? '<div class="f"><span style="font-weight:700;font-size:.8125rem;">Notes and updates about it</span><ul class="conn">' + W.notesFor(notes, it.id).map(n => '<li>' + (n.kind === 'update' ? 'Update' : 'Note: <b>' + esc(n.title) + '</b>') + (n.authorName ? ' · ' + esc(n.authorName) : '') + ' · ' + esc(when(n.createdAt)) + '<br><span class="cc-muted">' + esc(n.body.slice(0, 160)) + (n.body.length > 160 ? '…' : '') + '</span></li>').join('') + '</ul></div>' : '') +
     '<div class="acts">' + (ro ? '' : '<button type="submit" class="cc-btn sm" id="edSave">' + (isNew ? 'Add it' : 'Save') + '</button>') +
       '<button type="button" class="cc-btn sm ghost" id="edCancel">' + (ro ? 'Close' : 'Cancel') + '</button>' +
       (!ro && !isNew && (isAdmin || it.createdBy === user.uid) ? '<button type="button" class="linkbtn" id="edDel">Delete</button>' : '') + '</div></form>';
@@ -368,16 +404,16 @@ async function save(){
   if (p.length) { $('edErr').textContent = p.join(' '); $('edErr').hidden = false; return; }
   if (editing.isNew && items.length >= W.MAX_ITEMS) { $('edErr').textContent = 'The workspace is full (' + W.MAX_ITEMS + ' items). Delete some to add more.'; $('edErr').hidden = false; return; }
   $('edSave').disabled = true;
-  const stamp = { updatedBy: user.uid, updatedAt: serverTimestamp() };
+  const stamp = { updatedBy: user.uid, updatedByName: myName(), updatedAt: serverTimestamp() };
   try {
     if (editing.isNew) {
       const id = W.newId();
       await setDoc(doc(db, 'workspaces', org.id, 'items', id), Object.assign({}, data, stamp, { createdBy: user.uid, createdAt: serverTimestamp() }));
-      items.push(Object.assign({ id, createdBy: user.uid }, data));
+      items.push(Object.assign({ id, createdBy: user.uid, createdAt: Date.now(), updatedAt: Date.now(), updatedByName: myName() }, data));
       event('workspace_add', { type: data.type });
     } else {
       await updateDoc(doc(db, 'workspaces', org.id, 'items', editing.it.id), Object.assign({}, data, stamp));
-      Object.assign(editing.it, data);
+      Object.assign(editing.it, data, { updatedAt: Date.now(), updatedByName: myName() });
       event('workspace_edit', { type: data.type });
     }
     showErr(''); closeEditor();
@@ -393,6 +429,163 @@ async function del(){
     showErr(''); closeEditor();
   } catch (e) { fail(e, 'delete it'); }
 }
+
+/* ---------------------------------------------------------------- updates and notes */
+const myName = () => String((user && (user.displayName || (user.email || '').split('@')[0])) || '').slice(0, 80);
+const notesCol = () => collection(db, 'workspaces', org.id, 'notes');
+function when(v){
+  const t = W.ms(v); if (!t) return '';
+  const d = Math.floor((Date.now() - t) / 864e5);
+  return d <= 0 ? 'today' : d === 1 ? 'yesterday' : d < 14 ? d + ' days ago' : new Date(t).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
+}
+let feedFilter = '', upPicked = [];
+const FEED_KINDS = [['', 'Everything'], ['update', 'Updates'], ['note', 'Notes'], ['item', 'Item changes']];
+function linkPicker(boxId, qId, picked, onChange){
+  const q = ($(qId).value || '').toLowerCase();
+  const list = items.filter(i => !q || i.title.toLowerCase().indexOf(q) > -1).sort((a, b) => W.ORDER.indexOf(a.type) - W.ORDER.indexOf(b.type) || a.title.localeCompare(b.title)).slice(0, 60);
+  $(boxId).innerHTML = list.length ? list.map(o => '<label><input type="checkbox" value="' + esc(o.id) + '"' + (picked.indexOf(o.id) > -1 ? ' checked' : '') + (sample ? ' disabled' : '') + '><span>' + esc(T[o.type].label) + ': ' + esc(o.title) + '</span></label>').join('') : '<small class="cc-muted">No items match.</small>';
+  $(boxId).onchange = (e) => { const v = e.target.value; const i = picked.indexOf(v); if (e.target.checked && i < 0 && picked.length < W.NOTE_LIMITS.links) picked.push(v); else if (!e.target.checked && i > -1) picked.splice(i, 1); if (onChange) onChange(); };
+}
+function drawFeed(){
+  if (sample) { $('upText').disabled = true; $('upGo').disabled = true; $('noteNew').disabled = true; }
+  $('upN').textContent = $('upText').value.length;
+  $('upLinkN').textContent = upPicked.length ? '(' + upPicked.length + ')' : '';
+  linkPicker('upLinks', 'upLinkQ', upPicked, () => { $('upLinkN').textContent = upPicked.length ? '(' + upPicked.length + ')' : ''; });
+  const all = W.feed(items, notes, 80), c = { '': all.length, update: 0, note: 0, item: 0 };
+  all.forEach(f => { c[f.kind === 'added' || f.kind === 'changed' ? 'item' : f.kind]++; });
+  $('feedChips').innerHTML = FEED_KINDS.map(([k, l]) => '<button type="button" class="chip" data-ff="' + k + '" aria-pressed="' + (feedFilter === k) + '">' + l + ' <span class="n">' + c[k] + '</span></button>').join('');
+  const shown = all.filter(f => !feedFilter || (feedFilter === 'item' ? f.kind === 'added' || f.kind === 'changed' : f.kind === feedFilter));
+  const m = byId();
+  if (!shown.length) { $('feedList').innerHTML = '<p class="empty">' + (all.length ? 'Nothing of this kind yet.' : 'Nothing yet. Post an update, add a note, or add items: what changes shows up here.') + '</p>'; return; }
+  $('feedList').innerHTML = '<ul class="fd">' + shown.map(f => {
+    const isNote = f.kind === 'note' || f.kind === 'update', n = isNote ? notes.find(x => x.id === f.id) : null;
+    const head = '<div class="h"><span class="k">' + ({ update: 'Update', note: 'Note', added: 'Added', changed: 'Changed' })[f.kind] + '</span>' + (f.who ? '<span>' + esc(f.who) + '</span>' : '') + '<span>' + esc(when(f.at)) + '</span></div>';
+    if (!isNote) return '<li>' + head + '<p class="b">' + esc(T[f.type].label) + ': ' + openBtn(f.id, f.title) + '</p></li>';
+    const about = (f.links || []).filter(id => m[id]).map(id => openBtn(id, m[id].title)).join('');
+    const mine = !sample && n && n.authorId === user.uid, canDel = !sample && n && (mine || isAdmin);
+    return '<li>' + head + (f.kind === 'note' ? '<p class="b"><b>' + esc(f.title) + '</b></p>' : '') + '<p class="b">' + esc(f.text) + '</p>' +
+      (n && n.source ? '<div class="src">From: ' + esc(n.source) + '</div>' : '') + (about ? '<div class="about"><span class="cc-muted">About:</span>' + about + '</div>' : '') +
+      (mine || canDel ? '<div class="acts2">' + (mine && f.kind === 'note' ? '<button type="button" data-ne="' + esc(f.id) + '">Edit</button>' : '') + (canDel ? '<button type="button" data-nd="' + esc(f.id) + '">Delete</button>' : '') + '</div>' : '') + '</li>';
+  }).join('') + '</ul>';
+}
+$('feedChips').addEventListener('click', (e) => { const b = e.target.closest('[data-ff]'); if (b) { feedFilter = b.dataset.ff; drawFeed(); } });
+$('upText').addEventListener('input', () => { $('upN').textContent = $('upText').value.length; });
+$('upLinkQ').addEventListener('input', () => linkPicker('upLinks', 'upLinkQ', upPicked, () => { $('upLinkN').textContent = upPicked.length ? '(' + upPicked.length + ')' : ''; }));
+async function saveNote(data, existing){
+  const n = W.cleanNote(data, byId()), p = W.noteProblems(n);
+  if (p.length) throw { mine: p.join(' ') };
+  if (existing) {
+    await updateDoc(doc(db, 'workspaces', org.id, 'notes', existing.id), Object.assign({}, n, { updatedAt: serverTimestamp() }));
+    Object.assign(existing, n);
+  } else {
+    const id = W.newId();
+    await setDoc(doc(db, 'workspaces', org.id, 'notes', id), Object.assign({}, n, { authorId: user.uid, authorName: myName(), createdAt: serverTimestamp(), updatedAt: serverTimestamp() }));
+    notes.push(Object.assign({ id, authorId: user.uid, authorName: myName(), createdAt: Date.now() }, n));
+  }
+  event(existing ? 'workspace_note_edit' : 'workspace_' + n.kind, { links: n.links.length });
+}
+$('upForm').addEventListener('submit', async (e) => {
+  e.preventDefault(); if (sample) return;
+  $('upErr').hidden = true; $('upGo').disabled = true;
+  try { await saveNote({ kind: 'update', body: $('upText').value, links: upPicked.slice() }); $('upText').value = ''; upPicked = []; $('upLinkQ').value = ''; $('upLinksBox').open = false; showErr(''); drawFeed(); }
+  catch (err) { if (err && err.mine) { $('upErr').textContent = err.mine; $('upErr').hidden = false; } else fail(err, 'post the update'); }
+  $('upGo').disabled = false;
+});
+let notePicked = [], noteEditing = null;
+function openNote(n){
+  noteEditing = n || null; notePicked = n ? n.links.slice() : [];
+  $('noteEd').innerHTML = '<form class="ed" id="noteForm" novalidate><h2 id="noteEdT">' + (n ? 'Edit note' : 'Add a note') + '</h2>' +
+    '<p class="cc-muted" style="margin:0;font-size:.85rem;">Keep a useful discussion: meeting notes, a customer call, a decision and why. Link it to what it is about so it turns up there too.</p>' +
+    '<div class="err" id="noteErr" role="alert" hidden></div>' +
+    '<div class="f"><label for="noteT">Title</label><input id="noteT" maxlength="' + W.NOTE_LIMITS.title + '" value="' + esc(n ? n.title : '') + '"></div>' +
+    '<div class="f"><label for="noteB">Note</label><textarea id="noteB" rows="7" maxlength="' + W.NOTE_LIMITS.note + '">' + esc(n ? n.body : '') + '</textarea></div>' +
+    '<div class="f"><label for="noteS">Where it came from (optional)</label><input id="noteS" maxlength="' + W.NOTE_LIMITS.source + '" placeholder="e.g. Customer call, 9 June; or a link to the thread" value="' + esc(n ? n.source : '') + '"></div>' +
+    '<details class="f" open><summary>About these items</summary><input type="search" id="noteLinkQ" placeholder="Find an item" aria-label="Find an item to link"><div class="picks" id="noteLinks"></div></details>' +
+    '<div class="acts"><button type="submit" class="cc-btn sm" id="noteGo">' + (n ? 'Save' : 'Add the note') + '</button><button type="button" class="cc-btn sm ghost" id="noteCancel">Cancel</button></div></form>';
+  $('noteEd').hidden = false; $('feedPost').hidden = true;
+  linkPicker('noteLinks', 'noteLinkQ', notePicked);
+  $('noteLinkQ').addEventListener('input', () => linkPicker('noteLinks', 'noteLinkQ', notePicked));
+  $('noteCancel').addEventListener('click', closeNote);
+  $('noteForm').addEventListener('submit', async (e) => {
+    e.preventDefault(); $('noteGo').disabled = true;
+    try { await saveNote({ kind: 'note', title: $('noteT').value, body: $('noteB').value, source: $('noteS').value, links: notePicked.slice() }, noteEditing); showErr(''); closeNote(); }
+    catch (err) { $('noteGo').disabled = false; if (err && err.mine) { $('noteErr').textContent = err.mine; $('noteErr').hidden = false; } else fail(err, 'save the note'); }
+  });
+  $('noteT').focus();
+}
+function closeNote(){ noteEditing = null; $('noteEd').hidden = true; $('feedPost').hidden = false; drawFeed(); }
+$('noteNew').addEventListener('click', () => { if (!sample) openNote(null); });
+$('feedList').addEventListener('click', async (e) => {
+  const ed = e.target.closest('[data-ne]'), dl = e.target.closest('[data-nd]'), op = e.target.closest('[data-open]');
+  if (ed) { openNote(notes.find(n => n.id === ed.dataset.ne)); return; }
+  if (dl) {
+    const n = notes.find(x => x.id === dl.dataset.nd); if (!n || !confirm('Delete this ' + (n.kind === 'update' ? 'update' : 'note') + '?')) return;
+    try { await deleteDoc(doc(db, 'workspaces', org.id, 'notes', n.id)); notes = notes.filter(x => x !== n); showErr(''); drawFeed(); event('workspace_note_delete', {}); } catch (err) { fail(err, 'delete it'); }
+    return;
+  }
+  if (op) { const it = items.find(i => i.id === op.dataset.open); if (it) { showTab('tabItems'); openEditor(it); } }
+});
+
+/* ---------------------------------------------------------------- Ask (paid) */
+const ASK_EXAMPLE = { q: 'Why is Northgate waiting, and when will they get what they need?',
+  a: 'Northgate will only roll out to all its regions once dispatch works across branches [1]. That is the Multi-region teams feature [2], planned for the Autumn release on 5 October 2027 [3]. Next step: confirm the date with Northgate before their evaluation ends.',
+  refs: [{ id: 'samplen1', kind: 'note' }, { id: 'samplef5', kind: 'item' }, { id: 'sampler3', kind: 'item' }] };
+function refLabel(r){
+  if (!r) return '';
+  if (r.kind === 'item') { const it = items.find(i => i.id === r.id); return it ? T[it.type].label + ': ' + it.title : ''; }
+  const n = notes.find(x => x.id === r.id); return n ? (n.kind === 'update' ? 'Update' : 'Note: ' + n.title) + (n.authorName ? ' (' + n.authorName + ')' : '') : '';
+}
+function answerHtml(text, refs){
+  const used = [];
+  const cite = (s) => s.replace(/\[(\d{1,2})\]/g, (m0, k) => { const r = refs[+k - 1]; if (!r || !refLabel(r)) return ''; if (used.indexOf(+k) < 0) used.push(+k); return '<button type="button" class="cite" data-ref="' + (+k - 1) + '" title="' + esc(refLabel(r)) + '">' + k + '</button>'; });
+  const lines = String(text || '').split(/\n+/).map(l => l.trim()).filter(Boolean);
+  let html = '', inList = false;
+  lines.forEach(l => { const b = /^[-•]\s+/.test(l); if (b && !inList) { html += '<ul>'; inList = true; } if (!b && inList) { html += '</ul>'; inList = false; } html += b ? '<li>' + cite(esc(l.replace(/^[-•]\s+/, ''))) + '</li>' : '<p>' + cite(esc(l)) + '</p>'; });
+  if (inList) html += '</ul>';
+  if (used.length) html += '<p class="cc-muted" style="font-size:.78rem;margin:8px 0 0;">Sources</p><ol class="ask-src">' + used.sort((a, b) => a - b).map(k => '<li value="' + k + '"><button type="button" class="open" data-ref="' + (k - 1) + '">' + esc(refLabel(refs[k - 1])) + '</button></li>').join('') + '</ol>';
+  return html;
+}
+let lastRefs = [];
+function drawAsk(){
+  const intro = '<h2>Ask, with sources <span class="paid">Paid</span></h2><p class="cc-muted vw-intro">Ask a question about the workspace and Compass answers from your team’s own items, notes and updates, citing each one it used so you can open it and check.</p>';
+  if (!askOn) {
+    lastRefs = ASK_EXAMPLE.refs;
+    const ex = sample ? '<div class="ask-ex"><p class="cc-muted" style="font-size:.78rem;margin:0 0 6px;">Example, from the sample company</p><p class="q">' + esc(ASK_EXAMPLE.q) + '</p><div class="ask-a" style="margin-top:6px;">' + answerHtml(ASK_EXAMPLE.a, ASK_EXAMPLE.refs) + '</div></div>' : '';
+    $('askBody').innerHTML = intro + '<p class="note" style="margin:0;"><b>Ask is a paid add-on for company workspaces.</b> ' + (org ? (isAdmin ? 'To switch it on for ' + esc(org.name) + ', ' : 'Your company admin can ask to switch it on: ') : 'It comes with a company account: ') + '<a href="/request-info">ask us about it</a>.</p>' + ex;
+    return;
+  }
+  if ($('askQ')) return;   // already drawn: keep the conversation
+  $('askBody').innerHTML = intro + '<form class="ask-in" id="askForm"><label for="askQ" class="sr-only">Your question</label><input id="askQ" maxlength="400" placeholder="e.g. Which strategic accounts are waiting on the autumn release?"><button type="submit" class="cc-btn" id="askGo">Ask</button></form>' +
+    '<p class="cc-muted" style="font-size:.78rem;margin:8px 0 0;">Uses your Compass questions for the day. The most relevant items and notes are sent to the AI service to write the answer; nothing is kept.</p><div id="askOut" aria-live="polite"></div>';
+  $('askForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const q = $('askQ').value.replace(/\s+/g, ' ').trim(); if (q.length < 2) return;
+    const ctx = W.askContext(q, items, notes, settings), out = $('askOut'), go = $('askGo');
+    if (!ctx.refs.length) { out.innerHTML = '<div class="ask-a">There is nothing in the workspace to answer from yet.</div>'; return; }
+    go.disabled = true; out.innerHTML = '<div class="ask-a"><p class="q">' + esc(q) + '</p><p class="cc-muted">Compass is reading the workspace…</p></div>';
+    event('workspace_ask', { n: ctx.refs.length });
+    try {
+      const acct = window.PAAccount, tok = acct ? await acct.idToken() : null;
+      if (!tok || !acct.backend) throw { code: 'not_verified' };
+      const r = await acct.backend({ action: 'compass', idToken: tok, q, h: JSON.stringify(askHist.slice(-4)), page: JSON.stringify({ k: 'workspace', t: org.name + ' workspace', x: ctx.text }), ctx: '[]' }, 45000);
+      if (!r || !r.ok) throw { code: (r && r.error) || 'down' };
+      lastRefs = ctx.refs;
+      out.innerHTML = '<div class="ask-a"><p class="q">' + esc(q) + '</p>' + answerHtml(r.text, ctx.refs) + (typeof r.left === 'number' ? '<p class="cc-muted" style="font-size:.75rem;margin:8px 0 0;">' + r.left + ' Compass questions left today.</p>' : '') + '</div>';
+      askHist.push({ r: 'u', t: q }, { r: 'a', t: String(r.text).slice(0, 700) });
+      $('askQ').value = '';
+    } catch (err) {
+      const c = err && err.code;
+      out.innerHTML = '<div class="ask-a"><p class="q">' + esc(q) + '</p><p>' + (c === 'daily_limit' ? 'You’ve used today’s Compass questions. They reset tomorrow.' : c === 'not_enabled' ? 'Ask isn’t switched on for your company right now.' : c === 'not_verified' ? 'Please sign in again, then ask.' : 'Compass couldn’t answer just now. Please try again in a moment.') + '</p></div>';
+    }
+    go.disabled = false;
+  });
+}
+$('askBody').addEventListener('click', (e) => {
+  const b = e.target.closest('[data-ref]'); if (!b) return;
+  const r = lastRefs[+b.dataset.ref]; if (!r) return;
+  if (r.kind === 'item') { const it = items.find(i => i.id === r.id); if (it) { showTab('tabItems'); openEditor(it); } }
+  else { showTab('tabFeed'); feedFilter = ''; drawFeed(); }
+});
 
 /* ---------------------------------------------------------------- the views */
 const openBtn = (id, title) => '<button type="button" class="open" data-open="' + esc(id) + '">' + esc(title) + '</button>';
@@ -521,9 +714,9 @@ async function doImport(){
     for (let i = 0; i < r.items.length; i += 400) {
       const b = writeBatch(db);
       r.items.slice(i, i + 400).forEach(it => { const { id, ...data } = it;
-        b.set(doc(db, 'workspaces', org.id, 'items', id), Object.assign(data, { createdBy: user.uid, createdAt: serverTimestamp(), updatedBy: user.uid, updatedAt: serverTimestamp() })); });
+        b.set(doc(db, 'workspaces', org.id, 'items', id), Object.assign(data, { createdBy: user.uid, createdAt: serverTimestamp(), updatedBy: user.uid, updatedByName: myName(), updatedAt: serverTimestamp() })); });
       await b.commit();
-      r.items.slice(i, i + 400).forEach(it => items.push(Object.assign({ createdBy: user.uid }, it)));
+      r.items.slice(i, i + 400).forEach(it => items.push(Object.assign({ createdBy: user.uid, createdAt: Date.now(), updatedAt: Date.now(), updatedByName: myName() }, it)));
     }
     $('imMsg').textContent = 'Imported ' + r.items.length + (r.items.length === 1 ? ' item.' : ' items.');
     event('workspace_import', { n: r.items.length });
@@ -551,7 +744,7 @@ $('setForm').addEventListener('submit', async (e) => {
 
 /* ---------------------------------------------------------------- loading */
 function useSample(why){
-  sample = true; items = W.sample(); settings = W.SAMPLE_SETTINGS;
+  sample = true; items = W.sample(); notes = W.sampleNotes(); settings = W.SAMPLE_SETTINGS;
   $('wsSub').textContent = 'Tidewater (a fictional company) · ' + items.length + ' items';
   $('wsSample').innerHTML = '<b>This is a sample.</b> Tidewater is a made-up scheduling company, here so you can see how the workspace fits together. ' + why + ' Nothing here can be changed.';
   $('wsSample').hidden = false; $('wsAdd').disabled = true; $('wsAddType').disabled = true;
@@ -567,9 +760,12 @@ onAuthStateChanged(auth, async (u) => {
   } else {
     org = { id: mem.orgId, name: mem.orgName || 'your company' }; isAdmin = mem.role === 'admin';
     try {
-      const [s, list] = await Promise.all([getDoc(doc(db, 'workspaces', org.id)), getDocs(itemsCol())]);
+      const [s, list, nl, feat] = await Promise.all([getDoc(doc(db, 'workspaces', org.id)), getDocs(itemsCol()),
+        getDocs(notesCol()).catch(() => ({ docs: [] })), getDoc(doc(db, 'orgFeatures', org.id)).catch(() => null)]);
       if (s.exists()) settings = Object.assign({ valueMode: 'either', areas: [] }, s.data());
       items = list.docs.map(d => Object.assign({ id: d.id }, d.data()));
+      notes = nl.docs.map(d => Object.assign({ id: d.id }, d.data()));
+      askOn = !!(feat && feat.exists() && feat.data().wsAsk === true);
       $('tabSettings').hidden = !isAdmin;
       drawSettings();
       event('workspace_open', { n: items.length, admin: isAdmin });

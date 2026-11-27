@@ -113,5 +113,28 @@ t('trace: its lines are named from left to right', tFeat.edges.includes('samplei
 t('trace: an unknown item traces nothing', W.trace(SP, 'nope').ids.length === 0);
 t('map: an empty workspace still has its five columns', W.productMap([]).cols.length === 5 && W.productMap([]).edges.length === 0);
 
+// notes, updates, the feed and Ask
+const cn = W.cleanNote({ kind: 'note', title: '  Call  ', body: ' Hello ', links: ['samplea1', 'samplea1', 'bad id', 'missing01'], source: 'Call', extra: 1 }, Object.fromEntries(W.sample().map(i => [i.id, i])));
+t('a note: trimmed, links checked and de-duplicated, only its own fields', cn.title === 'Call' && cn.body === 'Hello' && JSON.stringify(cn.links) === '["samplea1"]' && Object.keys(cn).sort().join() === 'body,kind,links,source,title');
+const cu = W.cleanNote({ kind: 'update', title: 'x', body: 'y'.repeat(700), source: 's' });
+t('an update: no title or source, and short', cu.title === '' && cu.source === '' && cu.body.length === 600);
+t('what a note or update needs', W.noteProblems({ kind: 'note', title: '', body: 'b' }).length === 1 && W.noteProblems({ kind: 'update', title: '', body: '' }).length === 1 && W.noteProblems({ kind: 'update', title: '', body: 'b' }).length === 0);
+t('times from Firestore, numbers or strings', W.ms({ toMillis: () => 5 }) === 5 && W.ms(7) === 7 && W.ms({ seconds: 2 }) === 2000 && W.ms(null) === 0);
+const fd = W.feed([{ id: 'itemA00001', type: 'goal', title: 'G', createdAt: 1000, updatedAt: 1000 }, { id: 'itemB00001', type: 'idea', title: 'I', createdAt: 1000, updatedAt: 900000, updatedByName: 'Pat' }, { id: 'itemC00001', type: 'idea', title: 'Old' }],
+  [{ id: 'noteA00001', kind: 'update', body: 'Shipped', createdAt: 500000, authorName: 'Sam', links: [] }]);
+t('feed: newest first; an item changed later shows as changed, with who', fd.map(f => f.kind).join() === 'changed,update,added' && fd[0].who === 'Pat' && fd[1].who === 'Sam');
+t('feed: items with no times are left out', !fd.some(f => f.id === 'itemC00001'));
+const SN = W.sampleNotes();
+t('notes about an item, newest first', W.notesFor(SN, 'samplef7')[0].id === 'samplen2' && W.notesFor(SN, 'samplea1').length === 1);
+t('sample notes link only to sample items', SN.every(n => n.links.every(id => W.sample().some(i => i.id === id))));
+const ac = W.askContext('Which accounts want dispatch across branches?', W.sample(), SN, W.SAMPLE_SETTINGS);
+t('Ask: the entries sharing words with the question come first', /Dispatch across branches/.test(ac.text.split('\n\n')[0]), ac.text.split('\n\n')[0]);
+t('Ask: one ref per entry, in the same order, items and notes', ac.refs.length === ac.text.split('\n\n').length && ac.refs.some(r => r.kind === 'note') && ac.refs.some(r => r.kind === 'item'));
+t('Ask: an entry says what it is linked to, and accounts say their value', /Linked to: .*Account "Northgate Facilities"/.test(ac.text) && /Account: Harbor Plumbing Co\.\. Annual value: \$380k/.test(ac.text));
+t('Ask: in bands mode an account shows its band, not a figure', /Annual value: \$250k\+/.test(W.askContext('harbor', W.sample(), [], { valueMode: 'bands' }).text) && !/\$380k/.test(W.askContext('harbor', W.sample(), [], { valueMode: 'bands' }).text));
+const big = Array.from({ length: 120 }, (_, i) => ({ id: 'bigitem' + i, type: 'idea', title: 'Idea number ' + i + ' ' + 'x'.repeat(150), links: [], votes: 1 }));
+const acb = W.askContext('idea', big, [], {}, 6500);
+t('Ask: within the budget and at most 30 entries', acb.text.length <= 6500 && acb.refs.length <= 30);
+
 console.log('\n' + pass + ' passed, ' + fail + ' failed');
 process.exit(fail ? 1 : 0);
