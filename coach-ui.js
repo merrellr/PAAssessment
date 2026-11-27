@@ -222,6 +222,7 @@
     return '<div class="hr-head"><span class="eyebrow">Your readiness</span><span class="hr-stage">Overall: <b>' + esc(stage.label) + '</b></span></div>' +
       '<h2>My readiness</h2><ul class="hr-list">' + areas.map(function (a) { return '<li><span>' + esc(a.name) + '</span>' + chip(a.status, a.label) + '</li>'; }).join('') + '</ul>' +
       (C.changes(s).answers ? '<p class="hr-today">' + esc(C.changes(s).line) + '</p>' : '') +
+      '<div id="homeShapeLine" hidden></div>' +
       '<div class="home-go"><a class="more" href="/my-learning#readiness">View my readiness' + ARROW + '</a></div>';
   }
 

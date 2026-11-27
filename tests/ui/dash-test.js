@@ -224,6 +224,12 @@ const sleep = (ms) => new Promise(r => setTimeout(r, ms));
         const bar = document.querySelector('.demo-bar'), sc = document.querySelector('.demo-script');
         t('demo mode (owner): the banner says it is a fictional learner and nothing is saved', bar && /Alex Rivera/.test(bar.textContent) && /Nothing here is saved/.test(bar.textContent) && window.__paDemo === true);
         t('it greets Alex, not the owner', /Alex/.test(document.body.textContent) && !/Hi, Dash|Dash User/.test((document.querySelector('.home-hello') || document.body).textContent));
+        const sp = document.getElementById('shapePanel');
+        t('My shape (demo): measured against Senior PM, three gaps each with a next lesson', document.getElementById('shRole').value === 'spm' && sp.querySelectorAll('.sh-gaps li').length === 3 && sp.querySelectorAll('.sh-gaps li a[href^="/lesson"]').length === 3, sp.querySelectorAll('.sh-gaps li').length);
+        const cmpSel = document.getElementById('shCmp'); cmpSel.value = 'head'; cmpSel.dispatchEvent(new Event('change')); await sleep(60);
+        t('Compare with Head of Product: a second outline and the shape shift, more and less', document.querySelector('#shapePanel path.sh-target2') && /Shape shift: Senior Product Manager → Head of Product/.test(document.getElementById('shapePanel').textContent) && /Asks for more/.test(document.getElementById('shapePanel').textContent) && /Asks for less/.test(document.getElementById('shapePanel').textContent));
+        document.getElementById('shPlace').click(); await sleep(60);
+        t('Place me automatically names the closest role', /Your shape is (closest|nearest) to/.test(document.querySelector('.sh-placed').textContent), document.querySelector('.sh-placed') && document.querySelector('.sh-placed').textContent);
         t('Alex\'s data: the plan is in week 2, practice history shows', /Week 2 of 4/.test(document.getElementById('planPanel').textContent) && document.querySelectorAll('#readinessPanel .cc-act li').length >= 3);
         try { sessionStorage.removeItem('pa-demo-step'); sessionStorage.removeItem('pa-demo-min'); } catch (e) {}
         t('the demo script: a small card, seven dots, Start', sc && sc.querySelectorAll('.ds-dots i').length === 7 && /A quick tour of Compass/.test(sc.textContent) && sc.querySelector('[data-ds="next"]').textContent === 'Start');
@@ -293,6 +299,11 @@ const sleep = (ms) => new Promise(r => setTimeout(r, ms));
       t('My readiness: what changed today, with the area that moved up', /Today: 5 answers, 5 right/.test(rp.querySelector('.cc-chg').textContent) && /Needs attention → Developing/.test((rp.querySelector('.cc-chg-list') || {}).textContent || ''), rp.querySelector('.cc-chg').textContent);
       t('Compass Coach: recent activity too', cp.querySelectorAll('.cc-act li').length === 4);
       t('My gaps: the observed pattern column', /Observed pattern/.test(gp.textContent));
+      const sp = document.getElementById('shapePanel');
+      t('My shape: the chart, and with no role yet, an invitation to pick one', sp.querySelector('svg.sh-svg') && /Pick a role/.test(sp.textContent) && sp.querySelectorAll('.sh-all tbody tr').length === 28);
+      const sel = document.getElementById('shRole'); sel.value = 'pm'; sel.dispatchEvent(new Event('change')); await sleep(150);
+      t('choosing a role saves it as the role target (the same as Profile) and shows the gaps to it', (store['progress/uDash'].targets || {}).roleId === 'pm' && /Top gaps to Product Manager|at or above Product Manager/.test(document.getElementById('shapePanel').textContent), JSON.stringify(store['progress/uDash'].targets || {}));
+      t('Home: My skills shape in the readiness card', /My skills shape/.test((document.getElementById('homeShapeLine') || {}).textContent || ''));
       t('Home: the readiness card says what changed today', /Today: 5 answers/.test((document.querySelector('#homeReadiness .hr-today') || {}).textContent || ''));
       t('an activity row links to practising that area', /\/practice\?area=strategy/.test(rp.querySelector('.cc-act a').getAttribute('href')));
     }

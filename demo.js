@@ -39,7 +39,7 @@
         'strategy-novice': { completed: [1, 2, 3, 4], lastLesson: 4, updatedAt: new Date(now - 6 * DAY).toISOString() },
         'aiIndividual-novice': { completed: [1, 2], lastLesson: 2, updatedAt: new Date(now - 1 * DAY).toISOString() }
       },
-      answers: answers, lessonLog: lessonLog, goals: { weeklyLessons: 3, focus: ['strategy', 'aiIndividual'] },
+      answers: answers, lessonLog: lessonLog, goals: { weeklyLessons: 3, focus: ['strategy', 'aiIndividual'] }, targets: { roleId: 'spm', personal: {} },
       assessmentResult: { tier: 'Moderate Experience', overallPct: 57, categoryPct: PCT, submittedAt: taken, firstSubmittedAt: taken, assessmentId: 'demo' },
       studyPlan: null   // built on the page (PlanCore needs the lesson list), started 8 days ago
     };

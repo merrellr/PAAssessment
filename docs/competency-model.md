@@ -586,3 +586,38 @@ Getting AI into everyday use: small pilots, real feedback and staged rollout.
 - AI · Lots of: Iteration, Earning the Next Stage of Rollout
 - AI · Lots of: Adoption, Measured Like the Product It Is
 - AI · Advanced: Going the Extra Mile
+
+## Role benchmarks
+
+Each standard role's target level in every competency (1 Limited, 2 Moderate, 3 Lots of, 4 Advanced). **Bold** marks where the role asks for more or less than its area target. A company's own roles take their area targets.
+
+| Competency | Associate Product Manager | Product Manager | Senior Product Manager | Group or Principal Product Manager | Head of Product, Director or VP | Product Owner | Designer or Engineer partnering with product | Executive sponsor |
+|---|---|---|---|---|---|---|---|---|
+| Problem framing | 2 | 3 | 3 | 4 | **4** | 2 | 3 | **3** |
+| Customer research | 2 | 3 | 3 | 4 | **2** | 2 | 3 | **1** |
+| Validation & experiments | 2 | 3 | 3 | 4 | 3 | 2 | 3 | **1** |
+| Market & competitive insight | **1** | **2** | 3 | 4 | 3 | **1** | **1** | 2 |
+| Vision & narrative | 1 | 2 | 3 | 4 | 4 | **1** | 1 | **4** |
+| Roadmaps tied to objectives | 1 | 2 | 3 | 4 | 4 | 2 | 1 | 3 |
+| Business & commercial sense | 1 | 2 | 3 | 4 | 4 | 2 | 1 | **4** |
+| Go-to-market | 1 | 2 | 3 | 4 | 4 | **1** | 1 | 3 |
+| Trade-off judgment | 2 | 3 | 3 | 3 | 4 | 3 | 2 | 3 |
+| Value & effort estimation | 2 | 3 | 3 | 3 | 4 | 3 | 2 | 3 |
+| Saying no with a reason | **1** | **2** | 3 | 3 | 4 | 3 | 2 | 3 |
+| Decisions from evidence | 2 | 3 | 3 | 3 | 4 | 3 | 2 | 3 |
+| Delivery planning | 2 | 3 | 3 | 3 | **2** | 3 | 2 | **1** |
+| Quality & risk | 2 | 3 | 3 | **2** | **2** | 3 | **3** | 2 |
+| Working with engineering & design | 2 | 3 | **4** | 3 | 3 | 3 | **3** | **1** |
+| Measuring outcomes | 2 | 3 | 3 | 3 | 3 | 3 | 2 | 2 |
+| Updates people use | 2 | 2 | 3 | **3** | **3** | **3** | 2 | 3 |
+| Influence without authority | 2 | 2 | 3 | 4 | 4 | 2 | 2 | 3 |
+| Executive presence | **1** | **1** | **2** | 4 | 4 | **1** | **1** | **4** |
+| Cross-team alignment | 2 | 2 | 3 | 4 | 4 | 2 | 2 | 3 |
+| Everyday AI tools | **3** | 3 | 3 | 3 | **2** | 2 | 2 | 2 |
+| AI for research & analysis | 2 | 3 | 3 | 3 | 3 | 2 | 2 | 2 |
+| Checking AI’s work | 2 | 3 | 3 | 3 | 3 | 2 | 2 | 2 |
+| Designing your AI workflow | 2 | 3 | 3 | 3 | 3 | 2 | 2 | 2 |
+| Finding AI opportunities | 1 | 2 | **3** | 3 | 4 | 1 | 1 | 4 |
+| Agent & workflow design | 1 | 2 | 2 | 3 | 4 | 1 | 1 | 4 |
+| Governance & risk | 1 | 2 | 2 | 3 | 4 | 1 | 1 | 4 |
+| Adoption & change | 1 | 2 | 2 | 3 | 4 | 1 | 1 | 4 |

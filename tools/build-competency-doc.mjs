@@ -7,7 +7,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 const root = path.join(path.dirname(fileURLToPath(import.meta.url)), '..');
 globalThis.window = globalThis;
-for (const f of ['coach-bank.js', 'coach-charts.js', 'competencies-core.js']) eval(fs.readFileSync(path.join(root, f), 'utf8'));
+for (const f of ['company-core.js', 'roles-core.js', 'coach-bank.js', 'coach-charts.js', 'competencies-core.js', 'shape-core.js']) eval(fs.readFileSync(path.join(root, f), 'utf8'));
 const K = globalThis.CompetencyCore, B = globalThis.CoachBank, Q = B.questions.concat(globalThis.CoachCharts.questions);
 const AREA = { discovery: 'Customer & Market Discovery', strategy: 'Product Strategy & Roadmapping', prioritization: 'Prioritization & Trade-offs', execution: 'Execution & Delivery',
   stakeholder: 'Stakeholder Communication & Influence', aiIndividual: 'AI Fluency — Individual', aiOrg: 'AI Fluency — Organizational' };
@@ -31,6 +31,13 @@ Object.keys(AREA).forEach(a => {
       (lessonsFor[c.key] || []).map(x => '- ' + x).join('\n') + '\n';
   });
 });
+// Role benchmarks: each standard role's target in every competency (bold where it differs from the role's area target)
+const R = globalThis.RolesCore, S = globalThis.ShapeCore;
+md += '\n## Role benchmarks\n\nEach standard role\'s target level in every competency (1 Limited, 2 Moderate, 3 Lots of, 4 Advanced). ' +
+  '**Bold** marks where the role asks for more or less than its area target. A company\'s own roles take their area targets.\n\n' +
+  '| Competency | ' + R.ROLES.map(r => r.title).join(' | ') + ' |\n|---|' + R.ROLES.map(() => '---').join('|') + '|\n';
+const T = R.ROLES.map(r => S.targetsFor(r.targets, r.id));
+K.LIST.forEach(c => { md += '| ' + c.name + ' | ' + R.ROLES.map((r, i) => { const v = T[i][c.key], a = r.targets[c.area]; return v === a ? String(v) : '**' + v + '**'; }).join(' | ') + ' |\n'; });
 const out = path.join(root, 'docs', 'competency-model.md');
 if (process.argv.includes('--check')) { if (!fs.existsSync(out) || fs.readFileSync(out, 'utf8') !== md) { console.error('docs/competency-model.md is out of date'); process.exit(1); } }
 else { fs.writeFileSync(out, md); console.log('Wrote docs/competency-model.md'); }

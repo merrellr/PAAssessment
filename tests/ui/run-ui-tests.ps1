@@ -43,6 +43,9 @@ Copy-Item "$repo\learning-home-core.js" $site
 Copy-Item "$repo\coach-core.js" $site
 Copy-Item "$repo\coach-bank.js" $site
 Copy-Item "$repo\coach-charts.js" $site
+Copy-Item "$repo\competencies-core.js" $site
+Copy-Item "$repo\shape-core.js" $site
+Copy-Item "$repo\shape-ui.js" $site
 Copy-Item "$repo\coach-ui.js" $site
 Copy-Item "$repo\coach.css" $site
 Copy-Item "$repo\plan-core.js" $site

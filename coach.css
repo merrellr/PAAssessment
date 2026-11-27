@@ -30,7 +30,8 @@
 
 /* tabs */
 .cc-tabrow { display: flex; align-items: flex-end; justify-content: space-between; gap: 8px 16px; flex-wrap: wrap; margin: 20px 0 4px; border-bottom: 1px solid var(--pa-line); }
-.cc-tabs { display: flex; gap: 4px; overflow-x: auto; scrollbar-width: none; }
+.cc-tabs { display: flex; gap: 4px; overflow-x: auto; scrollbar-width: none; min-width: 0; max-width: 100%; }
+.cc-tabrow > * { min-width: 0; }
 .cc-tabs-tour { padding-bottom: 6px; }
 .cc-tabs-tour .guide-btn.guide-sm { margin: 0; }
 .cc-tabs button { flex: none; min-height: 42px; padding: 0 16px; border: 0; border-bottom: 3px solid transparent; background: none; color: var(--pa-muted); font: 700 .875rem var(--pa-sans); cursor: pointer; }
@@ -430,3 +431,74 @@ body.pa-demo .pa-notes-fab, body.pa-demo #homeNotes { display: none !important; 
 }
 .pr-q, .pr-chart, .pr-chart .ch { min-width: 0; max-width: 100%; }
 .pr-layout > main { min-width: 0; }
+
+/* ---------------------------------------------------------------- My shape (shape-ui.js) */
+#shapePanel:empty { display: none; }
+.sh-card { margin-bottom: 18px; }
+.sh-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px 24px; flex-wrap: wrap; }
+.sh-head h2 { margin: 2px 0 4px; }
+.sh-head .eyebrow { display: block; font-size: .6875rem; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: var(--pa-cyan-ink, var(--pa-primary)); }
+.sh-head > div:first-child { flex: 1 1 340px; }
+.sh-target-pick { flex: 0 1 300px; display: flex; flex-direction: column; gap: 6px; font-size: .84rem; }
+.sh-target-pick label { font-weight: 700; }
+.sh-target-pick select { font: inherit; padding: 8px 10px; border-radius: 10px; border: 1px solid var(--pa-line); background: var(--pa-card); color: var(--pa-ink); }
+.sh-target-pick select:focus-visible { outline: 3px solid var(--pa-cyan); outline-offset: 1px; }
+.sh-target-pick .linklike { align-self: flex-start; }
+.sh-placed { margin: 2px 0 0; padding: 8px 10px; border-radius: 10px; background: var(--pa-tint); }
+.sh-body { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 20px 28px; align-items: start; margin-top: 10px; }
+@media (max-width: 860px) { .sh-body { grid-template-columns: 1fr; } }
+.sh-body > *, .sh-head > * { min-width: 0; }
+.sh-g-go .cc-btn { white-space: normal; text-align: left; }
+.sh-g-top { flex-wrap: wrap; }
+.sh-fig { margin: 0; }
+.sh-svg { width: 100%; height: auto; display: block; max-width: 520px; margin: 0 auto; }
+.sh-ring { fill: none; stroke: var(--pa-line); stroke-width: 1; stroke-dasharray: 2 4; }
+.sh-petal { fill: var(--pa-primary); }
+.sh-petal.s-strong { fill-opacity: 1; } .sh-petal.s-some { fill-opacity: .78; } .sh-petal.s-thin { fill-opacity: .55; }
+.sh-petal.s-none { fill: var(--pa-line); }
+.sh-target { fill: none; stroke: #f59e0b; stroke-width: 2.5; stroke-dasharray: 5 3; stroke-linejoin: round; }
+.sh-band { fill: var(--pa-line); }
+.sh-area { font-size: 13px; font-weight: 700; fill: var(--pa-ink); font-family: inherit; }
+.sh-legend { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px 16px; font-size: .78rem; color: var(--pa-muted); margin-top: 4px; }
+.sh-k { display: inline-block; width: 12px; height: 12px; border-radius: 3px; margin-right: 6px; vertical-align: -2px; background: var(--pa-primary); }
+.sh-k.k-target { background: none; border: 2px dashed #f59e0b; width: 10px; height: 10px; }
+.sh-side h3 { margin: 4px 0 10px; font-size: 1rem; }
+.sh-empty { padding: 12px 14px; border-radius: 10px; background: var(--pa-tint); font-size: .875rem; }
+.sh-gaps { list-style: none; margin: 0; padding: 0; counter-reset: g; }
+.sh-gaps li { counter-increment: g; position: relative; padding: 12px 0 12px 34px; border-top: 1px solid var(--pa-line); }
+.sh-gaps li:first-child { border-top: 0; padding-top: 2px; }
+.sh-gaps li::before { content: counter(g); position: absolute; left: 0; top: 12px; width: 24px; height: 24px; border-radius: 50%; background: var(--pa-tint); color: var(--pa-primary); font-weight: 800; font-size: .8rem; display: grid; place-items: center; }
+.sh-gaps li:first-child::before { top: 2px; }
+.sh-g-top { display: flex; justify-content: space-between; gap: 8px; align-items: baseline; }
+.sh-g-area { font-size: .72rem; color: var(--pa-muted); white-space: nowrap; }
+.sh-g-lv { margin: 2px 0; font-size: .8rem; color: var(--pa-muted); }
+.sh-str { display: inline-block; margin-left: 6px; padding: 0 7px; border-radius: 999px; background: var(--pa-tint); font-size: .7rem; }
+.sh-g-what { margin: 4px 0 8px; font-size: .84rem; line-height: 1.45; }
+.sh-g-go { display: flex; flex-wrap: wrap; gap: 8px; }
+.sh-count { font-size: .78rem; margin-top: 8px; }
+.sh-ok { padding: 10px 12px; border-radius: 10px; background: var(--pa-tint); font-size: .875rem; }
+.sh-all { margin-top: 16px; border-top: 1px solid var(--pa-line); padding-top: 10px; }
+.sh-all summary { cursor: pointer; font-weight: 700; color: var(--pa-primary); }
+.sh-tw { overflow-x: auto; }
+.sh-all table { width: 100%; border-collapse: collapse; margin-top: 8px; font-size: .82rem; }
+.sh-all th, .sh-all td { text-align: left; padding: 6px 10px 6px 0; border-bottom: 1px solid var(--pa-line); white-space: nowrap; }
+.sh-all tbody th { font-weight: 600; white-space: normal; }
+.sh-all tr.st-below td:nth-child(3) { color: var(--pa-bad, #b45309); font-weight: 700; }
+.sh-met { color: var(--pa-good, #15803d); font-weight: 800; }
+/* Home: one line in My readiness */
+#homeShapeLine { margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--pa-line); }
+.hs-line { display: flex; gap: 10px; align-items: center; color: var(--pa-ink); text-decoration: none; font-size: .84rem; }
+.hs-line:hover b { color: var(--pa-primary); }
+.hs-mini { flex: none; width: 54px; height: 54px; }
+.hs-mini .sh-svg { width: 54px; height: 54px; }
+
+/* My shape: compare with another role (C3) */
+.sh-cmp-l { margin-top: 6px; }
+.sh-target-pick select#shCmp { font-size: .8rem; }
+.sh-target2 { fill: none; stroke: #8b5cf6; stroke-width: 2; stroke-dasharray: 1.5 3.5; stroke-linecap: round; }
+.sh-k.k-target2 { background: none; border: 2px dotted #8b5cf6; width: 10px; height: 10px; }
+.sh-shift { margin-top: 12px; padding: 12px 14px; border-radius: 12px; background: var(--pa-tint); }
+.sh-shift h3 { margin: 0 0 6px; font-size: .9rem; }
+.sh-sk { margin: 8px 0 2px; font-size: .6875rem; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; color: var(--pa-muted); }
+.sh-shift ul { list-style: none; margin: 0; padding: 0; }
+.sh-shift li { font-size: .82rem; padding: 2px 0; }
