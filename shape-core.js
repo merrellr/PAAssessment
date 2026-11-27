@@ -44,10 +44,25 @@
     });
   }
 
-  // A role's target for each competency: the area target (role targets are per area; C3 adds per-competency ones).
-  function targetsFor(areaTargets) {
-    var out = {}; K.LIST.forEach(function (c) { var t = areaTargets && areaTargets[c.area]; out[c.key] = t ? (typeof t === 'object' ? t.target : t) : 0; });
+  // A role's target for each competency: its benchmark (CompetencyCore.ROLE_SPIKES) where it has one, else the
+  // role's area target. areaTargets: { area: level } or RolesCore.targetsFor(...) ({ area: { target, source, role } }).
+  // A personal target (higher than the role's in an area) raises every competency in that area to at least it.
+  function targetsFor(areaTargets, roleId) {
+    var spikes = (roleId && K.ROLE_SPIKES && K.ROLE_SPIKES[roleId]) || {}, out = {};
+    K.LIST.forEach(function (c) {
+      var t = areaTargets && areaTargets[c.area], area = t ? (typeof t === 'object' ? t.target : t) : 0, role = t && typeof t === 'object' ? (t.role || 0) : area;
+      var v = spikes[c.key] !== undefined && role ? spikes[c.key] : area;
+      if (t && typeof t === 'object' && (t.source === 'personal' || t.source === 'both') && t.target > v) v = t.target;   // a personal stretch target
+      out[c.key] = Math.max(0, Math.min(4, v || 0));
+    });
     return out;
+  }
+
+  // Two roles side by side: where the second asks for more, and where less ({ more: [...], less: [...] }, biggest first).
+  function shift(fromT, toT) {
+    var d = K.LIST.map(function (c) { return { key: c.key, name: c.name, area: c.area, from: fromT[c.key] || 0, to: toT[c.key] || 0, diff: (toT[c.key] || 0) - (fromT[c.key] || 0) }; });
+    return { more: d.filter(function (x) { return x.diff > 0; }).sort(function (a, b) { return b.diff - a.diff; }),
+      less: d.filter(function (x) { return x.diff < 0; }).sort(function (a, b) { return a.diff - b.diff; }) };
   }
 
   // Compared with a role: each competency's gap (target - level, when the target is above), and the top gaps,
@@ -87,7 +102,8 @@
     if (known.length < 8) return null;   // too little to go on
     var best = null;
     (roles || []).forEach(function (r) {
-      var d = 0; known.forEach(function (c) { var t = r.targets[c.area] || 0; if (t) d += (c.level - t) * (c.level - t); });
+      var tg = targetsFor(r.targets, r.standard === false ? null : r.id), d = 0;
+      known.forEach(function (c) { var t = tg[c.key] || 0; if (t) d += (c.level - t) * (c.level - t); });
       d = d / known.length;
       if (!best || d < best.d) best = { role: r, d: d };
     });
@@ -101,5 +117,5 @@
     return out;
   }
 
-  root.ShapeCore = { levels: levels, targetsFor: targetsFor, compare: compare, place: place, areaAverages: areaAverages, areaLevelFromPct: areaLevelFromPct };
+  root.ShapeCore = { levels: levels, targetsFor: targetsFor, shift: shift, compare: compare, place: place, areaAverages: areaAverages, areaLevelFromPct: areaLevelFromPct };
 })(typeof window !== 'undefined' ? window : globalThis);

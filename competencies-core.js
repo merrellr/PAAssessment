@@ -103,6 +103,19 @@
     'aiOrg-advanced': [['ao.find'], ['ao.design'], ['ao.find'], ['ao.adopt'], ['ao.find']]
   };
 
+  // Role benchmarks: where a standard role (roles-core.js) asks for more or less than its area target in a
+  // competency. Everything not listed takes the role's area target. Levels 1 to 4.
+  var ROLE_SPIKES = {
+    apm: { 'd.market': 1, 'p.sayno': 1, 'k.exec': 1, 'ai.tools': 3 },
+    pm: { 'd.market': 2, 's.business': 2, 'p.sayno': 2, 'k.exec': 1, 'e.partner': 3, 'ai.tools': 3, 'ai.check': 3 },
+    spm: { 'd.market': 3, 'p.evidence': 3, 'e.partner': 4, 'k.exec': 2, 'ao.find': 3 },
+    gpm: { 'e.plan': 3, 'e.quality': 2, 's.vision': 4, 's.business': 4, 'k.exec': 4, 'k.updates': 3, 'ai.tools': 3, 'ao.design': 3 },
+    head: { 'd.framing': 4, 'd.research': 2, 'e.plan': 2, 'e.quality': 2, 'e.partner': 3, 's.vision': 4, 's.business': 4, 'k.exec': 4, 'k.align': 4, 'k.updates': 3, 'p.tradeoff': 4, 'ai.tools': 2, 'ao.find': 4, 'ao.govern': 4 },
+    po: { 'd.market': 1, 's.vision': 1, 's.gtm': 1, 'p.sayno': 3, 'e.plan': 3, 'e.quality': 3, 'k.exec': 1, 'k.updates': 3 },
+    partner: { 'd.research': 3, 'd.validate': 3, 'd.market': 1, 's.gtm': 1, 'e.partner': 3, 'e.quality': 3, 'k.exec': 1 },
+    exec: { 'd.framing': 3, 'd.research': 1, 'd.validate': 1, 's.vision': 4, 's.business': 4, 'e.plan': 1, 'e.partner': 1, 'k.exec': 4, 'ai.check': 2, 'ao.find': 4, 'ao.govern': 4 }
+  };
+
   var LEVELS = ['Limited Experience', 'Moderate Experience', 'Lots of Experience', 'Advanced Experience'];
   var LIST = C.map(function (c) { return { key: c[0], area: c[1], name: c[2], about: c[3], levels: c[4] }; });
   var BY = {}; LIST.forEach(function (c) { BY[c.key] = c; });
@@ -111,5 +124,5 @@
   function forQuestion(q) { return q ? forLesson(q.c, q.l) : []; }
   function inArea(area) { return LIST.filter(function (c) { return c.area === area; }); }
 
-  root.CompetencyCore = { LIST: LIST, BY: BY, LESSONS: LESSONS, LEVELS: LEVELS, forLesson: forLesson, forQuestion: forQuestion, inArea: inArea };
+  root.CompetencyCore = { LIST: LIST, BY: BY, LESSONS: LESSONS, LEVELS: LEVELS, ROLE_SPIKES: ROLE_SPIKES, forLesson: forLesson, forQuestion: forQuestion, inArea: inArea };
 })(typeof window !== 'undefined' ? window : globalThis);

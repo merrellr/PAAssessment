@@ -226,6 +226,8 @@ const sleep = (ms) => new Promise(r => setTimeout(r, ms));
         t('it greets Alex, not the owner', /Alex/.test(document.body.textContent) && !/Hi, Dash|Dash User/.test((document.querySelector('.home-hello') || document.body).textContent));
         const sp = document.getElementById('shapePanel');
         t('My shape (demo): measured against Senior PM, three gaps each with a next lesson', document.getElementById('shRole').value === 'spm' && sp.querySelectorAll('.sh-gaps li').length === 3 && sp.querySelectorAll('.sh-gaps li a[href^="/lesson"]').length === 3, sp.querySelectorAll('.sh-gaps li').length);
+        const cmpSel = document.getElementById('shCmp'); cmpSel.value = 'head'; cmpSel.dispatchEvent(new Event('change')); await sleep(60);
+        t('Compare with Head of Product: a second outline and the shape shift, more and less', document.querySelector('#shapePanel path.sh-target2') && /Shape shift: Senior Product Manager → Head of Product/.test(document.getElementById('shapePanel').textContent) && /Asks for more/.test(document.getElementById('shapePanel').textContent) && /Asks for less/.test(document.getElementById('shapePanel').textContent));
         document.getElementById('shPlace').click(); await sleep(60);
         t('Place me automatically names the closest role', /Your shape is (closest|nearest) to/.test(document.querySelector('.sh-placed').textContent), document.querySelector('.sh-placed') && document.querySelector('.sh-placed').textContent);
         t('Alex\'s data: the plan is in week 2, practice history shows', /Week 2 of 4/.test(document.getElementById('planPanel').textContent) && document.querySelectorAll('#readinessPanel .cc-act li').length >= 3);

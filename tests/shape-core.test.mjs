@@ -56,5 +56,15 @@ t('area averages', S.areaAverages(S.levels({ pct, log: [], progress: {}, questio
   t('the next lesson can come from another area that builds the competency', !next || (next.next && !next.next.course.startsWith('strategy-') && K.forLesson(next.next.course, next.next.lesson).includes('s.gtm')), JSON.stringify(next && next.next));
 }
 
+// role benchmarks (C3)
+t('every benchmark names a standard role and a real competency, at a level from 1 to 4', Object.keys(K.ROLE_SPIKES).every(id => R.ROLES.some(r => r.id === id)) && Object.values(K.ROLE_SPIKES).every(sp => Object.keys(sp).every(k => K.BY[k] && sp[k] >= 1 && sp[k] <= 4)));
+{ const head = R.ROLES.find(r => r.id === 'head'), ht = S.targetsFor(head.targets, 'head');
+  t('a role\'s benchmark overrides its area target (Head of Product: vision 4, delivery planning 2)', ht['s.vision'] === 4 && ht['e.plan'] === 2 && ht['e.outcomes'] === head.targets.execution);
+  const rt = R.targetsFor(head, { execution: 4 }), withPersonal = S.targetsFor(rt, 'head');
+  t('a personal stretch target raises every competency in that area', ['e.plan', 'e.quality', 'e.partner', 'e.outcomes'].every(k => withPersonal[k] === 4) && withPersonal['s.vision'] === 4);
+  const spmT = S.targetsFor(R.ROLES.find(r => r.id === 'spm').targets, 'spm'), sh = S.shift(spmT, ht);
+  t('shape shift Senior PM → Head of Product: more vision and executive presence, less delivery planning', sh.more.some(x => x.key === 's.vision') && sh.more.some(x => x.key === 'k.exec') && sh.less.some(x => x.key === 'e.plan') && sh.more[0].diff >= sh.more[sh.more.length - 1].diff); }
+t('a company\'s own role (no benchmark) takes its area targets', S.targetsFor({ strategy: 3 }, 'acme-lead')['s.vision'] === 3);
+
 console.log('\n' + pass + ' passed, ' + fail + ' failed');
 process.exit(fail ? 1 : 0);
