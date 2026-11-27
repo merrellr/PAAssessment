@@ -338,6 +338,61 @@ service cloud.firestore {
       allow delete: if isPlatformOwner() || isActiveAdminOf(orgId);
     }
 
+    // ------------------------------------------------ Team Knowledge Workspace
+    // workspaces/{orgId}: the company's settings for it (how account value is
+    // entered, its product areas), set by its admins. workspaces/{orgId}/items:
+    // its goals, releases, features, ideas and customer accounts (workspace-core.js).
+    // Only the company's active members read or change it (not even the platform
+    // owner: it is the company's own product data). Anyone in the company adds and
+    // edits items; whoever added an item, or an admin, deletes it. Writes need the
+    // company to be active. The 500-item cap is kept by the page.
+    function wsOrgActive(orgId) {
+      return get(/databases/$(database)/documents/orgs/$(orgId)).data.status == 'active';
+    }
+    function validWsItem(d) {
+      return d.keys().hasOnly(['type', 'title', 'note', 'area', 'status', 'date', 'links', 'band', 'value', 'tier', 'votes',
+                               'createdBy', 'createdAt', 'updatedBy', 'updatedAt'])
+        && d.keys().hasAll(['type', 'title', 'links', 'createdBy', 'createdAt', 'updatedBy', 'updatedAt'])
+        && d.type in ['goal', 'release', 'feature', 'idea', 'account']
+        && d.title is string && d.title.size() >= 1 && d.title.size() <= 120
+        && d.get('note', '') is string && d.get('note', '').size() <= 2000
+        && d.get('area', '') is string && d.get('area', '').size() <= 40
+        && d.get('status', '') in ['', 'on_track', 'at_risk', 'done', 'planned', 'in_progress', 'shipped', 'parked', 'new', 'considering', 'declined']
+        && d.get('date', '') is string && (d.get('date', '') == '' || d.get('date', '').matches('^[0-9]{4}-[0-9]{2}-[0-9]{2}$'))
+        && d.links is list && d.links.size() <= 40
+        && d.get('band', '') in ['', 'b1', 'b2', 'b3', 'b4']
+        && (d.get('value', null) == null || (d.get('value', null) is number && d.get('value', null) >= 0 && d.get('value', null) <= 10000000000))
+        && d.get('tier', 0) is int && d.get('tier', 0) >= 0 && d.get('tier', 0) <= 3
+        && d.get('votes', 0) is int && d.get('votes', 0) >= 0 && d.get('votes', 0) <= 100000
+        && d.updatedBy == request.auth.uid
+        && d.updatedAt == request.time;
+    }
+    match /workspaces/{orgId} {
+      allow get: if isActiveMemberOf(orgId);
+      allow create, update: if isActiveAdminOf(orgId) && wsOrgActive(orgId)
+        && request.resource.data.keys().hasOnly(['valueMode', 'areas', 'updatedBy', 'updatedAt'])
+        && request.resource.data.valueMode in ['bands', 'either', 'exact']
+        && request.resource.data.areas is list && request.resource.data.areas.size() <= 20
+        && request.resource.data.updatedBy == request.auth.uid
+        && request.resource.data.updatedAt == request.time;
+      allow delete: if false;
+    }
+    match /workspaces/{orgId}/items/{itemId} {
+      allow get, list: if isActiveMemberOf(orgId);
+      allow create: if isActiveMemberOf(orgId) && wsOrgActive(orgId)
+        && itemId.matches('^[A-Za-z0-9]{6,32}$')
+        && validWsItem(request.resource.data)
+        && request.resource.data.createdBy == request.auth.uid
+        && request.resource.data.createdAt == request.time;
+      allow update: if isActiveMemberOf(orgId) && wsOrgActive(orgId)
+        && validWsItem(request.resource.data)
+        && request.resource.data.type == resource.data.type
+        && request.resource.data.createdBy == resource.data.createdBy
+        && request.resource.data.createdAt == resource.data.createdAt;
+      allow delete: if isActiveMemberOf(orgId)
+        && (resource.data.createdBy == request.auth.uid || isActiveAdminOf(orgId));
+    }
+
     match /orgAssignments/{orgId} {
       allow get: if isPlatformOwner() || isActiveAdminOf(orgId) || isActiveMemberOf(orgId);
 

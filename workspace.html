@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>Team Knowledge Workspace · Product Advisory Learning</title>
+<link rel="icon" href="/images/icons/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="/images/icons/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="/images/icons/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@600&family=Lato:ital,wght@0,300;0,400;0,700;0,900;1,400&display=swap" rel="stylesheet">
+<script src="pa-prefs.js"></script>
+<script src="analytics.js"></script>
+<style>
+  *{ box-sizing: border-box; }
+  body{ margin:0; background: var(--pa-bg); font-family: var(--pa-sans); color: var(--pa-ink); }
+  .wrap{ max-width: 1080px; margin: 0 auto; padding: 24px 16px 64px; }
+  [hidden]{ display:none !important; }
+  h1{ font-family: var(--pa-display); color: var(--pa-navy-deep); margin: 2px 0 4px; font-size: clamp(1.4rem, 3vw, 1.9rem); }
+  h2{ font-family: var(--pa-display); color: var(--pa-navy-deep); font-size: 1.05rem; margin: 0 0 10px; }
+  .eyebrow{ display:block; font-size: .6875rem; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: var(--pa-cyan-ink, var(--pa-primary)); }
+  .back{ display:block; width:fit-content; margin-bottom: 14px; color: var(--pa-muted); font-size: .8125rem; text-decoration:none; }
+  .back:hover{ color: var(--pa-navy); }
+  .card{ background: var(--pa-card); border: 1px solid var(--pa-line); border-radius: 16px; padding: 18px 20px; margin-bottom: 16px; }
+  .sub{ color: var(--pa-muted); font-size: .875rem; margin: 0 0 16px; }
+  .note{ border: 1px solid var(--pa-note-line, var(--pa-line)); background: var(--pa-note-bg, var(--pa-tint)); color: var(--pa-note-ink, var(--pa-ink)); border-radius: 12px; padding: 12px 14px; font-size: .875rem; line-height: 1.5; margin-bottom: 16px; }
+  .err{ border: 1px solid var(--pa-bad); background: var(--pa-bad-bg); color: var(--pa-ink); border-radius: 12px; padding: 10px 14px; font-size: .875rem; margin: 10px 0; }
+  .tabs{ display:flex; flex-wrap:wrap; gap: 0; margin: 0 0 16px; border-bottom: 1px solid var(--pa-line); }
+  .tabs button{ border: 0; border-bottom: 3px solid transparent; background: none; padding: 10px 14px; font: 600 .9rem var(--pa-sans); color: var(--pa-muted); cursor: pointer; margin-bottom: -1px; }
+  .tabs button[aria-selected="true"]{ color: var(--pa-navy); border-bottom-color: var(--pa-primary); }
+  .tabs button:focus-visible, .chip:focus-visible, .ws-row:focus-visible{ outline: 3px solid var(--pa-cyan); outline-offset: -2px; }
+  .bar{ display:flex; flex-wrap:wrap; gap: 8px; align-items:center; margin-bottom: 12px; }
+  .bar input[type=search]{ flex: 1 1 220px; min-width: 0; padding: 10px 14px; border: 1.5px solid var(--pa-line); border-radius: 10px; background: var(--pa-card); color: var(--pa-ink); font: .9rem var(--pa-sans); }
+  .chips{ display:flex; flex-wrap:wrap; gap: 6px; margin: 0 0 14px; }
+  .chip{ border: 1px solid var(--pa-line); background: var(--pa-card); color: var(--pa-ink); border-radius: 999px; padding: 5px 12px; font: .8125rem var(--pa-sans); cursor: pointer; }
+  .chip[aria-pressed="true"]{ background: var(--pa-primary); border-color: var(--pa-primary); color: var(--pa-btn-ink); }
+  .chip .n{ opacity: .75; font-size: .75rem; margin-left: 2px; }
+  .group{ margin-bottom: 18px; }
+  .group h3{ font-size: .75rem; letter-spacing: .06em; text-transform: uppercase; color: var(--pa-muted); margin: 0 0 6px; }
+  .ws-list{ list-style:none; margin: 0; padding: 0; }
+  .ws-row{ display:flex; align-items:flex-start; justify-content:space-between; gap: 12px; width: 100%; text-align:left; padding: 10px 12px; border: 1px solid var(--pa-line); border-radius: 12px; background: var(--pa-card); color: var(--pa-ink); font: inherit; cursor: pointer; margin-bottom: 6px; }
+  .ws-row:hover{ border-color: var(--pa-primary); }
+  .ws-row .t{ font-weight: 700; display:block; overflow-wrap:anywhere; }
+  .ws-row .m{ display:flex; flex-wrap:wrap; gap: 4px 10px; font-size: .78rem; color: var(--pa-muted); margin-top: 3px; }
+  .ws-row .lk{ flex:none; font-size: .75rem; color: var(--pa-muted); white-space: nowrap; }
+  .pill{ display:inline-block; padding: 1px 8px; border-radius: 999px; font-size: .72rem; font-weight: 700; background: var(--pa-tint); color: var(--pa-navy); }
+  .pill.s-at_risk, .pill.s-declined{ background: var(--pa-warn-bg); color: var(--pa-ink); }
+  .pill.s-done, .pill.s-shipped, .pill.s-on_track{ background: var(--pa-ok-bg); color: var(--pa-ok-ink, var(--pa-ink)); }
+  .empty{ color: var(--pa-muted); font-size: .9rem; padding: 18px; border: 1px dashed var(--pa-line); border-radius: 12px; text-align:center; }
+  form.ed{ display:grid; gap: 12px; }
+  .f{ display:grid; gap: 4px; }
+  .f label, .f legend{ font-weight: 700; font-size: .8125rem; }
+  .f small{ color: var(--pa-muted); font-size: .75rem; }
+  .f input, .f select, .f textarea{ width: 100%; min-width: 0; padding: 9px 12px; border: 1.5px solid var(--pa-line); border-radius: 10px; background: var(--pa-card); color: var(--pa-ink); font: .9rem var(--pa-sans); }
+  .f textarea{ min-height: 90px; resize: vertical; }
+  .row2{ display:grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; }
+  fieldset.f{ border: 1px solid var(--pa-line); border-radius: 12px; padding: 10px 12px; margin: 0; min-width: 0; }
+  .picks{ max-height: 200px; overflow:auto; display:grid; gap: 2px; margin-top: 6px; }
+  .picks label{ display:flex; gap: 8px; align-items:flex-start; font-weight: 400; font-size: .875rem; padding: 3px 0; overflow-wrap:anywhere; }
+  .picks input{ width:auto; margin-top: 3px; }
+  .conn{ font-size: .85rem; color: var(--pa-ink); margin: 0; padding-left: 18px; }
+  .acts{ display:flex; flex-wrap:wrap; gap: 8px; align-items:center; }
+  .linkbtn{ background:none; border:0; padding: 0; color: var(--pa-bad); font: 700 .8125rem var(--pa-sans); cursor:pointer; text-decoration: underline; margin-left:auto; }
+    .map{ width: 100%; max-width: 640px; border-collapse: collapse; font-size: .85rem; }
+  .map th, .map td{ text-align:left; padding: 6px 8px; border-bottom: 1px solid var(--pa-line); vertical-align: top; }
+  .map select{ width: 100%; min-width: 120px; padding: 6px 8px; border: 1.5px solid var(--pa-line); border-radius: 8px; background: var(--pa-card); color: var(--pa-ink); }
+  .scroll{ overflow-x:auto; }
+  .soon{ display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; margin-top: 8px; }
+  .soon div{ border: 1px solid var(--pa-line); border-radius: 12px; padding: 10px 12px; font-size: .82rem; color: var(--pa-muted); }
+  .soon b{ display:block; color: var(--pa-ink); font-size: .875rem; margin-bottom: 2px; }
+  .paid{ font-size: .68rem; font-weight: 800; letter-spacing: .05em; text-transform: uppercase; color: var(--pa-cyan-ink, var(--pa-primary)); margin-left: 6px; }
+</style>
+<link rel="stylesheet" href="pa-theme.css">
+<link rel="stylesheet" href="coach.css">
+<script src="workspace-core.js"></script>
+<script src="demo.js"></script>
+</head>
+<body>
+<script src="pa-shell.js"></script>
+<div class="wrap">
+  <a class="back" href="/my-tools">← Back to My Toolkits</a>
+  <span class="eyebrow">Toolkit</span>
+  <h1>Team Knowledge Workspace</h1>
+  <p class="sub" id="wsSub">Loading…</p>
+  <div class="note" id="wsSample" hidden></div>
+  <div class="err" id="wsErr" role="alert" hidden></div>
+
+  <div class="tabs" role="tablist" aria-label="Workspace">
+    <button type="button" role="tab" id="tabItems" aria-selected="true" aria-controls="pnItems">Items</button>
+    <button type="button" role="tab" id="tabImport" aria-selected="false" aria-controls="pnImport">Import a CSV</button>
+    <button type="button" role="tab" id="tabSettings" aria-selected="false" aria-controls="pnSettings" hidden>Settings</button>
+  </div>
+
+  <section id="pnItems" role="tabpanel" aria-labelledby="tabItems">
+    <div id="wsListView">
+      <div class="bar">
+        <input type="search" id="wsQ" placeholder="Search titles, notes and areas" aria-label="Search the workspace">
+        <select id="wsAddType" class="chip" aria-label="Kind of item to add"></select>
+        <button type="button" class="cc-btn sm" id="wsAdd">+ Add</button>
+      </div>
+      <div class="chips" id="wsChips" role="group" aria-label="Show"></div>
+      <div id="wsList" aria-live="polite"></div>
+    </div>
+    <section class="card" id="wsEditor" hidden aria-labelledby="edTitle"></section>
+    <section class="card" aria-labelledby="soonT">
+      <h2 id="soonT">Coming to this workspace</h2>
+      <p class="cc-muted" style="margin:0;font-size:.875rem;">Views built from what you add here:</p>
+      <div class="soon">
+        <div><b>Value view</b>Ideas ranked by the account value and strategic weight behind them, next to plain vote counts.</div>
+        <div><b>Release map</b>Where ideas and features land, by product area and release.</div>
+        <div><b>Goal timeline</b>Each goal with the features that serve it, by release date.</div>
+        <div><b>Product map</b>Accounts, ideas, features, releases and goals as one connected map.</div>
+        <div><b>Updates and notes</b>What changed, and the team’s discussions kept with the items they’re about.</div>
+        <div><b>Ask, with sources<span class="paid">Paid</span></b>Questions about the workspace answered by Compass, citing the items and notes used.</div>
+      </div>
+    </section>
+  </section>
+
+  <section id="pnImport" role="tabpanel" aria-labelledby="tabImport" hidden>
+    <div class="card">
+      <h2>Import from a spreadsheet or another tool</h2>
+      <p class="cc-muted" style="font-size:.875rem;">Export a CSV from Jira, Productboard, Aha!, a spreadsheet or similar, then choose the file or paste it below. The first row should be the column names. Up to <span id="imMax">500</span> items in the workspace.</p>
+      <div class="f"><label for="imFile">CSV file</label><input type="file" id="imFile" accept=".csv,text/csv,text/plain"></div>
+      <div class="f" style="margin-top:10px;"><label for="imText">Or paste it</label><textarea id="imText" rows="6" placeholder="Title,Type,Status,Linked to"></textarea></div>
+      <div class="acts" style="margin-top:10px;"><button type="button" class="cc-btn sm" id="imRead">Read it</button></div>
+      <div id="imMap" hidden></div>
+      <p id="imMsg" role="status" class="cc-muted" style="font-size:.875rem;"></p>
+    </div>
+  </section>
+
+  <section id="pnSettings" role="tabpanel" aria-labelledby="tabSettings" hidden>
+    <form class="card ed" id="setForm">
+      <h2>Workspace settings</h2>
+      <p class="cc-muted" style="margin:0;font-size:.875rem;">Only company admins change these. They apply to everyone in the company.</p>
+      <fieldset class="f"><legend>Customer account value</legend><div id="setModes"></div>
+        <small>Exact figures rank most precisely, but they are sensitive: bands keep only a range.</small></fieldset>
+      <div class="f"><label for="setAreas">Product areas</label><textarea id="setAreas" rows="5" placeholder="One per line, e.g. Onboarding"></textarea><small>Up to 20, offered when adding features and ideas.</small></div>
+      <div class="acts"><button type="submit" class="cc-btn sm">Save settings</button><span id="setMsg" role="status" class="cc-muted" style="font-size:.85rem;"></span></div>
+    </form>
+  </section>
+  <div class="site-foot" style="margin-top:28px; padding:20px 0; border-top:1px solid var(--pa-line); text-align:center; font-size:0.75rem; color:var(--pa-muted);">
+    © <span id="footerYear"></span> Product Advisory, LLC. All rights reserved. &nbsp;·&nbsp;
+    <a href="https://www.productadvisory.co/privacy-policy" target="_blank" rel="noopener" style="color:inherit; text-decoration:underline;">Privacy Policy</a> &nbsp;·&nbsp;
+    <a href="https://www.productadvisory.co/terms-of-use" target="_blank" rel="noopener" style="color:inherit; text-decoration:underline;">Terms of Use</a>
+  </div>
+</div>
+<script>document.getElementById("footerYear").textContent = new Date().getFullYear();</script>
+<script type="module">
+/* The Team Knowledge Workspace (workspace-core.js): a company's goals, releases, features, ideas and customer
+   accounts, shared by everyone in it (workspaces/{orgId}/items, firestore.rules). Without a company (or in the
+   demo) it shows Tidewater, a fictional sample, read-only. */
+const firebaseConfig = {
+  apiKey: "AIzaSyAcECtS5c6WeOhKlwRK-LYFE47npbuq_eU",
+  authDomain: "auth.productadvisory.co",
+  projectId: "product-advisory-lms",
+  storageBucket: "product-advisory-lms.firebasestorage.app",
+  messagingSenderId: "1081134406437",
+  appId: "1:1081134406437:web:72e28604d093219e7698cc"
+};
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
+import { getFirestore, doc, getDoc, getDocs, collection, setDoc, updateDoc, deleteDoc, writeBatch, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+const app = initializeApp(firebaseConfig), auth = getAuth(app), db = getFirestore(app);
+const W = window.WorkspaceCore, T = W.TYPES;
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
+const event = (name, props) => { try { if (window.PAAnalytics) window.PAAnalytics.event(name, props || {}); } catch (e) {} };
+let user = null, org = null, isAdmin = false, sample = false, items = [], settings = { valueMode: 'either', areas: [] }, filter = '', editing = null, csv = null;
+
+const itemsCol = () => collection(db, 'workspaces', org.id, 'items');
+const byId = () => { const m = {}; items.forEach(i => { m[i.id] = i; }); return m; };
+const showErr = (m) => { $('wsErr').textContent = m; $('wsErr').hidden = !m; };
+const fail = (e, what) => { console.error(what, e); showErr('Could not ' + what + (e && e.code === 'permission-denied' ? ': you may no longer be in this company, or it isn’t active.' : '. Please try again.')); };
+
+/* ---------------------------------------------------------------- tabs */
+const TABS = [['tabItems', 'pnItems'], ['tabImport', 'pnImport'], ['tabSettings', 'pnSettings']];
+function showTab(id){ TABS.forEach(([t, p]) => { $(t).setAttribute('aria-selected', String(t === id)); $(p).hidden = t !== id; }); }
+TABS.forEach(([t]) => $(t).addEventListener('click', () => showTab(t)));
+
+/* ---------------------------------------------------------------- the list */
+function meta(it){
+  const m = [];
+  if (it.status) m.push('<span class="pill s-' + esc(it.status) + '">' + esc(W.STATUS[it.status]) + '</span>');
+  const txt = (x) => m.push('<span>' + esc(x) + '</span>');
+  if (it.area) txt(it.area);
+  if (it.date) txt(it.date);
+  if (it.type === 'account') { txt(W.valueLabel(it, settings.valueMode)); if (it.tier) txt(W.TIERS[it.tier]); }
+  if (it.type === 'idea' && it.votes) txt(it.votes + (it.votes === 1 ? ' vote' : ' votes'));
+  return m.join('');
+}
+function drawSub(){
+  if (sample || !org) return;
+  $('wsSub').innerHTML = 'Shared with everyone in <b>' + esc(org.name) + '</b> · ' + items.length + ' of ' + W.MAX_ITEMS + ' items';
+}
+function drawList(){
+  drawSub();
+  const g = W.graph(items), c = W.counts(items), q = $('wsQ').value;
+  $('wsChips').innerHTML = [['', 'All', items.length]].concat(W.ORDER.map(k => [k, T[k].plural, c[k]])).map(([k, l, n]) =>
+    '<button type="button" class="chip" data-f="' + k + '" aria-pressed="' + (filter === k) + '">' + esc(l) + ' <span class="n">' + n + '</span></button>').join('');
+  const shown = W.search(items, q, filter);
+  if (!items.length) { $('wsList').innerHTML = '<p class="empty">Nothing here yet. Add your first goal, release, feature, idea or account, or import a CSV.</p>'; return; }
+  if (!shown.length) { $('wsList').innerHTML = '<p class="empty">Nothing matches.</p>'; return; }
+  $('wsList').innerHTML = W.ORDER.filter(k => shown.some(i => i.type === k)).map(k =>
+    '<div class="group"><h3>' + esc(T[k].plural) + '</h3><ul class="ws-list">' + shown.filter(i => i.type === k).sort(T[k].date ? (a, b) => (a.date || '9999').localeCompare(b.date || '9999') || a.title.localeCompare(b.title) : (a, b) => a.title.localeCompare(b.title)).map(it =>
+      '<li><button type="button" class="ws-row" data-id="' + esc(it.id) + '"><span><span class="t">' + esc(it.title) + '</span><span class="m">' + meta(it) + '</span></span>' +
+      '<span class="lk">' + (g[it.id] || []).length + ' linked</span></button></li>').join('') + '</ul></div>').join('');
+}
+$('wsChips').addEventListener('click', (e) => { const b = e.target.closest('[data-f]'); if (!b) return; filter = b.dataset.f; drawList(); });
+$('wsQ').addEventListener('input', drawList);
+$('wsList').addEventListener('click', (e) => { const b = e.target.closest('[data-id]'); if (b) openEditor(items.find(i => i.id === b.dataset.id)); });
+$('wsAddType').innerHTML = W.ORDER.map(k => '<option value="' + k + '">' + esc(T[k].label) + '</option>').join('');
+$('wsAdd').addEventListener('click', () => openEditor({ type: $('wsAddType').value, title: '', links: [] }, true));
+
+/* ---------------------------------------------------------------- add / edit */
+function opt(v, label, cur){ return '<option value="' + esc(v) + '"' + (v === cur ? ' selected' : '') + '>' + esc(label) + '</option>'; }
+function openEditor(it, isNew){
+  editing = { it, isNew: !!isNew };
+  const t = T[it.type], ro = sample, m = byId(), g = W.graph(items);
+  const targets = W.linkTargets(it.type), from = (g[it.id] || []).filter(id => m[id] && (it.links || []).indexOf(id) < 0).map(id => m[id]);
+  const picks = targets.map(tt => {
+    const cands = items.filter(o => o.type === tt && o.id !== it.id).sort((a, b) => a.title.localeCompare(b.title));
+    return '<fieldset class="f"><legend>' + esc(T[tt].plural) + ' it’s linked to</legend>' + (cands.length ? '<div class="picks">' + cands.map(o =>
+      '<label><input type="checkbox" name="lk" value="' + esc(o.id) + '"' + ((it.links || []).indexOf(o.id) > -1 ? ' checked' : '') + (ro ? ' disabled' : '') + '><span>' + esc(o.title) + '</span></label>').join('') + '</div>'
+      : '<small>No ' + esc(T[tt].plural.toLowerCase()) + ' yet.</small>') + '</fieldset>';
+  }).join('');
+  const mode = settings.valueMode;
+  const areaList = W.areas(items, settings);
+  $('wsEditor').innerHTML = '<form class="ed" id="edForm" novalidate><h2 id="edTitle">' + (isNew ? 'Add ' + esc(t.label.toLowerCase()) : esc(t.label) + ': ' + esc(it.title)) + '</h2>' +
+    '<div class="err" id="edErr" role="alert" hidden></div>' +
+    '<div class="f"><label for="edT">Title</label><input id="edT" maxlength="' + W.LIMITS.title + '" value="' + esc(it.title) + '"' + (ro ? ' readonly' : '') + ' required></div>' +
+    '<div class="f"><label for="edN">Notes</label><textarea id="edN" maxlength="' + W.LIMITS.note + '"' + (ro ? ' readonly' : '') + '>' + esc(it.note || '') + '</textarea></div>' +
+    '<div class="row2">' +
+      (t.status.length ? '<div class="f"><label for="edS">Status</label><select id="edS"' + (ro ? ' disabled' : '') + '>' + t.status.map(s => opt(s, s ? W.STATUS[s] : 'Not set', it.status || '')).join('') + '</select></div>' : '') +
+      (t.area ? '<div class="f"><label for="edA">Product area</label><input id="edA" list="edAreas" maxlength="' + W.LIMITS.area + '" value="' + esc(it.area || '') + '"' + (ro ? ' readonly' : '') + '><datalist id="edAreas">' + areaList.map(a => '<option value="' + esc(a) + '">').join('') + '</datalist></div>' : '') +
+      (t.date ? '<div class="f"><label for="edD">' + esc(t.date) + '</label><input type="date" id="edD" value="' + esc(it.date || '') + '"' + (ro ? ' readonly' : '') + '></div>' : '') +
+      (t.votes ? '<div class="f"><label for="edV">Votes or requests</label><input type="number" id="edV" min="0" max="100000" step="1" value="' + (it.votes || 0) + '"' + (ro ? ' readonly' : '') + '></div>' : '') +
+      (t.value ? '<div class="f"><label for="edB">Annual value</label><select id="edB"' + (ro ? ' disabled' : '') + '>' + opt('', 'Not set', it.band || '') + W.BANDS.map(b => opt(b.id, b.label, it.band || '')).join('') + '</select></div>' +
+        (mode !== 'bands' ? '<div class="f"><label for="edX">Exact annual value (optional)</label><input id="edX" inputmode="decimal" placeholder="e.g. 120k" value="' + (typeof it.value === 'number' ? it.value : '') + '"' + (ro ? ' readonly' : '') + '><small>Sets the band to match.</small></div>' : '') +
+        '<div class="f"><label for="edR">How strategic</label><select id="edR"' + (ro ? ' disabled' : '') + '>' + W.TIERS.map((l, i) => opt(String(i), l, String(it.tier || 0))).join('') + '</select></div>' : '') +
+    '</div>' + picks +
+    (from.length ? '<div class="f"><span style="font-weight:700;font-size:.8125rem;">Linked from</span><ul class="conn">' + from.map(o => '<li>' + esc(T[o.type].label) + ': ' + esc(o.title) + '</li>').join('') + '</ul></div>' : '') +
+    '<div class="acts">' + (ro ? '' : '<button type="submit" class="cc-btn sm" id="edSave">' + (isNew ? 'Add it' : 'Save') + '</button>') +
+      '<button type="button" class="cc-btn sm ghost" id="edCancel">' + (ro ? 'Close' : 'Cancel') + '</button>' +
+      (!ro && !isNew && (isAdmin || it.createdBy === user.uid) ? '<button type="button" class="linkbtn" id="edDel">Delete</button>' : '') + '</div></form>';
+  $('wsListView').hidden = true; $('wsEditor').hidden = false;
+  $('edCancel').addEventListener('click', closeEditor);
+  if (!ro) {
+    $('edForm').addEventListener('submit', (e) => { e.preventDefault(); save(); });
+    if ($('edDel')) $('edDel').addEventListener('click', del);
+    if ($('edX')) $('edX').addEventListener('input', () => { const v = W.parseMoney($('edX').value); if (v != null) $('edB').value = W.bandFor(v); });
+  }
+  $('edT').focus();
+}
+function closeEditor(){ editing = null; $('wsEditor').hidden = true; $('wsListView').hidden = false; drawList(); }
+function fromForm(){
+  const it = editing.it, v = (id) => $(id) ? $(id).value : undefined;
+  return W.clean({ type: it.type, title: v('edT'), note: v('edN'), status: v('edS'), area: v('edA'), date: v('edD'), votes: v('edV'),
+    band: v('edB'), value: v('edX') === undefined ? (settings.valueMode === 'bands' ? null : it.value) : v('edX'), tier: v('edR'),
+    links: [...$('edForm').querySelectorAll('input[name=lk]:checked')].map(x => x.value) }, byId(), settings.valueMode);
+}
+async function save(){
+  const data = fromForm(), p = W.problems(data);
+  if (p.length) { $('edErr').textContent = p.join(' '); $('edErr').hidden = false; return; }
+  if (editing.isNew && items.length >= W.MAX_ITEMS) { $('edErr').textContent = 'The workspace is full (' + W.MAX_ITEMS + ' items). Delete some to add more.'; $('edErr').hidden = false; return; }
+  $('edSave').disabled = true;
+  const stamp = { updatedBy: user.uid, updatedAt: serverTimestamp() };
+  try {
+    if (editing.isNew) {
+      const id = W.newId();
+      await setDoc(doc(db, 'workspaces', org.id, 'items', id), Object.assign({}, data, stamp, { createdBy: user.uid, createdAt: serverTimestamp() }));
+      items.push(Object.assign({ id, createdBy: user.uid }, data));
+      event('workspace_add', { type: data.type });
+    } else {
+      await updateDoc(doc(db, 'workspaces', org.id, 'items', editing.it.id), Object.assign({}, data, stamp));
+      Object.assign(editing.it, data);
+      event('workspace_edit', { type: data.type });
+    }
+    showErr(''); closeEditor();
+  } catch (e) { $('edSave').disabled = false; fail(e, 'save it'); }
+}
+async function del(){
+  const it = editing.it;
+  if (!confirm('Delete “' + it.title + '”? Links to it from other items are dropped.')) return;
+  try {
+    await deleteDoc(doc(db, 'workspaces', org.id, 'items', it.id));
+    items = items.filter(i => i.id !== it.id);
+    event('workspace_delete', { type: it.type });
+    showErr(''); closeEditor();
+  } catch (e) { fail(e, 'delete it'); }
+}
+
+/* ---------------------------------------------------------------- CSV import */
+const FIELD_LABELS = [['title', 'Title (needed)'], ['type', 'Kind of item'], ['note', 'Notes'], ['area', 'Product area'], ['status', 'Status'], ['date', 'Date'],
+  ['votes', 'Votes or requests'], ['value', 'Annual value'], ['band', 'Value band'], ['tier', 'How strategic'], ['links', 'Linked to (titles, separated by ;)']];
+$('imMax').textContent = W.MAX_ITEMS;
+$('imFile').addEventListener('change', () => {
+  const f = $('imFile').files[0]; if (!f) return;
+  if (f.size > 2e6) { $('imMsg').textContent = 'That file is over 2 MB. Try exporting fewer rows.'; return; }
+  const r = new FileReader(); r.onload = () => { $('imText').value = String(r.result || ''); readCsv(); }; r.readAsText(f);
+});
+$('imRead').addEventListener('click', readCsv);
+function readCsv(){
+  csv = W.parseCsv($('imText').value);
+  if (!csv.headers.length || !csv.rows.length) { $('imMap').hidden = true; $('imMsg').textContent = 'Nothing to read: it needs a row of column names and at least one row below it.'; return; }
+  const m = W.guessMapping(csv.headers);
+  const col = (f) => '<select data-map="' + f + '" aria-label="Column for ' + esc(f) + '"><option value="">Not in the file</option>' + csv.headers.map((h, i) => '<option value="' + i + '"' + (m[f] === i ? ' selected' : '') + '>' + esc(h || 'Column ' + (i + 1)) + '</option>').join('') + '</select>';
+  $('imMap').innerHTML = '<h2 style="margin-top:16px;">Match the columns</h2><p class="cc-muted" style="font-size:.85rem;">' + csv.rows.length + ' rows found. We guessed the columns from their names; change any that are wrong.</p>' +
+    '<div class="scroll"><table class="map"><tbody>' + FIELD_LABELS.map(([f, l]) => '<tr><th scope="row">' + esc(l) + '</th><td>' + col(f) + '</td></tr>').join('') +
+    '<tr><th scope="row">When a row has no kind</th><td><select id="imType">' + W.ORDER.map(k => opt(k, T[k].label, 'idea')).join('') + '</select></td></tr></tbody></table></div>' +
+    '<div id="imPrev"></div><div class="acts" style="margin-top:10px;"><button type="button" class="cc-btn sm" id="imGo"' + (sample ? ' disabled' : '') + '>Import</button></div>';
+  $('imMap').hidden = false; $('imMsg').textContent = sample ? 'This is the sample workspace: importing needs a company account.' : '';
+  $('imMap').addEventListener('change', preview);
+  $('imGo').addEventListener('click', doImport);
+  preview();
+}
+function mapping(){ const m = {}; $('imMap').querySelectorAll('[data-map]').forEach(s => { if (s.value !== '') m[s.dataset.map] = +s.value; }); return m; }
+function preview(){
+  const r = W.fromRows(csv.rows, mapping(), $('imType').value, items, settings.valueMode), c = W.counts(r.items);
+  $('imPrev').innerHTML = '<p style="font-size:.875rem;margin:12px 0 4px;"><b>' + r.items.length + ' to import</b>: ' + W.ORDER.filter(k => c[k]).map(k => c[k] + ' ' + (c[k] === 1 ? T[k].label : T[k].plural).toLowerCase()).join(', ') +
+    (r.skipped.length ? '. <b>' + r.skipped.length + ' skipped</b>: ' + r.skipped.slice(0, 5).map(s => 'row ' + s.row + ' (' + esc(s.reason) + ')').join(', ') + (r.skipped.length > 5 ? '…' : '') : '') + '.</p>' +
+    '<ul class="conn">' + r.items.slice(0, 5).map(i => '<li>' + esc(T[i.type].label) + ': ' + esc(i.title) + (i.links.length ? ' <span class="cc-muted">(' + i.links.length + ' linked)</span>' : '') + '</li>').join('') + (r.items.length > 5 ? '<li class="cc-muted">and ' + (r.items.length - 5) + ' more</li>' : '') + '</ul>';
+  $('imGo').textContent = 'Import ' + r.items.length + (r.items.length === 1 ? ' item' : ' items');
+  $('imGo').disabled = sample || !r.items.length;
+  return r;
+}
+async function doImport(){
+  const r = preview(); if (!r.items.length) return;
+  $('imGo').disabled = true; $('imMsg').textContent = 'Importing…';
+  try {
+    for (let i = 0; i < r.items.length; i += 400) {
+      const b = writeBatch(db);
+      r.items.slice(i, i + 400).forEach(it => { const { id, ...data } = it;
+        b.set(doc(db, 'workspaces', org.id, 'items', id), Object.assign(data, { createdBy: user.uid, createdAt: serverTimestamp(), updatedBy: user.uid, updatedAt: serverTimestamp() })); });
+      await b.commit();
+      r.items.slice(i, i + 400).forEach(it => items.push(Object.assign({ createdBy: user.uid }, it)));
+    }
+    $('imMsg').textContent = 'Imported ' + r.items.length + (r.items.length === 1 ? ' item.' : ' items.');
+    event('workspace_import', { n: r.items.length });
+    $('imMap').hidden = true; $('imText').value = ''; $('imFile').value = '';
+    drawList();
+  } catch (e) { $('imGo').disabled = false; $('imMsg').textContent = ''; fail(e, 'import'); }
+}
+
+/* ---------------------------------------------------------------- settings (admins) */
+function drawSettings(){
+  $('setModes').innerHTML = Object.keys(W.VALUE_MODES).map(k => '<label style="display:flex;gap:8px;font-weight:400;font-size:.875rem;padding:3px 0;"><input type="radio" name="vm" value="' + k + '"' + (settings.valueMode === k ? ' checked' : '') + ' style="width:auto;">' + esc(W.VALUE_MODES[k]) + '</label>').join('');
+  $('setAreas').value = (settings.areas || []).join('\n');
+}
+$('setForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const vm = ($('setForm').querySelector('input[name=vm]:checked') || {}).value || 'either';
+  const areas = [...new Set($('setAreas').value.split('\n').map(s => s.trim().slice(0, W.LIMITS.area)).filter(Boolean))].slice(0, W.MAX_AREAS);
+  try {
+    await setDoc(doc(db, 'workspaces', org.id), { valueMode: vm, areas, updatedBy: user.uid, updatedAt: serverTimestamp() });
+    settings = { valueMode: vm, areas };
+    $('setMsg').textContent = 'Saved.'; drawSettings(); drawList();
+    event('workspace_settings', { valueMode: vm });
+  } catch (err) { fail(err, 'save the settings'); }
+});
+
+/* ---------------------------------------------------------------- loading */
+function useSample(why){
+  sample = true; items = W.sample(); settings = W.SAMPLE_SETTINGS;
+  $('wsSub').textContent = 'Tidewater (a fictional company) · ' + items.length + ' items';
+  $('wsSample').innerHTML = '<b>This is a sample.</b> Tidewater is a made-up scheduling company, here so you can see how the workspace fits together. ' + why + ' Nothing here can be changed.';
+  $('wsSample').hidden = false; $('wsAdd').disabled = true; $('wsAddType').disabled = true;
+}
+onAuthStateChanged(auth, async (u) => {
+  if (!u){ location.href = '/lms-dashboard'; return; }
+  user = u;
+  if (new URLSearchParams(location.search).get('demo') === '1' && window.DemoCore) window.__paDemo = true;
+  let mem = null;
+  if (!window.__paDemo) { try { const s = await getDoc(doc(db, 'memberships', u.uid)); mem = s.exists() ? s.data() : null; } catch (e) { mem = null; } }
+  if (!mem || mem.status !== 'active' || !mem.orgId) {
+    useSample(window.__paDemo ? 'In the demo, this is what a team sees.' : 'A team workspace comes with a company account: everyone in the company shares one. <a href="/request-info">Ask about company accounts</a>.');
+  } else {
+    org = { id: mem.orgId, name: mem.orgName || 'your company' }; isAdmin = mem.role === 'admin';
+    try {
+      const [s, list] = await Promise.all([getDoc(doc(db, 'workspaces', org.id)), getDocs(itemsCol())]);
+      if (s.exists()) settings = Object.assign({ valueMode: 'either', areas: [] }, s.data());
+      items = list.docs.map(d => Object.assign({ id: d.id }, d.data()));
+      $('tabSettings').hidden = !isAdmin;
+      drawSettings();
+      event('workspace_open', { n: items.length, admin: isAdmin });
+    } catch (e) { fail(e, 'load the workspace'); $('wsSub').textContent = org.name; }
+  }
+  drawList();
+});
+</script>
+<script type="module" src="account-menu.js"></script>
+</body>
+</html>
