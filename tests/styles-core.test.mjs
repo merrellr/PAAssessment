@@ -1,0 +1,28 @@
+// Tests for styles-core.js (DISC Work Styles, no DOM).   Run:  node tests/styles-core.test.mjs
+import fs from 'fs';
+globalThis.window = globalThis;
+eval(fs.readFileSync(new URL('../styles-core.js', import.meta.url), 'utf8'));
+const S = globalThis.StylesCore;
+let pass = 0, fail = 0;
+const t = (label, ok, extra) => { if (ok) { pass++; console.log('PASS  ' + label); } else { fail++; console.log('FAIL  ' + label + (extra ? '   [' + extra + ']' : '')); } };
+t('24 situations, each with one response per style, unique ids', S.QUESTIONS.length === 24 && new Set(S.QUESTIONS.map(q => q.id)).size === 24 && S.QUESTIONS.every(q => q.o.map(o => o.k).sort().join() === 'c,d,i,s'));
+const firsts = {}; S.QUESTIONS.forEach(q => { firsts[q.o[0].k] = (firsts[q.o[0].k] || 0) + 1; });
+t('responses are shuffled: no style is always first', Object.keys(firsts).length === 4 && Math.max(...Object.values(firsts)) <= 12, JSON.stringify(firsts));
+const all = (most, least) => Object.fromEntries(S.QUESTIONS.map(q => [q.id, { most, least }]));
+const r = S.score(all('d', 's'));
+t('all Dominance first, Steadiness last: D 100, S 0, the others in the middle', r.scores.d === 100 && r.scores.s === 0 && r.scores.i === 50 && r.scores.c === 50 && r.primary === 'd' && r.complete);
+t('a clear single style has no second style', r.secondary === '' && r.blend === 'D' && S.label(r) === 'Dominance');
+const mix = {}; S.QUESTIONS.forEach((q, n) => { mix[q.id] = n % 2 ? { most: 'i', least: 'c' } : { most: 'd', least: 'c' }; });
+const rm = S.score(mix);
+t('half D, half I first: a blend', rm.scores.d === 75 && rm.scores.i === 75 && rm.primary === 'd' && rm.secondary === 'i' && rm.blend === 'Di' && /Dominance with Influence/.test(S.label(rm)) && !!S.blendText(rm));
+t('bad answers are ignored (same style most and least, unknown style, unknown question)', S.score({ ws1: { most: 'd', least: 'd' }, ws2: { most: 'x', least: 'd' }, nope: { most: 'd', least: 'c' } }).answered === 0);
+t('no answers: no style', S.score({}).primary === '' && S.label(S.score({})) === '');
+const pD = S.position(r.scores), pS = S.position(S.score(all('s', 'd')).scores);
+t('position: Dominance is fast and task-focused, Steadiness measured and people-focused', pD.x < 0 && pD.y > 0 && pS.x > 0 && pS.y < 0);
+t('position stays within the picture', [pD, pS, S.position(rm.scores)].every(p => Math.abs(p.x) <= 1 && Math.abs(p.y) <= 1));
+const saved = S.toSave(Object.assign(all('c', 'i'), { junk: { most: 'd', least: 'c' } }), '2026-11-27T00:00:00Z');
+t('what is saved: clean answers, scores, styles, when', Object.keys(saved.answers).length === 24 && saved.primary === 'c' && saved.complete && saved.at === '2026-11-27T00:00:00Z' && !saved.answers.junk);
+t('every style has its report text', S.KEYS.every(k => { const s = S.STYLES[k]; return s.name && s.best && s.drains && s.withYou && s.watch && s.work.length === 3; }));
+t('every pair of styles has a line', Object.keys(S.PAIRS).length === 6 && S.pairKey('s', 'd') === 'ds');
+console.log('\n' + pass + ' passed, ' + fail + ' failed');
+process.exit(fail ? 1 : 0);
