@@ -222,6 +222,91 @@
     return { items: items, skipped: skipped };
   }
 
+  // ------------------------------------------------------------------------------------------------ the views
+  var TIER_WEIGHT = [1, 1, 1.5, 2];   // Not set, Standard, Important, Strategic
+  function index(items) { var m = {}; items.forEach(function (i) { m[i.id] = i; }); return m; }
+  function rankBy(list, key) {   // 1 = highest; ties share a rank
+    var sorted = list.slice().sort(function (a, b) { return b[key] - a[key]; }), r = {};
+    sorted.forEach(function (x, i) { r[x.id] = i && sorted[i - 1][key] === x[key] ? r[sorted[i - 1].id] : i + 1; });
+    return r;
+  }
+  // Value view: each idea with the accounts asking for it, their annual value (exact or band middle), that value
+  // weighted by how strategic each account is (weighted: false to leave it out), and its votes; ranked by value,
+  // with its rank by votes beside it. exact: true when every account behind it has an exact figure.
+  function valueRank(items, opts) {
+    var weighted = !(opts && opts.weighted === false), m = index(items);
+    var rows = items.filter(function (i) { return i.type === 'idea'; }).map(function (idea) {
+      var accts = (idea.links || []).map(function (id) { return m[id]; }).filter(function (a) { return a && a.type === 'account'; });
+      var value = 0, score = 0;
+      accts.forEach(function (a) { var v = accountValue(a); value += v; score += v * (weighted ? TIER_WEIGHT[a.tier || 0] : 1); });
+      return { id: idea.id, title: idea.title, area: idea.area || '', status: idea.status || '', votes: idea.votes || 0, accounts: accts, value: value, score: Math.round(score),
+        exact: accts.length > 0 && accts.every(function (a) { return typeof a.value === 'number'; }), strategic: accts.filter(function (a) { return a.tier === 3; }).length };
+    });
+    var byValue = rankBy(rows, 'score'), byVotes = rankBy(rows, 'votes');
+    rows.forEach(function (r) { r.rank = byValue[r.id]; r.voteRank = byVotes[r.id]; r.shift = r.voteRank - r.rank; });
+    return rows.sort(function (a, b) { return a.rank - b.rank || b.votes - a.votes || a.title.localeCompare(b.title); });
+  }
+  function money(v, approx) {
+    var s = v >= 1e6 ? (v / 1e6).toFixed(1).replace(/\.0$/, '') + 'm' : v >= 1e3 ? Math.round(v / 1e3) + 'k' : String(Math.round(v));
+    return (approx ? '≈ $' : '$') + s;
+  }
+
+  // Release map: product areas (rows) by releases in date order (columns), plus "No area" and "No release".
+  // A cell holds the features in that area and release, each with the ideas linked to it.
+  function releaseMap(items) {
+    var m = index(items), feats = items.filter(function (i) { return i.type === 'feature'; });
+    var releases = items.filter(function (i) { return i.type === 'release'; }).sort(function (a, b) { return (a.date || '9999').localeCompare(b.date || '9999') || a.title.localeCompare(b.title); });
+    var g = graph(items), cols = releases.map(function (r) { return { id: r.id, title: r.title, date: r.date || '', status: r.status || '' }; });
+    var relOf = function (f) { var r = (f.links || []).map(function (id) { return m[id]; }).filter(function (x) { return x && x.type === 'release'; })[0]; return r ? r.id : ''; };
+    if (feats.some(function (f) { return !relOf(f); })) cols.push({ id: '', title: 'No release', date: '', status: '' });
+    var areaNames = []; feats.forEach(function (f) { var a = f.area || ''; if (areaNames.indexOf(a) < 0) areaNames.push(a); });
+    areaNames.sort(function (a, b) { return !a ? 1 : !b ? -1 : a.localeCompare(b); });
+    var rows = areaNames.map(function (a) {
+      return { area: a, label: a || 'No area', cells: cols.map(function (c) {
+        return feats.filter(function (f) { return (f.area || '') === a && relOf(f) === c.id; }).sort(function (x, y) { return x.title.localeCompare(y.title); }).map(function (f) {
+          return { id: f.id, title: f.title, status: f.status || '', ideas: (g[f.id] || []).map(function (id) { return m[id]; }).filter(function (x) { return x && x.type === 'idea'; }).map(function (x) { return { id: x.id, title: x.title }; }) };
+        });
+      }) };
+    });
+    var ideasIn = cols.map(function (c, ci) { var seen = {}; rows.forEach(function (r) { r.cells[ci].forEach(function (f) { f.ideas.forEach(function (i) { seen[i.id] = 1; }); }); }); return Object.keys(seen).length; });
+    cols.forEach(function (c, i) { c.features = rows.reduce(function (n, r) { return n + r.cells[i].length; }, 0); c.ideas = ideasIn[i]; });
+    return { cols: cols, rows: rows };
+  }
+
+  // Goal timeline: each goal (by target date) with the features linked to it, each placed at its release's date
+  // (features with no dated release are listed as not scheduled), and the releases linked to it, as markers.
+  // range: the earliest and latest dates shown (goal targets and release dates), for drawing a shared axis.
+  function goalTimeline(items) {
+    var m = index(items), g = graph(items), all = [];
+    var relOf = function (f) { return (f.links || []).map(function (id) { return m[id]; }).filter(function (x) { return x && x.type === 'release'; })[0] || null; };
+    var goals = items.filter(function (i) { return i.type === 'goal'; }).sort(function (a, b) { return (a.date || '9999').localeCompare(b.date || '9999') || a.title.localeCompare(b.title); });
+    var out = goals.map(function (goal) {
+      var linked = g[goal.id] || [], feats = {}, rels = linked.map(function (id) { return m[id]; }).filter(function (x) { return x && x.type === 'release'; });
+      linked.forEach(function (id) { if (m[id] && m[id].type === 'feature') feats[id] = m[id]; });
+      var placed = [], unscheduled = [];
+      Object.keys(feats).forEach(function (id) {
+        var f = feats[id], r = relOf(f);
+        if (r && r.date) { placed.push({ id: f.id, title: f.title, status: f.status || '', date: r.date, release: r.title, releaseId: r.id, late: !!(goal.date && r.date > goal.date) }); all.push(r.date); }
+        else unscheduled.push({ id: f.id, title: f.title, status: f.status || '', release: r ? r.title : '' });
+      });
+      placed.sort(function (a, b) { return a.date.localeCompare(b.date) || a.title.localeCompare(b.title); });
+      unscheduled.sort(function (a, b) { return a.title.localeCompare(b.title); });
+      if (goal.date) all.push(goal.date);
+      var releases = rels.filter(function (r) { return r.date; }).map(function (r) { all.push(r.date); return { id: r.id, title: r.title, date: r.date, status: r.status || '' }; })
+        .sort(function (a, b) { return a.date.localeCompare(b.date); });
+      return { id: goal.id, title: goal.title, date: goal.date || '', status: goal.status || '', features: placed, unscheduled: unscheduled, releases: releases,
+        done: placed.concat(unscheduled).filter(function (f) { return f.status === 'done'; }).length };
+    });
+    all.sort();
+    return { goals: out, range: all.length ? { from: all[0], to: all[all.length - 1] } : null };
+  }
+  // Where a date falls between two others, 0 to 1 (for the timeline axis)
+  function position(date, range) {
+    if (!range || !date) return 0;
+    var a = Date.parse(range.from), b = Date.parse(range.to), d = Date.parse(date);
+    return b > a ? Math.max(0, Math.min(1, (d - a) / (b - a))) : 0.5;
+  }
+
   // ------------------------------------------------------------------------------------------ the sample company
   // Fictional: Tidewater, a scheduling app for field-service teams. Every name and number is made up.
   function sample() {
@@ -265,5 +350,6 @@
     MAX_LINKS: MAX_LINKS, MAX_AREAS: MAX_AREAS, LIMITS: LIMITS, FIELDS: FIELDS, clean: clean, problems: problems, newId: newId, isId: isId, isDate: isDate,
     parseMoney: parseMoney, bandFor: bandFor, accountValue: accountValue, valueLabel: valueLabel, graph: graph, linkTargets: linkTargets,
     linkedFrom: linkedFrom, counts: counts, search: search, areas: areas, parseCsv: parseCsv, guessMapping: guessMapping, typeFrom: typeFrom,
-    statusFrom: statusFrom, dateFrom: dateFrom, fromRows: fromRows, sample: sample, SAMPLE_SETTINGS: SAMPLE_SETTINGS };
+    statusFrom: statusFrom, dateFrom: dateFrom, fromRows: fromRows, sample: sample, SAMPLE_SETTINGS: SAMPLE_SETTINGS,
+    TIER_WEIGHT: TIER_WEIGHT, valueRank: valueRank, money: money, releaseMap: releaseMap, goalTimeline: goalTimeline, position: position };
 })(typeof window !== 'undefined' ? window : globalThis);

@@ -20,6 +20,29 @@ const row = (title) => [...document.querySelectorAll('#wsList .ws-row')].find(b 
       t('opening an item shows it, read-only, with its links ticked', !$('wsEditor').hidden && $('edT').readOnly && !$('edSave') && $('wsEditor').querySelectorAll('input[name=lk]:checked').length === 4);
       $('edCancel').click(); await sleep(20);
       t('no Settings tab without a company', $('tabSettings').hidden);
+      // the views
+      $('tabValue').click(); await sleep(30);
+      const vv = [...document.querySelectorAll('#vvBody .vv li')];
+      t('value view: every idea, ranked by account value', vv.length === 7 && /Plan routes by drive time/.test(vv[0].textContent) && /3 accounts/.test(vv[0].textContent), vv[0] && vv[0].textContent);
+      const loud = vv.find(li => /Let customers book online/.test(li.textContent));
+      t('value view: the most-voted idea shows where votes and value disagree', loud && /#1 by votes/.test(loud.textContent) && /↓ 5 places below its votes/.test(loud.textContent), loud && loud.textContent);
+      t('value view: bars scale to the top idea', parseFloat(vv[0].querySelector('.bar i').style.width) === 100 && parseFloat(loud.querySelector('.bar i').style.width) < 5);
+      $('vvWeight').click(); await sleep(20);
+      t('value view: weighting off re-ranks by plain value', document.querySelectorAll('#vvBody .vv li').length === 7 && parseFloat(document.querySelector('#vvBody .vv li .bar i').style.width) === 100);
+      $('tabRel').click(); await sleep(30);
+      const heads = [...document.querySelectorAll('#rmBody thead th')].map(th => th.textContent);
+      t('release map: releases by date, then No release', heads.length === 5 && /^Spring release/.test(heads[1]) && /^Summer/.test(heads[2]) && /^Autumn/.test(heads[3]) && /^No release/.test(heads[4]), heads.join(' | '));
+      const onb = [...document.querySelectorAll('#rmBody tbody tr')].find(tr => tr.querySelector('th').textContent === 'Onboarding');
+      t('release map: a feature sits in its area and release, with the ideas it answers', onb && /Guided setup/.test(onb.children[1].textContent) && /Plan routes by drive time/.test([...document.querySelectorAll('#rmBody tbody tr')].find(tr => tr.querySelector('th').textContent === 'Scheduling').children[2].textContent));
+      $('tabGoals').click(); await sleep(30);
+      const gts = [...document.querySelectorAll('#gtBody .gt')];
+      t('goal timeline: every goal, by target date', gts.length === 3 && /^Cut time to first job/.test(gts[0].textContent));
+      const grow = gts.find(g => /Grow mid-market/.test(g.textContent)), halve = gts.find(g => /Halve missed/.test(g.textContent));
+      t('goal timeline: the goal’s features on the track, by date', grow.querySelectorAll('.track .dot').length === 3 && /Route optimisation/.test(grow.querySelector('ul').textContent) && /0 of 3 features done/.test(grow.textContent));
+      t('goal timeline: a feature with no release is listed as not scheduled', /Not scheduled: Customer self-booking page/.test(halve.textContent));
+      grow.querySelector('[data-open]').click(); await sleep(30);
+      t('a title in a view opens the item', $('tabItems').getAttribute('aria-selected') === 'true' && !$('wsEditor').hidden && $('edT').value === 'Grow mid-market revenue 30%');
+      $('edCancel').click(); await sleep(20);
       t('nothing was written', !Object.keys(store()).some(k => k.indexOf('workspaces/') === 0));
     } else if (window.__scn === 'member') {
       t('the company’s workspace, shared, with the count', /Shared with everyone in\s*Acme/.test($('wsSub').textContent) && /4 of 500 items/.test($('wsSub').textContent) && $('wsSample').hidden);
@@ -52,6 +75,10 @@ const row = (title) => [...document.querySelectorAll('#wsList .ws-row')].find(b 
       t('their own item can be deleted', !!$('edDel'));
       $('edDel').click(); await until(() => !store()['workspaces/orgA/items/idea000001']);
       t('deleted', !store()['workspaces/orgA/items/idea000001'] && !row('Route planning'));
+      $('tabValue').click(); await sleep(30);
+      t('value view with no ideas left: says what to add', /No ideas yet/.test($('vvBody').textContent));
+      $('tabGoals').click(); await sleep(30);
+      t('goal timeline on company data: the new feature, at its release date', /Route optimisation/.test($('gtBody').textContent) && /1 of 1 feature|0 of 1 feature/.test($('gtBody').textContent), $('gtBody').textContent.slice(0, 300));
       // import
       $('tabImport').click();
       $('imText').value = 'Name,Type,Status,ARR,Linked to\nNorthgate,Customer,,$300k,\nBook online,Request,open,,Northgate; Nowhere\n,idea,,,';
@@ -62,6 +89,8 @@ const row = (title) => [...document.querySelectorAll('#wsList .ws-row')].find(b 
       t('imported, linked by title', ng && bo && ng.type === 'account' && bo.type === 'idea' && bo.status === 'new' && bo.links.length === 1, JSON.stringify(bo));
       t('bands only: the exact figure is not kept, only its band', ng && ng.value === null && ng.band === 'b4');
       t('the import is said', /Imported 2 items/.test($('imMsg').textContent));
+      $('tabValue').click(); await sleep(30);
+      t('value view on imported data: bands mode shows an approximate value', /Book online/.test($('vvBody').textContent) && /≈ \$400k a year from 1 account/.test($('vvBody').textContent) && /approximate/.test($('vvBody').textContent), $('vvBody').textContent.slice(0, 200));
       window.__failWrite = /workspaces\/orgA\/items/;
       $('tabItems').click(); $('wsAddType').value = 'goal'; $('wsAdd').click(); await sleep(20);
       $('edT').value = 'Refused'; $('edSave').click(); await sleep(80);
