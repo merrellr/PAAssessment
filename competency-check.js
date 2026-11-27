@@ -1,0 +1,117 @@
+// competency-check.js: the competency check (/check). One applied question per competency (28), plus two more each
+// for the two thinnest (Market & competitive insight, Governance & risk): 32 questions, about ten minutes. Each is a
+// "what would you do" situation at the Lots-of-Experience level (Moderate for the extra two), so a right answer is
+// evidence at that level and a miss at the level below (shape-core.js). Every situation is fictional.
+// A question: { id, k (competency), d (area), tier, t (kind), q, o (options, the right one first here), x (why) }.
+// CompetencyCheck.questions has the options in a fixed shuffled order (a), the same for everyone.
+(function (root) {
+  var A = 'aiIndividual', O = 'aiOrg';
+  var RAW = [
+    ['d.framing', 'discovery', 'scenario', 'A VP asks you to "add a dashboard export" because a large client requested it. What do you do first?',
+      ['Ask what the client is trying to get done with the export, and who else has that problem', 'Scope a basic CSV export this sprint, since a large client asking is strong enough evidence', 'Add it to the backlog with the client’s name, and rank it at the next quarterly planning session', 'Point the client to the existing API, which already lets them pull the same data themselves'],
+      'Framing turns a requested solution into the problem behind it. The client may need something an export only partly solves.'],
+    ['d.research', 'discovery', 'decision', 'You have five customer interviews next week. Which plan gets the most useful insight?',
+      ['Ask about the last time they did the task: what happened, what was hard, what they did about it', 'Walk each one through your prototype, then ask how likely they are to use it, on a 1–10 scale', 'Give them the list of planned features and ask them to rank the five that matter most to them', 'Ask what they would want the product to do in a year, so you hear their ideas for the future'],
+      'Past behaviour is far more reliable than opinions about the future. Stories about real recent work show the problem.'],
+    ['d.validate', 'discovery', 'decision', 'Before a three-month build, the riskiest assumption is that admins will set the feature up themselves. What is the best test?',
+      ['A clickable prototype or concierge test where five admins try the setup', 'Ship a thin first version to all admins and watch the setup completion rate for a month', 'Ask the sales team, who talk to admins every day, whether admins will do the setup themselves', 'Survey a few hundred admins on how confident they would feel setting the feature up alone'],
+      'Test the riskiest assumption cheaply, with the people it depends on, before committing months of work.'],
+    ['d.market', 'discovery', 'scenario', 'Sales says: "Competitor X just launched feature Y. We must match it." What is your first move?',
+      ['Check whether your target customers are asking for it or leaving over it, and why', 'Match it in the next sprint so sales has an answer, then improve on it in a later release', 'Stay focused on your own roadmap: reacting to every competitor launch spreads the team thin', 'Hold the price steady, but offer affected deals a discount until you have something similar'],
+      'A competitor’s launch is a signal, not a mandate. What your customers do about it tells you whether it matters.'],
+    ['d.market', 'discovery', 'scenario', 'Users love the product, but deals stall. The person who signs is the CFO, not the daily user. What does this tell you?',
+      ['The buyer’s concerns (cost, risk, return) need their own evidence and message', 'Usability isn’t good enough yet: if users loved it more, they would push the CFO to sign', 'Sales needs more demos for daily users, so their enthusiasm reaches the CFO', 'Price is the problem: a first-year discount would remove the CFO’s main objection'],
+      'The buyer is not always the user. Each has different questions, and both need answers before a deal closes.', 'moderate'],
+    ['d.market', 'discovery', 'data', 'Three segments: A is large but shrinking, B is small but growing 40% a year, C is flat. Your product wins most often in B. Where should you focus?',
+      ['B: you win there and it is growing, so build a strong position before it gets crowded', 'A: it is the largest today, so even a small share there is worth more than leading in B', 'All three equally, so the company isn’t exposed if one segment’s growth slows down', 'C: a flat segment is predictable, so it is the safest base to plan next year’s revenue on'],
+      'Focus where you can win and where the market is heading, not only where it is largest today.', 'moderate'],
+    ['s.vision', 'strategy', 'scenario', 'Engineers say they can’t see how this quarter’s work connects. What helps most?',
+      ['A short narrative: the problem, who it’s for, where you’re going and why these bets get you there', 'A more detailed roadmap, with every epic linked to its ticket, so each engineer can trace their work', 'A weekly status meeting where each team presents progress, so everyone sees the whole picture', 'Let each team set its own quarterly goals, since they are closest to the work and the customers'],
+      'People act on a story they can repeat. A clear narrative connects daily work to the destination.'],
+    ['s.roadmap', 'strategy', 'decision', 'Leadership wants exact dates for everything on next year’s roadmap. What is the best response?',
+      ['Commit dates for the near term; show later items as themes tied to objectives, with your confidence', 'Give a date for every item, padded by 30%, so the plan is complete and leadership is covered', 'Explain that agile teams don’t give dates, and share the sprint backlog for the next quarter', 'Give dates for the items leadership cares about most, and keep the rest of the roadmap internal'],
+      'A roadmap builds trust when it is honest about uncertainty: firm near term, themes and confidence further out.'],
+    ['s.business', 'strategy', 'data', 'A feature lifted engagement by 10% but added support costs that wipe out the revenue it brought in. How do you judge it?',
+      ['Judge its net effect on the goal it was meant to serve, then fix the cost driver or reconsider', 'Call it a success: engagement is the leading indicator, and revenue will follow in time', 'Call it a failure and remove it now, since the support costs cancel out what it earned', 'Survey users on how much they like it, and keep it if satisfaction scores are high enough'],
+      'Product decisions are business decisions. Judge the net effect, not one number in isolation.'],
+    ['s.gtm', 'strategy', 'decision', 'A launch is aimed at enterprise IT buyers and at team leads. Should they get one message?',
+      ['No: the same product, but different value propositions, such as control for IT and time saved for leads', 'Yes: one message keeps the brand consistent, and both groups end up using the same product', 'Message IT only, since they sign the contract, and let team leads hear about it from them', 'Message team leads only, since they use it daily and will push IT to buy it for them'],
+      'Each audience buys for different reasons. A value proposition lands when it speaks to theirs.'],
+    ['p.tradeoff', 'prioritization', 'scenario', 'Three stakeholders each insist their request is the top priority. What is your best move?',
+      ['Score all three on the same agreed criteria, openly, and share the result', 'Start with the most senior stakeholder’s request, since their goals carry the most weight', 'Start all three in parallel with smaller teams, so nobody feels their request was dropped', 'Ask the CEO to rank them each time, so the decision carries authority nobody will question'],
+      'A shared, visible method replaces the loudest voice with reasons everyone can see.'],
+    ['p.estimate', 'prioritization', 'data', 'A feature is called "high value" in every discussion, but nobody can say how much. What is the next step?',
+      ['Put a number on it: users affected and revenue or cost at stake, as a range with assumptions', 'Build it: when every discussion agrees it is high value, more analysis only slows it down', 'Drop it until a customer complains, since value nobody can describe probably isn’t there', 'Ask for a larger team, so high-value work like this doesn’t compete with other priorities'],
+      'Value needs numbers behind it, even rough ones, so it can be compared and checked later.'],
+    ['p.sayno', 'prioritization', 'scenario', 'A senior sales leader asks for a custom feature for one prospect. It doesn’t fit the strategy. How do you respond?',
+      ['Say “not now,” with the reason tied to current priorities and what would change the answer', 'Say yes and fit it in quietly: one prospect is small, and the relationship matters more', 'Hold off replying until the next planning cycle, when it can be weighed with everything else', 'Escalate it to your manager straight away, so the decision comes from someone more senior'],
+      'A clear no with a reason, and what would change it, keeps trust without derailing the strategy.'],
+    ['p.evidence', 'prioritization', 'decision', 'Last quarter you shipped the top three priorities. What should you do before planning the next quarter?',
+      ['Check whether those three delivered the outcomes you expected, and adjust how you score', 'Start planning straight away, while the team’s momentum from shipping all three is high', 'Ship a few quick extras on the same features, so the quarter’s results look even stronger', 'Ask each stakeholder whether they are happy with what shipped, and plan around their answers'],
+      'Closing the loop shows whether your prioritization works, and makes the next round better.'],
+    ['e.plan', 'execution', 'decision', 'A two-month project has no checkpoints until launch. What reduces surprises most?',
+      ['Break it into increments, with a demo and feedback every week or two', 'Add two more engineers now, so there is spare capacity if problems appear near launch', 'Plan for extra hours in the last two weeks, so the team can absorb any late surprises', 'Move the deadline out by a month now, so there is buffer for whatever goes wrong later'],
+      'Small increments with feedback surface problems while there is still time to act.'],
+    ['e.quality', 'execution', 'decision', 'Bugs keep reaching customers. What is the most lasting fix?',
+      ['Automate the key checks and track a few quality numbers, so problems show early', 'Add a full manual test pass before each release, run by the whole team the day before', 'Ask QA to cover more scenarios each cycle, with extra hours in the week before release', 'Release less often, in bigger batches, so each release can be tested more thoroughly'],
+      'Quality that is built in and measured beats heroics at the end.'],
+    ['e.partner', 'execution', 'scenario', 'Engineering says a design will cost far more than expected. What is the best response?',
+      ['Explore the trade-offs together: what outcome matters, and which simpler versions get most of it', 'Hold to the spec as written, since design and the customer have already agreed to it', 'Raise it with their manager, so the estimate gets a second look from someone senior', 'Drop the feature, since a cost that high means it was never going to be worth building'],
+      'Partnership means solving the trade-off together, with the outcome in mind.'],
+    ['e.outcomes', 'execution', 'data', 'A feature shipped on time. How do you know it worked?',
+      ['Check the outcome measure you set before building, against a baseline', 'It shipped on time and to spec, which is what the team committed to, so it worked', 'Count the positive comments from customers in the first two weeks after launch', 'Ask the team in the retrospective how they feel the feature and the launch went'],
+      'Shipping is output. Whether it worked depends on the outcome you meant to change.'],
+    ['k.updates', 'stakeholder', 'decision', 'Your weekly update is long, and few people read it. What is the best change?',
+      ['Lead with decisions needed and what changed, in a few lines, with detail linked', 'Add more detail and a full metrics table, so nobody can say they weren’t told something', 'Send it every two weeks instead, so there is more to say and it feels worth reading', 'Stop sending it and answer questions in meetings, since nobody is reading it anyway'],
+      'Updates get read when they are short and lead with what the reader needs to know or do.'],
+    ['k.influence', 'stakeholder', 'scenario', 'You need another team’s help, but they report elsewhere and have their own goals. What is the best approach?',
+      ['Show how helping serves their goals, make it easy, and agree what each side gives', 'Ask your VP to tell their VP it is a priority, so the request comes with authority', 'Do their part of the work yourself, so you don’t depend on a team with other goals', 'Put it on their backlog and wait until they have time, so you don’t strain the relationship'],
+      'Influence without authority starts with their goals, not yours.'],
+    ['k.exec', 'stakeholder', 'decision', 'You have five minutes with the CEO for a decision. How do you open?',
+      ['With your recommendation and the decision needed, then the key evidence', 'With the full background and how you got here, so they understand before deciding', 'With a quick product demo, so they see the problem for themselves before the ask', 'With questions about their priorities, so you can shape the ask around what they say'],
+      'Senior leaders decide fast: lead with the ask, then support it.'],
+    ['k.align', 'stakeholder', 'scenario', 'Marketing and sales learn about launches at the last minute. What fixes it for good?',
+      ['Bring them into planning early, with a shared launch calendar and clear roles', 'Send them a detailed launch email a week before, with every feature and its release notes', 'Launch less often, in bigger releases, so there are fewer moments to coordinate', 'Invite them to the engineering stand-up, so they hear about launches as they happen'],
+      'Alignment is built into how you plan, not added at the end.'],
+    ['ai.tools', A, 'decision', 'You are new to AI tools at work. What is the best way to start?',
+      ['Pick one weekly task, try AI on it for two weeks, and note what works', 'Wait for the company-wide training, so you learn the approved tools the right way first', 'Use AI for every task this week, to find out quickly where it helps and where it doesn’t', 'Read up on how large language models work, so you understand them before trying them'],
+      'A small, repeated experiment builds the habit and shows where AI really helps.'],
+    ['ai.research', A, 'scenario', 'You have 200 customer comments to make sense of. How should AI help?',
+      ['Let it group and summarize the themes, then read samples yourself to judge what they mean', 'Let it summarize the themes and recommend what to build, since it has read every comment', 'Keep AI out of research: reading every comment yourself is the only way to understand them', 'Ask it for the ten most representative comments, and base your conclusions on those alone'],
+      'AI is good at synthesis. People are still needed for interpretation and judgment.'],
+    ['ai.check', A, 'scenario', 'An AI-drafted status report cites a number you don’t recognize. What do you do?',
+      ['Check it against the source before sending, and fix or remove it', 'Send it: the rest of the report is accurate, so this number is most likely right too', 'Delete the draft and write it yourself, since one bad number means none can be trusted', 'Ask the AI whether it is sure about the number, and keep it if it confirms it'],
+      'You own what you send. Check facts the AI produced, especially numbers.'],
+    ['ai.workflow', A, 'decision', 'You use AI for one-off tasks, but the results vary a lot. What makes it reliable?',
+      ['Make it a repeatable routine: the same prompt, inputs and review step each time', 'Try a different tool each time, until you find the one that gives the best results', 'Use AI only for the simplest tasks, where differences between answers matter less', 'Let it run without review for a while, so it learns your preferences and settles down'],
+      'Turning tasks into routines makes AI output consistent and easy to check.'],
+    ['ao.find', O, 'decision', 'Leadership asks where to use AI first. What is the best way to choose?',
+      ['Map workflows and pick a repetitive, high-volume step with clear inputs and a measurable outcome', 'Start where a vendor has a ready-made solution, since that is the fastest way to show value', 'Roll it out everywhere at once, so no team falls behind and the company learns fastest', 'Start wherever the newest model scores best on benchmarks, since that is where it is strongest'],
+      'Start from the work, not the technology: frequent, clear, measurable tasks make good first targets.'],
+    ['ao.design', O, 'scenario', 'One chatbot is doing research, drafting and checking, and the quality is poor. What helps?',
+      ['Split the work into roles, such as researcher, drafter and checker, with clear handoffs', 'Move to a bigger, newer model, since poor quality usually means the model isn’t capable enough', 'Write one much longer prompt that covers research, drafting and checking in detail', 'Turn it off and go back to doing the work by hand until the tools are more mature'],
+      'Agents work better designed like roles on a team, each with a clear job and handoff.'],
+    ['ao.govern', O, 'decision', 'A team wants to feed customer data into a new AI tool next week. What comes first?',
+      ['Check the data rules, privacy and who reviews the output, then pilot with safeguards', 'Go ahead next week, since speed matters and the tool is popular with other companies', 'Ban new AI tools for now, until the company has a full policy for every possible use', 'Ask the vendor to confirm it is safe, and go ahead once their security page says so'],
+      'Governance makes speed safe: clear rules on data and review before customer data goes in.'],
+    ['ao.govern', O, 'scenario', 'An AI assistant’s answers are mostly right but sometimes wrong in costly ways. What is the best safeguard?',
+      ['Evaluate it like a product: test cases, people reviewing costly cases, and tracking errors', 'Keep trusting it, since mostly right is better than most people manage on the same work', 'Stop using AI for this altogether, since any costly mistake is one too many', 'Ask users to report wrong answers, and fix each one as the reports come in'],
+      'Evaluate AI like a product, with review where the cost of a mistake is high.', 'moderate'],
+    ['ao.govern', O, 'knowledge', 'Who should own the decision about where AI may be used with customer data?',
+      ['A named owner with clear rules, agreed with legal, security and the product teams', 'Each employee, case by case, since they know their own customers and data best', 'The AI vendor, since they know best what their tool does with customer data', 'The engineering team that sets the tools up, since they control what data goes in'],
+      'Governance needs an owner and written rules, agreed with the people who carry the risk.', 'moderate'],
+    ['ao.adopt', O, 'scenario', 'An AI pilot worked, but usage dropped after the wider launch. What do you look at?',
+      ['Listen to users, measure adoption like a product, and fix what blocks everyday use', 'Nothing yet: the pilot proved it works, so usage will recover as people get used to it', 'Make its use mandatory, with usage targets for each team tracked by their managers', 'Start another pilot in a different team, to find a group where it sticks better'],
+      'Adoption is earned. Measure it, listen for what gets in the way, and fix it.']
+  ];
+  var LEVEL_TIER = { moderate: 'moderate' };
+  function hash(s) { var h = 0; for (var i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) >>> 0; return h; }
+  var seen = {};
+  var Q = RAW.map(function (r) {
+    seen[r[0]] = (seen[r[0]] || 0) + 1;
+    var id = 'cc:' + r[0] + ':' + seen[r[0]], n = r[4].length, pos = hash(id) % n;
+    var opts = r[4].slice(1); opts.splice(pos, 0, r[4][0]);   // the right answer moves to a fixed spot for this question
+    return { id: id, k: r[0], d: r[1], t: r[2], q: r[3], o: opts, a: pos, x: r[5], tier: r[6] || 'experienced' };
+  });
+  root.CompetencyCheck = { questions: Q, MINUTES: 10 };
+})(typeof window !== 'undefined' ? window : globalThis);

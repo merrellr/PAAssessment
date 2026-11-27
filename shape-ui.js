@@ -97,7 +97,7 @@
       '<figcaption class="sh-legend"><span><i class="sh-k s-strong"></i>Your level (darker: more evidence)</span>' + (role ? '<span><i class="sh-k k-target"></i>' + esc(role.title) + '</span>' : '') + (other ? '<span><i class="sh-k k-target2"></i>' + esc(other.title) + '</span>' : '') + '<span class="cc-muted">' + known + ' of 28 known</span></figcaption>' +
       shiftView(role, other, cmp, otherT) + '</figure>' +
       '<div class="sh-side"><h3>' + (role ? 'Top gaps to ' + esc(role.title) : 'Your gaps') + '</h3>' + gaps +
-      (cmp ? '<p class="cc-muted sh-count">' + cmp.met + ' of ' + cmp.total + ' competencies at or above the role.</p>' : '') + '</div></div>' + table + '</section>';
+      (cmp ? '<p class="cc-muted sh-count">' + cmp.met + ' of ' + cmp.total + ' competencies at or above the role.</p>' : '') + checkCta(rows) + '</div></div>' + table + '</section>';
   }
 
   // Shape shift: from the role measured against (or the learner's shape) to the compared role.
@@ -157,9 +157,16 @@
   function render(ctx, opts) {
     if (!S || !K) return null;
     state.ctx = ctx; state.opts = opts || {}; state.placed = null;
-    if (!state.ctx.questions) state.ctx.questions = ((ctx.bank && ctx.bank.questions) || []).concat((root.CoachCharts && root.CoachCharts.questions) || []);
+    if (!state.ctx.questions) state.ctx.questions = ((ctx.bank && ctx.bank.questions) || []).concat((root.CoachCharts && root.CoachCharts.questions) || []).concat((root.CompetencyCheck && root.CompetencyCheck.questions) || []);
     return draw();
   }
 
+  // The competency check (check.html): offered while much of the shape rests on thin or no evidence, and kept as a
+  // quiet link once it doesn't.
+  function checkCta(rows) {
+    var weak = rows.filter(function (r) { return r.strength === 'none' || r.strength === 'thin'; }).length;
+    return weak >= 8 ? '<div class="sh-check"><p><b>' + weak + ' of 28</b> rest on little or no evidence.</p><a class="cc-btn" id="shCheck" href="/check">Take the competency check (10 min) →</a></div>'
+      : '<p class="sh-check-q"><a href="/check" id="shCheck">Take the competency check again</a></p>';
+  }
   root.ShapeUI = { render: render, chart: chart };
 })(typeof window !== 'undefined' ? window : globalThis);

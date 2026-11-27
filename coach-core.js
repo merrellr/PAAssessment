@@ -231,7 +231,7 @@
   // Recent activity, newest first: practice sessions, lesson checks and refreshers (grouped by day and area), and
   // lessons finished (progress.lessonLog: { 'YYYY-MM-DD': n }). Each: { at, kind, d, title, detail, flag }, where
   // flag is 'review' when most of the answers were misses, 'good' when they were all right.
-  var SRC = { practice: 'Practised', lesson: 'Lesson check in', review: 'Refresher in' };
+  var SRC = { practice: 'Practised', lesson: 'Lesson check in', review: 'Refresher in', check: 'Competency check in' };
   function activity(ctx, max) {
     var log = ctx.log || [], groups = {}, out = [];
     log.forEach(function (e) {

@@ -121,7 +121,8 @@
   var BY = {}; LIST.forEach(function (c) { BY[c.key] = c; });
 
   function forLesson(courseId, lessonId) { var ls = LESSONS[courseId]; return (ls && ls[lessonId - 1]) || []; }
-  function forQuestion(q) { return q ? forLesson(q.c, q.l) : []; }
+  // a competency check question (competency-check.js) names its competency; a bank question goes by its lesson's tags
+  function forQuestion(q) { return !q ? [] : q.k ? (BY[q.k] ? [q.k] : []) : forLesson(q.c, q.l); }
   function inArea(area) { return LIST.filter(function (c) { return c.area === area; }); }
 
   root.CompetencyCore = { LIST: LIST, BY: BY, LESSONS: LESSONS, LEVELS: LEVELS, ROLE_SPIKES: ROLE_SPIKES, forLesson: forLesson, forQuestion: forQuestion, inArea: inArea };

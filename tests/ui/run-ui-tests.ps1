@@ -43,6 +43,7 @@ Copy-Item "$repo\learning-home-core.js" $site
 Copy-Item "$repo\coach-core.js" $site
 Copy-Item "$repo\coach-bank.js" $site
 Copy-Item "$repo\coach-charts.js" $site
+Copy-Item "$repo\competency-check.js" $site
 Copy-Item "$repo\competencies-core.js" $site
 Copy-Item "$repo\shape-core.js" $site
 Copy-Item "$repo\shape-ui.js" $site
@@ -109,6 +110,7 @@ Build-Page 'lms-dashboard.html' 'twostep-test.html' 'twostep-seed.js' 'twostep-t
 Build-Page 'profile.html' 'del-test.html' 'del-seed.js' 'del-test.js'
 Build-Page 'lesson.html' 'les-test.html' 'les-seed.js' 'les-test.js'
 Build-Page 'practice.html' 'practice-test.html' 'practice-seed.js' 'practice-test.js'
+Build-Page 'check.html' 'check-test.html' 'check-seed.js' 'check-test.js'
 Build-Page 'coach.html' 'coach-test.html' 'coach-seed.js' 'coach-test.js'
 Build-Page 'team-session.html' 'team-test.html' 'team-seed.js' 'team-test.js'
 Build-Page 'company.html' 'company-test.html' 'company-seed.js' 'company-test.js'
@@ -197,6 +199,8 @@ try {
   $results += Run-Page "practice: an area asked for" "$base/practice-test.html?scn=area&area=prioritization&n=3" 30000
   $results += Run-Page "practice: the coach picks" "$base/practice-test.html?scn=coached" 30000
   $results += Run-Page "practice: charts, how sure, explain it back" "$base/practice-test.html?scn=charts&area=prioritization&n=3" 30000
+  $results += Run-Page "competency check: a fresh start" "$base/check-test.html?scn=fresh" 30000
+  $results += Run-Page "competency check: picking up and finishing" "$base/check-test.html?scn=resume" 30000
   $results += Run-Page "lesson audio: a narrated lesson" "$base/les-test.html?scn=listen&course=discovery-novice&lesson=2" 30000
   $results += Run-Page "lesson audio: opened from the Library" "$base/les-test.html?scn=listenopen&course=discovery-novice&lesson=2&listen=1" 30000
   $results += Run-Page "lesson audio: a lesson with no audio yet" "$base/les-test.html?scn=noaudio&course=discovery-novice&lesson=4" 30000

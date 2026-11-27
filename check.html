@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>Competency check · Product Advisory Learning</title>
+<link rel="icon" href="/images/icons/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="/images/icons/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="/images/icons/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@600&family=Lato:ital,wght@0,300;0,400;0,700;0,900;1,400&display=swap" rel="stylesheet">
+<script src="pa-prefs.js"></script>
+<script src="analytics.js"></script>
+<style>
+  *{ box-sizing: border-box; }
+  body{ margin:0; background: var(--pa-bg); font-family: var(--pa-sans); color: var(--pa-ink); }
+  .wrap{ max-width: 1180px; margin: 0 auto; padding: 24px 16px 64px; }
+  [hidden]{ display:none !important; }
+  h1{ font-family: var(--pa-display); color: var(--pa-navy-deep); margin: 2px 0 4px; font-size: clamp(1.4rem, 3vw, 1.9rem); }
+  .back{ display:block; width:fit-content; margin-bottom: 14px; color: var(--pa-muted); font-size: .8125rem; text-decoration:none; }
+  .back:hover{ color: var(--pa-navy); }
+  .pr-layout{ display:grid; grid-template-columns: 300px minmax(0, 1fr); gap: 24px; align-items:start; margin-top: 18px; }
+  .pr-side{ display:flex; flex-direction:column; gap: 16px; position: sticky; top: 84px; }
+  .card{ background: var(--pa-card); border: 1px solid var(--pa-line); border-radius: 16px; padding: 18px 20px; }
+  .card h2{ font-size: 1rem; margin: 0 0 10px; }
+  .pr-goal{ display:flex; flex-wrap: wrap; align-items:center; justify-content:space-between; gap: 12px; padding: 12px 18px; border-radius: 14px; border: 1px solid var(--pa-line); background: var(--pa-card); }
+  .pr-goal b{ font-weight: 800; }
+  .pr-pips{ display:flex; align-items:center; gap: 6px; color: var(--pa-muted); font-size: .8125rem; }
+  .pr-pips span{ white-space: nowrap; }
+  .pr-pips i{ width: 26px; height: 6px; border-radius: 3px; background: var(--pa-line); }
+  .pr-pips i.on{ background: var(--pa-primary); }
+  .pr-pips i.ok{ background: var(--pa-ok, #2e8b57); } .pr-pips i.miss{ background: var(--pa-warn, #c0622a); }
+  .pr-say{ display:flex; gap: 12px; align-items:flex-start; margin: 18px 0; font-size: 1rem; line-height: 1.6; }
+  .pr-say .ico{ flex:none; display:grid; place-items:center; width: 34px; height: 34px; border-radius: 50%; background: var(--pa-primary); color: var(--pa-btn-ink); }
+  .pr-say .ico svg{ width: 17px; height: 17px; fill:none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .pr-say .ico.ico-compass{ background: var(--pa-cdisc); color: var(--pa-cdisc-ink); box-shadow: inset 0 0 0 1px var(--pa-cdisc-line); }
+  .pr-say .ico.ico-compass svg{ width: 24px; height: 24px; }
+  .pr-say p{ margin: 4px 0 0; }
+  .pr-q{ padding: 22px 24px; }
+  .pr-tags{ display:flex; flex-wrap:wrap; gap: 6px; margin-bottom: 12px; }
+  .pr-tags span{ padding: 3px 10px; border-radius: 12px; background: var(--pa-tint); color: var(--pa-navy); font-size: .75rem; font-weight: 700; }
+  .pr-question{ font-size: 1.125rem; line-height: 1.55; margin: 0 0 18px; color: var(--pa-ink); }
+  .pr-opts{ display:flex; flex-direction:column; gap: 10px; }
+  .pr-opt{ display:flex; gap: 12px; align-items:flex-start; width:100%; padding: 14px 16px; border: 1.5px solid var(--pa-line); border-radius: 12px; background: var(--pa-bg); color: var(--pa-ink); font: inherit; font-size: .9688rem; line-height: 1.5; text-align:left; cursor:pointer; }
+  .pr-opt:hover:not(:disabled){ border-color: var(--pa-primary); }
+  .pr-opt[aria-pressed="true"]{ border-color: var(--pa-primary); box-shadow: 0 0 0 2px color-mix(in srgb, var(--pa-primary) 25%, transparent); }
+  .pr-opt .k{ flex:none; font-weight: 800; color: var(--pa-muted); }
+  .pr-opt.right{ border-color: var(--pa-ok, #2e8b57); background: var(--pa-ok-bg, #eef9f1); }
+  .pr-opt.wrong{ border-color: var(--pa-warn, #c0622a); background: var(--pa-warn-bg, #fdf1ea); }
+  .pr-opt:disabled{ cursor: default; }
+  .pr-foot{ display:flex; justify-content:flex-end; gap: 10px; margin-top: 16px; flex-wrap: wrap; }
+  .pr-why{ margin-top: 16px; padding: 14px 16px; border-radius: 12px; background: var(--pa-band); border: 1px solid var(--pa-line); }
+  .pr-why .verdict{ font-weight: 800; }
+  .pr-why .verdict.ok{ color: var(--pa-ok-ink, #1f6b47); } .pr-why .verdict.bad{ color: var(--pa-warn, #c0622a); }
+  .pr-why p{ margin: 6px 0 0; line-height: 1.6; }
+  .pr-why a{ color: var(--pa-primary); font-weight: 700; }
+  .pr-offer{ margin-top: 14px; padding: 14px 16px; border-radius: 12px; border: 1.5px dashed var(--pa-primary); }
+  .pr-offer p{ margin: 0 0 10px; }
+  .pr-offer .row{ display:flex; flex-wrap:wrap; gap: 8px; }
+  .pr-adapt{ list-style:none; margin: 0; padding: 0 0 0 12px; border-left: 2px solid var(--pa-line); font-size: .8438rem; }
+  .pr-adapt li{ margin: 0 0 8px; }
+  .pr-area-row{ display:flex; justify-content:space-between; align-items:center; gap: 8px; padding: 7px 0; border-bottom: 1px solid var(--pa-line); font-size: .8438rem; }
+  .pr-area-row.cur{ font-weight: 800; }
+  a.pr-area-row{ color: var(--pa-ink); text-decoration: none; border-radius: 6px; margin: 0 -6px; padding: 7px 6px; }
+  a.pr-area-row:hover{ background: var(--pa-tint); }
+  a.pr-area-row:hover > span:first-child{ color: var(--pa-primary); }
+  a.pr-area-row:focus-visible{ outline: 3px solid var(--pa-cyan); outline-offset: 1px; }
+  .pr-area-hint{ margin: 0 0 6px; font-size: .75rem; color: var(--pa-muted); }
+  .pr-done h2{ font-size: 1.25rem; }
+  .pr-done .big{ font-family: var(--pa-display); font-size: 2.2rem; color: var(--pa-navy-deep); margin: 4px 0; }
+  @media (max-width: 900px){ .pr-layout{ grid-template-columns: 1fr; } .pr-side{ position: static; order: 2; } }
+  .ck-intro ul{ margin: 8px 0 14px; padding-left: 20px; line-height: 1.6; }
+  .ck-bar{ height: 6px; border-radius: 3px; background: var(--pa-line); overflow: hidden; margin: 6px 0 14px; }
+  .ck-bar i{ display:block; height: 100%; background: var(--pa-primary); transition: width .3s; }
+  .ck-meta{ display:flex; justify-content:space-between; gap: 10px; font-size: .8125rem; color: var(--pa-muted); }
+  .ck-areas{ list-style:none; margin: 10px 0 16px; padding: 0; }
+  .ck-areas li{ display:flex; justify-content:space-between; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--pa-line); font-size: .875rem; }
+  .ck-go{ display:flex; flex-wrap: wrap; gap: 8px; }
+</style>
+<link rel="stylesheet" href="pa-theme.css">
+<link rel="stylesheet" href="coach.css">
+<script src="coach-core.js"></script>
+<script src="competencies-core.js"></script>
+<script src="competency-check.js"></script>
+<script src="demo.js"></script>
+</head>
+<body>
+<script src="pa-shell.js"></script>
+<div class="wrap" style="max-width: 760px;">
+  <a class="back" href="/my-learning#readiness">← Back to My Learning</a>
+  <span class="eyebrow">Compass</span>
+  <h1>Competency check</h1>
+  <section class="card ck-intro" id="ckIntro" hidden>
+    <p>One short situation for each of the <b>28 competencies</b>, plus a few extra where we have the least to go on: <span id="ckCount">32</span> questions, about ten minutes.</p>
+    <ul>
+      <li>Pick what you would do. After each answer you see why, in a sentence.</li>
+      <li>Your answers feed <b>My shape</b> on My Learning, alongside your skill check, practice and lessons.</li>
+      <li>You can stop at any time; you'll pick up where you left off.</li>
+    </ul>
+    <div class="ck-go"><button type="button" class="cc-btn" id="ckStart">Start the check →</button></div>
+  </section>
+  <section class="card pr-q" id="ckCard" hidden aria-live="polite">
+    <div class="ck-meta"><span id="ckWhere"></span><span id="ckArea"></span></div>
+    <div class="ck-bar" aria-hidden="true"><i id="ckBar" style="width:0%"></i></div>
+    <p class="pr-question" id="ckQuestion"></p>
+    <div class="pr-opts" id="ckOpts" role="group" aria-label="Answers"></div>
+    <div class="pr-why" id="ckWhy" hidden></div>
+    <div class="pr-foot"><button type="button" class="cc-btn" id="ckSubmit" disabled>Check my answer</button><button type="button" class="cc-btn" id="ckNext" hidden>Next question →</button></div>
+  </section>
+  <section class="card pr-done" id="ckDone" hidden aria-live="polite"></section>
+  <div class="site-foot" style="margin-top:28px; padding:20px 0; border-top:1px solid var(--pa-line); text-align:center; font-size:0.75rem; color:var(--pa-muted);">
+    © <span id="footerYear"></span> Product Advisory, LLC. All rights reserved. &nbsp;·&nbsp;
+    <a href="https://www.productadvisory.co/privacy-policy" target="_blank" rel="noopener" style="color:inherit; text-decoration:underline;">Privacy Policy</a> &nbsp;·&nbsp;
+    <a href="https://www.productadvisory.co/terms-of-use" target="_blank" rel="noopener" style="color:inherit; text-decoration:underline;">Terms of Use</a>
+  </div>
+</div>
+<script>document.getElementById("footerYear").textContent = new Date().getFullYear();</script>
+<script type="module">
+/* The competency check (competency-check.js): one situation per competency, plus extras for the thinnest. Each answer
+   goes on the learner's answer log (src "check"), so My shape (shape-core.js), readiness and recent activity use it.
+   Where they are in the check is kept on progress.check, so they can stop and pick up later. */
+const firebaseConfig = {
+  apiKey: "AIzaSyAcECtS5c6WeOhKlwRK-LYFE47npbuq_eU",
+  authDomain: "auth.productadvisory.co",
+  projectId: "product-advisory-lms",
+  storageBucket: "product-advisory-lms.firebasestorage.app",
+  messagingSenderId: "1081134406437",
+  appId: "1:1081134406437:web:72e28604d093219e7698cc"
+};
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
+import { getFirestore, doc, getDoc, setDoc as fsSetDoc } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+// the demo (?demo=1, demo.js): the fictional learner, and nothing is saved
+const setDoc = (...a) => window.__paDemo ? Promise.resolve() : fsSetDoc(...a);
+const app = initializeApp(firebaseConfig), auth = getAuth(app), db = getFirestore(app);
+
+const C = window.CoachCore, K = window.CompetencyCore, Q = window.CompetencyCheck.questions;
+const AREAS = { discovery: 'Customer & Market Discovery', strategy: 'Product Strategy & Roadmapping', prioritization: 'Prioritization & Trade-offs',
+  execution: 'Execution & Delivery', stakeholder: 'Stakeholder Communication & Influence', aiIndividual: 'AI Fluency — Individual', aiOrg: 'AI Fluency — Organizational' };
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
+const params = new URLSearchParams(location.search);
+const event = (name, props) => { try { if (window.PAAnalytics) window.PAAnalytics.event(name, props || {}); } catch (e) {} };
+const fresh = () => ({ i: 0, right: 0, done: [], areas: {} });
+let user = null, progress = {}, log = [], state = fresh(), picked = -1;
+
+function save(extra){
+  const data = Object.assign({ answers: log, check: { i: state.i, right: state.right, done: state.done, areas: state.areas, startedAt: state.startedAt || new Date().toISOString() } }, extra || {});
+  return setDoc(doc(db, 'progress', user.uid), data, { merge: true }).catch(() => {});
+}
+function ask(){
+  const q = Q[state.i];
+  if (!q){ finish(); return; }
+  picked = -1;
+  $('ckWhere').textContent = 'Question ' + (state.i + 1) + ' of ' + Q.length;
+  $('ckArea').textContent = K.BY[q.k].name + ' · ' + AREAS[q.d];
+  $('ckBar').style.width = Math.round(state.i / Q.length * 100) + '%';
+  $('ckQuestion').textContent = q.q;
+  $('ckOpts').innerHTML = q.o.map((o, i) => '<button type="button" class="pr-opt" aria-pressed="false" data-i="' + i + '"><span class="k">' + 'ABCD'[i] + '.</span><span>' + esc(o) + '</span></button>').join('');
+  $('ckWhy').hidden = true; $('ckNext').hidden = true; $('ckSubmit').hidden = false; $('ckSubmit').disabled = true;
+  $('ckCard').hidden = false;
+  $('ckOpts').querySelectorAll('.pr-opt').forEach(b => b.addEventListener('click', () => {
+    if (b.disabled) return;
+    picked = +b.dataset.i;
+    $('ckOpts').querySelectorAll('.pr-opt').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
+    $('ckSubmit').disabled = false;
+  }));
+  $('ckQuestion').focus && $('ckQuestion').setAttribute('tabindex', '-1');
+}
+function check(){
+  if (picked < 0) return;
+  const q = Q[state.i], ok = picked === q.a;
+  $('ckOpts').querySelectorAll('.pr-opt').forEach(b => { b.disabled = true; const i = +b.dataset.i; if (i === q.a) b.classList.add('right'); else if (i === picked) b.classList.add('wrong'); });
+  $('ckWhy').innerHTML = '<span class="verdict ' + (ok ? 'ok' : 'bad') + '">' + (ok ? '✓ Right.' : '✗ Not quite.') + '</span> <b>Why:</b><p>' + esc(q.x) + '</p>';
+  $('ckWhy').hidden = false; $('ckSubmit').hidden = true;
+  log = C.record(log, { d: q.d, id: q.id, t: q.t, ok, src: 'check' });
+  if (ok) state.right++;
+  const ar = state.areas[q.d] = state.areas[q.d] || { n: 0, r: 0 }; ar.n++; if (ok) ar.r++;
+  state.done.push(q.id); state.i++;
+  save();
+  event('check_answer', { comp: q.k, ok });
+  $('ckNext').textContent = state.i >= Q.length ? 'See how it went →' : 'Next question →';
+  $('ckNext').hidden = false; $('ckNext').focus();
+}
+function finish(){
+  $('ckCard').hidden = true; $('ckIntro').hidden = true;
+  const byArea = state.areas || {};
+  $('ckDone').innerHTML = '<span class="eyebrow">Check done</span><p class="big">' + state.right + ' of ' + Q.length + ' right</p>' +
+    '<p>Your answers are now part of <b>My shape</b>, with your skill check, practice and lessons. Here is how each domain went:</p><ul class="ck-areas">' +
+    Object.keys(AREAS).filter(a => byArea[a]).map(a => '<li><span>' + esc(AREAS[a]) + '</span><span>' + byArea[a].r + ' of ' + byArea[a].n + ' right</span></li>').join('') + '</ul>' +
+    '<div class="ck-go"><a class="cc-btn" href="/my-learning#readiness">See my shape →</a><button type="button" class="cc-btn ghost" id="ckAgain">Take it again</button></div>';
+  $('ckDone').hidden = false;
+  $('ckAgain').addEventListener('click', () => { state = Object.assign(fresh(), { startedAt: new Date().toISOString() }); save(); $('ckDone').hidden = true; ask(); event('check_retake'); });
+  if (!state.finishedAt){ state.finishedAt = new Date().toISOString(); save({ checkDoneAt: state.finishedAt }); }
+  event('check_done', { right: state.right, n: Q.length });
+}
+$('ckSubmit').addEventListener('click', check);
+$('ckNext').addEventListener('click', () => { if (state.i >= Q.length) finish(); else ask(); });
+$('ckStart').addEventListener('click', () => { state.startedAt = state.startedAt || new Date().toISOString(); $('ckIntro').hidden = true; ask(); event('check_start', { resume: state.i > 0 }); });
+
+onAuthStateChanged(auth, async (u) => {
+  if (!u){ location.href = '/lms-dashboard'; return; }
+  user = u;
+  if (params.get('demo') === '1' && window.DemoCore){ window.__paDemo = true; }
+  if (window.__paDemo){ progress = DemoCore.progress(Date.now()); if (window.DemoUI) DemoUI.script('practice'); }
+  else try {
+    const snap = await getDoc(doc(db, 'progress', u.uid));
+    progress = snap.exists() ? snap.data() : {};
+  } catch (e) { /* a fresh start still works */ }
+  log = progress.answers || [];
+  const c = progress.check;
+  if (c && typeof c.i === 'number' && c.i > 0 && c.i < Q.length) state = { i: c.i, right: c.right || 0, done: Array.isArray(c.done) ? c.done : [], areas: c.areas && typeof c.areas === 'object' ? c.areas : {}, startedAt: c.startedAt };
+  $('ckCount').textContent = Q.length;
+  if (state.i > 0){ $('ckStart').textContent = 'Pick up at question ' + (state.i + 1) + ' →'; }
+  $('ckIntro').hidden = false;
+});
+</script>
+<script type="module" src="account-menu.js"></script>
+</body>
+</html>
