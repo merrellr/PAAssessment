@@ -77,6 +77,10 @@
   @media (max-width: 560px){ .start-grid{ grid-template-columns: 1fr; } }
   .start{ position:relative; background: var(--surface); border:1px solid var(--line); border-radius: 14px; padding: 16px; display:flex; flex-direction:column; gap: 8px; transition: border-color .15s, box-shadow .15s, transform .15s; }
   .start:hover{ border-color: var(--tc); box-shadow: 0 10px 24px rgba(22,33,62,0.08); transform: translateY(-1px); }
+  .team-band{ display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap: 12px 20px; background: var(--surface); border:1px solid var(--line); border-radius: 14px; padding: 16px 18px; margin: -14px 0 30px; }
+  .team-band > div{ flex: 1 1 320px; min-width: 0; }
+  .team-band h3{ font-family:var(--display); font-size: 0.9688rem; color: var(--navy-deep); margin: 0 0 4px; }
+  .team-band p{ font-size: 0.8125rem; margin: 0; }
   .start h3{ font-family:var(--display); font-size: 0.9688rem; color: var(--navy-deep); margin: 2px 0 0; line-height: 1.3; }
   .start p{ font-size: 0.8125rem; margin: 0; flex: 1; }
   .start-go{ display:flex; flex-wrap:wrap; gap: 6px 14px; align-items:center; margin-top: 4px; }
@@ -239,6 +243,10 @@
 
     <div class="section-title"><h2 id="startTitle">Start something new</h2></div>
     <div class="start-grid" id="startGrid" aria-labelledby="startTitle"></div>
+    <div class="team-band" id="teamBand">
+      <div><h3>Team Knowledge Workspace</h3><p>Your company’s goals, releases, features, ideas and customer accounts in one shared, connected place. Add them by hand or import a CSV.</p></div>
+      <a class="btn btn-primary" href="/workspace">Open the workspace →</a>
+    </div>
 
     <div class="layout" id="layout">
       <section aria-labelledby="listTitle" id="listSection">
