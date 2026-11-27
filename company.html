@@ -174,6 +174,21 @@
     body.printing-report .btn-row, body.printing-report #refreshBtn, body.printing-report #ownerBackLink, body.printing-report .no-print{ display:none; }
     body.printing-report .card{ box-shadow:none; break-inside: avoid; }
   }
+
+  /* Skills shape against roles (C4) */
+  .role-pick{ font: inherit; font-size: .8125rem; padding: 4px 6px; border-radius: 8px; border: 1px solid var(--line); background: var(--surface, #fff); color: var(--ink); max-width: 190px; }
+  .shape-detail{ margin-top: 14px; }
+  .shape-detail-in{ display: grid; grid-template-columns: minmax(0, 260px) minmax(0, 1fr); gap: 12px 20px; align-items: start; }
+  @media (max-width: 640px){ .shape-detail-in{ grid-template-columns: 1fr; } }
+  .shape-mini .sh-svg{ max-width: 260px; }
+  .sh-hm th small{ display: block; font-weight: 400; color: var(--gray); font-size: .7rem; }
+  .sh-hm .sh-hm-area th{ text-align: left; background: var(--bg); font-size: .75rem; text-transform: uppercase; letter-spacing: .05em; padding-top: 10px; }
+  .sh-c{ text-align: center; font-variant-numeric: tabular-nums; font-size: .78rem; }
+  .sh-c.st-met{ background: #dcfce7; color: #14532d; } .sh-c.st-close{ background: #fef3c7; color: #78350f; } .sh-c.st-below{ background: #fee2e2; color: #7f1d1d; } .sh-c.st-unknown, .sh-c.st-none{ background: var(--bg); color: var(--gray); }
+  .hm-legend .sh-c{ padding: 2px 8px; border-radius: 6px; }
+  table.hm.sh-hm{ width: auto; }
+  .sh-hm td.sh-c, .sh-hm thead th:not(.hm-person){ width: 104px; min-width: 104px; }
+  .sh-hm .hm-person{ min-width: 220px; }
 </style>
 <link rel="stylesheet" href="pa-theme.css">
 
@@ -185,6 +200,11 @@
 <script src="company-report.js"></script>
 <script src="charts.js"></script>
 <script src="focus-board.js"></script>
+<script src="roles-core.js"></script>
+<script src="competencies-core.js"></script>
+<script src="shape-core.js"></script>
+<script src="shape-ui.js"></script>
+<link rel="stylesheet" href="coach.css">
 </head>
 <body>
 <script src="pa-shell.js"></script>
@@ -340,6 +360,16 @@
         <div class="hm-main" id="skillsGrid"></div>
         <div class="hm-side" id="skillsCallouts"></div>
       </div>
+    </div>
+
+    <div class="card" id="shapeTeamCard">
+      <div class="section-head">
+        <div>
+          <h2>Skills shape against roles</h2>
+          <div class="hint" style="margin:4px 0 0;">Assign each person a role in the team list below. Their skills shape (28 competencies, from the skill check, practice and lessons) then shows against it here, the next time they open My Learning. They're told their manager can see it.</div>
+        </div>
+      </div>
+      <div id="shapeTeam"></div>
     </div>
 
     <div class="card" id="assignCard">
@@ -527,7 +557,7 @@ const firebaseConfig = {
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
 import {
-  getFirestore, doc, getDoc, getDocs, setDoc, addDoc, updateDoc, collection, query, where, orderBy, limit, writeBatch,
+  getFirestore, doc, getDoc, getDocs, setDoc, addDoc, updateDoc, deleteDoc, collection, query, where, orderBy, limit, writeBatch,
   serverTimestamp, Timestamp
 } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
 
@@ -676,6 +706,16 @@ async function loadAll(){
     console.error('Could not read shared records:', err);
     data.sharesError = true;
   }
+  // The roles assigned to people (orgRoles), read separately too.
+  data.roles = {};
+  data.rolesError = false;
+  try {
+    const rSnap = await getDocs(collection(db, 'orgRoles', id, 'people'));
+    rSnap.docs.forEach(d => { data.roles[d.id] = d.data().roleId || ''; });
+  } catch (err){
+    console.error('Could not read the assigned roles:', err);
+    data.rolesError = true;
+  }
   // The team's assignments, read separately too.
   data.assignments = [];
   data.assignError = false;
@@ -730,6 +770,7 @@ function renderAll(){
   renderRollup();
   renderFocus();
   renderAssignments();
+  renderShapeTeam();
   renderTeam();
   renderInvites();
   renderFormer();
@@ -1326,9 +1367,138 @@ function lastActiveCell(p){
   return el('td', { class: 'nowrap', text: p.lastActiveAt ? fmtDate(Date.parse(p.lastActiveAt)) : '—' });
 }
 
+/* ---------------------------------------------- roles and skills shapes (C4) */
+const ROLES = window.RolesCore, SC = window.ShapeCore;
+const SH_LEVEL = ['Not yet known', 'Limited', 'Moderate', 'Lots of', 'Advanced'];
+const SH_TIERS = ['novice', 'moderate', 'experienced', 'advanced'];
+const companyRoles = () => ROLES ? ROLES.rolesFor(org && org.roles) : [];
+function roleTitle(id){ const r = ROLES && ROLES.roleById(companyRoles(), id); return r ? r.title : (id || ''); }
+// A person's shared shape against their assigned role: { role, rows, top, met, total } or null.
+function personShape(r){
+  const share = data.shares[r.id], roleId = data.roles[r.id];
+  if (!SC || !roleId || !share || !share.shape || share.shape.roleId !== roleId) return null;
+  const role = ROLES.roleById(companyRoles(), roleId);
+  if (!role) return null;
+  const back = { s: 'strong', m: 'some', t: 'thin' }, lv = window.CompetencyCore.LIST.map(c => {
+    const v = Number((share.shape.levels || {})[c.key]) || 0;
+    return { key: c.key, area: c.area, name: c.name, level: v, strength: v ? back[(share.shape.strength || {})[c.key]] || 'thin' : 'none' };
+  });
+  const cmp = SC.compare(lv, SC.targetsFor(role.targets, role.standard === false ? null : role.id), {}, null);
+  return Object.assign({ role, at: share.shape.at }, cmp);
+}
+function roleCell(r){
+  const roles = companyRoles(), cur = data.roles[r.id] || '';
+  if (isArchived() || data.rolesError) return el('td', { text: cur ? roleTitle(cur) : '—' });
+  const sel = el('select', { class: 'role-pick', 'aria-label': 'Role for ' + (r.name || r.email || 'this person') });
+  sel.appendChild(el('option', { value: '', text: 'No role' }));
+  const groups = {};
+  roles.forEach(x => { (groups[x.group] = groups[x.group] || []).push(x); });
+  Object.keys(groups).forEach(g => {
+    const og = el('optgroup', { label: g });
+    groups[g].forEach(x => og.appendChild(el('option', { value: x.id, text: x.title })));
+    sel.appendChild(og);
+  });
+  sel.value = cur;
+  sel.addEventListener('change', () => assignRole(r, sel.value, sel));
+  return el('td', null, sel);
+}
+async function assignRole(r, roleId, sel){
+  const who = r.name || r.email || 'this person', before = data.roles[r.id] || '';
+  if (roleId && !before){
+    const ok = window.confirm('Assign ' + who + ' the role ' + roleTitle(roleId) + '?\n\nTheir skills shape will be measured against it, and you will see it here. They are told that their manager can see it (their levels and how much evidence is behind each, never their answers).');
+    if (!ok){ sel.value = before; return; }
+  }
+  sel.disabled = true;
+  $('notice').textContent = ''; $('errorLine').textContent = '';
+  try {
+    const ref = doc(db, 'orgRoles', orgId, 'people', r.id);
+    if (roleId) await setDoc(ref, { roleId: roleId, assignedAt: serverTimestamp(), assignedBy: currentUser.uid });
+    else await deleteDoc(ref);
+    if (roleId) data.roles[r.id] = roleId; else delete data.roles[r.id];
+    logAudit(roleId ? 'role.assigned' : 'role.removed', r.email || '', roleId ? roleTitle(roleId) : roleTitle(before));
+    renderShapeTeam(); renderTeam();
+    $('notice').textContent = roleId ? who + ' is now measured against ' + roleTitle(roleId) + '. Their shape shows here after they next open My Learning.' : who + ' has no role now, and their skills shape is no longer shared.';
+  } catch (err){
+    console.error('Could not save the role:', err);
+    sel.value = before; sel.disabled = false;
+    $('errorLine').textContent = err && err.code === 'permission-denied'
+      ? 'The security rules refused this. Ask the platform owner to publish the latest rules.'
+      : 'Something went wrong saving the role, please try again.';
+  }
+}
+function shapeDetail(r){
+  const box = el('div', { class: 'shape-detail' }, el('h4', { text: 'Skills shape' }));
+  const roleId = data.roles[r.id];
+  if (!roleId){ box.appendChild(el('div', { class: 'cell-sub', text: 'Assign a role (in the Role column) to see their skills shape against it. They\'re told when a role is assigned.' })); return box; }
+  const sh = personShape(r);
+  if (!sh){ box.appendChild(el('div', { class: 'cell-sub', text: 'Measured against ' + roleTitle(roleId) + '. Their shape shows here after they next open My Learning.' })); return box; }
+  const wrap = el('div', { class: 'shape-detail-in' });
+  const chart = el('div', { class: 'shape-mini' }); chart.innerHTML = window.ShapeUI ? ShapeUI.chart(sh.rows, sh.role.title, false) : '';
+  wrap.appendChild(chart);
+  const side = el('div', null, el('p', { text: sh.met + ' of ' + sh.total + ' competencies at or above ' + sh.role.title + '.' }));
+  if (sh.top.length){
+    side.appendChild(el('div', { class: 'cell-sub', text: 'Biggest gaps' }));
+    const list = el('ul', { class: 'answer-list' });
+    sh.top.forEach(g => {
+      const course = g.area + '-' + SH_TIERS[Math.max(0, Math.min(3, g.target - 1))];
+      const taken = data.assignments.some(x => x.course === course);
+      const btn = isArchived() ? null : el('button', { class: 'btn btn-ghost btn-small', type: 'button', text: taken ? 'Course assigned' : 'Assign a course' });
+      if (btn){ if (taken) btn.disabled = true; else btn.addEventListener('click', () => openAssignForm(course)); }
+      list.appendChild(el('li', null, el('span', { class: 'cell-name', text: g.name }), ' — ' + (g.level ? SH_LEVEL[Math.max(1, Math.round(g.level))] : 'not yet known') + ', role asks ' + SH_LEVEL[g.target] + ' ', btn));
+    });
+    side.appendChild(list);
+  }
+  side.appendChild(el('div', { class: 'cell-sub', text: 'Updated ' + (sh.at ? fmtDate(Date.parse(sh.at)) : '') + '. Levels come from their skill check, practice and lessons; not a grade.' }));
+  wrap.appendChild(side);
+  box.appendChild(wrap);
+  return box;
+}
+// The team: competencies (rows) × people with a shape (columns), coloured against each person's role.
+function renderShapeTeam(){
+  const box = $('shapeTeam');
+  if (!box) return;
+  box.innerHTML = '';
+  if (!SC || !window.CompetencyCore){ box.appendChild(el('p', { class: 'empty', text: 'Skills shapes could not be loaded.' })); return; }
+  const people = activeRows().map(r => ({ r, sh: personShape(r) })).filter(x => x.sh);
+  const assignedN = activeRows().filter(r => data.roles[r.id]).length;
+  if (!people.length){
+    box.appendChild(el('p', { class: 'empty', text: assignedN ? plural(assignedN, 'person has', 'people have') + ' a role. Their shapes show here after they next open My Learning.' : 'No roles assigned yet. Pick a role for each person in the team list below.' }));
+    return;
+  }
+  const K = window.CompetencyCore, AREA = {}; C.DOMAINS.forEach(d => { AREA[d[0]] = d[1]; });
+  const table = el('table', { class: 'hm sh-hm' });
+  const head = el('tr', null, el('th', { scope: 'col', class: 'hm-person', text: 'Competency' }));
+  people.forEach(p => head.appendChild(el('th', { scope: 'col', title: p.sh.role.title }, el('span', { text: p.r.name || p.r.email || 'Member' }), el('small', { text: p.sh.role.title }))));
+  table.appendChild(el('thead', null, head));
+  const body = el('tbody');
+  const below = {};
+  Object.keys(AREA).forEach(a => {
+    body.appendChild(el('tr', { class: 'sh-hm-area' }, el('th', { scope: 'rowgroup', colspan: String(people.length + 1), text: AREA[a] })));
+    K.inArea(a).forEach(c => {
+      const tr = el('tr', null, el('th', { scope: 'row', class: 'hm-person', text: c.name }));
+      people.forEach(p => {
+        const row = p.sh.rows.find(x => x.key === c.key) || {};
+        if (row.status === 'below') below[c.key] = (below[c.key] || 0) + 1;
+        tr.appendChild(el('td', { class: 'sh-c st-' + (row.status || 'none'), title: c.name + ': ' + (row.level ? SH_LEVEL[Math.max(1, Math.round(row.level))] : 'not yet known') + (row.target ? ', role asks ' + SH_LEVEL[row.target] : ''),
+          text: row.level ? row.level.toFixed(1) : '—' }));
+      });
+      body.appendChild(tr);
+    });
+  });
+  table.appendChild(body);
+  box.appendChild(el('div', { class: 'hm-wrap' }, table));
+  box.appendChild(el('div', { class: 'hm-legend' }, el('span', { text: 'Against their role' }),
+    el('span', { class: 'sh-c st-met', text: 'At or above' }), el('span', { class: 'sh-c st-close', text: 'Within half a level' }), el('span', { class: 'sh-c st-below', text: 'Below' }), el('span', { class: 'sh-c st-unknown', text: 'Not yet known' })));
+  const shared = Object.keys(below).filter(k => below[k] >= Math.max(2, Math.ceil(people.length / 2))).sort((a, b) => below[b] - below[a]).slice(0, 3);
+  if (shared.length){
+    box.appendChild(el('div', { class: 'hm-call gap', style: 'margin-top:12px;' }, el('div', { class: 'eyebrow', text: 'Shared gaps' }),
+      el('p', { text: shared.map(k => K.BY[k].name + ' (' + below[k] + ' of ' + people.length + ' below)').join(' · ') + '. A team course or session on these helps most people at once.' })));
+  }
+}
+
 function teamRow(r){
   return el('tr', { 'data-uid': r.id },
-    nameCell(r), levelCell(r.progress), progressCell(r.progress),
+    nameCell(r), roleCell(r), levelCell(r.progress), progressCell(r.progress),
     el('td', null, ...statusPills(r)), lastActiveCell(r.progress),
     el('td', null, el('div', { class: 'btn-row' },
       el('button', { class: 'btn btn-ghost btn-small', type: 'button', text: expanded[r.id] ? 'Hide details' : 'Details',
@@ -1425,6 +1595,7 @@ function detailRow(r, cols){
       box.appendChild(items.length ? el('ul', { class: 'answer-list' }, ...items) : el('div', { text: 'No lessons finished yet.' }));
       box.appendChild(el('div', { class: 'cell-sub', style: 'margin-top:6px;', text: 'Their plan: ' + p.planDone + ' of ' + p.planTotal + ' lessons across ' + plural(p.coursesAssigned, 'course') + '.' }));
     }
+    box.appendChild(shapeDetail(r));
     box.appendChild(el('div', { class: 'cell-sub', style: 'margin-top:10px;', text: 'Last active: ' + (p.lastActiveAt ? fmtDateTime(Date.parse(p.lastActiveAt)) : 'no activity yet') }));
   }
   return el('tr', { class: 'detail-row' }, el('td', { colspan: String(cols) }, box));
@@ -1435,10 +1606,10 @@ function teamTable(rows, emptyText){
   const body = [];
   rows.forEach(r => {
     body.push(teamRow(r));
-    if (expanded[r.id]) body.push(detailRow(r, 6));
+    if (expanded[r.id]) body.push(detailRow(r, 7));
   });
   return el('table', { class: 'data' },
-    el('thead', null, el('tr', null, el('th', { text: 'Person' }), el('th', { text: 'Level' }), el('th', { text: 'Plan progress' }),
+    el('thead', null, el('tr', null, el('th', { text: 'Person' }), el('th', { text: 'Role' }), el('th', { text: 'Level' }), el('th', { text: 'Plan progress' }),
       el('th', { text: 'Status' }), el('th', { text: 'Last active' }), el('th', { text: '' }))),
     el('tbody', null, ...body));
 }

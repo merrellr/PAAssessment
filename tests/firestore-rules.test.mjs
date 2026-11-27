@@ -489,6 +489,37 @@ await deny('a former member cannot read it', () => getDoc(doc(asUser('removedR',
 await deny('a removed admin cannot read it', () => getDoc(doc(exAdminA, 'orgFocus/orgA')));
 await deny('a stranger cannot read it', () => getDoc(doc(stranger, 'orgFocus/orgA')));
 
+console.log('\n--- the skills shape on the shared record ---');
+const goodShape = (over = {}) => Object.assign({ roleId: 'spm', levels: { 'd.framing': 2.5, 's.vision': 3 }, strength: { 'd.framing': 's', 's.vision': 't' }, at: '2026-11-27T10:00:00Z' }, over);
+await allow('a member can share their skills shape with the record', () => setDoc(doc(memberA, 'orgs/orgA/members/memberA'), goodShare('member@a.com', { shape: goodShape() })));
+await allow('and leave it out (no role assigned)', () => setDoc(doc(memberA, 'orgs/orgA/members/memberA'), goodShare('member@a.com')));
+await deny('the shape cannot carry answers or anything else', () => setDoc(doc(memberA, 'orgs/orgA/members/memberA'), goodShare('member@a.com', { shape: goodShape({ answers: [1] }) })));
+await deny('more than 28 competency levels are refused', () => setDoc(doc(memberA, 'orgs/orgA/members/memberA'), goodShare('member@a.com', { shape: goodShape({ levels: Object.fromEntries(Array.from({ length: 29 }, (_, i) => ['k' + i, 1])) }) })));
+await deny('a role id must be a plain id', () => setDoc(doc(memberA, 'orgs/orgA/members/memberA'), goodShare('member@a.com', { shape: goodShape({ roleId: 'Bad Role!' }) })));
+await deny('the shape must be a map', () => setDoc(doc(memberA, 'orgs/orgA/members/memberA'), goodShare('member@a.com', { shape: 'all of it' })));
+
+console.log('\n--- assigned job roles (orgRoles) ---');
+await allow('a company admin assigns a role to a member', () => setDoc(doc(adminA, 'orgRoles/orgA/people/memberA'), { roleId: 'spm', assignedAt: serverTimestamp(), assignedBy: 'adminA' }));
+await allow('and changes it', () => setDoc(doc(adminA, 'orgRoles/orgA/people/memberA'), { roleId: 'gpm', assignedAt: serverTimestamp(), assignedBy: 'adminA' }));
+await allow('a company\'s own role id is fine', () => setDoc(doc(adminA, 'orgRoles/orgA/people/memberA'), { roleId: 'acme-lead', assignedAt: serverTimestamp(), assignedBy: 'adminA' }));
+await allow('the owner can assign too', () => setDoc(doc(owner, 'orgRoles/orgEdit/people/someone'), { roleId: 'pm', assignedAt: serverTimestamp(), assignedBy: 'owner1' }));
+await deny('assignedBy must be the admin themselves', () => setDoc(doc(adminA, 'orgRoles/orgA/people/memberA'), { roleId: 'pm', assignedAt: serverTimestamp(), assignedBy: 'someoneElse' }));
+await deny('a client-chosen time is refused', () => setDoc(doc(adminA, 'orgRoles/orgA/people/memberA'), { roleId: 'pm', assignedAt: Timestamp.fromDate(new Date(2020, 1, 1)), assignedBy: 'adminA' }));
+await deny('extra fields are refused', () => setDoc(doc(adminA, 'orgRoles/orgA/people/memberA'), { roleId: 'pm', assignedAt: serverTimestamp(), assignedBy: 'adminA', note: 'x' }));
+await deny('a role id must be a plain id', () => setDoc(doc(adminA, 'orgRoles/orgA/people/memberA'), { roleId: 'Head of Product', assignedAt: serverTimestamp(), assignedBy: 'adminA' }));
+await deny('a member cannot assign their own role', () => setDoc(doc(memberA, 'orgRoles/orgA/people/memberA'), { roleId: 'head', assignedAt: serverTimestamp(), assignedBy: 'memberA' }));
+await deny('an admin of another company cannot assign roles here', () => setDoc(doc(adminB, 'orgRoles/orgA/people/memberA'), { roleId: 'pm', assignedAt: serverTimestamp(), assignedBy: 'adminB' }));
+await deny('a removed admin cannot assign roles', () => setDoc(doc(exAdminA, 'orgRoles/orgA/people/memberA'), { roleId: 'pm', assignedAt: serverTimestamp(), assignedBy: 'exAdminA' }));
+await deny('an archived company gets no new role assignments', () => setDoc(doc(owner, 'orgRoles/orgOld/people/oldMember'), { roleId: 'pm', assignedAt: serverTimestamp(), assignedBy: 'owner1' }));
+await allow('the member reads their own role', () => getDoc(doc(memberA, 'orgRoles/orgA/people/memberA')));
+await deny('a member cannot read someone else\'s role', () => getDoc(doc(memberA, 'orgRoles/orgA/people/adminA')));
+await deny('a member cannot list the team\'s roles', () => getDocs(collection(memberA, 'orgRoles/orgA/people')));
+await allow('a company admin lists the team\'s roles', () => getDocs(collection(adminA, 'orgRoles/orgA/people')));
+await deny('an admin of another company cannot list them', () => getDocs(collection(adminB, 'orgRoles/orgA/people')));
+await deny('a former member cannot read their old role', () => getDoc(doc(asUser('removedR', 'r@a.com'), 'orgRoles/orgA/people/removedR')));
+await deny('a member cannot un-assign their role', () => deleteDoc(doc(memberA, 'orgRoles/orgA/people/memberA')));
+await allow('a company admin un-assigns it', () => deleteDoc(doc(adminA, 'orgRoles/orgA/people/memberA')));
+
 console.log('\n--- team assignments (orgAssignments) ---');
 const assignItem = { id: 'abc1234567', course: 'discovery-novice', due: '2026-12-15', note: 'Before planning', assignedAt: '2026-11-16' };
 const saveAssign = (db, orgId, items, over = {}) => setDoc(doc(db, 'orgAssignments/' + orgId), Object.assign({ items: items, updatedAt: serverTimestamp() }, over));

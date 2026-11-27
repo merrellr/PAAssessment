@@ -242,8 +242,21 @@ service cloud.firestore {
         && myMembership().status == 'active';
     }
 
+    // The skills shape (shape-core.js): only once the company has assigned the person a role
+    // (orgRoles below), and only the 28 competency levels and how much evidence is behind each,
+    // never their answers. Assigning a role is the consent; the learner is told so.
+    function validShapeShare(s) {
+      return s is map
+        && s.keys().hasOnly(['roleId', 'levels', 'strength', 'at'])
+        && s.roleId is string && s.roleId.matches('^[a-z0-9-]{1,40}$')
+        && s.levels is map && s.levels.size() <= 28
+        && s.strength is map && s.strength.size() <= 28
+        && s.at is string && s.at.size() <= 40;
+    }
+
     function validShare(d) {
-      return d.keys().hasOnly(['identity', 'assessment', 'courses', 'lastActiveAt', 'updatedAt'])
+      return d.keys().hasOnly(['identity', 'assessment', 'courses', 'lastActiveAt', 'updatedAt', 'shape'])
+        && (!('shape' in d) || validShapeShare(d.shape))
         && d.identity is map
         && d.identity.keys().hasOnly(['name', 'email'])
         && d.identity.name is string && d.identity.name.size() <= 100
@@ -305,6 +318,26 @@ service cloud.firestore {
     // company's admins (or the platform owner) write it, and only while the company
     // is active. At most 20 items; each item's contents are checked by the app,
     // which only ever shows known courses, valid dates and short notes.
+    // ------------------------------------------------------ assigned job roles
+    // orgRoles/{orgId}/people/{uid}: the role (roles-core.js) a company's admin assigned
+    // to one person, which their skills shape is measured against. The admin (or the
+    // platform owner) writes it while the company is active; the person reads their own,
+    // and admins and the owner read them all. Deleting it un-assigns the role.
+    match /orgRoles/{orgId}/people/{uid} {
+      allow get: if isPlatformOwner() || isActiveAdminOf(orgId)
+        || (isSignedIn() && request.auth.uid == uid && isActiveMemberOf(orgId));
+      allow list: if isPlatformOwner() || isActiveAdminOf(orgId);
+
+      allow create, update: if (isPlatformOwner() || isActiveAdminOf(orgId))
+        && get(/databases/$(database)/documents/orgs/$(orgId)).data.status == 'active'
+        && request.resource.data.keys().hasOnly(['roleId', 'assignedAt', 'assignedBy'])
+        && request.resource.data.roleId is string && request.resource.data.roleId.matches('^[a-z0-9-]{1,40}$')
+        && request.resource.data.assignedAt == request.time
+        && request.resource.data.assignedBy == request.auth.uid;
+
+      allow delete: if isPlatformOwner() || isActiveAdminOf(orgId);
+    }
+
     match /orgAssignments/{orgId} {
       allow get: if isPlatformOwner() || isActiveAdminOf(orgId) || isActiveMemberOf(orgId);
 

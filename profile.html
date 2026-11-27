@@ -530,7 +530,7 @@ import {
   signInWithPopup, signInWithCredential, signInWithEmailAndPassword, sendPasswordResetEmail, signOut
 } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
 import { getFirestore, doc, getDoc, getDocs, setDoc, deleteDoc, collection, query, where, writeBatch, increment, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
-import { anonymizeOrgShares } from "./org-share.js";
+import { anonymizeOrgShares, assignedRole } from "./org-share.js";
 import { withTwoStep, hasTwoStep, setUpTwoStep, turnOffTwoStep, twoStepError, twoStepOffered } from "./two-step.js";
 
 const app = initializeApp(firebaseConfig);
@@ -1322,11 +1322,14 @@ function showAssessments(data){
 
 /* ---------------------------------------------------------- My role and targets */
 // roles-core.js works out where the learner stands; roles-ui.js draws the editor. Saved as progress.targets.
-function showTargets(data, user){
+async function showTargets(data, user){
   if (!window.RolesUI) return;
   const tg = data.targets || {};
+  // a role the company assigned wins; the company can then see the skills shape against it, and we say so
+  const assigned = await assignedRole(db, user);
+  const role = assigned ? RolesCore.roleById(RolesCore.rolesFor(), assigned) : null;
   RolesUI.editor($id('targetsBody'), {
-    roles: RolesCore.rolesFor(), roleId: tg.roleId || '', personal: tg.personal || {},
+    roles: RolesCore.rolesFor(), roleId: assigned || tg.roleId || '', lockedTitle: role ? role.title : (assigned ? 'Your company\'s role' : ''), personal: tg.personal || {},
     assessment: data.assessmentResult || null, courses: data.courses || {},
     onSave: async (v) => {
       const targets = { roleId: v.roleId || '', personal: v.personal, updatedAt: new Date().toISOString() };
@@ -1336,6 +1339,12 @@ function showTargets(data, user){
       showBadges(data, user);
     }
   });
+  if (assigned){
+    const note = document.createElement('p');
+    note.className = 'rt-consent'; note.id = 'rtConsent';
+    note.innerHTML = '<b>Your manager can see your skills shape against this role:</b> your level in each of the 28 competencies and how much evidence is behind each, never your answers or notes. It updates when you open My Learning.';
+    $id('targetsBody').prepend(note);
+  }
   if (location.hash === '#targets') $id('targets').focus();
 }
 

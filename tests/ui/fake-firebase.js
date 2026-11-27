@@ -12,6 +12,7 @@ export class Timestamp {
 const SERVER = { __server: true };
 export const serverTimestamp = () => SERVER;
 export const arrayUnion = (...items) => ({ __arrayUnion: items });
+export const deleteField = () => ({ __deleteField: true });
 function resolve(v){
   if (v === SERVER) return Timestamp.now();
   if (v instanceof Timestamp) return v;
@@ -37,6 +38,7 @@ function applyUpdate(existing, data){
       const parts = key.split('.'); k = parts.pop();
       parts.forEach(p => { if (!target[p] || typeof target[p] !== 'object') target[p] = {}; target = target[p]; });
     }
+    if (v && typeof v === 'object' && v.__deleteField){ delete target[k]; return; }
     if (v && typeof v === 'object' && v.__increment !== undefined){ target[k] = (Number(target[k]) || 0) + v.__increment; return; }
     if (v && typeof v === 'object' && v.__arrayUnion){
       const cur = Array.isArray(target[k]) ? target[k] : [];

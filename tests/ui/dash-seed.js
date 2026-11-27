@@ -21,7 +21,7 @@
       assessmentResult: { tier: 'Moderate Experience', overallPct: 55, overallTotal: 23, overallMax: 42, categoryPct: { discovery: 40, strategy: 50, prioritization: 55, execution: 60, stakeholder: 65, aiIndividual: 45, aiOrg: 35 },
         assessmentId: 'dash-1', submittedAt: '2026-10-05T10:00:00.000Z', answers: [{ n: 1, cat: 'discovery', question: 'Q', answer: 'A', points: 1 }] }
     };
-    if (scn === 'member' || scn === 'focus' || scn === 'focusdefault' || scn === 'assigned') store['memberships/uDash'] = { orgId: 'orgA', orgName: 'Acme Health', role: 'member', status: 'active', inviteToken: 't', joinedAt: Timestamp.now(), endedAt: null, email: 'dash@acme.com', displayName: 'Dash User' };
+    if (scn === 'member' || scn === 'focus' || scn === 'focusdefault' || scn === 'assigned' || scn === 'assignedrole') store['memberships/uDash'] = { orgId: 'orgA', orgName: 'Acme Health', role: 'member', status: 'active', inviteToken: 't', joinedAt: Timestamp.now(), endedAt: null, email: 'dash@acme.com', displayName: 'Dash User' };
     // a course counts as complete only when ALL its real lessons are done (discovery-moderate has 5)
     // a weekly goal of 2, with one lesson finished today and two last month
     if (scn === 'threelessons') { var d = new Date(), key = d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2);
@@ -47,6 +47,7 @@
     if (scn === 'removed') store['memberships/uDash'] = { orgId: 'orgA', orgName: 'Acme Health', role: 'member', status: 'removed', inviteToken: 't', joinedAt: Timestamp.now(), endedAt: Timestamp.now(), email: 'dash@acme.com', displayName: 'Dash User' };
     if (scn === 'removedold') store['memberships/uDash'] = { orgId: 'orgA', orgName: 'Acme Health', role: 'member', status: 'removed', inviteToken: 't', joinedAt: Timestamp.fromMillis(Date.now() - 400 * 864e5), endedAt: Timestamp.fromMillis(Date.now() - 90 * 864e5), email: 'dash@acme.com', displayName: 'Dash User' };
     if (scn === 'owner' || scn === 'demo') store['platformAdmins/uDash'] = { note: 'owner' };
+    if (scn === 'assignedrole') store['orgRoles/orgA/people/uDash'] = { roleId: 'gpm', assignedAt: Timestamp ? Timestamp.now() : null, assignedBy: 'uAdmin' };
     // an earlier assessment, so My growth can compare (discovery grew most, stakeholder dropped a little)
     if (scn === 'growth') store['progress/uDash'].assessmentHistory = [
       { assessmentId: 'dash-0', submittedAt: '2026-06-01T10:00:00.000Z', tier: 'Limited Experience', overallPct: 38,

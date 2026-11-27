@@ -1,6 +1,6 @@
 // Tests for org-share-core.js (the shared record's contents).
 // Run:  node --experimental-default-type=module tests/org-share-core.test.mjs
-import { buildShare, shareHash, orgIdsFor } from '../org-share-core.js';
+import { buildShare, shareHash, orgIdsFor, buildShape, shapeLevels } from '../org-share-core.js';
 
 let pass = 0, fail = 0;
 function t(label, ok, extra){
@@ -79,6 +79,17 @@ console.log('--- which companies to blank on deletion ---');
 t('current membership and history are combined without duplicates', same(orgIdsFor({ orgId: 'orgA' }, { orgIds: ['orgB', 'orgA', 'orgC'] }).sort(), ['orgA', 'orgB', 'orgC']));
 t('no membership and no history means none', same(orgIdsFor(null, null), []) && same(orgIdsFor({}, {}), []));
 t('junk entries are ignored', same(orgIdsFor({ orgId: 5 }, { orgIds: [null, '', 7, 'orgZ'] }), ['orgZ']));
+
+// The skills shape (C4): only levels and evidence strength, for an assigned role
+{
+  const lv = [{ key: 'd.framing', level: 2.46, strength: 'some', answers: 7, lessons: 2 }, { key: 's.vision', level: 0, strength: 'none' }, { key: 'p.tradeoff', level: 4.3, strength: 'strong' }];
+  const sh = buildShape(lv, 'spm', '2026-11-27T10:00:00Z');
+  t('the shape carries the role, rounded levels and strength codes, and nothing else', sh && sh.roleId === 'spm' && sh.levels['d.framing'] === 2.5 && sh.levels['p.tradeoff'] === 4 && sh.strength['d.framing'] === 'm' && sh.strength['p.tradeoff'] === 's' && !('s.vision' in sh.levels) && Object.keys(sh).sort().join() === 'at,levels,roleId,strength' && !JSON.stringify(sh).includes('answers'));
+  t('no role, a bad role id or nothing known: no shape', buildShape(lv, '') === null && buildShape(lv, 'Head of Product') === null && buildShape([{ key: 'x', level: 0 }], 'pm') === null);
+  const back = shapeLevels(sh);
+  t('and back into levels for the company dashboard', back.length === 2 && back.find(x => x.key === 'd.framing').strength === 'some' && back.find(x => x.key === 'p.tradeoff').level === 4);
+  t('an empty shape reads as no levels', shapeLevels(null).length === 0);
+}
 
 console.log('\n' + pass + ' passed, ' + fail + ' failed');
 process.exit(fail ? 1 : 0);

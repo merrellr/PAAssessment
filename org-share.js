@@ -7,9 +7,9 @@
    org-share-core.js. Who may write or read it is decided by firestore.rules. */
 
 import {
-  doc, getDoc, setDoc, updateDoc, arrayUnion, serverTimestamp
+  doc, getDoc, setDoc, updateDoc, arrayUnion, serverTimestamp, deleteField
 } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
-import { buildShare, shareHash, orgIdsFor } from "./org-share-core.js";
+import { buildShare, shareHash, orgIdsFor, buildShape } from "./org-share-core.js";
 
 function storageGet(key){ try { return localStorage.getItem(key); } catch (e){ return null; } }
 function storageSet(key, value){ try { localStorage.setItem(key, value); } catch (e){ /* storage unavailable */ } }
@@ -32,10 +32,55 @@ export async function syncOrgShare(db, user, options){
   const key = 'pa_share_' + membership.orgId + '_' + user.uid;
   if (!(options && options.force) && storageGet(key) === hash) return { status: 'unchanged' };
 
-  await setDoc(doc(db, 'orgs', membership.orgId, 'members', user.uid),
-    Object.assign({}, share, { updatedAt: serverTimestamp() }));
+  // The record is rewritten whole, so a skills shape already on it (syncOrgShape) is carried over.
+  const ref = doc(db, 'orgs', membership.orgId, 'members', user.uid);
+  let keep = null;
+  try { const cur = await getDoc(ref); if (cur.exists() && cur.data().shape) keep = cur.data().shape; } catch (e){ /* nothing to keep */ }
+  await setDoc(ref, Object.assign({}, share, keep ? { shape: keep } : {}, { updatedAt: serverTimestamp() }));
   storageSet(key, hash);
   return { status: 'synced', orgId: membership.orgId };
+}
+
+/* The skills shape on the company's shared record (C4). Shared only while the company has
+   assigned the person a role (orgRoles/{orgId}/people/{uid}); assigning the role is the
+   consent, and the learner is told so on My shape and Profile. With no role it removes any
+   shape shared before. levels: ShapeCore.levels(...). Skips the write when nothing changed. */
+export async function syncOrgShape(db, user, levels){
+  if (!user) return { status: 'no_user' };
+  const membershipSnap = await getDoc(doc(db, 'memberships', user.uid));
+  if (!membershipSnap.exists() || membershipSnap.data().status !== 'active') return { status: 'not_member' };
+  const orgId = membershipSnap.data().orgId;
+  let roleId = '';
+  try { const r = await getDoc(doc(db, 'orgRoles', orgId, 'people', user.uid)); if (r.exists()) roleId = r.data().roleId || ''; } catch (e){ return { status: 'no_role_access' }; }
+  const ref = doc(db, 'orgs', orgId, 'members', user.uid);
+  const key = 'pa_shape_' + orgId + '_' + user.uid;
+  if (!roleId){
+    if (storageGet(key) === 'none') return { status: 'no_role' };
+    try {
+      const cur = await getDoc(ref);
+      if (cur.exists() && cur.data().shape) await updateDoc(ref, { shape: deleteField(), updatedAt: serverTimestamp() });
+      storageSet(key, 'none');
+    } catch (e){ /* the share isn't there yet: nothing to remove */ }
+    return { status: 'no_role', roleId: '' };
+  }
+  const shape = buildShape(levels, roleId);
+  if (!shape) return { status: 'nothing', roleId };
+  const hash = shareHash({ roleId: shape.roleId, levels: shape.levels, strength: shape.strength });
+  if (storageGet(key) === hash) return { status: 'unchanged', roleId };
+  try { await updateDoc(ref, { shape: shape, updatedAt: serverTimestamp() }); }
+  catch (e){ return { status: 'no_share_yet', roleId }; }   // the full record is written first (syncOrgShare)
+  storageSet(key, hash);
+  return { status: 'synced', roleId };
+}
+
+/* The role this person's company assigned them, or '' (none, not a member, or no access). */
+export async function assignedRole(db, user){
+  try {
+    const m = await getDoc(doc(db, 'memberships', user.uid));
+    if (!m.exists() || m.data().status !== 'active') return '';
+    const r = await getDoc(doc(db, 'orgRoles', m.data().orgId, 'people', user.uid));
+    return r.exists() ? (r.data().roleId || '') : '';
+  } catch (e){ return ''; }
 }
 
 /* Remembers which companies this person has been in, on their own progress

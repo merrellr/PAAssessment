@@ -75,12 +75,35 @@
 
   .cta-row{ text-align:center; margin-top:28px; }
   .btn{ display:inline-block; background:linear-gradient(135deg, var(--navy) 0%, var(--primary-strong) 100%); color:var(--btn-ink); padding:12px 26px; border-radius:24px; text-decoration:none; font-weight:600; font-size:0.9062rem; }
+  .comp-h{ font-size: .9375rem; margin: 18px 0 8px; }
+  .comp-list{ display: grid; gap: 8px; }
+  .comp{ border: 1px solid var(--line); border-radius: 10px; background: var(--surface); }
+  .comp > summary{ list-style: none; cursor: pointer; padding: 10px 14px; display: flex; flex-direction: column; gap: 2px; }
+  .comp > summary::-webkit-details-marker{ display: none; }
+  .comp > summary b{ font-size: .9062rem; color: var(--navy-deep); }
+  .comp > summary b::after{ content: ' ▸'; color: var(--gray); font-weight: 400; }
+  .comp[open] > summary b::after{ content: ' ▾'; }
+  .comp > summary span{ font-size: .8125rem; color: var(--ink-soft); line-height: 1.5; }
+  .comp > summary:focus-visible{ outline: 3px solid var(--cyan); outline-offset: 2px; border-radius: 10px; }
+  .comp-levels{ list-style: none; margin: 0; padding: 0 14px 12px; display: grid; gap: 6px; }
+  .comp-levels li{ border-left: 3px solid var(--line); padding: 2px 0 2px 10px; font-size: .8125rem; color: var(--ink-soft); line-height: 1.5; }
+  .comp-lv{ display: block; font-weight: 700; font-size: .75rem; }
+  .role-bench{ margin-top: 12px; border-top: 1px solid var(--line); padding-top: 10px; }
+  .role-bench > summary{ cursor: pointer; font-weight: 700; color: var(--navy); }
+  .hint-sm{ font-size: .8125rem; }
+  .rb-wrap{ overflow-x: auto; }
+  .rb{ border-collapse: collapse; font-size: .78rem; min-width: 760px; }
+  .rb th, .rb td{ border-bottom: 1px solid var(--line); padding: 5px 8px; text-align: center; }
+  .rb thead th{ font-size: .72rem; vertical-align: bottom; }
+  .rb tbody th{ text-align: left; font-weight: 600; white-space: nowrap; }
+  .rb .rb-area th{ background: var(--bg); text-align: left; font-size: .72rem; text-transform: uppercase; letter-spacing: .05em; padding-top: 10px; }
   .art-list{ display:grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 10px 22px; }
   .art-area{ display:flex; gap: 10px; align-items:flex-start; padding: 8px 0; border-top: 1px solid var(--line); }
   .art-area b{ display:block; font-size: 0.875rem; color: var(--navy-deep); margin-bottom: 4px; }
   .art-area a{ display:block; font-size: 0.8125rem; color: var(--navy); margin: 3px 0; }
 </style>
 <link rel="stylesheet" href="pa-theme.css">
+<link rel="stylesheet" href="framework-graphic.css">
 <script src="analytics.js"></script>
 </head>
 <body>
@@ -104,25 +127,30 @@
 
   <div class="card">
     <span class="eyebrow">The Training Framework</span>
-    <h1>Seven Domains, Four Levels Each</h1>
+    <h1>Seven Domains, 28 Competencies, Four Levels</h1>
     <p>Everything in this program is organized around seven core skill areas that make up modern product management, three of them focused specifically on working with AI. Your assessment measures where you stand in each one today, and your course plan is built from that starting point, not a generic curriculum everyone gets.</p>
     <p>Within each domain, there are four levels: <strong>Limited Experience</strong>, <strong>Moderate Experience</strong>, <strong>Lots of Experience</strong>, and <strong>Advanced Experience</strong>. These aren't just labels, each one describes a genuinely different way of operating in that domain, not just "knows more facts."</p>
-    <p class="legend-intro"><strong>Reading the levels:</strong> each level carries a four-dot meter that fills as experience grows.</p>
-    <div class="tier-legend" id="tierLegend" aria-hidden="true"></div>
+    <p>Under each domain sit <strong>four competencies</strong>, the specific skills that make up the domain, 28 in all. Each is described at the same four levels, so you can see exactly what "Lots of Experience" in, say, Problem framing looks like.</p>
   </div>
 
-  <div class="card">
+  <div class="card" id="atAGlance">
     <span class="eyebrow">At a glance</span>
-    <h2 style="font-size:1.1875rem; margin-bottom:6px;">The seven skill domains</h2>
-    <p style="margin-bottom:16px;">Everything below is organized under these seven areas. Each one carries the four experience levels described above, in full detail in the cards below.</p>
-    <div class="overview-scroll">
-      <figure style="margin:0;">
-        <svg id="frameworkOverviewSvg" role="img" aria-label="The seven Product Advisory skill domains, each shown as an icon with its name."></svg>
-      </figure>
-    </div>
+    <div id="frameworkGraphic"></div>
   </div>
 
   <div id="domainsContainer"></div>
+
+  <!-- How the skills shape is measured, and the role benchmarks -->
+  <div class="card" id="shape">
+    <span class="eyebrow">Your skills shape</span>
+    <h2 style="font-size:1.1875rem; margin-bottom:6px;">How your level in each competency is worked out</h2>
+    <p>Your skill check sets the starting point for each domain's four competencies. Every practice question is tagged to the competencies its lesson builds, so each answer counts at that question's level, and lessons you finish set a floor. Each level also says how much evidence is behind it (thin, some or strong), so a level from two answers doesn't look like proof. It isn't a grade: it moves as you practise.</p>
+    <p>On <a href="/my-learning#readiness">My Learning › My readiness</a>, <b>My shape</b> draws all 28 as a chart against a role you choose (or Compass places you), with your top three gaps and the lesson that closes each. If your company assigns you a role, your manager can see your shape against it; you're told when that happens, and your answers are never shared.</p>
+    <details class="role-bench"><summary>Role benchmarks: what each role asks for, competency by competency</summary>
+      <p class="hint-sm">Levels 1 Limited, 2 Moderate, 3 Lots of, 4 Advanced. <b>Bold</b> marks where a role asks for more or less than its domain's usual level.</p>
+      <div class="rb-wrap" id="roleBench"></div>
+    </details>
+  </div>
 
   <!-- Companion articles: a longer read for the courses that have one, by skill area (linked from My Learning) -->
   <div class="card" id="articles" tabindex="-1" hidden>
@@ -145,6 +173,10 @@
 
 <script src="content/framework-data.js"></script>
 <script src="company-core.js"></script>
+<script src="roles-core.js"></script>
+<script src="competencies-core.js"></script>
+<script src="shape-core.js"></script>
+<script src="framework-graphic.js"></script>
 <script src="pa-icons.js"></script>
 <script>
 const DOMAIN_COLORS = {
@@ -173,10 +205,18 @@ function tierDotsHtml(tierKey, color){
   return `<span class="tier-dots" aria-hidden="true">${dots}</span>`;
 }
 
-const legend = document.getElementById('tierLegend');
-legend.innerHTML = TIER_LABELS.map(([key, label]) =>
-  `<span class="leg-item">${tierDotsHtml(key, '#1A4584')}<span>${label}</span></span>`
-).join('');
+
+
+// The four competencies under a domain (competencies-core.js), each with what it looks like at the four levels.
+const fwEsc = (t) => String(t).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+function competencyList(domainKey, color){
+  const K = window.CompetencyCore;
+  if (!K) return '';
+  return '<h3 class="comp-h">Four competencies</h3><div class="comp-list">' + K.inArea(domainKey).map(c =>
+    '<details class="comp" id="comp-' + c.key.replace('.', '-') + '"><summary><b>' + fwEsc(c.name) + '</b><span>' + fwEsc(c.about) + '</span></summary>' +
+    '<ol class="comp-levels">' + c.levels.map((d, i) => '<li style="border-left-color:' + color + ';"><span class="comp-lv" style="color:' + color + ';">' + TIER_LABELS[i][1] + '</span>' + fwEsc(d) + '</li>').join('') + '</ol></details>'
+  ).join('') + '</div>';
+}
 
 const container = document.getElementById('domainsContainer');
 Object.keys(window.FRAMEWORK_DATA).forEach(domainKey => {
@@ -204,66 +244,13 @@ Object.keys(window.FRAMEWORK_DATA).forEach(domainKey => {
     </div>
     <p>${domain.description}</p>
     <div class="tier-grid">${cells}</div>
+    ${competencyList(domainKey, color)}
   `;
   container.appendChild(card);
 });
 
-/* "At a glance" overview: seven tiles, icon + name only, three per row
-   (the last row's single tile centered). Built from the same
-   FRAMEWORK_DATA + DOMAIN_COLORS + icon set as the detail cards below,
-   so the two can never drift out of sync. What the framework covers,
-   not how deep it goes — the four levels are explained in the intro
-   above and in depth on each card below, not repeated here. */
-function renderFrameworkOverview(){
-  const svg = document.getElementById('frameworkOverviewSvg');
-  if (!svg) return;
-
-  const domainKeys = Object.keys(window.FRAMEWORK_DATA);
-  const COLS = 3, TILE_W = 196, TILE_H = 128, COL_GAP = 18, ROW_GAP = 18, PAD = 16;
-  const rows = Math.ceil(domainKeys.length / COLS);
-  const gridW = COLS * TILE_W + (COLS - 1) * COL_GAP;
-  const svgW = gridW + PAD * 2;
-  const svgH = rows * TILE_H + (rows - 1) * ROW_GAP + PAD * 2;
-  svg.setAttribute('viewBox', `0 0 ${svgW} ${svgH}`);
-
-  // Two-line, shortened labels — the full domain name is already on the
-  // matching detail card just below.
-  const TILE_LABEL = {
-    discovery: ['Customer &amp; Market', 'Discovery'],
-    strategy: ['Product Strategy', '&amp; Roadmapping'],
-    prioritization: ['Prioritization', '&amp; Trade-offs'],
-    execution: ['Execution', '&amp; Delivery'],
-    stakeholder: ['Stakeholder', 'Communication'],
-    aiIndividual: ['AI Fluency', 'Individual'],
-    aiOrg: ['AI Fluency', 'Organizational']
-  };
-
-  let s = '';
-  domainKeys.forEach((key, i) => {
-    const label = TILE_LABEL[key];
-    const row = Math.floor(i / COLS);
-    const itemsInRow = Math.min(COLS, domainKeys.length - row * COLS);
-    const rowW = itemsInRow * TILE_W + (itemsInRow - 1) * COL_GAP;
-    const rowX0 = PAD + (gridW - rowW) / 2; // centers a short last row
-    const col = i % COLS;
-
-    const tileX = rowX0 + col * (TILE_W + COL_GAP);
-    const tileY = PAD + row * (TILE_H + ROW_GAP);
-    const cx = tileX + TILE_W / 2;
-    const iconCy = tileY + 34;
-
-    // A line icon on a soft tile, as on www.productadvisory.co's service cards.
-    s += `<a class="fw-link" href="#${key}"><rect class="fw-hit" x="${tileX}" y="${tileY}" width="${TILE_W}" height="${TILE_H}" rx="14"/>`;
-    s += `<rect class="fw-tile" x="${cx - 30}" y="${iconCy - 30}" width="60" height="60" rx="16"/>`;
-    s += domainIconSvg(key, 38, cx - 19, iconCy - 19);
-
-    s += `<text x="${cx}" y="${iconCy + 52}" text-anchor="middle" font-family="var(--display)" font-weight="700" font-size="13" fill="var(--ink)">${label[0]}</text>`;
-    s += `<text x="${cx}" y="${iconCy + 68}" text-anchor="middle" font-family="var(--display)" font-weight="700" font-size="13" fill="var(--ink)">${label[1]}</text>` + '</a>';
-  });
-
-  svg.innerHTML = s;
-}
-renderFrameworkOverview();
+// "At a glance": the levels and the seven domains in two groups, with the 28 competencies a click away
+if (window.FrameworkGraphic) FrameworkGraphic.render(document.getElementById('frameworkGraphic'), { colors: DOMAIN_COLORS, tiers: TIER_LABELS });
 
 // The domain cards are built here at runtime, so a #domain hash in the
 // URL (e.g. arriving from a growth-area link on the results screen)
@@ -274,6 +261,21 @@ if (location.hash){
 }
 
 document.getElementById('footerYear').textContent = new Date().getFullYear();
+
+// Role benchmarks: every standard role's target in every competency (ShapeCore.targetsFor)
+(function(){
+  const K = window.CompetencyCore, RC = window.RolesCore, S = window.ShapeCore, box = document.getElementById('roleBench');
+  if (!K || !RC || !S || !box) return;
+  const roles = RC.ROLES, T = roles.map(r => S.targetsFor(r.targets, r.id));
+  let h = '<table class="rb"><thead><tr><th scope="col">Competency</th>' + roles.map(r => '<th scope="col">' + fwEsc(r.title) + '</th>').join('') + '</tr></thead><tbody>';
+  Object.keys(window.FRAMEWORK_DATA).forEach(a => {
+    h += '<tr class="rb-area"><th scope="rowgroup" colspan="' + (roles.length + 1) + '">' + fwEsc(window.FRAMEWORK_DATA[a].label) + '</th></tr>';
+    K.inArea(a).forEach(c => {
+      h += '<tr><th scope="row">' + fwEsc(c.name) + '</th>' + roles.map((r, i) => { const v = T[i][c.key]; return '<td>' + (v !== r.targets[a] ? '<b>' + v + '</b>' : v) + '</td>'; }).join('') + '</tr>';
+    });
+  });
+  box.innerHTML = h + '</tbody></table>';
+})();
 </script>
 
 <script>

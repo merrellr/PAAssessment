@@ -1026,7 +1026,7 @@ import { getFirestore, doc, getDoc, setDoc as fsSetDoc, increment, collection, q
 // Every write on this page goes through here, so the owner's demo mode (?demo=1, demo.js) never saves anything.
 const setDoc = (...a) => window.__paDemo ? Promise.resolve() : fsSetDoc(...a);
 const DEMO_ASKED = new URLSearchParams(location.search).get('demo') === '1';
-import { syncOrgShare } from "./org-share.js";
+import { syncOrgShare, syncOrgShape, assignedRole } from "./org-share.js";
 import { withTwoStep, twoStepError } from "./two-step.js";
 
 const app = initializeApp(firebaseConfig);
@@ -1679,16 +1679,19 @@ function renderCoach(user, progress, assessmentResult, assessmentUrl){
     CoachUI.render({ areas, pct, assessedAt: at || null, planArea: plan && !plan.over && !plan.week.complete ? plan.week.d : null, assessedLabel: at ? 'Skill check, ' + new Date(at).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) : '',
       log: progress.answers || [], progress, bank: window.CoachBank || null, resume, lessonsDone, assessUrl: assessmentUrl, now: Date.now() });
     // My shape: the 28 competencies against the target role (the same progress.targets as Profile's role targets)
-    if (window.ShapeUI && window.RolesCore){
+    if (window.ShapeUI && window.RolesCore) (async () => {
       const tg = progress.targets || {};
-      ShapeUI.render({ pct, log: progress.answers || [], progress, bank: window.CoachBank || null }, { roles: RolesCore.rolesFor(), roleId: tg.roleId || '', personal: tg.personal || {},
+      // a role the company assigned wins, and then the company can see this shape against it (told on screen)
+      const assigned = window.__paDemo ? '' : await assignedRole(db, auth.currentUser || user);
+      const shape = ShapeUI.render({ pct, log: progress.answers || [], progress, bank: window.CoachBank || null }, { roles: RolesCore.rolesFor(), roleId: assigned || tg.roleId || '', assigned: !!assigned, personal: tg.personal || {},
         save: v => {
           progress.targets = { roleId: v.roleId || '', personal: v.personal || {}, updatedAt: new Date().toISOString() };
           const t2 = RolesCore.forProgress(progress, assessmentResult || null), tt = document.getElementById('targetTile');
           if (tt && window.RolesUI) tt.innerHTML = RolesUI.tile(t2);
           return setDoc(doc(db, 'progress', user.uid), { targets: progress.targets }, { merge: true });
         } });
-    }
+      if (!window.__paDemo && shape && auth.currentUser) syncOrgShape(db, auth.currentUser, shape.levels).catch(() => {});
+    })();
     const focus = window.CoachCore.nextStep({ areas, pct, log: progress.answers || [], progress, bank: window.CoachBank || null }).area;
     document.querySelectorAll('[data-coach-sg="weakest"], [data-coach-sg="short"]').forEach(a => { a.href = '/practice' + (focus ? '?area=' + focus : '') + (a.dataset.coachSg === 'short' ? (focus ? '&' : '?') + 'n=6' : ''); });
   };

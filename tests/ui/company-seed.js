@@ -108,6 +108,15 @@
       store['orgs/orgA/snapshots/' + day28] = { day: day28, at: T(28), people: 4, assessed: 3, learning: 0, finished: 0, inactive: 0, avgOverall: 40, avgPlan: 2, lessons: 4, areas: { discovery: 40 } };
       store['orgs/orgA/snapshots/' + day10] = { day: day10, at: T(10), people: 5, assessed: 4, learning: 1, finished: 0, inactive: 0, avgOverall: 44, avgPlan: 6, lessons: 12, areas: { discovery: 45 } };
     }
+    // skills shapes (C4): Ben has a role and a shared shape; Dee has a role but hasn't opened My Learning since
+    if (scn === 'shapes') {
+      store['orgRoles/orgA/people/uBen'] = { roleId: 'spm', assignedAt: T(3), assignedBy: 'uAdmin' };
+      store['orgRoles/orgA/people/uDee'] = { roleId: 'pm', assignedAt: T(1), assignedBy: 'uAdmin' };
+      var lv = {}, st = {};
+      ['d.framing', 'd.research', 'd.validate', 'd.market', 's.vision', 's.roadmap', 's.business', 's.gtm', 'p.tradeoff', 'p.estimate', 'p.sayno', 'p.evidence', 'e.plan', 'e.quality', 'e.partner', 'e.outcomes',
+       'k.updates', 'k.influence', 'k.exec', 'k.align', 'ai.tools', 'ai.research', 'ai.check', 'ai.workflow', 'ao.find', 'ao.design', 'ao.govern', 'ao.adopt'].forEach(function (k, i) { lv[k] = [2, 3, 3.5, 1.5][i % 4]; st[k] = 'msts'[i % 4]; });
+      store['orgs/orgA/members/uBen'].shape = { roleId: 'spm', levels: lv, strength: st, at: new Date(Date.now() - 2 * day).toISOString() };
+    }
     if (scn === 'snapshotsdenied') window.__failList = /^orgs\/orgA\/snapshots$/;
     if (scn === 'snapfail') window.__failWrite = /\/snapshots\//;
     if (scn === 'noplatform') window.__platform = null;

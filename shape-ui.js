@@ -86,11 +86,12 @@
     var placed = state.placed;
     return '<section class="card sh-card" aria-labelledby="shT"><div class="sh-head"><div><span class="eyebrow">My shape</span><h2 id="shT">Your skills shape</h2>' +
       '<p class="cc-muted">28 competencies under the seven skill areas, from your skill check, practice and lessons. Like readiness, it isn’t a grade: it moves as you practise.</p></div>' +
-      '<div class="sh-target-pick"><label for="shRole">Measured against</label><select id="shRole">' + roleOptions(state.opts.roles, role ? role.id : '') + '</select>' +
+      '<div class="sh-target-pick"><label for="shRole">Measured against</label><select id="shRole"' + (state.opts.assigned ? ' disabled aria-describedby="shConsent"' : '') + '>' + roleOptions(state.opts.roles, role ? role.id : '') + '</select>' +
+      (state.opts.assigned ? '<p class="sh-consent" id="shConsent"><b>Your company assigned this role.</b> Your manager can see your skills shape against it (your levels and how much evidence is behind each, never your answers).</p>' : '') +
       '<button type="button" class="linklike" id="shPlace">Place me automatically</button>' +
       '<label for="shCmp" class="sh-cmp-l">Compare with another role</label><select id="shCmp"><option value="">No comparison</option>' + (state.opts.roles || []).filter(function (r) { return !role || r.id !== role.id; }).map(function (r) { return '<option value="' + esc(r.id) + '"' + (other && other.id === r.id ? ' selected' : '') + '>' + esc(r.title) + '</option>'; }).join('') + '</select>' +
       (placed ? '<p class="sh-placed" role="status">' + (placed.none ? 'Not enough to go on yet: take the skill check or a few practice sessions first.' :
-        'Your shape is ' + (placed.fit === 'close' ? 'closest to' : 'nearest to') + ' <b>' + esc(placed.role.title) + '</b>.' + (role && role.id === placed.role.id ? '' : ' <button type="button" class="linklike" id="shUsePlaced">Measure against it</button>')) + '</p>' : '') +
+        'Your shape is ' + (placed.fit === 'close' ? 'closest to' : 'nearest to') + ' <b>' + esc(placed.role.title) + '</b>.' + (role && role.id === placed.role.id || state.opts.assigned ? '' : ' <button type="button" class="linklike" id="shUsePlaced">Measure against it</button>')) + '</p>' : '') +
       '</div></div>' +
       '<div class="sh-body"><figure class="sh-fig">' + chart(rows, role && role.title, false, otherT) +
       '<figcaption class="sh-legend"><span><i class="sh-k s-strong"></i>Your level (darker: more evidence)</span>' + (role ? '<span><i class="sh-k k-target"></i>' + esc(role.title) + '</span>' : '') + (other ? '<span><i class="sh-k k-target2"></i>' + esc(other.title) + '</span>' : '') + '<span class="cc-muted">' + known + ' of 28 known</span></figcaption>' +
