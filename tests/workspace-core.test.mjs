@@ -55,5 +55,44 @@ t('sample: every kind of item, valid ids, all links resolve', W.ORDER.every(k =>
 t('sample: every link is a type its item may link to', S.every(i => i.links.every(l => W.linkTargets(i.type).indexOf(S.find(o => o.id === l).type) > -1)));
 t('sample: nothing is left unconnected', S.every(i => sg[i.id].length > 0));
 
+// the views
+const V = [
+  { id: 'acctBig01', type: 'account', title: 'Big', value: 400000, band: 'b4', tier: 3, links: [] },
+  { id: 'acctMid01', type: 'account', title: 'Mid', value: null, band: 'b2', tier: 1, links: [] },
+  { id: 'acctSml01', type: 'account', title: 'Small', value: 5000, band: 'b1', tier: 0, links: [] },
+  { id: 'ideaPop01', type: 'idea', title: 'Popular', votes: 50, links: ['acctSml01'] },
+  { id: 'ideaVal01', type: 'idea', title: 'Valuable', votes: 3, links: ['acctBig01', 'acctMid01', 'featA0001'] },
+  { id: 'ideaNon01', type: 'idea', title: 'Nobody', votes: 0, links: [] },
+  { id: 'relLate01', type: 'release', title: 'Late', date: '2027-09-01', links: ['goalA0001'] },
+  { id: 'relSoon01', type: 'release', title: 'Soon', date: '2027-03-01', links: [] },
+  { id: 'featA0001', type: 'feature', title: 'A', area: 'Core', status: 'done', links: ['relSoon01', 'goalA0001'] },
+  { id: 'featB0001', type: 'feature', title: 'B', area: 'Core', links: ['relLate01', 'goalA0001'] },
+  { id: 'featC0001', type: 'feature', title: 'C', area: '', links: ['goalA0001'] },
+  { id: 'goalA0001', type: 'goal', title: 'Goal A', date: '2027-06-30', links: [] },
+  { id: 'goalB0001', type: 'goal', title: 'Goal B', date: '', links: [] }
+];
+const vr = W.valueRank(V);
+t('value view: ranked by account value weighted by how strategic, not by votes', vr[0].title === 'Valuable' && vr[0].score === 400000 * 2 + 30000 && vr[0].value === 430000 && vr[0].voteRank === 2 && vr[1].title === 'Popular' && vr[1].voteRank === 1, JSON.stringify(vr.map(r => [r.title, r.score, r.rank, r.voteRank])));
+t('value view: exact only when every account behind it has a figure; strategic accounts counted', vr[0].exact === false && vr[1].exact === true && vr[0].strategic === 1);
+t('value view: an idea with no accounts ranks last, at 0', vr[2].title === 'Nobody' && vr[2].score === 0 && vr[2].rank === 3);
+t('value view: weighting can be left out', W.valueRank(V, { weighted: false })[0].score === 430000);
+t('value view: shift is how many places value lifts it above votes', vr[0].shift === 1 && vr[1].shift === -1);
+t('money', W.money(430000) === '$430k' && W.money(1250000, true) === '≈ $1.3m' && W.money(800) === '$800');
+const rm = W.releaseMap(V);
+t('release map: releases by date, then "No release"', rm.cols.map(c => c.title).join() === 'Soon,Late,No release', rm.cols.map(c => c.title).join());
+t('release map: areas, with "No area" last', rm.rows.map(r => r.label).join() === 'Core,No area');
+t('release map: each feature in its cell, with the ideas linked to it', rm.rows[0].cells[0][0].title === 'A' && rm.rows[0].cells[0][0].ideas[0].title === 'Valuable' && rm.rows[0].cells[1][0].title === 'B' && rm.rows[1].cells[2][0].title === 'C');
+t('release map: counts per release', rm.cols[0].features === 1 && rm.cols[0].ideas === 1 && rm.cols[2].features === 1);
+const gt = W.goalTimeline(V), ga = gt.goals[0];
+t('goal timeline: goals by date, undated last', gt.goals.map(g => g.title).join() === 'Goal A,Goal B');
+t('goal timeline: features placed at their release dates, in order', ga.features.map(f => f.title + '@' + f.date).join() === 'A@2027-03-01,B@2027-09-01');
+t('goal timeline: a feature landing after the goal’s target is flagged', !ga.features[0].late && ga.features[1].late);
+t('goal timeline: a feature with no release is not scheduled', ga.unscheduled.map(f => f.title).join() === 'C');
+t('goal timeline: the goal’s releases as markers, and how many features are done', ga.releases.map(r => r.title).join() === 'Late' && ga.done === 1);
+t('goal timeline: the range covers targets and releases', gt.range.from === '2027-03-01' && gt.range.to === '2027-09-01');
+t('position on the axis', W.position('2027-03-01', gt.range) === 0 && W.position('2027-09-01', gt.range) === 1 && W.position('', gt.range) === 0 && W.position('2027-05-01', { from: '2027-05-01', to: '2027-05-01' }) === 0.5);
+const sv = W.valueRank(W.sample());
+t('sample: the most-voted idea is not the most valuable (the point of the view)', sv[0].voteRank > 1 && sv.find(r => r.voteRank === 1).rank > 3);
+
 console.log('\n' + pass + ' passed, ' + fail + ' failed');
 process.exit(fail ? 1 : 0);

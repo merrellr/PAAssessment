@@ -70,6 +70,53 @@
   .soon{ display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; margin-top: 8px; }
   .soon div{ border: 1px solid var(--pa-line); border-radius: 12px; padding: 10px 12px; font-size: .82rem; color: var(--pa-muted); }
   .soon b{ display:block; color: var(--pa-ink); font-size: .875rem; margin-bottom: 2px; }
+  .vw-intro{ font-size: .875rem; margin: 0 0 12px; }
+  .vw-opt{ display:flex; gap: 8px; align-items:flex-start; font-size: .85rem; margin: 0 0 14px; }
+  .vw-opt input{ margin-top: 3px; }
+  .open{ background:none; border:0; padding:0; font: inherit; font-weight: 700; color: var(--pa-ink); text-align:left; cursor:pointer; overflow-wrap:anywhere; }
+  .open:hover{ color: var(--pa-navy); text-decoration: underline; }
+  .open:focus-visible{ outline: 3px solid var(--pa-cyan); outline-offset: 2px; }
+  .vv{ list-style:none; margin:0; padding:0; }
+  .vv li{ display:grid; grid-template-columns: 2.2em minmax(0, 1fr); gap: 4px 10px; padding: 12px 0; border-top: 1px solid var(--pa-line); }
+  .vv .rk{ font: 800 1.05rem var(--pa-display); color: var(--pa-navy); text-align:right; }
+  .vv .bar{ height: 10px; border-radius: 5px; background: var(--pa-line); overflow:hidden; margin: 6px 0 4px; }
+  .vv .bar i{ display:block; height:100%; background: var(--pa-primary); border-radius: 5px; }
+  .vv .facts{ display:flex; flex-wrap:wrap; gap: 4px 14px; font-size: .8rem; color: var(--pa-muted); }
+  .vv .facts b{ color: var(--pa-ink); }
+  .shift{ display:inline-block; font-size: .72rem; font-weight: 800; border-radius: 999px; padding: 1px 8px; }
+  .shift.up{ background: var(--pa-ok-bg); color: var(--pa-ok-ink, var(--pa-ink)); }
+  .shift.down{ background: var(--pa-warn-bg); color: var(--pa-ink); }
+  .rm{ border-collapse: separate; border-spacing: 0; font-size: .82rem; min-width: 100%; }
+  .rm th, .rm td{ border-bottom: 1px solid var(--pa-line); padding: 8px 10px; vertical-align: top; text-align:left; min-width: 150px; }
+  .rm thead th{ font-weight: 800; color: var(--pa-navy-deep); background: var(--pa-card); }
+  .rm thead small{ display:block; font-weight: 400; color: var(--pa-muted); }
+  .rm tbody th{ position: sticky; left: 0; background: var(--pa-card); min-width: 110px; font-weight: 700; box-shadow: 1px 0 0 var(--pa-line); }
+  .rm ul{ list-style:none; margin:0; padding:0; display:grid; gap: 6px; }
+  .rm li small{ display:block; color: var(--pa-muted); font-size: .74rem; }
+  .rm .none{ color: var(--pa-muted); }
+  .gt{ border-top: 1px solid var(--pa-line); padding: 14px 0; }
+  .gt-h{ display:flex; flex-wrap:wrap; justify-content:space-between; gap: 4px 12px; align-items:baseline; }
+  .gt-h .m{ font-size: .8rem; color: var(--pa-muted); display:flex; flex-wrap:wrap; gap: 4px 10px; align-items:center; }
+  .track{ position: relative; height: 34px; margin: 10px 8px 2px; }
+  .track::before{ content:''; position:absolute; left:0; right:0; top: 16px; height: 2px; background: var(--pa-line); }
+  .track .dot{ position:absolute; top: 11px; width: 12px; height: 12px; margin-left: -6px; border-radius: 50%; background: var(--pa-primary); border: 2px solid var(--pa-card); }
+  .track .dot.done{ background: var(--pa-ok, #2e8b57); }
+  .track .dot.late{ background: var(--pa-warn, #c0622a); }
+  .track .rel{ position:absolute; top: 6px; width: 2px; height: 22px; margin-left: -1px; background: var(--pa-muted); opacity: .5; }
+  .track .tgt{ position:absolute; top: 0; margin-left: -1px; width: 2px; height: 34px; background: var(--pa-navy); }
+  .track .tgt::after{ content:'Target'; position:absolute; top: -2px; left: 4px; font-size: .66rem; font-weight: 800; color: var(--pa-navy); white-space: nowrap; }
+  .track .tgt.end::after{ left:auto; right: 4px; }
+  .axis{ display:flex; justify-content:space-between; font-size: .7rem; color: var(--pa-muted); margin: 0 0 8px; }
+  .gt ul{ margin: 6px 0 0; padding-left: 18px; font-size: .85rem; line-height: 1.55; }
+  .gt .late-t{ color: var(--pa-warn, #c0622a); font-weight: 700; font-size: .78rem; }
+  .swipe{ display:none; font-size: .78rem; margin: -4px 0 8px; }
+  @media (max-width: 700px){ .swipe{ display:block; } }
+  .gt-key{ display:flex; flex-wrap:wrap; gap: 6px 16px; font-size: .75rem; color: var(--pa-muted); margin: 0 0 6px; }
+  .gt-key span{ display:inline-flex; align-items:center; gap: 6px; }
+  .k-dot{ width: 10px; height: 10px; border-radius: 50%; background: var(--pa-primary); display:inline-block; }
+  .k-dot.done{ background: var(--pa-ok, #2e8b57); } .k-dot.late{ background: var(--pa-warn, #c0622a); }
+  .k-rel{ width: 2px; height: 14px; background: var(--pa-muted); opacity: .5; display:inline-block; }
+  .k-tgt{ width: 2px; height: 14px; background: var(--pa-navy); display:inline-block; }
   .paid{ font-size: .68rem; font-weight: 800; letter-spacing: .05em; text-transform: uppercase; color: var(--pa-cyan-ink, var(--pa-primary)); margin-left: 6px; }
 </style>
 <link rel="stylesheet" href="pa-theme.css">
@@ -89,6 +136,9 @@
 
   <div class="tabs" role="tablist" aria-label="Workspace">
     <button type="button" role="tab" id="tabItems" aria-selected="true" aria-controls="pnItems">Items</button>
+    <button type="button" role="tab" id="tabValue" aria-selected="false" aria-controls="pnValue">Value view</button>
+    <button type="button" role="tab" id="tabRel" aria-selected="false" aria-controls="pnRel">Release map</button>
+    <button type="button" role="tab" id="tabGoals" aria-selected="false" aria-controls="pnGoals">Goal timeline</button>
     <button type="button" role="tab" id="tabImport" aria-selected="false" aria-controls="pnImport">Import a CSV</button>
     <button type="button" role="tab" id="tabSettings" aria-selected="false" aria-controls="pnSettings" hidden>Settings</button>
   </div>
@@ -106,16 +156,38 @@
     <section class="card" id="wsEditor" hidden aria-labelledby="edTitle"></section>
     <section class="card" aria-labelledby="soonT">
       <h2 id="soonT">Coming to this workspace</h2>
-      <p class="cc-muted" style="margin:0;font-size:.875rem;">Views built from what you add here:</p>
+      <p class="cc-muted" style="margin:0;font-size:.875rem;">Next, built from what you add here:</p>
       <div class="soon">
-        <div><b>Value view</b>Ideas ranked by the account value and strategic weight behind them, next to plain vote counts.</div>
-        <div><b>Release map</b>Where ideas and features land, by product area and release.</div>
-        <div><b>Goal timeline</b>Each goal with the features that serve it, by release date.</div>
         <div><b>Product map</b>Accounts, ideas, features, releases and goals as one connected map.</div>
         <div><b>Updates and notes</b>What changed, and the team’s discussions kept with the items they’re about.</div>
         <div><b>Ask, with sources<span class="paid">Paid</span></b>Questions about the workspace answered by Compass, citing the items and notes used.</div>
       </div>
     </section>
+  </section>
+
+  <section id="pnValue" role="tabpanel" aria-labelledby="tabValue" hidden>
+    <div class="card">
+      <h2>Value view</h2>
+      <p class="cc-muted vw-intro">Ideas ranked by the annual value of the customer accounts asking for them. Votes sit beside each one, so you can see where the two disagree: a loud request from small accounts, or a quiet one from your biggest.</p>
+      <label class="vw-opt"><input type="checkbox" id="vvWeight" checked> Weight by how strategic each account is (Strategic counts double, Important one and a half times)</label>
+      <div id="vvBody"></div>
+    </div>
+  </section>
+  <section id="pnRel" role="tabpanel" aria-labelledby="tabRel" hidden>
+    <div class="card">
+      <h2>Release map</h2>
+      <p class="cc-muted vw-intro">Where features land, by product area and release, with the ideas each one answers. Releases run left to right by date.</p>
+      <p class="cc-muted swipe">Scroll the map sideways to see every release.</p>
+      <div id="rmBody"></div>
+    </div>
+  </section>
+  <section id="pnGoals" role="tabpanel" aria-labelledby="tabGoals" hidden>
+    <div class="card">
+      <h2>Goal timeline</h2>
+      <p class="cc-muted vw-intro">Each goal with the features linked to it, placed at their release dates. A feature landing after the goal’s target date is flagged.</p>
+      <p class="gt-key" aria-hidden="true"><span><i class="k-dot"></i>Feature, at its release date</span><span><i class="k-dot done"></i>Done</span><span><i class="k-dot late"></i>After the target</span><span><i class="k-rel"></i>Release linked to the goal</span><span><i class="k-tgt"></i>Target date</span></p>
+      <div id="gtBody"></div>
+    </div>
   </section>
 
   <section id="pnImport" role="tabpanel" aria-labelledby="tabImport" hidden>
@@ -175,8 +247,12 @@ const showErr = (m) => { $('wsErr').textContent = m; $('wsErr').hidden = !m; };
 const fail = (e, what) => { console.error(what, e); showErr('Could not ' + what + (e && e.code === 'permission-denied' ? ': you may no longer be in this company, or it isn’t active.' : '. Please try again.')); };
 
 /* ---------------------------------------------------------------- tabs */
-const TABS = [['tabItems', 'pnItems'], ['tabImport', 'pnImport'], ['tabSettings', 'pnSettings']];
-function showTab(id){ TABS.forEach(([t, p]) => { $(t).setAttribute('aria-selected', String(t === id)); $(p).hidden = t !== id; }); }
+const TABS = [['tabItems', 'pnItems'], ['tabValue', 'pnValue'], ['tabRel', 'pnRel'], ['tabGoals', 'pnGoals'], ['tabImport', 'pnImport'], ['tabSettings', 'pnSettings']];
+function showTab(id){
+  TABS.forEach(([t, p]) => { $(t).setAttribute('aria-selected', String(t === id)); $(p).hidden = t !== id; });
+  if (id === 'tabValue') drawValue(); else if (id === 'tabRel') drawRel(); else if (id === 'tabGoals') drawGoals();
+  if (id !== 'tabItems') event('workspace_view', { view: id.slice(3).toLowerCase() });
+}
 TABS.forEach(([t]) => $(t).addEventListener('click', () => showTab(t)));
 
 /* ---------------------------------------------------------------- the list */
@@ -290,6 +366,58 @@ async function del(){
     showErr(''); closeEditor();
   } catch (e) { fail(e, 'delete it'); }
 }
+
+/* ---------------------------------------------------------------- the views */
+const openBtn = (id, title) => '<button type="button" class="open" data-open="' + esc(id) + '">' + esc(title) + '</button>';
+function viewEmpty(what){ return '<p class="empty">' + what + '</p>'; }
+const dateLabel = (d) => d ? new Date(d + 'T12:00:00Z').toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric', timeZone: 'UTC' }) : '';
+function drawValue(){
+  const rows = W.valueRank(items, { weighted: $('vvWeight').checked });
+  if (!rows.length) { $('vvBody').innerHTML = viewEmpty('No ideas yet. Add ideas and link them to the accounts asking for them.'); return; }
+  const max = Math.max(1, ...rows.map(r => r.score)), bands = settings.valueMode === 'bands';
+  $('vvBody').innerHTML = '<ol class="vv">' + rows.map(r => {
+    const val = r.accounts.length ? W.money(r.value, bands || !r.exact) + ' a year from ' + r.accounts.length + (r.accounts.length === 1 ? ' account' : ' accounts') : 'No accounts linked';
+    const sh = r.accounts.length && Math.abs(r.shift) >= 2 ? '<span class="shift ' + (r.shift > 0 ? 'up' : 'down') + '">' + (r.shift > 0 ? '↑ ' + r.shift + ' places above its votes' : '↓ ' + (-r.shift) + ' places below its votes') + '</span>' : '';
+    return '<li><span class="rk">' + r.rank + '</span><div>' + openBtn(r.id, r.title) +
+      '<div class="bar" role="img" aria-label="' + Math.round(r.score / max * 100) + '% of the top idea’s value"><i style="width:' + (r.score / max * 100).toFixed(1) + '%"></i></div>' +
+      '<div class="facts"><span><b>' + esc(val) + '</b></span>' + (r.strategic ? '<span>' + r.strategic + ' strategic</span>' : '') +
+      '<span>' + r.votes + (r.votes === 1 ? ' vote' : ' votes') + ' (#' + r.voteRank + ' by votes)</span>' + (r.area ? '<span>' + esc(r.area) + '</span>' : '') + sh + '</div></div></li>';
+  }).join('') + '</ol>' + (bands ? '<p class="cc-muted" style="font-size:.78rem;margin:10px 0 0;">Values come from each account’s band (its middle), so they are approximate.</p>' : '');
+}
+$('vvWeight').addEventListener('change', drawValue);
+function drawRel(){
+  const rm = W.releaseMap(items);
+  if (!rm.rows.length) { $('rmBody').innerHTML = viewEmpty('No features yet. Add features and link each to its release.'); return; }
+  $('rmBody').innerHTML = '<div class="scroll" tabindex="0" role="region" aria-label="Release map, scrolls sideways"><table class="rm"><thead><tr><th scope="col">Area</th>' + rm.cols.map(c =>
+    '<th scope="col">' + (c.id ? openBtn(c.id, c.title) : esc(c.title)) + '<small>' + (c.date ? esc(dateLabel(c.date)) + ' · ' : '') + c.features + (c.features === 1 ? ' feature' : ' features') + ', ' + c.ideas + (c.ideas === 1 ? ' idea' : ' ideas') + '</small></th>').join('') +
+    '</tr></thead><tbody>' + rm.rows.map(r => '<tr><th scope="row">' + esc(r.label) + '</th>' + r.cells.map(cell => '<td>' + (cell.length ? '<ul>' + cell.map(f =>
+      '<li>' + openBtn(f.id, f.title) + (f.status ? ' <span class="pill s-' + esc(f.status) + '">' + esc(W.STATUS[f.status]) + '</span>' : '') +
+      (f.ideas.length ? '<small>Answers ' + f.ideas.map(i => esc(i.title)).join('; ') + '</small>' : '') + '</li>').join('') + '</ul>' : '<span class="none" aria-label="nothing">–</span>') + '</td>').join('') + '</tr>').join('') +
+    '</tbody></table></div>';
+}
+function drawGoals(){
+  const gt = W.goalTimeline(items);
+  if (!gt.goals.length) { $('gtBody').innerHTML = viewEmpty('No goals yet. Add goals, then link features to them.'); return; }
+  const pos = (d) => (W.position(d, gt.range) * 100).toFixed(2) + '%';
+  $('gtBody').innerHTML = gt.goals.map(g => {
+    const n = g.features.length + g.unscheduled.length, late = g.features.filter(f => f.late).length;
+    const track = gt.range ? '<div class="track" aria-hidden="true">' + g.releases.map(r => '<span class="rel" style="left:' + pos(r.date) + '" title="' + esc(r.title) + '"></span>').join('') +
+      (g.date ? '<span class="tgt' + (W.position(g.date, gt.range) > 0.85 ? ' end' : '') + '" style="left:' + pos(g.date) + '"></span>' : '') +
+      g.features.map(f => '<span class="dot' + (f.status === 'done' ? ' done' : f.late ? ' late' : '') + '" style="left:' + pos(f.date) + '" title="' + esc(f.title + ' · ' + f.release) + '"></span>').join('') + '</div>' +
+      '<div class="axis" aria-hidden="true"><span>' + esc(dateLabel(gt.range.from)) + '</span><span>' + esc(dateLabel(gt.range.to)) + '</span></div>' : '';
+    const byDate = []; g.features.forEach(f => { const last = byDate[byDate.length - 1]; if (last && last.date === f.date) last.f.push(f); else byDate.push({ date: f.date, release: f.release, f: [f] }); });
+    return '<div class="gt"><div class="gt-h">' + openBtn(g.id, g.title) + '<span class="m">' + (g.status ? '<span class="pill s-' + esc(g.status) + '">' + esc(W.STATUS[g.status]) + '</span>' : '') +
+      (g.date ? '<span>Target ' + esc(dateLabel(g.date)) + '</span>' : '<span>No target date</span>') + '<span>' + g.done + ' of ' + n + (n === 1 ? ' feature' : ' features') + ' done</span></span></div>' + track +
+      (n ? '<ul>' + byDate.map(d => '<li><b>' + esc(dateLabel(d.date)) + '</b> · ' + esc(d.release) + ': ' + d.f.map(f => openBtn(f.id, f.title) + (f.late ? ' <span class="late-t">after the target</span>' : '')).join(', ') + '</li>').join('') +
+        (g.unscheduled.length ? '<li><b>Not scheduled</b>: ' + g.unscheduled.map(f => openBtn(f.id, f.title)).join(', ') + '</li>' : '') + '</ul>'
+        : '<p class="cc-muted" style="font-size:.85rem;margin:6px 0 0;">No features linked to this goal yet.</p>') + (late ? '<p class="late-t" style="margin:6px 0 0;">' + late + (late === 1 ? ' feature lands' : ' features land') + ' after the target date.</p>' : '') + '</div>';
+  }).join('');
+}
+['vvBody', 'rmBody', 'gtBody'].forEach(id => $(id).addEventListener('click', (e) => {
+  const b = e.target.closest('[data-open]'); if (!b) return;
+  const it = items.find(i => i.id === b.dataset.open); if (!it) return;
+  showTab('tabItems'); openEditor(it);
+}));
 
 /* ---------------------------------------------------------------- CSV import */
 const FIELD_LABELS = [['title', 'Title (needed)'], ['type', 'Kind of item'], ['note', 'Notes'], ['area', 'Product area'], ['status', 'Status'], ['date', 'Date'],
