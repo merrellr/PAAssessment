@@ -307,6 +307,77 @@
     return b > a ? Math.max(0, Math.min(1, (d - a) / (b - a))) : 0.5;
   }
 
+  // Product map: the five kinds as columns in link order (accounts → ideas → features → releases → goals), every
+  // link as a line between two columns. Each item gets a place; the order within a column starts sensibly (value,
+  // date) and is then nudged towards the middle of what it links to, so lines cross less.
+  //   productMap(items, { nodeW, nodeH, gapX, gapY }) → { cols: [{ type, label, x, nodes: [{ id, title, type, status, x, y }] }],
+  //     edges: [{ from, to }] (from: the left end), width, height, size: { w, h } }
+  var MAP_COLS = ['account', 'idea', 'feature', 'release', 'goal'];
+  function productMap(items, o) {
+    o = o || {};
+    var W = o.nodeW || 160, H = o.nodeH || 38, GX = o.gapX || 56, GY = o.gapY || 8, m = index(items);
+    var col = {}; MAP_COLS.forEach(function (t, i) { col[t] = i; });
+    var edges = [], seen = {};
+    items.forEach(function (it) {
+      (it.links || []).forEach(function (id) {
+        var o2 = m[id]; if (!o2 || col[it.type] == null || col[o2.type] == null || col[it.type] === col[o2.type]) return;
+        var a = col[it.type] < col[o2.type] ? it.id : o2.id, b = a === it.id ? o2.id : it.id, k = a + '>' + b;
+        if (!seen[k]) { seen[k] = 1; edges.push({ from: a, to: b }); }
+      });
+    });
+    var nb = {}; items.forEach(function (i) { nb[i.id] = []; });
+    edges.forEach(function (e) { nb[e.from].push(e.to); nb[e.to].push(e.from); });
+    var vr = {}; valueRank(items).forEach(function (r) { vr[r.id] = r.rank; });
+    var start = {
+      account: function (a, b) { return accountValue(b) - accountValue(a) || a.title.localeCompare(b.title); },
+      idea: function (a, b) { return vr[a.id] - vr[b.id] || a.title.localeCompare(b.title); },
+      feature: function (a, b) { return a.title.localeCompare(b.title); },
+      release: function (a, b) { return (a.date || '9999').localeCompare(b.date || '9999') || a.title.localeCompare(b.title); },
+      goal: function (a, b) { return (a.date || '9999').localeCompare(b.date || '9999') || a.title.localeCompare(b.title); }
+    };
+    var lists = MAP_COLS.map(function (t) { return items.filter(function (i) { return i.type === t; }).sort(start[t]); });
+    var pos = {};
+    var place = function () { lists.forEach(function (l) { l.forEach(function (it, i) { pos[it.id] = i / Math.max(1, l.length - 1); }); }); };
+    place();
+    // barycentre sweeps: right, then left, twice; items with no links keep their place
+    for (var sweep = 0; sweep < 4; sweep++) {
+      var order = sweep % 2 ? [3, 2, 1, 0] : [1, 2, 3, 4];
+      order.forEach(function (ci) {
+        var l = lists[ci], bc = {};
+        l.forEach(function (it) { var ps = nb[it.id].map(function (id) { return pos[id]; }); bc[it.id] = ps.length ? ps.reduce(function (a, b) { return a + b; }, 0) / ps.length : pos[it.id]; });
+        l.sort(function (a, b) { return bc[a.id] - bc[b.id] || pos[a.id] - pos[b.id]; });
+        l.forEach(function (it, i) { pos[it.id] = i / Math.max(1, l.length - 1); });
+      });
+    }
+    var tallest = Math.max.apply(null, lists.map(function (l) { return l.length; }).concat([1]));
+    var height = tallest * (H + GY) - GY;
+    var cols = MAP_COLS.map(function (t, ci) {
+      var l = lists[ci], x = ci * (W + GX), top = (height - (l.length * (H + GY) - GY)) / 2;   // shorter columns are centred
+      return { type: t, label: TYPES[t].plural, x: x, nodes: l.map(function (it, i) { return { id: it.id, title: it.title, type: t, status: it.status || '', x: x, y: Math.max(0, top) + i * (H + GY) }; }) };
+    });
+    return { cols: cols, edges: edges, width: MAP_COLS.length * W + (MAP_COLS.length - 1) * GX, height: Math.max(H, height), size: { w: W, h: H } };
+  }
+  // Everything one item leads to and comes from along the chain: going right only to the right, going left only to
+  // the left (so an account shows what its requests became, not every other account behind those features).
+  function trace(items, id) {
+    var m = index(items), col = {}; MAP_COLS.forEach(function (t, i) { col[t] = i; });
+    if (!m[id] || col[m[id].type] == null) return { ids: [], edges: [] };
+    var g = graph(items), ids = {}, edges = {};
+    ids[id] = 1;
+    [1, -1].forEach(function (dir) {
+      var todo = [id];
+      while (todo.length) {
+        var cur = todo.shift();
+        (g[cur] || []).forEach(function (n) {
+          if (!m[n] || col[m[n].type] == null || (col[m[n].type] - col[m[cur].type]) * dir <= 0) return;
+          var k = dir > 0 ? cur + '>' + n : n + '>' + cur; edges[k] = 1;
+          if (!ids[n]) { ids[n] = 1; todo.push(n); }
+        });
+      }
+    });
+    return { ids: Object.keys(ids), edges: Object.keys(edges) };
+  }
+
   // ------------------------------------------------------------------------------------------ the sample company
   // Fictional: Tidewater, a scheduling app for field-service teams. Every name and number is made up.
   function sample() {
@@ -351,5 +422,6 @@
     parseMoney: parseMoney, bandFor: bandFor, accountValue: accountValue, valueLabel: valueLabel, graph: graph, linkTargets: linkTargets,
     linkedFrom: linkedFrom, counts: counts, search: search, areas: areas, parseCsv: parseCsv, guessMapping: guessMapping, typeFrom: typeFrom,
     statusFrom: statusFrom, dateFrom: dateFrom, fromRows: fromRows, sample: sample, SAMPLE_SETTINGS: SAMPLE_SETTINGS,
-    TIER_WEIGHT: TIER_WEIGHT, valueRank: valueRank, money: money, releaseMap: releaseMap, goalTimeline: goalTimeline, position: position };
+    TIER_WEIGHT: TIER_WEIGHT, valueRank: valueRank, money: money, releaseMap: releaseMap, goalTimeline: goalTimeline, position: position,
+    MAP_COLS: MAP_COLS, productMap: productMap, trace: trace };
 })(typeof window !== 'undefined' ? window : globalThis);

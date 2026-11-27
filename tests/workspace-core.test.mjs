@@ -94,5 +94,24 @@ t('position on the axis', W.position('2027-03-01', gt.range) === 0 && W.position
 const sv = W.valueRank(W.sample());
 t('sample: the most-voted idea is not the most valuable (the point of the view)', sv[0].voteRank > 1 && sv.find(r => r.voteRank === 1).rank > 3);
 
+// product map
+const SP = W.sample(), pm = W.productMap(SP);
+t('map: five columns in link order, every item placed once', pm.cols.map(c => c.type).join() === 'account,idea,feature,release,goal' && pm.cols.reduce((n, c) => n + c.nodes.length, 0) === SP.length);
+const nodes = pm.cols.flatMap(c => c.nodes);
+t('map: no two items overlap in a column', pm.cols.every(c => c.nodes.every((n, i) => i === 0 || n.y >= c.nodes[i - 1].y + pm.size.h)));
+t('map: everything fits inside the map', nodes.every(n => n.x >= 0 && n.y >= 0 && n.x + pm.size.w <= pm.width && n.y + pm.size.h <= pm.height));
+const linkCount = SP.reduce((n, i) => n + i.links.length, 0);
+t('map: one line per link, always from the left column to the right', pm.edges.length === linkCount && pm.edges.every(e => { const a = nodes.find(n => n.id === e.from), b = nodes.find(n => n.id === e.to); return a.x < b.x; }));
+const crossings = (P) => { let x = 0; const by = {}; P.cols.forEach(c => c.nodes.forEach(n => { by[n.id] = n; })); const E = P.edges;
+  for (let i = 0; i < E.length; i++) for (let j = i + 1; j < E.length; j++) { const a = E[i], b = E[j]; if (by[a.from].x !== by[b.from].x || by[a.to].x !== by[b.to].x) continue; if ((by[a.from].y - by[b.from].y) * (by[a.to].y - by[b.to].y) < 0) x++; } return x; };
+t('map: ordering keeps line crossings low on the sample', crossings(pm) <= 20, crossings(pm));
+const tAcc = W.trace(SP, 'samplea6'), typeOf = (id) => SP.find(i => i.id === id).type;
+t('trace from an account: only rightwards (its ideas and what they became), no other accounts', tAcc.ids.filter(id => typeOf(id) === 'account').length === 1 && tAcc.ids.includes('samplei2') && tAcc.ids.includes('samplef5') && tAcc.ids.includes('sampleg1'));
+const tFeat = W.trace(SP, 'samplef7');
+t('trace from a feature: the ideas and accounts behind it, and its goal', tFeat.ids.includes('samplei3') && tFeat.ids.includes('samplea3') && tFeat.ids.includes('sampleg3') && !tFeat.ids.includes('samplea1'));
+t('trace: its lines are named from left to right', tFeat.edges.includes('samplei3>samplef7') && tFeat.edges.includes('samplef7>sampleg3'));
+t('trace: an unknown item traces nothing', W.trace(SP, 'nope').ids.length === 0);
+t('map: an empty workspace still has its five columns', W.productMap([]).cols.length === 5 && W.productMap([]).edges.length === 0);
+
 console.log('\n' + pass + ' passed, ' + fail + ' failed');
 process.exit(fail ? 1 : 0);

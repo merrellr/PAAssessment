@@ -117,6 +117,23 @@
   .k-dot.done{ background: var(--pa-ok, #2e8b57); } .k-dot.late{ background: var(--pa-warn, #c0622a); }
   .k-rel{ width: 2px; height: 14px; background: var(--pa-muted); opacity: .5; display:inline-block; }
   .k-tgt{ width: 2px; height: 14px; background: var(--pa-navy); display:inline-block; }
+  .pm-info{ display:flex; flex-wrap:wrap; align-items:center; gap: 8px 12px; min-height: 40px; font-size: .875rem; margin: 0 0 10px; padding: 8px 12px; border-radius: 12px; background: var(--pa-tint); }
+  .pm-wrap{ overflow:auto; max-height: 75vh; border: 1px solid var(--pa-line); border-radius: 12px; padding: 12px 10px; }
+  .pm-heads{ position: relative; height: 22px; margin-bottom: 6px; }
+  .pm-heads span{ position:absolute; top:0; font-size: .72rem; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; color: var(--pa-muted); }
+  .pm-canvas{ position: relative; }
+  .pm-canvas svg{ position:absolute; inset: 0; overflow: visible; }
+  .pm-canvas path{ fill:none; stroke: var(--pa-muted); stroke-opacity: .35; stroke-width: 1.2; }
+  .pm-n{ position:absolute; display:flex; align-items:center; gap: 6px; padding: 0 10px 0 8px; border: 1px solid var(--pa-line); border-left: 4px solid var(--tc); border-radius: 8px; background: var(--pa-card); color: var(--pa-ink); font: 600 .78rem var(--pa-sans); text-align:left; cursor:pointer; overflow:hidden; }
+  .pm-n span{ overflow:hidden; display:-webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; line-height: 1.25; }
+  .pm-n:hover{ border-color: var(--tc); }
+  .pm-n:focus-visible{ outline: 3px solid var(--pa-cyan); outline-offset: 1px; }
+  .t-account{ --tc: #8a5cd0; } .t-idea{ --tc: var(--pa-cyan); } .t-feature{ --tc: var(--pa-primary); } .t-release{ --tc: var(--pa-ok, #2e8b57); } .t-goal{ --tc: var(--pa-warn, #c0622a); }
+  .pm-canvas.tracing .pm-n{ opacity: .3; }
+  .pm-canvas.tracing .pm-n.on{ opacity: 1; }
+  .pm-canvas.tracing .pm-n[aria-pressed="true"]{ box-shadow: 0 0 0 2px var(--tc); }
+  .pm-canvas.tracing path{ stroke-opacity: .08; }
+  .pm-canvas.tracing path.on{ stroke: var(--pa-primary); stroke-opacity: 1; stroke-width: 2; }
   .paid{ font-size: .68rem; font-weight: 800; letter-spacing: .05em; text-transform: uppercase; color: var(--pa-cyan-ink, var(--pa-primary)); margin-left: 6px; }
 </style>
 <link rel="stylesheet" href="pa-theme.css">
@@ -139,6 +156,7 @@
     <button type="button" role="tab" id="tabValue" aria-selected="false" aria-controls="pnValue">Value view</button>
     <button type="button" role="tab" id="tabRel" aria-selected="false" aria-controls="pnRel">Release map</button>
     <button type="button" role="tab" id="tabGoals" aria-selected="false" aria-controls="pnGoals">Goal timeline</button>
+    <button type="button" role="tab" id="tabMap" aria-selected="false" aria-controls="pnMap">Product map</button>
     <button type="button" role="tab" id="tabImport" aria-selected="false" aria-controls="pnImport">Import a CSV</button>
     <button type="button" role="tab" id="tabSettings" aria-selected="false" aria-controls="pnSettings" hidden>Settings</button>
   </div>
@@ -158,7 +176,6 @@
       <h2 id="soonT">Coming to this workspace</h2>
       <p class="cc-muted" style="margin:0;font-size:.875rem;">Next, built from what you add here:</p>
       <div class="soon">
-        <div><b>Product map</b>Accounts, ideas, features, releases and goals as one connected map.</div>
         <div><b>Updates and notes</b>What changed, and the team’s discussions kept with the items they’re about.</div>
         <div><b>Ask, with sources<span class="paid">Paid</span></b>Questions about the workspace answered by Compass, citing the items and notes used.</div>
       </div>
@@ -187,6 +204,16 @@
       <p class="cc-muted vw-intro">Each goal with the features linked to it, placed at their release dates. A feature landing after the goal’s target date is flagged.</p>
       <p class="gt-key" aria-hidden="true"><span><i class="k-dot"></i>Feature, at its release date</span><span><i class="k-dot done"></i>Done</span><span><i class="k-dot late"></i>After the target</span><span><i class="k-rel"></i>Release linked to the goal</span><span><i class="k-tgt"></i>Target date</span></p>
       <div id="gtBody"></div>
+    </div>
+  </section>
+
+  <section id="pnMap" role="tabpanel" aria-labelledby="tabMap" hidden>
+    <div class="card">
+      <h2>Product map</h2>
+      <p class="cc-muted vw-intro">Everything in the workspace and how it connects, from the accounts asking to the goals it serves. Pick any item to light up its chain: what it leads to on the right, and what led to it on the left.</p>
+      <div class="pm-info" id="pmInfo" aria-live="polite"><span class="cc-muted">Pick an item to trace it.</span></div>
+      <p class="cc-muted swipe">Scroll the map sideways to see every column.</p>
+      <div id="pmBody"></div>
     </div>
   </section>
 
@@ -247,10 +274,10 @@ const showErr = (m) => { $('wsErr').textContent = m; $('wsErr').hidden = !m; };
 const fail = (e, what) => { console.error(what, e); showErr('Could not ' + what + (e && e.code === 'permission-denied' ? ': you may no longer be in this company, or it isn’t active.' : '. Please try again.')); };
 
 /* ---------------------------------------------------------------- tabs */
-const TABS = [['tabItems', 'pnItems'], ['tabValue', 'pnValue'], ['tabRel', 'pnRel'], ['tabGoals', 'pnGoals'], ['tabImport', 'pnImport'], ['tabSettings', 'pnSettings']];
+const TABS = [['tabItems', 'pnItems'], ['tabValue', 'pnValue'], ['tabRel', 'pnRel'], ['tabGoals', 'pnGoals'], ['tabMap', 'pnMap'], ['tabImport', 'pnImport'], ['tabSettings', 'pnSettings']];
 function showTab(id){
   TABS.forEach(([t, p]) => { $(t).setAttribute('aria-selected', String(t === id)); $(p).hidden = t !== id; });
-  if (id === 'tabValue') drawValue(); else if (id === 'tabRel') drawRel(); else if (id === 'tabGoals') drawGoals();
+  if (id === 'tabValue') drawValue(); else if (id === 'tabRel') drawRel(); else if (id === 'tabGoals') drawGoals(); else if (id === 'tabMap') drawMap();
   if (id !== 'tabItems') event('workspace_view', { view: id.slice(3).toLowerCase() });
 }
 TABS.forEach(([t]) => $(t).addEventListener('click', () => showTab(t)));
@@ -413,6 +440,40 @@ function drawGoals(){
         : '<p class="cc-muted" style="font-size:.85rem;margin:6px 0 0;">No features linked to this goal yet.</p>') + (late ? '<p class="late-t" style="margin:6px 0 0;">' + late + (late === 1 ? ' feature lands' : ' features land') + ' after the target date.</p>' : '') + '</div>';
   }).join('');
 }
+let pmSel = '';
+function drawMap(){
+  const pm = W.productMap(items, { nodeW: 150, nodeH: 46, gapX: 46, gapY: 8 }), N = pm.size;
+  if (!items.length) { $('pmBody').innerHTML = viewEmpty('Nothing to map yet. Add items and link them.'); return; }
+  const at = {}; pm.cols.forEach(c => c.nodes.forEach(n => { at[n.id] = n; }));
+  const path = (e) => { const a = at[e.from], b = at[e.to], x1 = a.x + N.w, y1 = a.y + N.h / 2, x2 = b.x, y2 = b.y + N.h / 2, mx = (x1 + x2) / 2;
+    return '<path data-e="' + esc(e.from + '>' + e.to) + '" d="M' + x1 + ' ' + y1 + ' C' + mx + ' ' + y1 + ' ' + mx + ' ' + y2 + ' ' + x2 + ' ' + y2 + '"/>'; };
+  $('pmBody').innerHTML = '<div class="pm-wrap" tabindex="0" role="region" aria-label="Product map"><div style="width:' + pm.width + 'px;">' +
+    '<div class="pm-heads" aria-hidden="true">' + pm.cols.map(c => '<span style="left:' + c.x + 'px">' + esc(c.label) + ' · ' + c.nodes.length + '</span>').join('') + '</div>' +
+    '<div class="pm-canvas" id="pmCanvas" style="width:' + pm.width + 'px;height:' + pm.height + 'px;"><svg width="' + pm.width + '" height="' + pm.height + '" aria-hidden="true">' + pm.edges.map(path).join('') + '</svg>' +
+    pm.cols.map(c => c.nodes.map(n => '<button type="button" class="pm-n t-' + n.type + '" data-pm="' + esc(n.id) + '" aria-pressed="false" title="' + esc(T[n.type].label + ': ' + n.title) + '" aria-label="' + esc(T[n.type].label + ': ' + n.title) + '" style="left:' + n.x + 'px;top:' + n.y + 'px;width:' + N.w + 'px;height:' + N.h + 'px;"><span>' + esc(n.title) + '</span></button>').join('')).join('') +
+    '</div></div></div>';
+  if (pmSel && items.some(i => i.id === pmSel)) traceMap(pmSel); else { pmSel = ''; $('pmInfo').innerHTML = '<span class="cc-muted">Pick an item to trace it.</span>'; }
+}
+function traceMap(id){
+  pmSel = id;
+  const cv = $('pmCanvas'); if (!cv) return;
+  if (!id) { cv.classList.remove('tracing'); cv.querySelectorAll('.on').forEach(x => x.classList.remove('on')); cv.querySelectorAll('[aria-pressed="true"]').forEach(x => x.setAttribute('aria-pressed', 'false'));
+    $('pmInfo').innerHTML = '<span class="cc-muted">Pick an item to trace it.</span>'; return; }
+  const tr = W.trace(items, id), on = new Set(tr.ids), eon = new Set(tr.edges), it = items.find(i => i.id === id);
+  cv.classList.add('tracing');
+  cv.querySelectorAll('.pm-n').forEach(b => { b.classList.toggle('on', on.has(b.dataset.pm)); b.setAttribute('aria-pressed', String(b.dataset.pm === id)); });
+  cv.querySelectorAll('path').forEach(p => p.classList.toggle('on', eon.has(p.dataset.e)));
+  const c = {}; tr.ids.forEach(x => { const o = items.find(i => i.id === x); if (o && x !== id) c[o.type] = (c[o.type] || 0) + 1; });
+  const parts = W.MAP_COLS.filter(t => c[t]).map(t => c[t] + ' ' + (c[t] === 1 ? T[t].label : T[t].plural).toLowerCase());
+  const list = parts.length > 1 ? parts.slice(0, -1).join(', ') + ' and ' + parts[parts.length - 1] : parts[0];
+  $('pmInfo').innerHTML = '<span><b>' + esc(it.title) + '</b> (' + esc(T[it.type].label.toLowerCase()) + ') ' + (list ? 'connects to ' + list + '.' : 'isn’t linked to anything yet.') + '</span>' +
+    '<button type="button" class="cc-btn sm" id="pmOpen">Open it</button><button type="button" class="cc-btn sm ghost" id="pmClear">Clear</button>';
+  $('pmOpen').addEventListener('click', () => { showTab('tabItems'); openEditor(it); });
+  $('pmClear').addEventListener('click', () => { traceMap(''); const b = cv.querySelector('[data-pm="' + id + '"]'); if (b) b.focus(); });
+  event('workspace_trace', { type: it.type, n: tr.ids.length });
+}
+$('pmBody').addEventListener('click', (e) => { const b = e.target.closest('[data-pm]'); if (b) traceMap(pmSel === b.dataset.pm ? '' : b.dataset.pm); });
+$('pnMap').addEventListener('keydown', (e) => { if (e.key === 'Escape' && pmSel) traceMap(''); });
 ['vvBody', 'rmBody', 'gtBody'].forEach(id => $(id).addEventListener('click', (e) => {
   const b = e.target.closest('[data-open]'); if (!b) return;
   const it = items.find(i => i.id === b.dataset.open); if (!it) return;

@@ -43,6 +43,18 @@ const row = (title) => [...document.querySelectorAll('#wsList .ws-row')].find(b 
       grow.querySelector('[data-open]').click(); await sleep(30);
       t('a title in a view opens the item', $('tabItems').getAttribute('aria-selected') === 'true' && !$('wsEditor').hidden && $('edT').value === 'Grow mid-market revenue 30%');
       $('edCancel').click(); await sleep(20);
+      $('tabMap').click(); await sleep(40);
+      const pmN = document.querySelectorAll('#pmBody .pm-n'), pmP = document.querySelectorAll('#pmBody path');
+      t('product map: every item, every link, five labelled columns', pmN.length === 26 && pmP.length === 37 && document.querySelectorAll('#pmBody .pm-heads span').length === 5 && /Accounts · 6/.test($('pmBody').textContent));
+      const kestrel = document.querySelector('#pmBody [data-pm="samplea5"]');
+      kestrel.click(); await sleep(30);
+      t('picking an account traces its chain and says what it connects to', $('pmCanvas').classList.contains('tracing') && kestrel.getAttribute('aria-pressed') === 'true' && document.querySelectorAll('#pmBody .pm-n.on').length >= 4 && /Kestrel Pest Control.*connects to 2 ideas, 1 feature and 1 goal/.test($('pmInfo').textContent), $('pmInfo').textContent);
+      t('other accounts fade', !document.querySelector('#pmBody [data-pm="samplea1"]').classList.contains('on') && document.querySelectorAll('#pmBody path.on').length >= 3);
+      $('pmClear').click(); await sleep(20);
+      t('Clear ends the trace', !$('pmCanvas').classList.contains('tracing') && /Pick an item/.test($('pmInfo').textContent));
+      document.querySelector('#pmBody [data-pm="sampleg1"]').click(); await sleep(20); $('pmOpen').click(); await sleep(30);
+      t('Open it shows the item', !$('wsEditor').hidden && $('edT').value === 'Grow mid-market revenue 30%');
+      $('edCancel').click(); await sleep(20);
       t('nothing was written', !Object.keys(store()).some(k => k.indexOf('workspaces/') === 0));
     } else if (window.__scn === 'member') {
       t('the company’s workspace, shared, with the count', /Shared with everyone in\s*Acme/.test($('wsSub').textContent) && /4 of 500 items/.test($('wsSub').textContent) && $('wsSample').hidden);
