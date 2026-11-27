@@ -378,6 +378,88 @@
     return { ids: Object.keys(ids), edges: Object.keys(edges) };
   }
 
+  // ------------------------------------------------------------------------------------- notes, updates, Ask
+  var NOTE_LIMITS = { title: 120, note: 4000, update: 600, source: 200, links: 20 };
+  // A note (title, body, where it came from) or a short update, linked to items (byId drops links to missing ones)
+  function cleanNote(n, byId) {
+    var kind = n.kind === 'update' ? 'update' : 'note', seen = {}, links = [];
+    (Array.isArray(n.links) ? n.links : []).forEach(function (id) {
+      if (!isId(id) || seen[id] || links.length >= NOTE_LIMITS.links || (byId && !byId[id])) return; seen[id] = 1; links.push(id);
+    });
+    return { kind: kind, title: kind === 'note' ? str(n.title, NOTE_LIMITS.title) : '', body: String(n.body == null ? '' : n.body).trim().slice(0, NOTE_LIMITS[kind]),
+      links: links, source: kind === 'note' ? str(n.source, NOTE_LIMITS.source) : '' };
+  }
+  function noteProblems(n) {
+    var p = [];
+    if (n.kind === 'note' && !n.title) p.push('Give the note a title.');
+    if (!n.body) p.push(n.kind === 'update' ? 'Write the update.' : 'Write the note.');
+    return p;
+  }
+  function ms(v) { return v == null ? 0 : typeof v === 'number' ? v : v.toMillis ? v.toMillis() : v.seconds ? v.seconds * 1000 : Date.parse(v) || 0; }
+  // What's been happening, newest first: posted updates, notes added, and items added or changed (only each item's
+  // latest change is known). Each: { at, kind: 'update' | 'note' | 'added' | 'changed', who, id, title, text, links, type }
+  function feed(items, notes, max) {
+    var out = [];
+    (notes || []).forEach(function (n) {
+      out.push({ at: ms(n.createdAt), kind: n.kind === 'update' ? 'update' : 'note', who: n.authorName || '', id: n.id, title: n.title || '', text: n.body || '', links: n.links || [] });
+    });
+    (items || []).forEach(function (it) {
+      var c = ms(it.createdAt), u = ms(it.updatedAt);
+      if (!c && !u) return;
+      var changed = !!u && (!c || u - c > 60000);   // no creation time known: it was at least changed then
+      out.push({ at: changed ? u : c || u, kind: changed ? 'changed' : 'added', who: it.updatedByName || '', id: it.id, title: it.title, text: '', links: [], type: it.type });
+    });
+    return out.sort(function (a, b) { return b.at - a.at; }).slice(0, max || 60);
+  }
+  function notesFor(notes, id) { return (notes || []).filter(function (n) { return (n.links || []).indexOf(id) > -1; }).sort(function (a, b) { return ms(b.createdAt) - ms(a.createdAt); }); }
+
+  // Ask: the workspace written out as entries, the ones that share the most words with the question first (the
+  // rest in a sensible order), up to a budget. Returns { text: entries joined by blank lines, refs: [{ id, kind }] in
+  // the same order, so the answer's [n] can open the nth }.
+  var STOP = { the: 1, a: 1, an: 1, and: 1, or: 1, of: 1, to: 1, in: 1, on: 1, for: 1, is: 1, are: 1, we: 1, our: 1, what: 1, which: 1, who: 1, how: 1, do: 1, does: 1, it: 1, this: 1, that: 1, with: 1, by: 1, be: 1, at: 1, from: 1, any: 1, about: 1 };
+  function words(t) { return String(t || '').toLowerCase().replace(/[^a-z0-9$£€%\s-]/g, ' ').split(/\s+/).filter(function (w) { return w.length > 1 && !STOP[w]; }); }
+  function askContext(question, items, notes, settings, budget) {
+    budget = budget || 3500;
+    var m = index(items), g = graph(items), mode = (settings && settings.valueMode) || 'either';
+    var title = function (id) { return m[id] ? m[id].title : null; };
+    var entries = items.map(function (it) {
+      var T = TYPES[it.type], bits = [T.label + ': ' + it.title];
+      if (it.status) bits.push('Status: ' + STATUS[it.status]);
+      if (it.area) bits.push('Area: ' + it.area);
+      if (it.date) bits.push((T.date || 'Date') + ': ' + it.date);
+      if (it.type === 'account') { bits.push('Annual value: ' + valueLabel(it, mode)); if (it.tier) bits.push('How strategic: ' + TIERS[it.tier]); }
+      if (it.type === 'idea') bits.push('Votes: ' + (it.votes || 0));
+      var linked = (g[it.id] || []).map(function (id) { return m[id] ? TYPES[m[id].type].label + ' "' + m[id].title + '"' : null; }).filter(Boolean);
+      if (linked.length) bits.push('Linked to: ' + linked.slice(0, 12).join(', '));
+      if (it.note) bits.push('Notes: ' + it.note.slice(0, 400));
+      return { id: it.id, kind: 'item', text: bits.join('. '), order: ORDER.indexOf(it.type) };
+    }).concat((notes || []).map(function (n) {
+      var about = (n.links || []).map(title).filter(Boolean);
+      return { id: n.id, kind: n.kind, text: (n.kind === 'update' ? 'Update' : 'Note: ' + n.title) + (n.authorName ? ' (by ' + n.authorName + ')' : '') +
+        (n.source ? ' [from ' + n.source + ']' : '') + '. ' + String(n.body || '').slice(0, 900) + (about.length ? ' About: ' + about.join(', ') : ''), order: 5, at: ms(n.createdAt) };
+    }));
+    var q = words(question);
+    entries.forEach(function (e) { var w = words(e.text), hit = 0; q.forEach(function (x) { if (w.indexOf(x) > -1) hit++; }); e.score = hit; });
+    entries.sort(function (a, b) { return b.score - a.score || a.order - b.order || (b.at || 0) - (a.at || 0); });
+    var out = [], refs = [], used = 0;
+    for (var i = 0; i < entries.length && refs.length < 30; i++) {
+      var tx = entries[i].text.replace(/\s*\n+\s*/g, ' ');
+      if (used + tx.length + 2 > budget) continue;
+      out.push(tx); refs.push({ id: entries[i].id, kind: entries[i].kind }); used += tx.length + 2;
+    }
+    return { text: out.join('\n\n'), refs: refs };
+  }
+  // The sample's notes and updates (fictional, like the rest of Tidewater)
+  function sampleNotes() {
+    var day = 864e5, now = Date.now();   // dated back from today, so "2 days ago" reads right
+    return [
+      { id: 'samplen1', kind: 'note', title: 'Northgate evaluation call', body: 'Northgate will only roll out to all regions if dispatch works across branches. They asked for a date; we said the autumn release, not sooner.', links: ['samplea6', 'samplei2', 'samplef5'], source: 'Customer call, 9 Jun', authorName: 'Priya (sample)', createdAt: now - 9 * day },
+      { id: 'samplen2', kind: 'note', title: 'Why self-booking is parked', body: 'Most requests come from accounts under $50k a year. We agreed to revisit after route optimisation ships.', links: ['samplef7', 'samplei3'], source: 'Planning, 2 Jun', authorName: 'Sam (sample)', createdAt: now - 16 * day },
+      { id: 'sampleu1', kind: 'update', title: '', body: 'Route optimisation is in beta with Harbor. Early drive-time savings look like 40 minutes a technician a day.', links: ['samplef4', 'samplea1'], source: '', authorName: 'Priya (sample)', createdAt: now - 2 * day },
+      { id: 'sampleu2', kind: 'update', title: '', body: 'Spring release is out: guided setup and sample jobs.', links: ['sampler1'], source: '', authorName: 'Sam (sample)', createdAt: now - 95 * day }
+    ];
+  }
+
   // ------------------------------------------------------------------------------------------ the sample company
   // Fictional: Tidewater, a scheduling app for field-service teams. Every name and number is made up.
   function sample() {
@@ -423,5 +505,6 @@
     linkedFrom: linkedFrom, counts: counts, search: search, areas: areas, parseCsv: parseCsv, guessMapping: guessMapping, typeFrom: typeFrom,
     statusFrom: statusFrom, dateFrom: dateFrom, fromRows: fromRows, sample: sample, SAMPLE_SETTINGS: SAMPLE_SETTINGS,
     TIER_WEIGHT: TIER_WEIGHT, valueRank: valueRank, money: money, releaseMap: releaseMap, goalTimeline: goalTimeline, position: position,
-    MAP_COLS: MAP_COLS, productMap: productMap, trace: trace };
+    MAP_COLS: MAP_COLS, productMap: productMap, trace: trace,
+    NOTE_LIMITS: NOTE_LIMITS, cleanNote: cleanNote, noteProblems: noteProblems, ms: ms, feed: feed, notesFor: notesFor, askContext: askContext, sampleNotes: sampleNotes };
 })(typeof window !== 'undefined' ? window : globalThis);

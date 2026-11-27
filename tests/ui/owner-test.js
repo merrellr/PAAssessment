@@ -103,6 +103,12 @@ function finish(){
     t('company page shows point of contact and billing address', /Pat Jones/.test(summaryText) && /pat@acme\.com/.test(summaryText) && /Springfield/.test(summaryText));
     t('company card shows the seat counts up front and folds the rest', $('detailSeats').querySelectorAll('.pa-seat').length === 3 && /Active/.test(textOf($('detailSeats'))) && /Available of 3/.test(textOf($('detailSeats'))) && $('detailMore').contains($('detailSummary')) && !$('detailMore').open, textOf($('detailSeats')));
     t('company page shows seats, notes and created / last modified', /of 3 seats in use/.test(summaryText) && /Pilot customer/.test(summaryText) && /Created/.test(summaryText) && /Last modified/.test(summaryText));
+    t('Workspace Ask (paid) starts off for a new company', /Workspace Ask \(paid\)\s*Off/.test(summaryText) && $('wsAskBtn') && $('wsAskBtn').textContent === 'Turn on', summaryText.slice(-200));
+    $('wsAskBtn').click(); await new Promise(r => setTimeout(r, 120));
+    const featId = orgPath.split('/')[1], feat = window.__store['orgFeatures/' + featId];
+    t('the owner switches it on: saved for the company, said, and the button flips', feat && feat.wsAsk === true && feat.updatedAt && Object.keys(feat).sort().join() === 'updatedAt,wsAsk' && /Workspace Ask is now on/.test($('detailNotice').textContent) && $('wsAskBtn').textContent === 'Turn off', JSON.stringify(feat));
+    $('wsAskBtn').click(); await new Promise(r => setTimeout(r, 120));
+    t('and off again', window.__store['orgFeatures/' + featId].wsAsk === false && $('wsAskBtn').textContent === 'Turn on');
     const invPath = Object.keys(window.__store).find(p => p.indexOf('invites/') === 0);
     const inv = window.__store[invPath];
     t('first admin invite created with role, name, phone and lower-cased email',

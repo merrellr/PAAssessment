@@ -351,7 +351,8 @@ service cloud.firestore {
     }
     function validWsItem(d) {
       return d.keys().hasOnly(['type', 'title', 'note', 'area', 'status', 'date', 'links', 'band', 'value', 'tier', 'votes',
-                               'createdBy', 'createdAt', 'updatedBy', 'updatedAt'])
+                               'createdBy', 'createdAt', 'updatedBy', 'updatedAt', 'updatedByName'])
+        && d.get('updatedByName', '') is string && d.get('updatedByName', '').size() <= 80
         && d.keys().hasAll(['type', 'title', 'links', 'createdBy', 'createdAt', 'updatedBy', 'updatedAt'])
         && d.type in ['goal', 'release', 'feature', 'idea', 'account']
         && d.title is string && d.title.size() >= 1 && d.title.size() <= 120
@@ -391,6 +392,50 @@ service cloud.firestore {
         && request.resource.data.createdAt == resource.data.createdAt;
       allow delete: if isActiveMemberOf(orgId)
         && (resource.data.createdBy == request.auth.uid || isActiveAdminOf(orgId));
+    }
+
+    // workspaces/{orgId}/notes: the team's notes (a discussion, meeting notes, a decision, with where it came
+    // from) and short updates, each linked to the items it is about. Members read them and add their own; only
+    // the author edits one; the author or an admin deletes it.
+    function validWsNote(d) {
+      return d.keys().hasOnly(['kind', 'title', 'body', 'links', 'source', 'authorId', 'authorName', 'createdAt', 'updatedAt'])
+        && d.keys().hasAll(['kind', 'body', 'links', 'authorId', 'createdAt', 'updatedAt'])
+        && d.kind in ['note', 'update']
+        && d.get('title', '') is string && d.get('title', '').size() <= 120
+        && (d.kind == 'update' || d.get('title', '').size() >= 1)
+        && d.body is string && d.body.size() >= 1 && d.body.size() <= (d.kind == 'update' ? 600 : 4000)
+        && d.links is list && d.links.size() <= 20
+        && d.get('source', '') is string && d.get('source', '').size() <= 200
+        && d.get('authorName', '') is string && d.get('authorName', '').size() <= 80
+        && d.updatedAt == request.time;
+    }
+    match /workspaces/{orgId}/notes/{noteId} {
+      allow get, list: if isActiveMemberOf(orgId);
+      allow create: if isActiveMemberOf(orgId) && wsOrgActive(orgId)
+        && noteId.matches('^[A-Za-z0-9]{6,32}$')
+        && validWsNote(request.resource.data)
+        && request.resource.data.authorId == request.auth.uid
+        && request.resource.data.createdAt == request.time;
+      allow update: if isActiveMemberOf(orgId) && wsOrgActive(orgId)
+        && resource.data.authorId == request.auth.uid
+        && validWsNote(request.resource.data)
+        && request.resource.data.authorId == resource.data.authorId
+        && request.resource.data.kind == resource.data.kind
+        && request.resource.data.createdAt == resource.data.createdAt;
+      allow delete: if isActiveMemberOf(orgId)
+        && (resource.data.authorId == request.auth.uid || isActiveAdminOf(orgId));
+    }
+
+    // orgFeatures/{orgId}: paid extras the platform owner switches on for a company (wsAsk: Ask in the Team
+    // Knowledge Workspace). Its members read it, so the page knows; only the owner changes it. Apps Script reads
+    // it with the asking member's own sign-in before answering.
+    match /orgFeatures/{orgId} {
+      allow get: if isPlatformOwner() || isActiveMemberOf(orgId);
+      allow create, update: if isPlatformOwner()
+        && request.resource.data.keys().hasOnly(['wsAsk', 'updatedAt'])
+        && request.resource.data.wsAsk is bool
+        && request.resource.data.updatedAt == request.time;
+      allow delete: if false;
     }
 
     match /orgAssignments/{orgId} {

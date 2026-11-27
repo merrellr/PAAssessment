@@ -55,6 +55,14 @@ const row = (title) => [...document.querySelectorAll('#wsList .ws-row')].find(b 
       document.querySelector('#pmBody [data-pm="sampleg1"]').click(); await sleep(20); $('pmOpen').click(); await sleep(30);
       t('Open it shows the item', !$('wsEditor').hidden && $('edT').value === 'Grow mid-market revenue 30%');
       $('edCancel').click(); await sleep(20);
+      $('tabFeed').click(); await sleep(30);
+      t('sample updates & notes: the notes and updates, newest first, posting switched off', document.querySelectorAll('#feedList .fd li').length === 4 && /Route optimisation is in beta/.test(document.querySelector('#feedList .fd li').textContent) && $('upGo').disabled && $('noteNew').disabled);
+      t('a note shows where it came from and what it is about', /From: Customer call, 9 Jun/.test($('feedList').textContent) && /About:\s*Northgate Facilities/.test($('feedList').textContent));
+      $('tabAsk').click(); await sleep(30);
+      t('sample Ask: a paid feature, with a worked example citing its sources', /paid add-on/.test($('askBody').textContent) && document.querySelectorAll('#askBody .cite').length === 3 && /Note: Northgate evaluation call/.test($('askBody').textContent) && !$('askQ'));
+      document.querySelector('#askBody .cite[data-ref="1"]').click(); await sleep(30);
+      t('a source opens the item it points at', !$('wsEditor').hidden && $('edT').value === 'Multi-region teams');
+      $('edCancel').click(); await sleep(20);
       t('nothing was written', !Object.keys(store()).some(k => k.indexOf('workspaces/') === 0));
     } else if (window.__scn === 'member') {
       t('the company’s workspace, shared, with the count', /Shared with everyone in\s*Acme/.test($('wsSub').textContent) && /4 of 500 items/.test($('wsSub').textContent) && $('wsSample').hidden);
@@ -73,7 +81,7 @@ const row = (title) => [...document.querySelectorAll('#wsList .ws-row')].find(b 
       $('edSave').click(); await until(() => items().length === 5);
       const k = items().find(p => store()[p].title === 'Route optimisation'), d = k && store()[k];
       t('saved for the company, with who and when, and its links', d && d.type === 'feature' && d.createdBy === 'uMem' && d.updatedBy === 'uMem' && d.createdAt && d.updatedAt && d.links.length === 2 && d.status === 'in_progress' && d.area === 'Scheduling', JSON.stringify(d));
-      t('only the saved fields are written', d && Object.keys(d).sort().join() === 'area,band,createdAt,createdBy,date,links,note,status,tier,title,type,updatedAt,updatedBy,value,votes');
+      t('only the saved fields are written', d && Object.keys(d).sort().join() === 'area,band,createdAt,createdBy,date,links,note,status,tier,title,type,updatedAt,updatedBy,updatedByName,value,votes');
       t('back on the list, the count moves', !$('wsListView').hidden && /5 of 500/.test($('wsSub').textContent));
       // the goal now shows it as linked from
       row('Grow mid-market').click(); await sleep(30);
@@ -91,6 +99,43 @@ const row = (title) => [...document.querySelectorAll('#wsList .ws-row')].find(b 
       t('value view with no ideas left: says what to add', /No ideas yet/.test($('vvBody').textContent));
       $('tabGoals').click(); await sleep(30);
       t('goal timeline on company data: the new feature, at its release date', /Route optimisation/.test($('gtBody').textContent) && /1 of 1 feature|0 of 1 feature/.test($('gtBody').textContent), $('gtBody').textContent.slice(0, 300));
+      // updates and notes
+      $('tabFeed').click(); await sleep(30);
+      t('updates & notes: a teammate\'s note and the item changes', /Harbor call/.test($('feedList').textContent) && /Olive/.test($('feedList').textContent) && /Added/.test($('feedList').textContent));
+      t('someone else\'s note: no edit or delete for a member', !document.querySelector('#feedList [data-ne="noteOther01"]') && !document.querySelector('#feedList [data-nd="noteOther01"]'));
+      $('upGo').click(); await sleep(40);
+      t('an empty update is not posted', !$('upErr').hidden && /Write the update/.test($('upErr').textContent));
+      $('upText').value = 'Route optimisation is in beta.'; $('upLinksBox').open = true; $('upLinkQ').value = 'summer'; $('upLinkQ').dispatchEvent(new Event('input'));
+      const box = $('upLinks').querySelector('input'); box.checked = true; box.dispatchEvent(new Event('change', { bubbles: true }));
+      $('upGo').click();
+      await until(() => Object.keys(store()).some(k => k.indexOf('workspaces/orgA/notes/') === 0 && store()[k].kind === 'update'));
+      await until(() => /Route optimisation is in beta/.test((document.querySelector('#feedList .fd li') || {}).textContent || ''));
+      const upd = Object.keys(store()).filter(k => k.indexOf('workspaces/orgA/notes/') === 0).map(k => store()[k]).find(n => n.kind === 'update');
+      t('an update is saved for the company, linked, with its author', upd && upd.body === 'Route optimisation is in beta.' && upd.links.join() === 'rel0000001' && upd.authorId === 'uMem' && upd.authorName === 'Wes Space' && upd.title === '' && upd.createdAt && Object.keys(upd).sort().join() === 'authorId,authorName,body,createdAt,kind,links,source,title,updatedAt', JSON.stringify(upd));
+      t('it shows at the top, with the item it is about', /Route optimisation is in beta/.test(document.querySelector('#feedList .fd li').textContent) && /Summer release/.test(document.querySelector('#feedList .fd li').textContent), document.querySelector('#feedList .fd li').textContent);
+      $('noteNew').click(); await sleep(30);
+      $('noteGo').click(); await sleep(30);
+      t('a note needs a title and words', !$('noteErr').hidden && /title/.test($('noteErr').textContent));
+      $('noteT').value = 'Planning notes'; $('noteB').value = 'We agreed to ship route planning in summer.'; $('noteS').value = 'Planning, 1 Jun';
+      $('noteLinkQ').value = 'grow'; $('noteLinkQ').dispatchEvent(new Event('input'));
+      const nb = $('noteLinks').querySelector('input'); nb.checked = true; nb.dispatchEvent(new Event('change', { bubbles: true }));
+      $('noteGo').click();
+      await until(() => Object.keys(store()).some(k => k.indexOf('workspaces/orgA/notes/') === 0 && store()[k].title === 'Planning notes'));
+      const nk = Object.keys(store()).find(k => k.indexOf('workspaces/orgA/notes/') === 0 && store()[k].title === 'Planning notes');
+      await until(() => !!document.querySelector('#feedList [data-ne="' + nk.split('/').pop() + '"]'));
+      t('a note is saved with its source and links', store()[nk].source === 'Planning, 1 Jun' && store()[nk].links.join() === 'goal000001' && store()[nk].kind === 'note');
+      t('their note has Edit and Delete', !!document.querySelector('#feedList [data-ne="' + nk.split('/').pop() + '"]'), $('feedList').innerHTML.slice(0, 600));
+      document.querySelector('#feedList [data-ne="' + nk.split('/').pop() + '"]').click(); await sleep(30);
+      $('noteB').value = 'Summer, confirmed.'; $('noteGo').click(); await until(() => store()[nk].body === 'Summer, confirmed.');
+      t('the author edits their note', store()[nk].body === 'Summer, confirmed.' && store()[nk].authorId === 'uMem');
+      $('tabItems').click(); row('Grow mid-market').click(); await sleep(30);
+      t('an item lists the notes about it', /Notes and updates about it/.test($('wsEditor').textContent) && /Planning notes/.test($('wsEditor').textContent));
+      $('edCancel').click(); await sleep(20);
+      $('tabFeed').click(); await sleep(20);
+      document.querySelector('#feedList [data-nd="' + nk.split('/').pop() + '"]').click(); await until(() => !store()[nk]);
+      t('the author deletes their note', !store()[nk]);
+      $('tabAsk').click(); await sleep(20);
+      t('Ask not switched on for the company: said, with no example and no question box', /paid add-on/.test($('askBody').textContent) && /Your company admin can ask/.test($('askBody').textContent) && !$('askQ') && !document.querySelector('#askBody .cite'));
       // import
       $('tabImport').click();
       $('imText').value = 'Name,Type,Status,ARR,Linked to\nNorthgate,Customer,,$300k,\nBook online,Request,open,,Northgate; Nowhere\n,idea,,,';
@@ -108,6 +153,25 @@ const row = (title) => [...document.querySelectorAll('#wsList .ws-row')].find(b 
       $('edT').value = 'Refused'; $('edSave').click(); await sleep(80);
       t('a refused write is said plainly', !$('wsErr').hidden && /no longer be in this company/.test($('wsErr').textContent));
       window.__failWrite = null;
+    } else if (window.__scn === 'ask') {
+      let sent = null;
+      window.PAAccount.backend = async (p) => { sent = p; return window.__askReply; };
+      $('tabAsk').click(); await sleep(30);
+      t('Ask switched on: a question box, and no paid notice', !!$('askQ') && !/paid add-on/.test($('askBody').textContent));
+      $('askQ').value = 'Who wants route planning?'; $('askForm').requestSubmit();
+      await until(() => document.querySelector('#askOut .cite'));
+      const pg = sent && JSON.parse(sent.page);
+      t('it asks Compass with the workspace as the page, the most relevant entries first', sent && sent.action === 'compass' && sent.q === 'Who wants route planning?' && pg.k === 'workspace' && /Acme workspace/.test(pg.t) && /^Idea: Route planning/.test(pg.x) && pg.x.length <= 3500, sent && sent.page.slice(0, 200));
+      const cites = [...document.querySelectorAll('#askOut .cite')];
+      t('the answer shows its sources as numbers, dropping ones that were never sent', cites.length === 2 && cites.map(c => c.textContent).join() === '2,1' && document.querySelectorAll('#askOut .ask-src li').length === 2 && document.querySelectorAll('#askOut li').length >= 3);
+      t('and how many questions are left', /21 Compass questions left today/.test($('askOut').textContent));
+      document.querySelector('#askOut .ask-src [data-ref="0"]').click(); await sleep(30);
+      t('a source opens what it points at', !$('wsEditor').hidden && $('edT').value === 'Route planning');
+      $('edCancel').click(); await sleep(20);
+      window.__askReply = { ok: false, error: 'daily_limit' };
+      $('tabAsk').click(); $('askQ').value = 'Anything else?'; $('askForm').requestSubmit(); await until(() => /today’s Compass questions/.test($('askOut').textContent));
+      t('a daily limit is said plainly', /used today’s Compass questions/.test($('askOut').textContent));
+      t('the follow-up carried the conversation so far', JSON.parse(sent.h).length === 2);
     } else if (window.__scn === 'admin') {
       t('an admin has the Settings tab', !$('tabSettings').hidden);
       t('either mode: the exact figure shows', /\$380k/.test(row('Harbor Plumbing').textContent));
@@ -116,7 +180,11 @@ const row = (title) => [...document.querySelectorAll('#wsList .ws-row')].find(b 
       $('edX').value = '45k'; $('edX').dispatchEvent(new Event('input'));
       t('an exact value sets the band to match', $('edB').value === 'b2');
       $('edSave').click(); await until(() => store()['workspaces/orgA/items/acct000001'].value === 45000);
-      t('saved', store()['workspaces/orgA/items/acct000001'].band === 'b2' && store()['workspaces/orgA/items/acct000001'].updatedBy === 'uAdm');
+      t('saved, with the editor\'s name for the updates feed', store()['workspaces/orgA/items/acct000001'].band === 'b2' && store()['workspaces/orgA/items/acct000001'].updatedBy === 'uAdm' && store()['workspaces/orgA/items/acct000001'].updatedByName === 'Wes Space');
+      $('tabFeed').click(); await sleep(30);
+      t('an admin may delete a teammate\'s note, but not edit it', !!document.querySelector('#feedList [data-nd="noteOther01"]') && !document.querySelector('#feedList [data-ne="noteOther01"]'));
+      t('the change shows in the feed, with who made it', /Changed\s*Wes Space/.test($('feedList').textContent));
+      $('tabItems').click();
       $('tabSettings').click();
       $('setForm').querySelector('input[value="bands"]').checked = true; $('setAreas').value = 'Onboarding\nScheduling\nOnboarding\n';
       $('setForm').requestSubmit(); await until(() => store()['workspaces/orgA'].valueMode === 'bands');
