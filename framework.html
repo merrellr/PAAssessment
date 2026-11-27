@@ -103,6 +103,7 @@
   .art-area a{ display:block; font-size: 0.8125rem; color: var(--navy); margin: 3px 0; }
 </style>
 <link rel="stylesheet" href="pa-theme.css">
+<link rel="stylesheet" href="framework-graphic.css">
 <script src="analytics.js"></script>
 </head>
 <body>
@@ -130,19 +131,11 @@
     <p>Everything in this program is organized around seven core skill areas that make up modern product management, three of them focused specifically on working with AI. Your assessment measures where you stand in each one today, and your course plan is built from that starting point, not a generic curriculum everyone gets.</p>
     <p>Within each domain, there are four levels: <strong>Limited Experience</strong>, <strong>Moderate Experience</strong>, <strong>Lots of Experience</strong>, and <strong>Advanced Experience</strong>. These aren't just labels, each one describes a genuinely different way of operating in that domain, not just "knows more facts."</p>
     <p>Under each domain sit <strong>four competencies</strong>, the specific skills that make up the domain, 28 in all. Each is described at the same four levels, so you can see exactly what "Lots of Experience" in, say, Problem framing looks like.</p>
-    <p class="legend-intro"><strong>Reading the levels:</strong> each level carries a four-dot meter that fills as experience grows.</p>
-    <div class="tier-legend" id="tierLegend" aria-hidden="true"></div>
   </div>
 
-  <div class="card">
+  <div class="card" id="atAGlance">
     <span class="eyebrow">At a glance</span>
-    <h2 style="font-size:1.1875rem; margin-bottom:6px;">The seven skill domains</h2>
-    <p style="margin-bottom:16px;">Everything below is organized under these seven areas. Each one carries the four experience levels described above and its four competencies, in full detail in the cards below.</p>
-    <div class="overview-scroll">
-      <figure style="margin:0;">
-        <svg id="frameworkOverviewSvg" role="img" aria-label="The seven Product Advisory skill domains, each shown as an icon with its name."></svg>
-      </figure>
-    </div>
+    <div id="frameworkGraphic"></div>
   </div>
 
   <div id="domainsContainer"></div>
@@ -183,6 +176,7 @@
 <script src="roles-core.js"></script>
 <script src="competencies-core.js"></script>
 <script src="shape-core.js"></script>
+<script src="framework-graphic.js"></script>
 <script src="pa-icons.js"></script>
 <script>
 const DOMAIN_COLORS = {
@@ -211,10 +205,7 @@ function tierDotsHtml(tierKey, color){
   return `<span class="tier-dots" aria-hidden="true">${dots}</span>`;
 }
 
-const legend = document.getElementById('tierLegend');
-legend.innerHTML = TIER_LABELS.map(([key, label]) =>
-  `<span class="leg-item">${tierDotsHtml(key, '#1A4584')}<span>${label}</span></span>`
-).join('');
+
 
 // The four competencies under a domain (competencies-core.js), each with what it looks like at the four levels.
 const fwEsc = (t) => String(t).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
@@ -258,62 +249,8 @@ Object.keys(window.FRAMEWORK_DATA).forEach(domainKey => {
   container.appendChild(card);
 });
 
-/* "At a glance" overview: seven tiles, icon + name only, three per row
-   (the last row's single tile centered). Built from the same
-   FRAMEWORK_DATA + DOMAIN_COLORS + icon set as the detail cards below,
-   so the two can never drift out of sync. What the framework covers,
-   not how deep it goes — the four levels are explained in the intro
-   above and in depth on each card below, not repeated here. */
-function renderFrameworkOverview(){
-  const svg = document.getElementById('frameworkOverviewSvg');
-  if (!svg) return;
-
-  const domainKeys = Object.keys(window.FRAMEWORK_DATA);
-  const COLS = 3, TILE_W = 196, TILE_H = 128, COL_GAP = 18, ROW_GAP = 18, PAD = 16;
-  const rows = Math.ceil(domainKeys.length / COLS);
-  const gridW = COLS * TILE_W + (COLS - 1) * COL_GAP;
-  const svgW = gridW + PAD * 2;
-  const svgH = rows * TILE_H + (rows - 1) * ROW_GAP + PAD * 2;
-  svg.setAttribute('viewBox', `0 0 ${svgW} ${svgH}`);
-
-  // Two-line, shortened labels — the full domain name is already on the
-  // matching detail card just below.
-  const TILE_LABEL = {
-    discovery: ['Customer &amp; Market', 'Discovery'],
-    strategy: ['Product Strategy', '&amp; Roadmapping'],
-    prioritization: ['Prioritization', '&amp; Trade-offs'],
-    execution: ['Execution', '&amp; Delivery'],
-    stakeholder: ['Stakeholder', 'Communication'],
-    aiIndividual: ['AI Fluency', 'Individual'],
-    aiOrg: ['AI Fluency', 'Organizational']
-  };
-
-  let s = '';
-  domainKeys.forEach((key, i) => {
-    const label = TILE_LABEL[key];
-    const row = Math.floor(i / COLS);
-    const itemsInRow = Math.min(COLS, domainKeys.length - row * COLS);
-    const rowW = itemsInRow * TILE_W + (itemsInRow - 1) * COL_GAP;
-    const rowX0 = PAD + (gridW - rowW) / 2; // centers a short last row
-    const col = i % COLS;
-
-    const tileX = rowX0 + col * (TILE_W + COL_GAP);
-    const tileY = PAD + row * (TILE_H + ROW_GAP);
-    const cx = tileX + TILE_W / 2;
-    const iconCy = tileY + 34;
-
-    // A line icon on a soft tile, as on www.productadvisory.co's service cards.
-    s += `<a class="fw-link" href="#${key}"><rect class="fw-hit" x="${tileX}" y="${tileY}" width="${TILE_W}" height="${TILE_H}" rx="14"/>`;
-    s += `<rect class="fw-tile" x="${cx - 30}" y="${iconCy - 30}" width="60" height="60" rx="16"/>`;
-    s += domainIconSvg(key, 38, cx - 19, iconCy - 19);
-
-    s += `<text x="${cx}" y="${iconCy + 52}" text-anchor="middle" font-family="var(--display)" font-weight="700" font-size="13" fill="var(--ink)">${label[0]}</text>`;
-    s += `<text x="${cx}" y="${iconCy + 68}" text-anchor="middle" font-family="var(--display)" font-weight="700" font-size="13" fill="var(--ink)">${label[1]}</text>` + '</a>';
-  });
-
-  svg.innerHTML = s;
-}
-renderFrameworkOverview();
+// "At a glance": the levels and the seven domains in two groups, with the 28 competencies a click away
+if (window.FrameworkGraphic) FrameworkGraphic.render(document.getElementById('frameworkGraphic'), { colors: DOMAIN_COLORS, tiers: TIER_LABELS });
 
 // The domain cards are built here at runtime, so a #domain hash in the
 // URL (e.g. arriving from a growth-area link on the results screen)
