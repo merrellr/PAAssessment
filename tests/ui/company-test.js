@@ -543,6 +543,7 @@ async function readBlob(d){ return await d.blob.text(); }
       t('the team view is a paid add-on, said plainly', /paid add-on/.test(txt('stylesBody')));
       $('stShowPeople').click(); await until(() => /Ben B/.test(txt('stPeople')));
       t('admins can see who has shared, and their style', /Ben B/.test(txt('stPeople')) && /Steadiness/.test(txt('stPeople')));
+      t('and the team map with its balance', !!$('stPeople').querySelector('svg.ws-map .ws-other') && /The balance of 1 person/.test(txt('stPeople')));
       const pick = (m) => { const r = body().querySelector('input[value=' + m + ']'); r.checked = true; r.dispatchEvent(new Event('change', { bubbles: true })); };
       pick('team'); await sleep(30);
       t('"within teams" shows the teams, with none yet', /No teams yet/.test(txt('stylesBody')) && !!$('stAddTeam'));
@@ -564,8 +565,21 @@ async function readBlob(d){ return await d.blob.text(); }
       t('saved: the mode and the teams, by the admin', st.mode === 'team' && st.teams[prod].name === 'Product' && st.teams[prod].members.sort().join() === 'uBen,uCy' && st.teams[prod].sees.join() === eng && st.teams[eng].members.join() === 'uDee' && st.updatedBy === 'uAdmin', JSON.stringify(st));
       const view = (u) => (window.__store['orgStyleViews/orgA/viewers/' + u] || {}).uids || null;
       t('who may see whom is written for each person: Product sees itself and Engineering', view('uBen').join() === 'uCy,uDee' && view('uCy').join() === 'uBen,uDee');
-      t('Engineering sees only itself; people in no team see no one', view('uDee').length === 0 && view('uEli').length === 0 && view('uAdmin').length === 0);
+      t('Engineering sees only itself (Dee: just Eli, given on request); people in no team see no one', view('uDee').join() === 'uEli' && view('uEli').length === 0 && view('uAdmin').length === 0, view('uDee').join());
       t('a person who has left gets no list', view('uOld') === null);
+      t('settings carry the names of people in teams, for members asking to see someone', JSON.stringify(st.names) === JSON.stringify({ uBen: 'Ben B', uCy: 'Cy C', uDee: 'Dee D' }), JSON.stringify(st.names));
+      t('access given on request is kept in the view lists when teams are saved', view('uDee').join() === 'uEli');
+      t('requests are listed for the admin, with the reason', /Cy C asks to see Ben B/.test(txt('stylesBody')) && /We run the Q3 launch together/.test(txt('stylesBody')) && /Dee D can see Eli E/.test(txt('stylesBody')));
+      body().querySelector('[data-rq="reqCy0001"][data-do="approve"]').click();
+      await until(() => window.__store['orgStyleGrants/orgA/items/reqCy0001']);
+      const g = window.__store['orgStyleGrants/orgA/items/reqCy0001'];
+      t('approving records who sees whom and why, by the admin', g.viewer === 'uCy' && g.subjects.join() === 'uBen' && g.reason === 'We run the Q3 launch together' && g.approvedBy === 'uAdmin' && g.at, JSON.stringify(g));
+      await until(() => window.__store['orgStyleRequests/orgA/items/reqCy0001'].status === 'approved');
+      t('the request is marked approved, and Cy\'s view list gains Ben', window.__store['orgStyleRequests/orgA/items/reqCy0001'].decidedBy === 'uAdmin' && view('uCy').indexOf('uBen') > -1 && view('uCy').indexOf('uDee') > -1);
+      body().querySelector('[data-ungrant="grantDee1"]').click();
+      await until(() => !window.__store['orgStyleGrants/orgA/items/grantDee1']);
+      await sleep(50);
+      t('removing access takes it off the view list', !window.__store['orgStyleGrants/orgA/items/grantDee1'] && view('uDee').indexOf('uEli') < 0);
     } else if (scn === 'shapes'){
       await shapeTests();
     } else if (scn === 'skills'){

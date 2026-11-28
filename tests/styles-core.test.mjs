@@ -27,5 +27,10 @@ const saved = S.toSave(Object.assign(all('c', 'i'), { junk: { most: 'd', least: 
 t('what is saved: clean answers, scores, styles, when', Object.keys(saved.answers).length === 24 && saved.primary === 'c' && saved.complete && saved.at === '2026-11-27T00:00:00Z' && !saved.answers.junk);
 t('every style has its report text', S.KEYS.every(k => { const s = S.STYLES[k]; return s.name && s.best && s.drains && s.withYou && s.watch && s.work.length === 3; }));
 t('every pair of styles has a blend line and a working-together line', Object.keys(S.PAIRS).length === 6 && Object.keys(S.TOGETHER).sort().join() === Object.keys(S.PAIRS).sort().join() && S.pairKey('s', 'd') === 'ds');
+const bl = S.balance([{ primary: 'd' }, { primary: 'd' }, { primary: 'c' }, { primary: 'd' }, { primary: 'x' }]);
+t('team balance: counts by main style, the styles no one leans to, and a clear majority', bl.n === 4 && bl.counts.d === 3 && bl.missing.join() === 'i,s' && bl.top === 'd');
+t('team balance: too few people to say what is missing', S.balance([{ primary: 'd' }, { primary: 'i' }]).missing.length === 0 && S.balance([{ primary: 'd' }, { primary: 'i' }]).top === 'd');
+t('every style has a line for when no one leans to it', S.KEYS.every(k => S.MISSING[k].length > 20));
+
 console.log('\n' + pass + ' passed, ' + fail + ' failed');
 process.exit(fail ? 1 : 0);

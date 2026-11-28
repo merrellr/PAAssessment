@@ -45,6 +45,24 @@ const pick = (k) => { const b = $('wsOpts').querySelector('.ws-opt[data-k="' + k
       await until(() => /Ed Eng/.test($('wsResult').textContent));
       t('the sharing box says who sees it, with no opt-out', /Shared within teams at Acme/.test($('wsResult').textContent) && !$('wsOptIn'));
       t('the styles they may see: their teammate and the team their team can see', /Mo Team/.test($('wsTeam').textContent) && /Influence with Steadiness/.test($('wsTeam').textContent) && /Ed Eng/.test($('wsTeam').textContent) && document.querySelectorAll('#wsTeam .ws-people li').length === 2);
+      t('the team map: your dot and theirs', !!document.querySelector('#wsTeam svg.ws-map .ws-dot') && document.querySelectorAll('#wsTeam svg.ws-map .ws-other').length === 2);
+      t('the balance: counts by style, and what the group may miss', /The balance of 3 people/.test($('wsTeam').textContent) && /No one leans Dominance/.test($('wsTeam').textContent) && /No one leans Steadiness/.test($('wsTeam').textContent), $('wsTeam').textContent.slice(0, 300));
+      const mo = [...document.querySelectorAll('#wsTeam .ws-person')].find(b => /Mo Team/.test(b.textContent));
+      mo.click(); await sleep(30);
+      t('working with someone: how to work with them, and you together', mo.getAttribute('aria-expanded') === 'true' && /Working with Mo/.test(mo.nextElementSibling.textContent) && /Talk it through/.test(mo.nextElementSibling.textContent) && /You and Mo together: One brings energy, the other rigour/.test(mo.nextElementSibling.textContent));
+      await until(() => $('wsReqForm'));
+      const opts = [...$('wsReqWho').options].map(o => o.textContent);
+      t('asking to see more: only teams and people they can\'t see yet', opts.join() === 'Team: Design,Zoe Zee', opts.join());
+      $('wsReqWho').value = 'person:uZoe'; $('wsReqWhy').value = 'pls'; $('wsReqForm').requestSubmit(); await sleep(30);
+      t('a request needs a reason', /Say briefly why/.test($('wsReqMsg').textContent));
+      $('wsReqWhy').value = 'We are pairing on the onboarding redesign.'; $('wsReqForm').requestSubmit();
+      await until(() => Object.keys(window.__store).some(k => k.indexOf('orgStyleRequests/orgA/items/') === 0));
+      const rq = Object.keys(window.__store).filter(k => k.indexOf('orgStyleRequests/orgA/items/') === 0).map(k => window.__store[k])[0];
+      t('the request is sent for an admin, pending, with the reason', rq.requester === 'uWs' && rq.kind === 'person' && rq.targetId === 'uZoe' && rq.targetName === 'Zoe Zee' && rq.status === 'pending' && /pairing/.test(rq.reason) && rq.createdAt, JSON.stringify(rq));
+      await until(() => /Waiting for an admin/.test($('wsAskAccess').textContent));
+      t('and shows as waiting, with a way to withdraw it', /Waiting for an admin/.test($('wsAskAccess').textContent) && !!$('wsAskAccess').querySelector('[data-withdraw]'));
+      await until(() => /shared on request/.test($('wsToldMe').textContent));
+      t('they are told when their own style was shared on request, with the reason', /With Zoe Zee/.test($('wsToldMe').textContent) && /Pairing on onboarding/.test($('wsToldMe').textContent));
     } else if (window.__scn === 'optional') {
       t('"by choice": a box to share, unticked, and nothing shared yet', $('wsOptIn') && !$('wsOptIn').checked && !window.__store['orgStyles/orgA/people/uWs']);
       $('wsOptIn').click(); await until(() => window.__store['orgStyles/orgA/people/uWs']);

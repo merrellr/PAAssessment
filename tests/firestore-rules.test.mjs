@@ -650,6 +650,31 @@ await deny('nobody deletes the settings', () => deleteDoc(doc(adminA, 'orgStyleS
 await allow('the owner switches on the paid team views', () => setDoc(doc(owner, 'orgFeatures/orgA'), { wsAsk: false, styles: true, updatedAt: serverTimestamp() }));
 await deny('a company admin cannot', () => setDoc(doc(adminA, 'orgFeatures/orgA'), { styles: true, updatedAt: serverTimestamp() }));
 
+console.log('\n--- DISC Work Styles access requests and grants (W3) ---');
+const stReq = (by, over = {}) => Object.assign({ requester: by, requesterName: 'Asker', kind: 'team', targetId: 'tprod', targetName: 'Product', reason: 'We start a joint project next week', status: 'pending', createdAt: serverTimestamp() }, over);
+const RQ = 'orgStyleRequests/orgA/items/';
+await allow('settings may carry team member names', () => setDoc(doc(adminA, 'orgStyleSettings/orgA'), Object.assign(stSet('team'), { names: { memberA: 'Member A', stA: 'St A' } })));
+await allow('a member asks to see a team, with a reason', () => setDoc(doc(asUser('stB', 'stB@a.com'), RQ + 'reqStB0001'), stReq('stB')));
+await deny('a request needs a real reason', () => setDoc(doc(asUser('stB', 'stB@a.com'), RQ + 'reqStB0002'), stReq('stB', { reason: 'pls' })));
+await deny('it must be their own', () => setDoc(doc(asUser('stB', 'stB@a.com'), RQ + 'reqStB0003'), stReq('stA')));
+await deny('it starts pending', () => setDoc(doc(asUser('stB', 'stB@a.com'), RQ + 'reqStB0004'), stReq('stB', { status: 'approved' })));
+await deny('another company cannot ask here', () => setDoc(doc(adminB, RQ + 'reqAdmB001'), stReq('adminB')));
+await allow('the asker reads their request', () => getDoc(doc(asUser('stB', 'stB@a.com'), RQ + 'reqStB0001')));
+await deny('another member cannot', () => getDoc(doc(asUser('stA', 'stA@a.com'), RQ + 'reqStB0001')));
+await allow('admins list requests', () => getDocs(collection(adminA, 'orgStyleRequests/orgA/items')));
+await deny('the asker cannot approve it', () => updateDoc(doc(asUser('stB', 'stB@a.com'), RQ + 'reqStB0001'), { status: 'approved', decidedBy: 'stB', decidedAt: serverTimestamp() }));
+await deny('an admin cannot change the reason', () => updateDoc(doc(adminA, RQ + 'reqStB0001'), { reason: 'Something else entirely', status: 'approved', decidedBy: 'adminA', decidedAt: serverTimestamp() }));
+await allow('an admin approves it', () => updateDoc(doc(adminA, RQ + 'reqStB0001'), { status: 'approved', decidedBy: 'adminA', decidedAt: serverTimestamp() }));
+const stGrant = { viewer: 'stB', viewerName: 'St B', subjects: ['memberA', 'stA'], targetName: 'Product', reason: 'We start a joint project next week', approvedBy: 'adminA', at: serverTimestamp() };
+await allow('the admin records the grant', () => setDoc(doc(adminA, 'orgStyleGrants/orgA/items/reqStB0001'), stGrant));
+await deny('a member cannot grant themselves access', () => setDoc(doc(asUser('stB', 'stB@a.com'), 'orgStyleGrants/orgA/items/selfGrant01'), Object.assign({}, stGrant, { approvedBy: 'stB' })));
+await allow('the person whose style was shared is told (reads the grant)', () => getDoc(doc(asUser('stA', 'stA@a.com'), 'orgStyleGrants/orgA/items/reqStB0001')));
+await allow('the viewer reads it', () => getDoc(doc(asUser('stB', 'stB@a.com'), 'orgStyleGrants/orgA/items/reqStB0001')));
+await deny('someone else cannot', () => getDoc(doc(asUser('rm7', 'rm7@a.com'), 'orgStyleGrants/orgA/items/reqStB0001')));
+await deny('a grant cannot be edited, only removed', () => updateDoc(doc(adminA, 'orgStyleGrants/orgA/items/reqStB0001'), { subjects: ['adminA'] }));
+await allow('the admin removes it', () => deleteDoc(doc(adminA, 'orgStyleGrants/orgA/items/reqStB0001')));
+await allow('the asker withdraws a request', () => deleteDoc(doc(asUser('stB', 'stB@a.com'), RQ + 'reqStB0001')));
+
 console.log('\n--- team assignments (orgAssignments) ---');
 const assignItem = { id: 'abc1234567', course: 'discovery-novice', due: '2026-12-15', note: 'Before planning', assignedAt: '2026-11-16' };
 const saveAssign = (db, orgId, items, over = {}) => setDoc(doc(db, 'orgAssignments/' + orgId), Object.assign({ items: items, updatedAt: serverTimestamp() }, over));

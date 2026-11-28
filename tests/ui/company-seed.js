@@ -112,6 +112,8 @@
     if (scn === 'styles') {   // DISC Work Styles: one person has shared, under "shared by choice"
       store['orgStyleSettings/orgA'] = { mode: 'optional', teams: {}, updatedBy: 'uAdmin', updatedAt: T(3) };
       store['orgStyles/orgA/people/uBen'] = { name: 'Ben B', scores: { d: 20, i: 30, s: 90, c: 60 }, primary: 's', secondary: '', at: T(2) };
+      store['orgStyleRequests/orgA/items/reqCy0001'] = { requester: 'uCy', requesterName: 'Cy C', kind: 'person', targetId: 'uBen', targetName: 'Ben B', reason: 'We run the Q3 launch together', status: 'pending', createdAt: T(1) };
+      store['orgStyleGrants/orgA/items/grantDee1'] = { viewer: 'uDee', viewerName: 'Dee D', subjects: ['uEli'], targetName: 'Eli E', reason: 'Mentoring', approvedBy: 'uAdmin', at: T(5) };
     }
     if (scn === 'shapes') {
       store['orgRoles/orgA/people/uBen'] = { roleId: 'spm', assignedAt: T(3), assignedBy: 'uAdmin' };

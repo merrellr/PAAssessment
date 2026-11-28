@@ -12,7 +12,9 @@
     var co = { optional: 'optional', team: 'team', unpaid: 'all' }[scn];
     if (co) {
       store['memberships/uWs'] = { orgId: 'orgA', orgName: 'Acme', role: 'member', status: 'active' };
-      store['orgStyleSettings/orgA'] = { mode: co, teams: { tprod: { name: 'Product', members: ['uWs', 'uMo'], sees: ['teng'] }, teng: { name: 'Engineering', members: ['uEd'], sees: [] } } };
+      store['orgStyleSettings/orgA'] = { mode: co, teams: { tprod: { name: 'Product', members: ['uWs', 'uMo'], sees: ['teng'] }, teng: { name: 'Engineering', members: ['uEd'], sees: [] }, tdes: { name: 'Design', members: ['uZoe'], sees: [] } },
+        names: { uWs: 'Wren Style', uMo: 'Mo Team', uEd: 'Ed Eng', uZoe: 'Zoe Zee' } };
+      if (scn === 'team') store['orgStyleGrants/orgA/items/grantOld01'] = { viewer: 'uZoe', viewerName: 'Zoe Zee', subjects: ['uWs'], targetName: 'Wren Style', reason: 'Pairing on onboarding', approvedBy: 'uAdm', at: { toDate: function () { return new Date('2026-11-20T00:00:00Z'); }, toMillis: function () { return 0; } } };
       if (scn !== 'unpaid') store['orgFeatures/orgA'] = { styles: true };
       store['orgStyleViews/orgA/viewers/uWs'] = { uids: ['uMo', 'uEd'] };
       store['orgStyles/orgA/people/uMo'] = { name: 'Mo Team', scores: { d: 30, i: 85, s: 70, c: 15 }, primary: 'i', secondary: 's', at: 1 };

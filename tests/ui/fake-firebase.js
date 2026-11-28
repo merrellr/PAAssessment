@@ -130,7 +130,7 @@ export async function getDocs(q){
   const prefix = q.col + '/';
   const docs = Object.keys(store).filter(p => p.indexOf(prefix) === 0 && p.slice(prefix.length).indexOf('/') === -1)
     .map(p => ({ id: p.slice(prefix.length), data: () => clone(store[p]) }))
-    .filter(d => wheres.every(w => d.data()[w.f] === w.v));
+    .filter(d => wheres.every(w => w.op === 'array-contains' ? (Array.isArray(d.data()[w.f]) && d.data()[w.f].indexOf(w.v) > -1) : d.data()[w.f] === w.v));
   const keyOf = (d, f) => { const v = d.data()[f]; return v && v.toMillis ? v.toMillis() : v; };
   (q.orders || []).slice().reverse().forEach(o => {
     docs.sort((a, b) => { const x = keyOf(a, o.f), y = keyOf(b, o.f); return (x < y ? -1 : x > y ? 1 : 0) * (o.dir === 'desc' ? -1 : 1); });
