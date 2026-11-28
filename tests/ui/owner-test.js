@@ -109,6 +109,8 @@ function finish(){
     t('the owner switches it on: saved for the company, said, and the button flips', feat && feat.wsAsk === true && feat.updatedAt && Object.keys(feat).sort().join() === 'updatedAt,wsAsk' && /Workspace Ask is now on/.test($('detailNotice').textContent) && $('wsAskBtn').textContent === 'Turn off', JSON.stringify(feat));
     $('wsAskBtn').click(); await new Promise(r => setTimeout(r, 120));
     t('and off again', window.__store['orgFeatures/' + featId].wsAsk === false && $('wsAskBtn').textContent === 'Turn on');
+    $('stylesBtn').click(); await new Promise(r => setTimeout(r, 120));
+    t('the DISC Work Styles team view switches on too, leaving Workspace Ask as it was', window.__store['orgFeatures/' + featId].styles === true && window.__store['orgFeatures/' + featId].wsAsk === false && $('stylesBtn').textContent === 'Turn off', JSON.stringify(window.__store['orgFeatures/' + featId]));
     const invPath = Object.keys(window.__store).find(p => p.indexOf('invites/') === 0);
     const inv = window.__store[invPath];
     t('first admin invite created with role, name, phone and lower-cased email',

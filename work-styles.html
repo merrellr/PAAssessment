@@ -95,12 +95,22 @@
   .ws-work{ margin: 10px 0 0; padding: 0; list-style: none; display: grid; gap: 8px; }
   .ws-work li{ font-size: .9rem; line-height: 1.5; } .ws-work b{ color: var(--pa-navy-deep); }
   .linklike{ background:none; border:0; padding:0; color: var(--pa-navy); font: inherit; font-weight: 700; cursor:pointer; text-decoration: underline; }
+  .ws-share{ border: 1px solid var(--pa-note-line, var(--pa-line)); background: var(--pa-note-bg, var(--pa-tint)); color: var(--pa-note-ink, var(--pa-ink)); border-radius: 12px; padding: 12px 14px; font-size: .88rem; line-height: 1.5; margin: 12px 0 0; }
+  .ws-share label{ display:flex; gap: 8px; align-items:flex-start; font-weight: 700; margin-top: 8px; cursor: pointer; }
+  .ws-share input{ margin-top: 3px; }
+  .ws-people{ list-style:none; margin: 8px 0 0; padding: 0; display:grid; gap: 6px; }
+  .ws-people li{ display:grid; grid-template-columns: 2.2em minmax(0, 1fr) minmax(0, 9em); gap: 10px; align-items:center; padding: 8px 10px; border: 1px solid var(--pa-line); border-radius: 10px; font-size: .875rem; }
+  .ws-chip{ display:grid; place-items:center; width: 2em; height: 2em; border-radius: 50%; color: #fff; font: 800 .85rem var(--pa-display); }
+  .ws-people .nm{ font-weight: 700; overflow-wrap:anywhere; } .ws-people .nm small{ display:block; font-weight: 400; color: var(--pa-muted); }
+  .ws-mini{ display:flex; gap: 3px; align-items:flex-end; height: 22px; }
+  .ws-mini i{ flex: 1; border-radius: 2px 2px 0 0; min-height: 2px; }
   .ws-go{ display:flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
 </style>
 <link rel="stylesheet" href="pa-theme.css">
 <link rel="stylesheet" href="coach.css">
 <script src="styles-core.js"></script>
 <script src="styles-ui.js"></script>
+<script src="styles-org-core.js"></script>
 <script src="demo.js"></script>
 </head>
 <body>
@@ -116,6 +126,7 @@
       <li>There are no right answers. Go with your first instinct about how you usually work, not how you’d like to.</li>
       <li>You can stop at any time and pick up where you left off.</li>
     </ul>
+    <p class="ws-share" id="wsNotice" hidden></p>
     <div class="ws-go"><button type="button" class="cc-btn" id="wsStart">Start →</button></div>
     <p class="ws-fine">Based on William Moulton Marston’s DISC model (1928). The situations, scoring and report are Product Advisory’s own. It describes how you prefer to work, not how good you are at anything, and isn’t for hiring or selection.</p>
   </section>
@@ -149,13 +160,15 @@ const firebaseConfig = {
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
 import { getFirestore, doc, getDoc, setDoc as fsSetDoc, deleteField } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+import { styleContext, syncOrgStyle, visibleStyles } from "./org-share.js";
 const setDoc = (...a) => window.__paDemo ? Promise.resolve() : fsSetDoc(...a);
 const app = initializeApp(firebaseConfig), auth = getAuth(app), db = getFirestore(app);
 const K = window.StylesCore, UI = window.StylesUI, Q = K.QUESTIONS;
 const $ = (id) => document.getElementById(id);
 const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
 const event = (name, props) => { try { if (window.PAAnalytics) window.PAAnalytics.event(name, props || {}); } catch (e) {} };
-let user = null, answers = {}, i = 0, most = '';
+let user = null, answers = {}, i = 0, most = '', ctx = null, optIn = false;
+const O = window.StylesOrgCore;
 
 const saveDraft = () => setDoc(doc(db, 'progress', user.uid), { workStyleDraft: { answers, i, at: new Date().toISOString() } }, { merge: true }).catch(() => {});
 function ask(){
@@ -193,6 +206,7 @@ async function finish(){
   $('wsCard').hidden = true; $('wsIntro').hidden = true;
   await setDoc(doc(db, 'progress', user.uid), { workStyle: saved, workStyleDraft: deleteField() }, { merge: true }).catch(() => {});
   event('workstyle_done', { style: saved.primary, blend: saved.secondary ? 1 : 0 });
+  if (ctx && !window.__paDemo) await syncOrgStyle(db, user, ctx, saved, optIn);
   showResult(saved);
 }
 function showResult(r){
@@ -206,9 +220,38 @@ function showResult(r){
     '<h2 style="font-size:1.05rem;margin:22px 0 4px;">In product work</h2><ul class="ws-work">' + st.work.map(w => '<li><b>' + esc(w[0]) + ':</b> ' + esc(w[1]) + '</li>').join('') + '</ul>' +
     '<h2 style="font-size:1.05rem;margin:22px 0 4px;">Working with the other styles</h2><ul class="ws-work">' + K.KEYS.filter(k => k !== res.primary).map(k => '<li><b>' + esc(K.STYLES[k].name) + ':</b> ' + esc(K.STYLES[k].withYou) + ' <span class="cc-muted">Together: ' + esc(K.TOGETHER[K.pairKey(res.primary, k)]) + '</span></li>').join('') + '</ul>' +
     '<div class="ws-go"><a class="cc-btn" href="/my-learning#readiness">Back to My Learning</a><button type="button" class="cc-btn ghost" id="wsAgain">Take it again</button></div>' +
-    '<p class="ws-fine">Taken ' + esc(new Date(r.at).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' })) + '. Your result is private to you. Based on Marston’s DISC model; it describes preferences, not ability, and isn’t for hiring or selection.</p>';
+    '<div id="wsSharing"></div><div id="wsTeam"></div>' +
+    '<p class="ws-fine">Taken ' + esc(new Date(r.at).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' })) + '. ' + (ctx && O.shouldShare(ctx.settings.mode, optIn) ? 'Your name and scores are shared as described above; your answers never are.' : 'Your result is private to you.') + ' Based on Marston’s DISC model; it describes preferences, not ability, and isn’t for hiring or selection.</p>';
   $('wsResult').hidden = false;
+  drawSharing(r); drawTeam();
   $('wsAgain').addEventListener('click', () => { answers = {}; i = 0; most = ''; $('wsResult').hidden = true; ask(); event('workstyle_retake'); });
+}
+/* ---------- sharing with the company (W2) ---------- */
+function drawSharing(r){
+  const box = $('wsSharing'); if (!box) return;
+  if (!ctx) { box.innerHTML = ''; return; }
+  const mode = ctx.settings.mode;
+  box.innerHTML = '<div class="ws-share"><b>' + esc(O.MODES[mode].label) + ' at ' + esc(ctx.orgName) + '.</b> ' + esc(O.audience(ctx.settings, user.uid, ctx.orgName)) +
+    (mode === 'optional' ? '<label><input type="checkbox" id="wsOptIn"' + (optIn ? ' checked' : '') + '> Share my work style with ' + esc(ctx.orgName) + '</label>' : '') + '</div>';
+  if ($('wsOptIn')) $('wsOptIn').addEventListener('change', async (e) => {
+    optIn = e.target.checked;
+    await setDoc(doc(db, 'progress', user.uid), { workStyleShare: optIn }, { merge: true }).catch(() => {});
+    if (!window.__paDemo) await syncOrgStyle(db, user, ctx, r, optIn);
+    event('workstyle_share', { on: optIn });
+    drawTeam();
+  });
+}
+async function drawTeam(){
+  const box = $('wsTeam'); if (!box) return;
+  if (!ctx || ctx.settings.mode === 'none') { box.innerHTML = ''; return; }
+  if (!ctx.teamView) { box.innerHTML = '<h2 style="font-size:1.05rem;margin:22px 0 4px;">Your team’s work styles</h2><p class="cc-muted" style="font-size:.88rem;margin:0;">Seeing your teammates’ work styles is a paid add-on for company accounts. ' + (ctx.isAdmin ? '' : 'Your company admin can ') + '<a href="/request-info">ask us about it</a>.</p>'; return; }
+  box.innerHTML = '<h2 style="font-size:1.05rem;margin:22px 0 4px;">Work styles you can see</h2><p class="cc-muted" style="font-size:.85rem;margin:0;">Loading…</p>';
+  const people = await visibleStyles(db, user, ctx);
+  box.innerHTML = '<h2 style="font-size:1.05rem;margin:22px 0 4px;">Work styles you can see</h2>' + (people.length ? '<ul class="ws-people">' + people.map(p => {
+      const st = K.STYLES[p.primary] || K.STYLES.d;
+      return '<li><span class="ws-chip" style="background:' + st.color + '" aria-hidden="true">' + st.letter + '</span><span class="nm">' + esc(p.name || 'A teammate') + '<small>' + esc(K.label(p)) + '</small></span>' +
+        '<span class="ws-mini" role="img" aria-label="' + esc(K.KEYS.map(k => K.STYLES[k].name + ' ' + (p.scores ? p.scores[k] : 0)).join(', ')) + '">' + K.KEYS.map(k => '<i style="background:' + K.STYLES[k].color + ';height:' + Math.max(2, (p.scores ? p.scores[k] : 0) * 0.22) + 'px"></i>').join('') + '</span></li>';
+    }).join('') + '</ul>' : '<p class="cc-muted" style="font-size:.88rem;margin:0;">No one you can see has shared a work style yet.</p>');
 }
 $('wsStart').addEventListener('click', () => { $('wsIntro').hidden = true; ask(); $('wsQuestion').focus(); event('workstyle_start', { resume: i > 0 }); });
 
@@ -219,6 +262,10 @@ onAuthStateChanged(auth, async (u) => {
   let progress = {};
   if (!window.__paDemo) { try { const s = await getDoc(doc(db, 'progress', u.uid)); progress = s.exists() ? s.data() : {}; } catch (e) { progress = {}; } }
   $('wsCount').textContent = Q.length; $('wsMin').textContent = K.MINUTES;
+  optIn = progress.workStyleShare === true;
+  if (!window.__paDemo) ctx = await styleContext(db, u);
+  if (ctx && ctx.settings.mode !== 'none') { $('wsNotice').textContent = O.audience(ctx.settings, u.uid, ctx.orgName) + (ctx.settings.mode === 'optional' ? ' You can decide after you finish.' : ''); $('wsNotice').hidden = false; }
+  if (ctx && progress.workStyle && progress.workStyle.complete) syncOrgStyle(db, u, ctx, progress.workStyle, optIn).catch(() => {});
   const d = progress.workStyleDraft;
   if (d && d.answers && typeof d.i === 'number' && d.i > 0 && d.i < Q.length) { answers = d.answers; i = d.i; $('wsStart').textContent = 'Pick up at ' + (i + 1) + ' of ' + Q.length + ' →'; }
   if (progress.workStyle && progress.workStyle.complete && !(d && d.i > 0)) showResult(progress.workStyle);

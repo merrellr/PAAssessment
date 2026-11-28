@@ -35,6 +35,27 @@ const pick = (k) => { const b = $('wsOpts').querySelector('.ws-opt[data-k="' + k
       pick('c'); pick('i'); await sleep(20); pick('c'); pick('i');
       await until(() => !$('wsResult').hidden);
       t('finishing a resumed check: Conscientiousness', prog().workStyle.primary === 'c' && /Conscientiousness/.test($('wsResult').textContent));
+    } else if (window.__scn === 'team') {
+      t('told before they start: their team, the teams that can see it, and that the company chose', !$('wsNotice').hidden && /your team \(Product\)/.test($('wsNotice').textContent) && /company chose this/.test($('wsNotice').textContent), $('wsNotice').textContent);
+      $('wsStart').click(); await sleep(20);
+      for (let n = 0; n < 24; n++) { pick('c'); pick('i'); await sleep(5); }
+      await until(() => window.__store['orgStyles/orgA/people/uWs']);
+      const mine = window.__store['orgStyles/orgA/people/uWs'];
+      t('finishing shares name and scores with the company (never the answers)', mine && mine.name === 'Wren Style' && mine.primary === 'c' && mine.scores.c === 100 && !mine.answers && mine.at, JSON.stringify(mine));
+      await until(() => /Ed Eng/.test($('wsResult').textContent));
+      t('the sharing box says who sees it, with no opt-out', /Shared within teams at Acme/.test($('wsResult').textContent) && !$('wsOptIn'));
+      t('the styles they may see: their teammate and the team their team can see', /Mo Team/.test($('wsTeam').textContent) && /Influence with Steadiness/.test($('wsTeam').textContent) && /Ed Eng/.test($('wsTeam').textContent) && document.querySelectorAll('#wsTeam .ws-people li').length === 2);
+    } else if (window.__scn === 'optional') {
+      t('"by choice": a box to share, unticked, and nothing shared yet', $('wsOptIn') && !$('wsOptIn').checked && !window.__store['orgStyles/orgA/people/uWs']);
+      $('wsOptIn').click(); await until(() => window.__store['orgStyles/orgA/people/uWs']);
+      t('ticking it shares, and remembers the choice', window.__store['orgStyles/orgA/people/uWs'].primary === 'd' && prog().workStyleShare === true);
+      $('wsOptIn').click(); await until(() => !window.__store['orgStyles/orgA/people/uWs']);
+      t('unticking takes it back off', !window.__store['orgStyles/orgA/people/uWs'] && prog().workStyleShare === false);
+    } else if (window.__scn === 'unpaid') {
+      await until(() => /paid add-on/.test($('wsTeam').textContent));
+      t('"everyone" without the paid team view: shared, but teammates\' styles are a paid add-on', /Shared with everyone at Acme/.test($('wsResult').textContent) && /paid add-on/.test($('wsTeam').textContent) && !document.querySelector('#wsTeam .ws-people'));
+      await until(() => window.__store['orgStyles/orgA/people/uWs']);
+      t('their style is shared all the same (the company decided)', !!window.__store['orgStyles/orgA/people/uWs']);
     } else {
       t('a finished result shows straight away, as a blend', !$('wsResult').hidden && /Dominance with Influence/.test($('wsResult').textContent) && $('wsIntro').hidden);
     }

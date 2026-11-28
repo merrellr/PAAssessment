@@ -448,6 +448,7 @@
 <script src="shape-ui.js"></script>
 <script src="styles-core.js"></script>
 <script src="styles-ui.js"></script>
+<script src="styles-org-core.js"></script>
 <link rel="stylesheet" href="coach.css">
 </head>
 <body>
@@ -1029,7 +1030,7 @@ import { getFirestore, doc, getDoc, setDoc as fsSetDoc, increment, collection, q
 // Every write on this page goes through here, so the owner's demo mode (?demo=1, demo.js) never saves anything.
 const setDoc = (...a) => window.__paDemo ? Promise.resolve() : fsSetDoc(...a);
 const DEMO_ASKED = new URLSearchParams(location.search).get('demo') === '1';
-import { syncOrgShare, syncOrgShape, assignedRole } from "./org-share.js";
+import { syncOrgShare, syncOrgShape, assignedRole, styleContext, syncOrgStyle } from "./org-share.js";
 import { withTwoStep, twoStepError } from "./two-step.js";
 
 const app = initializeApp(firebaseConfig);
@@ -1705,6 +1706,9 @@ function renderCoach(user, progress, assessmentResult, assessmentUrl){
           : 'Fast or measured, focused on the task or on people: a short check places you on those two lines, with a report on working well with others. About ' + StylesCore.MINUTES + ' minutes.') + '</p>' +
         '<a class="cc-btn sm" id="wsCardGo" href="/work-styles">' + (r ? 'See my report' : d && d.i > 0 ? 'Pick up where I left off' : 'Take the check') + '</a></div></section>';
     }
+    // keep the company's copy of the work style in step with how the company shares them (W2)
+    if (!window.__paDemo && progress.workStyle && progress.workStyle.complete && window.StylesOrgCore && auth.currentUser)
+      styleContext(db, auth.currentUser).then(c => c && syncOrgStyle(db, auth.currentUser, c, progress.workStyle, progress.workStyleShare === true)).catch(() => {});
     const focus = window.CoachCore.nextStep({ areas, pct, log: progress.answers || [], progress, bank: window.CoachBank || null }).area;
     document.querySelectorAll('[data-coach-sg="weakest"], [data-coach-sg="short"]').forEach(a => { a.href = '/practice' + (focus ? '?area=' + focus : '') + (a.dataset.coachSg === 'short' ? (focus ? '&' : '?') + 'n=6' : ''); });
   };

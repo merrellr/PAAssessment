@@ -85,6 +85,7 @@ await env.withSecurityRulesDisabled(async (ctx) => {
   for (const id of ['rm1', 'rm2', 'rm3', 'rm4', 'rm5', 'rm6', 'rm7']) await setDoc(doc(db, 'memberships/' + id), member('orgA', 'Acme', 'member'));
   await setDoc(doc(db, 'memberships/rmAdmin'), member('orgA', 'Acme', 'admin'));
   await setDoc(doc(db, 'memberships/rmOtherCo'), member('orgB', 'Beta', 'member'));
+  for (const id of ['stA', 'stB']) await setDoc(doc(db, 'memberships/' + id), member('orgA', 'Acme', 'member'));   // DISC Work Styles sharing
   await setDoc(doc(db, 'orgs/orgA/members/rm1'), { identity: { name: 'Seed', email: 'rm1@a.com' }, assessment: null, courses: {}, lastActiveAt: null, updatedAt: now() });
   await setDoc(doc(db, 'memberships/scrubMe2'), member('orgA', 'Acme', 'member'));
   const share = (email) => ({ identity: { name: 'Seed', email }, assessment: { tier: 'Moderate Experience', overallPct: 50 },
@@ -601,6 +602,53 @@ await deny('only known switches', () => setDoc(doc(owner, 'orgFeatures/orgA'), {
 await deny('a switch is true or false', () => setDoc(doc(owner, 'orgFeatures/orgA'), { wsAsk: 'yes', updatedAt: serverTimestamp() }));
 await allow('the owner switches it off', () => setDoc(doc(owner, 'orgFeatures/orgA'), { wsAsk: false, updatedAt: serverTimestamp() }));
 await deny('nobody deletes it', () => deleteDoc(doc(owner, 'orgFeatures/orgA')));
+
+console.log('\n--- DISC Work Styles, shared (orgStyleSettings, orgStyles, orgStyleViews) ---');
+const stRec = (name, over = {}) => Object.assign({ name, scores: { d: 75, i: 75, s: 50, c: 0 }, primary: 'd', secondary: 'i', at: serverTimestamp() }, over);
+const stSet = (mode, by = 'adminA') => ({ mode, teams: { tprod: { name: 'Product', members: ['memberA', 'stA'], sees: [] } }, updatedBy: by, updatedAt: serverTimestamp() });
+const SP = 'orgStyles/orgA/people/';
+await deny('no settings yet ("not shared"): a member cannot share', () => setDoc(doc(memberA, SP + 'memberA'), stRec('Member A')));
+await deny('a member cannot set the sharing mode', () => setDoc(doc(memberA, 'orgStyleSettings/orgA'), stSet('all', 'memberA')));
+await deny('another company\'s admin cannot either', () => setDoc(doc(adminB, 'orgStyleSettings/orgA'), stSet('all', 'adminB')));
+await deny('an unknown mode is refused', () => setDoc(doc(adminA, 'orgStyleSettings/orgA'), stSet('everyone')));
+await allow('an admin sets "shared by choice"', () => setDoc(doc(adminA, 'orgStyleSettings/orgA'), stSet('optional')));
+await allow('members read the setting', () => getDoc(doc(memberA, 'orgStyleSettings/orgA')));
+await deny('another company cannot', () => getDoc(doc(adminB, 'orgStyleSettings/orgA')));
+await allow('a member shares their own style', () => setDoc(doc(memberA, SP + 'memberA'), stRec('Member A')));
+await deny('not someone else\'s', () => setDoc(doc(memberA, SP + 'stA'), stRec('Someone')));
+await deny('answers are never on the copy', () => setDoc(doc(memberA, SP + 'memberA'), stRec('Member A', { answers: { ws1: 'd' } })));
+await deny('scores stay 0 to 100', () => setDoc(doc(memberA, SP + 'memberA'), stRec('Member A', { scores: { d: 101, i: 0, s: 0, c: 0 } })));
+await deny('all four scores are needed', () => setDoc(doc(memberA, SP + 'memberA'), stRec('Member A', { scores: { d: 50, i: 50, s: 50 } })));
+await deny('a client-chosen time is refused', () => setDoc(doc(memberA, SP + 'memberA'), stRec('Member A', { at: Timestamp.fromDate(new Date(2020, 1, 1)) })));
+await allow('"by choice": another member reads what was shared', () => getDoc(doc(asUser('stA', 'stA@a.com'), SP + 'memberA')));
+await allow('and lists it', () => getDocs(collection(asUser('stA', 'stA@a.com'), 'orgStyles/orgA/people')));
+await allow('the admin reads it', () => getDoc(doc(adminA, SP + 'memberA')));
+await deny('another company cannot', () => getDoc(doc(adminB, SP + 'memberA')));
+await deny('nor a former member', () => getDoc(doc(asUser('removedR', 'r@a.com'), SP + 'memberA')));
+await allow('"by choice": they can stop sharing', () => deleteDoc(doc(memberA, SP + 'memberA')));
+await allow('the admin sets "within teams", with who may see whom', () => setDoc(doc(adminA, 'orgStyleSettings/orgA'), stSet('team')));
+await allow('the admin writes a person\'s view list', () => setDoc(doc(adminA, 'orgStyleViews/orgA/viewers/stA'), { uids: ['memberA'], updatedAt: serverTimestamp() }));
+await deny('a member cannot write their own view list', () => setDoc(doc(memberA, 'orgStyleViews/orgA/viewers/memberA'), { uids: ['adminA', 'stB'], updatedAt: serverTimestamp() }));
+await allow('a member reads their own view list', () => getDoc(doc(asUser('stA', 'stA@a.com'), 'orgStyleViews/orgA/viewers/stA')));
+await deny('but not someone else\'s', () => getDoc(doc(memberA, 'orgStyleViews/orgA/viewers/stA')));
+await allow('"within teams": the member shares (the company decided)', () => setDoc(doc(memberA, SP + 'memberA'), stRec('Member A')));
+await deny('"within teams": they cannot remove it themselves', () => deleteDoc(doc(memberA, SP + 'memberA')));
+await allow('a teammate on their view list reads it', () => getDoc(doc(asUser('stA', 'stA@a.com'), SP + 'memberA')));
+await deny('someone not on a view list cannot', () => getDoc(doc(asUser('stB', 'stB@a.com'), SP + 'memberA')));
+await deny('"within teams": members cannot list everyone', () => getDocs(collection(asUser('stA', 'stA@a.com'), 'orgStyles/orgA/people')));
+await allow('the admin still sees everyone', () => getDocs(collection(adminA, 'orgStyles/orgA/people')));
+await allow('the person sees their own', () => getDoc(doc(memberA, SP + 'memberA')));
+await allow('the admin sets "everyone"', () => setDoc(doc(adminA, 'orgStyleSettings/orgA'), stSet('all')));
+await allow('"everyone": any member reads it', () => getDoc(doc(asUser('stB', 'stB@a.com'), SP + 'memberA')));
+await allow('the admin sets "not shared"', () => setDoc(doc(adminA, 'orgStyleSettings/orgA'), stSet('none')));
+await deny('"not shared": other members can no longer read it', () => getDoc(doc(asUser('stA', 'stA@a.com'), SP + 'memberA')));
+await deny('nor the admin', () => getDoc(doc(adminA, SP + 'memberA')));
+await allow('the person still sees their own', () => getDoc(doc(memberA, SP + 'memberA')));
+await deny('"not shared": no new shares', () => setDoc(doc(memberA, SP + 'memberA'), stRec('Member A again')));
+await allow('"not shared": they can remove the old copy', () => deleteDoc(doc(memberA, SP + 'memberA')));
+await deny('nobody deletes the settings', () => deleteDoc(doc(adminA, 'orgStyleSettings/orgA')));
+await allow('the owner switches on the paid team views', () => setDoc(doc(owner, 'orgFeatures/orgA'), { wsAsk: false, styles: true, updatedAt: serverTimestamp() }));
+await deny('a company admin cannot', () => setDoc(doc(adminA, 'orgFeatures/orgA'), { styles: true, updatedAt: serverTimestamp() }));
 
 console.log('\n--- team assignments (orgAssignments) ---');
 const assignItem = { id: 'abc1234567', course: 'discovery-novice', due: '2026-12-15', note: 'Before planning', assignedAt: '2026-11-16' };
