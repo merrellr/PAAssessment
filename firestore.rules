@@ -432,10 +432,68 @@ service cloud.firestore {
     match /orgFeatures/{orgId} {
       allow get: if isPlatformOwner() || isActiveMemberOf(orgId);
       allow create, update: if isPlatformOwner()
-        && request.resource.data.keys().hasOnly(['wsAsk', 'updatedAt'])
-        && request.resource.data.wsAsk is bool
+        && request.resource.data.keys().hasOnly(['wsAsk', 'styles', 'updatedAt'])
+        && request.resource.data.get('wsAsk', false) is bool
+        && request.resource.data.get('styles', false) is bool
         && request.resource.data.updatedAt == request.time;
       allow delete: if false;
+    }
+
+    // ------------------------------------------------ DISC Work Styles, shared
+    // orgStyleSettings/{orgId}: how the company shares work styles (styles-org-core.js): mode none, optional, team
+    // or all, and its teams. Admins set it; members read it, so they are told before they start.
+    // orgStyles/{orgId}/people/{uid}: a person's style (name and scores, never answers), written by them while
+    // the mode allows sharing. Who reads it depends on the mode: themselves always; admins unless "none";
+    // everyone in the company in "optional" (only those who chose to share have one) and "all"; in "team", the
+    // people listed for them in orgStyleViews/{orgId}/viewers/{readerUid}, which admins write from the teams.
+    function styleMode(orgId) {
+      return exists(/databases/$(database)/documents/orgStyleSettings/$(orgId))
+        ? get(/databases/$(database)/documents/orgStyleSettings/$(orgId)).data.mode : 'none';
+    }
+    function maySeeStyleInTeam(orgId, uid) {
+      return exists(/databases/$(database)/documents/orgStyleViews/$(orgId)/viewers/$(request.auth.uid))
+        && uid in get(/databases/$(database)/documents/orgStyleViews/$(orgId)/viewers/$(request.auth.uid)).data.uids;
+    }
+    function validStyleShare(d) {
+      return d.keys().hasOnly(['name', 'scores', 'primary', 'secondary', 'at'])
+        && d.name is string && d.name.size() <= 80
+        && d.scores is map && d.scores.keys().hasOnly(['d', 'i', 's', 'c']) && d.scores.keys().hasAll(['d', 'i', 's', 'c'])
+        && d.scores.d is int && d.scores.d >= 0 && d.scores.d <= 100 && d.scores.i is int && d.scores.i >= 0 && d.scores.i <= 100
+        && d.scores.s is int && d.scores.s >= 0 && d.scores.s <= 100 && d.scores.c is int && d.scores.c >= 0 && d.scores.c <= 100
+        && d.primary in ['d', 'i', 's', 'c'] && d.secondary in ['', 'd', 'i', 's', 'c']
+        && d.at == request.time;
+    }
+    match /orgStyleSettings/{orgId} {
+      allow get: if isActiveMemberOf(orgId) || isPlatformOwner();
+      allow create, update: if isActiveAdminOf(orgId) && wsOrgActive(orgId)
+        && request.resource.data.keys().hasOnly(['mode', 'teams', 'updatedBy', 'updatedAt'])
+        && request.resource.data.mode in ['none', 'optional', 'team', 'all']
+        && request.resource.data.teams is map && request.resource.data.teams.size() <= 30
+        && request.resource.data.updatedBy == request.auth.uid
+        && request.resource.data.updatedAt == request.time;
+      allow delete: if false;
+    }
+    match /orgStyles/{orgId}/people/{uid} {
+      allow get: if isActiveMemberOf(orgId) && (
+        request.auth.uid == uid
+        || (isActiveAdminOf(orgId) && styleMode(orgId) != 'none')
+        || styleMode(orgId) in ['optional', 'all']
+        || (styleMode(orgId) == 'team' && maySeeStyleInTeam(orgId, uid)));
+      allow list: if isActiveMemberOf(orgId) && (styleMode(orgId) in ['optional', 'all'] || (isActiveAdminOf(orgId) && styleMode(orgId) != 'none'));
+      allow create, update: if request.auth.uid == uid && isActiveMemberOf(orgId) && wsOrgActive(orgId)
+        && styleMode(orgId) != 'none'
+        && validStyleShare(request.resource.data);
+      allow delete: if (request.auth.uid == uid && styleMode(orgId) in ['none', 'optional'])
+        || isActiveAdminOf(orgId);
+    }
+    match /orgStyleViews/{orgId}/viewers/{uid} {
+      allow get: if (request.auth.uid == uid && isActiveMemberOf(orgId)) || isActiveAdminOf(orgId);
+      allow list: if isActiveAdminOf(orgId);
+      allow create, update: if isActiveAdminOf(orgId)
+        && request.resource.data.keys().hasOnly(['uids', 'updatedAt'])
+        && request.resource.data.uids is list && request.resource.data.uids.size() <= 2000
+        && request.resource.data.updatedAt == request.time;
+      allow delete: if isActiveAdminOf(orgId);
     }
 
     match /orgAssignments/{orgId} {

@@ -536,6 +536,36 @@ async function readBlob(d){ return await d.blob.text(); }
       btn(items()[1], 'Remove').click(); await until(() => items().length === 1);
       t('Remove takes it off the list', window.__store['orgAssignments/orgA'].items.length === 1 && window.__store['orgAssignments/orgA'].items[0].course === 'discovery-novice');
       t('and the activity log records that too', Object.keys(window.__store).some(k => /^orgs\/orgA\/audit\//.test(k) && window.__store[k].action === 'assignment.removed'));
+    } else if (scn === 'styles'){
+      await until(() => $('stylesBody') && $('stylesBody').querySelector('input[name=stMode]'));
+      const body = () => $('stylesBody');
+      t('work styles sharing: four modes, the current one ticked, and how many have shared', body().querySelectorAll('input[name=stMode]').length === 4 && body().querySelector('input[value=optional]').checked && /1 person has a work style shared/.test(txt('stylesBody')), txt('stylesBody').slice(0, 200));
+      t('the team view is a paid add-on, said plainly', /paid add-on/.test(txt('stylesBody')));
+      $('stShowPeople').click(); await until(() => /Ben B/.test(txt('stPeople')));
+      t('admins can see who has shared, and their style', /Ben B/.test(txt('stPeople')) && /Steadiness/.test(txt('stPeople')));
+      const pick = (m) => { const r = body().querySelector('input[value=' + m + ']'); r.checked = true; r.dispatchEvent(new Event('change', { bubbles: true })); };
+      pick('team'); await sleep(30);
+      t('"within teams" shows the teams, with none yet', /No teams yet/.test(txt('stylesBody')) && !!$('stAddTeam'));
+      $('stAddTeam').click(); await sleep(20);
+      $('stSave').click(); await sleep(30);
+      t('a team needs a name', /Give every team a name/.test(txt('stMsg')));
+      const teamIds = () => Array.prototype.map.call(body().querySelectorAll('.st-team'), d => d.dataset.team);
+      const name = (id, v) => { const i = body().querySelector('[data-tname="' + id + '"]'); i.value = v; i.dispatchEvent(new Event('input', { bubbles: true })); };
+      const tick = (attr, id, v) => { const c = body().querySelector('[' + attr + '="' + id + '"][value="' + v + '"]'); c.checked = true; c.dispatchEvent(new Event('change', { bubbles: true })); };
+      const [prod] = teamIds(); name(prod, 'Product'); tick('data-tmem', prod, 'uBen'); tick('data-tmem', prod, 'uCy');
+      $('stAddTeam').click(); await sleep(20);
+      const eng = teamIds().find(x => x !== prod); name(eng, 'Engineering'); tick('data-tmem', eng, 'uDee');
+      t('a team\'s new name shows straight away where other teams pick it', textOf(body().querySelector('[data-tseelabel="' + eng + '"]')) === 'Engineering');
+      t('each team lists the company\'s people and the other teams', body().querySelectorAll('[data-tmem="' + eng + '"]').length >= 5 && body().querySelectorAll('[data-tsee="' + prod + '"]').length === 1);
+      tick('data-tsee', prod, eng);
+      $('stSave').click();
+      await until(() => /Saved/.test(txt('stMsg')));
+      const st = window.__store['orgStyleSettings/orgA'];
+      t('saved: the mode and the teams, by the admin', st.mode === 'team' && st.teams[prod].name === 'Product' && st.teams[prod].members.sort().join() === 'uBen,uCy' && st.teams[prod].sees.join() === eng && st.teams[eng].members.join() === 'uDee' && st.updatedBy === 'uAdmin', JSON.stringify(st));
+      const view = (u) => (window.__store['orgStyleViews/orgA/viewers/' + u] || {}).uids || null;
+      t('who may see whom is written for each person: Product sees itself and Engineering', view('uBen').join() === 'uCy,uDee' && view('uCy').join() === 'uBen,uDee');
+      t('Engineering sees only itself; people in no team see no one', view('uDee').length === 0 && view('uEli').length === 0 && view('uAdmin').length === 0);
+      t('a person who has left gets no list', view('uOld') === null);
     } else if (scn === 'shapes'){
       await shapeTests();
     } else if (scn === 'skills'){

@@ -7,7 +7,7 @@
    org-share-core.js. Who may write or read it is decided by firestore.rules. */
 
 import {
-  doc, getDoc, setDoc, updateDoc, arrayUnion, serverTimestamp, deleteField
+  doc, getDoc, getDocs, collection, setDoc, updateDoc, deleteDoc, arrayUnion, serverTimestamp, deleteField
 } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
 import { buildShare, shareHash, orgIdsFor, buildShape } from "./org-share-core.js";
 
@@ -114,4 +114,59 @@ export async function anonymizeOrgShares(db, user){
     await updateDoc(membershipRef, { email: '', displayName: '', phone: '' });
   }
   return { companies: orgIds.length, blanked: blanked };
+}
+
+/* ---------------------------------------------------------------- DISC Work Styles, shared (W2)
+   Needs styles-org-core.js on the page (window.StylesOrgCore). */
+
+/* The person's company and how it shares work styles: { orgId, orgName, isAdmin, settings: { mode, teams },
+   teamView } (teamView: the paid team views are switched on), or null when they are not in a company. */
+export async function styleContext(db, user){
+  try {
+    const m = await getDoc(doc(db, 'memberships', user.uid));
+    if (!m.exists() || m.data().status !== 'active' || !m.data().orgId) return null;
+    const orgId = m.data().orgId, O = window.StylesOrgCore;
+    const [st, feat] = await Promise.all([getDoc(doc(db, 'orgStyleSettings', orgId)).catch(() => null), getDoc(doc(db, 'orgFeatures', orgId)).catch(() => null)]);
+    return { orgId, orgName: m.data().orgName || 'your company', isAdmin: m.data().role === 'admin',
+      settings: O.clean(st && st.exists() ? st.data() : { mode: 'none' }), teamView: !!(feat && feat.exists() && feat.data().styles === true) };
+  } catch (e){ return null; }
+}
+
+/* Puts the person's work style on the company's copy when the company's mode says so (or they chose to, in
+   "optional"), and takes it off where that is theirs to decide. Name and scores only, never answers. */
+export async function syncOrgStyle(db, user, ctx, workStyle, optIn){
+  const O = window.StylesOrgCore;
+  if (!ctx || !O) return { status: 'no_company' };
+  const mode = ctx.settings.mode, ref = doc(db, 'orgStyles', ctx.orgId, 'people', user.uid);
+  const rec = workStyle && workStyle.complete ? O.shareRecord(workStyle, user.displayName || (user.email || '').split('@')[0]) : null;
+  const key = 'pa_style_' + ctx.orgId + '_' + user.uid;
+  if (rec && O.shouldShare(mode, optIn)){
+    const hash = JSON.stringify([mode, rec]);
+    if (storageGet(key) === hash) return { status: 'unchanged', mode };
+    try { await setDoc(ref, Object.assign({}, rec, { at: serverTimestamp() })); storageSet(key, hash); return { status: 'shared', mode }; }
+    catch (e){ return { status: 'failed', mode }; }
+  }
+  if (O.canUnshare(mode) && storageGet(key) !== 'none'){
+    try { const cur = await getDoc(ref); if (cur.exists()) await deleteDoc(ref); storageSet(key, 'none'); return { status: 'removed', mode }; }
+    catch (e){ return { status: 'failed', mode }; }
+  }
+  return { status: 'nothing', mode };
+}
+
+/* The work styles this person may see in their company (not their own): [{ uid, name, scores, primary, secondary }]. */
+export async function visibleStyles(db, user, ctx){
+  if (!ctx) return [];
+  const mode = ctx.settings.mode, out = [];
+  if (mode === 'none') return [];
+  try {
+    if (mode === 'optional' || mode === 'all' || ctx.isAdmin){
+      (await getDocs(collection(db, 'orgStyles', ctx.orgId, 'people'))).docs.forEach(d => { if (d.id !== user.uid) out.push(Object.assign({ uid: d.id }, d.data())); });
+    } else {
+      const v = await getDoc(doc(db, 'orgStyleViews', ctx.orgId, 'viewers', user.uid));
+      const uids = v.exists() ? (v.data().uids || []) : [];
+      const docs = await Promise.all(uids.slice(0, 200).map(u => getDoc(doc(db, 'orgStyles', ctx.orgId, 'people', u)).catch(() => null)));
+      docs.forEach((d, i) => { if (d && d.exists()) out.push(Object.assign({ uid: uids[i] }, d.data())); });
+    }
+  } catch (e){ return []; }
+  return out.sort((a, b) => String(a.name).localeCompare(String(b.name)));
 }

@@ -47,6 +47,7 @@ Copy-Item "$repo\competency-check.js" $site
 Copy-Item "$repo\workspace-core.js" $site
 Copy-Item "$repo\styles-core.js" $site
 Copy-Item "$repo\styles-ui.js" $site
+Copy-Item "$repo\styles-org-core.js" $site
 Copy-Item "$repo\competencies-core.js" $site
 Copy-Item "$repo\shape-core.js" $site
 Copy-Item "$repo\shape-ui.js" $site
@@ -210,7 +211,7 @@ try {
   $results += Run-Page "team workspace: an admin" "$base/ws-test.html?scn=admin" 30000
   $results += Run-Page "team workspace: no company (the sample)" "$base/ws-test.html?scn=solo" 30000
   $results += Run-Page "team workspace: Ask switched on" "$base/ws-test.html?scn=ask" 30000
-  foreach ($s in 'fresh', 'resume', 'done') { $results += Run-Page "work styles: $s" "$base/styles-test.html?scn=$s" 30000 }
+  foreach ($s in 'fresh', 'resume', 'done', 'team', 'optional', 'unpaid') { $results += Run-Page "work styles: $s" "$base/styles-test.html?scn=$s" 30000 }
   $results += Run-Page "lesson audio: a narrated lesson" "$base/les-test.html?scn=listen&course=discovery-novice&lesson=2" 30000
   $results += Run-Page "lesson audio: opened from the Library" "$base/les-test.html?scn=listenopen&course=discovery-novice&lesson=2&listen=1" 30000
   $results += Run-Page "lesson audio: a lesson with no audio yet" "$base/les-test.html?scn=noaudio&course=discovery-novice&lesson=4" 30000
@@ -218,7 +219,7 @@ try {
   $results += Run-Page "lesson figures: a value-vs-effort matrix and a scoring equation" "$base/les-test.html?scn=figs&course=prioritization-novice&lesson=2" 30000
   $results += Run-Page "lesson figures: a workflow drawn as a chain, lined up with the text" "$base/les-test.html?scn=figs&course=discovery-experienced&lesson=1" 30000
   $results += Run-Page "lesson figures: think first, then reveal the after" "$base/les-test.html?scn=figs&course=aiIndividual-moderate&lesson=2" 30000
-  foreach ($s in 'admin', 'empty', 'archived', 'nocopy', 'auditdenied', 'owner', 'ownernoorg', 'plain', 'member', 'removedadmin', 'denied', 'sharesdenied', 'signedout', 'history', 'snapshotsdenied', 'snapfail', 'noplatform', 'smallplatform', 'assign', 'assigndenied', 'skills', 'shapes') {
+  foreach ($s in 'admin', 'empty', 'archived', 'nocopy', 'auditdenied', 'owner', 'ownernoorg', 'plain', 'member', 'removedadmin', 'denied', 'sharesdenied', 'signedout', 'history', 'snapshotsdenied', 'snapfail', 'noplatform', 'smallplatform', 'assign', 'assigndenied', 'skills', 'shapes', 'styles') {
     $org = if ($s -eq 'owner') { '&org=orgA' } else { '' }
     $results += Run-Page "company dashboard: $s" "$base/company-test.html?scn=$s$org" 40000
   }

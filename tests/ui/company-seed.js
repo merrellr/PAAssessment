@@ -109,6 +109,10 @@
       store['orgs/orgA/snapshots/' + day10] = { day: day10, at: T(10), people: 5, assessed: 4, learning: 1, finished: 0, inactive: 0, avgOverall: 44, avgPlan: 6, lessons: 12, areas: { discovery: 45 } };
     }
     // skills shapes (C4): Ben has a role and a shared shape; Dee has a role but hasn't opened My Learning since
+    if (scn === 'styles') {   // DISC Work Styles: one person has shared, under "shared by choice"
+      store['orgStyleSettings/orgA'] = { mode: 'optional', teams: {}, updatedBy: 'uAdmin', updatedAt: T(3) };
+      store['orgStyles/orgA/people/uBen'] = { name: 'Ben B', scores: { d: 20, i: 30, s: 90, c: 60 }, primary: 's', secondary: '', at: T(2) };
+    }
     if (scn === 'shapes') {
       store['orgRoles/orgA/people/uBen'] = { roleId: 'spm', assignedAt: T(3), assignedBy: 'uAdmin' };
       store['orgRoles/orgA/people/uDee'] = { roleId: 'pm', assignedAt: T(1), assignedBy: 'uAdmin' };

@@ -104,6 +104,26 @@
   .legend i{ display:inline-block; width:10px; height:10px; border-radius:3px; margin-right:6px; vertical-align:-1px; }
   .hm-layout{ display:flex; flex-wrap:wrap; gap: 18px; align-items:flex-start; margin-top: 12px; }
   .hm-main{ flex: 999 1 560px; min-width: 0; }
+  .sr-only{ position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); border:0; }
+  .st-modes{ border:0; margin:0; padding:0; display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 8px; }
+  .st-mode{ display:flex; gap: 10px; align-items:flex-start; padding: 10px 12px; border: 1px solid var(--line); border-radius: 12px; cursor: pointer; }
+  .st-mode:has(input:checked){ border-color: var(--navy); box-shadow: 0 0 0 1px var(--navy) inset; }
+  .st-mode input{ margin-top: 3px; }
+  .st-mode small{ display:block; color: var(--ink-soft); font-size: .8rem; line-height: 1.4; margin-top: 2px; }
+  .st-teams{ margin-top: 16px; }
+  .st-teams h3{ font-size: .95rem; margin: 0 0 8px; }
+  .st-team{ border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; margin-bottom: 10px; }
+  .st-team-h{ display:flex; gap: 10px; align-items:center; margin-bottom: 8px; }
+  .st-name{ flex: 1 1 auto; min-width: 0; padding: 8px 10px; border: 1.5px solid var(--line); border-radius: 8px; font: inherit; background: var(--surface); color: var(--ink); }
+  .st-cols{ display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; }
+  .st-cols fieldset{ border: 0; margin: 0; padding: 0; min-width: 0; }
+  .st-cols legend{ font-size: .78rem; font-weight: 700; color: var(--ink-soft); margin-bottom: 4px; }
+  .st-cols label{ display:flex; gap: 6px; align-items:center; font-size: .85rem; padding: 2px 0; overflow-wrap:anywhere; }
+  .st-foot{ display:flex; flex-wrap:wrap; gap: 10px; align-items:center; margin-top: 14px; }
+  .linkbtn{ background:none; border:0; padding:0; color: var(--warn, #c0622a); font: 700 .8rem inherit; cursor:pointer; text-decoration: underline; white-space: nowrap; }
+  .st-people{ list-style:none; margin: 10px 0 0; padding: 0; display:grid; gap: 6px; }
+  .st-people li{ display:flex; gap: 10px; align-items:center; font-size: .88rem; }
+  .st-chip{ display:grid; place-items:center; width: 1.8em; height: 1.8em; border-radius: 50%; color: #fff; font-weight: 800; font-size: .8rem; flex: none; }
   .hm-side{ flex: 1 1 240px; min-width: 0; display:flex; flex-direction:column; gap: 12px; }
   .hm-wrap{ overflow-x:auto; }
   .hm{ border-collapse: separate; border-spacing: 3px; width: 100%; min-width: 640px; font-size: 0.8125rem; }
@@ -203,6 +223,8 @@
 <script src="roles-core.js"></script>
 <script src="competencies-core.js"></script>
 <script src="shape-core.js"></script>
+<script src="styles-core.js"></script>
+<script src="styles-org-core.js"></script>
 <script src="shape-ui.js"></script>
 <link rel="stylesheet" href="coach.css">
 </head>
@@ -360,6 +382,16 @@
         <div class="hm-main" id="skillsGrid"></div>
         <div class="hm-side" id="skillsCallouts"></div>
       </div>
+    </div>
+
+    <div class="card" id="stylesCard">
+      <div class="section-head">
+        <div>
+          <h2>DISC Work Styles: who can see them</h2>
+          <div class="hint" style="margin:4px 0 0;">Each person can take the free DISC Work Styles check. Choose how their results are shared in your company. Only names and scores are ever shared, never answers.</div>
+        </div>
+      </div>
+      <div id="stylesBody"></div>
     </div>
 
     <div class="card" id="shapeTeamCard">
@@ -716,6 +748,17 @@ async function loadAll(){
     console.error('Could not read the assigned roles:', err);
     data.rolesError = true;
   }
+  // DISC Work Styles sharing (orgStyleSettings), the paid team views (orgFeatures.styles) and how many have shared
+  data.styles = { settings: { mode: 'none', teams: {} }, teamView: false, shared: 0, error: false };
+  try {
+    const [stSnap, fSnap] = await Promise.all([getDoc(doc(db, 'orgStyleSettings', id)), getDoc(doc(db, 'orgFeatures', id)).catch(() => null)]);
+    data.styles.settings = window.StylesOrgCore.clean(stSnap.exists() ? stSnap.data() : { mode: 'none' });
+    data.styles.teamView = !!(fSnap && fSnap.exists() && fSnap.data().styles === true);
+    if (data.styles.settings.mode !== 'none') data.styles.shared = (await getDocs(collection(db, 'orgStyles', id, 'people')).catch(() => ({ docs: [] }))).docs.length;
+  } catch (err){
+    console.error('Could not read the work styles settings:', err);
+    data.styles.error = true;
+  }
   // The team's assignments, read separately too.
   data.assignments = [];
   data.assignError = false;
@@ -771,6 +814,7 @@ function renderAll(){
   renderFocus();
   renderAssignments();
   renderShapeTeam();
+  renderStyles();
   renderTeam();
   renderInvites();
   renderFormer();
@@ -1454,6 +1498,82 @@ function shapeDetail(r){
   return box;
 }
 // The team: competencies (rows) × people with a shape (columns), coloured against each person's role.
+/* ---------------------------------------------------------------- DISC Work Styles sharing (W2) */
+let styleDraft = null;
+const escS = (x) => String(x == null ? '' : x).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
+function renderStyles(){
+  const box = $('stylesBody'); if (!box) return;
+  const O = window.StylesOrgCore;
+  if (!O){ box.innerHTML = '<p class="empty">Work styles could not be loaded.</p>'; return; }
+  if (data.styles.error){ box.innerHTML = '<p class="empty">We couldn\'t load the work styles settings. The latest security rules may not be published yet.</p>'; return; }
+  const canEdit = !viewerIsOwner || isAdminHere();
+  if (!styleDraft) styleDraft = JSON.parse(JSON.stringify(data.styles.settings));
+  const people = activeRows(), tids = Object.keys(styleDraft.teams);
+  const name = (r) => r.name || r.email || 'Someone';
+  box.innerHTML =
+    '<fieldset class="st-modes"><legend class="sr-only">How work styles are shared</legend>' + O.ORDER.map(m =>
+      '<label class="st-mode"><input type="radio" name="stMode" value="' + m + '"' + (styleDraft.mode === m ? ' checked' : '') + (canEdit ? '' : ' disabled') + '><span><b>' + escS(O.MODES[m].label) + '</b><small>' + escS(O.MODES[m].about) + '</small></span></label>').join('') + '</fieldset>' +
+    (styleDraft.mode === 'team' ? '<div class="st-teams"><h3>Teams</h3>' + (tids.length ? tids.map(id => {
+      const t = styleDraft.teams[id];
+      return '<div class="st-team" data-team="' + id + '"><div class="st-team-h"><label class="sr-only" for="stName-' + id + '">Team name</label><input id="stName-' + id + '" class="st-name" data-tname="' + id + '" maxlength="' + O.MAX_NAME + '" value="' + escS(t.name) + '" placeholder="Team name"' + (canEdit ? '' : ' disabled') + '>' +
+        (canEdit ? '<button type="button" class="linkbtn" data-tdel="' + id + '">Remove team</button>' : '') + '</div>' +
+        '<div class="st-cols"><fieldset><legend>People in it</legend>' + (people.length ? people.map(r => '<label><input type="checkbox" data-tmem="' + id + '" value="' + escS(r.id) + '"' + (t.members.indexOf(r.id) > -1 ? ' checked' : '') + (canEdit ? '' : ' disabled') + '> ' + escS(name(r)) + '</label>').join('') : '<small>No one has joined yet.</small>') + '</fieldset>' +
+        '<fieldset><legend>Can also see these teams</legend>' + (tids.length > 1 ? tids.filter(x => x !== id).map(x => '<label><input type="checkbox" data-tsee="' + id + '" value="' + x + '"' + (t.sees.indexOf(x) > -1 ? ' checked' : '') + (canEdit ? '' : ' disabled') + '> <span data-tseelabel="' + x + '">' + escS(styleDraft.teams[x].name || 'Unnamed team') + '</span></label>').join('') : '<small>Add another team to choose.</small>') + '</fieldset></div></div>';
+    }).join('') : '<p class="empty" style="margin:0 0 8px;">No teams yet. Add one, then tick who is in it.</p>') +
+      (canEdit && tids.length < O.MAX_TEAMS ? '<button type="button" class="btn btn-ghost btn-small" id="stAddTeam">+ Add a team</button>' : '') + '<p class="hint" style="margin:8px 0 0;">Everyone sees their own team. Admins always see everyone (except in "Not shared"). People in no team are seen only by admins.</p></div>' : '') +
+    '<div class="st-foot">' + (canEdit ? '<button type="button" class="btn btn-primary btn-small" id="stSave">Save sharing settings</button>' : '<span class="hint">Only this company\'s admins can change these.</span>') +
+      '<span class="hint" id="stMsg" role="status"></span></div>' +
+    '<p class="hint" style="margin:12px 0 0;">' + (data.styles.settings.mode === 'none' ? 'Nothing is shared right now.' : data.styles.shared + ' ' + (data.styles.shared === 1 ? 'person has' : 'people have') + ' a work style shared with the company.') + ' ' +
+      (data.styles.teamView ? 'The team view is on: people see the styles they\'re allowed to on their DISC Work Styles page.' : 'Seeing teammates\' styles (the team view) is a paid add-on: <a href="/request-info">ask us about it</a>. Until then, only you as admins can see shared styles here.') + '</p>' +
+    (data.styles.settings.mode !== 'none' && data.styles.shared ? '<button type="button" class="btn btn-ghost btn-small" id="stShowPeople" style="margin-top:8px;">Show shared work styles</button><div id="stPeople"></div>' : '');
+  box.querySelectorAll('input[name=stMode]').forEach(x => x.addEventListener('change', () => { styleDraft.mode = x.value; renderStyles(); }));
+  box.querySelectorAll('[data-tname]').forEach(x => x.addEventListener('input', () => {
+    styleDraft.teams[x.dataset.tname].name = x.value;
+    box.querySelectorAll('[data-tseelabel="' + x.dataset.tname + '"]').forEach(l => { l.textContent = x.value.trim() || 'Unnamed team'; });
+  }));
+  box.querySelectorAll('[data-tmem]').forEach(x => x.addEventListener('change', () => { const m = styleDraft.teams[x.dataset.tmem].members; const i = m.indexOf(x.value); if (x.checked && i < 0) m.push(x.value); if (!x.checked && i > -1) m.splice(i, 1); }));
+  box.querySelectorAll('[data-tsee]').forEach(x => x.addEventListener('change', () => { const m = styleDraft.teams[x.dataset.tsee].sees; const i = m.indexOf(x.value); if (x.checked && i < 0) m.push(x.value); if (!x.checked && i > -1) m.splice(i, 1); }));
+  box.querySelectorAll('[data-tdel]').forEach(x => x.addEventListener('click', () => { const id = x.dataset.tdel; delete styleDraft.teams[id]; Object.keys(styleDraft.teams).forEach(k => { styleDraft.teams[k].sees = styleDraft.teams[k].sees.filter(y => y !== id); }); renderStyles(); }));
+  if ($('stAddTeam')) $('stAddTeam').addEventListener('click', () => { const id = O.newTeamId(); styleDraft.teams[id] = { name: '', members: [], sees: [] }; renderStyles(); const n = $('stName-' + id); if (n) n.focus(); });
+  if ($('stSave')) $('stSave').addEventListener('click', saveStyles);
+  if ($('stShowPeople')) $('stShowPeople').addEventListener('click', showStylePeople);
+}
+function isAdminHere(){ return !!(data.memberships || []).find(m => auth.currentUser && m.id === auth.currentUser.uid && m.role === 'admin' && m.status === 'active'); }
+async function saveStyles(){
+  const O = window.StylesOrgCore, btn = $('stSave');
+  const active = activeRows().map(r => r.id), clean = O.clean(styleDraft, active);
+  if (clean.mode === 'team' && Object.keys(styleDraft.teams).some(id => !String(styleDraft.teams[id].name || '').trim())){ $('stMsg').textContent = 'Give every team a name first.'; return; }
+  btn.disabled = true; $('stMsg').textContent = 'Saving…';
+  try {
+    await setDoc(doc(db, 'orgStyleSettings', orgId), { mode: clean.mode, teams: clean.teams, updatedBy: auth.currentUser.uid, updatedAt: serverTimestamp() });
+    // team mode: who may see whom, written out per person (the security rules read these)
+    if (clean.mode === 'team'){
+      const v = O.viewers(clean);
+      for (let i = 0; i < active.length; i += 400){
+        const b = writeBatch(db);
+        active.slice(i, i + 400).forEach(uid => b.set(doc(db, 'orgStyleViews', orgId, 'viewers', uid), { uids: v[uid] || [], updatedAt: serverTimestamp() }));
+        await b.commit();
+      }
+    }
+    data.styles.settings = clean; styleDraft = null;
+    renderStyles();
+    $('stMsg').textContent = 'Saved. People see the change the next time they open DISC Work Styles or My Learning.';
+  } catch (err){
+    console.error('Could not save the work styles settings:', err);
+    btn.disabled = false;
+    $('stMsg').textContent = err && err.code === 'permission-denied' ? "Couldn't save: the latest security rules may not be published yet." : "Couldn't save. Please try again.";
+  }
+}
+async function showStylePeople(){
+  const K = window.StylesCore, box = $('stPeople');
+  box.innerHTML = '<p class="hint">Loading…</p>';
+  try {
+    const snap = await getDocs(collection(db, 'orgStyles', orgId, 'people'));
+    const rows = snap.docs.map(d => d.data()).sort((a, b) => String(a.name).localeCompare(String(b.name)));
+    box.innerHTML = '<ul class="st-people">' + rows.map(p => { const st = K.STYLES[p.primary] || K.STYLES.d; return '<li><span class="st-chip" style="background:' + st.color + '">' + st.letter + '</span><b>' + escS(p.name || 'Someone') + '</b><span class="hint">' + escS(K.label(p)) + '</span></li>'; }).join('') + '</ul>';
+  } catch (err){ box.innerHTML = '<p class="hint">Couldn\'t load them.</p>'; }
+}
+
 function renderShapeTeam(){
   const box = $('shapeTeam');
   if (!box) return;
