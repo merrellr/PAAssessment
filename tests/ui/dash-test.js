@@ -309,6 +309,8 @@ const sleep = (ms) => new Promise(r => setTimeout(r, ms));
       t('My gaps: the observed pattern column', /Observed pattern/.test(gp.textContent));
       const sp = document.getElementById('shapePanel');
       t('My shape: the chart, and with no role yet, an invitation to pick one', sp.querySelector('svg.sh-svg') && /Pick a role/.test(sp.textContent) && sp.querySelectorAll('.sh-all tbody tr').length === 28);
+      const wsc = document.getElementById('stylePanel');
+      t('My Learning: the DISC Work Styles card next to My shape, inviting the check', wsc && /How do you like to work\?/.test(wsc.textContent) && wsc.querySelector('svg.ws-map') && document.getElementById('wsCardGo').getAttribute('href') === '/work-styles' && /Take the check/.test(document.getElementById('wsCardGo').textContent));
       const ck = document.getElementById('shCheck');
       t('My shape: the competency check is offered, by how much rests on little evidence', ck && ck.getAttribute('href') === '/check' && (/Take the competency check \(10 min\)/.test(ck.textContent) ? /\d+ of 28<\/b> rest on little or no evidence/.test(sp.innerHTML) : /again/.test(ck.textContent)), ck && ck.textContent);
       const sel = document.getElementById('shRole'); sel.value = 'pm'; sel.dispatchEvent(new Event('change')); await sleep(150);

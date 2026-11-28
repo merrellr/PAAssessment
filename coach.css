@@ -507,3 +507,24 @@ body.pa-demo .pa-notes-fab, body.pa-demo #homeNotes { display: none !important; 
 .sh-shift li { font-size: .82rem; padding: 2px 0; }
 .sh-consent { margin: 2px 0 0; padding: 8px 10px; border-radius: 10px; background: var(--pa-tint); font-size: .78rem; line-height: 1.45; }
 .sh-target-pick select:disabled { opacity: .85; cursor: not-allowed; }
+
+/* DISC Work Styles (styles-ui.js): the pace-and-focus map and the energy bars */
+.ws-map { display: block; max-width: 100%; height: auto; overflow: visible; }
+.ws-q { fill: var(--qc); fill-opacity: .08; stroke: var(--qc); stroke-opacity: .18; }
+.ws-q.mine { fill-opacity: .16; stroke-opacity: .45; }
+.ws-ql { font: 700 12px var(--pa-sans); }
+.ws-ql .ws-qletter { font: 800 15px var(--pa-display); }
+.ws-ql.small { font: 800 11px var(--pa-sans); }
+.ws-axis { stroke: var(--pa-line); stroke-width: 1.5; stroke-dasharray: 3 4; }
+.ws-ax { fill: var(--pa-muted); font: 600 11px var(--pa-sans); letter-spacing: .02em; }
+.ws-dot { fill: currentColor; stroke: var(--pa-card); stroke-width: 3; }
+.ws-other { fill: var(--pa-muted); fill-opacity: .55; stroke: var(--pa-card); stroke-width: 1.5; }
+.ws-bars { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+.ws-bars li { display: grid; grid-template-columns: minmax(0, 11em) minmax(0, 1fr) 2.4em; align-items: center; gap: 10px; font-size: .875rem; }
+.ws-bl b { color: var(--bc); font-family: var(--pa-display); }
+.ws-bt { height: 10px; border-radius: 5px; background: var(--pa-line); overflow: hidden; }
+.ws-bt i { display: block; height: 100%; border-radius: 5px; background: var(--bc); }
+.ws-bv { text-align: right; font-weight: 700; font-variant-numeric: tabular-nums; }
+.ws-card { display: flex; flex-wrap: wrap; gap: 16px 22px; align-items: center; }
+.ws-card .ws-map { flex: none; }
+.ws-card > div { flex: 1 1 240px; min-width: 0; }

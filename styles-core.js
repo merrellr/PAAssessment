@@ -95,12 +95,18 @@
     return { raw: raw, scores: scores, primary: primary, secondary: secondary, blend: primary ? STYLES[primary].letter + (secondary ? STYLES[secondary].letter.toLowerCase() : '') : '',
       answered: n, complete: n === QUESTIONS.length };
   }
-  // Where the scores sit on the two lines, each -1 to 1: x from tasks (-1) to people (1), y from measured (-1) to fast (1)
+  // Where the scores sit on the two lines, each -1 to 1: x from tasks (-1) to people (1), y from measured (-1) to fast (1).
+  // Only the styles above the middle (50) pull: each towards its own corner, as hard as it is above 50. So one strong
+  // style sits deep in its corner, two equal styles sit on the line between them, and an even spread sits in the middle.
+  var CORNER = { d: [-1, 1], i: [1, 1], s: [1, -1], c: [-1, -1] };
   function position(scores) {
-    var s = scores || {}, t = (s.d || 0) + (s.i || 0) + (s.s || 0) + (s.c || 0);
-    if (!t) return { x: 0, y: 0 };
-    var clamp = function (v) { return Math.max(-1, Math.min(1, v)); };
-    return { x: clamp(((s.i + s.s) - (s.d + s.c)) / t * 2), y: clamp(((s.d + s.i) - (s.s + s.c)) / t * 2) };
+    var s = scores || {}, w = {}, sum = 0;
+    KEYS.forEach(function (k) { w[k] = Math.max(0, (s[k] || 0) - 50); sum += w[k]; });
+    if (!sum) return { x: 0, y: 0 };
+    var x = 0, y = 0;
+    KEYS.forEach(function (k) { x += w[k] * CORNER[k][0]; y += w[k] * CORNER[k][1]; });
+    var strength = Math.min(1, sum / 50);
+    return { x: Math.max(-1, Math.min(1, x / sum * strength)), y: Math.max(-1, Math.min(1, y / sum * strength)) };
   }
   function label(result) {
     if (!result || !result.primary) return '';
@@ -113,6 +119,15 @@
     ds: 'Determined and dependable: you push for results without leaving the team behind.', is: 'Warm and encouraging: people feel included and supported around you.',
     ic: 'Imaginative and precise: ideas with the detail to make them real.', sc: 'Calm and thorough: steady, careful work people can rely on.'
   };
+  // Two people with different styles, working together
+  var TOGETHER = {
+    di: 'You both move fast. Decide who follows up and who checks the numbers.',
+    dc: 'You both care about the result: one wants speed, the other certainty. Agree how sure is sure enough.',
+    ds: 'One pushes, the other steadies. Give change early notice and agree realistic dates together.',
+    ic: 'One brings energy, the other rigour. Share the story and the evidence side by side.',
+    is: 'You both care about people. Make sure someone names the hard call.',
+    sc: 'You both like to do things properly. Set a decision date so care does not become delay.'
+  };
   function pairKey(a, b) { return [a, b].sort(function (x, y) { return KEYS.indexOf(x) - KEYS.indexOf(y); }).join(''); }
   function blendText(result) { return result && result.secondary ? PAIRS[pairKey(result.primary, result.secondary)] : ''; }
 
@@ -124,5 +139,5 @@
   }
 
   root.StylesCore = { KEYS: KEYS, STYLES: STYLES, QUESTIONS: QUESTIONS, PAIRS: PAIRS, score: score, position: position, label: label,
-    blendText: blendText, pairKey: pairKey, toSave: toSave, MINUTES: 8 };
+    blendText: blendText, pairKey: pairKey, TOGETHER: TOGETHER, toSave: toSave, MINUTES: 8 };
 })(typeof window !== 'undefined' ? window : globalThis);

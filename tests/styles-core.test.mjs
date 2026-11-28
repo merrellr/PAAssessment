@@ -19,10 +19,13 @@ t('bad answers are ignored (same style most and least, unknown style, unknown qu
 t('no answers: no style', S.score({}).primary === '' && S.label(S.score({})) === '');
 const pD = S.position(r.scores), pS = S.position(S.score(all('s', 'd')).scores);
 t('position: Dominance is fast and task-focused, Steadiness measured and people-focused', pD.x < 0 && pD.y > 0 && pS.x > 0 && pS.y < 0);
+const pDI = S.position(rm.scores);
+t('position: an even Dominance and Influence blend sits between them, at the fast end', Math.abs(pDI.x) < 0.05 && pDI.y > 0.9, JSON.stringify(pDI));
+t('position: an even spread sits in the middle', JSON.stringify(S.position({ d: 50, i: 50, s: 50, c: 50 })) === '{"x":0,"y":0}');
 t('position stays within the picture', [pD, pS, S.position(rm.scores)].every(p => Math.abs(p.x) <= 1 && Math.abs(p.y) <= 1));
 const saved = S.toSave(Object.assign(all('c', 'i'), { junk: { most: 'd', least: 'c' } }), '2026-11-27T00:00:00Z');
 t('what is saved: clean answers, scores, styles, when', Object.keys(saved.answers).length === 24 && saved.primary === 'c' && saved.complete && saved.at === '2026-11-27T00:00:00Z' && !saved.answers.junk);
 t('every style has its report text', S.KEYS.every(k => { const s = S.STYLES[k]; return s.name && s.best && s.drains && s.withYou && s.watch && s.work.length === 3; }));
-t('every pair of styles has a line', Object.keys(S.PAIRS).length === 6 && S.pairKey('s', 'd') === 'ds');
+t('every pair of styles has a blend line and a working-together line', Object.keys(S.PAIRS).length === 6 && Object.keys(S.TOGETHER).sort().join() === Object.keys(S.PAIRS).sort().join() && S.pairKey('s', 'd') === 'ds');
 console.log('\n' + pass + ' passed, ' + fail + ' failed');
 process.exit(fail ? 1 : 0);

@@ -446,6 +446,8 @@
 <script src="competencies-core.js"></script>
 <script src="shape-core.js"></script>
 <script src="shape-ui.js"></script>
+<script src="styles-core.js"></script>
+<script src="styles-ui.js"></script>
 <link rel="stylesheet" href="coach.css">
 </head>
 <body>
@@ -765,6 +767,7 @@
     <div class="cc-panel" id="planPanel" role="tabpanel" aria-labelledby="ltab-plan" data-only="learning" data-coach="plan"></div>
     <div class="cc-panel" id="libraryPanel" role="tabpanel" aria-labelledby="ltab-library" data-only="learning" data-coach="library"></div>
     <div class="cc-panel" id="shapePanel" data-only="learning" data-coach="readiness"></div>
+    <div class="cc-panel" id="stylePanel" data-only="learning" data-coach="readiness"></div>
     <div class="cc-panel" id="readinessPanel" role="tabpanel" aria-labelledby="ltab-readiness" data-only="learning" data-coach="readiness"></div>
     <div class="cc-panel" id="gapsPanel" role="tabpanel" aria-labelledby="ltab-gaps" data-only="learning" data-coach="gaps"></div>
 
@@ -1692,6 +1695,16 @@ function renderCoach(user, progress, assessmentResult, assessmentUrl){
         } });
       if (!window.__paDemo && shape && auth.currentUser) syncOrgShape(db, auth.currentUser, shape.levels).catch(() => {});
     })();
+    // DISC Work Styles: how they like to work, next to what they know (work-styles.html)
+    if (window.StylesCore && window.StylesUI && document.getElementById('stylePanel')) {
+      const ws = progress.workStyle, r = ws && ws.complete ? StylesCore.score(ws.answers || {}) : null, d = progress.workStyleDraft;
+      const esc2 = (x) => String(x == null ? '' : x).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
+      document.getElementById('stylePanel').innerHTML = '<section class="card ws-card" aria-labelledby="wsCardT">' + StylesUI.map(r, { size: 150, small: true }) +
+        '<div><span class="eyebrow">DISC Work Styles</span><h2 id="wsCardT" style="margin:2px 0 6px;font-size:1.1rem;">' + (r ? 'Your work style: ' + esc2(StylesCore.label(r)) : 'How do you like to work?') + '</h2>' +
+        '<p class="cc-muted" style="margin:0 0 10px;font-size:.9rem;">' + (r ? esc2(StylesCore.STYLES[r.primary].short) + '. How you work at your best, and how others can work well with you.'
+          : 'Fast or measured, focused on the task or on people: a short check places you on those two lines, with a report on working well with others. About ' + StylesCore.MINUTES + ' minutes.') + '</p>' +
+        '<a class="cc-btn sm" id="wsCardGo" href="/work-styles">' + (r ? 'See my report' : d && d.i > 0 ? 'Pick up where I left off' : 'Take the check') + '</a></div></section>';
+    }
     const focus = window.CoachCore.nextStep({ areas, pct, log: progress.answers || [], progress, bank: window.CoachBank || null }).area;
     document.querySelectorAll('[data-coach-sg="weakest"], [data-coach-sg="short"]').forEach(a => { a.href = '/practice' + (focus ? '?area=' + focus : '') + (a.dataset.coachSg === 'short' ? (focus ? '&' : '?') + 'n=6' : ''); });
   };
