@@ -512,8 +512,9 @@ body.pa-demo .pa-notes-fab, body.pa-demo #homeNotes { display: none !important; 
 .ws-map { display: block; max-width: 100%; height: auto; overflow: visible; }
 .ws-q { fill: var(--qc); fill-opacity: .08; stroke: var(--qc); stroke-opacity: .18; }
 .ws-q.mine { fill-opacity: .16; stroke-opacity: .45; }
-.ws-ql { font: 700 12px var(--pa-sans); }
-.ws-ql .ws-qletter { font: 800 15px var(--pa-display); }
+.ws-wm { opacity: .55; }
+.ws-wm-l { font: 800 38px var(--pa-display); opacity: .5; }
+.ws-wm-n { font: 700 11px var(--pa-sans); }
 .ws-ql.small { font: 800 11px var(--pa-sans); }
 .ws-axis { stroke: var(--pa-line); stroke-width: 1.5; stroke-dasharray: 3 4; }
 .ws-ax { fill: var(--pa-muted); font: 600 11px var(--pa-sans); letter-spacing: .02em; }

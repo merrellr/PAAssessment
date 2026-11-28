@@ -29,5 +29,17 @@ const rec = O.shareRecord({ scores: { d: 75.4, i: 120, s: -3, c: 'x' }, primary:
 t('the company copy: name and scores only, kept in range, never the answers', rec.name === 'Ann' && rec.scores.d === 75 && rec.scores.i === 100 && rec.scores.s === 0 && rec.scores.c === 0 && !('answers' in rec) && Object.keys(rec).sort().join() === 'name,primary,scores,secondary');
 t('no style, no copy', O.shareRecord({ scores: {} }, 'x') === null);
 t('team ids', /^t[a-z0-9]{9}$/.test(O.newTeamId()));
+// W3: names, grants, requests
+const cn = O.clean(Object.assign({}, raw, { names: { ann: '  Ann  A ', bob: 'Bob', zed: 'Not in a team' } }), ['ann', 'bob', 'cat', 'dan', 'eve']);
+t('names are kept only for people in teams, tidied', cn.names.ann === 'Ann A' && cn.names.bob === 'Bob' && !cn.names.zed);
+const vg = O.viewers(c, [{ viewer: 'cat', subjects: ['ann', 'cat'] }, { viewer: 'zed', subjects: ['bob'] }]);
+t('grants add to who someone may see (never themselves), even outside any team', vg.cat.join() === 'ann,dan' && vg.zed.join() === 'bob');
+const rq = O.cleanRequest({ kind: 'team', targetId: 'eng', targetName: '  Engineering ', reason: '  We   start a joint project next week  ', extra: 1 });
+t('a request: tidied, only its own fields', rq.kind === 'team' && rq.targetName === 'Engineering' && rq.reason === 'We start a joint project next week' && Object.keys(rq).sort().join() === 'kind,reason,targetId,targetName');
+t('a request needs someone and a reason', O.requestProblems(O.cleanRequest({ reason: 'x' })).length === 2 && O.requestProblems(rq).length === 0);
+t('approving a team request covers its members now, not the asker', O.subjectsFor(c, { kind: 'team', targetId: 'prod' }, 'ann').join() === 'bob' && O.subjectsFor(c, { kind: 'person', targetId: 'eve' }, 'cat').join() === 'eve' && O.subjectsFor(c, { kind: 'person', targetId: 'cat' }, 'cat').length === 0);
+const rb = O.requestable(cn, 'cat', ['dan']);
+t('what a member can ask for: teams with someone they can\'t see, and named people they can\'t see', rb.teams.map(x => x.name).sort().join() === 'Design,Product team' && rb.people.map(x => x.name).join() === 'Ann A,Bob');
+
 console.log('\n' + pass + ' passed, ' + fail + ' failed');
 process.exit(fail ? 1 : 0);

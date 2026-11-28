@@ -37,12 +37,16 @@
       var s = (raw.teams[id] && Array.isArray(raw.teams[id].sees)) ? raw.teams[id].sees : [];
       teams[id].sees = s.filter(function (x, i) { return x !== id && teams[x] && s.indexOf(x) === i; });
     });
-    return { mode: mode, teams: teams };
+    // the names of people in teams, so a member can ask to see someone by name (W3)
+    var names = {};
+    Object.keys(teams).forEach(function (id) { teams[id].members.forEach(function (u) { var nm = raw.names && raw.names[u]; if (nm) names[u] = String(nm).replace(/\s+/g, ' ').trim().slice(0, 80); }); });
+    return { mode: mode, teams: teams, names: names };
   }
   function teamsOf(settings, uid) { var t = (settings && settings.teams) || {}; return Object.keys(t).filter(function (id) { return t[id].members.indexOf(uid) > -1; }); }
 
-  // Team mode: { uid: [uids they may see] } for everyone in a team. Your own team(s), and the teams your team(s) may see.
-  function viewers(settings) {
+  // Team mode: { uid: [uids they may see] } for everyone in a team. Your own team(s), the teams your team(s) may see,
+  // and anyone an admin let them see on request (grants: [{ viewer, subjects: [uid] }]).
+  function viewers(settings, grants) {
     var t = (settings && settings.teams) || {}, out = {};
     Object.keys(t).forEach(function (id) {
       var see = {};
@@ -51,6 +55,11 @@
         var cur = out[u] || (out[u] = {});
         Object.keys(see).forEach(function (v) { if (v !== u) cur[v] = 1; });
       });
+    });
+    (grants || []).forEach(function (g) {
+      if (!g || !g.viewer) return;
+      var cur = out[g.viewer] || (out[g.viewer] = {});
+      (g.subjects || []).forEach(function (v) { if (v !== g.viewer) cur[v] = 1; });
     });
     var res = {}; Object.keys(out).forEach(function (u) { res[u] = Object.keys(out[u]).sort(); });
     return res;
@@ -79,6 +88,33 @@
     return { name: String(name || '').slice(0, 80), scores: scores, primary: workStyle.primary, secondary: k.indexOf(workStyle.secondary) > -1 ? workStyle.secondary : '' };
   }
 
-  root.StylesOrgCore = { MODES: MODES, ORDER: ORDER, MAX_TEAMS: MAX_TEAMS, MAX_MEMBERS: MAX_MEMBERS, MAX_NAME: MAX_NAME, newTeamId: newTeamId,
+  // Access requests (W3): ask to see one person or a team, with a reason; an admin approves or declines
+  var REASON_MAX = 500;
+  function cleanRequest(r) {
+    var kind = r && r.kind === 'team' ? 'team' : 'person';
+    return { kind: kind, targetId: String((r && r.targetId) || '').slice(0, 128), targetName: String((r && r.targetName) || '').replace(/\s+/g, ' ').trim().slice(0, 80),
+      reason: String((r && r.reason) || '').replace(/\s+/g, ' ').trim().slice(0, REASON_MAX) };
+  }
+  function requestProblems(r) {
+    var p = [];
+    if (!r.targetId) p.push('Choose who you would like to see.');
+    if (r.reason.length < 10) p.push('Say briefly why you need it (at least 10 characters).');
+    return p;
+  }
+  // Who a request covers when approved: the person, or the team's members now (not the asker)
+  function subjectsFor(settings, request, asker) {
+    if (request.kind === 'team') { var t = settings && settings.teams && settings.teams[request.targetId]; return t ? t.members.filter(function (u) { return u !== asker; }) : []; }
+    return request.targetId && request.targetId !== asker ? [request.targetId] : [];
+  }
+  // What a member could ask to see: teams and named people they can't see yet (team mode)
+  function requestable(settings, uid, canSee) {
+    var t = (settings && settings.teams) || {}, see = {}; (canSee || []).forEach(function (u) { see[u] = 1; });
+    var teams = Object.keys(t).filter(function (id) { return t[id].members.some(function (u) { return u !== uid && !see[u]; }); }).map(function (id) { return { id: id, name: t[id].name }; });
+    var people = Object.keys((settings && settings.names) || {}).filter(function (u) { return u !== uid && !see[u]; }).map(function (u) { return { id: u, name: settings.names[u] }; })
+      .sort(function (a, b) { return a.name.localeCompare(b.name); });
+    return { teams: teams, people: people };
+  }
+
+  root.StylesOrgCore = { REASON_MAX: REASON_MAX, cleanRequest: cleanRequest, requestProblems: requestProblems, subjectsFor: subjectsFor, requestable: requestable, MODES: MODES, ORDER: ORDER, MAX_TEAMS: MAX_TEAMS, MAX_MEMBERS: MAX_MEMBERS, MAX_NAME: MAX_NAME, newTeamId: newTeamId,
     clean: clean, teamsOf: teamsOf, viewers: viewers, audience: audience, shouldShare: shouldShare, canUnshare: canUnshare, shareRecord: shareRecord };
 })(typeof window !== 'undefined' ? window : globalThis);

@@ -128,6 +128,21 @@
     is: 'You both care about people. Make sure someone names the hard call.',
     sc: 'You both like to do things properly. Set a decision date so care does not become delay.'
   };
+  // What a team may miss when no one in it leans to a style (for the team balance)
+  var MISSING = {
+    d: 'Decisions may wait for everyone to agree. Name an owner for each call and a date to make it.',
+    i: 'Good work may not get sold beyond the team. Plan who tells the story, and to whom.',
+    s: 'The pace may outrun the people. Check workload before adding more, and give change some notice.',
+    c: 'Details and risks may slip through. Add a review step for anything hard to undo.'
+  };
+  // A group's balance: how many lean to each style (by main style), the styles no one leans to, and the most common
+  function balance(people) {
+    var counts = { d: 0, i: 0, s: 0, c: 0 }, n = 0;
+    (people || []).forEach(function (p) { if (p && KEYS.indexOf(p.primary) > -1) { counts[p.primary]++; n++; } });
+    var missing = KEYS.filter(function (k) { return n >= 3 && !counts[k]; });
+    var top = KEYS.slice().sort(function (a, b) { return counts[b] - counts[a]; })[0];
+    return { counts: counts, n: n, missing: missing, top: n && counts[top] / n >= 0.5 ? top : '' };
+  }
   function pairKey(a, b) { return [a, b].sort(function (x, y) { return KEYS.indexOf(x) - KEYS.indexOf(y); }).join(''); }
   function blendText(result) { return result && result.secondary ? PAIRS[pairKey(result.primary, result.secondary)] : ''; }
 
@@ -139,5 +154,5 @@
   }
 
   root.StylesCore = { KEYS: KEYS, STYLES: STYLES, QUESTIONS: QUESTIONS, PAIRS: PAIRS, score: score, position: position, label: label,
-    blendText: blendText, pairKey: pairKey, TOGETHER: TOGETHER, toSave: toSave, MINUTES: 8 };
+    blendText: blendText, pairKey: pairKey, TOGETHER: TOGETHER, MISSING: MISSING, balance: balance, toSave: toSave, MINUTES: 8 };
 })(typeof window !== 'undefined' ? window : globalThis);

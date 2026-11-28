@@ -19,8 +19,10 @@
       var q = QUAD[k], st = K.STYLES[k], x = pad + q[0] * half, y = pad + q[1] * half, mine = result && result.primary === k;
       parts.push('<rect class="ws-q' + (mine ? ' mine' : '') + '" x="' + x + '" y="' + y + '" width="' + half + '" height="' + half + '" rx="' + (opts.small ? 8 : 14) + '" style="--qc:' + st.color + '"/>');
       if (!opts.small) {
-        var lx = q[0] ? x + half - 12 : x + 12, ly = q[1] ? y + half - 14 : y + 22, anchor = q[0] ? 'end' : 'start';
-        parts.push('<text class="ws-ql" x="' + lx + '" y="' + ly + '" text-anchor="' + anchor + '" style="fill:' + st.color + '"><tspan class="ws-qletter">' + st.letter + '</tspan> ' + esc(st.name) + '</text>');
+        // a faint watermark in the middle of each square: the dots draw on top of it and nothing important is hidden
+        var lx = x + half / 2, ly = y + half / 2;
+        parts.push('<g class="ws-wm" style="fill:' + st.color + '"><text class="ws-wm-l" x="' + lx + '" y="' + (ly + 6) + '" text-anchor="middle">' + st.letter + '</text>' +
+          '<text class="ws-wm-n" x="' + lx + '" y="' + (ly + 26) + '" text-anchor="middle">' + esc(st.name) + '</text></g>');
       } else {
         var sx = q[0] ? x + half - 8 : x + 8, sy = q[1] ? y + half - 8 : y + 16;
         parts.push('<text class="ws-ql small" x="' + sx + '" y="' + sy + '" text-anchor="' + (q[0] ? 'end' : 'start') + '" style="fill:' + st.color + '">' + st.letter + '</text>');

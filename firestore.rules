@@ -466,8 +466,9 @@ service cloud.firestore {
     match /orgStyleSettings/{orgId} {
       allow get: if isActiveMemberOf(orgId) || isPlatformOwner();
       allow create, update: if isActiveAdminOf(orgId) && wsOrgActive(orgId)
-        && request.resource.data.keys().hasOnly(['mode', 'teams', 'updatedBy', 'updatedAt'])
+        && request.resource.data.keys().hasOnly(['mode', 'teams', 'names', 'updatedBy', 'updatedAt'])
         && request.resource.data.mode in ['none', 'optional', 'team', 'all']
+        && request.resource.data.get('names', {}) is map && request.resource.data.get('names', {}).size() <= 2000
         && request.resource.data.teams is map && request.resource.data.teams.size() <= 30
         && request.resource.data.updatedBy == request.auth.uid
         && request.resource.data.updatedAt == request.time;
@@ -493,6 +494,44 @@ service cloud.firestore {
         && request.resource.data.keys().hasOnly(['uids', 'updatedAt'])
         && request.resource.data.uids is list && request.resource.data.uids.size() <= 2000
         && request.resource.data.updatedAt == request.time;
+      allow delete: if isActiveAdminOf(orgId);
+    }
+
+    // DISC Work Styles access requests (W3): a member asks to see one person or a team, with a reason. Only
+    // they and admins read it; only an admin decides. An approval is a grant (below), which admins add to the
+    // person's view list. The people it covers can read the grant, so they are told.
+    match /orgStyleRequests/{orgId}/items/{reqId} {
+      allow get, list: if isActiveAdminOf(orgId) || (isActiveMemberOf(orgId) && resource.data.requester == request.auth.uid);
+      allow create: if isActiveMemberOf(orgId) && wsOrgActive(orgId)
+        && reqId.matches('^[A-Za-z0-9]{6,32}$')
+        && request.resource.data.keys().hasOnly(['requester', 'requesterName', 'kind', 'targetId', 'targetName', 'reason', 'status', 'createdAt'])
+        && request.resource.data.requester == request.auth.uid
+        && request.resource.data.requesterName is string && request.resource.data.requesterName.size() <= 80
+        && request.resource.data.kind in ['person', 'team']
+        && request.resource.data.targetId is string && request.resource.data.targetId.size() >= 1 && request.resource.data.targetId.size() <= 128
+        && request.resource.data.targetName is string && request.resource.data.targetName.size() <= 80
+        && request.resource.data.reason is string && request.resource.data.reason.size() >= 10 && request.resource.data.reason.size() <= 500
+        && request.resource.data.status == 'pending'
+        && request.resource.data.createdAt == request.time;
+      allow update: if isActiveAdminOf(orgId)
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'decidedBy', 'decidedAt'])
+        && request.resource.data.status in ['approved', 'declined']
+        && request.resource.data.decidedBy == request.auth.uid
+        && request.resource.data.decidedAt == request.time;
+      allow delete: if isActiveAdminOf(orgId) || (isActiveMemberOf(orgId) && resource.data.requester == request.auth.uid);
+    }
+    match /orgStyleGrants/{orgId}/items/{grantId} {
+      allow get, list: if isActiveAdminOf(orgId)
+        || (isActiveMemberOf(orgId) && (resource.data.viewer == request.auth.uid || request.auth.uid in resource.data.subjects));
+      allow create: if isActiveAdminOf(orgId)
+        && request.resource.data.keys().hasOnly(['viewer', 'viewerName', 'subjects', 'targetName', 'reason', 'approvedBy', 'at'])
+        && request.resource.data.viewer is string && request.resource.data.viewerName is string && request.resource.data.viewerName.size() <= 80
+        && request.resource.data.subjects is list && request.resource.data.subjects.size() <= 500
+        && request.resource.data.targetName is string && request.resource.data.targetName.size() <= 80
+        && request.resource.data.reason is string && request.resource.data.reason.size() <= 500
+        && request.resource.data.approvedBy == request.auth.uid
+        && request.resource.data.at == request.time;
+      allow update: if false;
       allow delete: if isActiveAdminOf(orgId);
     }
 

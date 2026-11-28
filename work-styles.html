@@ -104,6 +104,28 @@
   .ws-people .nm{ font-weight: 700; overflow-wrap:anywhere; } .ws-people .nm small{ display:block; font-weight: 400; color: var(--pa-muted); }
   .ws-mini{ display:flex; gap: 3px; align-items:flex-end; height: 22px; }
   .ws-mini i{ flex: 1; border-radius: 2px 2px 0 0; min-height: 2px; }
+  .ws-h2{ font-size: 1.05rem; margin: 22px 0 6px; }
+  .ws-h3{ font-size: .95rem; margin: 0 0 6px; color: var(--pa-navy-deep); }
+  .ws-team{ display:grid; grid-template-columns: minmax(0, 320px) minmax(0, 1fr); gap: 20px; align-items:start; }
+  @media (max-width: 720px){ .ws-team{ grid-template-columns: minmax(0, 1fr); } }
+  .ws-counts{ display:flex; flex-wrap:wrap; gap: 8px 16px; margin: 0 0 8px; font-weight: 700; }
+  .ws-counts span{ display:inline-flex; align-items:center; gap: 6px; }
+  .ws-chip.sm{ width: 1.6em; height: 1.6em; font-size: .75rem; font-style: normal; }
+  .ws-people li{ display:block; padding: 0; }
+  .ws-person{ display:grid; grid-template-columns: 2.2em minmax(0, 1fr) minmax(0, 9em); gap: 10px; align-items:center; width: 100%; padding: 8px 10px; border: 0; background: none; color: inherit; font: inherit; text-align: left; cursor: pointer; border-radius: 10px; }
+  .ws-person:hover{ background: var(--pa-tint); }
+  .ws-person:focus-visible{ outline: 3px solid var(--pa-cyan); outline-offset: -2px; }
+  .ws-pair{ padding: 4px 14px 12px 52px; font-size: .88rem; line-height: 1.55; }
+  .ws-pair h4{ margin: 0 0 4px; font-size: .9rem; }
+  .ws-pair p{ margin: 0 0 6px; }
+  .ws-req{ margin-top: 18px; border: 1px solid var(--pa-line); border-radius: 12px; padding: 10px 14px; }
+  .ws-req summary{ cursor:pointer; font-weight: 700; font-size: .9rem; }
+  .ws-req-f{ display:grid; gap: 6px; margin-top: 8px; }
+  .ws-req-f label{ font-weight: 700; font-size: .8125rem; }
+  .ws-req-f select, .ws-req-f textarea{ width: 100%; padding: 8px 10px; border: 1.5px solid var(--pa-line); border-radius: 10px; background: var(--pa-card); color: var(--pa-ink); font: .9rem var(--pa-sans); }
+  .ws-reqs{ margin: 10px 0 0; padding-left: 18px; font-size: .86rem; line-height: 1.6; }
+  .ws-st{ font-size: .75rem; font-weight: 700; padding: 1px 8px; border-radius: 999px; background: var(--pa-tint); }
+  .ws-st-approved{ background: var(--pa-ok-bg); } .ws-st-declined{ background: var(--pa-warn-bg); }
   .ws-go{ display:flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
 </style>
 <link rel="stylesheet" href="pa-theme.css">
@@ -159,7 +181,7 @@ const firebaseConfig = {
 };
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
-import { getFirestore, doc, getDoc, setDoc as fsSetDoc, deleteField } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+import { getFirestore, doc, getDoc, getDocs, collection, query, where, setDoc as fsSetDoc, deleteDoc, deleteField, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
 import { styleContext, syncOrgStyle, visibleStyles } from "./org-share.js";
 const setDoc = (...a) => window.__paDemo ? Promise.resolve() : fsSetDoc(...a);
 const app = initializeApp(firebaseConfig), auth = getAuth(app), db = getFirestore(app);
@@ -223,7 +245,7 @@ function showResult(r){
     '<div id="wsSharing"></div><div id="wsTeam"></div>' +
     '<p class="ws-fine">Taken ' + esc(new Date(r.at).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' })) + '. ' + (ctx && O.shouldShare(ctx.settings.mode, optIn) ? 'Your name and scores are shared as described above; your answers never are.' : 'Your result is private to you.') + ' Based on Marston’s DISC model; it describes preferences, not ability, and isn’t for hiring or selection.</p>';
   $('wsResult').hidden = false;
-  drawSharing(r); drawTeam();
+  myRes = res; drawSharing(r); drawTeam();
   $('wsAgain').addEventListener('click', () => { answers = {}; i = 0; most = ''; $('wsResult').hidden = true; ask(); event('workstyle_retake'); });
 }
 /* ---------- sharing with the company (W2) ---------- */
@@ -241,17 +263,90 @@ function drawSharing(r){
     drawTeam();
   });
 }
+let teamPeople = [], myRes = null;
 async function drawTeam(){
   const box = $('wsTeam'); if (!box) return;
   if (!ctx || ctx.settings.mode === 'none') { box.innerHTML = ''; return; }
-  if (!ctx.teamView) { box.innerHTML = '<h2 style="font-size:1.05rem;margin:22px 0 4px;">Your team’s work styles</h2><p class="cc-muted" style="font-size:.88rem;margin:0;">Seeing your teammates’ work styles is a paid add-on for company accounts. ' + (ctx.isAdmin ? '' : 'Your company admin can ') + '<a href="/request-info">ask us about it</a>.</p>'; return; }
-  box.innerHTML = '<h2 style="font-size:1.05rem;margin:22px 0 4px;">Work styles you can see</h2><p class="cc-muted" style="font-size:.85rem;margin:0;">Loading…</p>';
-  const people = await visibleStyles(db, user, ctx);
-  box.innerHTML = '<h2 style="font-size:1.05rem;margin:22px 0 4px;">Work styles you can see</h2>' + (people.length ? '<ul class="ws-people">' + people.map(p => {
-      const st = K.STYLES[p.primary] || K.STYLES.d;
-      return '<li><span class="ws-chip" style="background:' + st.color + '" aria-hidden="true">' + st.letter + '</span><span class="nm">' + esc(p.name || 'A teammate') + '<small>' + esc(K.label(p)) + '</small></span>' +
-        '<span class="ws-mini" role="img" aria-label="' + esc(K.KEYS.map(k => K.STYLES[k].name + ' ' + (p.scores ? p.scores[k] : 0)).join(', ')) + '">' + K.KEYS.map(k => '<i style="background:' + K.STYLES[k].color + ';height:' + Math.max(2, (p.scores ? p.scores[k] : 0) * 0.22) + 'px"></i>').join('') + '</span></li>';
-    }).join('') + '</ul>' : '<p class="cc-muted" style="font-size:.88rem;margin:0;">No one you can see has shared a work style yet.</p>');
+  if (!ctx.teamView) { box.innerHTML = '<h2 class="ws-h2">Your team’s work styles</h2><p class="cc-muted" style="font-size:.88rem;margin:0;">Seeing your teammates’ work styles, the team map and the guide to working with each person are a paid add-on for company accounts. ' + (ctx.isAdmin ? '' : 'Your company admin can ') + '<a href="/request-info">ask us about it</a>.</p>'; return; }
+  box.innerHTML = '<h2 class="ws-h2">Your team’s work styles</h2><p class="cc-muted" style="font-size:.85rem;margin:0;">Loading…</p>';
+  teamPeople = await visibleStyles(db, user, ctx);
+  const mine = myRes && myRes.primary ? [{ primary: myRes.primary }] : [];
+  const bal = K.balance(mine.concat(teamPeople)), n = bal.n;
+  const balLines = (bal.top ? '<li><b>Most of the group leans ' + esc(K.STYLES[bal.top].name) + '.</b> ' + esc(K.STYLES[bal.top].watch) + '</li>' : '') +
+    bal.missing.map(k => '<li><b>No one leans ' + esc(K.STYLES[k].name) + '.</b> ' + esc(K.MISSING[k]) + '</li>').join('');
+  box.innerHTML = '<h2 class="ws-h2">Your team’s work styles</h2>' + (teamPeople.length ? '<div class="ws-team"><div>' + UI.map(myRes, { size: 320, people: teamPeople }) +
+      '<p class="ws-fine" style="margin-top:6px;">Your dot in colour; the people you can see in grey. Hover or tap a dot for a name.</p></div>' +
+      '<div><h3 class="ws-h3">The balance of ' + n + (n === 1 ? ' person' : ' people') + ' (you included)</h3><p class="ws-counts">' + K.KEYS.map(k => '<span><i class="ws-chip sm" style="background:' + K.STYLES[k].color + '">' + K.STYLES[k].letter + '</i>' + bal.counts[k] + '</span>').join('') + '</p>' +
+      (balLines ? '<ul class="ws-work">' + balLines + '</ul>' : '<p class="cc-muted" style="font-size:.88rem;">A good spread: every style is here.</p>') + '</div></div>' +
+      '<h3 class="ws-h3" style="margin-top:18px;">Working with each person</h3><p class="cc-muted" style="font-size:.85rem;margin:0 0 6px;">Open someone for how to work with them, and what to watch out for together.</p>' +
+      '<ul class="ws-people">' + teamPeople.map((p, ix) => {
+        const st = K.STYLES[p.primary] || K.STYLES.d;
+        return '<li><button type="button" class="ws-person" data-p="' + ix + '" aria-expanded="false"><span class="ws-chip" style="background:' + st.color + '" aria-hidden="true">' + st.letter + '</span><span class="nm">' + esc(p.name || 'A teammate') + '<small>' + esc(K.label(p)) + '</small></span>' +
+          '<span class="ws-mini" role="img" aria-label="' + esc(K.KEYS.map(k => K.STYLES[k].name + ' ' + (p.scores ? p.scores[k] : 0)).join(', ')) + '">' + K.KEYS.map(k => '<i style="background:' + K.STYLES[k].color + ';height:' + Math.max(2, (p.scores ? p.scores[k] : 0) * 0.22) + 'px"></i>').join('') + '</span></button><div class="ws-pair" hidden></div></li>';
+      }).join('') + '</ul>'
+    : '<p class="cc-muted" style="font-size:.88rem;margin:0;">No one you can see has shared a work style yet.</p>') + '<div id="wsAskAccess"></div><div id="wsToldMe"></div>';
+  drawRequests(); drawTold();
+}
+// "Working with ...": their style, how to work with them, what to watch for together
+function pairHtml(p){
+  const them = K.STYLES[p.primary] || K.STYLES.d, me = myRes && myRes.primary ? myRes.primary : '';
+  const first = String(p.name || 'them').split(' ')[0];
+  const together = me && me !== p.primary ? K.TOGETHER[K.pairKey(me, p.primary)] : me ? 'You share a main style, so you will often agree on pace and focus. Watch for the blind spot you share: ' + them.watch.charAt(0).toLowerCase() + them.watch.slice(1) : '';
+  return '<h4>Working with ' + esc(first) + '</h4><p><b>How to work with ' + esc(first) + ':</b> ' + esc(them.withYou) + '</p>' +
+    '<p><b>' + esc(first) + ' at their best:</b> ' + esc(them.best) + '</p>' +
+    (together ? '<p><b>You and ' + esc(first) + ' together:</b> ' + esc(together) + '</p>' : '') +
+    '<p><b>What drains ' + esc(first) + ':</b> ' + esc(them.drains) + '</p>';
+}
+$('wsResult').addEventListener('click', (e) => {
+  const b = e.target.closest('.ws-person'); if (!b) return;
+  const panel = b.nextElementSibling, open = b.getAttribute('aria-expanded') !== 'true';
+  if (open) panel.innerHTML = pairHtml(teamPeople[+b.dataset.p]);
+  panel.hidden = !open; b.setAttribute('aria-expanded', String(open));
+  if (open) event('workstyle_pair', { theirs: teamPeople[+b.dataset.p].primary, mine: myRes && myRes.primary });
+});
+// Ask to see more (team mode): a person or a team, with a reason; an admin decides
+async function drawRequests(){
+  const box = $('wsAskAccess'); if (!box || !ctx || ctx.settings.mode !== 'team' || ctx.isAdmin) return;
+  const opts = O.requestable(ctx.settings, user.uid, teamPeople.map(p => p.uid));
+  let mine = [];
+  try { mine = (await getDocs(query(collection(db, 'orgStyleRequests', ctx.orgId, 'items'), where('requester', '==', user.uid)))).docs.map(d => Object.assign({ id: d.id }, d.data())); } catch (e) { mine = []; }
+  const pending = mine.filter(r => r.status === 'pending');
+  const sel = opts.teams.map(t => '<option value="team:' + esc(t.id) + '">Team: ' + esc(t.name) + '</option>').join('') + opts.people.map(p => '<option value="person:' + esc(p.id) + '">' + esc(p.name) + '</option>').join('');
+  box.innerHTML = '<details class="ws-req"' + (pending.length ? ' open' : '') + '><summary>Need to see someone else’s work style?</summary>' +
+    (sel ? '<form id="wsReqForm" class="ws-req-f"><p class="cc-muted" style="font-size:.85rem;margin:0;">Ask your company admin. Say why; they’ll approve or decline, and the people shared will be told.</p>' +
+      '<label for="wsReqWho">Who</label><select id="wsReqWho">' + sel + '</select>' +
+      '<label for="wsReqWhy">Why you need it</label><textarea id="wsReqWhy" rows="3" maxlength="' + O.REASON_MAX + '" placeholder="e.g. We start a joint project with Engineering next week."></textarea>' +
+      '<div class="ws-go" style="margin-top:8px;"><button type="submit" class="cc-btn sm" id="wsReqGo">Send the request</button><span id="wsReqMsg" class="cc-muted" role="status" style="font-size:.85rem;"></span></div></form>'
+      : '<p class="cc-muted" style="font-size:.85rem;">You can already see everyone who is in a team.</p>') +
+    (mine.length ? '<ul class="ws-reqs">' + mine.sort((a, b) => (b.createdAt && b.createdAt.toMillis ? b.createdAt.toMillis() : 0) - (a.createdAt && a.createdAt.toMillis ? a.createdAt.toMillis() : 0)).map(r =>
+      '<li><b>' + esc(r.kind === 'team' ? 'Team: ' + r.targetName : r.targetName) + '</b> <span class="ws-st ws-st-' + esc(r.status) + '">' + esc({ pending: 'Waiting for an admin', approved: 'Approved', declined: 'Declined' }[r.status] || r.status) + '</span>' +
+      (r.status === 'pending' ? ' <button type="button" class="linklike" data-withdraw="' + esc(r.id) + '">Withdraw</button>' : '') + '</li>').join('') + '</ul>' : '') + '</details>';
+  const f = $('wsReqForm');
+  if (f) f.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const [kind, id] = $('wsReqWho').value.split(':');
+    const label = $('wsReqWho').selectedOptions[0].textContent.replace(/^Team: /, '');
+    const r = O.cleanRequest({ kind, targetId: id, targetName: label, reason: $('wsReqWhy').value }), p = O.requestProblems(r);
+    if (p.length) { $('wsReqMsg').textContent = p.join(' '); return; }
+    $('wsReqGo').disabled = true;
+    try {
+      const rid = Array.from(crypto.getRandomValues(new Uint8Array(12)), x => 'abcdefghijkmnpqrstuvwxyz23456789'[x % 32]).join('');
+      await setDoc(doc(db, 'orgStyleRequests', ctx.orgId, 'items', rid), Object.assign({ requester: user.uid, requesterName: String(user.displayName || (user.email || '').split('@')[0]).slice(0, 80), status: 'pending', createdAt: serverTimestamp() }, r));
+      event('workstyle_request', { kind });
+      drawRequests();
+    } catch (err) { $('wsReqGo').disabled = false; $('wsReqMsg').textContent = 'Couldn’t send it. Please try again.'; }
+  });
+  box.querySelectorAll('[data-withdraw]').forEach(b => b.addEventListener('click', async () => {
+    try { await deleteDoc(doc(db, 'orgStyleRequests', ctx.orgId, 'items', b.dataset.withdraw)); drawRequests(); } catch (e) { /* stays listed */ }
+  }));
+}
+// The people whose style was shared on request are told
+async function drawTold(){
+  const box = $('wsToldMe'); if (!box || !ctx) return;
+  let g = [];
+  try { g = (await getDocs(query(collection(db, 'orgStyleGrants', ctx.orgId, 'items'), where('subjects', 'array-contains', user.uid)))).docs.map(d => d.data()); } catch (e) { g = []; }
+  box.innerHTML = g.length ? '<div class="ws-share"><b>Your work style was shared on request.</b><ul class="ws-reqs">' + g.map(x => '<li>With <b>' + esc(x.viewerName || 'a colleague') + '</b>' +
+    (x.at && x.at.toDate ? ' on ' + esc(x.at.toDate().toLocaleDateString(undefined, { month: 'long', day: 'numeric', year: 'numeric' })) : '') + ', approved by an admin. Their reason: “' + esc(x.reason) + '”</li>').join('') + '</ul></div>' : '';
 }
 $('wsStart').addEventListener('click', () => { $('wsIntro').hidden = true; ask(); $('wsQuestion').focus(); event('workstyle_start', { resume: i > 0 }); });
 
