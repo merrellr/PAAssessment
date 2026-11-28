@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>DISC Work Styles · Product Advisory Learning</title>
+<link rel="icon" href="/images/icons/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="/images/icons/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="/images/icons/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@600&family=Lato:ital,wght@0,300;0,400;0,700;0,900;1,400&display=swap" rel="stylesheet">
+<script src="pa-prefs.js"></script>
+<script src="analytics.js"></script>
+<style>
+  *{ box-sizing: border-box; }
+  body{ margin:0; background: var(--pa-bg); font-family: var(--pa-sans); color: var(--pa-ink); }
+  .wrap{ max-width: 1180px; margin: 0 auto; padding: 24px 16px 64px; }
+  [hidden]{ display:none !important; }
+  h1{ font-family: var(--pa-display); color: var(--pa-navy-deep); margin: 2px 0 4px; font-size: clamp(1.4rem, 3vw, 1.9rem); }
+  .back{ display:block; width:fit-content; margin-bottom: 14px; color: var(--pa-muted); font-size: .8125rem; text-decoration:none; }
+  .back:hover{ color: var(--pa-navy); }
+  .pr-layout{ display:grid; grid-template-columns: 300px minmax(0, 1fr); gap: 24px; align-items:start; margin-top: 18px; }
+  .pr-side{ display:flex; flex-direction:column; gap: 16px; position: sticky; top: 84px; }
+  .card{ background: var(--pa-card); border: 1px solid var(--pa-line); border-radius: 16px; padding: 18px 20px; }
+  .card h2{ font-size: 1rem; margin: 0 0 10px; }
+  .pr-goal{ display:flex; flex-wrap: wrap; align-items:center; justify-content:space-between; gap: 12px; padding: 12px 18px; border-radius: 14px; border: 1px solid var(--pa-line); background: var(--pa-card); }
+  .pr-goal b{ font-weight: 800; }
+  .pr-pips{ display:flex; align-items:center; gap: 6px; color: var(--pa-muted); font-size: .8125rem; }
+  .pr-pips span{ white-space: nowrap; }
+  .pr-pips i{ width: 26px; height: 6px; border-radius: 3px; background: var(--pa-line); }
+  .pr-pips i.on{ background: var(--pa-primary); }
+  .pr-pips i.ok{ background: var(--pa-ok, #2e8b57); } .pr-pips i.miss{ background: var(--pa-warn, #c0622a); }
+  .pr-say{ display:flex; gap: 12px; align-items:flex-start; margin: 18px 0; font-size: 1rem; line-height: 1.6; }
+  .pr-say .ico{ flex:none; display:grid; place-items:center; width: 34px; height: 34px; border-radius: 50%; background: var(--pa-primary); color: var(--pa-btn-ink); }
+  .pr-say .ico svg{ width: 17px; height: 17px; fill:none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .pr-say .ico.ico-compass{ background: var(--pa-cdisc); color: var(--pa-cdisc-ink); box-shadow: inset 0 0 0 1px var(--pa-cdisc-line); }
+  .pr-say .ico.ico-compass svg{ width: 24px; height: 24px; }
+  .pr-say p{ margin: 4px 0 0; }
+  .pr-q{ padding: 22px 24px; }
+  .pr-tags{ display:flex; flex-wrap:wrap; gap: 6px; margin-bottom: 12px; }
+  .pr-tags span{ padding: 3px 10px; border-radius: 12px; background: var(--pa-tint); color: var(--pa-navy); font-size: .75rem; font-weight: 700; }
+  .pr-question{ font-size: 1.125rem; line-height: 1.55; margin: 0 0 18px; color: var(--pa-ink); }
+  .pr-opts{ display:flex; flex-direction:column; gap: 10px; }
+  .pr-opt{ display:flex; gap: 12px; align-items:flex-start; width:100%; padding: 14px 16px; border: 1.5px solid var(--pa-line); border-radius: 12px; background: var(--pa-bg); color: var(--pa-ink); font: inherit; font-size: .9688rem; line-height: 1.5; text-align:left; cursor:pointer; }
+  .pr-opt:hover:not(:disabled){ border-color: var(--pa-primary); }
+  .pr-opt[aria-pressed="true"]{ border-color: var(--pa-primary); box-shadow: 0 0 0 2px color-mix(in srgb, var(--pa-primary) 25%, transparent); }
+  .pr-opt .k{ flex:none; font-weight: 800; color: var(--pa-muted); }
+  .pr-opt.right{ border-color: var(--pa-ok, #2e8b57); background: var(--pa-ok-bg, #eef9f1); }
+  .pr-opt.wrong{ border-color: var(--pa-warn, #c0622a); background: var(--pa-warn-bg, #fdf1ea); }
+  .pr-opt:disabled{ cursor: default; }
+  .pr-foot{ display:flex; justify-content:flex-end; gap: 10px; margin-top: 16px; flex-wrap: wrap; }
+  .pr-why{ margin-top: 16px; padding: 14px 16px; border-radius: 12px; background: var(--pa-band); border: 1px solid var(--pa-line); }
+  .pr-why .verdict{ font-weight: 800; }
+  .pr-why .verdict.ok{ color: var(--pa-ok-ink, #1f6b47); } .pr-why .verdict.bad{ color: var(--pa-warn, #c0622a); }
+  .pr-why p{ margin: 6px 0 0; line-height: 1.6; }
+  .pr-why a{ color: var(--pa-primary); font-weight: 700; }
+  .pr-offer{ margin-top: 14px; padding: 14px 16px; border-radius: 12px; border: 1.5px dashed var(--pa-primary); }
+  .pr-offer p{ margin: 0 0 10px; }
+  .pr-offer .row{ display:flex; flex-wrap:wrap; gap: 8px; }
+  .pr-adapt{ list-style:none; margin: 0; padding: 0 0 0 12px; border-left: 2px solid var(--pa-line); font-size: .8438rem; }
+  .pr-adapt li{ margin: 0 0 8px; }
+  .pr-area-row{ display:flex; justify-content:space-between; align-items:center; gap: 8px; padding: 7px 0; border-bottom: 1px solid var(--pa-line); font-size: .8438rem; }
+  .pr-area-row.cur{ font-weight: 800; }
+  a.pr-area-row{ color: var(--pa-ink); text-decoration: none; border-radius: 6px; margin: 0 -6px; padding: 7px 6px; }
+  a.pr-area-row:hover{ background: var(--pa-tint); }
+  a.pr-area-row:hover > span:first-child{ color: var(--pa-primary); }
+  a.pr-area-row:focus-visible{ outline: 3px solid var(--pa-cyan); outline-offset: 1px; }
+  .pr-area-hint{ margin: 0 0 6px; font-size: .75rem; color: var(--pa-muted); }
+  .pr-done h2{ font-size: 1.25rem; }
+  .pr-done .big{ font-family: var(--pa-display); font-size: 2.2rem; color: var(--pa-navy-deep); margin: 4px 0; }
+  @media (max-width: 900px){ .pr-layout{ grid-template-columns: 1fr; } .pr-side{ position: static; order: 2; } }
+  .ck-intro ul{ margin: 8px 0 14px; padding-left: 20px; line-height: 1.6; }
+  .ck-bar{ height: 6px; border-radius: 3px; background: var(--pa-line); overflow: hidden; margin: 6px 0 14px; }
+  .ck-bar i{ display:block; height: 100%; background: var(--pa-primary); transition: width .3s; }
+  .ck-meta{ display:flex; justify-content:space-between; gap: 10px; font-size: .8125rem; color: var(--pa-muted); }
+  .ck-areas{ list-style:none; margin: 10px 0 16px; padding: 0; }
+  .ck-areas li{ display:flex; justify-content:space-between; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--pa-line); font-size: .875rem; }
+  .ck-go{ display:flex; flex-wrap: wrap; gap: 8px; }
+  .ws-intro ul{ margin: 8px 0 14px; padding-left: 20px; line-height: 1.6; }
+  .ws-fine{ font-size: .8rem; color: var(--pa-muted); margin: 10px 0 0; }
+  .ws-step{ font-size: .8125rem; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; color: var(--pa-cyan-ink, var(--pa-primary)); margin: 14px 0 6px; }
+  .ws-opt[aria-pressed="true"].most{ border-color: var(--pa-ok, #2e8b57); background: var(--pa-ok-bg); }
+  .ws-opt.most-was{ opacity: .7; }
+  .ws-opt[aria-pressed="true"].least{ border-color: var(--pa-warn, #c0622a); background: var(--pa-warn-bg); }
+  .ws-tag{ margin-left: auto; font-size: .72rem; font-weight: 800; text-transform: uppercase; letter-spacing: .04em; }
+  .ws-res-top{ display:grid; grid-template-columns: minmax(0, 340px) minmax(0, 1fr); gap: 24px; align-items: center; }
+  @media (max-width: 720px){ .ws-res-top{ grid-template-columns: minmax(0, 1fr); } }
+  .ws-big{ font: 800 clamp(1.4rem, 3.4vw, 2rem) var(--pa-display); color: var(--pa-navy-deep); margin: 2px 0 6px; line-height: 1.15; }
+  .ws-sec{ display:grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-top: 16px; }
+  @media (max-width: 640px){ .ws-sec{ grid-template-columns: minmax(0, 1fr); } }
+  .ws-sec div{ border: 1px solid var(--pa-line); border-radius: 12px; padding: 12px 14px; font-size: .9rem; line-height: 1.55; }
+  .ws-sec h3{ font-size: .78rem; letter-spacing: .05em; text-transform: uppercase; color: var(--pa-muted); margin: 0 0 6px; }
+  .ws-work{ margin: 10px 0 0; padding: 0; list-style: none; display: grid; gap: 8px; }
+  .ws-work li{ font-size: .9rem; line-height: 1.5; } .ws-work b{ color: var(--pa-navy-deep); }
+  .linklike{ background:none; border:0; padding:0; color: var(--pa-navy); font: inherit; font-weight: 700; cursor:pointer; text-decoration: underline; }
+  .ws-go{ display:flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
+</style>
+<link rel="stylesheet" href="pa-theme.css">
+<link rel="stylesheet" href="coach.css">
+<script src="styles-core.js"></script>
+<script src="styles-ui.js"></script>
+<script src="demo.js"></script>
+</head>
+<body>
+<script src="pa-shell.js"></script>
+<div class="wrap" style="max-width: 900px;">
+  <a class="back" href="/my-learning#readiness">← Back to My Learning</a>
+  <span class="eyebrow">Toolkit</span>
+  <h1>DISC Work Styles</h1>
+  <section class="card ws-intro" id="wsIntro" hidden>
+    <p>How do you like to work: fast or measured, focused on the task or on the people? This short check places you on those two lines and shows your style, with a report on working at your best and working well with others.</p>
+    <ul>
+      <li><b><span id="wsCount">24</span> work situations</b>, about <span id="wsMin">8</span> minutes. For each, pick the response <b>most</b> like you, then the one <b>least</b> like you.</li>
+      <li>There are no right answers. Go with your first instinct about how you usually work, not how you’d like to.</li>
+      <li>You can stop at any time and pick up where you left off.</li>
+    </ul>
+    <div class="ws-go"><button type="button" class="cc-btn" id="wsStart">Start →</button></div>
+    <p class="ws-fine">Based on William Moulton Marston’s DISC model (1928). The situations, scoring and report are Product Advisory’s own. It describes how you prefer to work, not how good you are at anything, and isn’t for hiring or selection.</p>
+  </section>
+  <section class="card pr-q" id="wsCard" hidden aria-live="polite">
+    <div class="ck-meta"><span id="wsWhere"></span><button type="button" class="linklike" id="wsBack" hidden>← Back</button></div>
+    <div class="ck-bar" aria-hidden="true"><i id="wsBar" style="width:0%"></i></div>
+    <p class="pr-question" id="wsQuestion" tabindex="-1"></p>
+    <p class="ws-step" id="wsStep"></p>
+    <div class="pr-opts" id="wsOpts" role="group" aria-labelledby="wsStep"></div>
+  </section>
+  <section class="card" id="wsResult" hidden aria-live="polite"></section>
+  <div class="site-foot" style="margin-top:28px; padding:20px 0; border-top:1px solid var(--pa-line); text-align:center; font-size:0.75rem; color:var(--pa-muted);">
+    © <span id="footerYear"></span> Product Advisory, LLC. All rights reserved. &nbsp;·&nbsp;
+    <a href="https://www.productadvisory.co/privacy-policy" target="_blank" rel="noopener" style="color:inherit; text-decoration:underline;">Privacy Policy</a> &nbsp;·&nbsp;
+    <a href="https://www.productadvisory.co/terms-of-use" target="_blank" rel="noopener" style="color:inherit; text-decoration:underline;">Terms of Use</a>
+  </div>
+</div>
+<script>document.getElementById("footerYear").textContent = new Date().getFullYear();</script>
+<script type="module">
+/* DISC Work Styles (styles-core.js, styles-ui.js). Answers are kept as they go on progress.workStyleDraft, so a person
+   can stop and pick up later; the finished result is progress.workStyle. Both are the person's own: nothing here is
+   shared with a company (that comes with the company sharing settings). */
+const firebaseConfig = {
+  apiKey: "AIzaSyAcECtS5c6WeOhKlwRK-LYFE47npbuq_eU",
+  authDomain: "auth.productadvisory.co",
+  projectId: "product-advisory-lms",
+  storageBucket: "product-advisory-lms.firebasestorage.app",
+  messagingSenderId: "1081134406437",
+  appId: "1:1081134406437:web:72e28604d093219e7698cc"
+};
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
+import { getFirestore, doc, getDoc, setDoc as fsSetDoc, deleteField } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+const setDoc = (...a) => window.__paDemo ? Promise.resolve() : fsSetDoc(...a);
+const app = initializeApp(firebaseConfig), auth = getAuth(app), db = getFirestore(app);
+const K = window.StylesCore, UI = window.StylesUI, Q = K.QUESTIONS;
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
+const event = (name, props) => { try { if (window.PAAnalytics) window.PAAnalytics.event(name, props || {}); } catch (e) {} };
+let user = null, answers = {}, i = 0, most = '';
+
+const saveDraft = () => setDoc(doc(db, 'progress', user.uid), { workStyleDraft: { answers, i, at: new Date().toISOString() } }, { merge: true }).catch(() => {});
+function ask(){
+  const q = Q[i]; if (!q) { finish(); return; }
+  most = '';
+  $('wsWhere').textContent = (i + 1) + ' of ' + Q.length;
+  $('wsBar').style.width = Math.round(i / Q.length * 100) + '%';
+  $('wsBack').hidden = i === 0 && !most;
+  $('wsQuestion').textContent = q.q;
+  drawOpts();
+  $('wsCard').hidden = false;
+}
+function drawOpts(){
+  const q = Q[i];
+  $('wsStep').textContent = most ? 'And which is least like you?' : 'Which is most like you?';
+  $('wsOpts').innerHTML = q.o.map(o => {
+    const isMost = o.k === most;
+    return '<button type="button" class="pr-opt ws-opt' + (isMost ? ' most-was' : '') + '" data-k="' + o.k + '" aria-pressed="' + (isMost ? 'true' : 'false') + '"' + (isMost ? ' disabled' : '') + '><span>' + esc(o.t) + '</span>' + (isMost ? '<span class="ws-tag">Most like me</span>' : '') + '</button>';
+  }).join('');
+}
+$('wsOpts').addEventListener('click', (e) => {
+  const b = e.target.closest('.ws-opt'); if (!b || b.disabled) return;
+  const k = b.dataset.k, q = Q[i];
+  if (!most) { most = k; $('wsBack').hidden = false; drawOpts(); const first = $('wsOpts').querySelector('.ws-opt:not([disabled])'); if (first) first.focus(); return; }
+  answers[q.id] = { most, least: k }; most = ''; i++;
+  saveDraft();
+  if (i >= Q.length) finish(); else { ask(); $('wsQuestion').focus(); }
+});
+$('wsBack').addEventListener('click', () => {
+  if (most) { most = ''; drawOpts(); $('wsBack').hidden = i === 0; return; }
+  if (i > 0) { i--; delete answers[Q[i].id]; ask(); }
+});
+async function finish(){
+  const saved = K.toSave(answers);
+  $('wsCard').hidden = true; $('wsIntro').hidden = true;
+  await setDoc(doc(db, 'progress', user.uid), { workStyle: saved, workStyleDraft: deleteField() }, { merge: true }).catch(() => {});
+  event('workstyle_done', { style: saved.primary, blend: saved.secondary ? 1 : 0 });
+  showResult(saved);
+}
+function showResult(r){
+  const res = K.score(r.answers || {}), st = K.STYLES[res.primary], blend = K.blendText(res);
+  const sec = res.secondary ? K.STYLES[res.secondary] : null;
+  $('wsResult').innerHTML = '<div class="ws-res-top"><div>' + UI.map(res, { size: 320 }) + '</div><div><span class="eyebrow">Your work style</span>' +
+    '<p class="ws-big">' + esc(K.label(res)) + '</p><p style="margin:0 0 6px;">' + esc(st.short) + (sec ? ', with ' + esc(sec.short.toLowerCase()) : '') + '. ' + esc(st.pace === 'fast' ? 'A faster pace' : 'A measured pace') + ', ' + esc(st.focus === 'tasks' ? 'focused on the task.' : 'focused on people.') + '</p>' +
+    (blend ? '<p class="cc-muted" style="margin:0 0 12px;">' + esc(blend) + '</p>' : '') + UI.bars(res.scores) + '</div></div>' +
+    '<div class="ws-sec"><div><h3>At your best</h3>' + esc(st.best) + '</div><div><h3>What drains you</h3>' + esc(st.drains) + '</div>' +
+    '<div><h3>How others can work with you</h3>' + esc(st.withYou) + '</div><div><h3>Watch out for</h3>' + esc(st.watch) + '</div></div>' +
+    '<h2 style="font-size:1.05rem;margin:22px 0 4px;">In product work</h2><ul class="ws-work">' + st.work.map(w => '<li><b>' + esc(w[0]) + ':</b> ' + esc(w[1]) + '</li>').join('') + '</ul>' +
+    '<h2 style="font-size:1.05rem;margin:22px 0 4px;">Working with the other styles</h2><ul class="ws-work">' + K.KEYS.filter(k => k !== res.primary).map(k => '<li><b>' + esc(K.STYLES[k].name) + ':</b> ' + esc(K.STYLES[k].withYou) + ' <span class="cc-muted">Together: ' + esc(K.TOGETHER[K.pairKey(res.primary, k)]) + '</span></li>').join('') + '</ul>' +
+    '<div class="ws-go"><a class="cc-btn" href="/my-learning#readiness">Back to My Learning</a><button type="button" class="cc-btn ghost" id="wsAgain">Take it again</button></div>' +
+    '<p class="ws-fine">Taken ' + esc(new Date(r.at).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' })) + '. Your result is private to you. Based on Marston’s DISC model; it describes preferences, not ability, and isn’t for hiring or selection.</p>';
+  $('wsResult').hidden = false;
+  $('wsAgain').addEventListener('click', () => { answers = {}; i = 0; most = ''; $('wsResult').hidden = true; ask(); event('workstyle_retake'); });
+}
+$('wsStart').addEventListener('click', () => { $('wsIntro').hidden = true; ask(); $('wsQuestion').focus(); event('workstyle_start', { resume: i > 0 }); });
+
+onAuthStateChanged(auth, async (u) => {
+  if (!u){ location.href = '/lms-dashboard'; return; }
+  user = u;
+  if (new URLSearchParams(location.search).get('demo') === '1' && window.DemoCore) window.__paDemo = true;
+  let progress = {};
+  if (!window.__paDemo) { try { const s = await getDoc(doc(db, 'progress', u.uid)); progress = s.exists() ? s.data() : {}; } catch (e) { progress = {}; } }
+  $('wsCount').textContent = Q.length; $('wsMin').textContent = K.MINUTES;
+  const d = progress.workStyleDraft;
+  if (d && d.answers && typeof d.i === 'number' && d.i > 0 && d.i < Q.length) { answers = d.answers; i = d.i; $('wsStart').textContent = 'Pick up at ' + (i + 1) + ' of ' + Q.length + ' →'; }
+  if (progress.workStyle && progress.workStyle.complete && !(d && d.i > 0)) showResult(progress.workStyle);
+  else $('wsIntro').hidden = false;
+});
+</script>
+<script type="module" src="account-menu.js"></script>
+</body>
+</html>
